@@ -20,14 +20,22 @@ describe('clock', () => {
 })
 
 describe('clockWidth', () => {
-  it('sizes one and two digits so the countdown does not jump', () => {
-    expect(clockWidth('8')).toBe(1)
+  it('reports one and two digits identically, so the countdown cannot jump', () => {
+    // Floored at 2. Returning 1 here let the width term stop binding, the
+    // height term take over, and "9" render up to twice the size of "10".
+    expect(clockWidth('8')).toBe(2)
     expect(clockWidth('17')).toBe(2)
   })
 
   it('counts a colon as half a digit', () => {
     expect(clockWidth('4:30')).toBe(3.5)
     expect(clockWidth('10:05')).toBe(4.5)
+  })
+
+  it('only ever steps the size down, never up', () => {
+    const widths = ['9', '10', '1:00', '10:05'].map(clockWidth)
+    expect(widths).toEqual([...widths].sort((a, b) => a - b))
+    expect(Math.min(...widths)).toBe(2)
   })
 })
 

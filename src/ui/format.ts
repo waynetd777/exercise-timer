@@ -23,11 +23,18 @@ export function pathLabel(path: { label?: string; iteration: number; of: number 
 
 /**
  * Width of a clock string in ems, for sizing the countdown: a tabular digit
- * advances about 1 unit, a colon about half. Lets "8" and "17" render at the
- * same size while "4:30" steps down instead of overflowing.
+ * advances about 1 unit, a colon about half, with a floor of 2. So the size only
+ * ever steps DOWN for longer strings — "8" and "17" match, "4:30" is smaller.
  */
 export function clockWidth(text: string): number {
-  return [...text].reduce((width, char) => width + (char === ':' ? 0.5 : 1), 0)
+  const units = [...text].reduce((width, char) => width + (char === ':' ? 0.5 : 1), 0)
+  /*
+   * Floored at 2, which is what the width coefficient is calibrated for. Without
+   * it a single digit divides by 1 instead of 2, the width term stops binding,
+   * the height term takes over, and "9" renders up to twice the size of "10" —
+   * jumping mid-countdown and shoving everything below it off the screen.
+   */
+  return Math.max(2, units)
 }
 
 /**

@@ -64,8 +64,10 @@
      grid), so containment cannot collapse it. */
   container: body / size;
   display: grid;
+  /* Stacked: the countdown block takes what it needs and the panel absorbs the
+     rest, so a short window shrinks the image instead of pushing it off. */
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-5);
-  align-content: center;
   padding: var(--step-5) var(--step-5) 0;
   min-height: 0;
 }
@@ -75,6 +77,7 @@
     /* Proportional, and minmax(0, …) so both columns may shrink rather than
        being pinned to a rem cap that wastes a large screen. */
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
     gap: var(--step-7);
     padding: var(--step-5) var(--step-7);
@@ -128,10 +131,18 @@
  */
 .count__clock {
   --clock-coef: 140;
-  font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), 74cqh));
+  --clock-height: 40cqh;
+  --tracking: -0.045em;
+  font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), var(--clock-height)));
   font-weight: 700;
   line-height: 0.82;
-  letter-spacing: -0.045em;
+  letter-spacing: var(--tracking);
+  /*
+   * Letter-spacing is applied after the LAST glyph too, so the line box is
+   * narrower than the glyphs by that amount and a centred line sits half of it
+   * off-centre. Narrowing the block by the same amount puts it back.
+   */
+  padding-right: calc(-1 * var(--tracking));
   font-variant-numeric: tabular-nums slashed-zero;
   color: var(--phase);
   margin: 0;
@@ -187,11 +198,12 @@
   display: grid;
   place-items: center;
   min-height: 0;
-  /* Stacked on a phone the frame needs an intrinsic height, so it keeps an
-     aspect ratio there. On a wide layout it stretches to the row instead —
-     object-fit: contain means a bigger frame never distorts the image. */
-  aspect-ratio: 4 / 3;
-  max-height: min(40svh, 26rem);
+  /*
+   * No aspect-ratio in either layout: the frame takes whatever height is left
+   * over, which is what makes overflow impossible — object-fit: contain means a
+   * bigger or smaller frame never distorts the image.
+   */
+  height: 100%;
   overflow: hidden;
   background: var(--ink-800);
   border: var(--hairline);
@@ -199,16 +211,11 @@
 }
 
 @container shell (min-width: 46rem) {
-  /* Beside the panel the clock only has the 3fr column, so the width term has
-     to be far more conservative than when it is stacked full-width. */
+  /* Beside the panel the clock has far less width and far more height than it
+     does stacked, so both terms change. */
   .count__clock {
     --clock-coef: 88;
-  }
-
-  .panel__frame {
-    aspect-ratio: auto;
-    max-height: none;
-    height: 100%;
+    --clock-height: 74cqh;
   }
 }
 
