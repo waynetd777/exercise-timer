@@ -38,17 +38,27 @@
   min-width: 2px;
   height: calc(var(--effort) * 100%);
   border-radius: 1.5px 1.5px 0 0;
-  background: var(--step-colour);
-  opacity: 0.22;
-  transition: opacity 250ms var(--ease);
+  /*
+   * Explicit colours per state rather than opacity over the ground. Dimming a
+   * hue toward near-black is what makes it muddy — red at 22% composited to
+   * #431F1D, which is simply brown.
+   *
+   * Upcoming steps are therefore neutral: their HEIGHT already encodes work
+   * against rest, so the hue was redundant anyway. Completed steps keep their
+   * hue but are mixed toward a light grey instead of down toward black, which
+   * lands on a dusty version of the same colour (#C9716D for red) rather than
+   * brown. The current step is the only one at full strength.
+   */
+  background: var(--ink-600);
+  transition: background 250ms var(--ease);
 }
 
 .strip__step[data-state='done'] {
-  opacity: 0.5;
+  background: color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim));
 }
 
 .strip__step[data-state='current'] {
-  opacity: 1;
+  background: var(--step-colour);
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */
