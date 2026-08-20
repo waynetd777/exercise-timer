@@ -40,6 +40,14 @@
   - `src/routines/tabataFormat.ts` — imports the Tabata Timer app's export format. Decoded from Wayne's real file; `workout.intervals` is fully expanded and the sibling `cycles`/`work`/`rest` fields are template defaults, NOT multipliers (honouring `cycles: 3` would have made a 42-minute workout 126 minutes). Flat import, no repeat-group inference — a wrong guess would silently alter someone's workout.
   - `src/routines/beginner-mixed-cardio.tabata.json` — Wayne's routine, committed so it drives both the demo and the tests. 86 steps, 42:09, 10 postimages illustrations, several exercises with no image.
   - **80 tests green**, typecheck + build clean.
+- **Real cue sounds** (user request: "use the same sounds tabata uses")
+  - Located the source app installed on this Mac: `/Applications/Tabata Timer.app/Wrapper/TabataTimer.app/` — 110 audio files. Copied a 10-sound palette (248KB) into `src/audio/cues/`.
+  - `src/audio/samples.ts` — sounds imported as MODULES (`?url`), so a rename breaks the build rather than going silent, and each gets a content-hashed URL. Mapping and per-cue gain live in one object: countdown → `beep`, phase change → `bell`, complete → `win`. Alternates shipped: `click`, `water-drop`, `finger-snap`, `ding-dong`, `xylophone`, `electronic-stab`, `ten-seconds-left` (spoken).
+  - `src/audio/engine.ts` — `preload()` fetches and decodes buffers; `scheduleSample()` queues `AudioBufferSourceNode.start(at)` on the audio clock exactly as the oscillator path did. Returns false when a buffer is not ready, so `tones.ts` covers the gap and no cue is ever silent.
+  - All three countdown blips now use the SAME sound, as the app does (the rising-pitch idea was nicer but not the ask).
+  - ⚠️ The app stores no sound choice in its export and had no prefs plist here, so **this mapping is a sensible default, not a verified match** to what Wayne actually hears.
+  - ⚠️ **Licensing:** third-party assets from a commercial app. Fine privately; do not publish the site publicly with them in place. Concrete reason to prefer an access-controlled host over GitHub Pages.
+  - **84 tests green**, typecheck + build clean; all 10 mp3s emitted with content hashes.
 
 ---
 

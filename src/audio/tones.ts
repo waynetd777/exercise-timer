@@ -10,12 +10,14 @@ export type ToneSpec = {
 }
 
 /**
- * Synthesised rather than sampled: no audio files to ship, cache or lose
- * offline, and the pitches can form a deliberate figure.
+ * FALLBACK cues, synthesised with oscillators.
+ *
+ * The real cues are now the Tabata Timer samples in `samples.ts` — this covers
+ * the window before they decode, and any case where a file is missing or a
+ * browser will not decode mp3, so a cue is never silent.
  *
  * The three countdown blips rise (F#5, A♭5, B♭5) and the phase change resolves
- * above them (D#6), so the approach of a transition is audible as shape rather
- * than as three identical beeps.
+ * above them (D#6), so an approaching transition is audible as shape.
  */
 export function toneFor(kind: CueKind, value?: number): ToneSpec | null {
   switch (kind) {
