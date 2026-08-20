@@ -87,6 +87,44 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T00:05:00Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-08-21T00:55:00Z",
+      "error_message": "USER REPORTED: 'make all the small text much bigger' \u2014 labels, meta rows, button text and stats were unreadable",
+      "file": "src/ui/theme.css",
+      "root_cause": "The --label token was `600 0.7rem/1.2` (~11.2px) with 0.16em tracking \u2014 a sensible size for a desktop dashboard, and a deliberate typographic counterweight to the giant numerals, but it ignored this app's actual requirement: readable across a gym, mid-effort, at 2-3 metres. Fixed rem sizing also meant it never grew on a large screen.",
+      "fix": "--label-size is now clamp(1rem, 1.6cqi, 1.6rem), so ~11px became 16px on a phone and 23px on a laptop; tracking eased to 0.11em since the same tracking reads much wider at a larger size. Also enlarged: exercise name floor 1.25rem -> 1.75rem, stat figures to clamp(1.75rem, 4cqi, 3rem), primary button its own clamp(1.05rem, 1.9cqi, 1.9rem), chevron glyphs their own larger scale, button targets 56px -> 64px (primary 76px).",
+      "fix_rule": "Type scale must follow the VIEWING DISTANCE, not convention. For anything read at arm's length or further, treat ~1rem as the floor for secondary text and let it scale with the container.",
+      "tags": [
+        "css",
+        "typography",
+        "legibility",
+        "accessibility",
+        "phase-2",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T00:55:00Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-08-21T00:55:00Z",
+      "error_message": "Control row would overflow a phone width once button text was enlarged (5 buttons, primary min-width 12rem, no wrapping)",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.controls` was a nowrap flex row with `justify-content: center`, and `.btn--primary` had a fixed `min-width: 12rem`. At the enlarged label size the five buttons total ~550px against a 390px phone. Latent before the type change; the bigger text made it certain.",
+      "fix": "Added `flex-wrap: wrap` so transport controls take the first line and Reset/Sound fall to the second, and changed the primary button to `min-width: min(12rem, 100%)` so a narrow screen cannot be forced wider than it is.",
+      "fix_rule": "A fixed min-width inside a nowrap flex row is an overflow waiting to happen. Guard with min(target, 100%) and let the row wrap.",
+      "tags": [
+        "css",
+        "flexbox",
+        "overflow",
+        "responsive",
+        "phase-2",
+        "found-alongside-fix"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T00:55:00Z"
     }
   ]
 }

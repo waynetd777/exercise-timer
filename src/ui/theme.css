@@ -41,9 +41,17 @@
 
   --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* Small, wide-tracked uppercase — the counterweight to the huge numerals. */
-  --label: 600 0.7rem/1.2 var(--font-ui);
-  --label-tracking: 0.16em;
+  /*
+   * Wide-tracked uppercase — the counterweight to the huge numerals. Sized
+   * fluidly rather than fixed: this has to be readable across a gym, so it was
+   * far too small at the 0.7rem a label would get on a desktop dashboard.
+   * cqi resolves against whichever container the label sits in (shell or body);
+   * with no container it falls back to the viewport, which is also fine.
+   */
+  --label-size: clamp(1rem, 1.6cqi, 1.6rem);
+  --label: 650 var(--label-size)/1.3 var(--font-ui);
+  /* Eased off from 0.16em: the same tracking reads much wider at this size. */
+  --label-tracking: 0.11em;
 
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }

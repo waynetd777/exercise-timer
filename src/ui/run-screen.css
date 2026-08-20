@@ -130,7 +130,7 @@
 }
 
 .count__name {
-  font-size: max(1.25rem, min(7cqi, 7cqh));
+  font-size: max(1.75rem, min(8cqi, 8cqh));
   font-weight: 650;
   letter-spacing: -0.01em;
   margin: 0;
@@ -139,7 +139,7 @@
 .count__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--step-4);
+  gap: var(--step-3) var(--step-5);
   margin: 0;
 }
 
@@ -199,8 +199,10 @@
 }
 
 .panel__next b {
-  font-weight: 650;
+  font-weight: 700;
   color: var(--bone);
+  /* Slightly above the label scale: this names the next exercise. */
+  font-size: clamp(1.1rem, 1.9cqi, 1.9rem);
 }
 
 /* ── Controls ──────────────────────────────────────────────────────────────
@@ -210,6 +212,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Wraps rather than overflows: at the enlarged label size five buttons do
+     not fit a phone width. Transport controls take the first line, Reset and
+     Sound fall to the second. */
+  flex-wrap: wrap;
   gap: var(--step-3);
   padding: var(--step-4) var(--step-4) var(--step-5);
   border-top: var(--hairline);
@@ -218,9 +224,9 @@
 .btn {
   display: grid;
   place-items: center;
-  min-width: 56px;
-  min-height: 56px;
-  padding: 0 var(--step-4);
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0 var(--step-5);
   border-radius: var(--radius);
   font: var(--label);
   letter-spacing: var(--label-tracking);
@@ -244,8 +250,10 @@
 }
 
 .btn--primary {
-  min-width: 10rem;
-  min-height: 64px;
+  /* min() so a narrow screen cannot be forced wider than it is. */
+  min-width: min(12rem, 100%);
+  min-height: 76px;
+  font-size: clamp(1.05rem, 1.9cqi, 1.9rem);
   color: var(--ink-900);
   background: var(--phase);
   border-color: transparent;
@@ -259,6 +267,12 @@
 
 .btn--ghost {
   background: none;
+}
+
+/* Chevron glyphs read smaller than letterforms at the same size. */
+.btn[aria-label] {
+  font-size: clamp(1.2rem, 2.2cqi, 2.2rem);
+  letter-spacing: 0;
 }
 
 /* ── Idle and complete ─────────────────────────────────────────────────── */
@@ -297,7 +311,7 @@
 }
 
 .stat b {
-  font-size: 1.5rem;
+  font-size: clamp(1.75rem, 4cqi, 3rem);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
