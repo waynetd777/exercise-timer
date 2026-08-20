@@ -7,7 +7,8 @@
      now that .run__body is a container too. */
   container: shell / inline-size;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  /* header, progress, body, controls */
+  grid-template-rows: auto auto 1fr auto;
   height: 100%;
   background: var(--ink-900);
   background:
@@ -54,6 +55,25 @@
   line-height: 1.25;
   text-transform: uppercase;
   color: var(--bone-dim);
+}
+
+/* ── Progress ──────────────────────────────────────────────────────────────
+ * Deliberately thin and low-contrast: it is for a glance, not for reading, and
+ * the countdown is what should hold the eye.
+ */
+.run__progress {
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--phase) 16%, transparent);
+}
+
+.run__progress span {
+  display: block;
+  height: 100%;
+  background: color-mix(in oklab, var(--phase) 70%, var(--ink-900));
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left;
+  transition: transform 400ms linear;
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */

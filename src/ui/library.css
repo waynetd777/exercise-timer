@@ -12,7 +12,14 @@
   height: 100%;
   padding: var(--step-5);
   overflow: hidden;
+  /* Same wash as the run screen, in the mark's blue. Fallback first, for any
+     browser without color-mix. */
   background: var(--ink-900);
+  background: radial-gradient(
+    140% 90% at 50% -10%,
+    color-mix(in oklab, var(--role-rest) 14%, var(--ink-900)),
+    var(--ink-900) 72%
+  );
 }
 
 .library__scroll {

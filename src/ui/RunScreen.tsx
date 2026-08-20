@@ -138,6 +138,30 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         <span />
       </header>
 
+      {/*
+        Whole-workout progress, edge to edge under the header rule. Driven by a
+        scaled inner element rather than a gradient stop, because a transform
+        transitions smoothly and a gradient stop does not — the value only
+        changes once a second.
+      */}
+      <div
+        className="run__progress"
+        style={{
+          ['--progress' as string]: timeline.totalMs
+            ? at.totalElapsedMs / timeline.totalMs
+            : 0,
+        }}
+        role="progressbar"
+        aria-label="Workout progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(
+          timeline.totalMs ? (at.totalElapsedMs / timeline.totalMs) * 100 : 0,
+        )}
+      >
+        <span />
+      </div>
+
       {status === 'idle' && (
         <div className="rest-state">
           <p className="rest-state__title">Ready</p>

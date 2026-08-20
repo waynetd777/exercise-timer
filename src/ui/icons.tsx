@@ -185,3 +185,48 @@ export function StopwatchIcon() {
     </svg>
   )
 }
+
+export function UpIcon() {
+  return (
+    <Svg>
+      <polyline points="6 14.5 12 8.5 18 14.5" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function DownIcon() {
+  return (
+    <Svg>
+      <polyline points="6 9.5 12 15.5 18 9.5" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function PlusIcon() {
+  return (
+    <Svg>
+      <path d="M12 5v14M5 12h14" {...STROKE} />
+    </Svg>
+  )
+}
+
+/** Wrap in rounds: a loop. */
+export function RoundsIcon() {
+  return (
+    <Svg>
+      <path d="M4.5 11a7.5 7.5 0 0 1 12.8-5.3" {...STROKE} />
+      <polyline points="17.5 2.5 17.5 6.5 13.5 6.5" {...STROKE} />
+      <path d="M19.5 13a7.5 7.5 0 0 1-12.8 5.3" {...STROKE} />
+      <polyline points="6.5 21.5 6.5 17.5 10.5 17.5" {...STROKE} />
+    </Svg>
+  )
+}
+
+/** Edit the steps of a routine, as distinct from renaming it. */
+export function StepsIcon() {
+  return (
+    <Svg>
+      <path d="M4 7h11M4 12h16M4 17h8" {...STROKE} />
+    </Svg>
+  )
+}
