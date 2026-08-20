@@ -1,0 +1,86 @@
+/*
+ * Inline SVG rather than an icon font or emoji: it inherits `currentColor`,
+ * stays crisp at any size, renders identically on every platform, and ships no
+ * extra request — which matters for something that has to work offline.
+ *
+ * Transport icons are filled, utilities are stroked; that is the usual split
+ * and keeps the row from looking uniformly heavy.
+ */
+
+const STROKE = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2.2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const
+
+function Svg({ children }: { children: React.ReactNode }) {
+  return (
+    <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {children}
+    </svg>
+  )
+}
+
+export function PlayIcon() {
+  return (
+    <Svg>
+      <path d="M8 5.2v13.6L19 12z" fill="currentColor" />
+    </Svg>
+  )
+}
+
+export function PauseIcon() {
+  return (
+    <Svg>
+      <path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="currentColor" />
+    </Svg>
+  )
+}
+
+export function ResetIcon() {
+  return (
+    <Svg>
+      <polyline points="3 4 3 10 9 10" {...STROKE} />
+      <path d="M5.2 14.5a7.5 7.5 0 1 0 1.6-7.9L3 10" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function PrevIcon() {
+  return (
+    <Svg>
+      <polyline points="11.5 6 5.5 12 11.5 18" {...STROKE} />
+      <polyline points="18.5 6 12.5 12 18.5 18" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function NextIcon() {
+  return (
+    <Svg>
+      <polyline points="5.5 6 11.5 12 5.5 18" {...STROKE} />
+      <polyline points="12.5 6 18.5 12 12.5 18" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function SoundOnIcon() {
+  return (
+    <Svg>
+      <path d="M11 4 6 8.5H2.8v7H6l5 4.5z" fill="currentColor" />
+      <path d="M15.2 9a4.2 4.2 0 0 1 0 6" {...STROKE} />
+      <path d="M18 6.2a8 8 0 0 1 0 11.6" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function SoundOffIcon() {
+  return (
+    <Svg>
+      <path d="M11 4 6 8.5H2.8v7H6l5 4.5z" fill="currentColor" />
+      <path d="M15.5 9.5l5 5M20.5 9.5l-5 5" {...STROKE} />
+    </Svg>
+  )
+}
