@@ -48,6 +48,9 @@
 - [2026-08-21] **`tsconfig.app.json` has `types: ["vite/client"]` and NO node types — deliberately, so app code cannot reach for `process` or `fs`.** Consequence: never use `node:fs`/`node:path`/`process` in a test under `src/`, because `tsc -b` compiles tests as part of the app project and will fail even though vitest runs them fine. Restructure the test to avoid node APIs rather than adding node types.
 - [2026-08-21] **Sample playback keeps the pre-scheduling architecture unchanged** — `AudioBufferSourceNode.start(at)` schedules on the audio clock exactly like an oscillator. Buffers must be fetched and decoded BEFORE scheduling, so `audio.preload()` runs on first arm and the scheduler re-arms after it resolves; `scheduleSample` returns false when a buffer is not ready so the caller falls back to a tone and no cue is ever silent.
 
+- [2026-08-21] **Size type for the VIEWING DISTANCE, not by convention.** This is a gym timer read at 2-3 metres mid-effort, and the label token started at 0.7rem (~11px) because that is what secondary text gets on a dashboard. User asked twice for bigger elements (`bug-005` countdown, `bug-006` labels). Rule for this project: ~1rem is the FLOOR for secondary text, scaled with the container (`clamp(1rem, 1.6cqi, 1.6rem)`), and reduce letter-spacing as size grows — 0.16em tracking that looks right at 11px reads far too wide at 23px.
+- [2026-08-21] **A fixed `min-width` inside a `nowrap` flex row is a latent overflow.** The control row's primary button had `min-width: 12rem`; enlarging the labels pushed five buttons to ~550px against a 390px phone. Use `min(target, 100%)` and let the row `flex-wrap`. Check this whenever type sizes go up. (`bug-007`)
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
