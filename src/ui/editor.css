@@ -198,8 +198,9 @@
 
 .erow__thumb {
   flex: none;
-  width: 44px;
-  height: 44px;
+  /* 50% up from 44px — big enough to tell two similar machines apart. */
+  width: 66px;
+  height: 66px;
   object-fit: contain;
   background: var(--ink-900);
   border-radius: 6px;
