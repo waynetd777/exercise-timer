@@ -196,14 +196,164 @@
   color: var(--bone-faint);
 }
 
+/* Back to 44px — it is a hit target for the full-size preview, not the preview. */
 .erow__thumb {
   flex: none;
-  /* 50% up from 44px — big enough to tell two similar machines apart. */
-  width: 66px;
-  height: 66px;
-  object-fit: contain;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
   background: var(--ink-900);
+  border: var(--hairline);
   border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease);
+}
+
+.erow__thumb:hover,
+.erow__thumb:focus-visible {
+  border-color: var(--role-rest);
+}
+
+.erow__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Lightbox ──────────────────────────────────────────────────────────────
+ * A native dialog, sized to nearly fill the viewport with the image contained,
+ * so it shows as large as it can without cropping.
+ */
+.lightbox {
+  width: min(96vw, 1600px);
+  height: min(92svh, 1200px);
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  /* A literal colour: ::backdrop inheritance is not dependable enough to rely
+     on a custom property here. */
+  background: rgb(8 9 10 / 0.9);
+}
+
+.lightbox img {
+  /* max-* rather than 100%, so a small image is shown at its own size instead
+     of being scaled up into a blur. */
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--radius);
+}
+
+/* ── Image picker ────────────────────────────────────────────────────────── */
+.picker {
+  width: min(94vw, 60rem);
+  max-width: none;
+  max-height: min(88svh, 44rem);
+  margin: auto;
+  padding: var(--step-4);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--step-4);
+  color: var(--bone);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.picker::backdrop {
+  background: rgb(8 9 10 / 0.9);
+}
+
+.picker__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--step-3);
+}
+
+.picker__title {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.picker__head .btn {
+  width: 44px;
+  height: 44px;
+}
+
+.picker__empty {
+  margin: 0;
+  color: var(--bone-faint);
+}
+
+.picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--step-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.picker__item {
+  display: grid;
+  gap: var(--step-2);
+  width: 100%;
+  padding: var(--step-2);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color 150ms var(--ease),
+    background 150ms var(--ease);
+}
+
+.picker__item:hover,
+.picker__item:focus-visible {
+  border-color: var(--role-rest);
+  background: var(--ink-700);
+}
+
+.picker__item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: var(--bone);
+  border-radius: 6px;
+}
+
+.picker__label {
+  font-size: max(0.85rem, min(1.3cqi, 1rem));
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  background: var(--ink-800);
 }
 
 /* ── Fields ───────────────────────────────────────────────────────────── */

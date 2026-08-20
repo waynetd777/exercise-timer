@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { newRoutineBlocks } from '../editor/blocks'
+import { collectImages } from '../editor/images'
 import { SEED_ROUTINES } from '../routines/samples'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
@@ -40,6 +41,9 @@ export function App() {
    * identity would recompile the timeline mid-workout.
    */
   const [view, setView] = useState<View>({ screen: 'library' })
+
+  /** Every image already in use, so the editor can offer them for reuse. */
+  const knownImages = useMemo(() => collectImages(library.workouts), [library.workouts])
   const toLibrary = useCallback(() => setView({ screen: 'library' }), [])
 
   const onStarted = useCallback(() => {
@@ -59,7 +63,14 @@ export function App() {
   }
 
   if (view.screen === 'edit') {
-    return <EditorScreen workout={view.workout} onSave={onSave} onCancel={toLibrary} />
+    return (
+      <EditorScreen
+        workout={view.workout}
+        knownImages={knownImages}
+        onSave={onSave}
+        onCancel={toLibrary}
+      />
+    )
   }
 
   return (

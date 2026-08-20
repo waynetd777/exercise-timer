@@ -239,3 +239,13 @@ export function RedoIcon() {
     </Svg>
   )
 }
+
+export function ImageIcon() {
+  return (
+    <Svg>
+      <rect x="3.5" y="5" width="17" height="14" rx="2.5" {...STROKE} />
+      <circle cx="9" cy="10" r="1.6" {...STROKE} />
+      <polyline points="5 17 10 12.5 13.5 15.5 16.5 13 19 15" {...STROKE} />
+    </Svg>
+  )
+}
