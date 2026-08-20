@@ -72,6 +72,11 @@
   - Name de-duplicated: the countdown eyebrow now carries only "Round 3 of 8" and is omitted for a flat routine so the row collapses; idle and complete screens lead with "Ready" / "Done" rather than repeating the name.
   - Reclaimed space spent on: countdown height term 65cqh → **74cqh** (489 → 556px on a laptop, +14%), exercise name `max(2.5rem, min(11cqi, 11cqh))`, idle/complete title `max(2.5rem, min(14cqi, 9rem))`. The media panel grows on its own, since it stretches to the row.
   - Wide clock coefficient trimmed 92 → 88: at 92 an iPad hit 97% of the column width, inside the error bar of the glyph-width estimate. Fit verified at 5 viewports (82-92% vertical use).
+- **Centred routine name, icon-only controls** (user-reported)
+  - `.run__header` centres the title.
+  - New `src/ui/icons.tsx` — inline SVG (play, pause, reset, prev, next, sound on/off), inheriting `currentColor`, no font or extra request. Transport filled, utilities stroked.
+  - Buttons are square and text-free: 56px, primary 68px. Row width **508px → 372px**, so it now fits one line at 390px phone width instead of always wrapping; `flex-wrap` kept for narrower devices. The primary button's action and name are derived from `status`, and every control carries both `aria-label` and `title`.
+  - Removed as dead code: `.btn` text styling, the `.btn[aria-label]` tracking rule, and the `--label-size-control` / `--label-tracking-control` tokens.
 
 ---
 

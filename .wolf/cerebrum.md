@@ -79,6 +79,10 @@
 - [2026-08-21] **The routine name lives in the header only.** It used to be duplicated — header plus the eyebrow above the countdown, plus the idle-screen hero. The eyebrow now carries only "Round 3 of 8" and is omitted entirely for a flat routine so the row collapses; the idle and complete screens lead with "Ready" / "Done" instead of repeating the name. Don't re-add the name to the body.
 - [2026-08-21] **Wide clock coefficient is 88, not 92** — at 92 a two-digit countdown reached 97% of the column width on an iPad (1024x768), which is inside the error bar of the ~1.2em glyph-width estimate. 88 gives 93% there and costs nothing on a laptop, where the height term governs anyway.
 
+- [2026-08-21] **Controls are icon-only square buttons** (56px, primary 68px) using inline SVG from `src/ui/icons.tsx` — chosen over an icon font or emoji because SVG inherits `currentColor`, renders identically everywhere and needs no extra request offline. Transport icons filled, utilities stroked. **Every control carries its name in `aria-label` AND `title`**, which is the only thing keeping them discoverable — never add an icon button here without both.
+- [2026-08-21] **The control row now fits one line at phone width** (372px vs 390px), where the text version was ~508px and always wrapped. `flex-wrap` stays for narrower devices (a 320px iPhone SE still wraps). If text ever returns to these buttons, the `--label-size-control` / `--label-tracking-control` tokens were deleted as dead code and would need reinstating.
+- [2026-08-21] **Routine name is centred in the header** by request.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
