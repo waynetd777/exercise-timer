@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Block, MediaRef, Repeat, Segment, SegmentRole, Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
 import {
@@ -18,12 +18,15 @@ import {
 } from '../editor/blocks'
 import type { Path } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
+import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
 import { normaliseImageUrl } from '../editor/postimages'
 import { duration } from './format'
 import {
   BackIcon,
   CheckIcon,
+  CloseIcon,
+  ImageIcon,
   CopyIcon,
   DownIcon,
   PlusIcon,
@@ -44,6 +47,123 @@ const ROLES: { role: SegmentRole; label: string }[] = [
   { role: 'rest', label: 'Rest' },
   { role: 'recover', label: 'Recover' },
 ]
+
+/**
+ * Full-size image preview.
+ *
+ * A native `<dialog>` opened with `showModal()`, so Escape, focus trapping and
+ * the backdrop are the browser's job rather than mine. A click that lands on the
+ * dialog itself is a backdrop click — the image and the close button are
+ * children, so they never match.
+ */
+function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    dialog.current?.showModal()
+  }, [])
+
+  return (
+    <dialog
+      ref={dialog}
+      className="lightbox"
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === dialog.current) onClose()
+      }}
+    >
+      <img src={src} alt={alt} />
+      <button
+        type="button"
+        className="btn btn--ghost lightbox__close"
+        onClick={onClose}
+        aria-label="Close preview"
+        title="Close"
+      >
+        <CloseIcon />
+      </button>
+    </dialog>
+  )
+}
+
+/**
+ * Pick from the images already used somewhere in the library.
+ *
+ * Visual rather than a list of urls: the point is to recognise the machine, not
+ * to read a postimages id. Filtered by name once there are enough to scroll.
+ */
+function ImagePicker({
+  images,
+  onPick,
+  onClose,
+}: {
+  images: readonly KnownImage[]
+  onPick: (url: string) => void
+  onClose: () => void
+}) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    dialog.current?.showModal()
+  }, [])
+
+  const shown = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return needle ? images.filter((i) => i.label.toLowerCase().includes(needle)) : images
+  }, [images, query])
+
+  return (
+    <dialog
+      ref={dialog}
+      className="picker"
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === dialog.current) onClose()
+      }}
+    >
+      <header className="picker__head">
+        <h2 className="picker__title label label--sm">Images in your routines</h2>
+        <input
+          className="efield"
+          type="search"
+          value={query}
+          placeholder="Search"
+          aria-label="Search images"
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={onClose}
+          aria-label="Close"
+          title="Close"
+        >
+          <CloseIcon />
+        </button>
+      </header>
+
+      {shown.length === 0 ? (
+        <p className="picker__empty label label--sm">
+          {images.length === 0
+            ? 'No routine uses an image yet. Paste a link instead.'
+            : `Nothing matches “${query}”.`}
+        </p>
+      ) : (
+        <ul className="picker__grid">
+          {shown.map((image) => (
+            <li key={image.url}>
+              <button type="button" className="picker__item" onClick={() => onPick(image.url)}>
+                <img src={image.url} alt="" loading="lazy" />
+                <span className="picker__label">{image.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </dialog>
+  )
+}
 
 /** The URL currently on a segment, for the image field. */
 function mediaUrl(media: MediaRef | undefined): string {
@@ -72,13 +192,18 @@ function SegmentRow({
   onPatch,
   onClearImage,
   onWrap,
+  onPreview,
+  onChoose,
 }: RowProps & {
   segment: Segment
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onClearImage: (path: Path) => void
   onWrap: (path: Path) => void
+  onPreview: (src: string, alt: string) => void
+  onChoose: (path: Path) => void
 }) {
   const [urlDraft, setUrlDraft] = useState(mediaUrl(segment.media))
+  const imageUrl = segment.media?.source === 'remote' ? segment.media.url : null
 
   const commitUrl = () => {
     const url = normaliseImageUrl(urlDraft)
@@ -180,7 +305,9 @@ function SegmentRow({
         </div>
       </div>
 
-      <label className="erow__image">
+      {/* A div, not a label: a label wrapping the preview button would forward
+          the button's click to the input. The input names itself instead. */}
+      <div className="erow__image">
         <span className="label label--sm">Image</span>
         <input
           className="efield"
@@ -193,10 +320,28 @@ function SegmentRow({
             if (event.key === 'Enter') commitUrl()
           }}
         />
-        {segment.media?.source === 'remote' && (
-          <img className="erow__thumb" src={segment.media.url} alt="" />
+        <button
+          type="button"
+          className="chip chip--action"
+          onClick={() => onChoose(path)}
+          aria-label="Choose an image already used in your routines"
+        >
+          <ImageIcon />
+          Choose
+        </button>
+
+        {imageUrl && (
+          <button
+            type="button"
+            className="erow__thumb"
+            onClick={() => onPreview(imageUrl, segment.name)}
+            aria-label={`Preview the image for ${segment.name}`}
+            title="Preview image"
+          >
+            <img src={imageUrl} alt="" />
+          </button>
         )}
-      </label>
+      </div>
     </li>
   )
 }
@@ -304,10 +449,13 @@ function RepeatRow({
 
 export function EditorScreen({
   workout,
+  knownImages,
   onSave,
   onCancel,
 }: {
   workout: Workout
+  /** Images already used across the library, offered by the picker. */
+  knownImages: readonly KnownImage[]
   onSave: (workout: Workout) => void
   onCancel: () => void
 }) {
@@ -320,6 +468,9 @@ export function EditorScreen({
   )
   const { name, blocks } = history.present
   const [confirmingExit, setConfirmingExit] = useState(false)
+  const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null)
+  /** The step whose image is being chosen, or null when the picker is closed. */
+  const [choosingFor, setChoosingFor] = useState<Path | null>(null)
 
   /**
    * `coalesce` marks a text-ish edit, which collapses a run of keystrokes into
@@ -466,6 +617,8 @@ export function EditorScreen({
                   onPatch={patchSegment}
                   onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
+                  onPreview={(src, alt) => setImagePreview({ src, alt })}
+                  onChoose={setChoosingFor}
                 />
               ) : (
                 <RepeatRow
@@ -487,6 +640,25 @@ export function EditorScreen({
           </ul>
         )}
       </div>
+
+      {choosingFor && (
+        <ImagePicker
+          images={knownImages}
+          onPick={(url) => {
+            patchSegment(choosingFor, { media: { source: 'remote', url } })
+            setChoosingFor(null)
+          }}
+          onClose={() => setChoosingFor(null)}
+        />
+      )}
+
+      {imagePreview && (
+        <Lightbox
+          src={imagePreview.src}
+          alt={imagePreview.alt}
+          onClose={() => setImagePreview(null)}
+        />
+      )}
 
       <div className="editor__add">
         {ROLES.map(({ role, label }) => (
