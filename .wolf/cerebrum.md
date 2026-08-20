@@ -123,6 +123,9 @@
 - [2026-08-21] **Both the run and editor screens carry the blue radial wash** (`--role-rest` at 14% / 10%), matching the home screen. A screen without it will look like it belongs to a different app.
 - [2026-08-21] **Run-screen progress bar is a scaled inner element, not a gradient stop** — `transform: scaleX(var(--progress))` with a 400ms linear transition, because gradient stops do not transition and the value only changes once a second. Kept thin (3px) and low-contrast on purpose: the countdown should hold the eye.
 
+- [2026-08-21] **The countdown is sized from the STEP'S LONGEST STRING, not the current one.** `--chars = clockWidth(clock(ceil(entry.durationMs / 1000)))`, so it is constant for the whole step. Sizing from the live value made a 90s step jump ~75% larger crossing 1:00 -> 59. Accepted trade: a step over a minute renders smaller throughout (137px vs 239px on a phone) — stability beats peak size, and the long steps are the ones you are not staring at. (`bug-017`)
+- [2026-08-21] **The stacked run layout uses FIXED proportions (56fr / 44fr), not `auto` + remainder.** With `auto`, the countdown block took what it needed and the image absorbed the rest — so any change in numeral size visibly squashed the picture. Consequence: `--clock-height` is 34cqh stacked (not 40), because the countdown only has 56% of the body while cqh still measures the whole body. Re-verify the count block fits its row if either number changes; 342x380 is the tightest case checked. (`bug-017`)
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

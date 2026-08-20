@@ -287,6 +287,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T05:30:00Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-08-21T06:40:00Z",
+      "error_message": "USER REPORTED: 'the countdown is still changing size when it transitions from 1:00 to 59 and squashing the image'",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "TWO causes, both left over from bug-010's partial fix. (1) `--chars` was computed from the CURRENT clock string, so a step counting through the minute boundary went from '1:00' (3.5 units) to '59' (2 units) and the font grew ~75% mid-step. Flooring at 2 had only fixed the single-digit case. (2) The stacked layout used `grid-template-rows: auto minmax(0, 1fr)`, so the countdown block took whatever height it needed and the image absorbed the rest \u2014 meaning any change in numeral size resized the picture.",
+      "fix": "`--chars` now comes from the step's LONGEST string \u2014 clockWidth(clock(ceil(entry.durationMs / 1000))) \u2014 so it is constant for the whole step and the countdown cannot change size while running. And the stacked split is fixed proportions (56fr / 44fr) instead of auto, so the image never moves. Because the countdown now only gets 56% of the body while cqh still measures the whole body, --clock-height came down from 40cqh to 34cqh; verified the count block fits its row at six window sizes including 342x380.",
+      "fix_rule": "Size a countdown from the LONGEST value it will display, never the current one \u2014 otherwise it resizes as digits drop. And in a stacked layout, give a flexible neighbour a fixed proportion rather than the remainder, or it moves whenever its sibling does.",
+      "tags": [
+        "css",
+        "sizing",
+        "layout",
+        "grid",
+        "regression",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T06:40:00Z"
     }
   ]
 }
