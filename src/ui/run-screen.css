@@ -25,11 +25,18 @@
  * eyebrow row above the countdown.
  */
 .run__header {
-  display: flex;
+  /* Three columns so the title stays optically centred with a back button
+     beside it, rather than being pushed off-centre by it. */
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 3.5rem;
   align-items: center;
-  justify-content: center;
   padding: var(--step-2) var(--step-5);
   border-bottom: var(--hairline);
+}
+
+.run__header .btn {
+  width: 44px;
+  height: 44px;
 }
 
 @container shell (min-width: 46rem) {
@@ -99,6 +106,8 @@
   display: grid;
   gap: var(--step-2);
   align-content: center;
+  justify-items: center;
+  text-align: center;
   min-width: 0;
 }
 
@@ -152,6 +161,7 @@
 .count__meta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   /* Column gap in em so it scales with the label size — a fixed 1.5rem read as
      cramped once the labels grew to ~43px. */
   gap: var(--step-3) 1.75em;
@@ -229,6 +239,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
+  text-align: center;
   gap: var(--step-2) var(--step-3);
   min-height: 1.2em;
 }
@@ -328,7 +340,8 @@
   display: grid;
   gap: var(--step-4);
   align-content: center;
-  justify-items: start;
+  justify-items: center;
+  text-align: center;
   padding: var(--step-6) var(--step-5);
 }
 
@@ -350,6 +363,7 @@
 .rest-state__stats {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--step-5);
   margin: 0;
 }

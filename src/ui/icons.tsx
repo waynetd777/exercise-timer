@@ -84,3 +84,78 @@ export function SoundOffIcon() {
     </Svg>
   )
 }
+
+export function BackIcon() {
+  return (
+    <Svg>
+      <polyline points="14 6 8 12 14 18" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function StarIcon({ filled = false }: { filled?: boolean }) {
+  const points = "12 3.6 14.7 9.2 20.8 10 16.4 14.3 17.5 20.4 12 17.4 6.5 20.4 7.6 14.3 3.2 10 9.3 9.2"
+  return (
+    <Svg>
+      {filled ? (
+        <polygon points={points} fill="currentColor" />
+      ) : (
+        <polygon points={points} {...STROKE} />
+      )}
+    </Svg>
+  )
+}
+
+export function CopyIcon() {
+  return (
+    <Svg>
+      <rect x="9" y="9" width="11" height="11" rx="2" {...STROKE} />
+      <path d="M15 5.5H6A1.5 1.5 0 0 0 4.5 7v9" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function PencilIcon() {
+  return (
+    <Svg>
+      <path d="M4 20h4l10-10-4-4L4 16z" {...STROKE} />
+      <path d="M14.5 5.5 18.5 9.5" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function TrashIcon() {
+  return (
+    <Svg>
+      <path d="M4.5 7h15" {...STROKE} />
+      <path d="M9.5 7V4.8h5V7" {...STROKE} />
+      <path d="M6.5 7l1 12.2h9L17.5 7" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function ImportIcon() {
+  return (
+    <Svg>
+      <path d="M12 3.5v10.5" {...STROKE} />
+      <polyline points="7.5 9.5 12 14 16.5 9.5" {...STROKE} />
+      <path d="M4.5 17v2.5h15V17" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function CheckIcon() {
+  return (
+    <Svg>
+      <polyline points="5 12.5 9.5 17 19 7.5" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function CloseIcon() {
+  return (
+    <Svg>
+      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" {...STROKE} />
+    </Svg>
+  )
+}
