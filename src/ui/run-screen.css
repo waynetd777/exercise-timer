@@ -3,7 +3,9 @@
  * phase boundary changes the room's glow without anything needing to be read.
  */
 .run {
-  container-type: inline-size;
+  /* Named so it is unambiguous which container a query or cq unit refers to,
+     now that .run__body is a container too. */
+  container: shell / inline-size;
   display: grid;
   grid-template-rows: auto 1fr auto;
   height: 100%;
@@ -51,6 +53,11 @@
 
 /* ── Body ──────────────────────────────────────────────────────────────── */
 .run__body {
+  /* `size`, not `inline-size`: the countdown has to be sized against the
+     available HEIGHT as well as width, or it overflows on a short window.
+     Safe here because the block size is definite (a 1fr row of a 100%-height
+     grid), so containment cannot collapse it. */
+  container: body / size;
   display: grid;
   gap: var(--step-5);
   align-content: center;
@@ -58,12 +65,14 @@
   min-height: 0;
 }
 
-@container (min-width: 46rem) {
+@container shell (min-width: 46rem) {
   .run__body {
-    grid-template-columns: 1fr minmax(16rem, 22rem);
-    align-items: center;
+    /* Proportional, and minmax(0, …) so both columns may shrink rather than
+       being pinned to a rem cap that wastes a large screen. */
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: stretch;
     gap: var(--step-7);
-    padding-inline: var(--step-7);
+    padding: var(--step-5) var(--step-7);
   }
 }
 
@@ -83,11 +92,21 @@
 .count {
   display: grid;
   gap: var(--step-2);
+  align-content: center;
   min-width: 0;
 }
 
+/*
+ * The numerals fill whatever space exists, bounded by BOTH axes:
+ *   - width  84cqi / --chars, where --chars is the string's width in ems
+ *            (a digit counts 1, a colon 0.5). So "8" and "17" render at the
+ *            same size, while "4:30" steps down instead of overflowing.
+ *   - height 52cqh, leaving room for the label, name and meta rows.
+ * Whichever is smaller wins. No rem ceiling — that was what kept this tiny on
+ * a laptop.
+ */
 .count__clock {
-  font-size: clamp(5rem, 34cqi, 15rem);
+  font-size: max(3rem, min(calc(84cqi / var(--chars, 2)), 52cqh));
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
@@ -111,7 +130,7 @@
 }
 
 .count__name {
-  font-size: clamp(1.25rem, 5cqi, 2.25rem);
+  font-size: max(1.25rem, min(7cqi, 7cqh));
   font-weight: 650;
   letter-spacing: -0.01em;
   margin: 0;
@@ -129,20 +148,34 @@
  */
 .panel {
   display: grid;
+  /* Frame takes the slack; the "next" line keeps its intrinsic height. */
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: var(--step-3);
   min-width: 0;
+  min-height: 0;
 }
 
 .panel__frame {
   display: grid;
   place-items: center;
+  min-height: 0;
+  /* Stacked on a phone the frame needs an intrinsic height, so it keeps an
+     aspect ratio there. On a wide layout it stretches to the row instead —
+     object-fit: contain means a bigger frame never distorts the image. */
   aspect-ratio: 4 / 3;
-  /* Not cqh: .run is an inline-size container, so cqh has nothing to resolve against. */
   max-height: min(40svh, 26rem);
   overflow: hidden;
   background: var(--ink-800);
   border: var(--hairline);
   border-radius: var(--radius);
+}
+
+@container shell (min-width: 46rem) {
+  .panel__frame {
+    aspect-ratio: auto;
+    max-height: none;
+    height: 100%;
+  }
 }
 
 .panel__frame img {
@@ -237,14 +270,14 @@
   padding: var(--step-6) var(--step-5);
 }
 
-@container (min-width: 46rem) {
+@container shell (min-width: 46rem) {
   .rest-state {
     padding-inline: var(--step-7);
   }
 }
 
 .rest-state__title {
-  font-size: clamp(2rem, 9cqi, 4.5rem);
+  font-size: max(2rem, min(13cqi, 8rem));
   font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.03em;
