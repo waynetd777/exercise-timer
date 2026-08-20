@@ -48,7 +48,14 @@
    * cqi resolves against whichever container the label sits in (shell or body);
    * with no container it falls back to the viewport, which is also fine.
    */
-  --label-size: clamp(1.25rem, 2.4cqi, 2.4rem);
+  /*
+   * Height-aware as well as width-aware. At this size the meta row wraps to two
+   * lines, and on a short laptop window that plus a ~300px countdown would
+   * overflow the body row — so labels give way when vertical space is what is
+   * scarce. Inside `.run__body` (a size container) cqh is the body height;
+   * elsewhere it falls back to the viewport, which is close enough.
+   */
+  --label-size: clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem);
   /* The size the controls keep — they are already right, so `.controls`
      overrides --label-size back to this rather than being special-cased. */
   --label-size-control: clamp(1rem, 1.6cqi, 1.6rem);

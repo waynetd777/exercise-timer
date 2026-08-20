@@ -55,6 +55,9 @@
 - [2026-08-21] **Empty media panel shows the STEP NAME, not "No image".** 46 of the 86 steps in Wayne's real routine have no illustration (21× "Get ready", 20× "Rest", 3× "Low Pulley Squat", 2× "Change Sides") — over half — so this is the normal state, and it must look designed rather than like a failure.
 - [2026-08-21] **`fitCqi(text)` in `src/ui/format.ts` sizes a wrapping headline off its LONGEST WORD** (161 / longest, capped), because that word is what has to fit one line. "REST" then sets ~3x larger than "SEATED ABDOMINAL CRUNCH" and both fill the frame. Requires the frame itself to be `container-type: inline-size`, or cqi measures the whole body and long names overflow. Same family as `clockWidth` for the countdown — prefer extending this pattern over inventing a new fitting trick.
 
+- [2026-08-21] **`--label-size` is height-aware: `clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem)`.** Wayne asked for bigger secondary text three times (`bug-006`, then twice more), and at ~46px the meta row wraps to two lines — combined with a ~300px countdown that would overflow the body row on a short laptop window. The `cqh` term makes labels give way when VERTICAL space is the scarce axis, so the request is honoured wherever there is room. If asked to enlarge again, raise the cqi term and the cap, and re-check the vertical stack (label + clock + name + wrapped meta) against body height at 1440x600 — that is the tightest real case.
+- [2026-08-21] **Wayne's instinct on type size runs much larger than a conventional UI scale.** Three separate requests to enlarge. When building new screens for this project, start secondary text around 2.5-3cqi (~30-43px on a laptop), not at a dashboard-like 0.7-1rem, and expect the hero to fill its box.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
