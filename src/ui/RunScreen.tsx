@@ -6,7 +6,7 @@ import { useCueScheduler } from '../audio/useCueScheduler'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import { EffortStrip } from './EffortStrip'
-import { clock, clockWidth, duration, pathLabel } from './format'
+import { clock, clockWidth, duration, fitCqi, pathLabel } from './format'
 import { resolveMediaPreview } from './media'
 import './run-screen.css'
 
@@ -31,7 +31,16 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
         {src ? (
           <img src={src} alt={entry.name} />
         ) : (
-          <span className="panel__empty">No image</span>
+          // The step name rather than "No image": plenty of real exercises have
+          // no illustration, so this is a normal state. aria-hidden because the
+          // name is already the heading beside it.
+          <span
+            className="panel__empty"
+            style={{ ['--fit' as string]: fitCqi(entry.name) }}
+            aria-hidden="true"
+          >
+            {entry.name}
+          </span>
         )}
       </div>
       <p className="panel__next label">

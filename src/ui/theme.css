@@ -48,7 +48,10 @@
    * cqi resolves against whichever container the label sits in (shell or body);
    * with no container it falls back to the viewport, which is also fine.
    */
-  --label-size: clamp(1rem, 1.6cqi, 1.6rem);
+  --label-size: clamp(1.25rem, 2.4cqi, 2.4rem);
+  /* The size the controls keep — they are already right, so `.controls`
+     overrides --label-size back to this rather than being special-cased. */
+  --label-size-control: clamp(1rem, 1.6cqi, 1.6rem);
   --label: 650 var(--label-size)/1.3 var(--font-ui);
   /* Eased off from 0.16em: the same tracking reads much wider at this size. */
   --label-tracking: 0.11em;
