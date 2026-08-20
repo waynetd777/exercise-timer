@@ -8,9 +8,66 @@
       "file": "src/engine/__tests__/runtime.test.ts",
       "root_cause": "Test expectation was wrong, not the implementation. position() guards with `Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0`, so +Infinity is rejected as invalid input and clamps to 0 rather than being read as 'past the end' and completing the workout.",
       "fix": "Kept the implementation and corrected the test: ALL non-finite input (NaN, -Infinity, +Infinity) clamps to the start. One rule for invalid input beats two special cases, and a real monotonic clock never produces these values. Documented the rule in the test and in position()'s doc comment.",
-      "tags": ["engine", "test-expectation", "edge-case", "non-finite", "phase-1"],
+      "tags": [
+        "engine",
+        "test-expectation",
+        "edge-case",
+        "non-finite",
+        "phase-1"
+      ],
       "occurrences": 1,
       "last_seen": "2026-08-20T23:10:40Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-08-20T23:40:00Z",
+      "error_message": "Idle run screen rendered the 'Ready' panel AND a live countdown simultaneously, putting 4 children into a 3-row grid",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "position(timeline, 0) legitimately returns the FIRST entry, not null \u2014 only completion yields a null entry. So `at.entry` is truthy before the workout starts, and gating the running body on `entry &&` alone was true during 'idle'.",
+      "fix": "Derive `const isRunning = status === 'running' || status === 'paused'` and gate on `isRunning ? at.entry : null`. Same flag unlights the effort strip when idle (currentIndex -1).",
+      "tags": [
+        "ui",
+        "react",
+        "state-gating",
+        "phase-2",
+        "found-by-self-review"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T23:40:00Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-08-20T23:40:00Z",
+      "error_message": "Skipping a step while paused (or stepping back from complete) left the clock advancing, so the next Resume credited a huge bogus pause and jumped the workout forward",
+      "file": "src/state/useTimer.ts",
+      "root_cause": "seekTo() re-anchored startedAt but only refreshed pausedAt if it was already non-zero. Stepping back from 'complete' set status to 'paused' while pausedAt stayed 0, so readElapsed() kept using now() \u2014 the clock ran while the UI said paused, and resume() then added (now - 0).",
+      "fix": "seekTo takes an explicit `freeze` flag (`status !== 'running'`) and always sets pausedAt accordingly. Also extracted the whole arithmetic into pure src/state/clock.ts (Clock + elapsed/started/paused/resumed/seeked) with 11 unit tests that need no DOM \u2014 including one named for this bug.",
+      "tags": [
+        "clock",
+        "pause",
+        "seek",
+        "phase-2",
+        "found-by-self-review",
+        "prompted-refactor"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T23:40:00Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-08-20T23:40:00Z",
+      "error_message": "max-height: 40cqh on the media panel had no container to resolve against",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.run` declares `container-type: inline-size`, which establishes an INLINE-axis query container only. cqh needs `container-type: size` (which requires a definite block size). With no eligible container, cqh silently falls back to the small viewport \u2014 right by accident, wrong by intent.",
+      "fix": "Use `min(40svh, 26rem)` explicitly. Rule: with container-type: inline-size, only cqi/cqw are meaningful.",
+      "tags": [
+        "css",
+        "container-queries",
+        "phase-2",
+        "found-by-self-review"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T23:40:00Z"
     }
   ]
 }

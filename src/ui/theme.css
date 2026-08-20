@@ -1,0 +1,93 @@
+/*
+ * Tokens. Dark ground for gym lighting, warm-neutral rather than blue-black.
+ *
+ * Phase colours are coded WARM vs COOL rather than red vs green: temperature
+ * survives every colour-vision deficiency and is what makes a phase readable
+ * in peripheral vision, mid-effort, from three metres away.
+ */
+:root {
+  --ink-900: #12100e;
+  --ink-800: #1a1714;
+  --ink-700: #241f1a;
+  --ink-600: #332b23;
+
+  --bone: #f2ede4;
+  --bone-dim: #a1988b;
+  --bone-faint: #6b6359;
+
+  --role-prepare: #e8e0d2; /* neutral — prepare is the absence of effort */
+  --role-work: #ff7a2f;
+  --role-rest: #52a8ce;
+  --role-recover: #9080e8;
+  --role-custom: #d8cfc0;
+
+  /* Relative height of a step in the effort strip. */
+  --effort-prepare: 0.3;
+  --effort-work: 1;
+  --effort-rest: 0.42;
+  --effort-recover: 0.62;
+  --effort-custom: 0.7;
+
+  --step-1: 0.25rem;
+  --step-2: 0.5rem;
+  --step-3: 0.75rem;
+  --step-4: 1rem;
+  --step-5: 1.5rem;
+  --step-6: 2rem;
+  --step-7: 3rem;
+
+  --radius: 10px;
+  --hairline: 1px solid var(--ink-600);
+
+  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Small, wide-tracked uppercase — the counterweight to the huge numerals. */
+  --label: 600 0.7rem/1.2 var(--font-ui);
+  --label-tracking: 0.16em;
+
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink-900);
+  color: var(--bone);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

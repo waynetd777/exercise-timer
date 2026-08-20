@@ -18,35 +18,44 @@
   - `src/engine/cues.ts` — `cues()` precomputed absolute-time cues (phase change, 3-2-1 countdown suppressed when it would collide with a step start, completion) and `cuesBetween()` half-open window for the rolling audio lookahead.
   - **41 tests green**, typecheck + production build clean. Covers Tabata, named circuits, 2-level nesting, degenerate durations/repeat counts, every timeline boundary, non-finite input, cue windowing, and `totalDurationMs`/`stepCount` agreement with `compile()`.
   - `vite.config.ts` `base` reads `VITE_BASE` so root-domain and subpath hosts both work with no retrofit.
+- **Phase 2 COMPLETE** — RunScreen, run clock, effort strip
+  - `src/state/clock.ts` — the run clock as PURE data + transitions (`Clock` = `{ startedAt, pausedTotalMs, pausedAt }`; `elapsed/started/paused/resumed/seeked`). Extracted from the hook because this arithmetic is the most bug-prone part of the app; 11 DOM-free tests.
+  - `src/state/useTimer.ts` — thin React wrapper. **Schedules ONE `setTimeout` to the exact instant the display next changes** (`entry.endMs - (secondsShown - 1) * 1000`), not a 60fps rAF loop: ~1 callback/sec, same precision. Resyncs immediately on `visibilitychange`.
+  - `src/state/useWakeLock.ts` — pulled forward from phase 7 (a timer whose screen sleeps is useless). Feature-detected, re-acquires on visibility return.
+  - `src/ui/RunScreen.tsx` — idle / running / paused / complete states, countdown, phase colour, path label ("Circuit 2 of 3"), total remaining, step N of M, controls (start/pause/resume/reset/skip both ways).
+  - `src/ui/EffortStrip.tsx` — **the signature element.** One sliver per step, width ∝ duration, height ∝ effort (work tall, rest short), so a routine's shape is visible at a glance; doubles as the progress bar.
+  - `src/ui/theme.css` + `run-screen.css` — plain CSS + custom properties, container queries. Warm-neutral dark ground; phases coded WARM vs COOL (work amber / rest steel-blue / recover violet / prepare neutral) so they survive colour-vision deficiency and read peripherally. Background carries a faint wash of the phase colour.
+  - `src/ui/media.ts` — **PHASE 2 STOPGAP** resolving `remote` + `bundled` only, so real images show now. Phase 4 replaces it with `src/media/resolveMedia`.
+  - `src/ui/format.ts`, `src/routines/samples.ts` (Tabata + Upper body circuit using the real Cable-Fly postimages URL).
+  - **52 tests green**, typecheck + build clean. 3 bugs found in self-review and fixed before first render — see buglog `bug-002`..`bug-004`.
+  - ⚠️ **Not visually verified.** No browser driver installed, so the rendering has never been looked at. Criteria 5 (background 2 min) and 6 (responsive) still need eyes on a device.
 
 ---
 
-## 🚀 Next phase — Phase 2: RunScreen
+## 🚀 Next phase — Phase 3: audio cues
 
-**Goal:** Get a real workout running on screen — big countdown, phase colour, working controls — driven by the phase-1 engine.
+**Goal:** Beeps that land on time, including after the tab has been backgrounded.
 
 ### Acceptance criteria
-1. A `useTimer(workout)` hook owns run state as `{ startedAt, pausedTotalMs, status }` and derives elapsed on every animation frame. **No countdown integer in state; no tick accumulation.**
-2. `RunScreen` shows: current step name, seconds remaining (`Math.ceil(remainingMs / 1000)`), the repeat path ("Round 3 of 8"), total time remaining, and a progress indicator.
-3. Controls work: start, pause, resume, reset, skip forward, skip back — skip wired to `skipForward`/`skipBack`.
-4. Phase colour keyed off `entry.role` (prepare / work / rest / recover).
-5. Backgrounding the tab for 2 minutes and returning shows the CORRECT elapsed time (proves the timestamp-derived clock).
-6. Responsive: phone portrait = fullscreen countdown; iPad/laptop = countdown + upcoming-step rail. Container queries, one component set.
-7. Image slot present but stubbed — a placeholder box sized from `entry.media`; real resolution lands in phase 4.
+1. `AudioContext` unlocked on the first user gesture (the Start tap) — mobile browsers block autoplay, so this cannot be deferred.
+2. Cues pre-scheduled on `AudioContext.currentTime`, never fired from a JS tick. Rolling lookahead window (~30s) re-armed on a timer and on `visibilitychange`, using `cuesBetween()` from the engine.
+3. Distinct tones: 3-2-1 countdown (short, rising), phase change (firmer), workout complete (a resolved two-note figure). Synthesised with oscillators — no audio files to ship or cache.
+4. Pause/resume/seek re-arm the window correctly; no orphaned beeps from the abandoned position.
+5. Mute toggle, persisted.
+6. Verified: start a routine, background the tab 10 minutes, and the beeps are still on the beat.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| new | `src/state/useTimer.ts` | rAF loop, run state, derives `Position` from the clock |
-| new | `src/ui/RunScreen.tsx` | Countdown, phase colour, step name, path label, controls |
-| new | `src/ui/SegmentRail.tsx` | Upcoming steps (iPad/laptop only) |
-| new | `src/ui/theme.css` | Role colours + layout tokens as custom properties |
-| edit | `src/main.tsx` | Mount `RunScreen` with a hardcoded Tabata fixture |
+| new | `src/audio/engine.ts` | AudioContext lifecycle, unlock, `scheduleTone(atAudioTime, spec)` |
+| new | `src/audio/tones.ts` | Tone specs per `CueKind` |
+| new | `src/audio/useCueScheduler.ts` | Maps run clock → audio clock, arms the rolling window |
+| edit | `src/state/useTimer.ts` | Expose the clock offset the scheduler needs |
+| edit | `src/ui/RunScreen.tsx` | Mute toggle |
 
-### Notes for phase 2
-- Decide the styling approach at the start of this phase (open decision below).
-- Decide the run-screen image treatment here too — needs something on screen to judge.
-- `document.visibilitychange` is the moment to re-derive, not to correct — the clock is already right; only the rAF loop pauses.
+### Notes for phase 3
+- The bridge is one subtraction: `audioTime = ctx.currentTime + (cue.atMs - elapsedNow) / 1000`. Recompute the offset on every re-arm rather than caching it — pause/seek invalidate it.
+- iOS suspends the context when the page hides; on return, resume it and re-arm from the current position.
 
 ### Closed decisions
 - **Platform: installable web PWA** (React + TypeScript + Vite), responsive across phone / iPad / laptop. Chosen over native for iteration speed and no App Store. Accepted tradeoff: will not run reliably with an iPhone screen locked / in pocket.
@@ -70,6 +79,10 @@
 - **Portability: export/import a single `.json` bundle** with images inline as base64 (~1-1.5MB for a 10-step workout), moved by AirDrop / Files. **No backend, no sync** — judged unjustified for a single-user timer, and a server would make the app offline-breakable.
 - **Share links now mostly work:** remote and bundled refs export as short strings, so only `local` photos force a large bundle. A routine built from postimages or bundled images fits in a URL.
 - **Hosting deliberately left open.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1, so a root-domain host and a subpath host (GitHub Pages `/exercise-timer/`) both work with no retrofit. Recommendation on record for phase 7: Cloudflare Pages — free tier deploys private repos, serves from the root, good SW caching. GitHub Pages needs Pro for a private repo and publishes a public site.
+- **RESOLVED phase 2 — styling: plain CSS + custom properties.** No Tailwind. A handful of screens, one token file, container queries for layout. CSS ships at ~1.7kB gzipped.
+- **RESOLVED phase 2 — images: bounded panel beside the countdown** on wide layouts, stacked below on phone portrait (a bounded panel is impossible "beside" a 390px-wide column).
+- **Phase colours are coded warm vs cool, not red vs green** — temperature survives every colour-vision deficiency and is what makes a phase readable peripherally, mid-effort, at three metres. Work amber `#FF7A2F`, rest steel-blue `#52A8CE`, recover violet `#9080E8`, prepare neutral bone (prepare is the absence of effort).
+- **`SegmentRail` was cut.** The effort strip plus a single "Next · Rest 20s" line does its job with less furniture.
 - **Responsive = layout only.** One component set; phone portrait is fullscreen countdown, iPad/laptop adds upcoming-segment rail + editor via container queries.
 - **Routine library is first-class: build / save / load any number of routines.** The `workouts` store is keyed by id, so unbounded count is free — what this adds is a Library screen as the app's home: list, create, duplicate, rename, delete, and load into either the runner or the editor.
 - **`Workout` carries library metadata:** `createdAt`, `updatedAt`, `lastRunAt`, `favourite`, `estimatedTotalMs` (derived at save time so the list can show durations without compiling every routine).
@@ -79,8 +92,7 @@
 - **Deferred:** workout history/logging, voice announcements, sound packs, Apple Watch, video media, folders/tags, any server.
 
 ### Open decisions
-- **Styling approach (plain CSS + custom properties vs Tailwind) — DUE NOW, phase 2.** Leaning plain CSS: the app is a handful of screens, the countdown is one big custom-property-driven layout, and it keeps the bundle honest.
-- **Run-screen image treatment — DUE NOW, phase 2.** Fullscreen behind the countdown, or a bounded panel beside/above it? Judge with something on screen.
+- Whether to install a browser driver (Playwright) so UI work can be screenshotted and self-reviewed. Currently none, so phase 2 shipped visually unverified. Decide before phase 5/6 (library + editor) — those are much more layout-heavy.
 - Wake-lock fallback: silent looping audio, or accept Screen Wake Lock API support only? Decide at phase 7.
 
 ---
@@ -92,16 +104,16 @@
   - `src/engine/` — pure interval-timer core (compile / position / cues). DOM-free, unit-tested.
   - `src/audio/` — AudioContext unlock + `scheduleAt(time, tone)`.
   - `src/media/` — `resolveMedia` (remote/bundled/local), postimages URL normaliser, import pipeline (downscale + hash), IndexedDB blob store, objectURL cache, offline pinning.
-  - `src/state/` — `useTimer` (rAF loop, wake lock), `storage` (IndexedDB workouts, versioned schema, export/import).
-  - `src/ui/` — `LibraryScreen` (home), `RunScreen`, `SegmentRail`, `WorkoutEditor`, `BlockRow`, `ImagePicker`.
+  - `src/state/` — `clock.ts` (pure run clock), `useTimer` (timeout-scheduled, derives Position), `useWakeLock`; `storage` (IndexedDB workouts, versioned schema, export/import) lands phase 4.
+  - `src/ui/` — `RunScreen`, `EffortStrip`, `theme.css`/`run-screen.css`, `format.ts`, `media.ts` (stopgap). Still to come: `LibraryScreen` (phase 5), `WorkoutEditor`/`BlockRow`/`ImagePicker` (phase 6).
 - **Patterns:** engine stays pure and DOM-free; all time derived from timestamps, never accumulated; audio scheduled ahead on the audio clock, not fired from JS ticks; images content-addressed and always downscaled before storage.
 
 ### Build order
 | Phase | Deliverable |
 |---|---|
-| 1 | `engine/` + tests (types include `MediaRef`) |
-| 2 | RunScreen — countdown, phase colour, start/pause/reset/skip; image slot stubbed |
-| 3 | Audio cues |
+| 1 | ✅ `engine/` + tests |
+| 2 | ✅ RunScreen + pure run clock + effort strip |
+| 3 | ◀ **NEXT** — audio cues |
 | 4 | Media pipeline — `resolveMedia` over all 3 sources, postimages URL normaliser, IndexedDB blob store, downscale, content-hash, objectURL cache, pin-for-offline, next-image preload |
 | 5 | LibraryScreen — list / create / duplicate / rename / delete / load routines, search + sort, media GC |
 | 6 | WorkoutEditor — block tree editing + image picker (photo/camera/drag/paste) |
