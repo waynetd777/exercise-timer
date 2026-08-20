@@ -2,26 +2,34 @@
   "session_id": "session-2026-08-20-2242",
   "started": "2026-08-20T20:42:16.934Z",
   "files_read": {
-    "/Users/wayned/Projects/exercise-timer/public/icon-512.png": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-08-20T22:50:08.447Z",
-      "read_mtime": 1787266204703.2153,
-      "anatomy_hit": false
-    },
     "/Users/wayned/Projects/exercise-timer/public/favicon-64.png": {
       "count": 1,
       "tokens": 0,
       "first_read": "2026-08-20T22:58:54.206Z",
       "read_mtime": 1787266730924.4368,
       "anatomy_hit": false
+    },
+    "/Users/wayned/Projects/exercise-timer/public/icon-512.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-20T23:03:12.997Z",
+      "read_mtime": 1787266988229.1304,
+      "anatomy_hit": false
+    },
+    "/Users/wayned/Projects/exercise-timer/public/icon-maskable-512.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-20T23:03:17.437Z",
+      "read_mtime": 1787266988460.2024,
+      "anatomy_hit": false
     }
   },
   "files_written": [],
   "edit_counts": {},
   "anatomy_hits": 0,
-  "anatomy_misses": 2,
+  "anatomy_misses": 4,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 26
+  "stop_count": 27,
+  "reminders_sent": {}
 }
