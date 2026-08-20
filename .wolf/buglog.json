@@ -306,6 +306,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T06:40:00Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-08-21T07:00:00Z",
+      "error_message": "USER REPORTED: 'on a small screen can you shrink the image to fit the available space?'",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "Not an overflow \u2014 the image was already contained. The exercise illustrations are near-square (876x800 measured from the real file), so a SHORT WIDE frame fits them to its height and leaves the width unused: at a 342x103 frame the picture rendered at 0.13x, tiny inside a large empty bordered box. The fixed 56/44 stacked split gave the panel the same share regardless of how little vertical space there was.",
+      "fix": "Two viewport-height tiers hand space to the image on short screens: at <=700px the split becomes 50/50 with --clock-height 28cqh, and at <=540px it becomes 46/54 with 22cqh plus lower name and label FLOORS (those floors, not the countdown, are what crowd the row at that height). Image renders 19-47% larger depending on size; a normal phone portrait (390x844) is unchanged. Declared before the wide container block, since the two-column layout overrides both rows and --clock-height and must not be affected.",
+      "fix_rule": "`object-fit: contain` fits the SMALLER axis, so a box whose aspect ratio is far from the image's wastes the other axis. When the content is near-square, the box's aspect ratio matters more than its area.",
+      "tags": [
+        "css",
+        "responsive",
+        "media-queries",
+        "aspect-ratio",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T07:00:00Z"
     }
   ]
 }

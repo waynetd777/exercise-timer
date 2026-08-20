@@ -121,6 +121,7 @@
 - **Blue wash on the home and editor screens** (user-reported) — same radial gradient as the run screen, in `--role-rest`.
 - **Run-screen progress bar** (user-reported) — 3px, edge to edge under the header rule, in the phase colour. Driven by `transform: scaleX()` on an inner element rather than a gradient stop, since gradients do not transition and the value updates once a second.
 - **Countdown no longer resizes mid-step** (user-reported) — `--chars` now comes from the step's longest string rather than the live value, so a step crossing 1:00 → 59 no longer jumps ~75%; and the stacked layout uses fixed 56fr/44fr proportions instead of `auto` + remainder, so the image never resizes with it. `--clock-height` tightened 40cqh → 34cqh accordingly, fit verified at six window sizes. See buglog `bug-017`.
+- **Image gets more room on short screens** (user-reported) — the illustrations are near-square (876x800), so a short wide frame fitted them to its height and wasted the width, rendering at 0.13x on a small window. Two viewport-height tiers now hand space to the panel: `<=700px` 50/50 with `--clock-height: 28cqh`, `<=540px` 46/54 with 22cqh and lower name/label floors. Image renders **19-47% larger**; a normal phone portrait is unchanged. See buglog `bug-018`.
 
 ---
 
