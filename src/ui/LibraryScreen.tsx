@@ -261,30 +261,37 @@ export function LibraryScreen({
         </div>
       </header>
 
-      {notice && (
-        <p className="library__notice label" role="status">
-          {notice}
-        </p>
-      )}
-      {library.error && (
-        <p className="library__notice library__notice--error label" role="alert">
-          {library.error}
-        </p>
-      )}
+      {/*
+        Everything below the header scrolls, so the title, search and sort
+        controls stay put. A wrapper rather than a grid row per element: the
+        number of notices varies, and the scroll region must not depend on it.
+      */}
+      <div className="library__scroll">
+        {notice && (
+          <p className="library__notice label" role="status">
+            {notice}
+          </p>
+        )}
+        {library.error && (
+          <p className="library__notice library__notice--error label" role="alert">
+            {library.error}
+          </p>
+        )}
 
-      {library.loading ? (
-        <p className="library__empty label">Opening your routines…</p>
-      ) : visible.length === 0 ? (
-        <p className="library__empty label">
-          {query ? `Nothing matches “${query}”.` : 'Drop a .tabata file here to add a routine.'}
-        </p>
-      ) : (
-        <ul className="library__list">
-          {visible.map((workout) => (
-            <Row key={workout.id} workout={workout} library={library} onRun={onRun} />
-          ))}
-        </ul>
-      )}
+        {library.loading ? (
+          <p className="library__empty label">Opening your routines…</p>
+        ) : visible.length === 0 ? (
+          <p className="library__empty label">
+            {query ? `Nothing matches “${query}”.` : 'Drop a .tabata file here to add a routine.'}
+          </p>
+        ) : (
+          <ul className="library__list">
+            {visible.map((workout) => (
+              <Row key={workout.id} workout={workout} library={library} onRun={onRun} />
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="library__drop" aria-hidden="true">
         <ImportIcon />

@@ -109,6 +109,8 @@
   - **Other two routines imported** and committed; seeding is now once-per-id via localStorage, so new seeds reach existing installs and deleted ones stay deleted. Interval **type 3 = 60s recovery between exercises** (confirmed against `restBetweenTabatas`).
   - **App mark**: blue stopwatch — `favicon.svg` + 32/64px PNG fallbacks, and a matching `StopwatchIcon` beside the home title. Title and mark share the blue via `currentColor`.
   - **122 tests green.**
+- **Home screen header frozen** (user-reported) — title, search, sorts and Import stay put; only the routine list scrolls. `.library` is `grid-template-rows: auto minmax(0, 1fr)` with `overflow: hidden`, and everything below the header sits in a `.library__scroll` wrapper. A wrapper rather than one grid row per element, because the number of notices varies and the scroll region must not depend on it. `overscroll-behavior: contain` stops a rubber-band scroll dragging the page behind it.
+- **Title uses the mark's blue** — set once on `.library__title`, with `.mark` on `currentColor` so the two cannot drift apart.
 
 ---
 
