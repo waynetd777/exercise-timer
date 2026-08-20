@@ -141,6 +141,11 @@
 - **Duration and round-count fields lost their spinner arrows** (user-reported). `appearance: textfield` plus the WebKit spin-button pseudo-elements. `type="number"` kept deliberately, so arrow keys still nudge the value and mobile still gets a numeric keypad — only the arrows are hidden.
 - **Duplicate buttons on editor rows** (user-reported) — on both steps and rounds; a round copies with all its children. `duplicateAt` deep-copies with **fresh ids**, since the editor keys its rows by `block.id`. The copy lands directly after the original, so duplicating repeatedly stacks. **7 new tests, 186 green.**
 - **Editor image previews 50% bigger** (user-reported) — `.erow__thumb` 44px → 66px.
+- **Image previews are clickable, and the field is now a selector** (user-reported)
+  - Thumbnails reverted to 44px and turned into buttons that open a **full-size lightbox** (native `<dialog>` + `showModal()`, so Escape, focus trapping and the backdrop are the browser's). The lightbox image uses `max-*: 100%` so a small source is not upscaled into a blur.
+  - New **"Choose" picker**: a searchable visual grid of every image already used across the library. `collectImages()` in `src/editor/images.ts` is pure — distinct urls, labelled with the step name they appear under most often, ties broken alphabetically for stability. **8 tests.** Wayne's routines yield 13 distinct images, several used 9 times.
+  - The image row became a `<div>`: a `<label>` wrapping a button forwards the click to its input.
+  - **194 tests green.**
 
 ---
 

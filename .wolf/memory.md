@@ -44,3 +44,4 @@
 | 08:30 | Hid the number-input spinner arrows on the editor's duration and round-count fields, keeping type=number for arrow keys and the mobile numeric keypad | src/ui/editor.css | 179/179 tests pass, verified in built CSS |  ~6k |
 | 08:40 | Added duplicate to editor rows (steps and rounds) via duplicateAt with deep fresh-id copying; 7 new tests | src/editor/blocks.ts, src/ui/EditorScreen.tsx | 186/186 tests pass, build clean | ~15k |
 | 08:45 | Editor image thumbnails 44px -> 66px | src/ui/editor.css | build clean, verified in dist | ~4k |
+| 09:00 | Reverted thumbs to 44px as clickable buttons opening a full-size lightbox; added a searchable picker of all images used across the library (collectImages, 8 tests) | src/editor/images.ts, src/ui/EditorScreen.tsx, editor.css, icons.tsx, App.tsx | 194/194 tests pass, build clean | ~50k |

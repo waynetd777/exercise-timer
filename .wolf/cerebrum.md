@@ -154,6 +154,11 @@
 - [2026-08-21] **`duplicateAt` deep-copies with FRESH IDS all the way down.** The editor keys its rows by `block.id`, so a copy that kept them would give two rows the same React key. Any future "copy a block" operation must do the same.
 - [2026-08-21] **Editor row actions** — segment: move up, move down, repeat-this-step, duplicate, delete. Repeat: add step inside, move up, move down, ungroup, duplicate, delete. Duplicate always sits immediately before delete, and inserts the copy directly after the original so repeated duplication stacks.
 
+- [2026-08-21] **The editor's image field is a URL input PLUS a "Choose" picker.** `collectImages(workouts)` in `src/editor/images.ts` gathers every distinct `remote` image across the library, labelling each with the step name it appears under MOST OFTEN (ties broken alphabetically so the order is stable) — a picker showing "Leg Press" is useful where a list of postimages ids is not. Wayne's three routines yield 13 distinct images, several used 9 times, which is exactly why reuse beats re-pasting.
+- [2026-08-21] **Both overlays are native `<dialog>` + `showModal()`** — the lightbox and the image picker. Escape, focus trapping and the backdrop come from the browser. A click whose `event.target` IS the dialog element is a backdrop click; children never match. `::backdrop` uses a literal colour, since inheriting a custom property into it is not dependable.
+- [2026-08-21] **Editor thumbnails are 44px and are BUTTONS that open the full-size lightbox** — briefly enlarged to 66px, then reverted on request. Their `<img>` uses `max-width/max-height: 100%` in the lightbox rather than `100%`, so a small image is shown at its own size instead of being upscaled into a blur.
+- [2026-08-21] **A `<label>` must not wrap a button** — the label forwards the button's click to its input. The editor's image row is a `<div>` with the input naming itself via `aria-label` for exactly this reason.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
