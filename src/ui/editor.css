@@ -36,6 +36,20 @@
   height: 48px;
 }
 
+/* Beats `.editor__head .btn` on specificity, so the square sizing does not
+   apply to the one button that carries a word. */
+.editor__head .editor__save {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--step-2);
+  width: auto;
+  padding: 0 var(--step-4);
+  font-weight: 700;
+  font-size: var(--label-size-sm);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
 .editor__name {
   font-size: max(1.25rem, min(2.6cqi, 2rem));
   font-weight: 700;
