@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { compile, totalDurationMs } from '../../engine'
-import raw from '../beginner-mixed-cardio.tabata.json'
+import raw from '../beginner-mixed-cardio-2.tabata.json'
+import rawFullBody from '../beginner-full-body.tabata.json'
+import rawMixedCardio1 from '../beginner-mixed-cardio-1.tabata.json'
+import { SEED_ROUTINES } from '../samples'
 import { importTabataFile, TabataImportError } from '../tabataFormat'
 
 describe('importTabataFile', () => {
@@ -71,5 +74,46 @@ describe('importTabataFile', () => {
       workout: { title: 'Edge', intervals: [{ type: 1, time: 0 }, { type: 1, time: 20 }] },
     })
     expect(imported.blocks).toHaveLength(1)
+  })
+})
+
+describe('the other seeded routines', () => {
+  it('imports the full-body routine, including its type-3 recovery intervals', () => {
+    // type 3 is 60s with no description and matches restBetweenTabatas: 60 —
+    // the long recovery between exercises, mapped to the `recover` role.
+    const workout = importTabataFile(rawFullBody)
+    const timeline = compile(workout)
+
+    expect(workout.name).toBe('Beginner Full-Body Workout Routine')
+    expect(timeline.entries).toHaveLength(69)
+    expect(totalDurationMs(workout)).toBe(1_490_000)
+
+    const recover = timeline.entries.filter((e) => e.role === 'recover')
+    expect(recover).toHaveLength(9)
+    for (const entry of recover) expect(entry.durationMs).toBe(60_000)
+  })
+
+  it('imports mixed cardio 1', () => {
+    const workout = importTabataFile(rawMixedCardio1)
+    expect(workout.name).toBe('Beginner Mixed Cardio & Full-Body Workout Routine 1')
+    expect(compile(workout).entries).toHaveLength(82)
+    expect(totalDurationMs(workout)).toBe(2_449_000)
+  })
+
+  it('gives every seeded routine a stable, unique id', () => {
+    // Seeding is keyed on these, so a collision would silently drop a routine
+    // and an unstable one would re-add it on every load.
+    const ids = SEED_ROUTINES.map((w) => w.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const id of ids) expect(id).toMatch(/^seed-/)
+  })
+
+  it('seeds one routine with repeat groups, so the round label is exercised', () => {
+    // Imported .tabata routines are always flat.
+    const withRounds = SEED_ROUTINES.filter((w) =>
+      w.blocks.some((b) => b.kind === 'repeat'),
+    )
+    expect(withRounds).toHaveLength(1)
+    expect(compile(withRounds[0]!).entries.some((e) => e.path.length > 0)).toBe(true)
   })
 })

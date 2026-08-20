@@ -60,7 +60,7 @@ function assertShape(json: unknown): TabataFile {
   return json as TabataFile
 }
 
-export function importTabataFile(json: unknown, now = 0): Workout {
+export function importTabataFile(json: unknown, now = 0, id?: string): Workout {
   const { workout } = assertShape(json)
 
   const blocks: Segment[] = workout.intervals
@@ -83,7 +83,7 @@ export function importTabataFile(json: unknown, now = 0): Workout {
     })
 
   return {
-    id: `imported-${now}`,
+    id: id ?? `imported-${now}`,
     name: workout.title?.trim() || 'Imported routine',
     blocks,
     schemaVersion: SCHEMA_VERSION,
