@@ -199,6 +199,43 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T04:30:00Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-08-21T04:55:00Z",
+      "error_message": "USER REPORTED: 'the text on the cards is the wrong way around - the routine name should be bigger and the text below it smaller'",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.label` was declared as `font: var(--label)` \u2014 the FONT SHORTHAND, which resets font-size. It lived in run-screen.css while `.row__meta` (which carries both classes) set its own smaller font-size in library.css. Equal specificity, so source order decided, and App.tsx imports LibraryScreen before RunScreen \u2014 so run-screen.css loaded last and `.label` silently clobbered the card's size. Card meta rendered at 44.5px against a 30.4px routine name on a laptop, inverted at every width.",
+      "fix": "Moved `.label` and `.unit` to theme.css (loaded first by main.tsx, so components can override) and rewrote them with LONGHAND properties, so setting font-size or the --label-size token actually wins. `.row__meta` now steps down via `--label-size: var(--label-size-sm)`. Name/meta ratio is 1.5-2.07x depending on width.",
+      "fix_rule": "Never use the `font:` shorthand in a shared utility class \u2014 it resets font-size and family, so any component override becomes import-order dependent. Shared utilities belong in the globally-first stylesheet, in longhand, parameterised by a custom property.",
+      "tags": [
+        "css",
+        "shorthand",
+        "cascade",
+        "import-order",
+        "shared-utility",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T04:55:00Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-08-21T04:55:00Z",
+      "error_message": "USER REPORTED: 'something is off with the combination of fonts - the home screen seems different to the routine screens'",
+      "file": "src/ui/library.css",
+      "root_cause": "No shared type scale. An audit found 11 ad-hoc font-size expressions and 5 different letter-spacing values (-0.03, -0.02, -0.01, 0.06, 0.1, 0.11em) split across library.css and run-screen.css, each invented per element. The same role was styled differently per screen \u2014 uppercase labels tracked 0.06em on one and 0.11em on the other, and screen titles used unrelated sizes \u2014 so the two screens read as different apps.",
+      "fix": "One scale in theme.css: three tracking tokens keyed to ROLE (--track-display -0.03em, --track-name -0.01em, --label-tracking 0.11em) and four size tokens (--size-display, --size-title, --size-name, --label-size plus --label-size-sm). Both stylesheets now reference tokens only; the sole remaining literal is .count__name, which needs a cqh term the tokens do not carry, and is commented as such.",
+      "fix_rule": "Type scale belongs in the shared theme, keyed to role, before a second screen exists. Per-element clamps invented locally will diverge.",
+      "tags": [
+        "css",
+        "design-system",
+        "typography",
+        "consistency",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T04:55:00Z"
     }
   ]
 }

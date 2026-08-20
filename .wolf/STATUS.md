@@ -93,6 +93,10 @@
   - **Size jump on digit change:** `clockWidth` returned 1 for a single digit while the coefficient was calibrated for 2, so "9" rendered up to **100% larger** than "10". Floored at 2 — size now only ever steps down. The old test asserted `clockWidth('8') === 1` under the name "does not jump", so it guaranteed the jump; corrected and a monotonicity test added.
   - **Panel pushed off-screen:** the frame had `aspect-ratio: 4/3`, demanding height from its width no matter what was left. Now `height: 100%` with `.run__body` stacked as `grid-template-rows: auto minmax(0, 1fr)`, so the panel absorbs the remainder. Clock height term split per layout: `--clock-height` 40cqh stacked, 74cqh beside the panel. Verified the panel keeps 137-432px across five stacked window sizes.
   - **113 tests green**, typecheck + build clean.
+- **One type scale, and the card hierarchy fixed** (user-reported) — see buglog `bug-012`, `bug-013`
+  - **Cards were inverted:** `.label` used the `font:` SHORTHAND (which resets font-size) and lived in run-screen.css; App.tsx imports LibraryScreen first, so run-screen.css loaded last and clobbered the cards' meta size. Card meta rendered at 44.5px against a 30.4px name on a laptop — inverted at every width. `.label`/`.unit` moved to theme.css in longhand; `.row__meta` steps down via `--label-size`. Name/meta ratio now 1.5-2.07x.
+  - **Screens read as different apps** because there was no shared scale: 11 ad-hoc font sizes and 5 letter-spacing values across the two stylesheets. Now one scale in theme.css keyed to role — `--track-display`/`--track-name`/`--label-tracking`, and `--size-display`/`--size-title`/`--size-name`/`--label-size`/`--label-size-sm`. Both stylesheets reference tokens only.
+  - **113 tests green**, typecheck + build clean.
 
 ---
 
