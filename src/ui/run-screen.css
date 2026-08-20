@@ -101,6 +101,14 @@
  */
 .count {
   display: grid;
+  /* Lead fills the column, meta takes the bottom edge. */
+  grid-template-rows: 1fr auto;
+  gap: var(--step-4);
+  min-width: 0;
+}
+
+.count__lead {
+  display: grid;
   gap: var(--step-2);
   align-content: center;
   min-width: 0;
@@ -108,15 +116,21 @@
 
 /*
  * The numerals fill whatever space exists, bounded by BOTH axes:
- *   - width  84cqi / --chars, where --chars is the string's width in ems
- *            (a digit counts 1, a colon 0.5). So "8" and "17" render at the
- *            same size, while "4:30" steps down instead of overflowing.
- *   - height 52cqh, leaving room for the label, name and meta rows.
+ *   - width  --clock-coef cqi / --chars, where --chars is the string's width
+ *            in ems (a digit counts 1, a colon 0.5). So "8" and "17" render at
+ *            the same size, while "4:30" steps down instead of overflowing.
+ *   - height 65cqh, leaving room for the label, name and meta rows.
+ *
+ * The width coefficient differs by layout because cqi measures the whole body,
+ * not the column the clock actually occupies. Stacked, that is the full width;
+ * beside the image panel it is only the 3fr column, where 100 would compute a
+ * two-digit countdown to 804px against a 775px column and overflow.
  * Whichever is smaller wins. No rem ceiling — that was what kept this tiny on
  * a laptop.
  */
 .count__clock {
-  font-size: max(3rem, min(calc(84cqi / var(--chars, 2)), 52cqh));
+  --clock-coef: 140;
+  font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), 65cqh));
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
@@ -198,6 +212,12 @@
 }
 
 @container shell (min-width: 46rem) {
+  /* Beside the panel the clock only has the 3fr column, so the width term has
+     to be far more conservative than when it is stacked full-width. */
+  .count__clock {
+    --clock-coef: 92;
+  }
+
   .panel__frame {
     aspect-ratio: auto;
     max-height: none;
