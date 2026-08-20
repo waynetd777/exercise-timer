@@ -21,12 +21,26 @@ describe('toneFor', () => {
     // Countdown cues are 1s apart.
     const note = toneFor('countdown')!.notes[0]!
     expect(note.durationMs).toBeLessThan(1000)
-    expect(note.decayMs).toBeLessThan(note.durationMs)
+  })
+
+  it('gives the phase change a long ringing tail, which is what makes it a bell', () => {
+    // The measured bell is still audible at 1.2s. A short note here reads as a
+    // click no matter what the pitch is — that was the original bug.
+    const note = toneFor('phase-change')!.notes[0]!
+    expect(note.durationMs).toBeGreaterThan(1500)
+    // And it must drop quickly to a quiet sustain, not hold near peak.
+    expect(note.strikeMs).toBeLessThan(40)
+    expect(note.sustain).toBeLessThan(0.5)
+  })
+
+  it('lets the metallic partial die before the body stops ringing', () => {
+    const partial = toneFor('phase-change')!.notes[0]!.partial!
+    expect(partial.decayScale).toBeLessThan(1)
   })
 
   it('gives the phase change an INHARMONIC partial, which is what sounds metallic', () => {
     const note = toneFor('phase-change')!.notes[0]!
-    expect(note.freq).toBeCloseTo(2658, 0)
+    expect(note.freq).toBeCloseTo(2659, 0)
     expect(note.partial).toBeDefined()
     // Not a whole-number multiple — that is the difference between a bell and
     // a plain tone with a harmonic.
@@ -59,9 +73,11 @@ describe('toneFor', () => {
       for (const note of toneFor(kind)!.notes) {
         expect(note.gain).toBeGreaterThan(0)
         expect(note.gain).toBeLessThanOrEqual(1)
-        expect(note.decayMs).toBeGreaterThan(0)
-        // Decay must fit inside the note, or the envelope stages cross over.
-        expect(note.decayMs).toBeLessThan(note.durationMs)
+        expect(note.sustain).toBeGreaterThan(0)
+        expect(note.sustain).toBeLessThanOrEqual(1)
+        // The strike must fit inside the note, or the envelope stages cross.
+        expect(note.strikeMs).toBeGreaterThan(0)
+        expect(note.strikeMs).toBeLessThan(note.durationMs)
       }
     }
   })

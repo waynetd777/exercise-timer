@@ -12,6 +12,7 @@ import {
   ImportIcon,
   PencilIcon,
   StarIcon,
+  StopwatchIcon,
   TrashIcon,
 } from './icons'
 import './library.css'
@@ -214,7 +215,10 @@ export function LibraryScreen({
       }}
     >
       <header className="library__head">
-        <h1 className="library__title">DavShack Timer</h1>
+        <h1 className="library__title">
+          <StopwatchIcon />
+          DavShack Timer
+        </h1>
 
         <div className="library__tools">
           <input

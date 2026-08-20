@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DavShack Timer">
+  <rect width="64" height="64" rx="13" fill="#121314"/>
+  <g fill="none" stroke="#4a93f5" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="38" r="18"/>
+    <path d="M26.5 7h11"/>
+    <path d="M32 7v6.2"/>
+    <path d="M47.5 15.5l3.6 3.6"/>
+    <path d="M32 38V27.5"/>
+  </g>
+</svg>
