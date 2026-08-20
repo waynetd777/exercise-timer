@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clock, clockWidth, duration, pathLabel } from '../format'
+import { clock, clockWidth, duration, fitCqi, pathLabel } from '../format'
 
 describe('clock', () => {
   it('shows bare seconds under a minute — faster to read at three metres', () => {
@@ -59,5 +59,32 @@ describe('pathLabel', () => {
 
   it('returns empty for a step outside any repeat', () => {
     expect(pathLabel([])).toBe('')
+  })
+})
+
+describe('fitCqi', () => {
+  it('sizes off the longest word, since that is what must fit a line', () => {
+    // "REST" fits a line easily, so it is set much larger than "LOW PULLEY
+    // SQUAT", whose longest word is "PULLEY".
+    expect(fitCqi('Rest')).toBeGreaterThan(fitCqi('Low Pulley Squat'))
+    expect(fitCqi('Get ready')).toBeGreaterThan(fitCqi('Seated Abdominal Crunch'))
+  })
+
+  it('ignores total length when the words are short', () => {
+    expect(fitCqi('a a a a a a')).toBe(fitCqi('a'))
+  })
+
+  it('caps short words so one letter does not fill the panel', () => {
+    expect(fitCqi('Go')).toBe(40)
+    expect(fitCqi('Go', 25)).toBe(25)
+  })
+
+  it('shrinks steadily as the longest word grows', () => {
+    const sizes = ['Rest', 'Cycling', 'Abdominal', 'Extraordinarily'].map((n) => fitCqi(n))
+    expect(sizes).toEqual([...sizes].sort((a, b) => b - a))
+  })
+
+  it('survives empty input', () => {
+    expect(fitCqi('')).toBe(40)
   })
 })

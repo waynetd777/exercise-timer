@@ -49,6 +49,11 @@
   - ⚠️ **Licensing:** third-party assets from a commercial app. Fine privately; do not publish the site publicly with them in place. Concrete reason to prefer an access-controlled host over GitHub Pages.
   - **84 tests green**, typecheck + build clean; all 10 mp3s emitted with content hashes.
 - **Type scale fix** (user-reported: "make all the small text much bigger") — `--label-size` is now `clamp(1rem, 1.6cqi, 1.6rem)`, taking labels from ~11px to 16px on a phone and 23px on a laptop; tracking eased 0.16em → 0.11em. Exercise name floor 1.25→1.75rem, stat figures fluid, primary button and chevrons on their own larger scales, targets 56→64px (primary 76px). Control row now wraps, and the primary button uses `min(12rem, 100%)`, fixing a latent phone overflow the larger text would have triggered. See buglog `bug-006`, `bug-007`.
+- **Type scale raised again + empty-panel redesign** (user-reported)
+  - `--label-size` → `clamp(1.25rem, 2.4cqi, 2.4rem)`: labels now 20px on a phone, 34.6px on a laptop (from 16/23). Stat figures `clamp(2rem, 5cqi, 4rem)`. "Next up" exercise name `clamp(1.4rem, 2.9cqi, 2.9rem)` so it stays above the label scale, and the line wraps.
+  - **Controls held at their previous size** via a second token, `--label-size-control`, which `.controls` assigns to `--label-size` so the buttons inherit it. Body text can grow again without regrowing the bottom bar.
+  - Empty media panel now shows the **step name** ("GET READY", "REST") instead of "No image" — 46 of the 86 steps in Wayne's routine have no illustration, so this is the normal state. Set in the phase colour, sized by `fitCqi()` off the longest word (capped at 7rem), with `.panel__frame` made an inline-size container so long names are measured against the frame rather than the body.
+  - **89 tests green**, typecheck + build clean.
 
 ---
 
