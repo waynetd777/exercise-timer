@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
 import { requestPersistence } from './db'
+import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
-import {
-  countWorkouts,
-  deleteWorkout,
-  listWorkouts,
-  putWorkout,
-  saveWorkout,
-} from './workouts'
+import { deleteWorkout, listWorkouts, putWorkout, saveWorkout } from './workouts'
 
 const newId = () => crypto.randomUUID()
 const now = () => Date.now()
@@ -28,9 +23,10 @@ export type Library = {
 /**
  * The routine library, backed by IndexedDB.
  *
- * `seed` is imported on first run so the library is never empty — the pure
- * operations live in `library.ts`, and this only wires them to storage and
- * React state.
+ * Seeds are offered ONCE EACH, tracked by id in `seeded.ts` — not "when the
+ * library is empty". That way a newly added seed reaches an existing install,
+ * and a seeded routine that gets deleted stays deleted. The pure operations
+ * live in `library.ts`; this only wires them to storage and React state.
  */
 export function useLibrary(seed: readonly Workout[]): Library {
   const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -44,9 +40,13 @@ export function useLibrary(seed: readonly Workout[]): Library {
       try {
         void requestPersistence()
 
-        if ((await countWorkouts()) === 0) {
-          for (const workout of seed) await saveWorkout(workout, now())
+        const offered = seededIds()
+        const fresh = seed.filter((workout) => !offered.has(workout.id))
+        if (fresh.length > 0) {
+          for (const workout of fresh) await saveWorkout(workout, now())
+          markSeeded(fresh.map((workout) => workout.id))
         }
+
         const stored = await listWorkouts()
         if (!cancelled) setWorkouts(stored)
       } catch (cause) {
