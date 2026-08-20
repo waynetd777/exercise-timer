@@ -1,5 +1,6 @@
 /*
- * Tokens. Dark ground for gym lighting, warm-neutral rather than blue-black.
+ * Tokens. Dark ground for gym lighting — a NEUTRAL grey ramp, faintly cool.
+ * (It was warm-neutral; the brown cast was not wanted.)
  *
  * Phase colours follow traffic-light convention by request: green to get ready,
  * red to work, blue to rest.
@@ -10,14 +11,15 @@
  * against the dark button text it sits behind (green 9.6, blue 6.1, red 5.2).
  */
 :root {
-  --ink-900: #12100e;
-  --ink-800: #1a1714;
-  --ink-700: #241f1a;
-  --ink-600: #332b23;
+  --ink-900: #121314;
+  --ink-800: #1a1c1d;
+  --ink-700: #242628;
+  --ink-600: #34373a;
 
-  --bone: #f2ede4;
-  --bone-dim: #a1988b;
-  --bone-faint: #6b6359;
+  --bone: #f1f2f3;
+  --bone-dim: #9ba0a6;
+  /* Light enough to clear 4.5:1 on the ground even at phone label sizes. */
+  --bone-faint: #7e838a;
 
   --role-prepare: #4fd07e; /* green  — get ready */
   --role-work: #ef4a3f; /* red    — work */

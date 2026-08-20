@@ -129,6 +129,18 @@
   }
 }
 
+/*
+ * The eyebrow shows "Round 3 of 8" when a routine has repeat groups, and falls
+ * back to the routine name when it does not — which an imported flat routine
+ * never does. Names run to 50+ characters, so this case gets its own smaller,
+ * quieter treatment rather than the full label scale.
+ */
+.count__routine {
+  font-size: clamp(1rem, 1.7cqi, 1.8rem);
+  letter-spacing: 0.07em;
+  color: var(--bone-faint);
+}
+
 .count__name {
   font-size: max(2.25rem, min(10cqi, 10cqh));
   font-weight: 650;
@@ -316,7 +328,8 @@
 }
 
 .rest-state__title {
-  font-size: max(2rem, min(13cqi, 8rem));
+  font-size: max(1.75rem, min(9cqi, 5.5rem));
+  text-wrap: balance;
   font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.03em;

@@ -63,6 +63,9 @@
 
 - [2026-08-21] **`text-transform: uppercase` mangles unit suffixes** — the label transform rendered "20s" as "20S". `.unit` in `run-screen.css` sets `text-transform: none`; wrap any `duration()` output that sits inside an uppercase label in it. Applied to the next-up line and the meta row (the latter only shows a suffix when under a minute remains, so it was a latent version of the same bug).
 
+- [2026-08-21] **Ground is a NEUTRAL grey ramp, faintly cool — the warm/brown cast was rejected.** `--ink-900 #121314`, `--ink-800 #1A1C1D`, `--ink-700 #242628`, `--ink-600 #34373A`, `--bone #F1F2F3`, `--bone-dim #9BA0A6`, `--bone-faint #7E838A`. Do not reintroduce the warm neutrals (`#12100E` / `#F2EDE4` / `#A1988B`) — that was my choice, not his. `--bone-faint` is set light specifically to clear 4.5:1 on the grey ground at phone label sizes; the original grey I picked (`#656A70`) only managed 3.41:1.
+- [2026-08-21] **The routine name has TWO homes and both needed shrinking.** The idle title (`.rest-state__title`), and the running eyebrow — which shows "Round 3 of 8" only when a routine HAS repeat groups, and otherwise falls back to `workout.name`. Every imported `.tabata` routine is flat, so the eyebrow always shows the routine name, and these run to 50+ characters. `.count__routine` gives that case its own smaller, quieter treatment while "Round 3 of 8" keeps the full label scale. If either grows again, remember to check both.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

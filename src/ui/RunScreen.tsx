@@ -131,7 +131,9 @@ export function RunScreen({ workout }: { workout: Workout }) {
       {entry && (
         <div className="run__body">
           <div className="count">
-            <p className="label">{rounds || workout.name}</p>
+            <p className={rounds ? 'label' : 'label count__routine'}>
+              {rounds || workout.name}
+            </p>
             <p
               // Remounting each second restarts the pulse animation, so it
               // lands on the beat instead of drifting against the countdown.
