@@ -50,3 +50,14 @@ export function fitCqi(text: string, max = 40): number {
   const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
   return Math.min(max, 161 / longest)
 }
+
+/**
+ * Number of lines the fallback step name will occupy, at most.
+ *
+ * `fitCqi` sizes so the LONGEST word fits one line, which means each word may
+ * end up on its own line — so the word count is an upper bound, and using it to
+ * divide the height budget errs on the side of fitting.
+ */
+export function wordCount(text: string): number {
+  return Math.max(1, text.trim().split(/\s+/).filter(Boolean).length)
+}

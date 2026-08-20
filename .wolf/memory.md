@@ -29,3 +29,4 @@
 | 05:10 | Renamed app to DavShack Timer (heading + document title) and centred the home heading | src/ui/LibraryScreen.tsx, library.css, index.html | 113/113 tests pass, build clean | ~5k |
 | 05:15 | Lifted the panel's "Next ..." line 3px off the divider below it | src/ui/run-screen.css | build clean | ~4k |
 | 05:30 | Root-caused the flush next-up line to zero bottom padding on the stacked .run__body (not the nudge); added 16px padding, removed the 3px margin, verified in built CSS | src/ui/run-screen.css | 113/113 tests pass, build clean | ~10k |
+| 05:45 | Bounded the empty-panel step name by frame HEIGHT as well as width (size container + --lines word count) and made its padding proportional; verified fit down to a 70px frame | src/ui/run-screen.css, format.ts, RunScreen.tsx | 116/116 tests pass, build clean | ~15k |

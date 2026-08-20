@@ -99,6 +99,7 @@
   - **113 tests green**, typecheck + build clean.
 - **Renamed to "DavShack Timer"** and centred the home heading (user-reported). Applied in `LibraryScreen.tsx` and `index.html` (the document title carries through to the PWA install name).
 - **Cleared the "Next …" line off the divider** (user-reported twice). The real cause was that the STACKED `.run__body` had zero bottom padding, so the panel met the controls' border directly and a 3px nudge was the whole clearance. Now `padding-bottom: var(--step-4)` and the nudge removed as redundant; the wide layout always had 24px. See buglog `bug-014`.
+- **Fallback step name now shrinks with the frame** (user-reported) — it was sized only in `cqi` (frame WIDTH), so a shorter frame kept a width-derived size and overflowed. `.panel__frame` became `container-type: size` so the block axis is queryable, and the text is `clamp(1rem, min(--fit * 1cqi, 72cqh / --lines), 7rem)` where `--lines` is the word count (an upper bound on line count, so dividing by it errs toward fitting). Vertical padding also went proportional (`4cqh`) — a fixed 16px was 29% of a 110px frame and clipped on its own. Verified "REST", "GET READY" and "SEATED ABDOMINAL CRUNCH" all fit at frame heights of 500 / 300 / 180 / 110 / 70px. **116 tests green.**
 
 ---
 
