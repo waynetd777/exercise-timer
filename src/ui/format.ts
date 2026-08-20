@@ -20,3 +20,12 @@ export function pathLabel(path: { label?: string; iteration: number; of: number 
     .map((step) => `${step.label ?? 'Round'} ${step.iteration} of ${step.of}`)
     .join(' · ')
 }
+
+/**
+ * Width of a clock string in ems, for sizing the countdown: a tabular digit
+ * advances about 1 unit, a colon about half. Lets "8" and "17" render at the
+ * same size while "4:30" steps down instead of overflowing.
+ */
+export function clockWidth(text: string): number {
+  return [...text].reduce((width, char) => width + (char === ':' ? 0.5 : 1), 0)
+}

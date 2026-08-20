@@ -9,3 +9,4 @@
 |------|--------|---------|---------|--------|
 | 23:12 | Phase 1: scaffolded Vite+React+TS+vitest and built the DOM-free interval-timer engine (compile/position/cues + 41 tests); git init + initial push to private repo | src/engine/*, package.json, tsconfig*.json, vite.config.ts | 41/41 tests pass, typecheck + build clean, pushed as 50e8ea7 | ~50k |
 | 23:45 | Phase 2: RunScreen + pure run clock (clock.ts) + effort strip signature element; plain CSS token system; 3 bugs caught in self-review | src/state/*, src/ui/*, src/routines/samples.ts | 52/52 tests pass, typecheck + build clean, dev server up on :5173, NOT visually verified | ~75k |
+| 00:10 | Fixed user-reported tiny countdown/panel (rem caps -> two-axis cq sizing); phase 3 audio (pre-scheduled Web Audio cues, mute); wrote .tabata importer + mounted Wayne's real 86-step routine | src/ui/run-screen.css, src/audio/*, src/routines/tabataFormat.ts | 80/80 tests pass, typecheck + build clean | ~65k |

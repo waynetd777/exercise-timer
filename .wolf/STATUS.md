@@ -29,33 +29,48 @@
   - `src/ui/format.ts`, `src/routines/samples.ts` (Tabata + Upper body circuit using the real Cable-Fly postimages URL).
   - **52 tests green**, typecheck + build clean. 3 bugs found in self-review and fixed before first render — see buglog `bug-002`..`bug-004`.
   - ⚠️ **Not visually verified.** No browser driver installed, so the rendering has never been looked at. Criteria 5 (background 2 min) and 6 (responsive) still need eyes on a device.
+- **Phase 2 sizing fix** (user-reported: countdown and panel tiny on a laptop) — both were capped in `rem`. Now sized against BOTH axes: named containers (`shell` / inline-size, `body` / size), countdown `max(3rem, min(calc(84cqi / var(--chars)), 52cqh))` with `--chars` from the string's em width, columns `minmax(0, 3fr) minmax(0, 2fr)`, panel frame stretches to the row on wide layouts. See buglog `bug-005`.
+- **Phase 3 COMPLETE** — audio cues
+  - `src/audio/engine.ts` — AudioContext lifecycle, gesture unlock (idempotent, wired to every control), `resume()` for iOS, click-free ramped envelopes, and `cancelPending()` tracking scheduled oscillators so pause/seek leaves no orphaned beeps.
+  - `src/audio/tones.ts` — synthesised specs (no files to ship or cache). Countdown blips RISE (F#5/A♭5/B♭5) and the phase change resolves above them (D#6), so an approaching transition is audible as shape. Completion is a two-note figure. Plus `audioTimeFor()`, the one pure subtraction bridging run time to the audio clock.
+  - `src/audio/useCueScheduler.ts` — 30s rolling lookahead, re-armed every 10s, on every clock mutation (via `timer.generation`), and on `visibilitychange` (resuming the context first, since iOS suspends it while hidden). Cancels pending before each arm.
+  - `src/audio/useMuted.ts` — mute persisted to localStorage (right home for a UI flag; the IndexedDB decision was about routines and images).
+  - `useTimer` now exposes `readElapsed` (live, not a snapshot) and `generation`.
+- **`.tabata` importer + real routine mounted**
+  - `src/routines/tabataFormat.ts` — imports the Tabata Timer app's export format. Decoded from Wayne's real file; `workout.intervals` is fully expanded and the sibling `cycles`/`work`/`rest` fields are template defaults, NOT multipliers (honouring `cycles: 3` would have made a 42-minute workout 126 minutes). Flat import, no repeat-group inference — a wrong guess would silently alter someone's workout.
+  - `src/routines/beginner-mixed-cardio.tabata.json` — Wayne's routine, committed so it drives both the demo and the tests. 86 steps, 42:09, 10 postimages illustrations, several exercises with no image.
+  - **80 tests green**, typecheck + build clean.
 
 ---
 
-## 🚀 Next phase — Phase 3: audio cues
+## 🚀 Next phase — Phase 4: media pipeline + IndexedDB
 
-**Goal:** Beeps that land on time, including after the tab has been backgrounded.
+**Goal:** Replace the phase-2 stopgap resolver with the real thing, so images survive gym wifi and postimages link-rot.
 
 ### Acceptance criteria
-1. `AudioContext` unlocked on the first user gesture (the Start tap) — mobile browsers block autoplay, so this cannot be deferred.
-2. Cues pre-scheduled on `AudioContext.currentTime`, never fired from a JS tick. Rolling lookahead window (~30s) re-armed on a timer and on `visibilitychange`, using `cuesBetween()` from the engine.
-3. Distinct tones: 3-2-1 countdown (short, rising), phase change (firmer), workout complete (a resolved two-note figure). Synthesised with oscillators — no audio files to ship or cache.
-4. Pause/resume/seek re-arm the window correctly; no orphaned beeps from the abandoned position.
-5. Mute toggle, persisted.
-6. Verified: start a routine, background the tab 10 minutes, and the beeps are still on the beat.
+1. `src/media/resolveMedia(ref)` handles all three sources; `local` returns a cached objectURL from IndexedDB. Replaces and deletes `src/ui/media.ts`.
+2. IndexedDB store `media`, keyed by sha256 of the blob (`crypto.subtle.digest`). Content-addressed, so an image reused across steps or routines is stored once.
+3. Import pipeline for own photos: decode → canvas resize to 1024px long edge → WebP q0.8 → hash → store. Never store a 3-5MB original.
+4. postimages URL normaliser: `postimg.cc/<id>` → `https://i.postimg.cc/<id>/img.png` (VERIFIED: the filename segment is ignored). Accept either form.
+5. "Pin for offline" on a remote ref: `fetch` → Blob → hash → store → set `cachedHash`; resolver then prefers the local copy. Works because `i.postimg.cc` sends `access-control-allow-origin: *` (VERIFIED). Skip downscaling below 300KB — his images are ~31KB.
+6. objectURL cache keyed by media id, revoked on unmount, or blobs leak.
+7. `navigator.storage.persist()` requested, or the browser may evict a routine's images.
+8. Graceful failure for a HEIC that will not decode outside Safari — a clear message, not a broken image.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| new | `src/audio/engine.ts` | AudioContext lifecycle, unlock, `scheduleTone(atAudioTime, spec)` |
-| new | `src/audio/tones.ts` | Tone specs per `CueKind` |
-| new | `src/audio/useCueScheduler.ts` | Maps run clock → audio clock, arms the rolling window |
-| edit | `src/state/useTimer.ts` | Expose the clock offset the scheduler needs |
-| edit | `src/ui/RunScreen.tsx` | Mute toggle |
+| new | `src/media/db.ts` | IndexedDB open/upgrade, `media` + `workouts` stores |
+| new | `src/media/hash.ts` | sha256 of a Blob via `crypto.subtle` |
+| new | `src/media/downscale.ts` | canvas resize → WebP encode |
+| new | `src/media/postimages.ts` | URL normaliser (pure — test it) |
+| new | `src/media/resolveMedia.ts` | Three-source resolver + objectURL cache |
+| new | `src/media/pin.ts` | Fetch a remote ref into local storage |
+| del | `src/ui/media.ts` | Stopgap, superseded |
 
-### Notes for phase 3
-- The bridge is one subtraction: `audioTime = ctx.currentTime + (cue.atMs - elapsedNow) / 1000`. Recompute the offset on every re-arm rather than caching it — pause/seek invalidate it.
-- iOS suspends the context when the page hides; on return, resume it and re-arm from the current position.
+### Notes for phase 4
+- Keep the pure parts pure (`postimages.ts`, `hash.ts`) so they test without a DOM, as with `clock.ts`.
+- Wayne's routine has 10 distinct remote images — a good real fixture for pinning.
 
 ### Closed decisions
 - **Platform: installable web PWA** (React + TypeScript + Vite), responsive across phone / iPad / laptop. Chosen over native for iteration speed and no App Store. Accepted tradeoff: will not run reliably with an iPhone screen locked / in pocket.
@@ -92,7 +107,7 @@
 - **Deferred:** workout history/logging, voice announcements, sound packs, Apple Watch, video media, folders/tags, any server.
 
 ### Open decisions
-- Whether to install a browser driver (Playwright) so UI work can be screenshotted and self-reviewed. Currently none, so phase 2 shipped visually unverified. Decide before phase 5/6 (library + editor) — those are much more layout-heavy.
+- _(none open)_ — **RESOLVED: no browser driver.** User reviews UI in the browser himself; keep a dev server running and hand over the URL.
 - Wake-lock fallback: silent looping audio, or accept Screen Wake Lock API support only? Decide at phase 7.
 
 ---
@@ -102,9 +117,10 @@
 - **Stack:** React + TypeScript + Vite, vitest. IndexedDB for persistence. PWA (service worker) from phase 6. No backend.
 - **Key modules:**
   - `src/engine/` — pure interval-timer core (compile / position / cues). DOM-free, unit-tested.
-  - `src/audio/` — AudioContext unlock + `scheduleAt(time, tone)`.
+  - `src/audio/` — `engine.ts` (context lifecycle, scheduling, cancellation), `tones.ts` (synthesised specs + `audioTimeFor`), `useCueScheduler.ts` (rolling lookahead), `useMuted.ts`.
   - `src/media/` — `resolveMedia` (remote/bundled/local), postimages URL normaliser, import pipeline (downscale + hash), IndexedDB blob store, objectURL cache, offline pinning.
   - `src/state/` — `clock.ts` (pure run clock), `useTimer` (timeout-scheduled, derives Position), `useWakeLock`; `storage` (IndexedDB workouts, versioned schema, export/import) lands phase 4.
+  - `src/routines/` — `tabataFormat.ts` (.tabata importer), `samples.ts`, Wayne's real routine as JSON.
   - `src/ui/` — `RunScreen`, `EffortStrip`, `theme.css`/`run-screen.css`, `format.ts`, `media.ts` (stopgap). Still to come: `LibraryScreen` (phase 5), `WorkoutEditor`/`BlockRow`/`ImagePicker` (phase 6).
 - **Patterns:** engine stays pure and DOM-free; all time derived from timestamps, never accumulated; audio scheduled ahead on the audio clock, not fired from JS ticks; images content-addressed and always downscaled before storage.
 
@@ -113,8 +129,8 @@
 |---|---|
 | 1 | ✅ `engine/` + tests |
 | 2 | ✅ RunScreen + pure run clock + effort strip |
-| 3 | ◀ **NEXT** — audio cues |
-| 4 | Media pipeline — `resolveMedia` over all 3 sources, postimages URL normaliser, IndexedDB blob store, downscale, content-hash, objectURL cache, pin-for-offline, next-image preload |
+| 3 | ✅ audio cues (pre-scheduled Web Audio, mute) |
+| 4 | ◀ **NEXT** — Media pipeline — `resolveMedia` over all 3 sources, postimages URL normaliser, IndexedDB blob store, downscale, content-hash, objectURL cache, pin-for-offline, next-image preload |
 | 5 | LibraryScreen — list / create / duplicate / rename / delete / load routines, search + sort, media GC |
 | 6 | WorkoutEditor — block tree editing + image picker (photo/camera/drag/paste) |
 | 7 | PWA install, wake lock, offline, export/import (routine + library backup), share links, design pass |

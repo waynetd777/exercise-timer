@@ -68,6 +68,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-20T23:40:00Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-08-21T00:05:00Z",
+      "error_message": "USER REPORTED: 'the countdown and image panels need to be responsive and size to occupy the available screen space. they're tiny on my laptop'",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "Both were capped in rem, so a big screen was wasted. `.count__clock` was clamp(5rem, 34cqi, 15rem) \u2014 on a 1440px laptop 34cqi computes to ~490px and the 15rem ceiling chopped it to 240px. The media column was minmax(16rem, 22rem), hard-capped at 352px. Neither considered available HEIGHT at all, and `.run` was container-type: inline-size so cqh was not even available.",
+      "fix": "Named containers (`shell` / inline-size for layout switching, `body` / size on .run__body so BOTH axes are queryable \u2014 safe because a 1fr row of a 100%-height grid has a definite block size). Countdown is now max(3rem, min(calc(84cqi / var(--chars)), 52cqh)) with --chars set from the string's em width (digit 1, colon 0.5) so '8' and '17' match while '4:30' steps down. Columns became minmax(0, 3fr) minmax(0, 2fr); the panel frame drops aspect-ratio on wide layouts and stretches to the row height with object-fit: contain.",
+      "fix_rule": "Do not cap a hero element in rem. Size it against both axes with cq units and let content length, not an arbitrary ceiling, be the limit.",
+      "tags": [
+        "css",
+        "responsive",
+        "container-queries",
+        "sizing",
+        "phase-2",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T00:05:00Z"
     }
   ]
 }
