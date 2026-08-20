@@ -87,6 +87,7 @@
   - `RunScreen` gained `onExit` (back button, header now a 3-column grid so the title stays centred) and `onStarted` (stamps `lastRunAt`).
   - 8 new icons. **112 tests green**, typecheck + build clean.
 - **Column contents centred** (user-reported) — countdown, exercise name, meta row, next-up line, and the idle/complete screens.
+- **Named the app, made cards clickable** (user-reported) — home heading and document title are now "DavShack Gym Timer" (the latter becomes the PWA install name in phase 7). The per-card play button is gone; the whole card opens the routine via a stretched `<button>` overlay, layered above the name/stats but below the star and action buttons, and rendered only in idle mode so it cannot cover the rename input or delete confirmation. Cards get a hover state.
 
 ---
 
