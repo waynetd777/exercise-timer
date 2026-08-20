@@ -4,6 +4,7 @@ import { stepCount, totalDurationMs } from '../engine'
 import {
   appendTo,
   clearMedia,
+  duplicateAt,
   flatten,
   insertAfter,
   moveBy,
@@ -23,6 +24,7 @@ import { duration } from './format'
 import {
   BackIcon,
   CheckIcon,
+  CopyIcon,
   DownIcon,
   PlusIcon,
   RedoIcon,
@@ -54,6 +56,7 @@ type RowProps = {
   first: boolean
   last: boolean
   onMove: (path: Path, delta: number) => void
+  onDuplicate: (path: Path) => void
   onRemove: (path: Path) => void
 }
 
@@ -64,6 +67,7 @@ function SegmentRow({
   first,
   last,
   onMove,
+  onDuplicate,
   onRemove,
   onPatch,
   onClearImage,
@@ -159,6 +163,14 @@ function SegmentRow({
           </button>
           <button
             className="btn btn--ghost"
+            onClick={() => onDuplicate(path)}
+            aria-label="Duplicate step"
+            title="Duplicate step"
+          >
+            <CopyIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
             onClick={() => onRemove(path)}
             aria-label="Delete step"
             title="Delete step"
@@ -196,6 +208,7 @@ function RepeatRow({
   first,
   last,
   onMove,
+  onDuplicate,
   onRemove,
   onPatch,
   onAddChild,
@@ -266,6 +279,14 @@ function RepeatRow({
             title="Ungroup — keeps the steps, drops the repeat"
           >
             <RoundsIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onDuplicate(path)}
+            aria-label="Duplicate these rounds"
+            title="Duplicate rounds and steps"
+          >
+            <CopyIcon />
           </button>
           <button
             className="btn btn--ghost"
@@ -440,6 +461,7 @@ export function EditorScreen({
                   first={first}
                   last={last}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
                   onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
@@ -454,6 +476,7 @@ export function EditorScreen({
                   first={first}
                   last={last}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchRepeat}
                   onAddChild={(p) => editBlocks((c) => appendTo(c, p, newSegment('work')))}
