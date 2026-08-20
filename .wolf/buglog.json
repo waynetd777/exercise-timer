@@ -1,4 +1,16 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-08-20T23:10:40Z",
+      "error_message": "runtime.test.ts > position > clamps negative and non-finite input to the start: AssertionError: expected false to be true (position(TABATA, Number.POSITIVE_INFINITY).isComplete)",
+      "file": "src/engine/__tests__/runtime.test.ts",
+      "root_cause": "Test expectation was wrong, not the implementation. position() guards with `Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0`, so +Infinity is rejected as invalid input and clamps to 0 rather than being read as 'past the end' and completing the workout.",
+      "fix": "Kept the implementation and corrected the test: ALL non-finite input (NaN, -Infinity, +Infinity) clamps to the start. One rule for invalid input beats two special cases, and a real monotonic clock never produces these values. Documented the rule in the test and in position()'s doc comment.",
+      "tags": ["engine", "test-expectation", "edge-case", "non-finite", "phase-1"],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T23:10:40Z"
+    }
+  ]
 }
