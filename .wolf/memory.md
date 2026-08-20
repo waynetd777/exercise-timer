@@ -34,3 +34,4 @@
 | 05:40 | Froze the home-screen header (scroll region wrapper) and made the wordmark share the mark's blue | src/ui/LibraryScreen.tsx, library.css | 122/122 tests pass, build clean | ~12k |
 | 05:55 | Removed the synthetic Classic Tabata seed; only the 3 real imported routines seed now | src/routines/samples.ts, tabataFormat.test.ts | 122/122 tests pass, build clean | ~8k |
 | 06:20 | Phase 6: workout editor (pure block-tree ops + postimages normaliser + EditorScreen, 36 new tests); blue wash on home/editor; run-screen progress bar | src/editor/*, src/ui/EditorScreen.tsx, editor.css, App.tsx, LibraryScreen.tsx | 158/158 tests pass, build clean | ~120k |
+| 06:40 | Fixed countdown resizing at 1:00->59 (size from step's longest string, not live value) and the image squashing (fixed 56/44 stacked split) | src/ui/RunScreen.tsx, run-screen.css | 158/158 tests pass, fit verified at 6 viewports | ~15k |

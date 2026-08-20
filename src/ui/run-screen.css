@@ -84,9 +84,13 @@
      grid), so containment cannot collapse it. */
   container: body / size;
   display: grid;
-  /* Stacked: the countdown block takes what it needs and the panel absorbs the
-     rest, so a short window shrinks the image instead of pushing it off. */
-  grid-template-rows: auto minmax(0, 1fr);
+  /*
+   * Stacked: a FIXED split rather than "countdown takes what it needs". With an
+   * auto row the image resized whenever the numerals did — so a step whose
+   * digits differ in width visibly squashed the picture. Proportions instead,
+   * so the image never moves.
+   */
+  grid-template-rows: minmax(0, 56fr) minmax(0, 44fr);
   gap: var(--step-5);
   padding: var(--step-5) var(--step-5) var(--step-4);
   min-height: 0;
@@ -143,7 +147,9 @@
  */
 .count__clock {
   --clock-coef: 140;
-  --clock-height: 40cqh;
+  /* Stacked, the countdown only has the 56fr row, but cqh measures the whole
+     body — so this has to be well under the row's share. */
+  --clock-height: 34cqh;
   --tracking: -0.045em;
   font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), var(--clock-height)));
   font-weight: 700;

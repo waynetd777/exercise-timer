@@ -110,6 +110,16 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const rounds = entry ? pathLabel(entry.path) : ''
   const clockText = clock(timer.secondsLeft)
 
+  /*
+   * Sized from the step's LONGEST string — the value at its top — not from what
+   * is on screen right now. Otherwise a 90s step counting through 1:00 to 59
+   * drops from 3.5 units to 2 and the numerals jump ~75% larger mid-step.
+   * Constant within a step, so the countdown never changes size while running.
+   */
+  const clockChars = entry
+    ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
+    : 2
+
   const begin = () => {
     onStarted?.()
     timer.start()
@@ -210,7 +220,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
                 key={timer.secondsLeft}
                 className="count__clock"
                 data-urgent={status === 'running' && at.remainingMs <= URGENT_MS}
-                style={{ ['--chars' as string]: clockWidth(clockText) }}
+                style={{ ['--chars' as string]: clockChars }}
                 aria-live="off"
               >
                 {clockText}

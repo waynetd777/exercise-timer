@@ -120,6 +120,7 @@
   - **158 tests green.**
 - **Blue wash on the home and editor screens** (user-reported) — same radial gradient as the run screen, in `--role-rest`.
 - **Run-screen progress bar** (user-reported) — 3px, edge to edge under the header rule, in the phase colour. Driven by `transform: scaleX()` on an inner element rather than a gradient stop, since gradients do not transition and the value updates once a second.
+- **Countdown no longer resizes mid-step** (user-reported) — `--chars` now comes from the step's longest string rather than the live value, so a step crossing 1:00 → 59 no longer jumps ~75%; and the stacked layout uses fixed 56fr/44fr proportions instead of `auto` + remainder, so the image never resizes with it. `--clock-height` tightened 40cqh → 34cqh accordingly, fit verified at six window sizes. See buglog `bug-017`.
 
 ---
 
