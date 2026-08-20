@@ -212,6 +212,14 @@
   min-height: 1.2em;
 }
 
+/*
+ * Opts out of the surrounding uppercase so a unit suffix stays a unit: the
+ * label transform would otherwise render "20s" as "20S".
+ */
+.unit {
+  text-transform: none;
+}
+
 .panel__next b {
   font-weight: 700;
   color: var(--bone);
