@@ -125,6 +125,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T00:55:00Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-08-21T02:25:00Z",
+      "error_message": "USER REPORTED: 'the progress bar on top - the muted red bars look brown'",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "The effort strip used a single background colour with opacity per state (0.22 todo / 0.5 done / 1 current) over a near-black ground. Compositing a saturated hue down toward black is exactly how you make brown: red #EF4A3F at 22% resolves to #431F1D and at 50% to #802E2A. Green and blue muddied the same way, but red is the one that reads unmistakably as brown because dark desaturated red IS brown.",
+      "fix": "Dropped opacity for explicit per-state backgrounds. Upcoming steps are neutral `var(--ink-600)` \u2014 their HEIGHT already encodes work vs rest, so hue was redundant. Completed steps keep hue but mix toward a LIGHT grey rather than down toward black: `color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim))`, giving #C9716D for red. Only the current step is at full strength.",
+      "fix_rule": "Never dim a saturated colour toward a near-black ground to indicate an inactive state. Mix toward a mid or light neutral to keep the hue readable, or drop the hue entirely.",
+      "tags": [
+        "css",
+        "colour",
+        "compositing",
+        "opacity",
+        "effort-strip",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T02:25:00Z"
     }
   ]
 }
