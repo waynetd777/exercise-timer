@@ -29,3 +29,17 @@ export function pathLabel(path: { label?: string; iteration: number; of: number 
 export function clockWidth(text: string): number {
   return [...text].reduce((width, char) => width + (char === ':' ? 0.5 : 1), 0)
 }
+
+/**
+ * Font size in `cqi` for a headline that should fill its container, given that
+ * it wraps between words. Sized off the LONGEST WORD, since that is what has to
+ * fit on one line — so "REST" is set far larger than "LOW PULLEY SQUAT" and
+ * both fill the frame.
+ *
+ * The 161 comes from 100cqi divided by an average uppercase bold advance of
+ * ~0.62em. Same idea as `clockWidth`, applied to words instead of digits.
+ */
+export function fitCqi(text: string, max = 40): number {
+  const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
+  return Math.min(max, 161 / longest)
+}
