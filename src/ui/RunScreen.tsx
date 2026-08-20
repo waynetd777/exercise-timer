@@ -5,7 +5,7 @@ import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
-import { clock, clockWidth, duration, fitCqi, pathLabel } from './format'
+import { clock, clockWidth, duration, fitCqi, pathLabel, wordCount } from './format'
 import {
   BackIcon,
   NextIcon,
@@ -45,7 +45,10 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
           // name is already the heading beside it.
           <span
             className="panel__empty"
-            style={{ ['--fit' as string]: fitCqi(entry.name) }}
+            style={{
+              ['--fit' as string]: fitCqi(entry.name),
+              ['--lines' as string]: wordCount(entry.name),
+            }}
             aria-hidden="true"
           >
             {entry.name}

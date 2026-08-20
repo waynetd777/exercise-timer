@@ -189,9 +189,11 @@
 }
 
 .panel__frame {
-  /* Its own container, so the fallback step name is sized against the FRAME
-     rather than the whole body — otherwise a long name overflows the panel. */
-  container-type: inline-size;
+  /* Its own container, and `size` not `inline-size`: the fallback step name has
+     to be measured against the frame's HEIGHT as well as its width, or it keeps
+     a width-derived size as the frame gets shorter and overflows. Safe because
+     the frame's block size is definite — it fills a 1fr grid row. */
+  container-type: size;
   display: grid;
   place-items: center;
   min-height: 0;
@@ -228,9 +230,16 @@
  * no illustration, so this is a normal state, not an error state.
  */
 .panel__empty {
-  padding: var(--step-4);
+  /* Vertical padding proportional to the frame: a fixed 16px is 29% of a 110px
+     frame, which was enough on its own to clip the text. */
+  padding: 4cqh var(--step-3);
   font-weight: 700;
-  font-size: clamp(1.25rem, calc(var(--fit, 24) * 1cqi), 7rem);
+  /*
+   * Bounded on both axes: --fit sizes the longest word to the frame's width,
+   * while the height term divides the frame's height by the line count so a
+   * short frame shrinks the text instead of spilling out of it.
+   */
+  font-size: clamp(1rem, min(calc(var(--fit, 24) * 1cqi), calc(72cqh / var(--lines, 1))), 7rem);
   line-height: 1.05;
   letter-spacing: var(--track-name);
   text-align: center;
