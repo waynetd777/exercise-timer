@@ -137,6 +137,7 @@
   - Undo/redo buttons sit in a toolbar row with the running totals; Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z work, deliberately overriding native text-field undo.
   - New routines now end with a **60s recover** step: prepare 30 → Round ×3 [20 work, 10 rest] → prepare 30 → recover 60. 9 steps, 3:30.
   - **179 tests green.**
+- **Delete confirmation is emphatically red** (user-reported) — red row border and tinted background, red routine name, bold red "Delete?", filled-red tick. Worth noting: the rules were **already red in the deployed CSS**, verified by fetching it, so the report was most likely a stale service-worker cache; the state was strengthened rather than just re-applied. Also made `theme.css` explicitly the first CSS import so the base layer always precedes its modifiers.
 
 ---
 
