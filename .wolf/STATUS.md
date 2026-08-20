@@ -77,6 +77,16 @@
   - New `src/ui/icons.tsx` — inline SVG (play, pause, reset, prev, next, sound on/off), inheriting `currentColor`, no font or extra request. Transport filled, utilities stroked.
   - Buttons are square and text-free: 56px, primary 68px. Row width **508px → 372px**, so it now fits one line at 390px phone width instead of always wrapping; `flex-wrap` kept for narrower devices. The primary button's action and name are derived from `status`, and every control carries both `aria-label` and `title`.
   - Removed as dead code: `.btn` text styling, the `.btn[aria-label]` tracking rule, and the `--label-size-control` / `--label-tracking-control` tokens.
+- **Phase 5 COMPLETE — routine library + `.tabata` import** (built ahead of phase 4 by choice)
+  - `src/storage/db.ts` — IndexedDB opened once; `workouts` and `media` stores both created at v1 so phase 4 is an addition, not a migration. Plus `requestPersistence()` so the browser does not evict saved routines.
+  - `src/storage/library.ts` — PURE logic: `stamp`, `summary`, `filterWorkouts`, `sortWorkouts` (favourites pinned, never-run sorts below run, falls back to recently-edited), `copyName` (numbers copies without stacking suffixes), `duplicate`, `rename` (rejects blank), `markRun`, `toggleFavourite`. **23 new tests, no DOM.**
+  - `src/storage/workouts.ts` — thin IndexedDB CRUD. `src/storage/useLibrary.ts` — React wiring, seeds on first run so the library is never empty.
+  - `src/routines/importFiles.ts` — multi-file `.tabata` import; every file attempted and failures collected, so one bad file does not lose the rest. Fresh uuid per file (the importer's timestamp id would collide across a drop).
+  - `src/ui/LibraryScreen.tsx` + `library.css` — search, three sort modes, favourite star, run/rename/duplicate/delete per row, whole-screen drag-and-drop with a drop overlay, and a file picker. Rename is inline; delete is a two-step confirm rather than a blocking dialog.
+  - `src/ui/App.tsx` — shell routing library ↔ run. The running routine is held in state, not looked up by id, so library metadata writes cannot recompile the timeline mid-workout.
+  - `RunScreen` gained `onExit` (back button, header now a 3-column grid so the title stays centred) and `onStarted` (stamps `lastRunAt`).
+  - 8 new icons. **112 tests green**, typecheck + build clean.
+- **Column contents centred** (user-reported) — countdown, exercise name, meta row, next-up line, and the idle/complete screens.
 
 ---
 
@@ -85,19 +95,20 @@
 **Goal:** Replace the phase-2 stopgap resolver with the real thing, so images survive gym wifi and postimages link-rot.
 
 ### Acceptance criteria
-1. `src/media/resolveMedia(ref)` handles all three sources; `local` returns a cached objectURL from IndexedDB. Replaces and deletes `src/ui/media.ts`.
+1. `src/media/resolveMedia(ref)` handles all three sources; `local` returns a cached objectURL from IndexedDB. Replaces and deletes `src/ui/media.ts`. Import the DB from `src/storage/db.ts` (already has the `media` store).
 2. IndexedDB store `media`, keyed by sha256 of the blob (`crypto.subtle.digest`). Content-addressed, so an image reused across steps or routines is stored once.
 3. Import pipeline for own photos: decode → canvas resize to 1024px long edge → WebP q0.8 → hash → store. Never store a 3-5MB original.
 4. postimages URL normaliser: `postimg.cc/<id>` → `https://i.postimg.cc/<id>/img.png` (VERIFIED: the filename segment is ignored). Accept either form.
 5. "Pin for offline" on a remote ref: `fetch` → Blob → hash → store → set `cachedHash`; resolver then prefers the local copy. Works because `i.postimg.cc` sends `access-control-allow-origin: *` (VERIFIED). Skip downscaling below 300KB — his images are ~31KB.
 6. objectURL cache keyed by media id, revoked on unmount, or blobs leak.
-7. `navigator.storage.persist()` requested, or the browser may evict a routine's images.
+7. ~~`navigator.storage.persist()`~~ — DONE in phase 5 (`requestPersistence()` in `src/storage/db.ts`).
+8. Media GC on routine delete: `useLibrary.remove` has the hook point marked with a comment.
 8. Graceful failure for a HEIC that will not decode outside Safari — a clear message, not a broken image.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| new | `src/media/db.ts` | IndexedDB open/upgrade, `media` + `workouts` stores |
+| ~~new~~ | ~~`src/media/db.ts`~~ | **DONE in phase 5** as `src/storage/db.ts` — both stores exist at v1 |
 | new | `src/media/hash.ts` | sha256 of a Blob via `crypto.subtle` |
 | new | `src/media/downscale.ts` | canvas resize → WebP encode |
 | new | `src/media/postimages.ts` | URL normaliser (pure — test it) |
@@ -130,7 +141,8 @@
 - **Mandatory downscale pipeline on import:** decode → canvas resize to 1024px long edge → WebP q0.8 → ~100KB Blob → hash → store. Never store the original phone photo (3-5MB). All input sources (photo picker, camera capture, drag-drop, clipboard paste) are just `Blob`s and feed this one path.
 - **Portability: export/import a single `.json` bundle** with images inline as base64 (~1-1.5MB for a 10-step workout), moved by AirDrop / Files. **No backend, no sync** — judged unjustified for a single-user timer, and a server would make the app offline-breakable.
 - **Share links now mostly work:** remote and bundled refs export as short strings, so only `local` photos force a large bundle. A routine built from postimages or bundled images fits in a URL.
-- **Hosting deliberately left open.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1, so a root-domain host and a subpath host (GitHub Pages `/exercise-timer/`) both work with no retrofit. Recommendation on record for phase 7: Cloudflare Pages — free tier deploys private repos, serves from the root, good SW caching. GitHub Pages needs Pro for a private repo and publishes a public site.
+- **RESOLVED — hosting: GitHub Pages, repo goes PUBLIC once complete.** Pages is free for public repos, so the earlier Pro caveat falls away; `VITE_BASE=/exercise-timer/` is already wired. ⚠️ **PRE-PUBLIC CHECKLIST:** remove `src/audio/cues/*.mp3` (Tabata Timer's commercial assets) in favour of the synthesised fallback in `tones.ts`, and note that the postimages URLs become public too.
+- **(superseded) Hosting deliberately left open.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1, so a root-domain host and a subpath host (GitHub Pages `/exercise-timer/`) both work with no retrofit. Recommendation on record for phase 7: Cloudflare Pages — free tier deploys private repos, serves from the root, good SW caching. GitHub Pages needs Pro for a private repo and publishes a public site.
 - **RESOLVED phase 2 — styling: plain CSS + custom properties.** No Tailwind. A handful of screens, one token file, container queries for layout. CSS ships at ~1.7kB gzipped.
 - **RESOLVED phase 2 — images: bounded panel beside the countdown** on wide layouts, stacked below on phone portrait (a bounded panel is impossible "beside" a 390px-wide column).
 - **Phase colours are coded warm vs cool, not red vs green** — temperature survives every colour-vision deficiency and is what makes a phase readable peripherally, mid-effort, at three metres. Work amber `#FF7A2F`, rest steel-blue `#52A8CE`, recover violet `#9080E8`, prepare neutral bone (prepare is the absence of effort).
@@ -168,7 +180,7 @@
 | 2 | ✅ RunScreen + pure run clock + effort strip |
 | 3 | ✅ audio cues (pre-scheduled Web Audio, mute) |
 | 4 | ◀ **NEXT** — Media pipeline — `resolveMedia` over all 3 sources, postimages URL normaliser, IndexedDB blob store, downscale, content-hash, objectURL cache, pin-for-offline, next-image preload |
-| 5 | LibraryScreen — list / create / duplicate / rename / delete / load routines, search + sort, media GC |
+| 5 | ✅ LibraryScreen + `.tabata` import + IndexedDB storage |
 | 6 | WorkoutEditor — block tree editing + image picker (photo/camera/drag/paste) |
 | 7 | PWA install, wake lock, offline, export/import (routine + library backup), share links, design pass |
 

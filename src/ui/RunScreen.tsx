@@ -7,6 +7,7 @@ import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import { clock, clockWidth, duration, fitCqi, pathLabel } from './format'
 import {
+  BackIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -64,7 +65,15 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
   )
 }
 
-export function RunScreen({ workout }: { workout: Workout }) {
+type Props = {
+  workout: Workout
+  /** Back to the library. */
+  onExit?: () => void
+  /** Called when a run actually begins, so the library can stamp `lastRunAt`. */
+  onStarted?: () => void
+}
+
+export function RunScreen({ workout, onExit, onStarted }: Props) {
   const timer = useTimer(workout)
   const { at, status, timeline } = timer
   const [muted, toggleMuted] = useMuted()
@@ -98,7 +107,11 @@ export function RunScreen({ workout }: { workout: Workout }) {
   const rounds = entry ? pathLabel(entry.path) : ''
   const clockText = clock(timer.secondsLeft)
 
-  const primaryAction = status === 'paused' ? timer.resume : timer.start
+  const begin = () => {
+    onStarted?.()
+    timer.start()
+  }
+  const primaryAction = status === 'paused' ? timer.resume : begin
   const primaryLabel =
     status === 'running'
       ? 'Pause'
@@ -111,7 +124,15 @@ export function RunScreen({ workout }: { workout: Workout }) {
   return (
     <main className="run" style={{ ['--phase' as string]: phase }}>
       <header className="run__header">
+        {onExit ? (
+          <button className="btn btn--ghost" onClick={onExit} aria-label="Back to routines" title="Back to routines">
+            <BackIcon />
+          </button>
+        ) : (
+          <span />
+        )}
         <h1 className="run__title">{workout.name}</h1>
+        <span />
       </header>
 
       {status === 'idle' && (
