@@ -1,15 +1,12 @@
 import { useCallback, useState } from 'react'
 import type { Workout } from '../engine'
-import { BEGINNER_MIXED_CARDIO, TABATA, UPPER_CIRCUIT } from '../routines/samples'
+import { SEED_ROUTINES } from '../routines/samples'
 import { useLibrary } from '../storage/useLibrary'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
 
-/** Imported on first run so the library is never empty. Stable identity for the hook. */
-const SEED: readonly Workout[] = [BEGINNER_MIXED_CARDIO, TABATA, UPPER_CIRCUIT]
-
 export function App() {
-  const library = useLibrary(SEED)
+  const library = useLibrary(SEED_ROUTINES)
 
   /**
    * The running routine is held in state rather than looked up by id: the

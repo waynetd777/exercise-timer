@@ -1,73 +1,71 @@
-import type { Block, MediaRef, Repeat, Segment, SegmentRole, Workout } from '../engine'
+import type { Block, Repeat, Segment, SegmentRole, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
-import rawBeginnerMixedCardio from './beginner-mixed-cardio.tabata.json'
+import rawFullBody from './beginner-full-body.tabata.json'
+import rawMixedCardio1 from './beginner-mixed-cardio-1.tabata.json'
+import rawMixedCardio2 from './beginner-mixed-cardio-2.tabata.json'
 import { importTabataFile } from './tabataFormat'
 
-let n = 0
-const id = (p: string) => `${p}-${++n}`
+/**
+ * Routines seeded into the library.
+ *
+ * The three imported ones are Wayne's real routines, exported from the Tabata
+ * Timer app and committed so they also serve as test fixtures. Their ids are
+ * STABLE and deliberate: seeding is keyed on them, so a routine is offered once
+ * and stays deleted if it is deleted.
+ */
+
+export const BEGINNER_FULL_BODY = importTabataFile(rawFullBody, 0, 'seed-beginner-full-body')
+export const BEGINNER_MIXED_CARDIO_1 = importTabataFile(
+  rawMixedCardio1,
+  0,
+  'seed-beginner-mixed-cardio-1',
+)
+export const BEGINNER_MIXED_CARDIO_2 = importTabataFile(
+  rawMixedCardio2,
+  0,
+  'seed-beginner-mixed-cardio-2',
+)
 
 const seg = (
   name: string,
   seconds: number,
   role: SegmentRole = 'work',
-  media?: MediaRef,
 ): Segment => ({
   kind: 'segment',
-  id: id('seg'),
+  id: `tabata-${name}-${seconds}-${role}`,
   name,
   durationMs: seconds * 1000,
   role,
-  ...(media ? { media } : {}),
 })
 
 const rep = (times: number, children: Block[], label: string): Repeat => ({
   kind: 'repeat',
-  id: id('rep'),
+  id: 'tabata-rounds',
   times,
   children,
   label,
 })
 
-const routine = (name: string, blocks: Block[]): Workout => ({
-  id: id('wk'),
-  name,
-  blocks,
+/**
+ * Classic Tabata, kept because it is genuinely useful and because it is the
+ * only seeded routine that uses a repeat group — imported `.tabata` files are
+ * always flat, so this is what exercises the "Round 3 of 8" path.
+ */
+export const CLASSIC_TABATA: Workout = {
+  id: 'seed-classic-tabata',
+  name: 'Classic Tabata',
+  blocks: [
+    seg('Get ready', 10, 'prepare'),
+    rep(8, [seg('Work', 20, 'work'), seg('Rest', 10, 'rest')], 'Round'),
+  ],
   schemaVersion: SCHEMA_VERSION,
   createdAt: 0,
   updatedAt: 0,
-})
-
-const CABLE_FLY: MediaRef = {
-  source: 'remote',
-  url: 'https://i.postimg.cc/jCGnZ34t/Cable-Fly.png',
 }
 
-export const TABATA = routine('Tabata', [
-  seg('Get ready', 10, 'prepare'),
-  rep(8, [seg('Work', 20, 'work'), seg('Rest', 10, 'rest')], 'Round'),
-])
-
-export const UPPER_CIRCUIT = routine('Upper body circuit', [
-  seg('Get ready', 10, 'prepare'),
-  rep(
-    3,
-    [
-      seg('Cable fly', 40, 'work', CABLE_FLY),
-      seg('Rest', 20, 'rest'),
-      seg('Push-up', 40, 'work'),
-      seg('Rest', 20, 'rest'),
-      seg('Row', 40, 'work'),
-      seg('Recover', 60, 'recover'),
-    ],
-    'Circuit',
-  ),
-])
-
-/**
- * Wayne's real routine, imported from the Tabata Timer app's export: a 10-minute
- * cycling warm-up, then each exercise as prepare + 3 x (20s work / 10s rest)
- * with a 60s cycling interlude between. 86 steps, 42 minutes, 10 distinct
- * postimages illustrations — and a few exercises with no image at all, which
- * exercises the empty panel.
- */
-export const BEGINNER_MIXED_CARDIO = importTabataFile(rawBeginnerMixedCardio)
+export const SEED_ROUTINES: readonly Workout[] = [
+  BEGINNER_MIXED_CARDIO_2,
+  BEGINNER_MIXED_CARDIO_1,
+  BEGINNER_FULL_BODY,
+  CLASSIC_TABATA,
+]

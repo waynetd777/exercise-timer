@@ -3,8 +3,6 @@ import { cues, cuesBetween } from '../engine'
 import type { Timeline } from '../engine'
 import type { RunStatus } from '../state/useTimer'
 import { audio } from './engine'
-import { CUE_GAIN, CUE_SOUNDS } from './samples'
-import type { CueSoundName } from './samples'
 import { audioTimeFor, toneFor } from './tones'
 
 /** How far ahead cues are queued on the audio clock. */
@@ -53,21 +51,10 @@ export function useCueScheduler({
       const audioNow = audio.now
 
       for (const cue of cuesBetween(allCues, elapsed, elapsed + LOOKAHEAD_MS)) {
-        const at = audioTimeFor(cue.atMs, elapsed, audioNow)
-
-        // Prefer the real sample; fall back to a synthesised tone if it has not
-        // decoded yet or the file is missing, so a cue is never silent.
-        const played = audio.scheduleSample(at, CUE_SOUNDS[cue.kind], CUE_GAIN[cue.kind])
-        if (played) continue
-
-        const spec = toneFor(cue.kind, cue.value)
-        if (spec) audio.scheduleTone(at, spec)
+        const spec = toneFor(cue.kind)
+        if (spec) audio.scheduleTone(audioTimeFor(cue.atMs, elapsed, audioNow), spec)
       }
     }
-
-    // Decode the mapped sounds, then re-arm so the first cues use samples
-    // rather than the fallback tones.
-    void audio.preload(Object.values(CUE_SOUNDS) as CueSoundName[]).then(arm)
 
     arm()
     const interval = window.setInterval(arm, REARM_MS)
