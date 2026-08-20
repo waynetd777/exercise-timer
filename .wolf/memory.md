@@ -27,3 +27,4 @@
 | 04:35 | Fixed 3 reported countdown/layout bugs: off-centre digits (letter-spacing), +100% size jump on digit change (clockWidth floor), panel pushed off-screen (aspect-ratio -> absorb remainder) | src/ui/format.ts, run-screen.css, format.test.ts | 113/113 tests pass, build clean | ~25k |
 | 05:00 | Root-caused card text inversion to `font:` shorthand in a shared .label clobbering library.css by import order; built one role-keyed type scale in theme.css and pointed both screens at it | src/ui/theme.css, library.css, run-screen.css | 113/113 tests pass, build clean | ~30k |
 | 05:10 | Renamed app to DavShack Timer (heading + document title) and centred the home heading | src/ui/LibraryScreen.tsx, library.css, index.html | 113/113 tests pass, build clean | ~5k |
+| 05:15 | Lifted the panel's "Next ..." line 3px off the divider below it | src/ui/run-screen.css | build clean | ~4k |
