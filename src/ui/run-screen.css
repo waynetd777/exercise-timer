@@ -20,45 +20,31 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* ── Effort strip ──────────────────────────────────────────────────────────
- * One sliver per step: width proportional to duration, height proportional to
- * effort. Eight rounds of Tabata read as eight peaks, so the shape of the
- * routine is visible at a glance and the strip doubles as the progress bar.
+/* ── Header ────────────────────────────────────────────────────────────────
+ * Was the effort strip. The routine name lives here now, which also freed the
+ * eyebrow row above the countdown.
  */
-.strip {
+.run__header {
   display: flex;
-  align-items: flex-end;
-  gap: 1px;
-  height: 44px;
-  padding: var(--step-3) var(--step-3) 0;
+  align-items: center;
+  padding: var(--step-2) var(--step-5);
   border-bottom: var(--hairline);
 }
 
-.strip__step {
-  min-width: 2px;
-  height: calc(var(--effort) * 100%);
-  border-radius: 1.5px 1.5px 0 0;
-  /*
-   * Explicit colours per state rather than opacity over the ground. Dimming a
-   * hue toward near-black is what makes it muddy — red at 22% composited to
-   * #431F1D, which is simply brown.
-   *
-   * Upcoming steps are therefore neutral: their HEIGHT already encodes work
-   * against rest, so the hue was redundant anyway. Completed steps keep their
-   * hue but are mixed toward a light grey instead of down toward black, which
-   * lands on a dusty version of the same colour (#C9716D for red) rather than
-   * brown. The current step is the only one at full strength.
-   */
-  background: var(--ink-600);
-  transition: background 250ms var(--ease);
+@container shell (min-width: 46rem) {
+  .run__header {
+    padding-inline: var(--step-7);
+  }
 }
 
-.strip__step[data-state='done'] {
-  background: color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim));
-}
-
-.strip__step[data-state='current'] {
-  background: var(--step-colour);
+.run__title {
+  margin: 0;
+  font-size: clamp(1rem, 1.9cqi, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: var(--bone-dim);
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */
@@ -119,18 +105,19 @@
  *   - width  --clock-coef cqi / --chars, where --chars is the string's width
  *            in ems (a digit counts 1, a colon 0.5). So "8" and "17" render at
  *            the same size, while "4:30" steps down instead of overflowing.
- *   - height 65cqh, leaving room for the label, name and meta rows.
+ *   - height 74cqh — raised after the effort strip and the eyebrow row were
+ *            removed, which is where the extra vertical space came from.
  *
  * The width coefficient differs by layout because cqi measures the whole body,
  * not the column the clock actually occupies. Stacked, that is the full width;
- * beside the image panel it is only the 3fr column, where 100 would compute a
- * two-digit countdown to 804px against a 775px column and overflow.
+ * beside the image panel it is only the 3fr column, where a larger value would
+ * push a two-digit countdown wider than the column, most tightly on an iPad.
  * Whichever is smaller wins. No rem ceiling — that was what kept this tiny on
  * a laptop.
  */
 .count__clock {
   --clock-coef: 140;
-  font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), 65cqh));
+  font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), 74cqh));
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
@@ -153,20 +140,8 @@
   }
 }
 
-/*
- * The eyebrow shows "Round 3 of 8" when a routine has repeat groups, and falls
- * back to the routine name when it does not — which an imported flat routine
- * never does. Names run to 50+ characters, so this case gets its own smaller,
- * quieter treatment rather than the full label scale.
- */
-.count__routine {
-  font-size: clamp(1rem, 1.7cqi, 1.8rem);
-  letter-spacing: 0.07em;
-  color: var(--bone-faint);
-}
-
 .count__name {
-  font-size: max(2.25rem, min(10cqi, 10cqh));
+  font-size: max(2.5rem, min(11cqi, 11cqh));
   font-weight: 650;
   letter-spacing: -0.01em;
   margin: 0;
@@ -215,7 +190,7 @@
   /* Beside the panel the clock only has the 3fr column, so the width term has
      to be far more conservative than when it is stacked full-width. */
   .count__clock {
-    --clock-coef: 92;
+    --clock-coef: 88;
   }
 
   .panel__frame {
@@ -360,7 +335,7 @@
 }
 
 .rest-state__title {
-  font-size: max(1.75rem, min(9cqi, 5.5rem));
+  font-size: max(2.5rem, min(14cqi, 9rem));
   text-wrap: balance;
   font-weight: 700;
   line-height: 0.95;

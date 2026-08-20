@@ -5,7 +5,6 @@ import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
-import { EffortStrip } from './EffortStrip'
 import { clock, clockWidth, duration, fitCqi, pathLabel } from './format'
 import { resolveMediaPreview } from './media'
 import './run-screen.css'
@@ -92,12 +91,13 @@ export function RunScreen({ workout }: { workout: Workout }) {
 
   return (
     <main className="run" style={{ ['--phase' as string]: phase }}>
-      <EffortStrip timeline={timeline} currentIndex={isRunning ? at.index : -1} />
+      <header className="run__header">
+        <h1 className="run__title">{workout.name}</h1>
+      </header>
 
       {status === 'idle' && (
         <div className="rest-state">
-          <p className="label">Ready</p>
-          <h1 className="rest-state__title">{workout.name}</h1>
+          <p className="rest-state__title">Ready</p>
           <div className="rest-state__stats">
             <span className="stat">
               <b>{duration(totalDurationMs(workout))}</b>
@@ -113,8 +113,7 @@ export function RunScreen({ workout }: { workout: Workout }) {
 
       {status === 'complete' && (
         <div className="rest-state">
-          <p className="label">Finished</p>
-          <h1 className="rest-state__title">Done</h1>
+          <p className="rest-state__title">Done</p>
           <div className="rest-state__stats">
             <span className="stat">
               <b>{duration(timeline.totalMs)}</b>
@@ -134,9 +133,10 @@ export function RunScreen({ workout }: { workout: Workout }) {
             {/* Grouped so the meta row below can be pinned to the bottom of the
                 column while this block stays vertically centred. */}
             <div className="count__lead">
-              <p className={rounds ? 'label' : 'label count__routine'}>
-                {rounds || workout.name}
-              </p>
+              {/* Rounds only — the routine name is in the header now. Omitted
+                  entirely for a flat routine, so the row collapses rather than
+                  reserving empty space. */}
+              {rounds && <p className="label">{rounds}</p>}
               <p
                 // Remounting each second restarts the pulse animation, so it
                 // lands on the beat instead of drifting against the countdown.
