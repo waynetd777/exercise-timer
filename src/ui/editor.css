@@ -1,0 +1,195 @@
+/* ── Editor ────────────────────────────────────────────────────────────────
+ * Header and add-buttons fixed, the step list scrolling between them — same
+ * shape as the library, so the two screens behave alike.
+ */
+.editor {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--step-3);
+  height: 100%;
+  padding: var(--step-4) var(--step-4) 0;
+  overflow: hidden;
+  background: var(--ink-900);
+  background: radial-gradient(
+    140% 90% at 50% -10%,
+    color-mix(in oklab, var(--role-rest) 10%, var(--ink-900)),
+    var(--ink-900) 72%
+  );
+}
+
+@container (min-width: 46rem) {
+  .editor {
+    padding: var(--step-5) var(--step-6) 0;
+  }
+}
+
+.editor__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--step-3);
+}
+
+.editor__head .btn {
+  width: 48px;
+  height: 48px;
+}
+
+.editor__name {
+  font-size: max(1.25rem, min(2.6cqi, 2rem));
+  font-weight: 700;
+  letter-spacing: var(--track-name);
+}
+
+.editor__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2) var(--step-4);
+  margin: 0;
+}
+
+.editor__scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--step-3);
+}
+
+.editor__empty {
+  margin: 0;
+  padding: var(--step-5) 0;
+  color: var(--bone-faint);
+}
+
+.editor__list {
+  display: grid;
+  gap: var(--step-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2);
+  padding: var(--step-3) 0 var(--step-4);
+  border-top: var(--hairline);
+}
+
+/* ── Rows ─────────────────────────────────────────────────────────────────
+ * A left border in the step's own phase colour, which makes the shape of a
+ * routine readable while scrolling without adding any extra furniture.
+ */
+.erow {
+  display: grid;
+  gap: var(--step-2);
+  padding: var(--step-3);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-left: 4px solid var(--bone-faint);
+  border-radius: var(--radius);
+}
+
+.erow[data-role='prepare'] { border-left-color: var(--role-prepare); }
+.erow[data-role='work'] { border-left-color: var(--role-work); }
+.erow[data-role='rest'] { border-left-color: var(--role-rest); }
+.erow[data-role='recover'] { border-left-color: var(--role-recover); }
+
+/* Indented so a step inside rounds is visibly inside them. */
+.erow[data-depth='1'] {
+  margin-left: var(--step-5);
+}
+
+.erow--repeat {
+  background: var(--ink-700);
+  border-left-color: var(--bone-dim);
+}
+
+.erow__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--step-2);
+}
+
+.erow__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--step-1);
+  margin-left: auto;
+}
+
+.erow__actions .btn {
+  width: 42px;
+  height: 42px;
+}
+
+.erow__actions .icon {
+  width: 19px;
+  height: 19px;
+}
+
+.erow__image {
+  display: flex;
+  align-items: center;
+  gap: var(--step-2);
+}
+
+.erow__image .label {
+  flex: none;
+  color: var(--bone-faint);
+}
+
+.erow__thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  background: var(--ink-900);
+  border-radius: 6px;
+}
+
+/* ── Fields ───────────────────────────────────────────────────────────── */
+.efield {
+  min-width: 0;
+  padding: var(--step-2) var(--step-3);
+  font: inherit;
+  font-size: max(1rem, min(1.7cqi, 1.25rem));
+  color: var(--bone);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: 8px;
+}
+
+.efield::placeholder {
+  color: var(--bone-faint);
+}
+
+.efield--name {
+  flex: 1 1 9rem;
+}
+
+.efield--role {
+  flex: none;
+  /* Wide enough for "Get ready" without clipping the native arrow. */
+  min-width: 8.5rem;
+}
+
+.efield--secs {
+  width: 4.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.erow__image .efield {
+  flex: 1 1 10rem;
+}
+
+.esecs {
+  display: flex;
+  align-items: center;
+  gap: var(--step-1);
+  color: var(--bone-dim);
+}

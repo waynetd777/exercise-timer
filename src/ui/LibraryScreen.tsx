@@ -11,7 +11,9 @@ import {
   CopyIcon,
   ImportIcon,
   PencilIcon,
+  PlusIcon,
   StarIcon,
+  StepsIcon,
   StopwatchIcon,
   TrashIcon,
 } from './icons'
@@ -29,10 +31,12 @@ function Row({
   workout,
   library,
   onRun,
+  onEdit,
 }: {
   workout: Workout
   library: Library
   onRun: (workout: Workout) => void
+  onEdit: (workout: Workout) => void
 }) {
   const [mode, setMode] = useState<RowMode>('idle')
   const [draft, setDraft] = useState(workout.name)
@@ -101,6 +105,14 @@ function Row({
           <>
             <button
               className="btn btn--ghost"
+              onClick={() => onEdit(workout)}
+              aria-label="Edit steps"
+              title="Edit steps"
+            >
+              <StepsIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
               onClick={() => {
                 setDraft(workout.name)
                 setMode('renaming')
@@ -164,9 +176,13 @@ function Row({
 export function LibraryScreen({
   library,
   onRun,
+  onEdit,
+  onNew,
 }: {
   library: Library
   onRun: (workout: Workout) => void
+  onEdit: (workout: Workout) => void
+  onNew: () => void
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
@@ -243,6 +259,11 @@ export function LibraryScreen({
             ))}
           </div>
 
+          <button className="chip chip--action" onClick={onNew}>
+            <PlusIcon />
+            New
+          </button>
+
           <button className="chip chip--action" onClick={() => picker.current?.click()}>
             <ImportIcon />
             Import
@@ -287,7 +308,13 @@ export function LibraryScreen({
         ) : (
           <ul className="library__list">
             {visible.map((workout) => (
-              <Row key={workout.id} workout={workout} library={library} onRun={onRun} />
+              <Row
+              key={workout.id}
+              workout={workout}
+              library={library}
+              onRun={onRun}
+              onEdit={onEdit}
+            />
             ))}
           </ul>
         )}

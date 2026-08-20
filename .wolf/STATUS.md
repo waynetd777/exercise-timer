@@ -112,38 +112,50 @@
 - **Home screen header frozen** (user-reported) — title, search, sorts and Import stay put; only the routine list scrolls. `.library` is `grid-template-rows: auto minmax(0, 1fr)` with `overflow: hidden`, and everything below the header sits in a `.library__scroll` wrapper. A wrapper rather than one grid row per element, because the number of notices varies and the scroll region must not depend on it. `overscroll-behavior: contain` stops a rubber-band scroll dragging the page behind it.
 - **Title uses the mark's blue** — set once on `.library__title`, with `.mark` on `currentColor` so the two cannot drift apart.
 - **Removed "Classic Tabata" from the seed set** (user-reported) — only Wayne's three real routines seed now. Existing libraries keep their copy until deleted in the UI; no auto-delete migration, since that would destroy a routine the user may have edited.
+- **Phase 6 COMPLETE — workout editor**
+  - `src/editor/blocks.ts` — PURE tree ops on `Block[]` addressed by a `Path` (index chain): `insertAfter`, `appendTo`, `removeAt`, `moveBy`, `updateSegment`, `updateRepeat`, `clearMedia`, `wrapInRepeat`, `unwrapRepeat`, `flatten`, plus `newSegment`/`newRepeat` with per-role defaults. Immutable throughout. **29 tests.**
+  - `src/editor/postimages.ts` — accepts a direct link, a `postimg.cc/<id>` share link, or a bare id, and passes any other https URL through. **7 tests.**
+  - `src/ui/EditorScreen.tsx` + `editor.css` — per-step role select, name, seconds, image link with thumbnail; move up/down, repeat-this-step, delete; repeat rows with label, count, add-step-inside, ungroup; live total and step count; add buttons per role plus Rounds. Rows carry a left border in the step's phase colour.
+  - Library gained **New** and per-row **Edit steps**; `App` routes library ↔ run ↔ edit.
+  - **158 tests green.**
+- **Blue wash on the home and editor screens** (user-reported) — same radial gradient as the run screen, in `--role-rest`.
+- **Run-screen progress bar** (user-reported) — 3px, edge to edge under the header rule, in the phase colour. Driven by `transform: scaleX()` on an inner element rather than a gradient stop, since gradients do not transition and the value updates once a second.
 
 ---
 
-## 🚀 Next phase — Phase 4: media pipeline + IndexedDB
+## 🚀 Next phase — pick one
 
-**Goal:** Replace the phase-2 stopgap resolver with the real thing, so images survive gym wifi and postimages link-rot.
+Everything in the original 7-phase plan is now done except phase 4, and the app
+is live, installed and in real use. Remaining work, roughly by value:
 
-### Acceptance criteria
-1. `src/media/resolveMedia(ref)` handles all three sources; `local` returns a cached objectURL from IndexedDB. Replaces and deletes `src/ui/media.ts`. Import the DB from `src/storage/db.ts` (already has the `media` store).
-2. IndexedDB store `media`, keyed by sha256 of the blob (`crypto.subtle.digest`). Content-addressed, so an image reused across steps or routines is stored once.
-3. Import pipeline for own photos: decode → canvas resize to 1024px long edge → WebP q0.8 → hash → store. Never store a 3-5MB original.
-4. postimages URL normaliser: `postimg.cc/<id>` → `https://i.postimg.cc/<id>/img.png` (VERIFIED: the filename segment is ignored). Accept either form.
-5. "Pin for offline" on a remote ref: `fetch` → Blob → hash → store → set `cachedHash`; resolver then prefers the local copy. Works because `i.postimg.cc` sends `access-control-allow-origin: *` (VERIFIED). Skip downscaling below 300KB — his images are ~31KB.
-6. objectURL cache keyed by media id, revoked on unmount, or blobs leak.
-7. ~~`navigator.storage.persist()`~~ — DONE in phase 5 (`requestPersistence()` in `src/storage/db.ts`).
-8. Media GC on routine delete: `useLibrary.remove` has the hook point marked with a comment.
-8. Graceful failure for a HEIC that will not decode outside Safari — a clear message, not a broken image.
+### A. Export + backup (small)
+The library lives in one browser's IndexedDB. The three seeded routines are safe
+(committed in the repo) but edits, favourites and anything authored in the editor
+are not.
+- Export a single routine and a whole-library bundle as JSON; re-import both.
+- URL share links for routines whose images are all `remote`/`bundled` (they
+  export as short strings, so they fit).
 
-### Files to create / edit
-| Type | File | Content |
-|---|---|---|
-| ~~new~~ | ~~`src/media/db.ts`~~ | **DONE in phase 5** as `src/storage/db.ts` — both stores exist at v1 |
-| new | `src/media/hash.ts` | sha256 of a Blob via `crypto.subtle` |
-| new | `src/media/downscale.ts` | canvas resize → WebP encode |
-| new | `src/media/postimages.ts` | URL normaliser (pure — test it) |
-| new | `src/media/resolveMedia.ts` | Three-source resolver + objectURL cache |
-| new | `src/media/pin.ts` | Fetch a remote ref into local storage |
-| del | `src/ui/media.ts` | Stopgap, superseded |
+### B. Phase 4 — full media pipeline (medium)
+The service worker already caches `i.postimg.cc` images, so plain offline works.
+What is left is genuine ownership of the images:
+- IndexedDB blob store keyed by sha256 (the `media` store already exists at v1).
+- Pin-for-offline on a remote ref: fetch → hash → store → set `cachedHash`;
+  resolver prefers the local copy. Works because `i.postimg.cc` sends
+  `access-control-allow-origin: *` (VERIFIED).
+- Own-photo upload: decode → canvas resize to 1024px → WebP q0.8 → hash → store.
+- Replace and delete `src/ui/media.ts` (the phase-2 stopgap).
+- Media GC on routine delete — hook point marked in `useLibrary.remove`.
 
-### Notes for phase 4
-- Keep the pure parts pure (`postimages.ts`, `hash.ts`) so they test without a DOM, as with `clock.ts`.
-- Wayne's routine has 10 distinct remote images — a good real fixture for pinning.
+### C. Polish (small)
+- Keyboard shortcuts (space to pause, arrows to skip).
+- The app's spoken "10 seconds left" cue as a new `CueKind`.
+- Verify the wake lock actually holds on Wayne's iPhone.
+
+### Open decisions
+- Whether to keep the editor capped at two levels of nesting. `wrapInRepeat`
+  currently refuses to nest a repeat in a repeat; the DATA MODEL supports any
+  depth, so lifting the cap is a UI question, not a schema one.
 
 ### Closed decisions
 - **Platform: installable web PWA** (React + TypeScript + Vite), responsive across phone / iPad / laptop. Chosen over native for iteration speed and no App Store. Accepted tradeoff: will not run reliably with an iPhone screen locked / in pocket.
