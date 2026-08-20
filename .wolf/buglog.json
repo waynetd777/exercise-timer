@@ -236,6 +236,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T04:55:00Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-08-21T05:30:00Z",
+      "error_message": "USER REPORTED: the next-up line sits flush against the controls divider; a 3px nudge appeared to do nothing",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.run__body` in the STACKED layout had `padding: var(--step-5) var(--step-5) 0` \u2014 zero bottom padding \u2014 so the panel's bottom edge met the controls' border-top directly. The 3px margin DID apply (measurable as ~6 device px at 2x in the screenshot), it was simply the entire clearance that existed. The wide layout was fine because it has 24px bottom padding.",
+      "fix": "Gave the stacked body `var(--step-4)` (16px) bottom padding and removed the 3px margin as redundant. Fixing the missing padding rather than stacking a nudge on top of a zero.",
+      "fix_rule": "When a nudge appears to do nothing, check what it is being added to. A margin against zero padding is the whole gap, not an adjustment to one.",
+      "tags": [
+        "css",
+        "spacing",
+        "layout",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T05:30:00Z"
     }
   ]
 }

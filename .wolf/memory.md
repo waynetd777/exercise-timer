@@ -28,3 +28,4 @@
 | 05:00 | Root-caused card text inversion to `font:` shorthand in a shared .label clobbering library.css by import order; built one role-keyed type scale in theme.css and pointed both screens at it | src/ui/theme.css, library.css, run-screen.css | 113/113 tests pass, build clean | ~30k |
 | 05:10 | Renamed app to DavShack Timer (heading + document title) and centred the home heading | src/ui/LibraryScreen.tsx, library.css, index.html | 113/113 tests pass, build clean | ~5k |
 | 05:15 | Lifted the panel's "Next ..." line 3px off the divider below it | src/ui/run-screen.css | build clean | ~4k |
+| 05:30 | Root-caused the flush next-up line to zero bottom padding on the stacked .run__body (not the nudge); added 16px padding, removed the 3px margin, verified in built CSS | src/ui/run-screen.css | 113/113 tests pass, build clean | ~10k |

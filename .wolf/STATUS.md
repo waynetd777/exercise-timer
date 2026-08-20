@@ -98,7 +98,7 @@
   - **Screens read as different apps** because there was no shared scale: 11 ad-hoc font sizes and 5 letter-spacing values across the two stylesheets. Now one scale in theme.css keyed to role — `--track-display`/`--track-name`/`--label-tracking`, and `--size-display`/`--size-title`/`--size-name`/`--label-size`/`--label-size-sm`. Both stylesheets reference tokens only.
   - **113 tests green**, typecheck + build clean.
 - **Renamed to "DavShack Timer"** and centred the home heading (user-reported). Applied in `LibraryScreen.tsx` and `index.html` (the document title carries through to the PWA install name).
-- **Nudged the "Next …" line up 3px** (user-reported: too close to the divider below). `margin-bottom: 3px` on `.panel__next` — it is bottom-anchored in the panel's `auto` row, so the `1fr` frame above absorbs it.
+- **Cleared the "Next …" line off the divider** (user-reported twice). The real cause was that the STACKED `.run__body` had zero bottom padding, so the panel met the controls' border directly and a 3px nudge was the whole clearance. Now `padding-bottom: var(--step-4)` and the nudge removed as redundant; the wide layout always had 24px. See buglog `bug-014`.
 
 ---
 

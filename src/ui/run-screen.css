@@ -68,7 +68,7 @@
      rest, so a short window shrinks the image instead of pushing it off. */
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-5);
-  padding: var(--step-5) var(--step-5) 0;
+  padding: var(--step-5) var(--step-5) var(--step-4);
   min-height: 0;
 }
 
@@ -247,9 +247,6 @@
   text-align: center;
   gap: var(--step-2) var(--step-3);
   min-height: 1.2em;
-  /* Optical nudge: bottom-anchored in the panel, so this lifts it clear of the
-     divider below. The 1fr frame above absorbs the 3px. */
-  margin-bottom: 3px;
 }
 
 .panel__next b {

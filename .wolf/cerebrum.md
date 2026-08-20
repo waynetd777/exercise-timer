@@ -100,6 +100,9 @@
 - [2026-08-21] **There is ONE type scale, in `theme.css`, keyed to role.** Tracking: `--track-display: -0.03em`, `--track-name: -0.01em`, `--label-tracking: 0.11em`. Sizes: `--size-display`, `--size-title`, `--size-name`, `--label-size`, `--label-size-sm`. Both screens reference tokens only. Before this there were 11 ad-hoc font sizes and 5 tracking values, which is why the library and run screen read as different apps (`bug-013`). **Do not add a local clamp() for type** — extend the scale instead. The single documented exception is `.count__name`, which needs a `cqh` term the tokens do not carry.
 - [2026-08-21] **To step a label down, override the token** (`--label-size: var(--label-size-sm)`), never `font-size` directly. That is what keeps the `.label` treatment intact while changing only the step.
 
+- [2026-08-21] **Verify an edit actually landed before committing it.** A `sed`/python edit whose pattern silently failed to match got committed alongside notes claiming the fix, so the repo recorded a change it did not contain (commit `1bfa498`, corrected by `dccf660`). Assert the match AND that it is unique (`s.count(old) == 1`), check the printed confirmation, and for CSS grep the BUILT `dist/assets/*.css` — that is the only proof the rule survived the bundler.
+- [2026-08-21] **The stacked `.run__body` needs bottom padding.** It was `var(--step-5) var(--step-5) 0`, so the panel's next-up line sat flush on the controls divider and a 3px nudge was the entire clearance rather than an adjustment to it. Now `var(--step-4)`. The wide layout always had 24px. (`bug-014`)
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
