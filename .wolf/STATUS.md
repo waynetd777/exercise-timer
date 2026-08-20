@@ -139,6 +139,7 @@
   - **179 tests green.**
 - **Delete confirmation is emphatically red** (user-reported) — red row border and tinted background, red routine name, bold red "Delete?", filled-red tick. Worth noting: the rules were **already red in the deployed CSS**, verified by fetching it, so the report was most likely a stale service-worker cache; the state was strengthened rather than just re-applied. Also made `theme.css` explicitly the first CSS import so the base layer always precedes its modifiers.
 - **Duration and round-count fields lost their spinner arrows** (user-reported). `appearance: textfield` plus the WebKit spin-button pseudo-elements. `type="number"` kept deliberately, so arrow keys still nudge the value and mobile still gets a numeric keypad — only the arrows are hidden.
+- **Duplicate buttons on editor rows** (user-reported) — on both steps and rounds; a round copies with all its children. `duplicateAt` deep-copies with **fresh ids**, since the editor keys its rows by `block.id`. The copy lands directly after the original, so duplicating repeatedly stacks. **7 new tests, 186 green.**
 
 ---
 

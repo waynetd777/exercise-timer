@@ -138,6 +138,24 @@ export function appendTo(blocks: readonly Block[], path: Path, block: Block): Bl
   )
 }
 
+/**
+ * Deep copy with fresh ids all the way down.
+ *
+ * New ids matter: React keys the editor rows by `block.id`, so a duplicate that
+ * kept them would give two rows the same key.
+ */
+function withNewIds(block: Block): Block {
+  if (block.kind === 'segment') return { ...block, id: crypto.randomUUID() }
+  return { ...block, id: crypto.randomUUID(), children: block.children.map(withNewIds) }
+}
+
+/** Inserts a copy immediately after the block, so duplicating twice stacks up. */
+export function duplicateAt(blocks: readonly Block[], path: Path): Block[] {
+  const target = blockAt(blocks, path)
+  if (!target) return [...blocks]
+  return insertAfter(blocks, path, withNewIds(target))
+}
+
 export function removeAt(blocks: readonly Block[], path: Path): Block[] {
   return mapAt(blocks, path, () => null)
 }
