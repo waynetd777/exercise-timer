@@ -6,13 +6,25 @@
   container-type: inline-size;
   position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  align-content: start;
+  /* Header fixed, list scrolling. The shell itself must not scroll. */
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-4);
   height: 100%;
   padding: var(--step-5);
-  overflow-y: auto;
+  overflow: hidden;
   background: var(--ink-900);
+}
+
+.library__scroll {
+  display: grid;
+  align-content: start;
+  gap: var(--step-4);
+  min-height: 0;
+  overflow-y: auto;
+  /* Keeps a rubber-band scroll from dragging the page behind it. */
+  overscroll-behavior: contain;
+  /* So the last card is not flush against the bottom edge. */
+  padding-bottom: var(--step-4);
 }
 
 @container (min-width: 46rem) {
