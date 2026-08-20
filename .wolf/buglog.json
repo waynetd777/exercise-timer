@@ -324,6 +324,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T07:00:00Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-08-21T07:20:00Z",
+      "error_message": "USER REPORTED (screenshot): the exercise image is vertically truncated \u2014 the bottom of the picture is cut off at the frame edge",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.panel__frame img` had `width: 100%; height: 100%; object-fit: contain`, but as a normal grid item its `height: 100%` was resolving to AUTO. The box therefore took the image's natural aspect at full width (463x423 for an 876x800 image in a 463px frame), grew taller than the frame's 295px, and `overflow: hidden` cut the bottom off. `object-fit: contain` never letterboxed anything, because the box it was fitting into was already too tall. I had twice reasoned that 'contain means it cannot overflow' \u2014 which is only true once the box itself is bounded.",
+      "fix": "The image is absolutely positioned with `inset: 0` inside a `position: relative` frame. An absolutely-positioned box takes its dimensions from the containing block directly, so the height is definite regardless of the grid, and contain then shrinks the picture to fit \u2014 full height, letterboxed at the sides.",
+      "fix_rule": "`object-fit` only constrains the picture WITHIN the element's box; it does nothing about the box itself. If a replaced element's percentage height may resolve to auto, use `position: absolute; inset: 0` to make the box definite, or the natural aspect will overflow and be clipped.",
+      "tags": [
+        "css",
+        "object-fit",
+        "percentage-height",
+        "grid",
+        "overflow",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T07:20:00Z"
     }
   ]
 }

@@ -130,6 +130,9 @@
 - [2026-08-21] **Three stacked-layout tiers by viewport height**, handing space to the image as the screen gets shorter: default 56/44 with `--clock-height: 34cqh`; `<=700px` 50/50 with 28cqh; `<=540px` 46/54 with 22cqh plus lower name/label floors (at that height the FLOORS, not the countdown, crowd the row). Declared BEFORE the `@container shell` wide block, because the two-column layout overrides both rows and `--clock-height` and must keep winning. Verified the count block fits down to a 430px viewport; 400px clips by a pixel and is below any real device. (`bug-018`)
 - [2026-08-21] **A container cannot query its own size** — `.run__body` sets its own rows, so short-screen tiers have to be viewport `@media` queries, not `@container body` ones.
 
+- [2026-08-21] **`object-fit: contain` does NOT stop an image overflowing — it only constrains the picture inside the element's box.** If the box itself is too big, the picture is clipped and contain never letterboxes. `.panel__frame img` had `height: 100%` resolving to AUTO as a grid item, so the box took the natural aspect at full width and the bottom was cut off. Fix: `position: absolute; inset: 0` inside a `position: relative` frame, which takes the box from the containing block and is immune to percentage-height resolution. **I asserted twice that "contain means it cannot overflow" and was wrong both times** — check the BOX, not just the fit property. (`bug-019`)
+- [2026-08-21] **When a visual bug resists explanation, ask for a screenshot early.** Two turns were spent theorising about this one from CSS alone; the screenshot identified it immediately (natural aspect, full width, clipped at the bottom = the box is too tall, not the picture).
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
