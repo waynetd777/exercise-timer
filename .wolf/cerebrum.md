@@ -71,6 +71,10 @@
 
 - [2026-08-21] **Space between fluid text should be in `em`, not `rem`.** The meta row's `1.5rem` column gap looked fine at 11px labels and cramped at 43px. With `--label-size` fluid, any gap separating those items has to scale with them — `1.75em` on the flex container. Check other fixed gaps if the type scale changes again.
 
+- [2026-08-21] **`cqi` measures the CONTAINER, not the column an element occupies.** The countdown sits in a 3fr column of a 3fr/2fr grid inside the `body` size container, so a width coefficient safe when stacked full-width overflows when placed beside the image panel. Handled with `--clock-coef`: 140 stacked, 92 inside `@container shell (min-width: 46rem)`. Same trap applies to anything sized in cqi inside a multi-column grid — check against the COLUMN width, roughly `(bodyw - gap) * 3/5` here.
+- [2026-08-21] **Countdown geometry, for reference when it is next asked to grow:** `max(3rem, min(var(--clock-coef) * 1cqi / var(--chars), 65cqh))`. On a laptop the HEIGHT term governs (65cqh ≈ 459px) with the vertical stack at ~609px of ~706px available; on a phone the WIDTH term governs. To enlarge, raise 65cqh and re-check the stack (eyebrow + clock*0.82 + name*1.15 + meta + gaps) against body height at 1440x600, which is the tightest real case.
+- [2026-08-21] **No "Paused" indicator by request** — the primary button reading "Resume" is the only paused affordance. Don't add a chip or badge back.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

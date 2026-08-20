@@ -131,21 +131,27 @@ export function RunScreen({ workout }: { workout: Workout }) {
       {entry && (
         <div className="run__body">
           <div className="count">
-            <p className={rounds ? 'label' : 'label count__routine'}>
-              {rounds || workout.name}
-            </p>
-            <p
-              // Remounting each second restarts the pulse animation, so it
-              // lands on the beat instead of drifting against the countdown.
-              key={timer.secondsLeft}
-              className="count__clock"
-              data-urgent={status === 'running' && at.remainingMs <= URGENT_MS}
-              style={{ ['--chars' as string]: clockWidth(clockText) }}
-              aria-live="off"
-            >
-              {clockText}
-            </p>
-            <h1 className="count__name">{entry.name}</h1>
+            {/* Grouped so the meta row below can be pinned to the bottom of the
+                column while this block stays vertically centred. */}
+            <div className="count__lead">
+              <p className={rounds ? 'label' : 'label count__routine'}>
+                {rounds || workout.name}
+              </p>
+              <p
+                // Remounting each second restarts the pulse animation, so it
+                // lands on the beat instead of drifting against the countdown.
+                key={timer.secondsLeft}
+                className="count__clock"
+                data-urgent={status === 'running' && at.remainingMs <= URGENT_MS}
+                style={{ ['--chars' as string]: clockWidth(clockText) }}
+                aria-live="off"
+              >
+                {clockText}
+              </p>
+              <h1 className="count__name">{entry.name}</h1>
+            </div>
+
+            {/* No "Paused" chip — the primary button already reads "Resume". */}
             <p className="count__meta label">
               <span>
                 <span className="unit">{duration(at.totalRemainingMs)}</span> left
@@ -153,7 +159,6 @@ export function RunScreen({ workout }: { workout: Workout }) {
               <span>
                 Step {at.index + 1} / {timeline.entries.length}
               </span>
-              {status === 'paused' && <span>Paused</span>}
             </p>
           </div>
 
