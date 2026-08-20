@@ -48,9 +48,9 @@
 .run__title {
   margin: 0;
   text-align: center;
-  font-size: clamp(1rem, 1.9cqi, 2rem);
+  font-size: var(--label-size-sm);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--label-tracking);
   line-height: 1.25;
   text-transform: uppercase;
   color: var(--bone-dim);
@@ -82,14 +82,6 @@
     gap: var(--step-7);
     padding: var(--step-5) var(--step-7);
   }
-}
-
-.label {
-  font: var(--label);
-  letter-spacing: var(--label-tracking);
-  text-transform: uppercase;
-  color: var(--bone-dim);
-  margin: 0;
 }
 
 /* ── Countdown ─────────────────────────────────────────────────────────────
@@ -163,9 +155,14 @@
 }
 
 .count__name {
+  /*
+   * The one size not taken from --size-name: this is a hero-adjacent element
+   * that has to give way on a short window, so it needs the cqh term the scale
+   * tokens do not carry. A card's row name has no such constraint.
+   */
   font-size: max(2.5rem, min(11cqi, 11cqh));
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--track-name);
   margin: 0;
 }
 
@@ -235,7 +232,7 @@
   font-weight: 700;
   font-size: clamp(1.25rem, calc(var(--fit, 24) * 1cqi), 7rem);
   line-height: 1.05;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--track-name);
   text-align: center;
   text-transform: uppercase;
   text-wrap: balance;
@@ -252,19 +249,12 @@
   min-height: 1.2em;
 }
 
-/*
- * Opts out of the surrounding uppercase so a unit suffix stays a unit: the
- * label transform would otherwise render "20s" as "20S".
- */
-.unit {
-  text-transform: none;
-}
-
 .panel__next b {
   font-weight: 700;
   color: var(--bone);
   /* Stays above the label scale: this names the next exercise. */
-  font-size: clamp(1.8rem, 3.8cqi, 3.8rem);
+  font-size: var(--size-name);
+  letter-spacing: var(--track-name);
 }
 
 /* ── Controls ──────────────────────────────────────────────────────────────
@@ -359,11 +349,11 @@
 }
 
 .rest-state__title {
-  font-size: max(2.5rem, min(14cqi, 9rem));
+  font-size: var(--size-display);
   text-wrap: balance;
   font-weight: 700;
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--track-display);
   margin: 0;
 }
 
@@ -381,8 +371,8 @@
 }
 
 .stat b {
-  font-size: clamp(2.5rem, 6.5cqi, 5.5rem);
+  font-size: var(--size-title);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--track-display);
 }

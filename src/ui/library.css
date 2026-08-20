@@ -28,9 +28,9 @@
 
 .library__title {
   margin: 0;
-  font-size: max(2rem, min(7cqi, 3.5rem));
+  font-size: var(--size-display);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--track-display);
   line-height: 1;
 }
 
@@ -46,7 +46,7 @@
   min-width: 0;
   padding: var(--step-3) var(--step-4);
   font: inherit;
-  font-size: max(1rem, min(1.7cqi, 1.4rem));
+  font-size: var(--label-size-sm);
   color: var(--bone);
   background: var(--ink-800);
   border: var(--hairline);
@@ -68,8 +68,10 @@
   gap: var(--step-2);
   min-height: 44px;
   padding: 0 var(--step-4);
-  font: 650 max(0.9rem, min(1.5cqi, 1.2rem)) / 1 var(--font-ui);
-  letter-spacing: 0.06em;
+  font-weight: 650;
+  font-size: var(--label-size-sm);
+  line-height: 1;
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--bone-dim);
   background: var(--ink-800);
@@ -102,6 +104,7 @@
 
 .library__notice {
   margin: 0;
+  --label-size: var(--label-size-sm);
   color: var(--bone-dim);
 }
 
@@ -112,6 +115,7 @@
 .library__empty {
   margin: 0;
   padding: var(--step-6) 0;
+  --label-size: var(--label-size-sm);
   color: var(--bone-faint);
 }
 
@@ -195,16 +199,19 @@
 
 .row__name {
   margin: 0;
-  font-size: max(1.15rem, min(2.4cqi, 1.9rem));
+  font-size: var(--size-name);
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--track-name);
   overflow-wrap: anywhere;
 }
 
 .row__input {
   width: 100%;
   padding: var(--step-2) var(--step-3);
-  font: 650 max(1.15rem, min(2.4cqi, 1.9rem)) / 1.2 var(--font-ui);
+  font-weight: 650;
+  font-size: var(--size-name);
+  line-height: 1.2;
+  font-family: var(--font-ui);
   color: var(--bone);
   background: var(--ink-700);
   border: 1px solid var(--bone-faint);
@@ -216,7 +223,9 @@
   flex-wrap: wrap;
   gap: var(--step-2) var(--step-4);
   margin: 0;
-  font-size: max(0.85rem, min(1.4cqi, 1.1rem));
+  /* Steps the shared label down via the token — the routine name above must
+     stay the larger of the two. */
+  --label-size: var(--label-size-sm);
   color: var(--bone-dim);
 }
 
@@ -258,8 +267,11 @@
   place-content: center;
   justify-items: center;
   gap: var(--step-3);
-  font: 700 1.25rem/1 var(--font-ui);
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: var(--label-size);
+  line-height: 1;
+  font-family: var(--font-ui);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--role-prepare);
   background: color-mix(in oklab, var(--ink-900) 88%, transparent);

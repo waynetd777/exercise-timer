@@ -55,16 +55,31 @@
    * with no container it falls back to the viewport, which is also fine.
    */
   /*
-   * Height-aware as well as width-aware. At this size the meta row wraps to two
-   * lines, and on a short laptop window that plus a ~300px countdown would
-   * overflow the body row — so labels give way when vertical space is what is
-   * scarce. Inside `.run__body` (a size container) cqh is the body height;
-   * elsewhere it falls back to the viewport, which is close enough.
+   * ── Type scale ────────────────────────────────────────────────────────
+   * ONE scale for every screen. Before this, the library and the run screen
+   * each invented their own sizes and tracking, which is why they read as two
+   * different apps.
+   *
+   * Tracking is keyed to ROLE, not to element: display text tightens, names
+   * tighten slightly, uppercase labels open up. Three values, no others.
+   */
+  --track-display: -0.03em;
+  --track-name: -0.01em;
+  --label-tracking: 0.11em;
+
+  --size-display: max(2.5rem, min(11cqi, 5.5rem));
+  --size-title: max(1.75rem, min(4.5cqi, 3rem));
+  --size-name: max(1.5rem, min(3.4cqi, 2.6rem));
+
+  /*
+   * Labels are height-aware as well as width-aware: at this size the run
+   * screen's meta row wraps to two lines, and on a short window that plus a
+   * ~300px countdown would overflow. So labels give way when VERTICAL space is
+   * the scarce axis. Inside `.run__body` (a size container) cqh is the body
+   * height; elsewhere it falls back to the viewport, which is close enough.
    */
   --label-size: clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem);
-  --label: 650 var(--label-size)/1.3 var(--font-ui);
-  /* Eased off from 0.16em: the same tracking reads much wider at this size. */
-  --label-tracking: 0.11em;
+  --label-size-sm: clamp(1rem, 1.6cqi, 1.4rem);
 
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }
@@ -101,6 +116,30 @@ button {
 :focus-visible {
   outline: 2px solid var(--bone);
   outline-offset: 3px;
+}
+
+/*
+ * Shared text utilities. These live here, not in a screen's stylesheet, because
+ * both screens use them — and they use LONGHAND properties on purpose: the
+ * `font:` shorthand resets font-size, so a component setting its own size was
+ * silently clobbered depending on CSS import order.
+ *
+ * To step a label down, override the token: `--label-size: var(--label-size-sm)`.
+ */
+.label {
+  margin: 0;
+  font-weight: 650;
+  font-size: var(--label-size);
+  line-height: 1.3;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+/* Opts out of the surrounding uppercase so a unit suffix stays a unit: the
+   label transform would otherwise render "20s" as "20S". */
+.unit {
+  text-transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
