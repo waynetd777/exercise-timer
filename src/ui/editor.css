@@ -72,6 +72,30 @@
   letter-spacing: var(--track-name);
 }
 
+/* Undo and redo on the left, the running totals on the right. */
+.editor__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--step-2) var(--step-4);
+}
+
+.editor__history {
+  display: flex;
+  gap: var(--step-1);
+}
+
+.editor__history .btn {
+  width: 42px;
+  height: 42px;
+}
+
+.editor__history .icon {
+  width: 19px;
+  height: 19px;
+}
+
 .editor__stats {
   display: flex;
   flex-wrap: wrap;

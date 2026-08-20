@@ -244,17 +244,23 @@ const base = {
 describe('newRoutineBlocks — what a new routine opens on', () => {
   const template = newRoutineBlocks()
 
-  it('is get set, three rounds of work and rest, then get set again', () => {
-    expect(template.map((b) => b.kind)).toEqual(['segment', 'repeat', 'segment'])
+  it('is get set, three rounds of work and rest, get set again, then recover', () => {
+    expect(template.map((b) => b.kind)).toEqual(['segment', 'repeat', 'segment', 'segment'])
     expect((template[1] as Repeat).times).toBe(3)
     expect((template[1] as Repeat).children.map((c) => c.kind)).toEqual(['segment', 'segment'])
+    expect(template.map((b) => (b.kind === 'segment' ? b.role : 'repeat'))).toEqual([
+      'prepare',
+      'repeat',
+      'prepare',
+      'recover',
+    ])
   })
 
-  it('compiles to 8 steps totalling 2:30', () => {
-    // 30 + 3 x (20 + 10) + 30 = 150s
+  it('compiles to 9 steps totalling 3:30', () => {
+    // 30 + 3 x (20 + 10) + 30 + 60 = 210s
     const timeline = compile({ ...base, blocks: template })
-    expect(timeline.entries).toHaveLength(8)
-    expect(timeline.totalMs).toBe(150_000)
+    expect(timeline.entries).toHaveLength(9)
+    expect(timeline.totalMs).toBe(210_000)
   })
 
   it('labels the rounds, so the run screen shows "Round 2 of 3"', () => {
