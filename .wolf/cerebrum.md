@@ -126,6 +126,10 @@
 - [2026-08-21] **The countdown is sized from the STEP'S LONGEST STRING, not the current one.** `--chars = clockWidth(clock(ceil(entry.durationMs / 1000)))`, so it is constant for the whole step. Sizing from the live value made a 90s step jump ~75% larger crossing 1:00 -> 59. Accepted trade: a step over a minute renders smaller throughout (137px vs 239px on a phone) — stability beats peak size, and the long steps are the ones you are not staring at. (`bug-017`)
 - [2026-08-21] **The stacked run layout uses FIXED proportions (56fr / 44fr), not `auto` + remainder.** With `auto`, the countdown block took what it needed and the image absorbed the rest — so any change in numeral size visibly squashed the picture. Consequence: `--clock-height` is 34cqh stacked (not 40), because the countdown only has 56% of the body while cqh still measures the whole body. Re-verify the count block fits its row if either number changes; 342x380 is the tightest case checked. (`bug-017`)
 
+- [2026-08-21] **Wayne's exercise images are near-square (876x800, ~460KB).** That matters for layout: `object-fit: contain` fits the SMALLER axis, so a short wide frame wastes its width and renders the picture tiny. When choosing the panel's share of the screen, its ASPECT RATIO matters more than its area.
+- [2026-08-21] **Three stacked-layout tiers by viewport height**, handing space to the image as the screen gets shorter: default 56/44 with `--clock-height: 34cqh`; `<=700px` 50/50 with 28cqh; `<=540px` 46/54 with 22cqh plus lower name/label floors (at that height the FLOORS, not the countdown, crowd the row). Declared BEFORE the `@container shell` wide block, because the two-column layout overrides both rows and `--clock-height` and must keep winning. Verified the count block fits down to a 430px viewport; 400px clips by a pixel and is below any real device. (`bug-018`)
+- [2026-08-21] **A container cannot query its own size** — `.run__body` sets its own rows, so short-screen tiers have to be viewport `@media` queries, not `@container body` ones.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

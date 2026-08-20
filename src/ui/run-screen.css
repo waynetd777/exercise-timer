@@ -96,6 +96,51 @@
   min-height: 0;
 }
 
+/*
+ * Short screens hand space to the image.
+ *
+ * The exercise illustrations are near-square (876x800), so a short wide frame
+ * fits them to its HEIGHT and wastes the width — at 342x103 the picture renders
+ * at 0.13x. Giving the panel a bigger share is the only thing that helps.
+ *
+ * Viewport media queries rather than a container query, because a container
+ * cannot query its own size. Declared BEFORE the wide block on purpose: the
+ * two-column layout overrides both rows and --clock-height, so it is unaffected.
+ */
+@media (max-height: 700px) {
+  .run__body {
+    grid-template-rows: minmax(0, 50fr) minmax(0, 50fr);
+  }
+
+  .count__clock {
+    --clock-height: 28cqh;
+  }
+}
+
+@media (max-height: 540px) {
+  .run__body {
+    grid-template-rows: minmax(0, 46fr) minmax(0, 54fr);
+  }
+
+  .count__clock {
+    --clock-height: 22cqh;
+  }
+
+  /* At this height the name and label FLOORS are what crowd the countdown out,
+     so they come down too. */
+  .run {
+    --label-size: clamp(1.1rem, min(3.2cqi, 6.5cqh), 3.4rem);
+  }
+
+  .count__name {
+    font-size: max(1.5rem, min(11cqi, 11cqh));
+  }
+
+  .count {
+    gap: var(--step-2);
+  }
+}
+
 @container shell (min-width: 46rem) {
   .run__body {
     /* Proportional, and minmax(0, …) so both columns may shrink rather than

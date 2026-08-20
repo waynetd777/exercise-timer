@@ -35,3 +35,4 @@
 | 05:55 | Removed the synthetic Classic Tabata seed; only the 3 real imported routines seed now | src/routines/samples.ts, tabataFormat.test.ts | 122/122 tests pass, build clean | ~8k |
 | 06:20 | Phase 6: workout editor (pure block-tree ops + postimages normaliser + EditorScreen, 36 new tests); blue wash on home/editor; run-screen progress bar | src/editor/*, src/ui/EditorScreen.tsx, editor.css, App.tsx, LibraryScreen.tsx | 158/158 tests pass, build clean | ~120k |
 | 06:40 | Fixed countdown resizing at 1:00->59 (size from step's longest string, not live value) and the image squashing (fixed 56/44 stacked split) | src/ui/RunScreen.tsx, run-screen.css | 158/158 tests pass, fit verified at 6 viewports | ~15k |
+| 07:00 | Measured the images as near-square (876x800) and added two short-screen tiers so the panel gets more of the space; image 19-47% larger on small windows | src/ui/run-screen.css | 158/158 tests pass, fit verified at 7 viewports | ~20k |
