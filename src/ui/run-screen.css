@@ -161,7 +161,9 @@
 .count__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--step-3) var(--step-5);
+  /* Column gap in em so it scales with the label size — a fixed 1.5rem read as
+     cramped once the labels grew to ~43px. */
+  gap: var(--step-3) 1.75em;
   margin: 0;
 }
 

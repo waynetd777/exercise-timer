@@ -151,7 +151,7 @@ export function RunScreen({ workout }: { workout: Workout }) {
                 <span className="unit">{duration(at.totalRemainingMs)}</span> left
               </span>
               <span>
-                Step {at.index + 1} of {timeline.entries.length}
+                Step {at.index + 1} / {timeline.entries.length}
               </span>
               {status === 'paused' && <span>Paused</span>}
             </p>
