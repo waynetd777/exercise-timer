@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png'],
+      includeAssets: ['apple-touch-icon.png', 'favicon.svg', 'favicon-32.png', 'favicon-64.png'],
       manifest: {
         name: 'DavShack Timer',
         short_name: 'DavShack',
@@ -38,7 +38,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png}'],
+        globPatterns: ['**/*.{js,css,html,png,svg}'],
         // A 42-minute routine can outlast a cached page, so take over
         // immediately rather than waiting for every tab to close.
         clientsClaim: true,

@@ -8,12 +8,19 @@
       "first_read": "2026-08-20T22:50:08.447Z",
       "read_mtime": 1787266204703.2153,
       "anatomy_hit": false
+    },
+    "/Users/wayned/Projects/exercise-timer/public/favicon-64.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-20T22:58:54.206Z",
+      "read_mtime": 1787266730924.4368,
+      "anatomy_hit": false
     }
   },
   "files_written": [],
   "edit_counts": {},
   "anatomy_hits": 0,
-  "anatomy_misses": 1,
+  "anatomy_misses": 2,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
   "stop_count": 26

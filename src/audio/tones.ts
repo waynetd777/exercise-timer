@@ -18,50 +18,93 @@ import type { CueKind } from '../engine'
  *   complete   a 4s figure over G5 788 / F5 700 / C6 1052 / F6 1404
  */
 
+/**
+ * A struck note: a brief loud transient, then a much quieter tail that rings on.
+ *
+ * That two-part shape is the whole difference between a bell and a click. The
+ * app's bell drops to a third of peak within 25ms and is still audible at 1.2s;
+ * a single smooth exponential is loud in the middle and dead by 500ms, which is
+ * what a click sounds like.
+ */
 export type Note = {
   /** Offset from the cue's moment, in ms. */
   atMs: number
   freq: number
+  /** Total ringing time, to near-silence. */
   durationMs: number
-  /** Peak level, 0-1. */
+  /** Peak level of the strike, 0-1. */
   gain: number
-  /** Milliseconds to fall to a tenth of peak — the perceived decay. */
-  decayMs: number
+  /** Fraction of `gain` the strike falls to before the long tail begins. */
+  sustain: number
+  /** Milliseconds for the strike to fall to `sustain`. */
+  strikeMs: number
   type?: OscillatorType
-  /** An inharmonic partial, as a multiple of `freq`. Gives metallic timbres. */
-  partial?: { ratio: number; gain: number }
+  /**
+   * An inharmonic partial, as a multiple of `freq` — this is what makes a tone
+   * read as metallic. `decayScale` shortens it, because in a real bell the high
+   * partials die away well before the body stops ringing.
+   */
+  partial?: { ratio: number; gain: number; decayScale?: number }
 }
 
 export type ToneSpec = { notes: Note[] }
 
+/** Measured: drops to ~0.16 of peak by 60ms, gone by ~550ms. */
 const COUNTDOWN: ToneSpec = {
-  notes: [{ atMs: 0, freq: 523, durationMs: 500, gain: 0.5, decayMs: 92, type: 'sine' }],
+  notes: [
+    {
+      atMs: 0,
+      freq: 523,
+      durationMs: 550,
+      gain: 0.5,
+      sustain: 0.15,
+      strikeMs: 45,
+      type: 'sine',
+    },
+  ],
 }
 
+/**
+ * Measured: 0.33 of peak by 25ms, 0.11 at 300ms, 0.02 at 1000ms, still audible
+ * at 1200ms. The long quiet tail is what makes it a bell.
+ */
 const PHASE_CHANGE: ToneSpec = {
   notes: [
     {
       atMs: 0,
-      freq: 2658,
-      durationMs: 900,
+      freq: 2659,
+      durationMs: 2050,
       gain: 0.32,
-      decayMs: 306,
+      sustain: 0.33,
+      strikeMs: 22,
       type: 'sine',
-      partial: { ratio: 2.578, gain: 0.12 },
+      partial: { ratio: 2.578, gain: 0.14, decayScale: 0.45 },
     },
   ],
 }
 
 /** Transcribed from the measured onsets: G5 F5 C6, G5 F5, resolving on F6. */
+const fanfare = (atMs: number, freq: number, durationMs: number, gain: number): Note => ({
+  atMs,
+  freq,
+  durationMs,
+  gain,
+  // The app's figure holds its notes rather than plucking them, so these
+  // sustain far higher than the struck cues do.
+  sustain: 0.55,
+  strikeMs: 60,
+  type: 'triangle',
+})
+
 const COMPLETE: ToneSpec = {
   notes: [
-    { atMs: 0, freq: 788, durationMs: 480, gain: 0.4, decayMs: 260, type: 'triangle' },
-    { atMs: 420, freq: 700, durationMs: 620, gain: 0.4, decayMs: 320, type: 'triangle' },
-    { atMs: 1000, freq: 1052, durationMs: 620, gain: 0.38, decayMs: 340, type: 'triangle' },
-    { atMs: 1650, freq: 788, durationMs: 300, gain: 0.36, decayMs: 180, type: 'triangle' },
-    { atMs: 1900, freq: 700, durationMs: 300, gain: 0.36, decayMs: 180, type: 'triangle' },
-    { atMs: 2150, freq: 1404, durationMs: 1100, gain: 0.4, decayMs: 620, type: 'triangle' },
-    { atMs: 2150, freq: 702, durationMs: 1100, gain: 0.2, decayMs: 620, type: 'triangle' },
+    fanfare(0, 788, 520, 0.4),
+    fanfare(420, 700, 660, 0.4),
+    fanfare(1000, 1052, 700, 0.38),
+    fanfare(1650, 788, 320, 0.36),
+    fanfare(1900, 700, 320, 0.36),
+    fanfare(2150, 1404, 1300, 0.4),
+    fanfare(2150, 702, 1300, 0.2),
   ],
 }
 

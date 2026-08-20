@@ -159,3 +159,29 @@ export function CloseIcon() {
     </Svg>
   )
 }
+
+/**
+ * The app mark: a stopwatch, matching favicon.svg exactly.
+ *
+ * Its own viewBox and class rather than the 24-unit `Svg` wrapper, because it
+ * is sized in `em` to track whatever text it sits beside.
+ */
+export function StopwatchIcon() {
+  return (
+    <svg className="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="32" cy="38" r="18" />
+        <path d="M26.5 7h11" />
+        <path d="M32 7v6.2" />
+        <path d="M47.5 15.5l3.6 3.6" />
+        <path d="M32 38V27.5" />
+      </g>
+    </svg>
+  )
+}
