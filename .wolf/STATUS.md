@@ -88,6 +88,11 @@
   - 8 new icons. **112 tests green**, typecheck + build clean.
 - **Column contents centred** (user-reported) — countdown, exercise name, meta row, next-up line, and the idle/complete screens.
 - **Named the app, made cards clickable** (user-reported) — home heading and document title are now "DavShack Gym Timer" (the latter becomes the PWA install name in phase 7). The per-card play button is gone; the whole card opens the routine via a stretched `<button>` overlay, layered above the name/stats but below the star and action buttons, and rendered only in idle mode so it cannot cover the rename input or delete confirmation. Cards get a hover state.
+- **Three countdown/layout fixes** (user-reported with screenshot) — see buglog `bug-009`..`bug-011`
+  - **Off-centre digits:** letter-spacing applies after the last glyph, so a centred line sits half the tracking off-centre. Now `--tracking` plus `padding-right: calc(-1 * var(--tracking))`.
+  - **Size jump on digit change:** `clockWidth` returned 1 for a single digit while the coefficient was calibrated for 2, so "9" rendered up to **100% larger** than "10". Floored at 2 — size now only ever steps down. The old test asserted `clockWidth('8') === 1` under the name "does not jump", so it guaranteed the jump; corrected and a monotonicity test added.
+  - **Panel pushed off-screen:** the frame had `aspect-ratio: 4/3`, demanding height from its width no matter what was left. Now `height: 100%` with `.run__body` stacked as `grid-template-rows: auto minmax(0, 1fr)`, so the panel absorbs the remainder. Clock height term split per layout: `--clock-height` 40cqh stacked, 74cqh beside the panel. Verified the panel keeps 137-432px across five stacked window sizes.
+  - **113 tests green**, typecheck + build clean.
 
 ---
 
