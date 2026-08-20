@@ -56,8 +56,26 @@ export function newSegment(role: SegmentRole = 'work'): Segment {
   }
 }
 
-export function newRepeat(children: Block[] = [], times = 3): Repeat {
+/**
+ * A new round: three reps of a 20s exercise and a 10s rest.
+ *
+ * The default children matter — adding "Rounds" in the editor should give a
+ * usable round, not an empty one or a bare exercise. `wrapInRepeat` passes its
+ * own children, so the default only applies when a round is created fresh.
+ */
+export function newRepeat(
+  children: Block[] = [newSegment('work'), newSegment('rest')],
+  times = 3,
+): Repeat {
   return { kind: 'repeat', id: crypto.randomUUID(), times, children, label: 'Round' }
+}
+
+/**
+ * The shape a new routine opens on: get set, a round, then get set for whatever
+ * comes next. Exported so the app and its tests cannot disagree about it.
+ */
+export function newRoutineBlocks(): Block[] {
+  return [newSegment('prepare'), newRepeat(), newSegment('prepare')]
 }
 
 export function blockAt(blocks: readonly Block[], path: Path): Block | undefined {

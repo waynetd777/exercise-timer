@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Block, MediaRef, Repeat, Segment, SegmentRole, Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
 import {
@@ -16,6 +16,7 @@ import {
   wrapInRepeat,
 } from '../editor/blocks'
 import type { Path } from '../editor/blocks'
+import { isDirty } from '../editor/dirty'
 import { normaliseImageUrl } from '../editor/postimages'
 import { duration } from './format'
 import {
@@ -285,9 +286,24 @@ export function EditorScreen({
 }) {
   const [name, setName] = useState(workout.name)
   const [blocks, setBlocks] = useState<Block[]>(workout.blocks)
+  const [confirmingExit, setConfirmingExit] = useState(false)
 
   const rows = useMemo(() => flatten(blocks), [blocks])
   const preview = useMemo(() => ({ ...workout, name, blocks }), [workout, name, blocks])
+  const dirty = useMemo(() => isDirty(workout, name, blocks), [workout, name, blocks])
+
+  // Also catch a reload or a closed tab, not just the back button.
+  useEffect(() => {
+    if (!dirty) return
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
+
+  const goBack = () => {
+    if (dirty) setConfirmingExit(true)
+    else onCancel()
+  }
 
   const patchSegment = (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) =>
     setBlocks((current) => updateSegment(current, path, patch))
@@ -296,10 +312,24 @@ export function EditorScreen({
 
   return (
     <main className="editor">
-      <header className="editor__head">
-        <button className="btn btn--ghost" onClick={onCancel} aria-label="Discard changes" title="Discard changes">
-          <BackIcon />
-        </button>
+      <header className="editor__head" data-confirming={confirmingExit}>
+        {confirmingExit ? (
+          /* Two-step in place, matching how deleting a routine confirms, rather
+             than introducing a blocking dialog for one case. */
+          <div className="editor__confirm">
+            <span className="label label--sm">Discard your changes?</span>
+            <button className="chip chip--danger" onClick={onCancel}>
+              Discard
+            </button>
+            <button className="chip" onClick={() => setConfirmingExit(false)}>
+              Keep editing
+            </button>
+          </div>
+        ) : (
+          <>
+            <button className="btn btn--ghost" onClick={goBack} aria-label="Back to routines" title="Back to routines">
+              <BackIcon />
+            </button>
 
         <input
           className="efield editor__name"
@@ -311,14 +341,16 @@ export function EditorScreen({
 
         {/* Labelled, not icon-only: saving is infrequent and consequential, so
             a word beats a tick. */}
-        <button
-          className="btn btn--primary editor__save"
-          onClick={() => onSave({ ...preview, name: name.trim() || 'Untitled routine' })}
-          aria-label="Save routine"
-        >
-          <CheckIcon />
-          Save
-        </button>
+            <button
+              className="btn btn--primary editor__save"
+              onClick={() => onSave({ ...preview, name: name.trim() || 'Untitled routine' })}
+              aria-label="Save routine"
+            >
+              <CheckIcon />
+              Save
+            </button>
+          </>
+        )}
       </header>
 
       <p className="editor__stats label label--sm">
@@ -383,7 +415,7 @@ export function EditorScreen({
         ))}
         <button
           className="chip chip--action"
-          onClick={() => setBlocks((c) => insertAfter(c, [], newRepeat([newSegment('work')])))}
+          onClick={() => setBlocks((c) => insertAfter(c, [], newRepeat()))}
         >
           <PlusIcon />
           Rounds

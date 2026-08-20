@@ -221,12 +221,3 @@ export function RoundsIcon() {
     </Svg>
   )
 }
-
-/** Edit the steps of a routine, as distinct from renaming it. */
-export function StepsIcon() {
-  return (
-    <Svg>
-      <path d="M4 7h11M4 12h16M4 17h8" {...STROKE} />
-    </Svg>
-  )
-}

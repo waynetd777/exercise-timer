@@ -6,7 +6,6 @@ import {
   duplicate,
   filterWorkouts,
   markRun,
-  rename,
   sortWorkouts,
   stamp,
   summary,
@@ -149,20 +148,6 @@ describe('duplicate', () => {
 
   it('copies the blocks', () => {
     expect(copy.blocks).toEqual(original.blocks)
-  })
-})
-
-describe('rename', () => {
-  it('trims and re-stamps', () => {
-    const renamed = rename(make('Old'), '  New name  ', 7000)
-    expect(renamed.name).toBe('New name')
-    expect(renamed.updatedAt).toBe(7000)
-  })
-
-  it('refuses a blank name rather than saving a nameless routine', () => {
-    const original = make('Keep me')
-    expect(rename(original, '   ', 7000)).toBe(original)
-    expect(rename(original, '', 7000)).toBe(original)
   })
 })
 

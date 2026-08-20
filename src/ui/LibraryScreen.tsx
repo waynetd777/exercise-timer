@@ -13,7 +13,6 @@ import {
   PencilIcon,
   PlusIcon,
   StarIcon,
-  StepsIcon,
   StopwatchIcon,
   TrashIcon,
 } from './icons'
@@ -24,8 +23,6 @@ const SORTS: { mode: SortMode; label: string }[] = [
   { mode: 'name', label: 'Name' },
   { mode: 'duration', label: 'Longest' },
 ]
-
-type RowMode = 'idle' | 'renaming' | 'confirming'
 
 function Row({
   workout,
@@ -38,24 +35,18 @@ function Row({
   onRun: (workout: Workout) => void
   onEdit: (workout: Workout) => void
 }) {
-  const [mode, setMode] = useState<RowMode>('idle')
-  const [draft, setDraft] = useState(workout.name)
+  const [confirming, setConfirming] = useState(false)
   const { totalMs, steps } = summary(workout)
 
-  const commitRename = () => {
-    void library.rename(workout, draft)
-    setMode('idle')
-  }
-
   return (
-    <li className="row" data-clickable={mode === 'idle'}>
+    <li className="row" data-clickable={!confirming}>
       {/*
         A real button stretched over the card rather than a click handler on the
         li: it is focusable and announced, and nesting buttons inside a button
         would be invalid. Rendered only when idle, or it would sit over the
-        rename input and the delete confirmation.
+        delete confirmation.
       */}
-      {mode === 'idle' && (
+      {!confirming && (
         <button
           className="row__open"
           onClick={() => onRun(workout)}
@@ -74,21 +65,7 @@ function Row({
       </button>
 
       <div className="row__body">
-        {mode === 'renaming' ? (
-          <input
-            className="row__input"
-            value={draft}
-            autoFocus
-            aria-label="Routine name"
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') commitRename()
-              if (event.key === 'Escape') setMode('idle')
-            }}
-          />
-        ) : (
-          <h2 className="row__name">{workout.name}</h2>
-        )}
+        <h2 className="row__name">{workout.name}</h2>
         <p className="row__meta label">
           <span>
             <span className="unit">{duration(totalMs)}</span>
@@ -101,24 +78,28 @@ function Row({
       </div>
 
       <div className="row__actions">
-        {mode === 'idle' && (
+        {confirming ? (
+          // Two-step rather than a blocking confirm dialog.
+          <>
+            <span className="row__confirm label">Delete?</span>
+            <button
+              className="btn btn--danger"
+              onClick={() => void library.remove(workout.id)}
+              aria-label={`Delete ${workout.name}`}
+            >
+              <CheckIcon />
+            </button>
+            <button className="btn btn--ghost" onClick={() => setConfirming(false)} aria-label="Keep">
+              <CloseIcon />
+            </button>
+          </>
+        ) : (
           <>
             <button
               className="btn btn--ghost"
               onClick={() => onEdit(workout)}
-              aria-label="Edit steps"
-              title="Edit steps"
-            >
-              <StepsIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => {
-                setDraft(workout.name)
-                setMode('renaming')
-              }}
-              aria-label="Rename"
-              title="Rename"
+              aria-label="Edit routine"
+              title="Edit routine"
             >
               <PencilIcon />
             </button>
@@ -132,39 +113,11 @@ function Row({
             </button>
             <button
               className="btn btn--ghost"
-              onClick={() => setMode('confirming')}
+              onClick={() => setConfirming(true)}
               aria-label="Delete"
               title="Delete"
             >
               <TrashIcon />
-            </button>
-          </>
-        )}
-
-        {mode === 'renaming' && (
-          <>
-            <button className="btn btn--ghost" onClick={commitRename} aria-label="Save name">
-              <CheckIcon />
-            </button>
-            <button className="btn btn--ghost" onClick={() => setMode('idle')} aria-label="Cancel">
-              <CloseIcon />
-            </button>
-          </>
-        )}
-
-        {/* Two-step rather than a blocking confirm dialog. */}
-        {mode === 'confirming' && (
-          <>
-            <span className="row__confirm label">Delete?</span>
-            <button
-              className="btn btn--danger"
-              onClick={() => void library.remove(workout.id)}
-              aria-label={`Delete ${workout.name}`}
-            >
-              <CheckIcon />
-            </button>
-            <button className="btn btn--ghost" onClick={() => setMode('idle')} aria-label="Keep">
-              <CloseIcon />
             </button>
           </>
         )}

@@ -97,46 +97,6 @@
   gap: var(--step-2);
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--step-2);
-  min-height: 44px;
-  padding: 0 var(--step-4);
-  font-weight: 650;
-  font-size: var(--label-size-sm);
-  line-height: 1;
-  letter-spacing: var(--label-tracking);
-  text-transform: uppercase;
-  color: var(--bone-dim);
-  background: var(--ink-800);
-  border: var(--hairline);
-  border-radius: var(--radius);
-  transition:
-    color 150ms var(--ease),
-    background 150ms var(--ease);
-}
-
-.chip:hover {
-  color: var(--bone);
-  background: var(--ink-700);
-}
-
-.chip[aria-pressed='true'] {
-  color: var(--ink-900);
-  background: var(--bone-dim);
-  border-color: transparent;
-}
-
-.chip--action {
-  color: var(--bone);
-}
-
-.chip .icon {
-  width: 18px;
-  height: 18px;
-}
-
 .library__notice {
   margin: 0;
   --label-size: var(--label-size-sm);
@@ -238,19 +198,6 @@
   font-weight: 650;
   letter-spacing: var(--track-name);
   overflow-wrap: anywhere;
-}
-
-.row__input {
-  width: 100%;
-  padding: var(--step-2) var(--step-3);
-  font-weight: 650;
-  font-size: var(--size-name);
-  line-height: 1.2;
-  font-family: var(--font-ui);
-  color: var(--bone);
-  background: var(--ink-700);
-  border: 1px solid var(--bone-faint);
-  border-radius: var(--radius);
 }
 
 .row__meta {

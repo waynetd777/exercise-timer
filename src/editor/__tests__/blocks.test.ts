@@ -8,6 +8,7 @@ import {
   insertAfter,
   moveBy,
   newRepeat,
+  newRoutineBlocks,
   newSegment,
   removeAt,
   unwrapRepeat,
@@ -218,6 +219,18 @@ describe('constructors', () => {
     const blocks = [newRepeat([newSegment('work')], 5)]
     expect(compile({ ...base, blocks }).entries).toHaveLength(5)
   })
+
+  it('defaults a new round to 3 reps of a 20s exercise and a 10s rest', () => {
+    const round = newRepeat()
+    expect(round.times).toBe(3)
+    expect(round.label).toBe('Round')
+    expect(round.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null))).toEqual(
+      [
+        ['work', 20_000],
+        ['rest', 10_000],
+      ],
+    )
+  })
 })
 
 const base = {
@@ -228,13 +241,8 @@ const base = {
   updatedAt: 0,
 }
 
-describe('the starting template for a new routine', () => {
-  // Mirrors App.blankRoutine(); asserted here so the shape cannot drift.
-  const template = [
-    newSegment('prepare'),
-    newRepeat([newSegment('work'), newSegment('rest')], 3),
-    newSegment('prepare'),
-  ]
+describe('newRoutineBlocks — what a new routine opens on', () => {
+  const template = newRoutineBlocks()
 
   it('is get set, three rounds of work and rest, then get set again', () => {
     expect(template.map((b) => b.kind)).toEqual(['segment', 'repeat', 'segment'])
@@ -242,7 +250,7 @@ describe('the starting template for a new routine', () => {
     expect((template[1] as Repeat).children.map((c) => c.kind)).toEqual(['segment', 'segment'])
   })
 
-  it('compiles to 8 steps totalling 2 minutes', () => {
+  it('compiles to 8 steps totalling 2:30', () => {
     // 30 + 3 x (20 + 10) + 30 = 150s
     const timeline = compile({ ...base, blocks: template })
     expect(timeline.entries).toHaveLength(8)
@@ -254,5 +262,20 @@ describe('the starting template for a new routine', () => {
     expect(entry.path).toEqual([
       { repeatId: expect.any(String), label: 'Round', iteration: 2, of: 3 },
     ])
+  })
+})
+
+describe('defaults, stated once', () => {
+  it('holds every default the routines rely on', () => {
+    // Restated as a single guard: get ready 30s, round of 3 with 20s work and
+    // 10s rest, rest 10s. Changing any of these should fail here first.
+    expect(newSegment('prepare').durationMs).toBe(30_000)
+    expect(newSegment('rest').durationMs).toBe(10_000)
+    expect(newSegment('work').durationMs).toBe(20_000)
+
+    const round = newRepeat()
+    expect(round.times).toBe(3)
+    expect(round.children).toHaveLength(2)
+    expect(compile({ ...base, blocks: [round] }).totalMs).toBe(3 * 30_000)
   })
 })

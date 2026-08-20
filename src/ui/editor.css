@@ -36,6 +36,22 @@
   height: 48px;
 }
 
+/* While confirming, the prompt takes the whole header row. */
+.editor__head[data-confirming='true'] {
+  grid-template-columns: 1fr;
+}
+
+.editor__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--step-2) var(--step-3);
+}
+
+.editor__confirm .label {
+  color: var(--role-work);
+}
+
 /* Beats `.editor__head .btn` on specificity, so the square sizing does not
    apply to the one button that carries a word. */
 .editor__head .editor__save {
