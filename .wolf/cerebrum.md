@@ -147,6 +147,10 @@
 - [2026-08-21] **Cmd/Ctrl+Z in the editor deliberately overrides native text-input undo.** The draft history already covers typing, so one stack for the whole editor is less surprising than two that disagree.
 - [2026-08-21] **A new routine is: 30s prepare, Round x3 of [20s work, 10s rest], 30s prepare, 60s recover** — 9 steps, 3:30. `newRoutineBlocks()` is the single source of truth and its shape is asserted in tests.
 
+- [2026-08-21] **Import `theme.css` before anything that pulls in a screen stylesheet.** CSS is emitted in module-import order and equal-specificity ties go to the later rule, so the base layer must precede the modifiers. `main.tsx` states this explicitly. (It was already effectively the order — this is insurance, not a fix.)
+- [2026-08-21] **The delete confirmation is emphatically red**: red row border, a red-tinted row background, red routine name, red bold "Delete?", and a filled-red tick. `--role-work` throughout. Wayne asked for red when the rules were ALREADY red in the deployed CSS — most likely a stale service-worker cache on his device, so the styling was strengthened rather than merely re-applied.
+- [2026-08-21] **Stale-cache check before diagnosing a "styling didn't apply" report:** fetch the live CSS from the deployed URL and grep the rule. Two turns were burnt theorising about cascade order when the live stylesheet already contained the correct declarations.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

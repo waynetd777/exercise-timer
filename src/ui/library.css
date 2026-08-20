@@ -231,7 +231,18 @@
   height: 48px;
 }
 
+/* The whole row states the danger, not just one word of it. */
+.row[data-confirming='true'] {
+  border-color: var(--role-work);
+  background: color-mix(in oklab, var(--role-work) 12%, var(--ink-800));
+}
+
 .row__confirm {
+  font-weight: 700;
+  color: var(--role-work);
+}
+
+.row[data-confirming='true'] .row__name {
   color: var(--role-work);
 }
 
