@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clock, clockWidth, duration, fitCqi, pathLabel } from '../format'
+import { clock, clockWidth, duration, fitCqi, pathLabel, wordCount } from '../format'
 
 describe('clock', () => {
   it('shows bare seconds under a minute — faster to read at three metres', () => {
@@ -94,5 +94,23 @@ describe('fitCqi', () => {
 
   it('survives empty input', () => {
     expect(fitCqi('')).toBe(40)
+  })
+})
+
+describe('wordCount', () => {
+  it('counts the words a fallback name will wrap onto', () => {
+    expect(wordCount('Rest')).toBe(1)
+    expect(wordCount('Get ready')).toBe(2)
+    expect(wordCount('Seated Abdominal Crunch')).toBe(3)
+  })
+
+  it('never returns zero, so it is safe as a divisor', () => {
+    // It divides the height budget in CSS — a zero would blow the font size up.
+    expect(wordCount('')).toBe(1)
+    expect(wordCount('   ')).toBe(1)
+  })
+
+  it('collapses runs of whitespace', () => {
+    expect(wordCount('  Get   ready  ')).toBe(2)
   })
 })

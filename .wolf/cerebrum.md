@@ -103,6 +103,9 @@
 - [2026-08-21] **Verify an edit actually landed before committing it.** A `sed`/python edit whose pattern silently failed to match got committed alongside notes claiming the fix, so the repo recorded a change it did not contain (commit `1bfa498`, corrected by `dccf660`). Assert the match AND that it is unique (`s.count(old) == 1`), check the printed confirmation, and for CSS grep the BUILT `dist/assets/*.css` — that is the only proof the rule survived the bundler.
 - [2026-08-21] **The stacked `.run__body` needs bottom padding.** It was `var(--step-5) var(--step-5) 0`, so the panel's next-up line sat flush on the controls divider and a 3px nudge was the entire clearance rather than an adjustment to it. Now `var(--step-4)`. The wide layout always had 24px. (`bug-014`)
 
+- [2026-08-21] **The fallback step name is bounded on BOTH axes.** `.panel__frame` is `container-type: size` (not `inline-size`) so the text can be measured against the frame's height — safe because the frame fills a `1fr` grid row, giving it a definite block size. Size is `clamp(1rem, min(--fit * 1cqi, 72cqh / --lines), 7rem)`, where `--lines` is the word count from `wordCount()`. Word count is an UPPER bound on lines (because `fitCqi` sizes the longest word to the full width, so each word may take its own line), which is what makes dividing the height budget by it safe.
+- [2026-08-21] **Padding must scale with a container that can get small.** A fixed 16px was 29% of a 110px frame and clipped the text on its own, even with the font correctly bounded. `.panel__empty` uses `4cqh` vertical padding. Check this on anything inside an element that absorbs leftover space.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
