@@ -108,12 +108,12 @@ describe('the other seeded routines', () => {
     for (const id of ids) expect(id).toMatch(/^seed-/)
   })
 
-  it('seeds one routine with repeat groups, so the round label is exercised', () => {
-    // Imported .tabata routines are always flat.
-    const withRounds = SEED_ROUTINES.filter((w) =>
-      w.blocks.some((b) => b.kind === 'repeat'),
-    )
-    expect(withRounds).toHaveLength(1)
-    expect(compile(withRounds[0]!).entries.some((e) => e.path.length > 0)).toBe(true)
+  it('seeds only imported routines, which are always flat', () => {
+    // Nothing seeded uses repeat groups any more. The "Round 3 of 8" path is
+    // still covered by the engine and format tests, not by a seeded routine.
+    for (const workout of SEED_ROUTINES) {
+      expect(workout.blocks.every((b) => b.kind === 'segment')).toBe(true)
+    }
+    expect(SEED_ROUTINES).toHaveLength(3)
   })
 })
