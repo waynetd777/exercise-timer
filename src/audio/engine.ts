@@ -13,7 +13,8 @@ import type { Note, ToneSpec } from './tones'
 class AudioEngine {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
-  private pending = new Set<OscillatorNode>()
+  /** Scheduled oscillators, mapped to the audio time they start at. */
+  private pending = new Map<OscillatorNode, number>()
 
   /**
    * Must be called synchronously from a user gesture — mobile browsers refuse
@@ -43,18 +44,28 @@ class AudioEngine {
     return this.ctx?.currentTime ?? 0
   }
 
-  /** Stops everything queued but not yet sounded. Used on pause, seek and reset. */
+  /**
+   * Drops cues that are queued but have NOT started yet. Used on pause, seek,
+   * and every re-arm of the rolling window.
+   *
+   * Notes already sounding are deliberately left to ring out: cutting an
+   * oscillator mid-ring is itself an audible click, and since the window
+   * re-arms every ten seconds, stopping everything meant any cue unlucky enough
+   * to overlap a re-arm was truncated — which is exactly what turned the bell
+   * into a click.
+   */
   cancelPending(): void {
     if (!this.ctx) return
     const now = this.ctx.currentTime
-    for (const osc of this.pending) {
+    for (const [osc, startAt] of this.pending) {
+      if (startAt <= now + 0.01) continue
       try {
         osc.stop(now)
       } catch {
         // Already stopped; nothing to do.
       }
+      this.pending.delete(osc)
     }
-    this.pending.clear()
   }
 
   /** Queues every note of a cue at an exact moment on the audio clock. */
@@ -68,7 +79,7 @@ class AudioEngine {
 
     for (const note of spec.notes) {
       const noteAt = Math.max(at + note.atMs / 1000, ctx.currentTime)
-      this.play(ctx, master, noteAt, note, note.freq, note.gain)
+      this.play(ctx, master, noteAt, note, note.freq, note.gain, note.durationMs)
       if (note.partial) {
         this.play(
           ctx,
@@ -77,16 +88,18 @@ class AudioEngine {
           note,
           note.freq * note.partial.ratio,
           note.partial.gain,
+          note.durationMs * (note.partial.decayScale ?? 1),
         )
       }
     }
   }
 
   /**
-   * One oscillator with a two-stage exponential envelope: peak to a tenth over
-   * the measured decay, then down to silence over the rest. That two-stage
-   * shape is what makes a synthesised note read as struck rather than as a tone
-   * being switched off.
+   * One oscillator with a strike-then-ring envelope: up over a few ms, down to
+   * the sustain level over `strikeMs`, then a long exponential tail to silence.
+   *
+   * The tail is what makes it read as struck. A single exponential from peak
+   * sounds like a tone being switched off.
    */
   private play(
     ctx: AudioContext,
@@ -95,29 +108,31 @@ class AudioEngine {
     note: Note,
     freq: number,
     gain: number,
+    durationMs: number,
   ): void {
     const osc = ctx.createOscillator()
     const env = ctx.createGain()
 
-    const attack = 0.008
-    const total = note.durationMs / 1000
-    // Keep the stages ordered even if a note is given a very short duration.
-    const decay = Math.min(note.decayMs / 1000, Math.max(0.01, total - attack - 0.01))
+    const attack = 0.006
+    const total = durationMs / 1000
+    // Keep the stages strictly ordered even for a very short note.
+    const strike = Math.min(note.strikeMs / 1000, Math.max(0.005, total - attack - 0.01))
+    // Exponential ramps cannot reach or start from zero.
+    const sustain = Math.max(0.0002, gain * note.sustain)
 
     osc.type = note.type ?? 'sine'
     osc.frequency.setValueAtTime(freq, at)
 
-    // Ramped rather than switched, or every note starts with a click.
     env.gain.setValueAtTime(0.0001, at)
     env.gain.exponentialRampToValueAtTime(gain, at + attack)
-    env.gain.exponentialRampToValueAtTime(gain * 0.1, at + attack + decay)
+    env.gain.exponentialRampToValueAtTime(sustain, at + attack + strike)
     env.gain.exponentialRampToValueAtTime(0.0001, at + total)
 
     osc.connect(env).connect(master)
     osc.start(at)
     osc.stop(at + total + 0.02)
 
-    this.pending.add(osc)
+    this.pending.set(osc, at)
     osc.addEventListener('ended', () => {
       this.pending.delete(osc)
       env.disconnect()

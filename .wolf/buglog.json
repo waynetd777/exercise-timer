@@ -253,6 +253,40 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T05:30:00Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-08-21T05:30:00Z",
+      "error_message": "USER REPORTED: 'the sound after the 3s countdown is supposed to sound like a bell but it sounds like a click'",
+      "file": "src/audio/engine.ts",
+      "root_cause": "TWO causes. (1) The envelope was a single exponential from peak, which is loud in the middle and silent by 500ms. Re-measuring the app's bell showed the real shape is a STRIKE plus a RING: it drops to 0.33 of peak within 25ms and is still audible at 1200ms. A single exponential is a tone being switched off; the quiet long tail is what makes it a bell. (2) `cancelPending()` stopped EVERY tracked oscillator including ones already sounding, and the scheduler re-arms its window every 10 seconds \u2014 so any cue overlapping a re-arm was cut off mid-ring, which is itself an audible click. With phase changes every 10-20s in a Tabata, collisions were frequent.",
+      "fix": "Note gained `sustain` (fraction of peak the strike falls to) and `strikeMs`, so the envelope is attack -> strike -> long tail. Bell is now sustain 0.33, strikeMs 22, durationMs 2050, with the inharmonic partial given decayScale 0.45 because high partials die before the body stops ringing. And `pending` became a Map of node -> scheduled start time, so `cancelPending` skips anything already sounding and only drops future cues.",
+      "fix_rule": "A percussive sound needs a two-part envelope: brief loud transient, then a much quieter long tail. And never stop a sounding oscillator to re-arm a scheduler \u2014 cutting audio mid-ring is a click.",
+      "tags": [
+        "audio",
+        "web-audio",
+        "envelope",
+        "scheduling",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T05:30:00Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-08-21T05:30:00Z",
+      "error_message": "First FFT pass reported six 'partials' for each cue that were really adjacent bins of two peaks",
+      "file": "scratchpad analysis",
+      "root_cause": "Took the top-6 spectral bins by magnitude with no minimum separation, so spectral leakage around a single peak filled the list (511/517/519/527/529/531 Hz is one tone, not six). It happened to identify the right two partials for the bell, but it could easily have missed a weaker lower fundamental.",
+      "fix": "Re-ran peak-picking with a 40Hz minimum separation and reported relative magnitudes, which confirmed the bell is genuinely just 2659Hz at 1.00 and 6854Hz at 0.39.",
+      "fix_rule": "When picking spectral peaks, enforce a minimum separation. Adjacent bins are one peak.",
+      "tags": [
+        "analysis",
+        "fft",
+        "method"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T05:30:00Z"
     }
   ]
 }

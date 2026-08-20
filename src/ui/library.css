@@ -27,12 +27,27 @@
 }
 
 .library__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
   margin: 0;
   text-align: center;
   font-size: var(--size-display);
   font-weight: 700;
   letter-spacing: var(--track-display);
   line-height: 1;
+}
+
+/*
+ * Sized in em so it scales with whatever it sits beside, and coloured
+ * independently of the text — the mark is blue, the wordmark is not.
+ */
+.mark {
+  flex: none;
+  width: 0.92em;
+  height: 0.92em;
+  color: var(--role-rest);
 }
 
 .library__tools {
