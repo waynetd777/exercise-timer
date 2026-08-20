@@ -71,11 +71,12 @@ export function newRepeat(
 }
 
 /**
- * The shape a new routine opens on: get set, a round, then get set for whatever
- * comes next. Exported so the app and its tests cannot disagree about it.
+ * The shape a new routine opens on: get set, a round, get set for whatever comes
+ * next, then a recovery interval. Exported so the app and its tests cannot
+ * disagree about it.
  */
 export function newRoutineBlocks(): Block[] {
-  return [newSegment('prepare'), newRepeat(), newSegment('prepare')]
+  return [newSegment('prepare'), newRepeat(), newSegment('prepare'), newSegment('recover')]
 }
 
 export function blockAt(blocks: readonly Block[], path: Path): Block | undefined {
