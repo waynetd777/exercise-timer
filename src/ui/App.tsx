@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
-import { newRepeat, newSegment } from '../editor/blocks'
+import { newRoutineBlocks } from '../editor/blocks'
 import { SEED_ROUTINES } from '../routines/samples'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
@@ -24,11 +24,7 @@ function blankRoutine(): Workout {
      * exercise is then a matter of adding a round after that second prepare,
      * rather than starting from an empty list.
      */
-    blocks: [
-      newSegment('prepare'),
-      newRepeat([newSegment('work'), newSegment('rest')], 3),
-      newSegment('prepare'),
-    ],
+    blocks: newRoutineBlocks(),
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,

@@ -343,6 +343,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T07:20:00Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-08-21T07:50:00Z",
+      "error_message": "USER REPORTED: 'the save button is invisible' (editor header)",
+      "file": "src/ui/theme.css",
+      "root_cause": "`.btn--primary` is `color: var(--ink-900); background: var(--phase)`, and `--phase` was only ever set as an inline style on `.run`. In the editor it is undefined, and an undefined custom property makes the whole `background` declaration INVALID at computed-value time \u2014 so the background fell back to transparent and the button rendered as dark text on a dark ground.",
+      "fix": "Gave `--phase` a root default of `var(--role-rest)` in theme.css; the run screen still overrides it per step. Also moved `.btn*` and `.chip*` out of run-screen.css / library.css into theme.css, since three screens use them and they only worked from a screen-specific file because the bundler concatenates all CSS.",
+      "fix_rule": "A custom property consumed outside the subtree that sets it needs a root default (or a `var(x, fallback)`), or the whole declaration silently drops. And a class used by more than one screen belongs in the shared stylesheet, not in whichever screen defined it first.",
+      "tags": [
+        "css",
+        "custom-properties",
+        "shared-styles",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T07:50:00Z"
     }
   ]
 }

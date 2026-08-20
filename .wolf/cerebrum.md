@@ -137,6 +137,11 @@
 - [2026-08-21] **`newSegment` defaults match the real routines:** prepare 30s, work 20s, rest 10s, recover 60s. Chosen so an added step usually needs no editing. Don't "tidy" these to round numbers.
 - [2026-08-21] **Wayne could not find how to save in the editor** — the icon-only tick was too subtle. The Save button now carries the word. Rule for this project: icon-only is fine for frequent transport controls, but a consequential, infrequent action gets a label.
 
+- [2026-08-21] **`--phase` has a ROOT DEFAULT of `var(--role-rest)`; do not remove it.** `.btn--primary` uses it as a background, and an undefined custom property invalidates the whole declaration — which made the editor's Save button dark-on-dark and invisible. The run screen overrides it per step. Any custom property consumed outside the subtree that sets it needs a root default. (`bug-020`)
+- [2026-08-21] **Shared classes now live in `theme.css`: `.label`, `.label--sm`, `.unit`, `.btn*`, `.chip*`.** They used to sit in whichever screen defined them first and worked only because the bundler concatenates all CSS — the same accident that caused `bug-012`. If a class is used by more than one screen, move it.
+- [2026-08-21] **Library row actions are now: star, edit (pencil → opens the EDITOR), duplicate, delete.** Inline rename and the separate edit-steps button were both removed on request; the pencil does the editing and the editor names the routine. `rename` was deleted from `library.ts` and `useLibrary` as dead code along with its tests.
+- [2026-08-21] **The editor guards unsaved work**: `isDirty(original, name, blocks)` in `src/editor/dirty.ts` compares FIELD BY FIELD, not by `JSON.stringify` — serialising depends on key insertion order, and patching an object reorders keys, which would report false changes. Back turns the header into an in-place "Discard your changes?" prompt (matching the delete pattern rather than adding a dialog), and a `beforeunload` handler covers reloads and closing the tab.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
