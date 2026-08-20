@@ -62,6 +62,10 @@
 - **Neutral grey ground** (user-reported: brown tint disliked) — `--ink-900 #121314`, `--ink-800 #1A1C1D`, `--ink-700 #242628`, `--ink-600 #34373A`, `--bone #F1F2F3`, `--bone-dim #9BA0A6`, `--bone-faint #7E838A`. All phase colours still clear 4.5:1 against the dark button text (green 9.4, red 5.1, blue 6.0, violet 5.7); `--bone-faint` was lightened from my first pick because that only reached 3.41:1 on grey.
 - **Effort strip no longer goes brown** (user-reported) — replaced per-state `opacity` over the near-black ground with explicit backgrounds. Upcoming steps are neutral `--ink-600` (height already encodes work vs rest, so hue was redundant); completed steps keep hue but mix toward a light grey, `color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim))`, landing on `#C9716D` for red instead of `#802E2A`; only the current step is full strength. See buglog `bug-008`.
 - **Meta row tidy** (user-reported) — "Step 3 of 86" → "Step 3 / 86", and the column gap between "time left" and the step counter is now `1.75em` rather than a fixed `1.5rem`, so it scales with the label size (24px → 45/52/75px on phone/iPad/laptop).
+- **Countdown enlarged, meta moved to the bottom, "Paused" removed** (user-reported)
+  - `.count` is now `grid-template-rows: 1fr auto` with a `.count__lead` wrapper holding eyebrow + clock + name (vertically centred), so the meta row sits on the bottom edge of the column.
+  - Countdown height term 52cqh → 65cqh, and the width coefficient became layout-dependent (`--clock-coef`: 140 stacked, 92 beside the panel) because `cqi` measures the body, not the 3fr column. Result: **+67% on a phone, +25% on iPad/laptop** (367 → 459px on a laptop). Verified the width fits the column and the vertical stack fits body height at 390x844, 1024x768, 1440x900, 1440x700 and 1440x600.
+  - "Paused" chip gone — the primary button already reads "Resume".
 
 ---
 
