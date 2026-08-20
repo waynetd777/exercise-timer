@@ -4,6 +4,7 @@ import { compile, totalDurationMs } from '../../engine'
 import {
   appendTo,
   blockAt,
+  duplicateAt,
   flatten,
   insertAfter,
   moveBy,
@@ -283,5 +284,66 @@ describe('defaults, stated once', () => {
     expect(round.times).toBe(3)
     expect(round.children).toHaveLength(2)
     expect(compile({ ...base, blocks: [round] }).totalMs).toBe(3 * 30_000)
+  })
+})
+
+describe('duplicateAt', () => {
+  it('places the copy immediately after the original', () => {
+    expect(names(duplicateAt(tree(), [0]))).toEqual(['A', 'A', '[R]', 'B', 'C', 'D'])
+  })
+
+  it('duplicates inside a repeat without leaving it', () => {
+    expect(names(duplicateAt(tree(), [1, 0]))).toEqual(['A', '[R]', 'B', 'B', 'C', 'D'])
+  })
+
+  it('copies a repeat with all of its children', () => {
+    const blocks = duplicateAt(tree(), [1])
+    expect(flatten(blocks).map((f) => f.block.kind)).toEqual([
+      'segment',
+      'repeat',
+      'segment',
+      'segment',
+      'repeat',
+      'segment',
+      'segment',
+      'segment',
+    ])
+    expect(totalDurationMs({ ...base, blocks })).toBe(
+      totalDurationMs({ ...base, blocks: tree() }) + 3 * 40_000,
+    )
+  })
+
+  it('gives the copy fresh ids, right down through the children', () => {
+    // React keys the rows by id, so a shared id would collide.
+    const blocks = duplicateAt(tree(), [1])
+    const ids = flatten(blocks).map((f) => f.block.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('carries the values across, including an image', () => {
+    const withImage = updateSegment(tree(), [0], {
+      name: 'Cable fly',
+      durationMs: 45_000,
+      media: { source: 'remote', url: 'https://i.postimg.cc/x/y.png' },
+    })
+    const copy = blockAt(duplicateAt(withImage, [0]), [1])
+    expect(copy).toMatchObject({
+      name: 'Cable fly',
+      durationMs: 45_000,
+      media: { source: 'remote', url: 'https://i.postimg.cc/x/y.png' },
+    })
+  })
+
+  it('leaves the original tree untouched, and ignores a bad path', () => {
+    const original = tree()
+    duplicateAt(original, [0])
+    expect(names(original)).toEqual(['A', '[R]', 'B', 'C', 'D'])
+    expect(names(duplicateAt(original, [9]))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+  })
+
+  it('stacks when duplicated repeatedly', () => {
+    let blocks = duplicateAt(tree(), [0])
+    blocks = duplicateAt(blocks, [1])
+    expect(names(blocks)).toEqual(['A', 'A', 'A', '[R]', 'B', 'C', 'D'])
   })
 })

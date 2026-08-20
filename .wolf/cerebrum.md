@@ -151,6 +151,9 @@
 - [2026-08-21] **The delete confirmation is emphatically red**: red row border, a red-tinted row background, red routine name, red bold "Delete?", and a filled-red tick. `--role-work` throughout. Wayne asked for red when the rules were ALREADY red in the deployed CSS — most likely a stale service-worker cache on his device, so the styling was strengthened rather than merely re-applied.
 - [2026-08-21] **Stale-cache check before diagnosing a "styling didn't apply" report:** fetch the live CSS from the deployed URL and grep the rule. Two turns were burnt theorising about cascade order when the live stylesheet already contained the correct declarations.
 
+- [2026-08-21] **`duplicateAt` deep-copies with FRESH IDS all the way down.** The editor keys its rows by `block.id`, so a copy that kept them would give two rows the same React key. Any future "copy a block" operation must do the same.
+- [2026-08-21] **Editor row actions** — segment: move up, move down, repeat-this-step, duplicate, delete. Repeat: add step inside, move up, move down, ungroup, duplicate, delete. Duplicate always sits immediately before delete, and inserts the copy directly after the original so repeated duplication stacks.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
