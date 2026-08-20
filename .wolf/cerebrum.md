@@ -1,0 +1,44 @@
+# Cerebrum
+
+> OpenWolf's learning memory. Updated automatically as the AI learns from interactions.
+> Do not edit manually unless correcting an error.
+> Last updated: 2026-08-20
+
+## User Preferences
+
+<!-- How the user likes things done. Code style, tools, patterns, communication. -->
+
+- [2026-08-20] Wants apps to work across **all three of his devices** — phone, iPad, and laptop — not phone-only. Treat responsive/multi-device as a default requirement, not a nice-to-have.
+- [2026-08-20] Asks "how would you suggest we go about that?" before coding — prefers a proposed approach + explicit decisions up front over immediate code.
+
+## Key Learnings
+
+- **Project:** exercise-timer — an interval/Tabata-style exercise timer, built as an installable web PWA (React + TS + Vite), no backend.
+- [2026-08-20] Interval-timer correctness gotchas, decided up front: (1) never accumulate `setInterval` ticks — derive elapsed from `Date.now() - startedAt - pausedTotalMs`, since background tabs throttle/freeze timers; (2) never fire beeps from a JS tick — pre-schedule them on `AudioContext.currentTime` with a rolling lookahead, so a stalled main thread still cues on time; (3) mobile browsers require a user gesture to unlock `AudioContext`.
+- [2026-08-20] Web PWA cannot reliably run a timer with an iPhone screen locked / phone in pocket. User accepted this tradeoff for iteration speed. If it ever becomes a real problem, the escape hatch is Capacitor + a native background-audio plugin, reusing the same engine.
+- [2026-08-20] Media-storage gotchas to handle when phase 4 lands: (1) call `navigator.storage.persist()` — without it the browser may evict IndexedDB and silently lose a routine's images; (2) HEIC from an iPhone decodes in Safari but not Chrome/Firefox — the iOS file picker usually converts to JPEG, but handle decode failure with a clear message rather than a broken image; (3) content-addressed media needs GC on routine delete (sweep remaining workouts for live hashes, drop orphans; re-sweep on app start to catch interrupted deletes); (4) cache `URL.createObjectURL` results per media id and revoke on unmount or you leak blobs.
+- [2026-08-20] Run-screen image detail: preload and `img.decode()` the *next* segment's image during the current one, otherwise there's a white flash at the exact moment the user looks up. `position()` therefore returns `nextEntry` as well as `entry`.
+- [2026-08-20] **User already hosts their Tabata exercise images on postimages** (e.g. `https://i.postimg.cc/jCGnZ34t/Cable-Fly.png`) and wants to keep using them. So `remote` URL is the PRIMARY media source, not an afterthought — don't design as if local uploads are the default path.
+- [2026-08-20] **postimages facts, verified by curl (not assumed):** `i.postimg.cc` sends `access-control-allow-origin: *` and `cache-control: max-age=315360000`; images are ~31KB. The filename segment of `i.postimg.cc/<id>/<name>.<ext>` is IGNORED — any name or extension returns the image, only a bare trailing slash 404s. Therefore (a) remote images can be fetched → Blob → canvas-processed → pinned into IndexedDB, so remote is not a one-way door, and (b) a `postimg.cc/<id>` share link can be normalised in-app to `https://i.postimg.cc/<id>/img.png`. The `postimg.cc` HTML page has NO CORS, so never try to scrape it from the browser. Caveat: a share-link id may resolve to a resized variant — one page exposed 3 different ids for the same image.
+- [2026-08-20] GitHub account for this project: `waynetd777`. Repo `waynetd777/exercise-timer` exists and is private + empty; local dir is not yet `git init`-ed.
+
+## Do-Not-Repeat
+
+<!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
+<!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+
+## Decision Log
+
+<!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
+
+- [2026-08-20] **Web PWA over native iOS / React Native.** Fast iteration, installs to home screen without an App Store, one codebase covers phone + iPad + laptop. Cost: no reliable screen-locked operation.
+- [2026-08-20] **Recursive block tree (`segment | repeat{times, children}`) as the authoring model.** One primitive expresses classic Tabata, named circuits, pyramids and nested sets. Rejected a flat "rounds of segments" model — simpler, but cannot nest, and the user wants a full interval builder. Data model nests arbitrarily; editor UI capped at 2 levels initially.
+- [2026-08-20] **Compile-to-flat-timeline, pure runtime.** `compile(workout)` produces `TimelineEntry[]` with absolute `startMs`/`endMs`; `position(timeline, elapsedMs)` is a pure binary search. Chosen over a stateful step-through machine because it makes skip/seek/rewind trivial and lets the whole engine be unit-tested with a fake clock, with zero DOM.
+- [2026-08-20] **No backend, no sync.** localStorage + versioned schema + JSON export/import + URL-encoded share links to move workouts between devices. A server was judged unjustified for a single-user timer.
+- [2026-08-20] **Steps can carry one optional static image; IndexedDB replaces localStorage because of it.** localStorage's ~5MB quota plus base64's 33% inflation cannot hold photos. Stores: `workouts` (JSON by id) + `media` (Blob keyed by sha256 content hash, so an image reused across segments/routines is stored once). Rejected GIF (can't canvas-downscale without losing animation; 5-10MB per clip) and video (needs a separate <video> path — deferred, but `MediaRef.mime` leaves room to add it without a migration).
+- [2026-08-20] **All image input goes through one mandatory downscale pipeline:** decode → canvas resize to 1024px long edge → WebP q0.8 → ~100KB → hash → store. Storing original phone photos (3-5MB) would blow the quota inside one workout. Photo picker, camera, drag-drop and clipboard paste are all just Blobs into this one path.
+- [2026-08-20] **Portability via export/import `.json` bundle (images inline as base64), AirDropped — still no backend.** Reconsidered when images landed, and held: a server would make a local-first single-user timer offline-breakable for no real gain. Consequence accepted: URL share links carry structure only and degrade to text-only segments.
+- [2026-08-20] **Media is a 3-source discriminated union behind one `resolveMedia(ref)`**: `remote` (postimages URL, optional `cachedHash` for a pinned local copy), `bundled` (committed to `public/exercises/`, served same-origin), `local` (own photo → downscale → hash → IndexedDB). Rejected "repo-hosted images only": adding an image would need a git commit + push + deploy, which kills phone-side authoring; and offline still needs a local cache either way, so you don't escape local storage, you just lose control of eviction. Rejected "local only": remote/bundled refs export as short strings, which is what makes URL share links viable.
+- [2026-08-20] **Hosting is intentionally undecided; made irrelevant instead.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1 so root-domain and subpath hosts both work. GitHub Pages needs Pro for a private repo AND publishes a public site; Cloudflare Pages/Netlify/Vercel deploy private repos free from the root. Recommendation on record: Cloudflare Pages. Decide at phase 7.
+- [2026-08-20] **Routine library is first-class — unbounded build/save/load.** Free from the id-keyed store; the work is a Library home screen (list/create/duplicate/rename/delete/load) plus `Workout` metadata (`createdAt`, `updatedAt`, `lastRunAt`, `favourite`, `estimatedTotalMs` denormalised at save so the list needn't compile every routine). Flat searchable list sorted by recently-run with favourites pinned — folders/tags deferred until a flat list actually hurts.
+- [2026-08-20] **Build order: engine first (phase 1), UI second.** Correctness lives in the timeline compiler; getting it right and tested before any React removes the hardest class of bug from later phases.

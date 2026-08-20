@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "meta": {
+    "lastScanned": "2026-08-20T20:42:04.303Z",
+    "fileCount": 12,
+    "hits": 0,
+    "misses": 0,
+    "renderedHash": "a247ba80e035c7b664b24070ae12248ecbdedbdd6c66155b8e6653399fdfdec2",
+    "storeUpdatedAt": "2026-08-20T20:42:04.303Z"
+  },
+  "files": {
+    ".claude/commands/designqc.md": {
+      "description": "",
+      "tokens": 343,
+      "hash": "fb5066aac6fd7e5a",
+      "size": 1369,
+      "mtimeMs": 1787258524288.4253,
+      "updatedAt": "2026-08-20T20:42:04.296Z",
+      "source": "scan"
+    },
+    ".claude/commands/reframe.md": {
+      "description": "Mode: migrate [framework]",
+      "tokens": 551,
+      "hash": "17a75695be5d4629",
+      "size": 2221,
+      "mtimeMs": 1787258524288.027,
+      "updatedAt": "2026-08-20T20:42:04.297Z",
+      "source": "scan"
+    },
+    ".claude/commands/security-audit.md": {
+      "description": "Layer 1 — Dependencies",
+      "tokens": 510,
+      "hash": "e6f7e0b7337c9c86",
+      "size": 2060,
+      "mtimeMs": 1787258524287.7,
+      "updatedAt": "2026-08-20T20:42:04.297Z",
+      "source": "scan"
+    },
+    ".claude/rules/openwolf.md": {
+      "description": "",
+      "tokens": 251,
+      "hash": "0e6845e32d3752ea",
+      "size": 1003,
+      "mtimeMs": 1787258524257.1345,
+      "updatedAt": "2026-08-20T20:42:04.298Z",
+      "source": "scan"
+    },
+    ".claude/settings.json": {
+      "description": "",
+      "tokens": 665,
+      "hash": "c04e0c5229dda78d",
+      "size": 2327,
+      "mtimeMs": 1787258524256.9258,
+      "updatedAt": "2026-08-20T20:42:04.298Z",
+      "source": "scan"
+    },
+    ".codex/config.toml": {
+      "description": "",
+      "tokens": 7,
+      "hash": "d37497c327812159",
+      "size": 24,
+      "mtimeMs": 1787258524286.5227,
+      "updatedAt": "2026-08-20T20:42:04.299Z",
+      "source": "scan"
+    },
+    ".codex/hooks.json": {
+      "description": "",
+      "tokens": 677,
+      "hash": "b21189fa04d36ddb",
+      "size": 2369,
+      "mtimeMs": 1787258524286.4438,
+      "updatedAt": "2026-08-20T20:42:04.299Z",
+      "source": "scan"
+    },
+    ".codex/prompts/designqc.md": {
+      "description": "",
+      "tokens": 343,
+      "hash": "fb5066aac6fd7e5a",
+      "size": 1369,
+      "mtimeMs": 1787258524288.9004,
+      "updatedAt": "2026-08-20T20:42:04.299Z",
+      "source": "scan"
+    },
+    ".codex/prompts/reframe.md": {
+      "description": "Mode: migrate [framework]",
+      "tokens": 551,
+      "hash": "17a75695be5d4629",
+      "size": 2221,
+      "mtimeMs": 1787258524288.779,
+      "updatedAt": "2026-08-20T20:42:04.300Z",
+      "source": "scan"
+    },
+    ".codex/prompts/security-audit.md": {
+      "description": "Layer 1 — Dependencies",
+      "tokens": 510,
+      "hash": "e6f7e0b7337c9c86",
+      "size": 2060,
+      "mtimeMs": 1787258524288.634,
+      "updatedAt": "2026-08-20T20:42:04.300Z",
+      "source": "scan"
+    },
+    "AGENTS.md": {
+      "description": "OpenWolf",
+      "tokens": 75,
+      "hash": "e401f79554a8d796",
+      "size": 297,
+      "mtimeMs": 1787258524286.8047,
+      "updatedAt": "2026-08-20T20:42:04.302Z",
+      "source": "scan"
+    },
+    "CLAUDE.md": {
+      "description": "OpenWolf",
+      "tokens": 34,
+      "hash": "3d9051d26bf6d530",
+      "size": 134,
+      "mtimeMs": 1787258524257.3098,
+      "updatedAt": "2026-08-20T20:42:04.302Z",
+      "source": "scan"
+    }
+  },
+  "preamble": [
+    "> Project structure index. Auto-maintained by OpenWolf hooks and daemon.",
+    "> Run `openwolf scan` to generate, or wait for the first Claude Code session.",
+    "> Status: Pending initial scan"
+  ]
+}
