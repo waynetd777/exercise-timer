@@ -100,6 +100,15 @@
 - **Renamed to "DavShack Timer"** and centred the home heading (user-reported). Applied in `LibraryScreen.tsx` and `index.html` (the document title carries through to the PWA install name).
 - **Cleared the "Next …" line off the divider** (user-reported twice). The real cause was that the STACKED `.run__body` had zero bottom padding, so the panel met the controls' border directly and a 3px nudge was the whole clearance. Now `padding-bottom: var(--step-4)` and the nudge removed as redundant; the wide layout always had 24px. See buglog `bug-014`.
 - **Fallback step name now shrinks with the frame** (user-reported) — it was sized only in `cqi` (frame WIDTH), so a shorter frame kept a width-derived size and overflowed. `.panel__frame` became `container-type: size` so the block axis is queryable, and the text is `clamp(1rem, min(--fit * 1cqi, 72cqh / --lines), 7rem)` where `--lines` is the word count (an upper bound on line count, so dividing by it errs toward fitting). Vertical padding also went proportional (`4cqh`) — a fixed 16px was 29% of a 110px frame and clipped on its own. Verified "REST", "GET READY" and "SEATED ABDOMINAL CRUNCH" all fit at frame heights of 500 / 300 / 180 / 110 / 70px. **116 tests green.**
+- **Phase 7 (partly) COMPLETE — LIVE at https://waynetd777.github.io/exercise-timer/**
+  - Cues **synthesised from measurements** of the Tabata Timer app; no bundled audio, so the repo could go public. Countdown 523Hz sine; phase change 2659Hz + inharmonic partial x2.578; completion a transcription over G5/F5/C6/F6.
+  - **Bell fix** (user-reported it sounded like a click): envelope is now STRIKE + RING (`sustain`, `strikeMs`) — the real bell falls to 0.33 of peak in 25ms and rings to 1.2s, where a single exponential is dead by 500ms. AND `cancelPending()` was stopping sounding oscillators on every 10s re-arm, truncating cues mid-ring. See buglog `bug-015`, `bug-016`.
+  - **PWA**: vite-plugin-pwa manifest + Workbox service worker, precaching the shell and cache-first runtime caching for `i.postimg.cc` — which covers offline images far more cheaply than the full media pipeline. Icons generated (segmented ring, incl. maskable); `start_url`/`scope` relative so a subpath install behaves the same.
+  - **Deploy**: `.github/workflows/deploy.yml` builds with `VITE_BASE=/exercise-timer/` and deploys to Pages, gated on typecheck + tests.
+  - **Repo is PUBLIC.** History rewritten with `git filter-repo` to purge `src/audio/cues` first (backup bundle taken; all 26 commits kept, hashes changed, force-pushed). Verified zero mp3 objects in the remote before flipping visibility.
+  - **Other two routines imported** and committed; seeding is now once-per-id via localStorage, so new seeds reach existing installs and deleted ones stay deleted. Interval **type 3 = 60s recovery between exercises** (confirmed against `restBetweenTabatas`).
+  - **App mark**: blue stopwatch — `favicon.svg` + 32/64px PNG fallbacks, and a matching `StopwatchIcon` beside the home title. Title and mark share the blue via `currentColor`.
+  - **122 tests green.**
 
 ---
 
