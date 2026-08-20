@@ -15,3 +15,4 @@
 | 01:15 | Raised label scale again (controls held via second token); empty media panel now shows the step name, sized by fitCqi off the longest word | src/ui/theme.css, run-screen.css, format.ts, RunScreen.tsx | 89/89 tests pass, build clean | ~25k |
 | 01:30 | Raised label scale a third time and made it height-aware so the taller stack cannot overflow short windows; verified fit at 5 viewport sizes | src/ui/theme.css, run-screen.css | 89/89 tests pass, build clean | ~15k |
 | 01:40 | Reverted bottom controls to original scale (own tokens), keeping the wrap/min-width overflow guards; body text unchanged | src/ui/theme.css, run-screen.css | 89/89 tests pass, build clean | ~12k |
+| 01:55 | Traffic-light phase colours (green/red/blue) chosen for contrast + lightness separation; .unit class so duration suffixes stay lowercase under uppercase labels | src/ui/theme.css, run-screen.css, RunScreen.tsx | 89/89 tests pass, build clean | ~15k |
