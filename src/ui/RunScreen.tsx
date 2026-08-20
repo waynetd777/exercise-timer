@@ -6,6 +6,15 @@ import { useCueScheduler } from '../audio/useCueScheduler'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import { clock, clockWidth, duration, fitCqi, pathLabel } from './format'
+import {
+  NextIcon,
+  PauseIcon,
+  PlayIcon,
+  PrevIcon,
+  ResetIcon,
+  SoundOffIcon,
+  SoundOnIcon,
+} from './icons'
 import { resolveMediaPreview } from './media'
 import './run-screen.css'
 
@@ -88,6 +97,16 @@ export function RunScreen({ workout }: { workout: Workout }) {
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const rounds = entry ? pathLabel(entry.path) : ''
   const clockText = clock(timer.secondsLeft)
+
+  const primaryAction = status === 'paused' ? timer.resume : timer.start
+  const primaryLabel =
+    status === 'running'
+      ? 'Pause'
+      : status === 'paused'
+        ? 'Resume'
+        : status === 'complete'
+          ? 'Start again'
+          : 'Start'
 
   return (
     <main className="run" style={{ ['--phase' as string]: phase }}>
@@ -172,55 +191,50 @@ export function RunScreen({ workout }: { workout: Workout }) {
           onClick={withAudio(timer.previous)}
           disabled={status === 'idle'}
           aria-label="Previous step"
+          title="Previous step"
         >
-          &#10216;&#10216;
+          <PrevIcon />
         </button>
 
-        {status === 'idle' && (
-          <button className="btn btn--primary" onClick={withAudio(timer.start)}>
-            Start
-          </button>
-        )}
-        {status === 'running' && (
-          <button className="btn btn--primary" onClick={withAudio(timer.pause)}>
-            Pause
-          </button>
-        )}
-        {status === 'paused' && (
-          <button className="btn btn--primary" onClick={withAudio(timer.resume)}>
-            Resume
-          </button>
-        )}
-        {status === 'complete' && (
-          <button className="btn btn--primary" onClick={withAudio(timer.start)}>
-            Again
-          </button>
-        )}
+        {/* Icon-only, so every control carries its name in aria-label and title
+            rather than on screen. */}
+        <button
+          className="btn btn--primary"
+          onClick={withAudio(status === 'running' ? timer.pause : primaryAction)}
+          aria-label={primaryLabel}
+          title={primaryLabel}
+        >
+          {status === 'running' ? <PauseIcon /> : <PlayIcon />}
+        </button>
 
         <button
           className="btn"
           onClick={withAudio(timer.next)}
           disabled={status === 'idle' || status === 'complete'}
           aria-label="Next step"
+          title="Next step"
         >
-          &#10217;&#10217;
+          <NextIcon />
         </button>
 
         <button
           className="btn btn--ghost"
           onClick={withAudio(timer.reset)}
           disabled={status === 'idle'}
+          aria-label="Reset"
+          title="Reset"
         >
-          Reset
+          <ResetIcon />
         </button>
 
         <button
           className="btn btn--ghost"
           onClick={toggleMuted}
           aria-pressed={muted}
+          aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
           title={muted ? 'Turn sound on' : 'Turn sound off'}
         >
-          {muted ? 'Muted' : 'Sound'}
+          {muted ? <SoundOffIcon /> : <SoundOnIcon />}
         </button>
       </div>
     </main>
