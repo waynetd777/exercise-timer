@@ -231,10 +231,24 @@
   min-width: 8.5rem;
 }
 
+/*
+ * No spinner buttons: they are fiddly at this size and the field is edited by
+ * typing. `type="number"` is kept, so arrow keys still nudge the value and
+ * mobile still gets a numeric keypad — only the arrows are hidden.
+ */
 .efield--secs {
   width: 4.5rem;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.efield--secs::-webkit-outer-spin-button,
+.efield--secs::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
 }
 
 .erow__image .efield {
