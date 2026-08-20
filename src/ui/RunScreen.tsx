@@ -46,7 +46,7 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
       <p className="panel__next label">
         {next ? (
           <>
-            Next <b>{next.name}</b> {duration(next.durationMs)}
+            Next <b>{next.name}</b> <span className="unit">{duration(next.durationMs)}</span>
           </>
         ) : (
           'Last step'
@@ -145,7 +145,9 @@ export function RunScreen({ workout }: { workout: Workout }) {
             </p>
             <h1 className="count__name">{entry.name}</h1>
             <p className="count__meta label">
-              <span>{duration(at.totalRemainingMs)} left</span>
+              <span>
+                <span className="unit">{duration(at.totalRemainingMs)}</span> left
+              </span>
               <span>
                 Step {at.index + 1} of {timeline.entries.length}
               </span>
