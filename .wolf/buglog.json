@@ -144,6 +144,61 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T02:25:00Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-08-21T04:30:00Z",
+      "error_message": "USER REPORTED (with screenshot): 'the countdown numbers are not centered'",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "CSS applies letter-spacing after EVERY character including the last, so with `letter-spacing: -0.045em` the line box is narrower than the visible glyphs by that amount. Centring the line box therefore leaves the glyphs offset by half of it \u2014 about 20px at a 459px font size, and visibly off next to the centred exercise name and meta row.",
+      "fix": "Hoisted the value into `--tracking` and added `padding-right: calc(-1 * var(--tracking))` on the block. Narrowing the content box by the same amount shifts the centred line back by exactly half of it. Kept as one variable so the two can never drift apart.",
+      "fix_rule": "Centred text with non-zero letter-spacing is always offset by half the tracking. Compensate on the block with padding equal to the letter-spacing, from a shared custom property.",
+      "tags": [
+        "css",
+        "typography",
+        "letter-spacing",
+        "centring",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T04:30:00Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-08-21T04:30:00Z",
+      "error_message": "USER REPORTED: 'when the number of digits reduces, the numbers get bigger pushing the rest of the content off the screen'",
+      "file": "src/ui/format.ts",
+      "root_cause": "clockWidth() returned the literal em width of the string, so a single digit gave 1 and the font size became `coef * 1cqi / 1` instead of `/ 2`. The width term then stopped binding, the height term took over, and '9' rendered up to 100% larger than '10' \u2014 measured +100% at 342x710, +73% at 342x560, +59% at 600x900. The coefficient had been calibrated for two digits all along. A test even asserted clockWidth('8') === 1 under the name 'sizes one and two digits so the countdown does not jump', so the test guaranteed the very jump its name denied.",
+      "fix": "clockWidth now returns Math.max(2, units), so the size only ever steps DOWN for longer strings. Test corrected to assert the floor, plus a new test asserting the sequence is monotonically non-increasing.",
+      "fix_rule": "When a size divides by a content-derived factor, floor that factor at the value the coefficient was calibrated for. Otherwise short content grows instead of long content shrinking.",
+      "tags": [
+        "css",
+        "sizing",
+        "container-queries",
+        "regression",
+        "bad-test",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T04:30:00Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-08-21T04:30:00Z",
+      "error_message": "Media panel pushed below the fold on a short narrow window (visible in the same screenshot \u2014 no image panel at all)",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "In the stacked layout the panel frame had `aspect-ratio: 4/3` with `max-height: min(40svh, 26rem)`, so it demanded a height proportional to its WIDTH regardless of how much vertical space was left. Countdown + name + meta + a 4:3 panel simply exceeds a short body, and the overflow went off-screen silently.",
+      "fix": "Dropped aspect-ratio and max-height entirely; the frame is `height: 100%` in both layouts. `.run__body` stacked is now `grid-template-rows: auto minmax(0, 1fr)` so the countdown block takes what it needs and the panel absorbs the remainder. Also gave the clock its own `--clock-height` per layout: 40cqh stacked (the panel needs room below), 74cqh beside the panel. object-fit: contain means a smaller frame never distorts the image.",
+      "fix_rule": "In a stacked layout, size the flexible element off REMAINING space (minmax(0,1fr) + height:100%), not off its own width via aspect-ratio.",
+      "tags": [
+        "css",
+        "grid",
+        "aspect-ratio",
+        "overflow",
+        "responsive"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T04:30:00Z"
     }
   ]
 }
