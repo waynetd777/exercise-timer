@@ -81,6 +81,17 @@
   --label-size: clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem);
   --label-size-sm: clamp(1rem, 1.6cqi, 1.4rem);
 
+  /*
+   * The current phase colour. The run screen overrides this per step; everywhere
+   * else it falls back to the mark's blue.
+   *
+   * A default is NOT optional: `.btn--primary` is `background: var(--phase)`
+   * with dark text, and an undefined custom property makes the whole background
+   * declaration invalid — so the Save button in the editor rendered as dark text
+   * on a dark ground, i.e. invisible.
+   */
+  --phase: var(--role-rest);
+
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }
 
@@ -146,6 +157,126 @@ button {
 .unit {
   text-transform: none;
 }
+
+/* ── Chips ─────────────────────────────────────────────────────────────────
+ * Labelled pills, used by the library toolbar and the editor. Shared, so they
+ * live here rather than in one screen's stylesheet.
+ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--step-2);
+  min-height: 44px;
+  padding: 0 var(--step-4);
+  font-weight: 650;
+  font-size: var(--label-size-sm);
+  line-height: 1;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  transition:
+    color 150ms var(--ease),
+    background 150ms var(--ease);
+}
+
+.chip:hover {
+  color: var(--bone);
+  background: var(--ink-700);
+}
+
+.chip[aria-pressed='true'] {
+  color: var(--ink-900);
+  background: var(--bone-dim);
+  border-color: transparent;
+}
+
+.chip--action {
+  color: var(--bone);
+}
+
+.chip .icon {
+  width: 18px;
+  height: 18px;
+}
+
+
+.chip--danger {
+  color: var(--ink-900);
+  background: var(--role-work);
+  border-color: transparent;
+}
+
+.chip--danger:hover {
+  color: var(--ink-900);
+  background: color-mix(in oklab, var(--role-work) 88%, var(--bone));
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────
+ * Shared by the run, library and editor screens, so they live here rather than
+ * in any one screen's stylesheet — the same reason as `.label`. Previously in
+ * run-screen.css, which worked only because the bundler concatenates all CSS.
+ */
+/*
+ * Icon-only and square, which is what makes the row narrow enough to stay on
+ * one line at phone width. Each button carries its name in aria-label and
+ * title instead of on screen.
+ */
+.btn {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: var(--radius);
+  color: var(--bone-dim);
+  background: var(--ink-800);
+  border: var(--hairline);
+  transition:
+    color 150ms var(--ease),
+    background 150ms var(--ease);
+}
+
+.icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.btn:hover:not(:disabled) {
+  color: var(--bone);
+  background: var(--ink-700);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  width: 68px;
+  height: 68px;
+  color: var(--ink-900);
+  background: var(--phase);
+  border-color: transparent;
+}
+
+.btn--primary .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.btn--primary:hover:not(:disabled) {
+  color: var(--ink-900);
+  background: color-mix(in oklab, var(--phase) 88%, var(--bone));
+}
+
+.btn--ghost {
+  background: none;
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,

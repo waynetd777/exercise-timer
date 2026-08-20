@@ -355,7 +355,8 @@
 }
 
 /* ── Controls ──────────────────────────────────────────────────────────────
- * Bottom of the screen for thumb reach; nothing smaller than 56px.
+ * Bottom of the screen for thumb reach. Button styling itself lives in
+ * theme.css — three screens use it.
  */
 .controls {
   display: flex;
@@ -369,65 +370,6 @@
   padding: var(--step-4) var(--step-4) var(--step-5);
   border-top: var(--hairline);
 }
-
-/*
- * Icon-only and square, which is what makes the row narrow enough to stay on
- * one line at phone width. Each button carries its name in aria-label and
- * title instead of on screen.
- */
-.btn {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border-radius: var(--radius);
-  color: var(--bone-dim);
-  background: var(--ink-800);
-  border: var(--hairline);
-  transition:
-    color 150ms var(--ease),
-    background 150ms var(--ease);
-}
-
-.icon {
-  display: block;
-  width: 22px;
-  height: 22px;
-}
-
-.btn:hover:not(:disabled) {
-  color: var(--bone);
-  background: var(--ink-700);
-}
-
-.btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.btn--primary {
-  width: 68px;
-  height: 68px;
-  color: var(--ink-900);
-  background: var(--phase);
-  border-color: transparent;
-}
-
-.btn--primary .icon {
-  width: 28px;
-  height: 28px;
-}
-
-.btn--primary:hover:not(:disabled) {
-  color: var(--ink-900);
-  background: color-mix(in oklab, var(--phase) 88%, var(--bone));
-}
-
-.btn--ghost {
-  background: none;
-}
-
 
 /* ── Idle and complete ─────────────────────────────────────────────────── */
 .rest-state {

@@ -95,13 +95,6 @@ export function duplicate(
   return stamp(copy, now)
 }
 
-/** Blank names are rejected rather than saved, so a routine cannot go nameless. */
-export function rename(workout: Workout, name: string, now: number): Workout {
-  const trimmed = name.trim()
-  if (!trimmed) return workout
-  return stamp({ ...workout, name: trimmed }, now)
-}
-
 export function markRun(workout: Workout, now: number): Workout {
   return { ...workout, lastRunAt: now }
 }

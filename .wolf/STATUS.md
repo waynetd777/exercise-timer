@@ -124,6 +124,13 @@
 - **Image gets more room on short screens** (user-reported) — the illustrations are near-square (876x800), so a short wide frame fitted them to its height and wasted the width, rendering at 0.13x on a small window. Two viewport-height tiers now hand space to the panel: `<=700px` 50/50 with `--clock-height: 28cqh`, `<=540px` 46/54 with 22cqh and lower name/label floors. Image renders **19-47% larger**; a normal phone portrait is unchanged. See buglog `bug-018`.
 - **Image no longer truncated** (user-reported with screenshot) — `object-fit: contain` was not the safeguard I assumed: the `<img>`'s `height: 100%` resolved to auto as a grid item, so the box took the natural aspect at full width, exceeded the frame, and `overflow: hidden` clipped the bottom. Contain only constrains the picture WITHIN the box. Now `position: absolute; inset: 0` inside a `position: relative` frame, so the box is definite regardless of the grid. See buglog `bug-019`.
 - **New routines start from a template, and Save is labelled** (user-reported: could not find how to save). A new routine now opens as 30s prepare + `Round` x3 of [20s work, 10s rest] + 30s prepare (8 steps, 2:30), mirroring how the real routines are built. `newSegment` defaults also matched to them (prepare 30s, work 20s, rest 10s). The editor's Save button carries the word rather than a bare tick — icon-only suits frequent transport controls, not a consequential infrequent action. **161 tests green.**
+- **Editor defaults, the invisible Save button, merged edit action, and a dirty guard** (all user-reported)
+  - `newRepeat()` now defaults to **3 reps of 20s work + 10s rest** — the "+ Rounds" button was creating a round containing only a work step. `newRoutineBlocks()` is the single source of truth for a new routine's shape, shared by `App` and the tests.
+  - **Save was invisible:** `.btn--primary` uses `background: var(--phase)`, set only on `.run`, and an undefined custom property invalidates the declaration — dark text on a dark ground. `--phase` now has a root default of `--role-rest`. See buglog `bug-020`.
+  - Moved `.btn*` and `.chip*` into `theme.css` alongside `.label` — three screens use them, and they only worked from a screen-specific file because the bundler concatenates all CSS.
+  - **Pencil now opens the editor**; the separate edit-steps button and the inline rename are gone, and `rename` was deleted from `library.ts`/`useLibrary` as dead code.
+  - **Back guards unsaved work:** `src/editor/dirty.ts` compares field by field (not `JSON.stringify`, whose result depends on key order), the header becomes an in-place "Discard your changes?" prompt, and `beforeunload` covers reloads. **9 tests** for the dirty check.
+  - **170 tests green.**
 
 ---
 

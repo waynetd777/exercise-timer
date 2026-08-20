@@ -15,7 +15,6 @@ export type Library = {
   add: (workout: Workout) => Promise<Workout>
   remove: (id: string) => Promise<void>
   duplicate: (workout: Workout) => Promise<void>
-  rename: (workout: Workout, name: string) => Promise<void>
   toggleFavourite: (workout: Workout) => Promise<void>
   markRun: (workout: Workout) => Promise<void>
 }
@@ -98,15 +97,6 @@ export function useLibrary(seed: readonly Workout[]): Library {
     [workouts, replace],
   )
 
-  const rename = useCallback(
-    async (workout: Workout, name: string) => {
-      const renamed = lib.rename(workout, name, now())
-      if (renamed === workout) return
-      replace(await saveWorkout(renamed, now()))
-    },
-    [replace],
-  )
-
   const toggleFavourite = useCallback(
     async (workout: Workout) => {
       replace(await putWorkout(lib.toggleFavourite(workout, now())))
@@ -121,5 +111,5 @@ export function useLibrary(seed: readonly Workout[]): Library {
     [replace],
   )
 
-  return { workouts, loading, error, add, remove, duplicate, rename, toggleFavourite, markRun }
+  return { workouts, loading, error, add, remove, duplicate, toggleFavourite, markRun }
 }
