@@ -11,7 +11,6 @@ import {
   CopyIcon,
   ImportIcon,
   PencilIcon,
-  PlayIcon,
   StarIcon,
   TrashIcon,
 } from './icons'
@@ -44,7 +43,21 @@ function Row({
   }
 
   return (
-    <li className="row">
+    <li className="row" data-clickable={mode === 'idle'}>
+      {/*
+        A real button stretched over the card rather than a click handler on the
+        li: it is focusable and announced, and nesting buttons inside a button
+        would be invalid. Rendered only when idle, or it would sit over the
+        rename input and the delete confirmation.
+      */}
+      {mode === 'idle' && (
+        <button
+          className="row__open"
+          onClick={() => onRun(workout)}
+          aria-label={`Start ${workout.name}`}
+        />
+      )}
+
       <button
         className="row__star"
         onClick={() => void library.toggleFavourite(workout)}
@@ -85,14 +98,6 @@ function Row({
       <div className="row__actions">
         {mode === 'idle' && (
           <>
-            <button
-              className="btn btn--primary row__run"
-              onClick={() => onRun(workout)}
-              aria-label={`Start ${workout.name}`}
-              title="Start"
-            >
-              <PlayIcon />
-            </button>
             <button
               className="btn btn--ghost"
               onClick={() => {
@@ -209,7 +214,7 @@ export function LibraryScreen({
       }}
     >
       <header className="library__head">
-        <h1 className="library__title">Routines</h1>
+        <h1 className="library__title">DavShack Gym Timer</h1>
 
         <div className="library__tools">
           <input

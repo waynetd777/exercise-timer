@@ -129,6 +129,7 @@
  * body on a narrow screen rather than squeezing the name.
  */
 .row {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -143,6 +144,29 @@
   .row {
     grid-template-columns: auto 1fr auto;
   }
+}
+
+/*
+ * Layering: the stretched open button sits ABOVE the name and stats so the
+ * whole card is clickable, and BELOW the star and action buttons so those still
+ * work.
+ */
+.row__open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius);
+}
+
+.row__star,
+.row__actions {
+  position: relative;
+  z-index: 2;
+}
+
+.row[data-clickable='true']:hover {
+  background: var(--ink-700);
+  border-color: var(--bone-faint);
 }
 
 .row__star {
@@ -214,11 +238,6 @@
 .row__actions .btn {
   width: 48px;
   height: 48px;
-}
-
-.row__run {
-  /* No phase colour outside a run, so the primary action borrows the "ready" hue. */
-  background: var(--role-prepare);
 }
 
 .row__confirm {
