@@ -117,6 +117,12 @@
 - [2026-08-21] **Only Wayne's three real routines are seeded.** "Classic Tabata" was removed on request — do not re-add a synthetic demo routine to `SEED_ROUTINES`. Consequence: no seeded routine uses repeat groups (imported `.tabata` files are always flat), so the "Round 3 of 8" path is exercised only by the engine and format tests, not by anything in the library.
 - [2026-08-21] **Removing a seed does NOT remove it from an existing library** — seeding is once-per-id and the routine is already in IndexedDB. It has to be deleted in the UI. Deliberately no auto-delete-by-id migration: it would destroy a routine the user may have edited or renamed.
 
+- [2026-08-21] **Phase 6 (editor) is built.** Pattern held: pure tree ops in `src/editor/blocks.ts` (Path = index chain, immutable, 36 tests) + `src/editor/postimages.ts` (URL normaliser, 7 tests), with `src/ui/EditorScreen.tsx` as a thin shell. Deliberate constraints: `wrapInRepeat` REFUSES to nest a repeat inside a repeat, because the editor renders only two levels and a deeper tree would be invisible and un-editable; `moveBy` past either end is a no-op so holding a button cannot corrupt the tree; `unwrapRepeat` on an empty repeat drops it entirely.
+- [2026-08-21] **`clearMedia` exists because of `exactOptionalPropertyTypes`** — you cannot patch `media: undefined` through `updateSegment`. Clearing an image means DELETING the key so the property is absent, not present-and-undefined. Same will apply to any other optional field the editor learns to clear.
+- [2026-08-21] **Library row actions are: star, edit-steps (`StepsIcon`), rename (inline, `PencilIcon`), duplicate, delete.** Inline rename was kept alongside the editor deliberately — it is quicker for the common case, and two paths to a rename is normal (like a file manager). Header has New and Import.
+- [2026-08-21] **Both the run and editor screens carry the blue radial wash** (`--role-rest` at 14% / 10%), matching the home screen. A screen without it will look like it belongs to a different app.
+- [2026-08-21] **Run-screen progress bar is a scaled inner element, not a gradient stop** — `transform: scaleX(var(--progress))` with a 400ms linear transition, because gradient stops do not transition and the value only changes once a second. Kept thin (3px) and low-contrast on purpose: the countdown should hold the eye.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
