@@ -56,9 +56,10 @@
    * elsewhere it falls back to the viewport, which is close enough.
    */
   --label-size: clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem);
-  /* The size the controls keep — they are already right, so `.controls`
-     overrides --label-size back to this rather than being special-cased. */
-  --label-size-control: clamp(1rem, 1.6cqi, 1.6rem);
+  /* Controls are back to their original scale by request. Kept as its own
+     token so enlarging body text can never regrow the bottom bar again. */
+  --label-size-control: 0.7rem;
+  --label-tracking-control: 0.16em;
   --label: 650 var(--label-size)/1.3 var(--font-ui);
   /* Eased off from 0.16em: the same tracking reads much wider at this size. */
   --label-tracking: 0.11em;
