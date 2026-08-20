@@ -39,7 +39,7 @@ function Row({
   const { totalMs, steps } = summary(workout)
 
   return (
-    <li className="row" data-clickable={!confirming}>
+    <li className="row" data-clickable={!confirming} data-confirming={confirming}>
       {/*
         A real button stretched over the card rather than a click handler on the
         li: it is focusable and announced, and nesting buttons inside a button
