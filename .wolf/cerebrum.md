@@ -133,6 +133,10 @@
 - [2026-08-21] **`object-fit: contain` does NOT stop an image overflowing — it only constrains the picture inside the element's box.** If the box itself is too big, the picture is clipped and contain never letterboxes. `.panel__frame img` had `height: 100%` resolving to AUTO as a grid item, so the box took the natural aspect at full width and the bottom was cut off. Fix: `position: absolute; inset: 0` inside a `position: relative` frame, which takes the box from the containing block and is immune to percentage-height resolution. **I asserted twice that "contain means it cannot overflow" and was wrong both times** — check the BOX, not just the fit property. (`bug-019`)
 - [2026-08-21] **When a visual bug resists explanation, ask for a screenshot early.** Two turns were spent theorising about this one from CSS alone; the screenshot identified it immediately (natural aspect, full width, clipped at the bottom = the box is too tall, not the picture).
 
+- [2026-08-21] **A new routine opens on a template, not an empty list:** 30s prepare, a `Round` repeat x3 of [20s work, 10s rest], then another 30s prepare — 8 steps, 2:30. That mirrors how Wayne's own routines are built (a prepare before each exercise), so adding the next exercise means adding a round after the trailing prepare. Asserted in `blocks.test.ts` so the shape cannot drift; `App.blankRoutine()` is the source.
+- [2026-08-21] **`newSegment` defaults match the real routines:** prepare 30s, work 20s, rest 10s, recover 60s. Chosen so an added step usually needs no editing. Don't "tidy" these to round numbers.
+- [2026-08-21] **Wayne could not find how to save in the editor** — the icon-only tick was too subtle. The Save button now carries the word. Rule for this project: icon-only is fine for frequent transport controls, but a consequential, infrequent action gets a label.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
