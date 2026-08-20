@@ -20,3 +20,4 @@
 | 02:25 | Fixed brown effort-strip bars: dropped opacity-over-black for explicit state colours (neutral upcoming, hue mixed toward light grey when done) | src/ui/run-screen.css | 89/89 tests pass, build clean | ~12k |
 | 02:35 | 'Step n of n' -> 'Step n / n'; meta row column gap switched to em so it scales with the fluid label size | src/ui/RunScreen.tsx, run-screen.css | 89/89 tests pass, build clean | ~8k |
 | 02:50 | Removed Paused chip; pinned meta row to bottom via count__lead wrapper; countdown +25%/+67% with layout-dependent width coefficient | src/ui/RunScreen.tsx, run-screen.css | 89/89 tests pass, build clean, fit verified at 5 viewports | ~20k |
+| 03:10 | Removed effort strip, added header with routine name, de-duplicated the name, spent reclaimed space on a 14% bigger countdown + larger name/title | src/ui/RunScreen.tsx, run-screen.css, deleted EffortStrip.tsx | 89/89 tests pass, build clean, fit verified at 5 viewports | ~22k |

@@ -66,6 +66,12 @@
   - `.count` is now `grid-template-rows: 1fr auto` with a `.count__lead` wrapper holding eyebrow + clock + name (vertically centred), so the meta row sits on the bottom edge of the column.
   - Countdown height term 52cqh → 65cqh, and the width coefficient became layout-dependent (`--clock-coef`: 140 stacked, 92 beside the panel) because `cqi` measures the body, not the 3fr column. Result: **+67% on a phone, +25% on iPad/laptop** (367 → 459px on a laptop). Verified the width fits the column and the vertical stack fits body height at 390x844, 1024x768, 1440x900, 1440x700 and 1440x600.
   - "Paused" chip gone — the primary button already reads "Resume".
+- **Effort strip removed, header added, elements grown** (user request: "nuke the progress bars… place the routine name up there")
+  - `src/ui/EffortStrip.tsx` deleted along with its CSS. The signature element is gone by request — progress still reads from "Step n / m" and time remaining. `--effort-*` tokens left in theme.css, unused.
+  - New `.run__header` holds the routine name (`clamp(1rem, 1.9cqi, 2rem)`, uppercase, dim).
+  - Name de-duplicated: the countdown eyebrow now carries only "Round 3 of 8" and is omitted for a flat routine so the row collapses; idle and complete screens lead with "Ready" / "Done" rather than repeating the name.
+  - Reclaimed space spent on: countdown height term 65cqh → **74cqh** (489 → 556px on a laptop, +14%), exercise name `max(2.5rem, min(11cqi, 11cqh))`, idle/complete title `max(2.5rem, min(14cqi, 9rem))`. The media panel grows on its own, since it stretches to the row.
+  - Wide clock coefficient trimmed 92 → 88: at 92 an iPad hit 97% of the column width, inside the error bar of the glyph-width estimate. Fit verified at 5 viewports (82-92% vertical use).
 
 ---
 
