@@ -8,33 +8,45 @@
 
 ## ✅ Done
 
-- Created blank private GitHub repo: https://github.com/waynetd777/exercise-timer (empty; local dir not yet `git init`-ed)
+- Created private GitHub repo: https://github.com/waynetd777/exercise-timer — local repo initialised, `main` pushed
 - Agreed product shape + architecture (see Closed decisions)
+- **Phase 1 COMPLETE (commit `50e8ea7`)** — scaffold + interval-timer engine
+  - Scaffold: Vite 8 + React 19 + TS 7 + Vitest 4. `npm run dev / test / typecheck / build` all working.
+  - `src/engine/types.ts` — authoring model (`Segment` | `Repeat`), runtime model (`Timeline`/`TimelineEntry`), `MediaRef` 3-source union, `Position`, `CuePoint`.
+  - `src/engine/compile.ts` — `compile()` flattens repeats to an absolute-time timeline (records `path` for "Round 3 of 8", carries media through, drops non-positive durations and repeat counts < 1, rounds fractional ms, throws `TimelineTooLargeError` above 10k steps). Plus `totalDurationMs()` and `stepCount()` for library rows without compiling.
+  - `src/engine/runtime.ts` — `position()` binary search; steps own `[startMs, endMs)`; exposes `nextEntry` for image preload. Seek helpers `elapsedAtStepStart` / `skipForward` / `skipBack` (music-player convention, 1.5s restart threshold).
+  - `src/engine/cues.ts` — `cues()` precomputed absolute-time cues (phase change, 3-2-1 countdown suppressed when it would collide with a step start, completion) and `cuesBetween()` half-open window for the rolling audio lookahead.
+  - **41 tests green**, typecheck + production build clean. Covers Tabata, named circuits, 2-level nesting, degenerate durations/repeat counts, every timeline boundary, non-finite input, cue windowing, and `totalDurationMs`/`stepCount` agreement with `compile()`.
+  - `vite.config.ts` `base` reads `VITE_BASE` so root-domain and subpath hosts both work with no retrofit.
 
 ---
 
-## 🚀 Next phase — Phase 1: engine
+## 🚀 Next phase — Phase 2: RunScreen
 
-**Goal:** Build `src/engine/` — the pure, DOM-free interval-timer core plus its test suite.
+**Goal:** Get a real workout running on screen — big countdown, phase colour, working controls — driven by the phase-1 engine.
 
 ### Acceptance criteria
-1. `compile(workout)` flattens a recursive `Block[]` (segments + nested `repeat` groups) into a flat `TimelineEntry[]` with absolute `startMs`/`endMs` and a `path` for "Round 3 of 8" labels.
-2. `TimelineEntry` carries the segment's optional `media?: MediaRef` through, so `RunScreen` reads it directly off the current entry.
-3. `position(timeline, elapsedMs)` returns `{ entry, nextEntry, remainingMs, totalRemainingMs }` — pure, binary search, correct at every boundary (0ms and exact end). `nextEntry` exists so the UI can preload the next image.
-4. `cues(timeline)` returns absolute-time cue points (3-2-1 countdown, phase change, workout complete).
-5. Vitest suite covers: classic Tabata (20/10 ×8), a named circuit, 2-level nested repeats, `times: 1`, empty workout, boundary-exact `elapsedMs`, media passthrough.
-6. `totalDurationMs(workout)` exposed so the Library can show a routine's length without a full run.
-7. Zero imports from React/DOM in `engine/`.
+1. A `useTimer(workout)` hook owns run state as `{ startedAt, pausedTotalMs, status }` and derives elapsed on every animation frame. **No countdown integer in state; no tick accumulation.**
+2. `RunScreen` shows: current step name, seconds remaining (`Math.ceil(remainingMs / 1000)`), the repeat path ("Round 3 of 8"), total time remaining, and a progress indicator.
+3. Controls work: start, pause, resume, reset, skip forward, skip back — skip wired to `skipForward`/`skipBack`.
+4. Phase colour keyed off `entry.role` (prepare / work / rest / recover).
+5. Backgrounding the tab for 2 minutes and returning shows the CORRECT elapsed time (proves the timestamp-derived clock).
+6. Responsive: phone portrait = fullscreen countdown; iPad/laptop = countdown + upcoming-step rail. Container queries, one component set.
+7. Image slot present but stubbed — a placeholder box sized from `entry.media`; real resolution lands in phase 4.
 
 ### Files to create / edit
 | Type | File | Content |
 |---|---|---|
-| new | `package.json`, `tsconfig.json`, `vite.config.ts` | Vite + React + TS + vitest scaffold |
-| new | `src/engine/types.ts` | `Block`, `Workout`, `TimelineEntry`, `SegmentRole`, `CuePoint`, `MediaRef` (3-source union) |
-| new | `src/engine/compile.ts` | `Workout` → `TimelineEntry[]` (flatten repeats, accumulate offsets, build path, carry media) |
-| new | `src/engine/runtime.ts` | `position(timeline, elapsedMs)` — pure lookup |
-| new | `src/engine/cues.ts` | `TimelineEntry[]` → `CuePoint[]` |
-| new | `src/engine/__tests__/*.test.ts` | Fake-clock unit tests |
+| new | `src/state/useTimer.ts` | rAF loop, run state, derives `Position` from the clock |
+| new | `src/ui/RunScreen.tsx` | Countdown, phase colour, step name, path label, controls |
+| new | `src/ui/SegmentRail.tsx` | Upcoming steps (iPad/laptop only) |
+| new | `src/ui/theme.css` | Role colours + layout tokens as custom properties |
+| edit | `src/main.tsx` | Mount `RunScreen` with a hardcoded Tabata fixture |
+
+### Notes for phase 2
+- Decide the styling approach at the start of this phase (open decision below).
+- Decide the run-screen image treatment here too — needs something on screen to judge.
+- `document.visibilitychange` is the moment to re-derive, not to correct — the clock is already right; only the rAF loop pauses.
 
 ### Closed decisions
 - **Platform: installable web PWA** (React + TypeScript + Vite), responsive across phone / iPad / laptop. Chosen over native for iteration speed and no App Store. Accepted tradeoff: will not run reliably with an iPhone screen locked / in pocket.
@@ -67,8 +79,8 @@
 - **Deferred:** workout history/logging, voice announcements, sound packs, Apple Watch, video media, folders/tags, any server.
 
 ### Open decisions
-- Styling approach (plain CSS + custom properties vs Tailwind) — decide at phase 2.
-- Run-screen image treatment: fullscreen behind the countdown, or a bounded panel beside/above it? Decide at phase 2 with something on screen to look at.
+- **Styling approach (plain CSS + custom properties vs Tailwind) — DUE NOW, phase 2.** Leaning plain CSS: the app is a handful of screens, the countdown is one big custom-property-driven layout, and it keeps the bundle honest.
+- **Run-screen image treatment — DUE NOW, phase 2.** Fullscreen behind the countdown, or a bounded panel beside/above it? Judge with something on screen.
 - Wake-lock fallback: silent looping audio, or accept Screen Wake Lock API support only? Decide at phase 7.
 
 ---
@@ -99,16 +111,19 @@
 
 ## ⚠️ External blockers (don't block coding)
 
-- Local dir is not yet a git repo. To wire up: `git init && git remote add origin https://github.com/waynetd777/exercise-timer.git`
+- Hosting account not yet chosen (Cloudflare Pages recommended). Not blocking until phase 7 — `VITE_BASE` keeps both host shapes buildable.
 
 ---
 
 ## 🔧 Useful commands
 
 ```bash
-# (fill in once scaffolded)
-# npm run dev     — Vite dev server
-# npm test        — vitest engine suite
+npm run dev          # Vite dev server
+npm test             # vitest, single run
+npm run test:watch   # vitest, watch mode
+npm run typecheck    # tsc -b --noEmit
+npm run build        # tsc -b && vite build
+VITE_BASE=/exercise-timer/ npm run build   # subpath build (GitHub Pages)
 ```
 
 ---
