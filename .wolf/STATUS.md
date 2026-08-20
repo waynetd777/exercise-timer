@@ -111,6 +111,7 @@
   - **122 tests green.**
 - **Home screen header frozen** (user-reported) — title, search, sorts and Import stay put; only the routine list scrolls. `.library` is `grid-template-rows: auto minmax(0, 1fr)` with `overflow: hidden`, and everything below the header sits in a `.library__scroll` wrapper. A wrapper rather than one grid row per element, because the number of notices varies and the scroll region must not depend on it. `overscroll-behavior: contain` stops a rubber-band scroll dragging the page behind it.
 - **Title uses the mark's blue** — set once on `.library__title`, with `.mark` on `currentColor` so the two cannot drift apart.
+- **Removed "Classic Tabata" from the seed set** (user-reported) — only Wayne's three real routines seed now. Existing libraries keep their copy until deleted in the UI; no auto-delete migration, since that would destroy a routine the user may have edited.
 
 ---
 
