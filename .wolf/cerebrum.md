@@ -83,6 +83,11 @@
 - [2026-08-21] **The control row now fits one line at phone width** (372px vs 390px), where the text version was ~508px and always wrapped. `flex-wrap` stays for narrower devices (a 320px iPhone SE still wraps). If text ever returns to these buttons, the `--label-size-control` / `--label-tracking-control` tokens were deleted as dead code and would need reinstating.
 - [2026-08-21] **Routine name is centred in the header** by request.
 
+- [2026-08-21] **Hosting decided: GitHub Pages, and the repo goes PUBLIC once complete.** This resolves the earlier Pro-plan caveat (Pages is free for public repos) and means `VITE_BASE=/exercise-timer/` matters — already wired since phase 1. **PRE-PUBLIC CHECKLIST, must happen before flipping the repo public:** the `src/audio/cues/*.mp3` files are the Tabata Timer app's commercial assets and a public repo redistributes them. Swap to the synthesised fallback (delete the samples; `tones.ts` already covers every cue) or to CC0 replacements. Wayne's postimages URLs also become public at that point — probably fine, but it is his call to make knowingly.
+- [2026-08-21] **Storage lives in `src/storage/`, not `src/media/`** as originally planned — the `workouts` store is not media. `db.ts` creates BOTH the `workouts` and `media` stores at version 1, so phase 4's image work is an addition rather than a schema migration. Phase 4 code should import from `src/storage/db.ts`.
+- [2026-08-21] **Library pattern mirrors the run clock: pure logic in `library.ts`, IO in `workouts.ts`, React in `useLibrary.ts`.** All the fiddly rules (favourites pinned, never-run sorts below run, `(copy 2)` numbering that does not stack suffixes, blank rename rejected, `markRun` must NOT touch `updatedAt`) are pure and unit-tested without a browser. IndexedDB itself is deliberately dumb and untested — keep it that way rather than adding fake-indexeddb.
+- [2026-08-21] **Column contents are centred** — countdown, exercise name, meta row, next-up line, and the idle/complete screens. Left-aligned was the original; don't revert.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
