@@ -69,6 +69,8 @@
 - [2026-08-21] **Never fade a saturated colour toward the near-black ground to show an inactive state — that is how you make brown.** Cost a user-reported bug (`bug-008`): the effort strip used `opacity: 0.22/0.5` per state, so red `#EF4A3F` composited to `#431F1D` and `#802E2A`, both simply brown. Fix pattern: mix toward a MID or LIGHT neutral to keep the hue readable (`color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim))` → `#C9716D`), or drop the hue entirely. Wayne has now objected to a brown cast twice, so treat any muddy dark warm tone as a defect in this project.
 - [2026-08-21] **The effort strip encodes rhythm in HEIGHT, not hue** — work tall, rest short. That makes colour on upcoming steps redundant, which is why they are now plain neutral. Don't re-add hue to the `todo` state to make the strip look richer; it costs legibility and buys nothing.
 
+- [2026-08-21] **Space between fluid text should be in `em`, not `rem`.** The meta row's `1.5rem` column gap looked fine at 11px labels and cramped at 43px. With `--label-size` fluid, any gap separating those items has to scale with them — `1.75em` on the flex container. Check other fixed gaps if the type scale changes again.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

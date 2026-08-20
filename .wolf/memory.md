@@ -18,3 +18,4 @@
 | 01:55 | Traffic-light phase colours (green/red/blue) chosen for contrast + lightness separation; .unit class so duration suffixes stay lowercase under uppercase labels | src/ui/theme.css, run-screen.css, RunScreen.tsx | 89/89 tests pass, build clean | ~15k |
 | 02:10 | Shrank routine name (idle title + running eyebrow, which falls back to it on flat routines); swapped warm/brown ground for a neutral grey ramp, re-verified all contrast ratios | src/ui/theme.css, run-screen.css, RunScreen.tsx | 89/89 tests pass, build clean | ~18k |
 | 02:25 | Fixed brown effort-strip bars: dropped opacity-over-black for explicit state colours (neutral upcoming, hue mixed toward light grey when done) | src/ui/run-screen.css | 89/89 tests pass, build clean | ~12k |
+| 02:35 | 'Step n of n' -> 'Step n / n'; meta row column gap switched to em so it scales with the fluid label size | src/ui/RunScreen.tsx, run-screen.css | 89/89 tests pass, build clean | ~8k |
