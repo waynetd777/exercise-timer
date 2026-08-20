@@ -97,6 +97,7 @@
   - **Cards were inverted:** `.label` used the `font:` SHORTHAND (which resets font-size) and lived in run-screen.css; App.tsx imports LibraryScreen first, so run-screen.css loaded last and clobbered the cards' meta size. Card meta rendered at 44.5px against a 30.4px name on a laptop — inverted at every width. `.label`/`.unit` moved to theme.css in longhand; `.row__meta` steps down via `--label-size`. Name/meta ratio now 1.5-2.07x.
   - **Screens read as different apps** because there was no shared scale: 11 ad-hoc font sizes and 5 letter-spacing values across the two stylesheets. Now one scale in theme.css keyed to role — `--track-display`/`--track-name`/`--label-tracking`, and `--size-display`/`--size-title`/`--size-name`/`--label-size`/`--label-size-sm`. Both stylesheets reference tokens only.
   - **113 tests green**, typecheck + build clean.
+- **Renamed to "DavShack Timer"** and centred the home heading (user-reported). Applied in `LibraryScreen.tsx` and `index.html` (the document title carries through to the PWA install name).
 
 ---
 
