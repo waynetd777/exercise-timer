@@ -309,13 +309,15 @@ export function EditorScreen({
           onChange={(event) => setName(event.target.value)}
         />
 
+        {/* Labelled, not icon-only: saving is infrequent and consequential, so
+            a word beats a tick. */}
         <button
-          className="btn btn--primary"
+          className="btn btn--primary editor__save"
           onClick={() => onSave({ ...preview, name: name.trim() || 'Untitled routine' })}
           aria-label="Save routine"
-          title="Save"
         >
           <CheckIcon />
+          Save
         </button>
       </header>
 

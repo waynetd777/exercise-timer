@@ -25,10 +25,15 @@ export type FlatBlock = {
   last: boolean
 }
 
+/**
+ * Durations taken from Wayne's own routines, so an added step usually needs no
+ * adjustment: 30s to get set, 20s of work, 10s rest, 60s recovery between
+ * exercises.
+ */
 const DEFAULT_SECONDS: Record<SegmentRole, number> = {
-  prepare: 15,
-  work: 30,
-  rest: 15,
+  prepare: 30,
+  work: 20,
+  rest: 10,
   recover: 60,
   custom: 30,
 }

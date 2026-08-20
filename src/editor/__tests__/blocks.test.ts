@@ -203,9 +203,11 @@ describe('constructors', () => {
     expect(new Set(ids).size).toBe(4)
   })
 
-  it('defaults a new segment to something usable, per role', () => {
-    expect(newSegment('work')).toMatchObject({ role: 'work', durationMs: 30_000 })
-    expect(newSegment('rest')).toMatchObject({ role: 'rest', durationMs: 15_000 })
+  it('defaults a new segment to the durations the real routines use', () => {
+    // Taken from Wayne's own routines, so an added step usually needs no edit.
+    expect(newSegment('prepare')).toMatchObject({ role: 'prepare', durationMs: 30_000 })
+    expect(newSegment('work')).toMatchObject({ role: 'work', durationMs: 20_000 })
+    expect(newSegment('rest')).toMatchObject({ role: 'rest', durationMs: 10_000 })
     expect(newSegment('recover').durationMs).toBe(60_000)
     for (const role of ['prepare', 'work', 'rest', 'recover'] as const) {
       expect(newSegment(role).name.length).toBeGreaterThan(0)
@@ -225,3 +227,32 @@ const base = {
   createdAt: 0,
   updatedAt: 0,
 }
+
+describe('the starting template for a new routine', () => {
+  // Mirrors App.blankRoutine(); asserted here so the shape cannot drift.
+  const template = [
+    newSegment('prepare'),
+    newRepeat([newSegment('work'), newSegment('rest')], 3),
+    newSegment('prepare'),
+  ]
+
+  it('is get set, three rounds of work and rest, then get set again', () => {
+    expect(template.map((b) => b.kind)).toEqual(['segment', 'repeat', 'segment'])
+    expect((template[1] as Repeat).times).toBe(3)
+    expect((template[1] as Repeat).children.map((c) => c.kind)).toEqual(['segment', 'segment'])
+  })
+
+  it('compiles to 8 steps totalling 2 minutes', () => {
+    // 30 + 3 x (20 + 10) + 30 = 150s
+    const timeline = compile({ ...base, blocks: template })
+    expect(timeline.entries).toHaveLength(8)
+    expect(timeline.totalMs).toBe(150_000)
+  })
+
+  it('labels the rounds, so the run screen shows "Round 2 of 3"', () => {
+    const entry = compile({ ...base, blocks: template }).entries[3]!
+    expect(entry.path).toEqual([
+      { repeatId: expect.any(String), label: 'Round', iteration: 2, of: 3 },
+    ])
+  })
+})

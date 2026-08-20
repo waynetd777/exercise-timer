@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
-import { newSegment } from '../editor/blocks'
+import { newRepeat, newSegment } from '../editor/blocks'
 import { SEED_ROUTINES } from '../routines/samples'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
@@ -18,8 +18,17 @@ function blankRoutine(): Workout {
   return {
     id: crypto.randomUUID(),
     name: '',
-    // One step rather than nothing, so the editor opens on something to change.
-    blocks: [newSegment('work')],
+    /*
+     * Opens on the shape Wayne's routines actually take: get set, three rounds
+     * of work and rest, then get set for whatever comes next. Building the next
+     * exercise is then a matter of adding a round after that second prepare,
+     * rather than starting from an empty list.
+     */
+    blocks: [
+      newSegment('prepare'),
+      newRepeat([newSegment('work'), newSegment('rest')], 3),
+      newSegment('prepare'),
+    ],
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,
