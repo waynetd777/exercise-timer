@@ -43,3 +43,4 @@
 | 08:20 | Strengthened the delete-confirm state to be unmistakably red (row border/tint, name, label, tick); confirmed the live CSS already had red, so likely a stale SW cache | src/ui/library.css, LibraryScreen.tsx, main.tsx | 179/179 tests pass, build clean | ~18k |
 | 08:30 | Hid the number-input spinner arrows on the editor's duration and round-count fields, keeping type=number for arrow keys and the mobile numeric keypad | src/ui/editor.css | 179/179 tests pass, verified in built CSS |  ~6k |
 | 08:40 | Added duplicate to editor rows (steps and rounds) via duplicateAt with deep fresh-id copying; 7 new tests | src/editor/blocks.ts, src/ui/EditorScreen.tsx | 186/186 tests pass, build clean | ~15k |
+| 08:45 | Editor image thumbnails 44px -> 66px | src/ui/editor.css | build clean, verified in dist | ~4k |
