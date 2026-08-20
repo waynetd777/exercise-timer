@@ -1,3 +1,5 @@
+import type { CueSoundName } from './samples'
+import { cueSoundUrl } from './samples'
 import type { ToneSpec } from './tones'
 
 /**
@@ -10,7 +12,8 @@ import type { ToneSpec } from './tones'
 class AudioEngine {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
-  private pending = new Set<OscillatorNode>()
+  private pending = new Set<AudioScheduledSourceNode>()
+  private buffers = new Map<CueSoundName, AudioBuffer>()
 
   /**
    * Must be called synchronously from a user gesture — mobile browsers refuse
@@ -25,6 +28,62 @@ class AudioEngine {
       this.master.connect(this.ctx.destination)
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()
+  }
+
+  /**
+   * Fetches and decodes cue samples. Must complete before a sample can be
+   * scheduled, because pre-scheduling needs the buffer in hand — until then
+   * `scheduleSample` reports false and the caller falls back to a synthesised
+   * tone. Safe to call repeatedly; each sound is fetched once.
+   */
+  async preload(names: readonly CueSoundName[]): Promise<void> {
+    const ctx = this.ctx
+    if (!ctx) return
+
+    await Promise.all(
+      names.map(async (name) => {
+        if (this.buffers.has(name)) return
+        try {
+          const response = await fetch(cueSoundUrl(name))
+          if (!response.ok) return
+          this.buffers.set(name, await ctx.decodeAudioData(await response.arrayBuffer()))
+        } catch {
+          // Missing or undecodable: the synthesised fallback covers this cue.
+        }
+      }),
+    )
+  }
+
+  get loaded(): boolean {
+    return this.buffers.size > 0
+  }
+
+  /**
+   * Queues a sample at an exact moment on the audio clock. Returns false if the
+   * buffer is not decoded yet, so the caller can fall back to a tone.
+   */
+  scheduleSample(at: number, name: CueSoundName, gain: number): boolean {
+    const ctx = this.ctx
+    const master = this.master
+    const buffer = this.buffers.get(name)
+    if (!ctx || !master || !buffer) return false
+
+    if (at < ctx.currentTime - 0.05) return true // Moment passed; drop rather than play late.
+    const startAt = Math.max(at, ctx.currentTime)
+
+    const source = ctx.createBufferSource()
+    const level = ctx.createGain()
+    source.buffer = buffer
+    level.gain.value = gain
+    source.connect(level).connect(master)
+    source.start(startAt)
+
+    this.pending.add(source)
+    source.addEventListener('ended', () => {
+      this.pending.delete(source)
+      level.disconnect()
+    })
+    return true
   }
 
   /** iOS suspends the context when the page hides; call this on the way back. */
