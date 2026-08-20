@@ -131,6 +131,12 @@
   - **Pencil now opens the editor**; the separate edit-steps button and the inline rename are gone, and `rename` was deleted from `library.ts`/`useLibrary` as dead code.
   - **Back guards unsaved work:** `src/editor/dirty.ts` compares field by field (not `JSON.stringify`, whose result depends on key order), the header becomes an in-place "Discard your changes?" prompt, and `beforeunload` covers reloads. **9 tests** for the dirty check.
   - **170 tests green.**
+- **Undo/redo in the editor, and a recover step in the template** (user-reported)
+  - `src/editor/history.ts` — pure `History<T>`, capped at 60 entries. **A run of text edits coalesces into one undo step**; discrete changes (add/delete/reorder/change type) each get their own; undo ends a run so later typing does not overwrite the restored state. **9 tests.**
+  - Name and steps share one history entry (`Draft`), so undo restores a consistent draft. All mutations go through `edit()`/`editBlocks()` — `setBlocks` no longer exists, so a new mutation cannot silently bypass undo.
+  - Undo/redo buttons sit in a toolbar row with the running totals; Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z work, deliberately overriding native text-field undo.
+  - New routines now end with a **60s recover** step: prepare 30 → Round ×3 [20 work, 10 rest] → prepare 30 → recover 60. 9 steps, 3:30.
+  - **179 tests green.**
 
 ---
 

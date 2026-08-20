@@ -142,6 +142,11 @@
 - [2026-08-21] **Library row actions are now: star, edit (pencil → opens the EDITOR), duplicate, delete.** Inline rename and the separate edit-steps button were both removed on request; the pencil does the editing and the editor names the routine. `rename` was deleted from `library.ts` and `useLibrary` as dead code along with its tests.
 - [2026-08-21] **The editor guards unsaved work**: `isDirty(original, name, blocks)` in `src/editor/dirty.ts` compares FIELD BY FIELD, not by `JSON.stringify` — serialising depends on key insertion order, and patching an object reorders keys, which would report false changes. Back turns the header into an in-place "Discard your changes?" prompt (matching the delete pattern rather than adding a dialog), and a `beforeunload` handler covers reloads and closing the tab.
 
+- [2026-08-21] **Editor undo/redo lives in `src/editor/history.ts`** — pure `History<T>` with `past/present/future/coalescing`, capped at 60 entries, 9 tests. The rule worth preserving: **a run of text edits COALESCES into one undo step** (the caller passes `coalesce`, so no timers are needed), and any discrete change — add, delete, reorder, change a step's type — ends the run and gets its own step. Undo also ends a run, so typing after an undo does not overwrite the restored state.
+- [2026-08-21] **Name and steps share ONE history entry** (`Draft = { name, blocks }`), so undo restores a consistent draft rather than two states that can drift apart. Every editor mutation goes through `edit()` / `editBlocks()` — there is no `setBlocks` any more, and adding one would silently bypass undo.
+- [2026-08-21] **Cmd/Ctrl+Z in the editor deliberately overrides native text-input undo.** The draft history already covers typing, so one stack for the whole editor is less surprising than two that disagree.
+- [2026-08-21] **A new routine is: 30s prepare, Round x3 of [20s work, 10s rest], 30s prepare, 60s recover** — 9 steps, 3:30. `newRoutineBlocks()` is the single source of truth and its shape is asserted in tests.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

@@ -17,6 +17,7 @@ import {
 } from '../editor/blocks'
 import type { Path } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
+import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
 import { normaliseImageUrl } from '../editor/postimages'
 import { duration } from './format'
 import {
@@ -24,11 +25,16 @@ import {
   CheckIcon,
   DownIcon,
   PlusIcon,
+  RedoIcon,
   RoundsIcon,
   TrashIcon,
+  UndoIcon,
   UpIcon,
 } from './icons'
 import './editor.css'
+
+/** One undo step: name and steps together, so they cannot drift apart. */
+type Draft = { name: string; blocks: Block[] }
 
 const ROLES: { role: SegmentRole; label: string }[] = [
   { role: 'prepare', label: 'Get ready' },
@@ -284,9 +290,26 @@ export function EditorScreen({
   onSave: (workout: Workout) => void
   onCancel: () => void
 }) {
-  const [name, setName] = useState(workout.name)
-  const [blocks, setBlocks] = useState<Block[]>(workout.blocks)
+  /**
+   * Name and steps live in ONE history entry, so undo restores a consistent
+   * draft rather than two states that can drift apart.
+   */
+  const [history, setHistory] = useState(() =>
+    initHistory<Draft>({ name: workout.name, blocks: workout.blocks }),
+  )
+  const { name, blocks } = history.present
   const [confirmingExit, setConfirmingExit] = useState(false)
+
+  /**
+   * `coalesce` marks a text-ish edit, which collapses a run of keystrokes into
+   * one undo step. Discrete changes — adding, deleting, reordering, changing a
+   * step's type — each get their own.
+   */
+  const edit = (next: (draft: Draft) => Draft, coalesce = false) =>
+    setHistory((current) => push(current, next(current.present), coalesce))
+
+  const editBlocks = (op: (blocks: Block[]) => Block[], coalesce = false) =>
+    edit((draft) => ({ ...draft, blocks: op(draft.blocks) }), coalesce)
 
   const rows = useMemo(() => flatten(blocks), [blocks])
   const preview = useMemo(() => ({ ...workout, name, blocks }), [workout, name, blocks])
@@ -300,15 +323,32 @@ export function EditorScreen({
     return () => window.removeEventListener('beforeunload', warn)
   }, [dirty])
 
+  /*
+   * Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z. This deliberately overrides a text field's
+   * native undo: the draft's history already covers typing (coalesced into one
+   * step), so one undo stack for the whole editor is less surprising than two
+   * that disagree.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return
+      event.preventDefault()
+      setHistory(event.shiftKey ? redo : undo)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const goBack = () => {
     if (dirty) setConfirmingExit(true)
     else onCancel()
   }
 
+  // A role comes from a select, so it is discrete; everything else is typed.
   const patchSegment = (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) =>
-    setBlocks((current) => updateSegment(current, path, patch))
+    editBlocks((current) => updateSegment(current, path, patch), patch.role === undefined)
   const patchRepeat = (path: Path, patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>) =>
-    setBlocks((current) => updateRepeat(current, path, patch))
+    editBlocks((current) => updateRepeat(current, path, patch), true)
 
   return (
     <main className="editor">
@@ -336,7 +376,7 @@ export function EditorScreen({
           value={name}
           aria-label="Routine name"
           placeholder="Routine name"
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => edit((draft) => ({ ...draft, name: event.target.value }), true)}
         />
 
         {/* Labelled, not icon-only: saving is infrequent and consequential, so
@@ -353,12 +393,35 @@ export function EditorScreen({
         )}
       </header>
 
-      <p className="editor__stats label label--sm">
-        <span>
-          <span className="unit">{duration(totalDurationMs(preview))}</span> total
-        </span>
-        <span>{stepCount(preview)} steps</span>
-      </p>
+      <div className="editor__bar">
+        <div className="editor__history">
+          <button
+            className="btn btn--ghost"
+            onClick={() => setHistory(undo)}
+            disabled={!canUndo(history)}
+            aria-label="Undo"
+            title="Undo"
+          >
+            <UndoIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => setHistory(redo)}
+            disabled={!canRedo(history)}
+            aria-label="Redo"
+            title="Redo"
+          >
+            <RedoIcon />
+          </button>
+        </div>
+
+        <p className="editor__stats label label--sm">
+          <span>
+            <span className="unit">{duration(totalDurationMs(preview))}</span> total
+          </span>
+          <span>{stepCount(preview)} steps</span>
+        </p>
+      </div>
 
       <div className="editor__scroll">
         {rows.length === 0 ? (
@@ -376,11 +439,11 @@ export function EditorScreen({
                   depth={depth}
                   first={first}
                   last={last}
-                  onMove={(p, d) => setBlocks((c) => moveBy(c, p, d))}
-                  onRemove={(p) => setBlocks((c) => removeAt(c, p))}
+                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
-                  onClearImage={(p) => setBlocks((c) => clearMedia(c, p))}
-                  onWrap={(p) => setBlocks((c) => wrapInRepeat(c, p))}
+                  onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
+                  onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                 />
               ) : (
                 <RepeatRow
@@ -390,11 +453,11 @@ export function EditorScreen({
                   depth={depth}
                   first={first}
                   last={last}
-                  onMove={(p, d) => setBlocks((c) => moveBy(c, p, d))}
-                  onRemove={(p) => setBlocks((c) => removeAt(c, p))}
+                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchRepeat}
-                  onAddChild={(p) => setBlocks((c) => appendTo(c, p, newSegment('work')))}
-                  onUnwrap={(p) => setBlocks((c) => unwrapRepeat(c, p))}
+                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newSegment('work')))}
+                  onUnwrap={(p) => editBlocks((c) => unwrapRepeat(c, p))}
                 />
               ),
             )}
@@ -407,7 +470,7 @@ export function EditorScreen({
           <button
             key={role}
             className="chip chip--action"
-            onClick={() => setBlocks((c) => insertAfter(c, [], newSegment(role)))}
+            onClick={() => editBlocks((c) => insertAfter(c, [], newSegment(role)))}
           >
             <PlusIcon />
             {label}
@@ -415,7 +478,7 @@ export function EditorScreen({
         ))}
         <button
           className="chip chip--action"
-          onClick={() => setBlocks((c) => insertAfter(c, [], newRepeat()))}
+          onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
         >
           <PlusIcon />
           Rounds

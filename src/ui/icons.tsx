@@ -221,3 +221,21 @@ export function RoundsIcon() {
     </Svg>
   )
 }
+
+export function UndoIcon() {
+  return (
+    <Svg>
+      <polyline points="9 6 4 11 9 16" {...STROKE} />
+      <path d="M4 11h9.5a5.5 5.5 0 0 1 0 11H9" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function RedoIcon() {
+  return (
+    <Svg>
+      <polyline points="15 6 20 11 15 16" {...STROKE} />
+      <path d="M20 11h-9.5a5.5 5.5 0 0 0 0 11H15" {...STROKE} />
+    </Svg>
+  )
+}
