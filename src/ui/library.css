@@ -37,17 +37,17 @@
   font-weight: 700;
   letter-spacing: var(--track-display);
   line-height: 1;
+  color: var(--role-rest);
 }
 
 /*
- * Sized in em so it scales with whatever it sits beside, and coloured
- * independently of the text — the mark is blue, the wordmark is not.
+ * Sized in em so it tracks whatever text it sits beside, and left on
+ * currentColor so mark and wordmark stay the same colour by construction.
  */
 .mark {
   flex: none;
   width: 0.92em;
   height: 0.92em;
-  color: var(--role-rest);
 }
 
 .library__tools {
