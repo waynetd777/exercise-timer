@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import type { TimelineEntry, Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
+import { audio } from '../audio/engine'
+import { useCueScheduler } from '../audio/useCueScheduler'
+import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import { EffortStrip } from './EffortStrip'
-import { clock, duration, pathLabel } from './format'
+import { clock, clockWidth, duration, pathLabel } from './format'
 import { resolveMediaPreview } from './media'
 import './run-screen.css'
 
@@ -47,6 +50,26 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
 export function RunScreen({ workout }: { workout: Workout }) {
   const timer = useTimer(workout)
   const { at, status, timeline } = timer
+  const [muted, toggleMuted] = useMuted()
+
+  useCueScheduler({
+    timeline,
+    status,
+    muted,
+    readElapsed: timer.readElapsed,
+    generation: timer.generation,
+  })
+
+  /**
+   * Every control unlocks the AudioContext. It has to happen synchronously
+   * inside a user gesture — mobile browsers refuse otherwise — and unlock() is
+   * idempotent, so wrapping all of them is simpler than guessing which tap
+   * comes first.
+   */
+  const withAudio = (action: () => void) => () => {
+    audio.unlock()
+    action()
+  }
 
   // `position()` returns the first step at 0ms, so `at.entry` is non-null even
   // before the workout starts. The running body must be gated on status, or
@@ -56,6 +79,7 @@ export function RunScreen({ workout }: { workout: Workout }) {
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const rounds = entry ? pathLabel(entry.path) : ''
+  const clockText = clock(timer.secondsLeft)
 
   return (
     <main className="run" style={{ ['--phase' as string]: phase }}>
@@ -105,9 +129,10 @@ export function RunScreen({ workout }: { workout: Workout }) {
               key={timer.secondsLeft}
               className="count__clock"
               data-urgent={status === 'running' && at.remainingMs <= URGENT_MS}
+              style={{ ['--chars' as string]: clockWidth(clockText) }}
               aria-live="off"
             >
-              {clock(timer.secondsLeft)}
+              {clockText}
             </p>
             <h1 className="count__name">{entry.name}</h1>
             <p className="count__meta label">
@@ -126,7 +151,7 @@ export function RunScreen({ workout }: { workout: Workout }) {
       <div className="controls">
         <button
           className="btn"
-          onClick={timer.previous}
+          onClick={withAudio(timer.previous)}
           disabled={status === 'idle'}
           aria-label="Previous step"
         >
@@ -134,29 +159,29 @@ export function RunScreen({ workout }: { workout: Workout }) {
         </button>
 
         {status === 'idle' && (
-          <button className="btn btn--primary" onClick={timer.start}>
+          <button className="btn btn--primary" onClick={withAudio(timer.start)}>
             Start
           </button>
         )}
         {status === 'running' && (
-          <button className="btn btn--primary" onClick={timer.pause}>
+          <button className="btn btn--primary" onClick={withAudio(timer.pause)}>
             Pause
           </button>
         )}
         {status === 'paused' && (
-          <button className="btn btn--primary" onClick={timer.resume}>
+          <button className="btn btn--primary" onClick={withAudio(timer.resume)}>
             Resume
           </button>
         )}
         {status === 'complete' && (
-          <button className="btn btn--primary" onClick={timer.start}>
+          <button className="btn btn--primary" onClick={withAudio(timer.start)}>
             Again
           </button>
         )}
 
         <button
           className="btn"
-          onClick={timer.next}
+          onClick={withAudio(timer.next)}
           disabled={status === 'idle' || status === 'complete'}
           aria-label="Next step"
         >
@@ -165,10 +190,19 @@ export function RunScreen({ workout }: { workout: Workout }) {
 
         <button
           className="btn btn--ghost"
-          onClick={timer.reset}
+          onClick={withAudio(timer.reset)}
           disabled={status === 'idle'}
         >
           Reset
+        </button>
+
+        <button
+          className="btn btn--ghost"
+          onClick={toggleMuted}
+          aria-pressed={muted}
+          title={muted ? 'Turn sound on' : 'Turn sound off'}
+        >
+          {muted ? 'Muted' : 'Sound'}
         </button>
       </div>
     </main>

@@ -14,6 +14,10 @@ export type Timer = {
   at: Position
   /** Whole seconds to show for the current step. */
   secondsLeft: number
+  /** Reads live elapsed run time. The audio scheduler needs this, not a snapshot. */
+  readElapsed: () => number
+  /** Increments on every clock mutation, so the audio scheduler can re-arm. */
+  generation: number
   start: () => void
   pause: () => void
   resume: () => void
@@ -40,6 +44,7 @@ export function useTimer(workout: Workout): Timer {
 
   const [status, setStatus] = useState<RunStatus>('idle')
   const [elapsedMs, setElapsedMs] = useState(0)
+  const [generation, setGeneration] = useState(0)
 
   const clock = useRef<Clock>(IDLE_CLOCK)
   const readElapsed = useCallback(() => elapsed(clock.current, now()), [])
@@ -87,34 +92,44 @@ export function useTimer(workout: Workout): Timer {
 
   useWakeLock(status === 'running')
 
-  const seekTo = useCallback((to: number, freeze: boolean) => {
-    clock.current = seeked(now(), to, freeze)
-    setElapsedMs(to)
-  }, [])
+  const bump = useCallback(() => setGeneration((g) => g + 1), [])
+
+  const seekTo = useCallback(
+    (to: number, freeze: boolean) => {
+      clock.current = seeked(now(), to, freeze)
+      setElapsedMs(to)
+      bump()
+    },
+    [bump],
+  )
 
   const start = useCallback(() => {
     clock.current = started(now())
     setElapsedMs(0)
     setStatus('running')
-  }, [])
+    bump()
+  }, [bump])
 
   const pause = useCallback(() => {
     if (status !== 'running') return
     clock.current = paused(clock.current, now())
     setStatus('paused')
-  }, [status])
+    bump()
+  }, [status, bump])
 
   const resume = useCallback(() => {
     if (status !== 'paused') return
     clock.current = resumed(clock.current, now())
     setStatus('running')
-  }, [status])
+    bump()
+  }, [status, bump])
 
   const reset = useCallback(() => {
     clock.current = IDLE_CLOCK
     setElapsedMs(0)
     setStatus('idle')
-  }, [])
+    bump()
+  }, [bump])
 
   const next = useCallback(() => {
     if (status === 'idle' || status === 'complete') return
@@ -134,6 +149,8 @@ export function useTimer(workout: Workout): Timer {
     status,
     at,
     secondsLeft: at.entry ? Math.ceil(at.remainingMs / 1000) : 0,
+    readElapsed,
+    generation,
     start,
     pause,
     resume,
