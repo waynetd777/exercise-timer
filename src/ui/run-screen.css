@@ -223,10 +223,11 @@
  * Bottom of the screen for thumb reach; nothing smaller than 56px.
  */
 .controls {
-  /* Reported as already the right size, so the bottom bar holds its own scale
-     while everything above it grew. Overriding the token here is enough — the
-     buttons inherit it. */
+  /* Reverted to the original scale by request. Overriding the tokens here is
+     enough — the buttons inherit them — so the bottom bar is insulated from
+     any future change to body text. */
   --label-size: var(--label-size-control);
+  --label-tracking: var(--label-tracking-control);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,9 +243,9 @@
 .btn {
   display: grid;
   place-items: center;
-  min-width: 64px;
-  min-height: 64px;
-  padding: 0 var(--step-5);
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0 var(--step-4);
   border-radius: var(--radius);
   font: var(--label);
   letter-spacing: var(--label-tracking);
@@ -269,9 +270,8 @@
 
 .btn--primary {
   /* min() so a narrow screen cannot be forced wider than it is. */
-  min-width: min(12rem, 100%);
-  min-height: 76px;
-  font-size: clamp(1.05rem, 1.9cqi, 1.9rem);
+  min-width: min(10rem, 100%);
+  min-height: 64px;
   color: var(--ink-900);
   background: var(--phase);
   border-color: transparent;
@@ -287,9 +287,8 @@
   background: none;
 }
 
-/* Chevron glyphs read smaller than letterforms at the same size. */
+/* Chevron glyphs carry no tracking; they are centred rather than spaced. */
 .btn[aria-label] {
-  font-size: clamp(1.2rem, 2.2cqi, 2.2rem);
   letter-spacing: 0;
 }
 
