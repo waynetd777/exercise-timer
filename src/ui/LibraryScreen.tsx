@@ -12,6 +12,7 @@ import { updateApp } from '../state/updateApp'
 import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
 import { duration } from './format'
+import { Menu } from './Menu'
 import {
   CheckIcon,
   CloseIcon,
@@ -276,53 +277,51 @@ export function LibraryScreen({
             onChange={(event) => setQuery(event.target.value)}
           />
 
-          <div className="library__sorts" role="group" aria-label="Sort routines">
-            {SORTS.map(({ mode, label }) => (
-              <button
-                key={mode}
-                className="chip"
-                aria-pressed={sort === mode}
-                onClick={() => setSort(mode)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <label className="library__sort">
+            <span className="visually-hidden">Sort routines</span>
+            <select
+              className="chip chip--select"
+              value={sort}
+              onChange={(event) => setSort(event.target.value as SortMode)}
+            >
+              {SORTS.map(({ mode, label }) => (
+                <option key={mode} value={mode}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-          <button className="chip chip--action" onClick={onNew}>
-            <PlusIcon />
-            New
-          </button>
-
-          <button className="chip chip--action" onClick={() => picker.current?.click()}>
-            <ImportIcon />
-            Import
-          </button>
-
-          <button
-            className="chip chip--action"
-            onClick={() =>
-              downloadJson(
-                bundleFilename(null, new Date()),
-                toBundle(library.workouts, Date.now()),
-              )
-            }
-            disabled={library.workouts.length === 0}
-            title="Download every routine as one file"
-          >
-            <ExportIcon />
-            Export
-          </button>
-
-          <button
-            className="chip chip--action"
-            onClick={() => void saveImagesOffline()}
-            disabled={library.workouts.length === 0}
-            title="Store a copy of every linked image on this device"
-          >
-            <PinIcon />
-            Save images
-          </button>
+          <Menu
+            label="Routines"
+            items={[
+              { label: 'New', icon: <PlusIcon />, onSelect: onNew },
+              {
+                label: 'Import',
+                icon: <ImportIcon />,
+                title: 'Add routines from a .tabata or exported .json file',
+                onSelect: () => picker.current?.click(),
+              },
+              {
+                label: 'Export',
+                icon: <ExportIcon />,
+                title: 'Download every routine as one file',
+                disabled: library.workouts.length === 0,
+                onSelect: () =>
+                  downloadJson(
+                    bundleFilename(null, new Date()),
+                    toBundle(library.workouts, Date.now()),
+                  ),
+              },
+              {
+                label: 'Save images',
+                icon: <PinIcon />,
+                title: 'Store a copy of every linked image on this device',
+                disabled: library.workouts.length === 0,
+                onSelect: () => void saveImagesOffline(),
+              },
+            ]}
+          />
 
           <input
             ref={picker}

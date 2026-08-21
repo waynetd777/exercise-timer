@@ -203,6 +203,80 @@ button {
 }
 
 
+/* The sort control: a real <select>, so keyboard and mobile pickers come free. */
+.chip--select {
+  padding-right: var(--step-3);
+  font-family: inherit;
+  color: var(--bone);
+  cursor: pointer;
+}
+
+/* ── Menu ──────────────────────────────────────────────────────────────────
+ * A chip that opens a short list of actions. Positioned against its own
+ * wrapper rather than in the top layer, so it needs no anchor positioning.
+ */
+.menu {
+  position: relative;
+}
+
+.menu__caret {
+  display: grid;
+  place-items: center;
+  margin-left: calc(-1 * var(--step-1));
+}
+
+.menu__caret .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.menu__list {
+  /* Fixed, not absolute: the library shell clips its overflow, and a menu is
+     worth nothing if it is cut off at the header's edge. Coordinates come from
+     the trigger's bounding rect. */
+  position: fixed;
+  z-index: 40;
+  display: grid;
+  width: 13rem;
+  padding: var(--step-2);
+  gap: 2px;
+  background: var(--ink-700);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--step-3);
+  padding: var(--step-3);
+  font-weight: 650;
+  font-size: var(--label-size-sm);
+  text-align: left;
+  color: var(--bone);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 120ms var(--ease);
+}
+
+.menu__item:hover:not(:disabled),
+.menu__item:focus-visible {
+  background: var(--ink-600);
+}
+
+.menu__item:disabled {
+  color: var(--bone-faint);
+  cursor: not-allowed;
+}
+
+.menu__item .icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--bone-dim);
+}
+
 .chip--danger {
   color: var(--ink-900);
   background: var(--role-work);
