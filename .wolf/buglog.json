@@ -477,6 +477,56 @@
       "timestamp": "2026-08-21T11:27:16",
       "occurrences": 1,
       "last_seen": "2026-08-21T11:27:16"
+    },
+    {
+      "error_message": "Large gap between the 'Routine text' label and its textarea in the paste dialog",
+      "file": "src/ui/library.css",
+      "root_cause": "Both children of .paste__field were auto grid rows, and a grid stretches auto tracks to absorb spare height, so the label's row grew with the dialog and left the label at the top of it.",
+      "fix": "grid-template-rows: auto minmax(0, 1fr) on .paste__field - label sized to its text, control taking the rest.",
+      "fix_rule": "An auto grid track absorbs spare height. Declare the tracks when one child should grow and the other should not.",
+      "tags": [
+        "css",
+        "grid",
+        "layout"
+      ],
+      "id": "bug-028",
+      "timestamp": "2026-08-21T13:40:00+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:40:00+02:00"
+    },
+    {
+      "error_message": "Paste dialog looked bottom-heavy: too much space above the buttons",
+      "file": "src/ui/library.css",
+      "root_cause": "grid-template-rows declared five tracks but the dialog has four children when the parse report is absent, and an empty explicit track still takes its gap.",
+      "fix": "Three explicit tracks with the rest implicit, so there are exactly as many tracks as children.",
+      "fix_rule": "Declare only the tracks you always have. An empty explicit track is invisible but still costs a gap.",
+      "tags": [
+        "css",
+        "grid",
+        "layout"
+      ],
+      "id": "bug-029",
+      "timestamp": "2026-08-21T13:50:00+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:50:00+02:00"
+    },
+    {
+      "error_message": "Confirm dialog rendered nearly full-height, with its two buttons stretched into 280px slabs",
+      "file": "src/ui/theme.css",
+      "root_cause": "A dialog is a DOM child of the full-height grid screen that opened it. Stretched by that grid, .notice's three auto rows split the spare height between them - title pinned to the top, detail marooned in the middle, buttons at the bottom - and .notice__actions, being a stretched flex container, pulled its chips to full height as well.",
+      "fix": "height: fit-content plus align-self: center and align-content: center on .notice so the rows pack; align-items: center on .notice__actions so the chips keep their own height.",
+      "fix_rule": "Never trust a box to be sized by its contents when an ancestor is a grid or flex container. Auto grid rows and flex children both stretch by default. Same class as bug-028 and bug-029.",
+      "tags": [
+        "css",
+        "grid",
+        "flexbox",
+        "dialog",
+        "layout"
+      ],
+      "id": "bug-030",
+      "timestamp": "2026-08-21T14:10:00+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T14:10:00+02:00"
     }
   ]
 }
