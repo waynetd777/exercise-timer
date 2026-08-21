@@ -251,7 +251,7 @@ export function LibraryScreen({
   const ingest = async (files: readonly File[]) => {
     const candidates = files.filter(looksImportable)
     if (candidates.length === 0) {
-      setNotice('Only .tabata files and exported routines can be imported')
+      setNotice('Only .tabata files, exported routines and plain-text routines can be imported')
       return
     }
 
@@ -313,7 +313,7 @@ export function LibraryScreen({
               {
                 label: 'Import',
                 icon: <ImportIcon />,
-                title: 'Add routines from a .tabata or exported .json file',
+                title: 'Add routines from a .tabata, an exported .json, or a plain-text routine',
                 onSelect: () => picker.current?.click(),
               },
               {
@@ -352,7 +352,7 @@ export function LibraryScreen({
             ref={picker}
             className="visually-hidden"
             type="file"
-            accept=".tabata,.json,application/json"
+            accept=".tabata,.json,.txt,.md,application/json,text/plain"
             multiple
             onChange={(event) => {
               void ingest(Array.from(event.target.files ?? []))

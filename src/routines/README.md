@@ -20,10 +20,15 @@ after each exercise's sets, and matching the file's own `restBetweenTabatas: 60`
 The import is **flat** — no reps groups are inferred. The shape is recoverable
 later, but a wrong guess would silently alter someone's workout.
 
-`importFiles.ts` sits above both readers: it takes the dropped or picked files,
-tries this app's own bundle first (it identifies itself with a marker, so there is
-no guessing) and the `.tabata` reader second, and **collects failures instead of
+`importFiles.ts` sits above all three readers: it takes the dropped or picked
+files, tries this app's own bundle first (it identifies itself with a marker, so
+there is no guessing), the `.tabata` reader second, and the paste parser last,
+when the file turns out not to be JSON at all. It **collects failures instead of
 throwing**, so one bad file in a drop of ten does not lose the other nine.
+
+Plain text is accepted because the routines arrive as email, and saving one to a
+file is often easier than getting at its text to copy — particularly on a phone.
+The file's own name becomes the routine's.
 
 ## The paste parser
 

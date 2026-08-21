@@ -60,6 +60,13 @@ routine with no `createdAt` is still a routine — and strict about the id, name
 block tree, which are what the app would crash on. One corrupt routine in a file
 no longer loses the rest of it.
 
+**`isBlock` is a whitelist, and that is the trap.** When ladders and sections were
+added it still accepted only segments and repeats, so every pasted routine
+exported perfectly and was silently filtered out on the way back in — a backup
+that restored nothing, which is worse than one that fails. A new block kind has to
+be added to `GROUP_KINDS` at the same time. `shareLink.ts` has no such list: it
+checks only that `blocks` is an array, so links were never affected.
+
 ## Share links
 
 `shareLink.ts` gzips a routine into a URL fragment, which takes a real 86-step
