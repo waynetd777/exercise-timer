@@ -8,6 +8,7 @@ import {
   flatten,
   insertAfter,
   moveBy,
+  moveStep,
   newRepeat,
   newRoutineBlocks,
   newSegment,
@@ -345,5 +346,76 @@ describe('duplicateAt', () => {
     let blocks = duplicateAt(tree(), [0])
     blocks = duplicateAt(blocks, [1])
     expect(names(blocks)).toEqual(['A', 'A', 'A', '[R]', 'B', 'C', 'D'])
+  })
+})
+
+describe('moveStep — moving through rounds, not just around them', () => {
+  // A: 0, R: 1 (B: [1,0], C: [1,1]), D: 2
+  it('moves a step down INTO the round that follows it', () => {
+    expect(names(moveStep(tree(), [0], 1))).toEqual(['[R]', 'A', 'B', 'C', 'D'])
+    expect(blockAt(moveStep(tree(), [0], 1), [0, 0])).toMatchObject({ name: 'A' })
+  })
+
+  it('moves a step up INTO the round above it, landing last', () => {
+    expect(names(moveStep(tree(), [2], -1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+    expect(blockAt(moveStep(tree(), [2], -1), [1, 2])).toMatchObject({ name: 'D' })
+  })
+
+  it('moves the first step of a round OUT, above the round', () => {
+    expect(names(moveStep(tree(), [1, 0], -1))).toEqual(['A', 'B', '[R]', 'C', 'D'])
+  })
+
+  it('moves the last step of a round OUT, below the round', () => {
+    expect(names(moveStep(tree(), [1, 1], 1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+    // C is now a top-level sibling after the round, not its child.
+    const blocks = moveStep(tree(), [1, 1], 1)
+    expect(blockAt(blocks, [2])).toMatchObject({ name: 'C' })
+  })
+
+  it('still swaps two adjacent steps, inside a round or out', () => {
+    const four = [seg('A'), seg('B'), rep('R', [seg('C'), seg('D')])]
+    expect(names(moveStep(four, [0], 1))).toEqual(['B', 'A', '[R]', 'C', 'D'])
+    expect(names(moveStep(four, [2, 0], 1))).toEqual(['A', 'B', '[R]', 'D', 'C'])
+  })
+
+  it('does nothing at the very start or the very end', () => {
+    expect(names(moveStep(tree(), [0], -1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+    expect(names(moveStep(tree(), [2], 1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+  })
+
+  it('changes the total, because a step inside a round runs three times', () => {
+    // Moving A (20s) into a x3 round takes it from 20s to 60s.
+    const before = totalDurationMs({ ...base, blocks: tree() })
+    const after = totalDurationMs({ ...base, blocks: moveStep(tree(), [0], 1) })
+    expect(after - before).toBe(2 * 20_000)
+  })
+
+  it('leaves an emptied round in place rather than pruning it', () => {
+    // A group vanishing under you is more surprising than an empty one.
+    let blocks = moveStep(tree(), [1, 0], -1)
+    blocks = moveStep(blocks, [2, 0], 1)
+    expect(names(blocks)).toEqual(['A', 'B', '[R]', 'C', 'D'])
+    expect(blockAt(blocks, [2])).toMatchObject({ kind: 'repeat', children: [] })
+  })
+
+  it('only swaps rounds — it never nests one inside another', () => {
+    const two = [rep('R1', [seg('A')]), rep('R2', [seg('B')])]
+    const moved = moveStep(two, [0], 1)
+    expect(moved.map((b) => b.id)).toEqual(['R2', 'R1'])
+    expect((moved[0] as Repeat).children).toHaveLength(1)
+  })
+
+  it('is reversible: down then up returns the original shape', () => {
+    const original = tree()
+    const there = moveStep(original, [0], 1)
+    const back = moveStep(there, [0, 0], -1)
+    expect(names(back)).toEqual(names(original))
+  })
+
+  it('does not mutate the input, and ignores a bad path', () => {
+    const original = tree()
+    moveStep(original, [0], 1)
+    expect(names(original)).toEqual(['A', '[R]', 'B', 'C', 'D'])
+    expect(names(moveStep(original, [9], 1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
   })
 })

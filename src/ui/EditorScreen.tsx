@@ -7,7 +7,7 @@ import {
   duplicateAt,
   flatten,
   insertAfter,
-  moveBy,
+  moveStep,
   newRepeat,
   newSegment,
   removeAt,
@@ -175,7 +175,7 @@ type RowProps = {
   depth: number
   first: boolean
   last: boolean
-  onMove: (path: Path, delta: number) => void
+  onMove: (path: Path, delta: 1 | -1) => void
   onDuplicate: (path: Path) => void
   onRemove: (path: Path) => void
 }
@@ -262,18 +262,18 @@ function SegmentRow({
           <button
             className="btn btn--ghost"
             onClick={() => onMove(path, -1)}
-            disabled={first}
+            disabled={first && depth === 0}
             aria-label="Move up"
-            title="Move up"
+            title={first && depth > 0 ? 'Move out of the round' : 'Move up'}
           >
             <UpIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onMove(path, 1)}
-            disabled={last}
+            disabled={last && depth === 0}
             aria-label="Move down"
-            title="Move down"
+            title={last && depth > 0 ? 'Move out of the round' : 'Move down'}
           >
             <DownIcon />
           </button>
@@ -402,18 +402,18 @@ function RepeatRow({
           <button
             className="btn btn--ghost"
             onClick={() => onMove(path, -1)}
-            disabled={first}
+            disabled={first && depth === 0}
             aria-label="Move up"
-            title="Move up"
+            title={first && depth > 0 ? 'Move out of the round' : 'Move up'}
           >
             <UpIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onMove(path, 1)}
-            disabled={last}
+            disabled={last && depth === 0}
             aria-label="Move down"
-            title="Move down"
+            title={last && depth > 0 ? 'Move out of the round' : 'Move down'}
           >
             <DownIcon />
           </button>
@@ -611,7 +611,7 @@ export function EditorScreen({
                   depth={depth}
                   first={first}
                   last={last}
-                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
@@ -628,7 +628,7 @@ export function EditorScreen({
                   depth={depth}
                   first={first}
                   last={last}
-                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchRepeat}

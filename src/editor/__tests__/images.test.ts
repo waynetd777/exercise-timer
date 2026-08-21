@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { SEED_ROUTINES } from '../../routines/samples'
-import { collectImages } from '../images'
+import { IMAGE_CATALOGUE } from '../../routines/imageCatalogue'
+import { collectImages, labelFromUrl } from '../images'
 
 const seg = (name: string, url?: string): Block => ({
   kind: 'segment',
@@ -97,5 +98,73 @@ describe('collectImages', () => {
     expect(images.some((i) => i.uses > 1)).toBe(true)
     // Sorted and unique.
     expect(new Set(images.map((i) => i.url)).size).toBe(images.length)
+  })
+})
+
+describe('labelFromUrl', () => {
+  it('turns a filename into an exercise name', () => {
+    expect(labelFromUrl('https://i.postimg.cc/abc/Cable-Fly.png')).toBe('Cable Fly')
+    expect(labelFromUrl('https://i.postimg.cc/abc/Standard-Chest-Press.png')).toBe(
+      'Standard Chest Press',
+    )
+  })
+
+  it('handles other extensions and separators', () => {
+    expect(labelFromUrl('https://i.postimg.cc/x/horizon-5-0-r-recumbent-bike.jpg')).toBe(
+      'horizon 5 0 r recumbent bike',
+    )
+    expect(labelFromUrl('https://x/Seated_Row.webp')).toBe('Seated Row')
+  })
+
+  it('ignores a query string', () => {
+    expect(labelFromUrl('https://x/Leg-Press.png?v=2')).toBe('Leg Press')
+  })
+
+  it('falls back rather than returning empty', () => {
+    expect(labelFromUrl('https://x/')).toBe('Untitled')
+    expect(labelFromUrl('')).toBe('Untitled')
+  })
+})
+
+describe('collectImages with the catalogue', () => {
+  it('offers every catalogue image, even ones no routine uses', () => {
+    const images = collectImages([], IMAGE_CATALOGUE)
+    expect(images).toHaveLength(IMAGE_CATALOGUE.length)
+    expect(images.every((i) => i.uses === 0)).toBe(true)
+  })
+
+  it('keeps the catalogue label even when a routine uses it under another name', () => {
+    // "Cycling" describes the picture better than the step name "Warm Up" does.
+    const cycling = 'https://i.postimg.cc/0yFGWd24/Cycling.png'
+    const images = collectImages([routine('R', [seg('Warm Up', cycling)])], IMAGE_CATALOGUE)
+    expect(images.find((i) => i.url === cycling)).toEqual({
+      url: cycling,
+      label: 'Cycling',
+      uses: 1,
+    })
+  })
+
+  it('still includes an image a routine uses that is not in the catalogue', () => {
+    const odd = 'https://example.com/My-Own-Photo.png'
+    const images = collectImages([routine('R', [seg('Squat', odd)])], IMAGE_CATALOGUE)
+    expect(images).toHaveLength(IMAGE_CATALOGUE.length + 1)
+    expect(images.find((i) => i.url === odd)).toMatchObject({ label: 'Squat', uses: 1 })
+  })
+
+  it('counts uses across the real routines against the catalogue', () => {
+    const images = collectImages(SEED_ROUTINES, IMAGE_CATALOGUE)
+    const used = images.filter((i) => i.uses > 0)
+    expect(used.length).toBeGreaterThan(8)
+    // No duplicates, and every entry has a label.
+    expect(new Set(images.map((i) => i.url)).size).toBe(images.length)
+    expect(images.every((i) => i.label.length > 0)).toBe(true)
+  })
+
+  it('orders duplicate labels stably by url', () => {
+    // The catalogue holds two Tricep Press machines and two Standing Arm Curls.
+    const images = collectImages([], IMAGE_CATALOGUE)
+    const labels = images.map((i) => i.label)
+    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })))
+    expect(new Set(labels).size).toBeLessThan(labels.length)
   })
 })
