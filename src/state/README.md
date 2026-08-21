@@ -42,6 +42,23 @@ knowing is that **crossing a gate is derived, not walked**. A tab that slept for
 ten minutes lands on the step after the run that expired, in one move, rather
 than taking one step per tick until it catches up. There is a test named after it.
 
+## Two clocks, two questions
+
+The run clock answers "how long is left on this step", and to do that it is
+re-anchored at every gate and every skip. That makes it the wrong instrument for
+"how long have I been training" — a question a gated routine can answer no other
+way, since the routine has no total length to subtract from.
+
+So `useTimer` keeps a **second clock of the same type**, started with the workout,
+paused with it, stopped at the finish, and deliberately untouched by `moveTo`: a
+skip changes where you are, not how long you have been at it. It surfaces as
+`sessionMs`, drives the stopwatch in the run screen's header, and is what the
+finished screen reports as Elapsed — which used to be the routine's *scheduled*
+length, and was hidden entirely for a gated routine.
+
+The two are different axes and will disagree after a skip. That is correct: one is
+a position in the routine, the other is time spent.
+
 ## No animation loop
 
 `useTimer` schedules **one timeout for the exact moment the display next changes**
@@ -56,7 +73,7 @@ counted. Timeout throttling in a hidden tab is therefore harmless.
 |---|---|
 | `clock.ts` | Pure clock: `elapsed`, `started`, `paused`, `resumed`, `seeked` |
 | `tick.ts` | Pure: stay / move / complete, and when the display next changes |
-| `useTimer.ts` | Run state as a cursor, the self-scheduling tick, and the seek controls |
+| `useTimer.ts` | Run state as a cursor, the session clock, the self-scheduling tick, and the seek controls |
 | `useWakeLock.ts` | Holds the screen awake while running; re-acquires on return, since the browser releases it when the page hides |
 | `updateApp.ts` | Pull-to-update. Drops only the precached shell — **never IndexedDB**, which holds the only copy of anything authored in the editor |
 | `usePullToRefresh.ts` | The gesture. Listeners are attached natively with `{ passive: false }`, because React registers `touchmove` as passive and would ignore `preventDefault` |

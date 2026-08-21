@@ -9,8 +9,8 @@
   background: var(--ink-900);
   background: radial-gradient(
     140% 90% at 50% -10%,
-    color-mix(in oklab, var(--role-rest) 12%, var(--ink-900)),
-    var(--ink-900) 72%
+    color-mix(in oklab, var(--role-rest) 16%, var(--ink-900)),
+    var(--ink-900) 78%
   );
 }
 

@@ -14,6 +14,7 @@ import {
   listLines,
   nameLines,
   pathLabel,
+  stopwatch,
   wordCount,
 } from '../format'
 import { defaultRoutineName } from '../PasteDialog'
@@ -61,6 +62,26 @@ describe('duration', () => {
     expect(duration(20_000)).toBe('20s')
     expect(duration(59_400)).toBe('59s')
     expect(duration(270_000)).toBe('4:30')
+  })
+})
+
+describe('stopwatch', () => {
+  it('stays m:ss from zero, unlike duration', () => {
+    // A clock in the corner must not change shape as the first minute passes.
+    expect(stopwatch(0)).toBe('0:00')
+    expect(stopwatch(9_000)).toBe('0:09')
+    expect(stopwatch(59_000)).toBe('0:59')
+    expect(stopwatch(60_000)).toBe('1:00')
+    expect(stopwatch(3_930_000)).toBe('65:30')
+  })
+
+  it('floors, so it never reports a second that has not finished', () => {
+    expect(stopwatch(59_900)).toBe('0:59')
+    expect(stopwatch(119_999)).toBe('1:59')
+  })
+
+  it('never goes negative, whatever a clock hands it', () => {
+    expect(stopwatch(-5_000)).toBe('0:00')
   })
 })
 

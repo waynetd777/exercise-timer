@@ -19,6 +19,7 @@ import {
   listLines,
   nameLines,
   pathLabel,
+  stopwatch,
   wordCount,
 } from './format'
 import {
@@ -368,7 +369,24 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           <span />
         )}
         <h1 className="run__title">{workout.name}</h1>
-        <span />
+
+        {/*
+          The session stopwatch, in the slot the layout already kept empty for
+          symmetry. Peripheral on purpose — the countdown is the number that
+          holds the eye — but it is the ONLY clock a rep-based routine has, since
+          those run in the list layout with no countdown at all.
+        */}
+        {status === 'idle' ? (
+          <span />
+        ) : (
+          <span
+            className="run__elapsed"
+            title="Time since you started"
+            aria-label={`${stopwatch(timer.sessionMs)} elapsed`}
+          >
+            {stopwatch(timer.sessionMs)}
+          </span>
+        )}
       </header>
 
       {/*
@@ -409,14 +427,14 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         <div className="rest-state">
           <p className="rest-state__title">Done</p>
           <div className="rest-state__stats">
-            {/* A gated routine has no elapsed time to report: the clock only
-                ever measured one run at a time. */}
-            {!routine.hasGates && (
-              <span className="stat">
-                <b>{duration(routine.totalMs)}</b>
-                <span className="label">Elapsed</span>
-              </span>
-            )}
+            {/* The time it actually took, which is what the session clock is
+                for. It used to be the routine's scheduled length, and was
+                omitted entirely for a gated routine — where the question "how
+                long did that take" is the only one time can answer. */}
+            <span className="stat">
+              <b>{duration(timer.sessionMs)}</b>
+              <span className="label">Elapsed</span>
+            </span>
             <span className="stat">
               <b>{routine.entries.length}</b>
               <span className="label">Steps</span>

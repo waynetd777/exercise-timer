@@ -23,6 +23,16 @@ export type Timer = {
   progress: number
   /** Time left in the whole routine, or `null` when gates make that unknowable. */
   totalRemainingMs: number | null
+  /**
+   * Time on the whole WORKOUT so far: wall-clock since the start, less pauses,
+   * stopped at the finish.
+   *
+   * A different axis from `totalRemainingMs`, which is a position in the routine
+   * — skip four steps and the routine is four steps further on while this is
+   * unmoved. That is the point: this is how long you have been training, and for
+   * a gated routine it is the only time there is.
+   */
+  sessionMs: number
   /** Reads live elapsed time IN THE CURRENT RUN. The audio scheduler needs this. */
   readElapsed: () => number
   /** Increments on every clock mutation, so the audio scheduler can re-arm. */
@@ -66,6 +76,22 @@ export function useTimer(workout: Workout): Timer {
   const clock = useRef<Clock>(IDLE_CLOCK)
   const readElapsed = useCallback(() => elapsed(clock.current, now()), [])
 
+  /**
+   * The whole workout, on the same data and transitions — minus the seeking.
+   *
+   * The run clock is re-anchored at every gate and every skip, which is what
+   * makes it trustworthy for the step you are on and useless for the session:
+   * it cannot say how long you have been training, and in a gated routine
+   * nothing else can either. A skip changes where you are, not how long you have
+   * been at it, so `moveTo` deliberately does not touch this.
+   */
+  const session = useRef<Clock>(IDLE_CLOCK)
+
+  /** Stops the session clock. The finish reports a time, not a stopwatch. */
+  const stopSession = useCallback(() => {
+    session.current = paused(session.current, now())
+  }, [])
+
   /** The tick reads the cursor without re-registering itself every second. */
   const cursorRef = useRef<Cursor>(cursor)
   cursorRef.current = cursor
@@ -100,6 +126,7 @@ export function useTimer(workout: Workout): Timer {
       const next = tick(routine, cursorRef.current.runIndex, readElapsed())
 
       if (next.kind === 'complete') {
+        stopSession()
         setCursor(next.cursor)
         setStatus('complete')
         return
@@ -130,12 +157,14 @@ export function useTimer(workout: Workout): Timer {
       window.clearTimeout(timeoutId)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [status, routine, readElapsed, moveTo])
+  }, [status, routine, readElapsed, moveTo, stopSession])
 
   useWakeLock(status === 'running')
 
   const start = useCallback(() => {
-    clock.current = started(now())
+    const stamp = now()
+    clock.current = started(stamp)
+    session.current = started(stamp)
     setCursor(START)
     setStatus('running')
     bump()
@@ -143,20 +172,25 @@ export function useTimer(workout: Workout): Timer {
 
   const pause = useCallback(() => {
     if (status !== 'running') return
-    clock.current = paused(clock.current, now())
+    const stamp = now()
+    clock.current = paused(clock.current, stamp)
+    session.current = paused(session.current, stamp)
     setStatus('paused')
     bump()
   }, [status, bump])
 
   const resume = useCallback(() => {
     if (status !== 'paused') return
-    clock.current = resumed(clock.current, now())
+    const stamp = now()
+    clock.current = resumed(clock.current, stamp)
+    session.current = resumed(session.current, stamp)
     setStatus('running')
     bump()
   }, [status, bump])
 
   const reset = useCallback(() => {
     clock.current = IDLE_CLOCK
+    session.current = IDLE_CLOCK
     setCursor(START)
     setStatus('idle')
     bump()
@@ -171,8 +205,11 @@ export function useTimer(workout: Workout): Timer {
     if (status === 'idle' || status === 'complete') return
     const target = advance(routine, here())
     moveTo(target, status !== 'running')
-    if (locate(routine, target).isComplete) setStatus('complete')
-  }, [status, routine, here, moveTo])
+    if (locate(routine, target).isComplete) {
+      stopSession()
+      setStatus('complete')
+    }
+  }, [status, routine, here, moveTo, stopSession])
 
   const previous = useCallback(() => {
     if (status === 'idle') return
@@ -206,6 +243,13 @@ export function useTimer(workout: Workout): Timer {
     secondsSpent: Math.floor(at.elapsedInEntryMs / 1000),
     progress,
     totalRemainingMs: routine.hasGates ? null : Math.max(0, routine.totalMs - timedElapsedMs),
+    /*
+     * Read at render rather than held in state. A value derived from a monotonic
+     * clock is only true at the moment it is read — the same reason nothing here
+     * accumulates ticks — and the display already re-renders every second while
+     * the workout runs, on a self-paced step as much as a timed one.
+     */
+    sessionMs: elapsed(session.current, now()),
     readElapsed,
     generation,
     start,
