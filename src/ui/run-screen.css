@@ -577,8 +577,20 @@
    * count, the same move `.panel__empty` makes — the width term that used to
    * govern here pinned a phone to the 1rem floor, which is unreadable from where
    * the phone is propped.
+   *
+   * The `cqi` term is the row's WIDTH budget, and it is not optional. A row is
+   * three columns and two of them are fixed in em — the count and its per-side
+   * qualifier — so the bigger the type, the less of the row is left for the name.
+   * With only three or four exercises the height term hit the 2.25rem ceiling,
+   * the fixed columns ate two thirds of the width, and `overflow-wrap` shattered
+   * the names a character at a time: "Spe / ed / Ska / ters". Only groups with a
+   * per-side row broke, since that column collapses to nothing otherwise — which
+   * is why some groups looked fine and others did not.
+   *
+   * 6.5cqi leaves the name about 7em, or a dozen characters a line, once both
+   * fixed columns and the padding have taken their share.
    */
-  font-size: clamp(1.05rem, calc(32cqh / var(--lines, 6)), 2.25rem);
+  font-size: clamp(1.05rem, min(calc(32cqh / var(--lines, 6)), 6.5cqi), 2.25rem);
 }
 
 .sheet__row {
@@ -651,9 +663,13 @@
  * Secondary: it qualifies the count rather than being part of it, and dimming it
  * keeps the numbers the thing the eye lands on down the column.
  */
+/*
+ * "each side". It may wrap — the pressure valve when a name still needs more room
+ * than the size cap alone can give it. It used to be `nowrap`, which made this
+ * column incompressible and the name column whatever was left.
+ */
 .sheet__side {
   padding-left: 0.45em;
-  white-space: nowrap;
   font-size: 0.72em;
   color: var(--bone-faint);
 }

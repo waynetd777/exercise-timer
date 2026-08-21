@@ -669,6 +669,24 @@
       "timestamp": "2026-08-21T22:08:39+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T22:08:39+02:00"
+    },
+    {
+      "error_message": "User-reported with a screenshot (iOS, list mode): some groups rendered with names broken mid-word \u2014 'Spe / ed / Ska / ters' \u2014 while other groups looked fine",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "`.sheet__list` sized its rows from the HEIGHT budget only \u2014 `clamp(1.05rem, 32cqh / var(--lines), 2.25rem)`. A row is three grid columns and two are fixed in em (the count at 3.4em and the per-side qualifier at 0.72em with white-space: nowrap), so a bigger font leaves the name column less width. With only three or four exercises the height term hit the 2.25rem ceiling; at that size the fixed columns took most of the row and `overflow-wrap: anywhere` on the name broke words a character at a time. It only happened to groups containing a per-side row, because that column collapses to nothing otherwise \u2014 which is why some groups looked fine.",
+      "fix": "Added the width term the sizing was missing: min(32cqh / --lines, 6.5cqi), which leaves the name about 7em once both fixed columns and the padding have taken their share. The qualifier may now also wrap (nowrap removed), so it is compressible rather than the name being whatever is left.",
+      "fix_rule": "A font size chosen from a HEIGHT budget must still be capped by the WIDTH the text has left, whenever the same element sits beside columns measured in em \u2014 the bigger the type, the narrower its own column becomes. And treat `overflow-wrap: anywhere` as a smoke alarm: if it ever fires in normal use, the sizing above it is wrong.",
+      "tags": [
+        "ios",
+        "layout",
+        "container-queries",
+        "list-mode",
+        "typography"
+      ],
+      "id": "bug-039",
+      "timestamp": "2026-08-21T22:20:42+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:20:42+02:00"
     }
   ]
 }
