@@ -114,31 +114,8 @@
 }
 
 /* ── Notice ──────────────────────────────────────────────────────────────── */
-.notice {
-  width: min(90vw, 26rem);
-  max-width: none;
-  margin: auto;
-  padding: var(--step-5);
-  display: grid;
-  justify-items: center;
-  gap: var(--step-4);
-  text-align: center;
-  color: var(--bone);
-  background: var(--ink-800);
-  border: var(--hairline);
-  border-radius: var(--radius);
-}
-
-.notice::backdrop {
-  background: rgb(8 9 10 / 0.85);
-}
-
-.notice__text {
-  margin: 0;
-  font-size: max(1.05rem, min(1.9cqi, 1.4rem));
-  font-weight: 650;
-  line-height: 1.35;
-}
+/* The notice and confirm dialogs are shared components; their styles live in
+   theme.css alongside .btn and .chip. */
 
 .library__notice {
   margin: 0;

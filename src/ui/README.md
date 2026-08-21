@@ -154,8 +154,9 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `PasteDialog.tsx` | Paste a routine as text; reports unparsed lines before saving |
 | `Menu.tsx` | The dropdown behind the collapsed toolbars. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger |
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
+| `ConfirmDialog.tsx` | Asks before something irreversible. A modal, unlike the editor's inline confirm, because it is answered mid-workout |
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL — synchronous pass first, so a step change cannot flash blank |
-| `theme.css` | Tokens, the type scale, the routine tints, and the shared `.label` / `.btn` / `.chip` classes |
+| `theme.css` | Tokens, the type scale, the routine tints, the shared `.label` / `.btn` / `.chip` classes, and the dialog shell both modals use |
 | `library.css`, `run-screen.css`, `editor.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
 | `icons.tsx` | Inline SVG — inherits `currentColor`, no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs |

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Run, TimelineEntry, Workout } from '../engine'
 import { groupEntries, groupOf, listMode, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
@@ -29,6 +29,7 @@ import {
   SoundOffIcon,
   SoundOnIcon,
 } from './icons'
+import { ConfirmDialog } from './ConfirmDialog'
 import { useMediaUrl } from './useMediaUrl'
 import './run-screen.css'
 
@@ -197,6 +198,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const timer = useTimer(workout)
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
+  const [leaving, setLeaving] = useState(false)
 
   useCueScheduler({
     // One run at a time: cues are scheduled on one clock, and a gate ends it.
@@ -274,6 +276,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const onKeyRef = useRef<(event: KeyboardEvent) => void>(() => {})
   onKeyRef.current = (event: KeyboardEvent) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return
+    // The dialog owns the keyboard while it is open.
+    if (leaving) return
     // Leave the key alone if something focused wants it — space on a button.
     const tag = (event.target as HTMLElement | null)?.tagName
     if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT') return
@@ -310,6 +314,29 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     timer.start()
   }
   const primaryAction = status === 'paused' ? timer.resume : begin
+
+  /*
+   * Leaving mid-workout pauses first and asks.
+   *
+   * The clock stops the moment Back is pressed rather than when the question is
+   * answered, so the seconds spent reading it are not charged to the step. If
+   * the answer is no, a workout that was running goes back to running — Back was
+   * a mistake, and nothing about the run should have changed.
+   */
+  const wasRunning = useRef(false)
+  const inProgress = status === 'running' || status === 'paused'
+
+  const requestExit = () => {
+    if (!inProgress) return onExit?.()
+    wasRunning.current = status === 'running'
+    timer.pause()
+    setLeaving(true)
+  }
+
+  const stay = () => {
+    setLeaving(false)
+    if (wasRunning.current) timer.resume()
+  }
   const primaryLabel =
     status === 'running'
       ? 'Pause'
@@ -323,7 +350,12 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     <main className="run" style={{ ['--phase' as string]: phase }}>
       <header className="run__header">
         {onExit ? (
-          <button className="btn btn--ghost" onClick={onExit} aria-label="Back to routines" title="Back to routines">
+          <button
+            className="btn btn--ghost"
+            onClick={requestExit}
+            aria-label="Back to routines"
+            title="Back to routines"
+          >
             <BackIcon />
           </button>
         ) : (
@@ -444,6 +476,16 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
               the control row is not a target you hit mid-effort at arm's length. */}
           {entry.selfPaced && <NextSlab onNext={withAudio(timer.next)} status={status} />}
         </div>
+      )}
+
+      {leaving && (
+        <ConfirmDialog
+          question="Leave this workout?"
+          detail="It is paused. Leaving loses your place in it."
+          confirmLabel="Leave"
+          onConfirm={() => onExit?.()}
+          onCancel={stay}
+        />
       )}
 
       <div className="controls">
