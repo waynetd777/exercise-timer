@@ -159,6 +159,10 @@
 - [2026-08-21] **Editor thumbnails are 44px and are BUTTONS that open the full-size lightbox** — briefly enlarged to 66px, then reverted on request. Their `<img>` uses `max-width/max-height: 100%` in the lightbox rather than `100%`, so a small image is shown at its own size instead of being upscaled into a blur.
 - [2026-08-21] **A `<label>` must not wrap a button** — the label forwards the button's click to its input. The editor's image row is a `<div>` with the input naming itself via `aria-label` for exactly this reason.
 
+- [2026-08-21] **The master list of exercise images is a vault note: `Fitness. Workouts.md`** (in `/Users/wayned/Library/CloudStorage/OneDrive-Personal/Notes`). 29 postimages URLs under an "Image links:" heading, grouped by blank lines (one group per machine, unnamed). Mirrored into `src/routines/imageCatalogue.ts` in the note's own order. If Wayne adds images to the note, regenerate that file. All 29 verified to resolve on 2026-08-21 — one returned a transient `000` from curl and was fine on retry, so re-check before concluding a link is dead.
+- [2026-08-21] **The catalogue stores URLs ONLY; labels come from `labelFromUrl()`** (filename, minus extension, separators to spaces). Nothing to keep in sync. A catalogue image keeps its filename label even when a routine uses it under a different step name — "Cycling" describes the picture better than the step name "Warm Up" does. Non-catalogue images fall back to their most common step name.
+- [2026-08-21] **`moveStep` moves a row through the routine as it READS, crossing round boundaries** — into an adjacent round (first child going down, last going up), swapping with an adjacent step, or stepping out of a round when at its edge. Rounds themselves only swap, never nest. Up/down are disabled only when `first`/`last` AND `depth === 0`, because a nested step at an edge can always step outside. An emptied round is deliberately LEFT in place; a group vanishing under you is worse than an empty one you can delete.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

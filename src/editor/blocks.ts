@@ -131,6 +131,14 @@ export function insertAfter(blocks: readonly Block[], path: Path, block: Block):
   })
 }
 
+/** Inserts AT a position among siblings, pushing whatever is there along. */
+export function insertAt(blocks: readonly Block[], path: Path, block: Block): Block[] {
+  return withSiblings(blocks, path, (siblings, index) => {
+    siblings.splice(index, 0, block)
+    return siblings
+  })
+}
+
 /** Appends into a repeat's children. `path` must point at the repeat. */
 export function appendTo(blocks: readonly Block[], path: Path, block: Block): Block[] {
   return mapAt(blocks, path, (target) =>
@@ -172,6 +180,59 @@ export function moveBy(blocks: readonly Block[], path: Path, delta: number): Blo
     siblings.splice(target, 0, moved!)
     return siblings
   })
+}
+
+/**
+ * Moves a step through the routine as it READS, crossing group boundaries.
+ *
+ * `moveBy` only reorders among siblings, which leaves a step trapped inside or
+ * outside a round. This walks the visual order instead:
+ *
+ *   - next to a round      -> move INTO it (first child going down, last going up)
+ *   - next to a step       -> swap with it
+ *   - at the edge, nested  -> move OUT, landing beside the round
+ *   - at the edge, top     -> nothing to do
+ *
+ * Rounds themselves only ever swap with their siblings: `wrapInRepeat` refuses
+ * to nest a round in a round, so moving one into another would build a tree the
+ * editor cannot show.
+ *
+ * A round left empty by a departing step is kept rather than pruned — a group
+ * vanishing under you is more surprising than an empty one you can delete.
+ */
+export function moveStep(blocks: readonly Block[], path: Path, delta: 1 | -1): Block[] {
+  const target = blockAt(blocks, path)
+  if (!target) return [...blocks]
+  if (target.kind === 'repeat') return moveBy(blocks, path, delta)
+
+  const index = path[path.length - 1]!
+  const parentPath = path.slice(0, -1)
+  const parent = parentPath.length > 0 ? blockAt(blocks, parentPath) : undefined
+  const siblings =
+    parent && parent.kind === 'repeat' ? parent.children : parentPath.length === 0 ? blocks : []
+
+  const neighbour = siblings[index + delta]
+
+  if (neighbour?.kind === 'repeat') {
+    const without = removeAt(blocks, path)
+    // Going down, removing the step shifts the round back by one; going up it
+    // sits before the step and is unaffected.
+    const roundPath = [...parentPath, delta === 1 ? index : index - 1]
+    return delta === 1
+      ? insertAt(without, [...roundPath, 0], target)
+      : appendTo(without, roundPath, target)
+  }
+
+  if (neighbour) return moveBy(blocks, path, delta)
+
+  // At the edge of a round: step outside it.
+  if (parentPath.length > 0) {
+    const without = removeAt(blocks, path)
+    const roundIndex = parentPath[parentPath.length - 1]!
+    return insertAt(without, [...parentPath.slice(0, -1), roundIndex + (delta === 1 ? 1 : 0)], target)
+  }
+
+  return [...blocks]
 }
 
 export function updateSegment(

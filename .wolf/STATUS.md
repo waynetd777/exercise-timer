@@ -146,6 +146,10 @@
   - New **"Choose" picker**: a searchable visual grid of every image already used across the library. `collectImages()` in `src/editor/images.ts` is pure — distinct urls, labelled with the step name they appear under most often, ties broken alphabetically for stability. **8 tests.** Wayne's routines yield 13 distinct images, several used 9 times.
   - The image row became a `<div>`: a `<label>` wrapping a button forwards the click to its input.
   - **194 tests green.**
+- **Rows can move in and out of rounds, and the picker offers the whole image catalogue** (user-reported)
+  - `moveStep` replaces `moveBy` in the editor: a step moves into an adjacent round (first child going down, last going up), swaps with an adjacent step, or steps out of a round at its edge. Rounds only ever swap — nesting stays refused. Up/down now disable only at `depth === 0`, since a nested step at an edge can always move out. An emptied round is left in place on purpose. **11 tests**, including reversibility and the fact that moving a step into a ×3 round triples its contribution.
+  - `src/routines/imageCatalogue.ts` — the **29 URLs from the `Fitness. Workouts` vault note**, in its original order and grouping, all verified to resolve. Labels are derived by `labelFromUrl()` so there is no parallel list to maintain; a catalogue image keeps its filename label even where a routine uses it under a different step name. The picker now offers all 29 whether or not a routine uses them.
+  - **214 tests green.**
 
 ---
 

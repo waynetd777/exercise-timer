@@ -3,6 +3,7 @@ import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { newRoutineBlocks } from '../editor/blocks'
 import { collectImages } from '../editor/images'
+import { IMAGE_CATALOGUE } from '../routines/imageCatalogue'
 import { SEED_ROUTINES } from '../routines/samples'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
@@ -43,7 +44,10 @@ export function App() {
   const [view, setView] = useState<View>({ screen: 'library' })
 
   /** Every image already in use, so the editor can offer them for reuse. */
-  const knownImages = useMemo(() => collectImages(library.workouts), [library.workouts])
+  const knownImages = useMemo(
+    () => collectImages(library.workouts, IMAGE_CATALOGUE),
+    [library.workouts],
+  )
   const toLibrary = useCallback(() => setView({ screen: 'library' }), [])
 
   const onStarted = useCallback(() => {
