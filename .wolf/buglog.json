@@ -722,6 +722,23 @@
       "timestamp": "2026-08-22T00:02:27+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-22T00:02:27+02:00"
+    },
+    {
+      "error_message": "User-reported: \"Let's go!\" did not play on the first routine started after opening the app, and worked on every start after that",
+      "file": "src/audio/speech.ts",
+      "root_cause": "iOS drops the FIRST utterance a page makes unless `speak()` is called inside a user gesture. The opening line is fired from a React effect and then a setTimeout (AFTER_START_CUE_MS), so it is never itself in the gesture \u2014 the tap is over by the time it runs. The first attempt was therefore swallowed, and it also served as the page's first utterance, which is why every later line was audible.",
+      "fix": "`unlockSpeech()` in speech.ts speaks a single space at zero volume, called synchronously from every control alongside `audio.unlock()` \u2014 the same problem the AudioContext has and the same shape of answer. Idempotent, inaudible, and it leaves nothing queued for the first real line to cancel.",
+      "fix_rule": "Anything gated on a user gesture must be primed FROM the gesture, not from whatever the gesture eventually causes. An effect or a timeout is a different task, and iOS counts tasks. The AudioContext taught this once already: when a second API turns out to be gesture-gated, wire it into the same `withAudio` wrapper rather than hoping the activation carries.",
+      "tags": [
+        "ios",
+        "speech",
+        "user-gesture",
+        "audio"
+      ],
+      "id": "bug-042",
+      "timestamp": "2026-08-22T00:29:27+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-22T00:29:27+02:00"
     }
   ]
 }

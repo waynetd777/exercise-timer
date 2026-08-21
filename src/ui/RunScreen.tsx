@@ -4,6 +4,7 @@ import { groupEntries, groupOf, listMode, sectionOf, stepCount, totalDurationMs 
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useSpokenCues } from '../audio/useSpokenCues'
+import { unlockSpeech } from '../audio/speech'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import type { RunStatus } from '../state/useTimer'
@@ -221,13 +222,18 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   useSpokenCues(at, status, muted)
 
   /**
-   * Every control unlocks the AudioContext. It has to happen synchronously
-   * inside a user gesture — mobile browsers refuse otherwise — and unlock() is
-   * idempotent, so wrapping all of them is simpler than guessing which tap
-   * comes first.
+   * Every control unlocks the AudioContext and primes the voice. Both have to
+   * happen synchronously inside a user gesture — mobile browsers refuse
+   * otherwise — and both are idempotent, so wrapping all of them is simpler than
+   * guessing which tap comes first.
+   *
+   * The voice needs it for the same reason and in a worse way: the opening line
+   * is spoken from an effect and then a timeout, so it is never itself inside the
+   * gesture, and iOS drops a page's first utterance when that is the case.
    */
   const withAudio = (action: () => void) => () => {
     audio.unlock()
+    unlockSpeech()
     action()
   }
 
@@ -293,6 +299,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     const act = (run: () => void) => {
       event.preventDefault()
       audio.unlock()
+      unlockSpeech()
       run()
     }
 
