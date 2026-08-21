@@ -124,6 +124,26 @@
   --phase: var(--role-rest);
 
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /*
+   * The notch, the Dynamic Island and the home indicator.
+   *
+   * `index.html` sets `viewport-fit=cover` and a translucent status bar, so an
+   * app installed to a home screen owns the WHOLE screen — which is right for the
+   * phase wash, and means every screen has to keep its own controls out from
+   * under the hardware itself. iOS takes touches in the status bar, so a button
+   * up there is not merely half-hidden: it cannot be pressed at all. That is what
+   * put the run screen's back button beyond reach mid-workout.
+   *
+   * Tokens rather than `env()` at each site, so the intent is greppable and a new
+   * screen can copy it. All four sides, because the island moves to the side in
+   * landscape and the home indicator follows it. Zero on hardware without them,
+   * and zero in a browser tab.
+   */
+  --safe-top: env(safe-area-inset-top);
+  --safe-right: env(safe-area-inset-right);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
 }
 
 *,
