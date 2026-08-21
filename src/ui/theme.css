@@ -203,14 +203,6 @@ button {
 }
 
 
-/* The sort control: a real <select>, so keyboard and mobile pickers come free. */
-.chip--select {
-  padding-right: var(--step-3);
-  font-family: inherit;
-  color: var(--bone);
-  cursor: pointer;
-}
-
 /* ── Menu ──────────────────────────────────────────────────────────────────
  * A chip that opens a short list of actions. Positioned against its own
  * wrapper rather than in the top layer, so it needs no anchor positioning.
@@ -268,6 +260,18 @@ button {
 .menu__item:disabled {
   color: var(--bone-faint);
   cursor: not-allowed;
+}
+
+/* Pushed to the far edge, so a ticked item still reads as one line. */
+.menu__tick {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  color: var(--role-prepare);
+}
+
+.menu__item[data-selected='true'] {
+  color: var(--bone);
 }
 
 .menu__item .icon {

@@ -95,10 +95,6 @@
   color: var(--bone-faint);
 }
 
-.library__sort {
-  display: flex;
-}
-
 /*
  * Pull-to-update indicator. Parked above the list and revealed by the same
  * translate that moves the list, so no layout shifts as the finger travels.
