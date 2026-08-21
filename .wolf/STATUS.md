@@ -218,10 +218,31 @@
 
 ---
 
-## 🚀 Next quest — strength routines: untimed steps, sections, ladders
+## 🚀 Next quest — none open
 
-**Agreed 2026-08-21 with Wayne. Steps 1–5 of the build order are DONE, committed
-and green (423 tests, typecheck + build clean). Only the EDITOR is left.**
+The strength-routine work below is COMPLETE and pushed. The obvious candidates
+now, none started:
+
+- **Train with it.** Still the only real unknown: whether the wake lock holds on
+  Wayne's iPhone through a full session, and whether the whistle decodes on iOS
+  or falls back to the plain tone. Neither can be checked from a desktop browser,
+  and the physical interaction changed completely — you now reach for the phone
+  once per set.
+- **Seed a strength routine.** The seed is still the old fully-timed one; a new
+  install would be better introduced by the kind of routine the app is now for.
+- **Show a step's note and alternative in the editor.** Both are preserved and
+  neither is visible in a row. Sections got a note field; step rows were already
+  dense, so this waited for the editor to be used in anger.
+- **Portrait iPad** puts the media panel at ~250x773, which renders near-square
+  illustrations small. Known, deliberate, unfixed.
+
+---
+
+## ✅ Done — strength routines: untimed steps, sections, ladders
+
+**COMPLETE. All six steps of the build order are done, green (441 tests,
+typecheck + build clean) and pushed.** The app takes a pasted strength routine,
+runs it a set at a time, and edits it.
 
 **REVIEWED IN THE BROWSER and signed off** — "looking very good now" after a
 round of run-screen fixes: one tap per round / rung / burnout block, a timed step
@@ -371,9 +392,10 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
 5. ✅ The paste parser (`routines/pasteFormat.ts`) plus a paste dialog in the
    Routines menu. Understands every line of all three emails; a line it cannot
    place is listed with its number before anything is saved.
-6. ◀ **NEXT** — `editor`: sections, ladders, rep fields, self-paced steps.
-   Biggest UI chunk. Until it lands, a pasted routine can be run but not edited,
-   and the editor says so rather than showing an empty list.
+6. ✅ `editor`: sections, ladders, rep fields, self-paced steps. The tree
+   operations recurse on `isGroup`; `setTiming` makes timed-or-counted one
+   exclusive choice; a ladder's rungs are edited as the text they are written as;
+   a section carries its instruction as a field. The step row's UNIT is the mode.
 
 ### Found while building step 2
 - **"Rest 45 seconds after each round" meets the trailing-rest rule.** A rest as
@@ -402,6 +424,16 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
   one tap, and a section's loose steps collapse too ("complete without stopping").
   `advance` lives on `Repeat`, `Ladder` and `Section`, defaulting to `'set'`.
   Taps across the three real routines: 37 / 35 / 38, down from ~155 each.
+
+### Landed after the review
+- Space follows the big button: on a self-paced step it is Next, while `k` and
+  the on-screen button keep pause.
+- Import accepts plain-text routines, and `bundle.ts`'s `isBlock` whitelist was
+  silently dropping every pasted routine on re-import (bug-032) — an export that
+  wrote perfectly and restored nothing.
+- A pile of run-screen layout fixes, all the same class and all in the buglog:
+  auto grid tracks and flex children stretch by default (bug-028/029/030), and
+  two things sharing a column must be sized against each other (bug-031).
 
 ### Still open
 - Trampoline warm-up (3 Aug) has a "Sprint Finish – Fast feet for 15 seconds"

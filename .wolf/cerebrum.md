@@ -331,3 +331,13 @@
   countdown, having no end of its own. The finish is fired BY HAND when a routine
   ends on a gate (`finishesOnTap`), because a tap cannot be queued on the audio
   clock ahead of time.
+
+- [2026-08-21] **Adding a block kind means updating every WHITELIST that
+  validates one.** `bundle.ts`'s `isBlock` accepted only segment and repeat, so
+  pasted routines exported perfectly and were silently filtered out on re-import
+  — a backup that restores nothing. `shareLink.ts` has no such list. Grep for
+  `kind ===` before shipping a new kind.
+- [2026-08-21] **The editor's three levels are `section > round/ladder > step`.**
+  Tree walks recurse on `isGroup`, never `kind === 'repeat'`. `setTiming` makes
+  timed-or-counted exclusive and DELETES the other key, for the same
+  `exactOptionalPropertyTypes` reason as `clearMedia`.
