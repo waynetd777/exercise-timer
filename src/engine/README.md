@@ -23,20 +23,23 @@ A fully timed routine compiles to exactly **one** run and behaves identically to
 before any of this existed. That is the point of the shape: the tested core is
 untouched, and `runtime.ts` and `cues.ts` never learned that gates exist.
 
-A gate usually holds one step. The exception is a group iteration — a **round**
-or a **ladder rung** — where one Next clears every rep-based step in it, because
-the iteration is the unit of work: "12 curls, 10 press, 12 flyes" is one round
-you do and tick off, not three prompts to tap through with your hands full. Both
-collapse by default; `advance: 'step'` opts a group out, and an inner opt-out
-beats an outer group's default.
+A gate usually holds one step. The exception is a **group** — a round, a ladder
+rung, or the loose steps of a section — where one Next clears every rep-based
+step in it, because the group is the unit of work: "12 curls, 10 press, 12
+flyes" is one round you do and tick off, not three prompts to tap through with
+your hands full, and a burnout block says "complete without stopping" in as many
+words. All of them collapse by default; `advance: 'step'` opts one out, and an
+inner opt-out beats an outer group's default.
 
-A TIMED step inside the iteration is never swallowed by the tap — it keeps its
-own run, so the 45-second rest after a round and the 10-second wall sit after a
-rung still count themselves down and flow on without one.
+Nothing is hidden by this — the list draws every step of the gate, all marked as
+being worked — so the only thing given up is per-exercise progress, which is not
+progress anyone tracks mid-set.
 
-A **section** never collapses. It is a part of a routine rather than a piece of
-work, and hiding a screenful behind one tap would lose the point of showing the
-list.
+A TIMED step is never swallowed by the tap. It keeps its own run, so the
+45-second rest after a round, the wall sit after a rung and the one in the middle
+of a burnout all count themselves down. That is why a burnout containing a wall
+sit is two taps rather than one: the clock has to start when you reach the hold,
+and your tap is what says you have.
 
 Two consequences:
 

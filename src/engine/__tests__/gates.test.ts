@@ -194,15 +194,35 @@ describe('a round clears with ONE tap', () => {
     expect(routine.runs).toHaveLength(3)
   })
 
-  it('never collapses a whole SECTION, only an iteration within one', () => {
-    // "Complete without stopping" is still four separate steps: a section is a
-    // part of a routine, not a piece of work, and hiding a screenful behind one
-    // tap would lose the point of showing the list.
+  it('collapses the loose steps of a section, which is what "without stopping" means', () => {
     const routine = compile(
       workout('Burnout', [
-        section('Final Burnout', [step('Sumo Squats', 20), step('Curtsy Lunges', 20)]),
+        section('Final Burnout', [
+          step('Sumo Squats', 20),
+          step('Curtsy Lunges', 20),
+          step('Squat Pulses', 30),
+        ]),
       ]),
     )
+    expect(routine.runs).toHaveLength(1)
+    expect(routine.runs[0]!.entries).toHaveLength(3)
+  })
+
+  it('keeps a section\'s own steps separate from a group inside it', () => {
+    // The last rung of the ladder must not merge with the block that follows it.
+    const routine = compile(
+      workout('Legs', [
+        section('Legs', [ladder([5], [step('Squats', 'rung')]), step('Calf Raises', 15)]),
+      ]),
+    )
+    expect(routine.runs.map((run) => run.entries.map((e) => e.name))).toEqual([
+      ['Squats'],
+      ['Calf Raises'],
+    ])
+  })
+
+  it('advances a step belonging to no group at all on its own', () => {
+    const routine = compile(workout('Loose', [step('Push-ups', 12), step('V-Ups', 10)]))
     expect(routine.runs).toHaveLength(2)
   })
 

@@ -115,6 +115,7 @@ function sectionStep(block: Section): PathStep {
     of: 1,
     display: block.display,
     ...(block.note !== undefined ? { note: block.note } : {}),
+    ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
 }
 
@@ -144,21 +145,25 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
 /**
  * The group a self-paced step advances WITH, or `null` if it advances alone.
  *
- * Steps sharing a key are cleared by one Next. The innermost round or rung wins,
- * and both collapse by default, because the ITERATION is the unit of work —
- * tapping through a round's five exercises separately is five taps for one thing
- * you just did. A section does not qualify: it is a part of a routine, not a
- * piece of work, and collapsing one would hide a whole screen behind one tap.
+ * Steps sharing a key are cleared by one Next. The innermost group wins, and all
+ * of them collapse by default, because the group is the unit of work: a round, a
+ * ladder rung, or the loose steps of a burnout block whose instruction reads
+ * "complete without stopping". Tapping through those separately is five taps for
+ * one thing you just did.
+ *
+ * Nothing is hidden — the list draws every step of the gate, all marked as being
+ * worked — so the only cost of collapsing is losing per-exercise progress, which
+ * is not progress anyone is tracking mid-set.
  */
 function gateKey(entry: TimelineEntry): string | null {
   for (let i = entry.path.length - 1; i >= 0; i--) {
     const step = entry.path[i]!
-    if (step.kind === 'section') continue
     // An explicit opt-out wins over an outer group's default: asking for one
     // exercise at a time must not be overruled by the group enclosing it.
     if (step.advance === 'step') return null
     return `${step.id}@${step.iteration}`
   }
+  // A step belonging to no group at all advances alone.
   return null
 }
 
