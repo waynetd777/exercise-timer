@@ -141,13 +141,19 @@
  * two-column layout sets --clock-height itself rather than --clock-max, so it is
  * unaffected by these.
  */
+/*
+ * Short windows. The row split changes, so the clock's share is re-stated in the
+ * COLUMN's own height — the same basis as the base rule, since `.count` became
+ * the container. Read as a share of the body these would be 25% and 22%, which
+ * is what they used to say when `cqh` meant the whole body.
+ */
 @media (max-height: 700px) {
   .run__body {
     grid-template-rows: minmax(0, 50fr) minmax(0, 50fr);
   }
 
   .count__clock {
-    --clock-max: 28cqh;
+    --clock-max: 50cqh;
   }
 }
 
@@ -157,7 +163,7 @@
   }
 
   .count__clock {
-    --clock-max: 22cqh;
+    --clock-max: 48cqh;
   }
 
   /* At this height the name and label FLOORS are what crowd the countdown out,
@@ -167,8 +173,9 @@
   }
 
   .count__name {
-    /* Floor comes down, but the fit cap stays: a long name must still fit. */
-    font-size: clamp(1.15rem, min(11cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
+    /* Floor comes down, but the cap stays where the base rule puts it: a long
+       name must still fit its column. */
+    font-size: clamp(1.15rem, min(14cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
   }
 
   .count {
