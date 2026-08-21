@@ -284,3 +284,15 @@
   silently skipped the new group kinds, and in `media/gc.ts` that would have
   orphaned live images and deleted them. `isGroup()` in `engine/types.ts` exists
   for this.
+
+- [2026-08-21] **A pasted routine goes to the LIBRARY, not the editor.** The
+  editor has no row for a section or a ladder yet, so it would open on a blank
+  screen. Review happens in the paste dialog, which lists every line the parser
+  could not place. Revisit once the editor gains those rows.
+- [2026-08-21] **In list mode the SECTION decides the display, not the step.** A
+  45s rest inside a rep-based section stays a row in the list; flipping to a
+  full-screen countdown for it and back would be disorienting.
+- [2026-08-21] **Regex trap in `pasteFormat.ts`:** `DASH` is a complete character
+  class, `DASH_CHARS` is the bare characters. Nesting the first inside another
+  class silently gives `[\s[-–—]]`, which matches a literal bracket — it is what
+  stopped "30-second Plank" being read as a duration.

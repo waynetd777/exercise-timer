@@ -220,8 +220,13 @@
 
 ## 🚀 Next quest — strength routines: untimed steps, sections, ladders
 
-**Agreed 2026-08-21 with Wayne. Steps 1–3 of the build order are DONE and green
-(356 tests, typecheck + build clean). Next: step 4, list mode on the run screen.**
+**Agreed 2026-08-21 with Wayne. Steps 1–5 of the build order are DONE, committed
+and green (380 tests, typecheck + build clean). Only the EDITOR is left.**
+
+**AWAITING REVIEW IN THE BROWSER** — dev server on http://localhost:5175/. Two
+things to check: (1) the seeded routine still runs correctly, since the whole run
+loop changed underneath it; (2) Routines → Paste, paste one of the emails in
+`src/routines/__tests__/emails/`, add it, and run it to see list mode.
 
 ### Landed so far
 - **Step 1** — the three routines are saved verbatim as parser fixtures in
@@ -356,11 +361,16 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
    (stay / move / complete + when the display next changes), tested without a
    DOM — including that ten minutes asleep JUMPS to the gate in one move rather
    than walking a step per tick.
-4. ◀ **NEXT** — `ui`: list mode on the run screen. `groupEntries()` already
-   returns exactly the rows to draw and `sectionOf()` the display mode; what is
-   missing is the component, the full-width NEXT button, and picking the mode.
-5. The paste parser, with the three emails as fixtures.
-6. `editor`: sections, ladders, rep fields, untimed steps. Biggest UI chunk, last.
+4. ✅ `ui`: list mode. The section decides the mode, not the step; the list is the
+   innermost group; NEXT is a slab across the bottom. Steps 4 and 5 were SWAPPED
+   — the parser went first, because list mode had nothing to render until a
+   rep-based routine could get into the app.
+5. ✅ The paste parser (`routines/pasteFormat.ts`) plus a paste dialog in the
+   Routines menu. Understands every line of all three emails; a line it cannot
+   place is listed with its number before anything is saved.
+6. ◀ **NEXT** — `editor`: sections, ladders, rep fields, self-paced steps.
+   Biggest UI chunk. Until it lands, a pasted routine can be run but not edited,
+   and the editor says so rather than showing an empty list.
 
 ### Found while building step 2
 - **"Rest 45 seconds after each round" meets the trailing-rest rule.** A rest as
@@ -370,6 +380,18 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
   way it is decided, the test says which was chosen.
 - A `reps: {kind:'rung'}` step outside a ladder resolves to NO count rather than
   zero. Half-authored beats "0 ×".
+
+### Landed in steps 4–5
+- `ui/PasteDialog.tsx` + `PasteIcon`, wired into the Routines menu. Parses as you
+  type; adds to the LIBRARY, not the editor, since the editor cannot show a
+  section or ladder yet.
+- `ui/RunScreen.tsx` gained `SectionList`, and `format.ts` gained `effortLabel`
+  and `groupCaption`. Styles in `run-screen.css` (`.run__sheet`, `.sheet__*`,
+  `.btn--next`) and `library.css` (`.paste*`).
+- Parser decisions are documented in `routines/README.md`. The regex trap worth
+  remembering: `DASH` is a complete character class and `DASH_CHARS` is the bare
+  characters — nesting the first inside another class yields `[\s[-–—]]`, which
+  is what stopped "30-second Plank" parsing as a duration.
 
 ### Still open
 - Trampoline warm-up (3 Aug) has a "Sprint Finish – Fast feet for 15 seconds"
