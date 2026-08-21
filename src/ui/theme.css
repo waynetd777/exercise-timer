@@ -169,6 +169,18 @@ body,
    */
   height: 100%;
   height: 100dvh;
+  /*
+   * The document itself never scrolls. Every screen is a full-height grid with
+   * its own scroller inside it, and a dialog scrolls its own panel — so a
+   * scrollable document can only ever be a mistake.
+   *
+   * It was one: focusing the paste box brought the keyboard up, iOS scrolled the
+   * DOCUMENT to reveal the field, and closing the dialog left it scrolled. The
+   * home screen then had a band of nothing at the bottom until it was dragged
+   * back down by hand. With nothing scrollable there is nothing to leave scrolled
+   * — iOS moves the visual viewport instead, which snaps back on its own.
+   */
+  overflow: hidden;
 }
 
 body {
