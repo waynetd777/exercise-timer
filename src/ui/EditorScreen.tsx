@@ -21,12 +21,15 @@ import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
 import { normaliseImageUrl } from '../editor/postimages'
+import { storeFile } from '../media/pin'
 import { duration } from './format'
+import { useMediaUrl } from './useMediaUrl'
 import {
   BackIcon,
   CheckIcon,
   CloseIcon,
   ImageIcon,
+  ImportIcon,
   CopyIcon,
   DownIcon,
   PlusIcon,
@@ -194,6 +197,7 @@ function SegmentRow({
   onWrap,
   onPreview,
   onChoose,
+  onUpload,
 }: RowProps & {
   segment: Segment
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
@@ -201,9 +205,11 @@ function SegmentRow({
   onWrap: (path: Path) => void
   onPreview: (src: string, alt: string) => void
   onChoose: (path: Path) => void
+  onUpload: (path: Path, file: File) => Promise<void>
 }) {
   const [urlDraft, setUrlDraft] = useState(mediaUrl(segment.media))
-  const imageUrl = segment.media?.source === 'remote' ? segment.media.url : null
+  const upload = useRef<HTMLInputElement>(null)
+  const imageUrl = useMediaUrl(segment.media)
 
   const commitUrl = () => {
     const url = normaliseImageUrl(urlDraft)
@@ -329,6 +335,28 @@ function SegmentRow({
           <ImageIcon />
           Choose
         </button>
+
+        <button
+          type="button"
+          className="chip chip--action"
+          onClick={() => upload.current?.click()}
+          aria-label="Upload your own photo for this step"
+          title="Upload your own photo"
+        >
+          <ImportIcon />
+          Upload
+        </button>
+        <input
+          ref={upload}
+          className="visually-hidden"
+          type="file"
+          accept="image/*"
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            event.target.value = ''
+            if (file) void onUpload(path, file)
+          }}
+        />
 
         {imageUrl && (
           <button
@@ -471,6 +499,7 @@ export function EditorScreen({
   const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null)
   /** The step whose image is being chosen, or null when the picker is closed. */
   const [choosingFor, setChoosingFor] = useState<Path | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   /**
    * `coalesce` marks a text-ish edit, which collapses a run of keystrokes into
@@ -510,6 +539,15 @@ export function EditorScreen({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  const upload = async (path: Path, file: File) => {
+    try {
+      const media = await storeFile(file)
+      patchSegment(path, { media })
+    } catch {
+      setUploadError('That image could not be read. Try a JPEG, PNG or WebP.')
+    }
+  }
 
   const goBack = () => {
     if (dirty) setConfirmingExit(true)
@@ -587,6 +625,12 @@ export function EditorScreen({
           </button>
         </div>
 
+        {uploadError && (
+          <p className="editor__error label label--sm" role="alert">
+            {uploadError}
+          </p>
+        )}
+
         <p className="editor__stats label label--sm">
           <span>
             <span className="unit">{duration(totalDurationMs(preview))}</span> total
@@ -619,6 +663,7 @@ export function EditorScreen({
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                   onPreview={(src, alt) => setImagePreview({ src, alt })}
                   onChoose={setChoosingFor}
+                  onUpload={upload}
                 />
               ) : (
                 <RepeatRow

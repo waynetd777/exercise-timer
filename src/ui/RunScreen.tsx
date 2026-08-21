@@ -17,15 +17,15 @@ import {
   SoundOffIcon,
   SoundOnIcon,
 } from './icons'
-import { resolveMediaPreview } from './media'
+import { useMediaUrl } from './useMediaUrl'
 import './run-screen.css'
 
 /** The final three seconds of a step, where the countdown starts to pulse. */
 const URGENT_MS = 3_000
 
 function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry | null }) {
-  const src = resolveMediaPreview(entry.media)
-  const nextSrc = resolveMediaPreview(next?.media)
+  const src = useMediaUrl(entry.media)
+  const nextSrc = useMediaUrl(next?.media)
 
   // Decode the next step's image while this one is still running, or the
   // transition lands on a blank frame at exactly the wrong moment.
