@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { compile, position, skipBack, skipForward } from '../engine'
-import type { Position, Timeline, Workout } from '../engine'
+import type { Position, Run, Timeline, Workout } from '../engine'
 import type { Clock } from './clock'
 import { elapsed, IDLE_CLOCK, paused, resumed, seeked, started } from './clock'
 import { useWakeLock } from './useWakeLock'
@@ -39,8 +39,20 @@ const now = () => performance.now()
  * end of the step, whichever comes first). About one callback per second
  * instead of sixty, with no loss of precision.
  */
+/** A routine with no steps at all still needs something for the runner to hold. */
+const EMPTY_RUN: Run = { index: 0, entries: [], totalMs: 0, selfPaced: false }
+
 export function useTimer(workout: Workout): Timer {
-  const timeline = useMemo(() => compile(workout), [workout])
+  /*
+   * The FIRST run, not the whole routine.
+   *
+   * Everything the editor can currently author is fully timed, and a fully timed
+   * routine compiles to exactly one run — so this is the whole thing, and the
+   * runner behaves as it always has. Gated routines need a cursor that can cross
+   * runs; `engine/navigate.ts` already has the pure moves for it, and wiring them
+   * in here is the next piece of the strength-routine work.
+   */
+  const timeline = useMemo(() => compile(workout).runs[0] ?? EMPTY_RUN, [workout])
 
   const [status, setStatus] = useState<RunStatus>('idle')
   const [elapsedMs, setElapsedMs] = useState(0)

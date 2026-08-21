@@ -88,7 +88,7 @@
 - [2026-08-21] **Library pattern mirrors the run clock: pure logic in `library.ts`, IO in `workouts.ts`, React in `useLibrary.ts`.** All the fiddly rules (favourites pinned, never-run sorts below run, `(copy 2)` numbering that does not stack suffixes, blank rename rejected, `markRun` must NOT touch `updatedAt`) are pure and unit-tested without a browser. IndexedDB itself is deliberately dumb and untested — keep it that way rather than adding fake-indexeddb.
 - [2026-08-21] **Column contents are centred** — countdown, exercise name, meta row, next-up line, and the idle/complete screens. Left-aligned was the original; don't revert.
 
-- [2026-08-21] **The app is called "DavShack Timer"** (renamed from "DavShack Gym Timer"). Shown as the centred home-screen heading and the document title (so it becomes the PWA install name). The library heading is the PRODUCT name, not a "Routines" section label.
+- [2026-08-21] **The app is called "Exercise Timer"** (was "DavShack Timer", before that "DavShack Gym Timer"). Shown as the centred home-screen heading and the document title, and carried in the PWA manifest. Five places: `index.html` (`<title>` + `apple-mobile-web-app-title`), `vite.config.ts` (manifest `name`/`short_name`), `public/favicon.svg` (aria-label), `LibraryScreen.tsx`, `README.md`. The library heading is the PRODUCT name, not a "Routines" section label. **The `davshack-timer-bundle` marker in `bundle.ts` is DATA, not branding — renaming it would make every existing export unreadable. Leave it.**
 - [2026-08-21] **Library cards open on a whole-card click, via a stretched `<button>` overlay** — not an onClick on the `<li>`, which would not be focusable or announced, and not a wrapping button, which cannot legally contain the star and action buttons. Layering matters: `.row__open` at `z-index: 1` sits ABOVE the name/stats so the whole card is clickable, and `.row__star`/`.row__actions` at `z-index: 2` sit above it so they still work. The overlay is rendered ONLY in idle mode — otherwise it covers the rename input and the delete confirmation.
 
 - [2026-08-21] **Centred text with letter-spacing is ALWAYS off-centre by half the tracking** — CSS applies letter-spacing after the last character too, so the line box and the visible glyphs differ by that amount. Fix: keep the value in one custom property and add `padding-right: calc(-1 * var(--tracking))` to the block. (`bug-009`)
@@ -186,8 +186,8 @@
 - [2026-08-21] **A portrait iPad (768px) lands in the WIDE two-column layout**, which gives the media panel only ~250x773 — narrow and very tall. That aspect is the reason near-square illustrations render small there. Lowering the panel's share or raising the 46rem breakpoint so 768px stacks would both help; not done, since it is a visible layout change rather than a bug.
 
 - [2026-08-21] **`CueKind` is `countdown | work-start | work-end | workout-complete`** — there is no single "phase change" any more. Every boundary is both an end and a start, so the cue is keyed on the step being ENTERED: entering work is `work-start` (a referee's whistle, play begins), entering anything else is `work-end` (a bell, the round is over). They mean opposite things mid-effort and must not sound alike. Wayne's spec: beep-beep-beep-whistle into work, beep-beep-beep-bell out of work, beep-beep-beep-ding-ding-ding at the end.
-- [2026-08-21] **The audio engine now supports `warble` (pitch LFO), `tremolo` (level LFO) and `noise` (band-passed breath).** A referee's pea whistle is not a steady tone — the pea chops the airflow — and without the chop and a little breath it reads as a synthesiser test tone. The whistle is 3800Hz + a hard 2nd harmonic, chopped at 26Hz in both pitch and level, with 5% breath at Q 1.6, held rather than struck (sustain 0.82).
-- [2026-08-21] **There is a sound bench at Routines → Sounds** (`SoundsScreen`). Each cue offers the FULL figure (timing is most of how a cue reads) and the terminal sound alone, with **the parameters printed beside it** so a change can be requested in the terms it will be made in — "warble slower", "whistle shorter" — rather than by description. Use it when iterating on any cue.
+- [2026-08-21] **The audio engine supports `warble` (pitch LFO), `tremolo` (level LFO) and `noise` (band-passed breath)**, added while trying to synthesise a pea whistle. **SUPERSEDED for the whistle:** five synthesis attempts were abandoned and the app now plays the CC0 recording (`referee-whistle-cc0.wav`), which measurement proved IS the sound being matched. A failed decode falls back to a plain 2900Hz tone from the note's own envelope fields — there is no second synthesis engine, and `curve` support was removed with it. The LFO capabilities remain available to other notes.
+- [2026-08-21] **There is a sound bench at Routines → Sounds** (`SoundsScreen`), **under `npm run dev` only** — `App.tsx` loads it through a dynamic import inside an `import.meta.env.DEV` branch so Vite drops it, and its CSS, from a production build. Each cue offers the FULL figure (timing is most of how a cue reads) and the terminal sound alone, with **the parameters printed beside it** so a change can be requested in the terms it will be made in — "warble slower", "whistle shorter" — rather than by description. Use it when iterating on any cue.
 
 ## Do-Not-Repeat
 
@@ -240,3 +240,47 @@
 - **`scripts/.analysis/` must stay gitignored.** Full-rate amplitude+frequency of
   the Tabata whistle is enough to resynthesise it; committing it would undo the
   history purge done before the repo went public.
+
+## Session 2026-08-21 — strength routines: the design, before any code
+
+- **Most real routines are NOT timed.** Wayne's strength emails are rep-based with
+  timed steps mixed in (a 45s rest inside a rounds section, a `30-second Plank`
+  inside a rep list). The model must carry both AT THE STEP LEVEL, not per routine.
+- **Timed runs separated by manual gates** is the framing that saves the engine.
+  Inside a run, everything works as today — absolute timeline, `position()` binary
+  search, pre-scheduled cues, a pocketed phone catching up. At a gate the clock
+  parks until Next. Do NOT reach for "make the whole timeline relative"; that
+  throws away the tested core and the drift immunity with it.
+- **A ladder (`2-4-6-8-10-8-6-4-2`) is a PER-RUNG CIRCUIT.** Rung 2 = 2 reps of
+  every exercise, then rung 4 = 4 of every exercise. Confirmed by Wayne. The
+  emails' note — "complete the full count of one exercise before moving to the
+  next" — reads naturally as "finish your SET before starting the next exercise",
+  where "the full count" is that rung's count. **Do not restate that note as
+  contradicting the circuit reading; it does not.** The lesson is about the
+  flagging, not the routine: an ambiguous sentence was labelled a contradiction
+  more confidently than its wording supported, which sent Wayne off to double-check
+  something that did not need checking. Weigh how plausible each reading is before
+  calling one of them a conflict.
+- **Accessories run after the final rung too**, unlike the trailing-rest rule where
+  a rest between reps is dropped at the end. Two similar-looking rules, opposite
+  answers, both by explicit decision.
+- **Next is a big button plus the spacebar, not tap-anywhere.** A stray touch
+  skipping a set is worse than reaching for the phone.
+- **Import is a paste box, not an `.eml` importer** — paste also covers WhatsApp
+  and Notes, and the parse lands in the editor for review rather than being
+  applied silently. Same principle as the `.tabata` importer refusing to infer reps.
+- The full design, with the model sketch and the build order, is the current quest
+  in `.wolf/STATUS.md`. Read it before starting.
+
+- [2026-08-21] **`Run` is structurally a `Timeline`**, which is why adding gates
+  cost `runtime.ts` and `cues.ts` exactly zero changes. Anything that reasons
+  about crossing a run goes in `engine/navigate.ts`; anything inside one stays in
+  `runtime.ts`. Do not blur that line.
+- [2026-08-21] **An absent `durationMs` is self-paced; a present non-positive one
+  is still dropped.** Not the same thing, and the test says so — otherwise a
+  mistyped `0` silently becomes a step that waits forever for a tap.
+- [2026-08-21] **Every non-segment block has `children`.** Tree walkers must
+  recurse on `block.kind !== 'segment'`, never `=== 'repeat'`. The old form
+  silently skipped the new group kinds, and in `media/gc.ts` that would have
+  orphaned live images and deleted them. `isGroup()` in `engine/types.ts` exists
+  for this.

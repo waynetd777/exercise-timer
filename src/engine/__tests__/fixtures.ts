@@ -1,4 +1,15 @@
-import type { Block, MediaRef, Segment, Repeat, SegmentRole, Workout } from '../types'
+import type {
+  Block,
+  Ladder,
+  MediaRef,
+  Repeat,
+  Reps,
+  Section,
+  SectionDisplay,
+  Segment,
+  SegmentRole,
+  Workout,
+} from '../types'
 import { SCHEMA_VERSION } from '../types'
 
 let counter = 0
@@ -74,5 +85,95 @@ export function circuit(): Workout {
 export function nested(): Workout {
   return workout('Pyramid', [
     rep(2, [rep(3, [seg('Work', 5), seg('Rest', 5, 'rest')], 'Reps'), seg('Recover', 30, 'recover')], 'Set'),
+  ])
+}
+
+/**
+ * A self-paced step: reps, no duration. Ends when the user taps Next.
+ *
+ * `reps` is a plain number for a fixed count, or `'rung'` to take the enclosing
+ * ladder's current rung.
+ */
+export function step(name: string, reps?: number | 'rung', perSide = false): Segment {
+  const spec: Reps | undefined =
+    reps === undefined
+      ? undefined
+      : reps === 'rung'
+        ? { kind: 'rung', ...(perSide ? { perSide: true } : {}) }
+        : { kind: 'fixed', count: reps, ...(perSide ? { perSide: true } : {}) }
+  return {
+    kind: 'segment',
+    id: nextId('step'),
+    name,
+    role: 'work',
+    ...(spec ? { reps: spec } : {}),
+  }
+}
+
+export function ladder(counts: number[], children: Block[], label?: string): Ladder {
+  return {
+    kind: 'ladder',
+    id: nextId('lad'),
+    counts,
+    children,
+    ...(label !== undefined ? { label } : {}),
+  }
+}
+
+export function section(
+  name: string,
+  children: Block[],
+  display: SectionDisplay = 'list',
+  note?: string,
+): Section {
+  return {
+    kind: 'section',
+    id: nextId('sec'),
+    name,
+    display,
+    children,
+    ...(note !== undefined ? { note } : {}),
+  }
+}
+
+/**
+ * "#2 ARMS & SHOULDERS — 4 Rounds", from the 17 Aug routine, trimmed to three
+ * exercises. Rep-based steps with a timed rest after each round: the mixed case
+ * the whole runs-and-gates design exists for.
+ */
+export function armsSection(): Workout {
+  return workout('Arms', [
+    section(
+      '#2 Arms & Shoulders',
+      [
+        rep(
+          4,
+          [
+            step('Bicep Curls', 12),
+            step('Arnold Press', 10),
+            step('Upright Rows', 10),
+            seg('Rest', 45, 'rest'),
+          ],
+          'Round',
+        ),
+      ],
+      'list',
+      'No rest between exercises. Rest 45 seconds after each round.',
+    ),
+  ])
+}
+
+/**
+ * "#3 LEGS — 20–16–12–8–4", the main-lift ladder with fixed accessories after
+ * every set, including the last.
+ */
+export function legsLadder(): Workout {
+  return workout('Legs', [
+    section('#3 Legs', [
+      ladder(
+        [20, 16, 12, 8, 4],
+        [step('Goblet Squats', 'rung'), step('RB Lateral Walks', 5, true), seg('Breathe', 15, 'rest')],
+      ),
+    ]),
   ])
 }

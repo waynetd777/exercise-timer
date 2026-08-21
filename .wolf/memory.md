@@ -56,3 +56,8 @@
 | 11:35 | Fixed placeholder-text truncation on portrait iPad: proportional padding both axes, explicit budget/advance with real slack, break-as-last-resort, tests against a pessimistic advance | src/ui/format.ts, run-screen.css, format.test.ts | 285/285 tests pass, build clean | ~25k |
 | 11:55 | Split boundary cues into work-start (whistle) / work-end (bell) + three-ding finish; added warble/tremolo/noise to the audio engine; built the Sounds bench with parameters shown | src/engine/{types,cues}.ts, src/audio/{tones,engine}.ts, src/ui/SoundsScreen.tsx, sounds.css, App.tsx, LibraryScreen.tsx | 289/289 tests pass, dev server up | ~70k |
 | 11:26 | reps rename + rest-between-reps + colours + CC0 whistle + scrollbars + dupes + voice + add-below | src/{engine,audio,ui,storage,editor,routines}, scripts/ | 303 tests green, nothing committed | ~150k |
+
+## Session: 2026-08-21 11:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

@@ -1,0 +1,220 @@
+import { describe, expect, it } from 'vitest'
+import { compile, hasGates, stepCount, totalDurationMs } from '../compile'
+import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'
+import type { Segment } from '../types'
+
+describe('self-paced steps', () => {
+  it('keeps a step with no duration, and marks it self-paced', () => {
+    const routine = compile(workout('Reps only', [step('Push-ups', 12)]))
+
+    expect(routine.entries).toHaveLength(1)
+    expect(routine.entries[0]).toMatchObject({
+      name: 'Push-ups',
+      selfPaced: true,
+      reps: { count: 12 },
+      startMs: 0,
+      endMs: 0,
+    })
+    // ABSENT, not present-and-undefined: `exactOptionalPropertyTypes` is on, and
+    // the difference is what stops a self-paced step reading as a zero-length one.
+    expect('durationMs' in routine.entries[0]!).toBe(false)
+    expect(routine.hasGates).toBe(true)
+  })
+
+  it('DROPS a step whose duration is present but zero, rather than making it self-paced', () => {
+    // The trap this rule exists for: a mistyped 0 must not silently become a
+    // step that waits forever for a tap.
+    const zero: Segment = { ...seg('Typo', 1), durationMs: 0 }
+    const negative: Segment = { ...seg('Worse', 1), durationMs: -5000 }
+    const nonFinite: Segment = { ...seg('Nonsense', 1), durationMs: Number.NaN }
+
+    const routine = compile(workout('Degenerate', [zero, negative, nonFinite, seg('Real', 10)]))
+
+    expect(routine.entries.map((e) => e.name)).toEqual(['Real'])
+    expect(routine.hasGates).toBe(false)
+  })
+
+  it('counts only timed steps towards the total, and flags the routine as estimated', () => {
+    const mixed = workout('Mixed', [seg('Warm up', 40), step('Push-ups', 12), seg('Rest', 20, 'rest')])
+    const routine = compile(mixed)
+
+    expect(routine.totalMs).toBe(60_000)
+    expect(routine.hasGates).toBe(true)
+    expect(totalDurationMs(mixed)).toBe(routine.totalMs)
+    expect(stepCount(mixed)).toBe(3)
+    expect(hasGates(mixed)).toBe(true)
+  })
+})
+
+describe('runs and gates', () => {
+  it('compiles a fully timed routine to exactly one run, unchanged from before', () => {
+    const routine = compile(tabata())
+
+    expect(routine.runs).toHaveLength(1)
+    expect(routine.hasGates).toBe(false)
+    expect(routine.runs[0]!.selfPaced).toBe(false)
+    expect(routine.runs[0]!.totalMs).toBe(routine.totalMs)
+    // Run-local times are routine times when there is only one run.
+    expect(routine.entries[1]).toMatchObject({ startMs: 10_000, endMs: 30_000, index: 1 })
+  })
+
+  it('gives every self-paced step a run of its own, and groups timed steps between them', () => {
+    const routine = compile(
+      workout('Mixed', [
+        seg('Jog', 40),
+        seg('Jacks', 40),
+        step('Push-ups', 12),
+        step('V-Ups', 10),
+        seg('Rest', 45, 'rest'),
+        seg('Plank', 30),
+      ]),
+    )
+
+    expect(routine.runs.map((run) => ({ selfPaced: run.selfPaced, steps: run.entries.length }))).toEqual([
+      { selfPaced: false, steps: 2 },
+      { selfPaced: true, steps: 1 },
+      { selfPaced: true, steps: 1 },
+      { selfPaced: false, steps: 2 },
+    ])
+    expect(routine.runs.map((run) => run.totalMs)).toEqual([80_000, 0, 0, 75_000])
+  })
+
+  it('restarts run-local time after every gate, while step numbers stay continuous', () => {
+    const routine = compile(
+      workout('Mixed', [seg('Jog', 40), step('Push-ups', 12), seg('Rest', 45, 'rest'), seg('Plank', 30)]),
+    )
+
+    expect(
+      routine.entries.map((e) => ({ step: e.step, index: e.index, run: e.runIndex, start: e.startMs })),
+    ).toEqual([
+      { step: 1, index: 0, run: 0, start: 0 },
+      { step: 2, index: 0, run: 1, start: 0 },
+      { step: 3, index: 0, run: 2, start: 0 },
+      { step: 4, index: 1, run: 2, start: 45_000 },
+    ])
+  })
+
+  it('shares one entry object between the routine and its run', () => {
+    const routine = compile(workout('Mixed', [seg('Jog', 40), step('Push-ups', 12)]))
+    expect(routine.runs[0]!.entries[0]).toBe(routine.entries[0])
+    expect(routine.runs[1]!.entries[0]).toBe(routine.entries[1])
+  })
+})
+
+describe('ladders', () => {
+  it('runs one iteration per rung, in order, scaling only the rung-marked children', () => {
+    const routine = compile(
+      workout('Ladder', [ladder([2, 4, 6], [step('Thrusters', 'rung'), step('Lunges', 10)])]),
+    )
+
+    expect(routine.entries.map((e) => `${e.name} ${e.reps!.count}`)).toEqual([
+      'Thrusters 2',
+      'Lunges 10',
+      'Thrusters 4',
+      'Lunges 10',
+      'Thrusters 6',
+      'Lunges 10',
+    ])
+  })
+
+  it('runs the accessories after the FINAL rung too, unlike a trailing rest', () => {
+    const routine = compile(legsLadder())
+    const last = routine.entries.slice(-3).map((e) => e.name)
+
+    expect(last).toEqual(['Goblet Squats', 'RB Lateral Walks', 'Breathe'])
+    // 5 rungs x 3 children, nothing dropped at the end.
+    expect(routine.entries).toHaveLength(15)
+  })
+
+  it('records the rung on the path, so the run screen can caption "Set 4 of 5 · 8 reps"', () => {
+    const routine = compile(legsLadder())
+    const fourthRung = routine.entries.find((e) => e.reps?.count === 8)!
+
+    expect(fourthRung.path.at(-1)).toEqual({
+      kind: 'ladder',
+      id: expect.any(String),
+      label: 'Set',
+      iteration: 4,
+      of: 5,
+      rung: 8,
+    })
+  })
+
+  it('drops degenerate rungs and floors fractional ones', () => {
+    const routine = compile(
+      workout('Rough', [ladder([0, -3, Number.NaN, 2.7, 5], [step('Squats', 'rung')])]),
+    )
+    expect(routine.entries.map((e) => e.reps!.count)).toEqual([2, 5])
+  })
+
+  it('contributes nothing when it has no usable rungs', () => {
+    const empty = workout('Empty ladder', [ladder([], [step('Squats', 'rung')])])
+    expect(compile(empty).entries).toHaveLength(0)
+    expect(stepCount(empty)).toBe(0)
+  })
+
+  it('shows no count for a rung-marked step outside a ladder', () => {
+    // Half-authored rather than zero reps: "0 ×" would be worse than nothing.
+    const routine = compile(workout('Orphan', [step('Squats', 'rung')]))
+    expect(routine.entries[0]!.reps).toBeUndefined()
+  })
+
+  it('keeps perSide, and never doubles the count itself', () => {
+    const routine = compile(legsLadder())
+    const walks = routine.entries.find((e) => e.name === 'RB Lateral Walks')!
+    expect(walks.reps).toEqual({ count: 5, perSide: true })
+  })
+})
+
+describe('sections', () => {
+  it('adds a path level carrying the display mode and the section note', () => {
+    const routine = compile(armsSection())
+
+    expect(routine.entries[0]!.path[0]).toEqual({
+      kind: 'section',
+      id: expect.any(String),
+      label: '#2 Arms & Shoulders',
+      iteration: 1,
+      of: 1,
+      display: 'list',
+      note: 'No rest between exercises. Rest 45 seconds after each round.',
+    })
+  })
+
+  it('changes nothing about timing or step count', () => {
+    const bare = workout('Bare', [seg('Jog', 40), seg('Rest', 20, 'rest')])
+    const wrapped = workout('Wrapped', [section('Warm-up', [seg('Jog', 40), seg('Rest', 20, 'rest')], 'timer')])
+
+    expect(compile(wrapped).totalMs).toBe(compile(bare).totalMs)
+    expect(compile(wrapped).entries).toHaveLength(compile(bare).entries.length)
+  })
+
+  it('still drops a round’s trailing rest inside a section', () => {
+    // "Rest 45 seconds after each round" meets the between-reps rule: three rests
+    // for four rounds. A parser wanting the fourth rest must place it AFTER the
+    // group rather than inside it.
+    const routine = compile(armsSection())
+    expect(routine.entries.filter((e) => e.name === 'Rest')).toHaveLength(3)
+    expect(routine.entries.at(-1)!.name).toBe('Upright Rows')
+  })
+})
+
+describe('the cheap measures agree with compile', () => {
+  const cases = {
+    tabata: tabata(),
+    arms: armsSection(),
+    legs: legsLadder(),
+    nestedSections: workout('Nested', [
+      section('Warm-up', [seg('Jog', 40), seg('Jacks', 40)], 'timer'),
+      section('Main', [rep(3, [step('Burpees', 10), seg('Rest', 30, 'rest')], 'Round')]),
+      section('Finish', [ladder([5, 10], [step('Squats', 'rung')])]),
+    ]),
+  }
+
+  it.each(Object.entries(cases))('%s', (_name, routine) => {
+    const compiled = compile(routine)
+    expect(totalDurationMs(routine)).toBe(compiled.totalMs)
+    expect(stepCount(routine)).toBe(compiled.entries.length)
+    expect(hasGates(routine)).toBe(compiled.hasGates)
+  })
+})
