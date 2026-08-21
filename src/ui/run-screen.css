@@ -318,9 +318,11 @@
  * no illustration, so this is a normal state, not an error state.
  */
 .panel__empty {
-  /* Vertical padding proportional to the frame: a fixed 16px is 29% of a 110px
-     frame, which was enough on its own to clip the text. */
-  padding: 4cqh var(--step-3);
+  /* Padding proportional on BOTH axes. Fixed padding is a tenth of a narrow
+     portrait-iPad panel and a thirtieth of a laptop one, so the text's width
+     budget has to be a constant share for `fitCqi` to be able to reason about
+     it at all. */
+  padding: 4cqh 4cqi;
   font-weight: 700;
   /*
    * Bounded on both axes: --fit sizes the longest word to the frame's width,
@@ -333,6 +335,9 @@
   text-align: center;
   text-transform: uppercase;
   text-wrap: balance;
+  /* Last resort. The sizing above should mean no word ever needs breaking, but a
+     broken word beats a clipped one if a font advances wider than assumed. */
+  overflow-wrap: anywhere;
   color: color-mix(in oklab, var(--phase) 42%, var(--bone-faint));
 }
 

@@ -53,3 +53,4 @@
 | 11:00 | Outcome notices moved into a dismissible NoticeDialog modal (progress while busy, Close when done) | src/ui/NoticeDialog.tsx, LibraryScreen.tsx, library.css | 273/273 tests pass, build clean | ~12k |
 | 11:10 | Sort control renamed: select -> a Sort menu matching Routines, with a tick on the active mode; removed the dead select styles | src/ui/Menu.tsx, LibraryScreen.tsx, theme.css, library.css | 273/273 tests pass, build clean | ~10k |
 | 11:20 | Dropped trailing periods from all UI messages; rewrote two-sentence ones as single em-dashed phrases | src/ui/LibraryScreen.tsx, EditorScreen.tsx | 273/273 tests pass, build clean | ~8k |
+| 11:35 | Fixed placeholder-text truncation on portrait iPad: proportional padding both axes, explicit budget/advance with real slack, break-as-last-resort, tests against a pessimistic advance | src/ui/format.ts, run-screen.css, format.test.ts | 285/285 tests pass, build clean | ~25k |

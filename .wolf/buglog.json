@@ -378,6 +378,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T00:35:00Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-08-21T00:45:00Z",
+      "error_message": "USER REPORTED: the image placeholder text is truncated on a portrait iPad",
+      "file": "src/ui/format.ts",
+      "root_cause": "`fitCqi`'s coefficient was 161, derived as 100 / 0.62 \u2014 two optimistic assumptions compounded. Bold uppercase advances nearer 0.68-0.72em, not 0.62, and the calculation used the FULL container width while `.panel__empty` had 12px of fixed padding either side. On a portrait iPad the wide layout gives the panel only ~250px, where 24px of padding is a tenth of the width, so every fallback name overflowed by about 20% and was clipped by the frame's overflow: hidden. It fitted on a laptop purely because the panel is twice as wide there and the padding proportionally trivial.",
+      "fix": "Padding is proportional on both axes (`4cqh 4cqi`), so the available share is a constant 92% at any size. The coefficient is now an explicit budget over an explicit advance \u2014 84 of the 92 available, divided by a 0.72em advance \u2014 and the gap between 84 and 92 is where all the safety lives, because the sizing maths is exact by construction. Added `overflow-wrap: anywhere` so a wider-than-assumed font breaks a word rather than clipping it, and a test asserting the fit holds against a PESSIMISTIC 0.78em advance, since testing against the assumed advance would prove nothing.",
+      "fix_rule": "When sizing text by arithmetic, the assumed glyph advance is the whole risk. Leave an explicit margin between what the text claims and what is available, and test against a wider advance than you assumed.",
+      "tags": [
+        "css",
+        "typography",
+        "sizing",
+        "container-queries",
+        "ipad",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T00:45:00Z"
     }
   ]
 }
