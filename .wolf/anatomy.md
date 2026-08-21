@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T18:33:42.622Z
-> Files: 20 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T18:55:52.997Z
+> Files: 21 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -62,3 +62,4 @@
 
 - `help.ts` — The help text, kept out of the screens that show it. (~1154 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
+- `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)

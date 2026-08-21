@@ -615,6 +615,23 @@
       "timestamp": "2026-08-21T19:31:41+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T19:31:41+02:00"
+    },
+    {
+      "error_message": "User-reported: after starting a routine by CLICKING play, the right arrow key did not skip \u2014 starting it with the spacebar and the arrows worked",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "The keyboard handler bailed out on `tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT'`. Clicking a control leaves it focused, so every later keydown targets a <button> and EVERY shortcut was dropped, arrows included. Starting with the spacebar left focus on <body>, so the same session had a working keyboard. The guard's stated intent was only to stop space double-firing on a focused button.",
+      "fix": "Extracted `shortcutApplies(tagName, key)` to src/ui/keys.ts: a field or select takes every key, a button takes only Space and Enter (which activate it), and the arrows / m / k always belong to the screen. Tested without a DOM.",
+      "fix_rule": "A focus guard has to name the KEYS the focused thing consumes, not just its tag. 'Ignore all keys while X has focus' silently disables every unrelated shortcut, and the failure mode is silence \u2014 nothing logs, nothing throws.",
+      "tags": [
+        "ui",
+        "keyboard",
+        "focus",
+        "accessibility"
+      ],
+      "id": "bug-036",
+      "timestamp": "2026-08-21T20:56:21+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T20:56:21+02:00"
     }
   ]
 }

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-21T18:33:42.622Z",
-    "fileCount": 20,
+    "lastScanned": "2026-08-21T18:55:52.997Z",
+    "fileCount": 21,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b6aa4ed1f86244bcafc9404edba3e046159052a77869a7e899d5fb7200486cab",
-    "storeUpdatedAt": "2026-08-21T18:33:42.631Z"
+    "renderedHash": "b18e2ee121ad710e5a37b22cfc0459e91441a4f0aa9d85027b714386e9f7d8cd",
+    "storeUpdatedAt": "2026-08-21T18:55:53.007Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -286,6 +286,15 @@
       "size": 4674,
       "mtimeMs": 1787337222551.4827,
       "updatedAt": "2026-08-21T18:33:42.622Z",
+      "source": "hook"
+    },
+    "src/ui/keys.ts": {
+      "description": "Whether the run screen's shortcuts should act on a key, given what has focus.",
+      "tokens": 422,
+      "hash": "15d9902282218a80",
+      "size": 1479,
+      "mtimeMs": 1787338552915.0764,
+      "updatedAt": "2026-08-21T18:55:52.997Z",
       "source": "hook"
     }
   },

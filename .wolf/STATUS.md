@@ -239,6 +239,17 @@ now, none started:
   line in the parser moves the rest outside the group if four is wanted.
 
 ### Done since the quest closed (2026-08-21, all pushed)
+- **Seven kinds, seven colours.** Reps was neutral, a ladder was violet like
+  Recover, and a section took `--phase` (the Rest blue). Now `--group-reps` /
+  `-ladder` / `-section` (orange, yellow, teal), shown as the row's 4px left rule
+  and mirrored on each add button's left edge via `data-kind`.
+- **The arrows worked only if you started with the spacebar** (bug-036). Clicking
+  a control leaves it focused, and the handler ignored every key while a `<button>`
+  had focus. `src/ui/keys.ts` names the keys instead: fields take everything, a
+  button takes Space and Enter, the arrows are always the screen's.
+- **The note toggle moved out of the action cluster** to the end of the field run,
+  so all four row types share one button grammar: add · up · down · [wrap or
+  ungroup] · duplicate · delete.
 - **Two ways to clear a step's image, each where you would look for it.** The ×
   in the link box now clears the TEXT and only appears when there is text; a
   second × sits beside the thumbnail and removes the image itself, whatever its
