@@ -420,3 +420,143 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-display);
 }
+
+/* ── List mode ─────────────────────────────────────────────────────────────
+ * A whole group on screen at once, for a rep-based section. The countdown is
+ * the wrong instrument here: there is nothing to count down, and the useful
+ * information is the four exercises after this one.
+ *
+ * Sized on the same principle as everything else — read from three metres, mid
+ * effort. Five or six rows is what the source routines actually contain, so the
+ * rows can stay large; the list scrolls rather than shrinking if one is longer,
+ * because a row too small to read is worse than one out of sight.
+ */
+.run__sheet {
+  container: sheet / size;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--step-4);
+  padding: var(--step-5) var(--step-5) var(--step-4);
+  min-height: 0;
+}
+
+.sheet {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--step-4);
+  min-height: 0;
+}
+
+.sheet__head {
+  display: grid;
+  gap: var(--step-1);
+}
+
+.sheet__title {
+  margin: 0;
+  font-size: clamp(1.3rem, 5.5cqi, 2.2rem);
+  font-weight: 650;
+  letter-spacing: var(--track-name);
+  line-height: 1.1;
+  color: var(--bone);
+}
+
+.sheet__caption {
+  --label-size: clamp(0.95rem, 3.2cqi, 1.35rem);
+  color: var(--phase);
+}
+
+.sheet__note {
+  color: var(--bone-faint);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--step-2);
+  /* Scrolled content must not sit under the Next button's edge. */
+  scrollbar-gutter: stable;
+}
+
+.sheet__row {
+  display: grid;
+  /* The effort column is sized from its content but shares one width down the
+     list, so the names line up however wide "5 × each side" turns out to be. */
+  grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--step-3);
+  padding: var(--step-2) var(--step-3);
+  border-radius: var(--radius);
+  font-size: clamp(1rem, 3.6cqi, 1.5rem);
+  line-height: 1.25;
+  transition:
+    background 200ms var(--ease),
+    opacity 200ms var(--ease);
+}
+
+/*
+ * The current row is marked by BACKGROUND and weight, not by colour alone:
+ * mid-effort peripheral vision reads a filled block long before it reads a hue,
+ * and the phase colour is already carrying meaning elsewhere on the screen.
+ */
+.sheet__row[data-state='current'] {
+  background: color-mix(in oklab, var(--phase) 22%, var(--ink-800));
+  font-weight: 640;
+  color: var(--bone);
+}
+
+.sheet__row[data-state='done'] {
+  color: var(--bone-faint);
+  /* Struck through rather than merely faded: "done" should survive a glance in
+     bad light, where a lightness difference alone does not. */
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, var(--bone-faint) 60%, transparent);
+}
+
+.sheet__row[data-state='todo'] {
+  color: var(--bone-dim);
+}
+
+.sheet__effort {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-name);
+  white-space: nowrap;
+  text-align: right;
+  color: var(--phase);
+}
+
+.sheet__row[data-state='done'] .sheet__effort {
+  color: inherit;
+}
+
+.sheet__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sheet__alt {
+  display: block;
+  font-size: 0.72em;
+  font-style: normal;
+  color: var(--bone-faint);
+  text-decoration: none;
+}
+
+/*
+ * Next is deliberately a slab rather than another icon in the control row. It
+ * is pressed once per exercise with sweaty hands at arm's length, which makes
+ * it the most-used control in the app and the one worth the space.
+ */
+.btn--next {
+  width: 100%;
+  min-height: clamp(3.25rem, 11cqh, 4.5rem);
+  font-size: clamp(1.05rem, 4cqi, 1.5rem);
+  font-weight: 650;
+  letter-spacing: var(--track-name);
+}

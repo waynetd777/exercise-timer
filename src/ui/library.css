@@ -372,3 +372,108 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ── Paste a routine ───────────────────────────────────────────────────────
+ * Wider and taller than the notice dialog: this one is a working surface, and
+ * a routine pasted in from an email is forty-odd lines.
+ */
+.paste {
+  width: min(94vw, 44rem);
+  max-width: none;
+  max-height: min(90dvh, 48rem);
+  margin: auto;
+  padding: var(--step-5);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  gap: var(--step-4);
+  color: var(--bone);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.paste::backdrop {
+  background: rgb(8 9 10 / 0.85);
+}
+
+.paste__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--step-3);
+}
+
+.paste__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: var(--track-name);
+}
+
+.paste__field {
+  display: grid;
+  gap: var(--step-2);
+  min-height: 0;
+}
+
+.paste__name,
+.paste__text {
+  width: 100%;
+  padding: var(--step-3);
+  color: var(--bone);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+.paste__text {
+  /* Monospace so the pasted structure — bullets, counts, indentation — reads as
+     the parser sees it rather than as prose. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 0;
+  white-space: pre;
+  overflow: auto;
+}
+
+.paste__name:focus-visible,
+.paste__text:focus-visible {
+  outline: 2px solid var(--phase);
+  outline-offset: 1px;
+}
+
+.paste__report {
+  display: grid;
+  gap: var(--step-2);
+  max-height: 9rem;
+  overflow-y: auto;
+}
+
+.paste__skipped {
+  margin: 0;
+  padding: var(--step-2) var(--step-3);
+  display: grid;
+  gap: var(--step-1);
+  list-style: none;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--bone-dim);
+  background: var(--ink-900);
+  border-radius: var(--radius);
+}
+
+.paste__skipped b {
+  display: inline-block;
+  min-width: 2ch;
+  color: var(--role-work);
+  font-variant-numeric: tabular-nums;
+}
+
+.paste__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--step-3);
+}

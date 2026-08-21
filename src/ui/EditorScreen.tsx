@@ -557,6 +557,23 @@ export function EditorScreen({
     edit((draft) => ({ ...draft, blocks: op(draft.blocks) }), coalesce)
 
   const rows = useMemo(() => flatten(blocks), [blocks])
+
+  /*
+   * A pasted strength routine is built from sections and ladders, which have no
+   * row yet. Saying so beats rendering an empty list and letting someone think
+   * the routine was lost — it is all still there, and saving keeps it.
+   */
+  const hasUneditable = useMemo(() => {
+    const any = (list: Block[]): boolean =>
+      list.some((block) =>
+        block.kind === 'section' || block.kind === 'ladder'
+          ? true
+          : block.kind === 'repeat'
+            ? any(block.children)
+            : false,
+      )
+    return any(blocks)
+  }, [blocks])
   /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
    * set to undefined is not the same as an absent key. So the untinted case
@@ -719,7 +736,13 @@ export function EditorScreen({
       </div>
 
       <div className="editor__scroll">
-        {rows.length === 0 ? (
+        {hasUneditable && (
+          <p className="editor__empty label label--sm">
+            This routine has sections or ladders, which cannot be edited here yet. They are
+            still in the routine and saving will keep them.
+          </p>
+        )}
+        {rows.length === 0 && !hasUneditable ? (
           <p className="editor__empty label label--sm">No steps yet — add one below</p>
         ) : (
           <ul className="editor__list">
