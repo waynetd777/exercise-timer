@@ -22,8 +22,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/TPg0hk3q/Leg-Press.png"
+            "source": "bundled",
+            "path": "exercises/Leg-Press.jpg"
           }
         },
         {
@@ -62,8 +62,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/fy8xjvPR/Standard-Chest-Press.png"
+            "source": "bundled",
+            "path": "exercises/Standard-Chest-Press.jpg"
           }
         },
         {
@@ -102,8 +102,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/0yLZkgPy/Lat-Pulldown.png"
+            "source": "bundled",
+            "path": "exercises/Lat-Pulldown.jpg"
           }
         },
         {
@@ -142,8 +142,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/sXzcWpBF/Seated-Row.png"
+            "source": "bundled",
+            "path": "exercises/Seated-Row.jpg"
           }
         },
         {
@@ -182,8 +182,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/Znb8dQVQ/Seated-Ab-Crunch.png"
+            "source": "bundled",
+            "path": "exercises/Seated-Abdominal-Crunch.jpg"
           }
         },
         {
@@ -222,8 +222,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/Y9c6xc3V/Standing-Shoulder-Press.png"
+            "source": "bundled",
+            "path": "exercises/Standing-Shoulder-Press.jpg"
           }
         },
         {
@@ -262,8 +262,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/4d11QmtY/Standing-Arm-Curl.png"
+            "source": "bundled",
+            "path": "exercises/Standing-Arm-Curl.jpg"
           }
         },
         {
@@ -302,8 +302,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/Gt7J6VXr/Tricep-Press.png"
+            "source": "bundled",
+            "path": "exercises/Triceps-Press.jpg"
           }
         },
         {
@@ -342,8 +342,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/0jpgwZM1/Seated-Leg-Extension.png"
+            "source": "bundled",
+            "path": "exercises/Seated-Leg-Extension.jpg"
           }
         },
         {
@@ -382,8 +382,8 @@
           "durationMs": 20000,
           "role": "work",
           "media": {
-            "source": "remote",
-            "url": "https://i.postimg.cc/3rSS6RxS/Toe-Raise.png"
+            "source": "bundled",
+            "path": "exercises/Toe-Raise.jpg"
           }
         },
         {

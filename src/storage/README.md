@@ -36,12 +36,25 @@ stored routines are, and no schema step has to run before anything can be read. 
 returns its input unchanged when there is nothing to fix, so React sees no
 needless new objects.
 
-The fix that exists today: repeat groups were called "rounds", and every one the
-editor created stored the literal label `'Round'`. The label is **data**, so a
-code-only rename would have left existing routines saying "Round 2 of 3" forever.
-Only the exact former defaults are renamed — a group someone deliberately called
-"Round 1" keeps its name. Any future rename of a stored label needs the same
-treatment.
+Two fixes exist today.
+
+**Repeat labels.** Groups were called "rounds", and every one the editor created
+stored the literal label `'Round'`. The label is **data**, so a code-only rename
+would have left existing routines saying "Round 2 of 3" forever. Only the exact
+former defaults are renamed — a group someone deliberately called "Round 1" keeps
+its name. Any future rename of a stored label needs the same treatment.
+
+**Rehosted illustrations.** The catalogue was 27 postimages links and is now 43
+images that ship with the app, so `REHOSTED` maps every URL it ever held — the two
+duplicate uploads included, and the four whose filenames changed — onto a bundled
+path. A pinned copy is dropped with the link, which costs nothing: a bundled image
+is precached. This is not a repair of something broken; the old links still work.
+It is how the dependency gets cut without anyone losing a picture.
+
+Both walk **every** group, not just repeats. That was a real gap: the walk used to
+return a section or a ladder untouched, so a nested repeat never had its label
+fixed — and since a pasted routine is nothing but sections, the image rewrite
+would have missed exactly the routines that matter most.
 
 ## Seeding is once per id
 
