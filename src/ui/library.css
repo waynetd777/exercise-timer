@@ -376,12 +376,20 @@
 /* ── Paste a routine ───────────────────────────────────────────────────────
  * Wider and taller than the notice dialog: this one is a working surface, and
  * a routine pasted in from an email is forty-odd lines.
+ *
+ * The panel inside `.modal`, which is the sheet that centres it inside the safe
+ * area — a separate element because a <dialog> styled as the box does not hug its
+ * content on iOS. See theme.css.
  */
 .paste {
-  width: min(94vw, 44rem);
-  max-width: none;
-  max-height: min(90dvh, 48rem);
-  margin: auto;
+  width: min(100%, 44rem);
+  /*
+   * Whatever the sheet leaves after its padding, which already accounts for the
+   * insets and shrinks with the keyboard. Anything taller scrolls; it used to
+   * compress, which drove the name field and the routine text into each other.
+   */
+  max-height: 100%;
+  overflow-y: auto;
   padding: var(--step-5);
   display: grid;
   /*
@@ -402,9 +410,6 @@
   border-radius: var(--radius);
 }
 
-.paste::backdrop {
-  background: rgb(8 9 10 / 0.85);
-}
 
 .paste__title {
   margin: 0;

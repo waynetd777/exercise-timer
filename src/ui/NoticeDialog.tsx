@@ -31,7 +31,7 @@ export function NoticeDialog({
   return (
     <dialog
       ref={dialog}
-      className="notice"
+      className="modal"
       onCancel={(event) => {
         // Escape, while work is in flight.
         if (busy) event.preventDefault()
@@ -43,14 +43,18 @@ export function NoticeDialog({
         if (!busy && event.target === dialog.current) onClose()
       }}
     >
-      <p className="notice__text">{text}</p>
+      {/* The panel is its own element: a <dialog> styled as the box does not hug
+          its content on iOS — see `.modal` in theme.css. */}
+      <div className="notice">
+        <p className="notice__text">{text}</p>
 
-      {!busy && (
-        <button type="button" className="chip chip--action" onClick={onClose} autoFocus>
-          <CloseIcon />
-          Close
-        </button>
-      )}
+        {!busy && (
+          <button type="button" className="chip chip--action" onClick={onClose} autoFocus>
+            <CloseIcon />
+            Close
+          </button>
+        )}
+      </div>
     </dialog>
   )
 }

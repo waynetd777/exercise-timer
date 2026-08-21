@@ -33,25 +33,29 @@ export function ConfirmDialog({
   return (
     <dialog
       ref={dialog}
-      className="notice"
+      className="modal"
       onClose={onCancel}
       onClick={(event) => {
         if (event.target === dialog.current) onCancel()
       }}
     >
-      <p className="notice__text">{question}</p>
-      {detail && <p className="notice__detail label label--sm">{detail}</p>}
+      {/* The panel is its own element: a <dialog> styled as the box does not hug
+          its content on iOS — see `.modal` in theme.css. */}
+      <div className="notice">
+        <p className="notice__text">{question}</p>
+        {detail && <p className="notice__detail label label--sm">{detail}</p>}
 
-      <div className="notice__actions">
-        {/* Cancel is focused, so a stray Enter or space keeps you where you are. */}
-        <button type="button" className="chip" onClick={onCancel} autoFocus>
-          <CloseIcon />
-          Cancel
-        </button>
-        <button type="button" className="chip chip--danger" onClick={onConfirm}>
-          <CheckIcon />
-          {confirmLabel}
-        </button>
+        <div className="notice__actions">
+          {/* Cancel is focused, so a stray Enter or space keeps you where you are. */}
+          <button type="button" className="chip" onClick={onCancel} autoFocus>
+            <CloseIcon />
+            Cancel
+          </button>
+          <button type="button" className="chip chip--danger" onClick={onConfirm}>
+            <CheckIcon />
+            {confirmLabel}
+          </button>
+        </div>
       </div>
     </dialog>
   )

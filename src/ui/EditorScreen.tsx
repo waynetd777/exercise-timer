@@ -134,12 +134,14 @@ function ImagePicker({
   return (
     <dialog
       ref={dialog}
-      className="picker"
+      className="modal"
       onClose={onClose}
       onClick={(event) => {
         if (event.target === dialog.current) onClose()
       }}
     >
+      {/* The panel is its own element — see `.modal` in theme.css. */}
+      <div className="picker">
       <header className="picker__head">
         <h2 className="picker__title label label--sm">Choose an image</h2>
         <input
@@ -181,6 +183,7 @@ function ImagePicker({
           ))}
         </ul>
       )}
+      </div>
     </dialog>
   )
 }
