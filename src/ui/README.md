@@ -178,6 +178,25 @@ the button either way: colour is the second cue, never the only one, and seven
 hues cannot all survive a colour-vision deficiency. Luminance is spread as well
 as hue, so they also separate in greyscale.
 
+## A dialog is two elements
+
+`.modal` is the `<dialog>`: transparent, viewport-filling, padded by the safe-area
+insets, `place-items: center`, `overscroll-behavior: contain`. The box — ground,
+border, padding, rows — is a child div: `.notice`, `.paste`, `.picker`.
+
+It was one element, the dialog styled as the panel and held to its content by
+`height: fit-content` with `align-self` and `align-content`. That works in Chrome
+and does not on iOS, where the box takes the height available and its auto rows
+stretch to share out the surplus: title at the top, detail marooned in the middle,
+buttons a screen away, Close drawn as a slab. Tuning it produced the other failure
+— centred content in a scroll container, top overflow unreachable, title clipped
+along its cap height.
+
+So: **never style a `<dialog>` as the panel.** A wrapper cannot be stretched by
+anything, and the sheet is also the right place for the insets and for stopping a
+scroll gesture reaching the screen behind. The lightbox is the exception that
+proves it: it was always a transparent centring sheet, and only needed the insets.
+
 ## The build badge
 
 The home screen shows `v<version>` beside the help button, from `src/version.ts`,
