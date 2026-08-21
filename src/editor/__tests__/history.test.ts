@@ -52,31 +52,52 @@ describe('history', () => {
     expect(undo(h).present).toBe('b')
   })
 
-  it('collapses a run of text edits into one undo step', () => {
+  it('collapses a run of keystrokes in ONE field into one undo step', () => {
     // Typing "Leg day" must not cost seven undos.
     let h = initHistory('')
-    for (const value of ['L', 'Le', 'Leg']) h = push(h, value, true)
+    for (const value of ['L', 'Le', 'Leg']) h = push(h, value, 'name')
     expect(h.present).toBe('Leg')
     expect(h.past).toHaveLength(1)
     expect(undo(h).present).toBe('')
   })
 
+  it('does NOT collapse typing in two different fields', () => {
+    /*
+     * The reason this takes a field rather than a flag. Renaming a step and then
+     * renaming the next one are two edits, and one undo must not take both back
+     * just because they were both typed.
+     */
+    let h = push(initHistory('a'), 'ab', 'step-1:name')
+    h = push(h, 'abc', 'step-2:name')
+    expect(h.past).toHaveLength(2)
+    expect(undo(h).present).toBe('ab')
+  })
+
   it('ends the run at a structural change, so each is its own step', () => {
-    let h = push(push(initHistory('a'), 'ab', true), 'abc', true)
+    let h = push(push(initHistory('a'), 'ab', 'name'), 'abc', 'name')
     h = push(h, 'structural')
-    h = push(h, 'x', true)
+    h = push(h, 'x', 'name')
     expect(undo(h).present).toBe('structural')
     expect(undo(undo(h)).present).toBe('abc')
     expect(undo(undo(undo(h))).present).toBe('a')
   })
 
   it('starts a fresh step after an undo, rather than rewriting the restored state', () => {
-    let h = push(push(initHistory('a'), 'ab', true), 'abc', true)
+    let h = push(push(initHistory('a'), 'ab', 'name'), 'abc', 'name')
     h = undo(h)
     expect(h.present).toBe('a')
-    h = push(h, 'ax', true)
+    h = push(h, 'ax', 'name')
     // The undone state is still reachable, not overwritten by the new typing.
     expect(undo(h).present).toBe('a')
+  })
+
+  it('gives a discrete edit its own step even twice over', () => {
+    // Choosing an image for two steps in a row: two edits, two undos. With a
+    // shared flag these collapsed, and one press took both pictures back.
+    let h = push(initHistory('a'), 'image-1')
+    h = push(h, 'image-2')
+    expect(h.past).toHaveLength(2)
+    expect(undo(h).present).toBe('image-1')
   })
 
   it('caps the past so a long session cannot grow without bound', () => {

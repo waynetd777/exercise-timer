@@ -16,7 +16,9 @@ import {
   newSection,
   newSegment,
   removeAt,
+  isTypedPatch,
   setTiming,
+  shownAsList,
   timingOf,
   unwrapRepeat,
   updateLadder,
@@ -31,6 +33,8 @@ import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
 import { normaliseImageUrl } from '../editor/postimages'
+import { HelpTray } from './HelpTray'
+import { EDITOR_HELP } from './help'
 import { storeFile } from '../media/pin'
 import { duration } from './format'
 import { useMediaUrl } from './useMediaUrl'
@@ -40,6 +44,7 @@ import {
   CloseIcon,
   CopyIcon,
   DownIcon,
+  HelpIcon,
   ImageIcon,
   ImportIcon,
   NoteIcon,
@@ -112,7 +117,7 @@ function ImagePicker({
   onClose,
 }: {
   images: readonly KnownImage[]
-  onPick: (url: string) => void
+  onPick: (ref: MediaRef) => void
   onClose: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -166,9 +171,11 @@ function ImagePicker({
       ) : (
         <ul className="picker__grid">
           {shown.map((image) => (
-            <li key={image.url}>
-              <button type="button" className="picker__item" onClick={() => onPick(image.url)}>
-                <img src={image.url} alt="" loading="lazy" />
+            <li key={image.id}>
+              <button type="button" className="picker__item" onClick={() => onPick(image.ref)}>
+                {/* `src` is not the stored ref: a bundled image stores a path and
+                    renders through BASE_URL. */}
+                <img src={image.src} alt="" loading="lazy" />
                 <span className="picker__label">{image.label}</span>
               </button>
             </li>
@@ -215,13 +222,19 @@ function unitOf(timing: Timing): string {
   return timing.perSide ? `${timing.kind}-side` : timing.kind
 }
 
+/** The single field a group patch carries, for keying a run of keystrokes. */
+function keyOf(patch: object): string {
+  return Object.keys(patch).join(',')
+}
+
 /** The number the field shows, and what a change to it means. */
 function TimingField({
   segment,
   onChange,
 }: {
   segment: Segment
-  onChange: (timing: Timing) => void
+  /** `typed` marks a keystroke in the number box, as opposed to the unit select. */
+  onChange: (timing: Timing, typed?: boolean) => void
 }) {
   const timing = timingOf(segment)
   const unit = unitOf(timing)
@@ -258,6 +271,7 @@ function TimingField({
               timing.kind === 'timed'
                 ? { kind: 'timed', durationMs: rounded * 1000 }
                 : { kind: 'reps', count: rounded, ...(timing.perSide ? { perSide: true } : {}) },
+              true,
             )
           }}
         />
@@ -284,6 +298,7 @@ function SegmentRow({
   depth,
   first,
   last,
+  listed,
   onMove,
   onAdd,
   onDuplicate,
@@ -299,8 +314,10 @@ function SegmentRow({
 }: RowProps & {
   onAdd: (path: Path, role: SegmentRole) => void
   segment: Segment
+  /** Shown as a row in a list while running, so it has no media panel. */
+  listed: boolean
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
-  onTiming: (path: Path, timing: Timing) => void
+  onTiming: (path: Path, timing: Timing, typed?: boolean) => void
   onClearText: (path: Path, field: 'note' | 'alternative') => void
   onClearImage: (path: Path) => void
   onWrap: (path: Path) => void
@@ -312,16 +329,40 @@ function SegmentRow({
   const upload = useRef<HTMLInputElement>(null)
   const imageUrl = useMediaUrl(segment.media)
 
+  /**
+   * Takes the image off the step, whatever kind it is.
+   *
+   * Shared by the × in the link box and the one beside the thumbnail: same act,
+   * two places to reach it, because the picture is what people look at and the
+   * link box is empty for a picked or uploaded image.
+   */
+  const clearImage = () => {
+    setUrlDraft('')
+    // Only touch the routine when there is something to remove: clearing a
+    // half-typed link changes the field, not the step.
+    if (segment.media !== undefined) onClearImage(path)
+  }
+
   const commitUrl = () => {
     const url = normaliseImageUrl(urlDraft)
-    // An empty field clears the image; anything unrecognised is left alone so a
-    // half-typed paste does not wipe what was there.
+
     if (urlDraft.trim() === '') {
-      onClearImage(path)
-    } else if (url) {
-      onPatch(path, { media: { source: 'remote', url } })
-      setUrlDraft(url)
+      /*
+       * Emptying the box clears the link it was showing. An uploaded photo never
+       * had a link in here — the box is empty for one — so a stray focus and blur
+       * must not delete it. The × does that, deliberately.
+       */
+      if (segment.media?.source === 'remote') onClearImage(path)
+      return
     }
+
+    // Anything unrecognised is left alone, so a half-typed paste cannot wipe what
+    // was there.
+    if (!url) return
+
+    // Show the tidied form either way; only write when it actually differs.
+    setUrlDraft(url)
+    if (url !== mediaUrl(segment.media)) onPatch(path, { media: { source: 'remote', url } })
   }
 
   /*
@@ -350,9 +391,16 @@ function SegmentRow({
   const hasExtras = segment.note !== undefined || segment.alternative !== undefined
   const showExtras = hasExtras || extras
 
+  /*
+   * Blur commits, so nothing is written until the field is left — and nothing at
+   * all if it comes back unchanged. Without that guard, tabbing through a step
+   * left an undo step that undid nothing visible.
+   */
   const commitText = (field: 'note' | 'alternative', value: string) => {
-    if (value.trim() === '') onClearText(path, field)
-    else onPatch(path, { [field]: value })
+    const next = value.trim()
+    if (next === (segment[field] ?? '')) return
+    if (next === '') onClearText(path, field)
+    else onPatch(path, { [field]: next })
   }
 
   return (
@@ -392,7 +440,10 @@ function SegmentRow({
           </span>
         )}
 
-        <TimingField segment={segment} onChange={(timing) => onTiming(path, timing)} />
+        <TimingField
+          segment={segment}
+          onChange={(timing, typed) => onTiming(path, timing, typed)}
+        />
 
         <div className="erow__actions">
           {/*
@@ -494,65 +545,130 @@ function SegmentRow({
         </div>
       )}
 
-      {/* A div, not a label: a label wrapping the preview button would forward
-          the button's click to the input. The input names itself instead. */}
-      <div className="erow__image">
-        <span className="label label--sm">Image</span>
-        <input
-          className="efield"
-          value={urlDraft}
-          placeholder="postimages link, or leave empty"
-          aria-label="Image link"
-          onChange={(event) => setUrlDraft(event.target.value)}
-          onBlur={commitUrl}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') commitUrl()
-          }}
-        />
-        <button
-          type="button"
-          className="chip chip--action"
-          onClick={() => onChoose(path)}
-          aria-label="Choose an image already used in your routines"
-        >
-          <ImageIcon />
-          Choose
-        </button>
+      {/*
+        The image row, offered only where an image can actually be seen.
+        
+        A listed step is drawn as a row of its group and has no media panel, so
+        the controls would set something nobody will ever look at. An image that
+        is ALREADY set still gets its row: hiding it would trap data — the step
+        would carry a picture with nothing in the app able to remove it.
 
-        <button
-          type="button"
-          className="chip chip--action"
-          onClick={() => upload.current?.click()}
-          aria-label="Upload your own photo for this step"
-          title="Upload your own photo"
-        >
-          <ImportIcon />
-          Upload
-        </button>
-        <input
-          ref={upload}
-          className="visually-hidden"
-          type="file"
-          accept="image/*"
-          onChange={(event) => {
-            const file = event.target.files?.[0]
-            event.target.value = ''
-            if (file) void onUpload(path, file)
-          }}
-        />
+        A div, not a label: a label wrapping the preview button would forward the
+        button's click to the input. The input names itself instead.
+      */}
+      {(!listed || segment.media !== undefined) && (
+        <div className="erow__image">
+          <span className="label label--sm">Image</span>
+          <span className="erow__url">
+            <input
+              className="efield"
+              value={urlDraft}
+              placeholder="Paste an image link"
+              aria-label="Image link"
+              onChange={(event) => setUrlDraft(event.target.value)}
+              onBlur={commitUrl}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') commitUrl()
+              }}
+            />
+            {/* Only when there is text to clear. It used to show for a picked
+                or uploaded image too — an × inside an empty box, which is not
+                where anyone looks to remove a picture they can see. That job
+                belongs to the button beside the thumbnail. */}
+            {urlDraft.trim() !== '' && (
+              <button
+                type="button"
+                className="erow__clear"
+                /*
+                 * Keeps focus in the field, which is what stops the blur above
+                 * from committing the link a fraction before this clears it —
+                 * an edit and an undo step for a button that means "remove".
+                 * The click still fires.
+                 */
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={clearImage}
+                aria-label={`Clear the image link for ${segment.name}`}
+                title="Clear the link"
+              >
+                <CloseIcon />
+              </button>
+            )}
+          </span>
+          {/* Adding one is what a listed step has no use for; clearing the one it
+              has is exactly what it needs. */}
+          {!listed && (
+            <>
+              <button
+                type="button"
+                className="chip chip--action"
+                onClick={() => onChoose(path)}
+                aria-label="Choose an image already used in your routines"
+              >
+                <ImageIcon />
+                Choose
+              </button>
 
-        {imageUrl && (
-          <button
-            type="button"
-            className="erow__thumb"
-            onClick={() => onPreview(imageUrl, segment.name)}
-            aria-label={`Preview the image for ${segment.name}`}
-            title="Preview image"
-          >
-            <img src={imageUrl} alt="" />
-          </button>
-        )}
-      </div>
+              <button
+                type="button"
+                className="chip chip--action"
+                onClick={() => upload.current?.click()}
+                aria-label="Upload your own photo for this step"
+                title="Upload your own photo"
+              >
+                <ImportIcon />
+                Upload
+              </button>
+              <input
+                ref={upload}
+                className="visually-hidden"
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ''
+                  if (file) void onUpload(path, file)
+                }}
+              />
+            </>
+          )}
+
+          {listed && (
+            <span className="erow__unseen label label--sm">
+              Not shown — this step runs as a row in its section’s list
+            </span>
+          )}
+
+          {imageUrl && (
+            <button
+              type="button"
+              className="erow__thumb"
+              onClick={() => onPreview(imageUrl, segment.name)}
+              aria-label={`Preview the image for ${segment.name}`}
+              title="Preview image"
+            >
+              <img src={imageUrl} alt="" />
+            </button>
+          )}
+
+          {/* Beside the picture, because that is where you are looking when you
+              decide to get rid of it. Keyed on the ref rather than on the
+              thumbnail, so an image whose local copy has gone can still be
+              removed rather than being stuck on the step. */}
+          {segment.media !== undefined && (
+            <button
+              type="button"
+              className="btn btn--ghost erow__unset"
+              onClick={clearImage}
+              aria-label={`Remove the image from ${segment.name}`}
+              title="Remove image"
+            >
+              {/* Not a trash can: this row already has one, and it deletes the
+                  whole step. Within a row an icon has to mean one thing. */}
+              <CloseIcon />
+            </button>
+          )}
+        </div>
+      )}
     </li>
   )
 }
@@ -881,21 +997,31 @@ export function EditorScreen({
   )
   const { name, blocks, colour } = history.present
   const [confirmingExit, setConfirmingExit] = useState(false)
+  const [helping, setHelping] = useState(false)
   const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null)
   /** The step whose image is being chosen, or null when the picker is closed. */
   const [choosingFor, setChoosingFor] = useState<Path | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   /**
-   * `coalesce` marks a text-ish edit, which collapses a run of keystrokes into
-   * one undo step. Discrete changes — adding, deleting, reordering, changing a
-   * step's type — each get their own.
+   * `typing` names the field a keystroke belongs to, so a run in ONE field
+   * collapses into a single undo step. Everything else — adding, deleting,
+   * reordering, changing a step's type, choosing an image — is discrete and gets
+   * a step of its own.
    */
-  const edit = (next: (draft: Draft) => Draft, coalesce = false) =>
-    setHistory((current) => push(current, next(current.present), coalesce))
+  const edit = (next: (draft: Draft) => Draft, typing: string | null = null) =>
+    setHistory((current) => push(current, next(current.present), typing))
 
-  const editBlocks = (op: (blocks: Block[]) => Block[], coalesce = false) =>
-    edit((draft) => ({ ...draft, blocks: op(draft.blocks) }), coalesce)
+  const editBlocks = (op: (blocks: Block[]) => Block[], typing: string | null = null) =>
+    edit((draft) => ({ ...draft, blocks: op(draft.blocks) }), typing)
+
+  /**
+   * Identifies the field being typed into.
+   *
+   * Per field, not per screen: with one shared flag, renaming a step and then
+   * renaming the next one were a single undo step.
+   */
+  const typingIn = (path: Path, field: string) => `${path.join('.')}:${field}`
 
   const rows = useMemo(() => flatten(blocks), [blocks])
 
@@ -957,22 +1083,36 @@ export function EditorScreen({
     else onCancel()
   }
 
-  // A role comes from a select, so it is discrete; everything else is typed.
-  const patchSegment = (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) =>
-    editBlocks((current) => updateSegment(current, path, patch), patch.role === undefined)
-  const patchRepeat = (path: Path, patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>) =>
-    editBlocks((current) => updateRepeat(current, path, patch), true)
-  const patchLadder = (path: Path, patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>) =>
-    editBlocks((current) => updateLadder(current, path, patch), true)
-  const patchSection = (path: Path, patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>) =>
-    editBlocks((current) => updateSection(current, path, patch), true)
   /*
-   * Not coalesced: switching a step between timed and counted is a discrete
-   * change, and undo should put it back in one press rather than unwinding it
-   * through whatever typing came before.
+   * Only a keystroke-by-keystroke field coalesces — see `isTypedPatch`. Anything
+   * else, an image above all, is one deliberate act and gets one undo step.
    */
-  const patchTiming = (path: Path, timing: Timing) =>
-    editBlocks((current) => setTiming(current, path, timing))
+  const patchSegment = (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) =>
+    editBlocks(
+      (current) => updateSegment(current, path, patch),
+      isTypedPatch(patch) ? typingIn(path, 'name') : null,
+    )
+  /*
+   * Every field on a group is typed straight into, so all three coalesce — keyed
+   * on the field, so a label and a rep count do not share a step.
+   */
+  const patchRepeat = (path: Path, patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>) =>
+    editBlocks((current) => updateRepeat(current, path, patch), typingIn(path, keyOf(patch)))
+  const patchLadder = (path: Path, patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>) =>
+    editBlocks((current) => updateLadder(current, path, patch), typingIn(path, keyOf(patch)))
+  const patchSection = (path: Path, patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>) =>
+    editBlocks((current) => updateSection(current, path, patch), typingIn(path, keyOf(patch)))
+  /*
+   * Switching a step between timed and counted is discrete, and undo should put
+   * it back in one press rather than unwinding it through whatever typing came
+   * before. TYPING the number is the other case — a run of keystrokes, which
+   * collapses like any other, or "45" would cost two undos to take back.
+   */
+  const patchTiming = (path: Path, timing: Timing, typed = false) =>
+    editBlocks(
+      (current) => setTiming(current, path, timing),
+      typed ? typingIn(path, 'timing') : null,
+    )
 
   return (
     <main className="editor" data-colour={colour ?? undefined}>
@@ -1000,7 +1140,7 @@ export function EditorScreen({
           value={name}
           aria-label="Routine name"
           placeholder="Routine name"
-          onChange={(event) => edit((draft) => ({ ...draft, name: event.target.value }), true)}
+          onChange={(event) => edit((draft) => ({ ...draft, name: event.target.value }), 'name')}
         />
 
         {/* Labelled, not icon-only: saving is infrequent and consequential, so
@@ -1012,6 +1152,17 @@ export function EditorScreen({
             >
               <CheckIcon />
               Save
+            </button>
+
+            {/* Last in the row, so Save keeps the position the thumb already
+                knows. */}
+            <button
+              className="btn btn--ghost"
+              onClick={() => setHelping(true)}
+              aria-label="Help"
+              title="What this screen can do"
+            >
+              <HelpIcon />
             </button>
           </>
         )}
@@ -1124,6 +1275,7 @@ export function EditorScreen({
                   depth={depth}
                   first={first}
                   last={last}
+                  listed={shownAsList(blocks, path)}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
                   onAdd={(p, role) => editBlocks((c) => insertAfter(c, p, newSegment(role)))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
@@ -1161,8 +1313,8 @@ export function EditorScreen({
       {choosingFor && (
         <ImagePicker
           images={knownImages}
-          onPick={(url) => {
-            patchSegment(choosingFor, { media: { source: 'remote', url } })
+          onPick={(ref) => {
+            patchSegment(choosingFor, { media: ref })
             setChoosingFor(null)
           }}
           onClose={() => setChoosingFor(null)}
@@ -1175,6 +1327,10 @@ export function EditorScreen({
           alt={imagePreview.alt}
           onClose={() => setImagePreview(null)}
         />
+      )}
+
+      {helping && (
+        <HelpTray title="Help" sections={EDITOR_HELP} onClose={() => setHelping(false)} />
       )}
 
       <div className="editor__add">

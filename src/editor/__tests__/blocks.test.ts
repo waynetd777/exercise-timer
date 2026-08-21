@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Block, Ladder, Repeat, Section, Segment } from '../../engine'
-import { compile, totalDurationMs } from '../../engine'
+import { compile, listMode, SCHEMA_VERSION, totalDurationMs } from '../../engine'
 import {
   appendTo,
   blockAt,
@@ -8,6 +8,7 @@ import {
   duplicateAt,
   flatten,
   insertAfter,
+  isTypedPatch,
   moveBy,
   moveStep,
   newLadder,
@@ -18,6 +19,7 @@ import {
   newSegment,
   removeAt,
   setTiming,
+  shownAsList,
   timingOf,
   unwrapRepeat,
   updateLadder,
@@ -582,5 +584,122 @@ describe('clearText — emptying a note removes it', () => {
   it('leaves a group alone', () => {
     const blocks = [newSection('Burnout')]
     expect(clearText(blocks, [0], 'note')).toEqual(blocks)
+  })
+})
+
+describe('shownAsList — where an image can never be seen', () => {
+  /** A counted step: no duration, so it waits for a tap. */
+  const counted = (name: string): Segment => ({
+    kind: 'segment',
+    id: `id-${name}`,
+    name,
+    role: 'work',
+    reps: { kind: 'fixed', count: 12 },
+  })
+
+  const section = (children: Block[], display: 'list' | 'timer' = 'list'): Section => ({
+    kind: 'section',
+    id: 'sec',
+    name: 'Upper body',
+    display,
+    children,
+  })
+
+  it('is true for a counted step inside a list section', () => {
+    const blocks = [section([counted('Curls'), counted('Press')])]
+    expect(shownAsList(blocks, [0, 0])).toBe(true)
+  })
+
+  it('is false for a TIMED step in the same section — it runs as the countdown', () => {
+    const blocks = [section([seg('Plank', 30), counted('Press')])]
+    expect(shownAsList(blocks, [0, 0])).toBe(false)
+  })
+
+  it('is false for a section displayed as a timer', () => {
+    const blocks = [section([counted('Curls')], 'timer')]
+    expect(shownAsList(blocks, [0, 0])).toBe(false)
+  })
+
+  it('asks about the SECTION, not the group the step sits in', () => {
+    // A ladder or a reps group on its own always runs as the countdown; inside a
+    // list section, its steps are listed. The section owns the display mode.
+    const loose = [rep('r', [counted('Curls')])]
+    expect(shownAsList(loose, [0, 0])).toBe(false)
+
+    // section → repeat → step, so the step is two levels down.
+    const nested = [section([rep('r', [counted('Curls')])])]
+    expect(shownAsList(nested, [0, 0, 0])).toBe(true)
+  })
+
+  it('is false for a step in no section at all, and for a group itself', () => {
+    expect(shownAsList([counted('Curls')], [0])).toBe(false)
+    expect(shownAsList([section([counted('Curls')])], [0])).toBe(false)
+  })
+
+  it('never hides the controls for a step the runtime actually shows a panel for', () => {
+    /*
+     * The property that matters, checked against the authority: every entry the
+     * runtime draws as a list row must be one the editor calls listed. The
+     * converse does not hold — the last remaining row of a group runs as the
+     * countdown — so this is a one-way check by design.
+     */
+    const blocks: Block[] = [
+      seg('Get ready', 5),
+      section([counted('Curls'), counted('Press'), seg('Plank', 30)]),
+      section([counted('Rows'), counted('Dips')], 'timer'),
+      rep('r', [counted('Squats'), counted('Lunges')]),
+    ]
+    const routine = compile({
+      id: 'w',
+      name: 'Mixed',
+      blocks,
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: 0,
+      updatedAt: 0,
+    })
+
+    const listedByEditor = new Set(
+      flatten(blocks)
+        .filter(({ block, path }) => block.kind === 'segment' && shownAsList(blocks, path))
+        .map(({ block }) => block.id),
+    )
+
+    for (const entry of routine.entries) {
+      if (!listMode(routine, entry)) continue
+      expect(listedByEditor, `${entry.name} is listed while running`).toContain(entry.segmentId)
+    }
+    // And the check is not vacuous: something in there IS listed while running.
+    expect(routine.entries.some((entry) => listMode(routine, entry))).toBe(true)
+  })
+})
+
+describe('isTypedPatch — which edits share an undo step', () => {
+  it('coalesces a name, which is bound to every keystroke', () => {
+    expect(isTypedPatch({ name: 'Squa' })).toBe(true)
+  })
+
+  it('does NOT coalesce an image', () => {
+    /*
+     * The bug this exists for: with "anything but the role" as the rule, choosing
+     * a picture for two steps in a row collapsed into one undo step, and one
+     * press took both back.
+     */
+    expect(isTypedPatch({ media: { source: 'remote', url: 'https://x/y.jpg' } })).toBe(false)
+  })
+
+  it('does NOT coalesce a role, a note or an alternative', () => {
+    // A role is a select; a note and an alternative are committed on blur, so
+    // each is one deliberate state rather than a run of them.
+    expect(isTypedPatch({ role: 'rest' })).toBe(false)
+    expect(isTypedPatch({ note: 'chest up' })).toBe(false)
+    expect(isTypedPatch({ alternative: 'box squat' })).toBe(false)
+  })
+
+  it('treats a mixed patch as discrete — all of it has to be typing', () => {
+    expect(isTypedPatch({ name: 'Squats', role: 'work' })).toBe(false)
+  })
+
+  it('is false for an empty patch, which is not an edit at all', () => {
+    expect(isTypedPatch({})).toBe(false)
   })
 })

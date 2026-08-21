@@ -93,6 +93,21 @@ A trap worth knowing: the dash characters are built into patterns two ways, as
 first inside another class silently yields `[\s[-–—]]`, which is what stopped
 "30-second Plank" reading as a duration for an afternoon.
 
+## The template is part of the parser
+
+`pasteTemplate.ts` is a routine written in every part of the grammar above, handed
+to the clipboard by the paste dialog's **Copy template**. It teaches by example
+rather than by a syntax table, which is the only honest way to describe a parser
+whose input is a human's handout — two rules interacting is exactly what a table
+cannot show.
+
+`__tests__/pasteTemplate.test.ts` parses it and asserts `skipped` is empty, then
+asserts the shape it produced: the ladder's main lift scaling while its
+accessories stay fixed, the bonus landing after the ladder, the rest inside the
+rounds group, the alternative from a lone "or" line, the long parenthetical
+becoming a note. Deliberately coupled — if the grammar moves, the one example the
+app offers must not become the one thing the app cannot read.
+
 ## The seeded routines
 
 Two, and deliberately one of each KIND: `beginner-full-body`, a fully timed
@@ -122,25 +137,42 @@ and quietly replacing a routine someone may have edited is the worse trade.
 
 ## The image catalogue
 
-27 URLs mirrored from the vault note `Fitness. Workouts.md`, in its own order and
-grouping. Every one was verified to resolve when the file was written — and one
-returned a transient connection error on the first attempt, so retry before
-concluding a link is dead.
+43 illustrations that **ship with the app**, under `public/exercises/`. Each entry
+is a path, which `resolvePlan` turns into `${BASE_URL}${path}` at render time —
+the base is applied late and never stored, so one routine works on a root domain,
+on a subpath host, and inside an export opened on another device.
 
-The note lists 29. Two were dropped as duplicate re-uploads — a second Tricep
-Press and a second Standing Arm Curl. The file used to claim they were "genuinely
-different images"; they are not, and the claim had never been checked. Aligned for
-a 1px crop they differ by 1.8/255 and 3.3/255 mean, where two genuinely different
-plates in this set differ by 16.6/255. The dropped URLs still work, so a routine
-already pointing at one keeps loading it — steps store a URL, not a catalogue
-index.
+They were 27 postimages links until 2026-08-21, mirrored by hand from the vault
+note `Fitness. Workouts.md`. That worked, but it made the pictures depend on a
+third party, needed a screenshot-and-upload for every addition, and left a routine
+one dead host away from having none. The set now comes from the Horizon Torus
+guide by way of `scripts/exercise_plates.py`, so it is reproducible: 41 plates, one
+per exercise page, at 881px wide and ~65KB each, plus the two cardio photos that
+are not from the guide.
 
-**The app does not read the vault at runtime.** If images are added to the note,
-this file needs regenerating.
+What the rehosting had to get right, all of it verified rather than assumed:
 
-Only URLs are stored; labels are derived from the filename by `labelFromUrl()` in
-`editor/images.ts`, so there is no parallel list to keep in sync — the filenames
-are already the exercise names.
+- **The framing matches the old screenshots**, to 4–6/255 mean difference against
+  three originals, where two genuinely different plates differ by 22–68. The crop
+  is anchored on the grey strip above the title band, not on the band itself —
+  the band's colour codes the muscle group, and anchoring on yellow produced a
+  plate with the Horizon logo in it.
+- **Four filenames changed**, because the guide's own wording won: Seated Ab
+  Crunch → Seated Abdominal Crunch, Tricep Dip → Tricep Dips, Tricep Press →
+  Triceps Press, Cable Row → Seated Cable Row. Labels come from filenames, so
+  this is what the picker now says.
+- **Every old URL still resolves to its picture.** `storage/migrate.ts` maps all
+  29 links the catalogue ever held — including the two duplicate uploads — onto
+  these paths, on read, so a routine saved on a phone last week and an export made
+  last year both come back with illustrations.
+- **The note is no longer the master list.** The guide is, and the script reads it.
+
+Two guards the old URL list could not have: every entry must name a file that
+exists, and every file in `public/exercises` must be named by an entry. A typo
+used to be a broken image nobody noticed until they scrolled the picker.
+
+Labels are still derived by `labelFromUrl()` in `editor/images.ts`, so there is no
+parallel list of names to keep in sync — the filenames are the exercise names.
 
 ## Files
 
@@ -148,8 +180,10 @@ are already the exercise names.
 |---|---|
 | `tabataFormat.ts` | The `.tabata` reader and its `TabataImportError` |
 | `pasteFormat.ts` | The pasted-text parser: `parseRoutine`, `parseItem` |
+| `pasteTemplate.ts` | The example routine the paste dialog copies out; a test keeps it parseable |
+| `../../scripts/exercise_plates.py` | Regenerates `public/exercises/` from the Torus guide PDF |
 | `importFiles.ts` | Bundle-or-tabata dispatch over dropped files, failures collected |
 | `samples.ts` | The two seeds, loaded from `*.routine.json` |
 | `strength-training.routine.json` | The generated strength seed — regenerate with the parser, never edit by hand |
-| `imageCatalogue.ts` | The 27 URLs, in the note's own order and grouping |
+| `imageCatalogue.ts` | The 43 bundled illustration paths, in the note's original order and grouping |
 | `*.tabata.json` | Importer fixtures — not imported by the app |

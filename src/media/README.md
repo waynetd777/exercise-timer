@@ -25,11 +25,22 @@ result is smaller, since re-encoding an already-optimised PNG can grow it.
 Failures return the original rather than losing the image: HEIC does not decode
 outside Safari, and storing an oversized file beats storing nothing.
 
+## Three sources, and which one needs what
+
+- **`bundled`** — the illustration catalogue, served from the app's own origin out
+  of `public/exercises/`. Precached by the service worker, so it needs no pinning
+  and no network: it is present the moment the app installs. `pinRemote` refuses
+  one, deliberately, because there is nothing to rescue.
+- **`remote`** — a link someone pasted. Pinnable, and worth pinning.
+- **`local`** — a photo uploaded here. Already local; lives in IndexedDB, keyed by
+  content hash, and never travels to another device on its own.
+
 ## Pinning, and why it is possible
 
 `i.postimg.cc` sends `access-control-allow-origin: *`. That is what makes pinning
-possible at all — the bytes can be *read*, not merely displayed — and it is why
-a routine can survive both gym wifi and the host eventually losing a file.
+possible at all — the bytes can be *read*, not merely displayed — and it is why a
+routine with pasted links can survive both gym wifi and the host eventually losing
+a file. The catalogue no longer relies on it: those images ship with the app.
 
 A pinned image resolves from its local copy, and falls back to the network if the
 blob is ever evicted. A local image has no fallback: better nothing than a broken

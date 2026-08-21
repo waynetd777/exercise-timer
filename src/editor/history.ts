@@ -3,28 +3,43 @@
  *
  * The interesting rule is COALESCING. Every keystroke in a text field produces a
  * new state, and undoing a rename one character at a time is useless — so a run
- * of text edits collapses into a single step, and any structural change ends the
- * run. The caller says which kind of edit it is made; that keeps the decision
- * where the context is, and keeps this module free of timers.
+ * of keystrokes collapses into a single step. The caller says which FIELD it is
+ * typing into; that keeps the decision where the context is, and keeps this
+ * module free of timers.
+ *
+ * A field rather than a flag, because a flag collapses too much: with one shared
+ * "this was text" bit, renaming the routine and then renaming a step became a
+ * single undo step, and every non-typing edit that rode the same path — choosing
+ * an image, above all — was absorbed into whatever typing came before it.
  */
 export type History<T> = {
   past: readonly T[]
   present: T
   future: readonly T[]
-  /** True when the last push was coalescible, so the next one may replace it. */
-  coalescing: boolean
+  /**
+   * The field the last push was typing into, or null when it was a discrete edit.
+   * Only a push naming the SAME field may replace the present.
+   */
+  typing: string | null
 }
 
 /** Bounds memory. Deep enough that no one reaches the end of it by hand. */
 export const HISTORY_LIMIT = 60
 
 export function initHistory<T>(present: T): History<T> {
-  return { past: [], present, future: [], coalescing: false }
+  return { past: [], present, future: [], typing: null }
 }
 
-export function push<T>(history: History<T>, next: T, coalesce = false): History<T> {
-  // A continuing run of text edits replaces the present rather than stacking.
-  if (coalesce && history.coalescing) {
+/**
+ * Adds a state.
+ *
+ * `typing` names the field the keystroke belongs to — anything stable and unique
+ * to it — or is left out for a discrete edit, which always gets its own step.
+ */
+export function push<T>(history: History<T>, next: T, typing: string | null = null): History<T> {
+  // A continuing run of keystrokes in the same field replaces the present rather
+  // than stacking. A different field starts a new step, even mid-sentence.
+  if (typing !== null && typing === history.typing) {
     return { ...history, present: next, future: [] }
   }
 
@@ -33,7 +48,7 @@ export function push<T>(history: History<T>, next: T, coalesce = false): History
     past: past.length > HISTORY_LIMIT ? past.slice(past.length - HISTORY_LIMIT) : past,
     present: next,
     future: [],
-    coalescing: coalesce,
+    typing,
   }
 }
 
@@ -52,8 +67,8 @@ export function undo<T>(history: History<T>): History<T> {
     past,
     present: history.past[history.past.length - 1]!,
     future: [history.present, ...history.future],
-    // Undoing ends any run, so the next text edit starts a fresh step.
-    coalescing: false,
+    // Undoing ends any run, so the next keystroke starts a fresh step.
+    typing: null,
   }
 }
 
@@ -63,6 +78,6 @@ export function redo<T>(history: History<T>): History<T> {
     past: [...history.past, history.present],
     present: history.future[0]!,
     future: history.future.slice(1),
-    coalescing: false,
+    typing: null,
   }
 }

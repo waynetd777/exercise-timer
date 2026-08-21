@@ -426,6 +426,73 @@ export function unwrapRepeat(blocks: readonly Block[], path: Path): Block[] {
   })
 }
 
+/**
+ * Fields of a step that are edited a character at a time, and so should collapse
+ * into the undo step before them.
+ *
+ * Deliberately just the one. Coalescing exists because a field bound to
+ * `onChange` produces a state per keystroke, and undoing a rename letter by
+ * letter is useless. Nothing else on a step is like that: a note, an alternative
+ * and an image link are committed on blur — one state each — a role comes from a
+ * select, and an image chosen from the picker or uploaded is not typing at all.
+ *
+ * The rule this replaces was "anything that is not the role", which quietly gave
+ * the image picker a shared undo step: choosing pictures for two steps in a row
+ * collapsed into one, and one press of undo took both back.
+ */
+const TYPED_SEGMENT_FIELDS = new Set(['name'])
+
+/**
+ * Whether a patch is a run of keystrokes, and so coalescible.
+ *
+ * `every`, not `some`: a patch is only typing if all of it is.
+ */
+export function isTypedPatch(patch: Partial<Omit<Segment, 'kind' | 'id'>>): boolean {
+  const keys = Object.keys(patch)
+  return keys.length > 0 && keys.every((key) => TYPED_SEGMENT_FIELDS.has(key))
+}
+
+/**
+ * Whether this step will be shown as a row in a list rather than as the
+ * countdown — which is the same as asking whether its image can ever be seen,
+ * since only the countdown layout has a media panel.
+ *
+ * The authoring-time counterpart of `listMode()` in `engine/navigate.ts`, which
+ * is the authority; keep the two in step. Two of its three conditions can be
+ * decided from the tree alone:
+ *
+ * - the step waits for a tap, i.e. it has no duration of its own, and
+ * - its nearest enclosing SECTION is displayed as a list.
+ *
+ * It is the section that owns the display mode, never the immediate group: a
+ * ladder or a reps group outside a section always runs as the countdown, and
+ * inside a list section its steps are listed. So this deliberately asks about
+ * ancestry, not about the group a step happens to sit in.
+ *
+ * The third condition is positional — the LAST remaining row of a group is shown
+ * as the countdown, so its image does appear — and is left out on purpose. A
+ * control that materialised on whichever step happened to be last, and moved
+ * when the steps were reordered, would be worse than one that is simply absent.
+ * Callers therefore treat this as "the image will not be seen", and must still
+ * show an image that is already set: see `EditorScreen`.
+ */
+export function shownAsList(blocks: readonly Block[], path: Path): boolean {
+  const target = blockAt(blocks, path)
+  if (!target || target.kind !== 'segment' || target.durationMs !== undefined) return false
+
+  let listed = false
+  let level: readonly Block[] = blocks
+  // Every ancestor except the step itself, outermost first, so the NEAREST
+  // section is the one that decides.
+  for (const index of path.slice(0, -1)) {
+    const block: Block | undefined = level[index]
+    if (!block || !isGroup(block)) return listed
+    if (block.kind === 'section') listed = block.display === 'list'
+    level = block.children
+  }
+  return listed
+}
+
 /** Depth-first list for rendering, with the sibling position each row needs. */
 export function flatten(blocks: readonly Block[], prefix: Path = []): FlatBlock[] {
   return blocks.flatMap((block, index) => {

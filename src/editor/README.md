@@ -71,28 +71,79 @@ would leave a blank line under the step for ever.
   repetitions. It is *data*, so renaming it in code is never enough; see
   `storage/migrate.ts`.
 
+## An image is only offered where it will be seen
+
+Only the countdown layout has a media panel. A step that runs as a row of its
+section's list has nowhere to draw a picture, so the editor stops offering one:
+`shownAsList(blocks, path)` answers the question from the tree, and the image row
+is left out for those steps.
+
+Two details it would be easy to get wrong:
+
+- **It is the enclosing SECTION that decides, not the group the step sits in.** A
+  ladder or a reps group on its own always runs as the countdown; inside a
+  list-display section, its steps are listed. So the check walks ancestors for the
+  nearest section rather than looking at the immediate parent.
+- **A TIMED step in a list section still runs as the countdown**, because you
+  watch the clock through a wall sit rather than reading a list. Its image shows,
+  so its controls stay.
+
+An image that is ALREADY set keeps its row, with the field to clear it and a line
+saying it will not be shown. Hiding it would trap data: a step carrying a picture
+that nothing in the app can remove.
+
+`engine/navigate.ts`'s `listMode()` is the authority — it has a third, positional
+clause (the last remaining row of a group runs as the countdown) that this
+deliberately drops, since a control appearing on whichever step happened to be
+last, and moving when steps were reordered, is worse than one that is absent. A
+test asserts the one-way property that matters: everything the runtime lists is
+something the editor calls listed.
+
 ## Undo, and why typing collapses
 
 `history.ts` is a `History<T>` of past, present and future, capped at 60 entries.
-The interesting rule is **coalescing**: a run of text edits collapses into one undo
+The interesting rule is **coalescing**: a run of keystrokes collapses into one undo
 step, because undoing a rename one character at a time is useless, while any
-discrete change — adding, deleting, reordering, changing a step's type — ends the
-run and earns its own step.
+discrete change — adding, deleting, reordering, changing a step's type, choosing
+an image — earns its own step.
 
-The caller says which kind of edit it is making, so there are no timers involved
-and the behaviour is testable. Undo also ends a run, so typing after an undo does
-not overwrite the state it just restored.
+`push` takes the **field** being typed into, not a boolean, and only a push naming
+the same field may replace the present. A flag collapsed too much, in two ways
+that were both real:
 
-Name and steps share **one** history entry, so undo restores a consistent draft
-rather than two states that can drift apart. Every mutation in the editor goes
-through the same two helpers and there is no `setBlocks` — a new mutation
-therefore cannot quietly bypass undo.
+- **Renaming a step and then the next one became one undo step**, since both were
+  merely "text".
+- **Every non-typing edit that shared the text path was absorbed** into whatever
+  typing came before it. `patchSegment` coalesced anything that was not a role, so
+  choosing pictures for two steps in a row collapsed into a single step and one
+  undo took both back. `isTypedPatch` in `blocks.ts` now names the fields that are
+  genuinely typed a character at a time — just `name` — and everything else is
+  discrete.
+
+The other half of "is it in the undo stack" is not writing when nothing changed.
+The note, the alternative and the image link commit on blur, so tabbing through a
+step used to leave undo steps that undid nothing visible; each now compares
+against what is stored and returns if it matches. And an empty image box only
+clears a **remote** link: an uploaded photo never had a link in there, so a stray
+focus-and-blur must not delete it.
+
+The caller says which field it is typing into, so there are no timers involved and
+the behaviour is testable. Undo also ends a run, so typing after an undo does not
+overwrite the state it just restored.
+
+Name, colour and steps share **one** history entry, so undo restores a consistent
+draft rather than states that can drift apart. Every mutation in the editor goes
+through the same two helpers — `edit` and `editBlocks` — and `setHistory` is
+touched nowhere else but undo and redo, so a new mutation cannot quietly bypass
+the stack. Screen state that is not the routine (the extras row, the picker, the
+lightbox, the help tray, the exit prompt) is deliberately outside it: undo should
+not close a dialog.
 
 ## Files
 
 | | |
 |---|---|
-| `blocks.ts` | The tree operations, the constructors, `setTiming`, and the new-routine template |
+| `blocks.ts` | The tree operations, the constructors, `setTiming`, `shownAsList`, and the new-routine template |
 | `history.ts` | Undo/redo with coalescing |
 | `dirty.ts` | Unsaved-change detection, compared **field by field** — `JSON.stringify` depends on key insertion order, and patching an object reorders keys |
 | `images.ts` | The images a step can be given: the catalogue merged with library usage |

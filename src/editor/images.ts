@@ -1,32 +1,64 @@
-import type { Block, Workout } from '../engine'
+import type { Block, MediaRef, Workout } from '../engine'
+import { resolvePlan } from '../media/resolve'
 
 /**
- * The distinct images already used across the library, so a step can reuse one
- * by picking it rather than by pasting a link.
+ * An image a step can be given, whether it ships with the app or a routine
+ * brought it.
  *
- * The label is the step name that URL appears under most often — a picker
- * showing "Leg Press" is useful in a way that a list of postimages ids is not.
+ * `ref` is what gets stored and `src` is what the picker renders; they are not
+ * the same thing for a bundled image, whose ref is a base-less path so the
+ * routine survives a change of host. `id` is the stable identity — the path or
+ * the URL — used for deduplication and as the React key.
  */
 export type KnownImage = {
-  url: string
+  id: string
+  ref: MediaRef
+  src: string
   label: string
   /** How many steps across the library use it. */
   uses: number
 }
 
-function walk(blocks: readonly Block[], visit: (url: string, name: string) => void): void {
+/**
+ * What a catalogue entry means.
+ *
+ * A path is an image that ships with the app, under `public/`; an absolute URL is
+ * something hosted elsewhere. The catalogue is all paths since the rehosting, but
+ * the URL case stays because it costs one line and a routine may still carry one.
+ */
+export function refFor(entry: string): MediaRef {
+  return entry.startsWith('https://')
+    ? { source: 'remote', url: entry }
+    : { source: 'bundled', path: entry }
+}
+
+/** The identity of a ref, for deduplication. Local blobs have no picker entry. */
+function idOf(ref: MediaRef): string | null {
+  if (ref.source === 'remote') return ref.url
+  if (ref.source === 'bundled') return ref.path
+  return null
+}
+
+function walk(blocks: readonly Block[], visit: (ref: MediaRef, name: string) => void): void {
   for (const block of blocks) {
     if (block.kind !== 'segment') {
       walk(block.children, visit)
       continue
     }
-    if (block.media?.source === 'remote') visit(block.media.url, block.name.trim())
+    /*
+     * Bundled as well as remote, or every catalogue image a routine actually uses
+     * would look unused — and an image a routine brought would be missing from
+     * the picker entirely. An uploaded photo is deliberately left out: its bytes
+     * live in IndexedDB, so it has no src to show without reading storage, and
+     * the picker resolves synchronously.
+     */
+    if (block.media && idOf(block.media) !== null) visit(block.media, block.name.trim())
   }
 }
 
 /**
- * A readable name from an image URL: the filename, without its extension, with
- * separators turned back into spaces. "Cable-Fly.png" -> "Cable Fly".
+ * A readable name from an image path or URL: the filename, without its extension,
+ * with separators turned back into spaces. "Cable-Fly.jpg" -> "Cable Fly".
  *
  * Deriving beats storing a parallel list of names — there is nothing to keep in
  * sync, and the catalogue's filenames are already the exercise names.
@@ -49,34 +81,53 @@ export function labelFromUrl(url: string): string {
 export function collectImages(
   workouts: readonly Workout[],
   catalogue: readonly string[] = [],
+  /** `import.meta.env.BASE_URL`, for resolving a bundled path to a thumbnail. */
+  base = '/',
 ): KnownImage[] {
-  const byUrl = new Map<string, { uses: number; names: Map<string, number> }>()
-  const inCatalogue = new Set(catalogue)
+  const byId = new Map<string, { ref: MediaRef; uses: number; names: Map<string, number> }>()
+  const inCatalogue = new Set<string>()
 
-  for (const url of catalogue) byUrl.set(url, { uses: 0, names: new Map() })
+  for (const entry of catalogue) {
+    const ref = refFor(entry)
+    const id = idOf(ref)!
+    inCatalogue.add(id)
+    byId.set(id, { ref, uses: 0, names: new Map() })
+  }
 
   for (const workout of workouts) {
-    walk(workout.blocks, (url, name) => {
-      const entry = byUrl.get(url) ?? { uses: 0, names: new Map<string, number>() }
+    walk(workout.blocks, (ref, name) => {
+      const id = idOf(ref)!
+      const entry = byId.get(id) ?? { ref, uses: 0, names: new Map<string, number>() }
       entry.uses += 1
       if (name) entry.names.set(name, (entry.names.get(name) ?? 0) + 1)
-      byUrl.set(url, entry)
+      byId.set(id, entry)
     })
   }
 
-  return [...byUrl.entries()]
-    .map(([url, { uses, names }]) => {
-      if (inCatalogue.has(url)) return { url, label: labelFromUrl(url), uses }
+  /*
+   * `resolvePlan` rather than a second `${base}${path}` of our own, so the picker
+   * and the run screen cannot disagree about where an image lives. `hasBlob` is
+   * stubbed false because the picker resolves synchronously: a pinned remote
+   * image shows from its URL here, which is what it did before.
+   */
+  const srcOf = (ref: MediaRef): string => {
+    const plan = resolvePlan(ref, () => false, base)
+    return plan.kind === 'url' ? plan.url : ''
+  }
+
+  return [...byId.entries()]
+    .map(([id, { ref, uses, names }]) => {
+      if (inCatalogue.has(id)) return { id, ref, src: srcOf(ref), label: labelFromUrl(id), uses }
       // Most frequent step name wins; ties break alphabetically so the result is
       // stable rather than dependent on insertion order.
       const label =
         [...names.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ??
-        labelFromUrl(url)
-      return { url, label, uses }
+        labelFromUrl(id)
+      return { id, ref, src: srcOf(ref), label, uses }
     })
     .sort(
       (a, b) =>
         a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }) ||
-        a.url.localeCompare(b.url),
+        a.id.localeCompare(b.id),
     )
 }

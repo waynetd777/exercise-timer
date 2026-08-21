@@ -86,9 +86,12 @@ export function App() {
     })()
   }, [library])
 
-  /** Every image already in use, so the editor can offer them for reuse. */
+  /**
+   * Every image already in use, so the editor can offer them for reuse. The base
+   * is needed because a catalogue entry is a PATH now — see `imageCatalogue`.
+   */
   const knownImages = useMemo(
-    () => collectImages(library.workouts, IMAGE_CATALOGUE),
+    () => collectImages(library.workouts, IMAGE_CATALOGUE, import.meta.env.BASE_URL),
     [library.workouts],
   )
   const toLibrary = useCallback(() => setView({ screen: 'library' }), [])
