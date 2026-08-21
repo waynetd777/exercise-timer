@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-20
+> Last updated: 2026-08-21
 
 ---
 
@@ -185,6 +185,28 @@
   - **Three dings** for the finish: 3136Hz, inharmonic ×2.74, 520ms, struck at 0/260/520ms — brighter and shorter than the bell, as specified.
   - **Sound bench at Routines → Sounds**: each cue plays as the full beep-beep-beep-X figure and as the terminal sound alone, with its parameters printed beside it so iteration is precise.
   - **289 tests green**, including that the whistle and bell cannot be confused and that every boundary sound fits inside the shortest real step.
+
+- **The whistle is the real thing, and it was CC0 all along** (after five rejected synthesis attempts)
+  - Measured CC0 freesound candidates against the Tabata whistle. Sound **218318 "Referee whistle blow, gymnasium" by SpliceSound** matched on every figure — 852ms sounding, 2902Hz peak, 98.4% tonal, 9.9Hz rattle — and **waveform cross-correlation 0.992 at a 0.2ms lag** proves it is the same recording. The Tabata app plays a public-domain file; synthesis was never necessary. Licence confirmed from the `publicdomain/zero` link in the page markup, not a search summary.
+  - Ships as `src/audio/referee-whistle-cc0.wav`: the 3.329s original trimmed to the blast plus its gymnasium decay (899ms), peak-normalised, 3ms fades, 22.05kHz mono, **44KB**. WAV because macOS has no mp3 encoder and AAC decode is not universal. `globPatterns` in `vite.config.ts` gained `wav` — without it the sound is fetched at runtime and lost in a gym with no signal.
+  - `src/audio/samples.ts` holds provenance + licence reasoning. `Note.sample` + `playbackRate` added; the engine plays a buffer when decoded and **falls back to the synthesised curve** otherwise, so a dead network costs fidelity not silence. Both are on the bench as "Recording" / "Synthesised".
+  - `scripts/gen_whistle.py` regenerates `whistleCurve.ts` (the fallback) from analysis arrays; defaults ARE the shipped sound. **`scripts/.analysis/` is gitignored** — full-rate amplitude+frequency of the Tabata mp3 is enough to resynthesise it, so committing it would undo the history purge.
+  - **Beep and bell hunted too and NOT found**: 89 CC0 candidates for the beep (best 0.740, inside an 89s file) and 67 for the bell (best **0.147**). Both stay synthesised. Tabata's `sound_ding.mp3` is 300Hz/1715ms — unrelated to our short dings, which are ours to spec.
+- **Rounds renamed to Reps** (user: "it's short for repetitions", so always plural)
+  - The label is DATA — `newRepeat()` wrote the literal `'Round'` — so a code rename alone would leave saved routines saying "Round 2 of 3". `src/storage/migrate.ts` maps `'Round'` and the interim `'Rep'` to `'Reps'` on READ, wired into all three entry points: `listWorkouts`, `fromBundle`, `decodeRoutine`. A deliberately-named "Round 1" is left alone.
+- **A rest runs BETWEEN reps only** (user-specified; behaviour change)
+  - `compile()` drops a group's trailing `rest` child on the final iteration, and `totalDurationMs`/`stepCount` match. 3 reps of work+rest is work·rest·work·rest·work — 5 steps. Classic Tabata is now 16 steps / 5:00 (was 17 / 5:10); a new routine is 8 steps / 3:20 (was 9 / 3:30). **Five tests pinned the old behaviour and were updated deliberately.**
+  - Made visible rather than documented: the trailing rest carries a **"between reps"** chip and a dashed duration field in the editor, and the chip disappears live if a step is added below it. To rest after the last rep, put a rest step AFTER the group.
+- **Routine colours** (user-specified: red, yellow, green, blue, orange, purple)
+  - `Workout.colour?: RoutineColour`, `ROUTINE_COLOURS` in spectrum order. Six swatches + "no colour" in the editor toolbar, part of the undo history alongside name and blocks, and compared by `isDirty` (4th arg defaults to the original's, so old 3-arg callers still work).
+  - Rendered as a gradient wash: 18% → neutral across the library row, 11% on the editor surface (a whole screen needs less tint than a 72px row). Red/green/blue/purple reuse the phase hues; orange and yellow complete the spectrum.
+  - **NOT applied to the run screen** — its green/red/blue *mean* get ready/work/rest, and tinting the countdown would break the one thing readable across a gym.
+  - Cascade trap found: the existing hover rule sets a flat `background` and TIES with the tint rule on specificity, so tinted rows would have had no hover feedback. There is now a tinted hover, and delete-confirm is excluded via `:not()` rather than source order.
+- **Two duplicate images removed, and a false claim corrected**
+  - `imageCatalogue.ts` asserted the repeated Tricep Press and Standing Arm Curl were "genuinely different images". They are not, and it had never been checked. Aligned for a 1px crop they differ 1.8/255 and 3.3/255 where two genuinely different plates differ 16.6/255, and both are visibly the same photograph and station. **27 images now**, two guard tests added.
+  - The dropped Tricep Press URL was referenced 6 times across two seeded routines; repointed at the canonical copy so the media store caches one blob, not two near-identical ones.
+- **Smaller asks**: dark scrollbars (`scrollbar-color` + `::-webkit-scrollbar`, thumb inset by a transparent border so the hit area stays 10px; iOS overlay scrollbars ignore both and that is fine); opening voice line **"Enjoy your workout, you've got this!"** 900ms after start (clears the whistle, the longest opening cue; once per run, never on resume, and the flag is set even when muted so unmuting cannot fire it late); **+ button on every step row** adding a fresh step of the same type below, distinct from duplicate beside it.
+- **303 tests green**, typecheck + build clean. **NOTHING COMMITTED** — standing instruction "don't keep pushing while we iterate" is still in force.
 
 ---
 

@@ -209,3 +209,34 @@
 - [2026-08-20] **Hosting is intentionally undecided; made irrelevant instead.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1 so root-domain and subpath hosts both work. GitHub Pages needs Pro for a private repo AND publishes a public site; Cloudflare Pages/Netlify/Vercel deploy private repos free from the root. Recommendation on record: Cloudflare Pages. Decide at phase 7.
 - [2026-08-20] **Routine library is first-class — unbounded build/save/load.** Free from the id-keyed store; the work is a Library home screen (list/create/duplicate/rename/delete/load) plus `Workout` metadata (`createdAt`, `updatedAt`, `lastRunAt`, `favourite`, `estimatedTotalMs` denormalised at save so the list needn't compile every routine). Flat searchable list sorted by recently-run with favourites pinned — folders/tags deferred until a flat list actually hurts.
 - [2026-08-20] **Build order: engine first (phase 1), UI second.** Correctness lives in the timeline compiler; getting it right and tested before any React removes the hardest class of bug from later phases.
+
+## Session 2026-08-21 — terminology, verification, and what shipped
+
+- **"Reps", always plural.** User correction: it is short for repetitions. The
+  label is DATA (`newRepeat()` writes it), so renaming in code is not enough —
+  `src/storage/migrate.ts` maps legacy labels on read at all three entry points
+  (IndexedDB, bundle import, share link). Any future rename of a stored label
+  needs the same treatment.
+- **A rest belongs BETWEEN reps.** `compile()` drops a group's trailing `rest`
+  child on the final iteration. This changed the length of every existing
+  routine, so five tests that pinned the old behaviour were updated on purpose.
+  To rest after the last rep, put a rest step after the group.
+- **Do not tint the run screen.** Its green/red/blue mean get ready/work/rest.
+  Routine colours are labels and stop at the library row and the editor.
+- **Search results are not evidence.** A freesound search summary claiming CC0
+  was confirmed against the `publicdomain/zero` link in the page markup before
+  anything was shipped. Similarly, a keyword hit is not a match: the whistle was
+  identified by 0.992 waveform cross-correlation, and the beep (0.740) and bell
+  (0.147) were REJECTED on the same measure despite ranking well on keywords.
+- **Verify before measuring.** A truncated download was briefly treated as a
+  smaller image. Decode an image / check a file is complete before comparing
+  sizes or hashes.
+- **Do not restate an unverified claim as fact in a comment.** `imageCatalogue.ts`
+  asserted two duplicate-named images were "genuinely different"; they were the
+  same photograph, and the claim had never been checked.
+- **CSS specificity ties are decided by source order.** A new `[data-colour]`
+  tint rule tied with the existing `:hover` rule and silently killed hover on
+  tinted rows. Prefer `:not()` to encode precedence over relying on ordering.
+- **`scripts/.analysis/` must stay gitignored.** Full-rate amplitude+frequency of
+  the Tabata whistle is enough to resynthesise it; committing it would undo the
+  history purge done before the repo went public.

@@ -48,7 +48,7 @@ export type Segment = {
 export type Repeat = {
   kind: 'repeat'
   id: string
-  /** Shown as e.g. "Round 3 of 8" while running. */
+  /** Shown as e.g. "Reps 3 of 8" while running. */
   label?: string
   /** Iteration count. Floored; anything below 1 contributes nothing. */
   times: number
@@ -59,9 +59,24 @@ export type Block = Segment | Repeat
 
 export const SCHEMA_VERSION = 1 as const
 
+/**
+ * Routine tints, in spectrum order rather than the order they were asked for, so
+ * the picker reads as a palette instead of a list.
+ *
+ * These are labels, not phase colours. The run screen's green/red/blue mean get
+ * ready/work/rest and a routine's tint deliberately does NOT override them —
+ * recolouring the countdown would break the one thing that is readable across a
+ * gym at a glance.
+ */
+export const ROUTINE_COLOURS = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'] as const
+
+export type RoutineColour = (typeof ROUTINE_COLOURS)[number]
+
 export type Workout = {
   id: string
   name: string
+  /** A tint for the library row and the editor. Absent means untinted. */
+  colour?: RoutineColour
   blocks: Block[]
   schemaVersion: typeof SCHEMA_VERSION
   createdAt: number

@@ -1,4 +1,4 @@
-import type { Block, MediaRef, Workout } from '../engine'
+import type { Block, MediaRef, RoutineColour, Workout } from '../engine'
 
 /**
  * Whether the editor holds unsaved changes.
@@ -49,9 +49,16 @@ export function isDirty(
   original: Workout,
   name: string,
   blocks: readonly Block[],
+  /**
+   * The draft's colour, where null means untinted. Defaults to the original's, so
+   * a caller that does not deal in colours can keep passing three arguments and
+   * still get the right answer.
+   */
+  colour: RoutineColour | null = original.colour ?? null,
 ): boolean {
   // Trimmed, because leading or trailing space in the name field is not a change
   // worth warning about — saving trims it anyway.
   if (name.trim() !== original.name.trim()) return true
+  if (colour !== (original.colour ?? null)) return true
   return !sameBlocks(blocks, original.blocks)
 }

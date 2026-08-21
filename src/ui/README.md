@@ -71,7 +71,7 @@ re-check that ratio if any role colour changes.
 | `App.tsx` | Routing between library, run and edit; consumes a shared routine from the URL |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
 | `LibraryScreen.tsx` | Routines, import, export, share, pull-to-update |
-| `EditorScreen.tsx` | Steps, rounds, images, undo, the lightbox and image picker |
+| `EditorScreen.tsx` | Steps, reps, images, undo, the lightbox and image picker |
 | `theme.css` | Tokens, the type scale, and the shared `.label` / `.btn` / `.chip` classes |
 | `icons.tsx` | Inline SVG — inherits `currentColor`, no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs |

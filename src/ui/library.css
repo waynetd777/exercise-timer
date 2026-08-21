@@ -274,6 +274,43 @@
   height: 48px;
 }
 
+/*
+ * A routine's own colour, as a wash that fades out across the row rather than a
+ * flat fill: at 18% even the brightest tint stays a hint, and the gradient keeps
+ * the right-hand side neutral so the meta text and buttons are unaffected.
+ *
+ * Excluded while confirming a delete on purpose, and by :not() rather than by
+ * source order, so the red danger state cannot lose to a tint no matter where
+ * these rules end up in the cascade.
+ */
+.row[data-colour]:not([data-confirming='true']) {
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in oklab, var(--tint) 18%, var(--ink-800)) 0%,
+      color-mix(in oklab, var(--tint) 7%, var(--ink-800)) 46%,
+      var(--ink-800) 78%
+    );
+  border-color: color-mix(in oklab, var(--tint) 24%, transparent);
+}
+
+/*
+ * Hover for a tinted row. Needed because the plain hover rule sets a flat
+ * `background`, and it ties with the tint rule on specificity — so whichever is
+ * written later wins outright and a tinted row would otherwise have NO hover
+ * feedback at all. Same wash, mixed into the lighter hover ground.
+ */
+.row[data-colour][data-clickable='true']:not([data-confirming='true']):hover {
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in oklab, var(--tint) 22%, var(--ink-700)) 0%,
+      color-mix(in oklab, var(--tint) 9%, var(--ink-700)) 46%,
+      var(--ink-700) 78%
+    );
+  border-color: var(--bone-faint);
+}
+
 /* The whole row states the danger, not just one word of it. */
 .row[data-confirming='true'] {
   border-color: var(--role-work);

@@ -23,11 +23,17 @@ Two consequences worth knowing:
 
 ## The tones are measured, not invented
 
-The cues reproduce the sounds of the Tabata Timer app, but nothing from it is
-bundled. The pitches and envelopes were measured from its audio — FFT for the
+The cues reproduce the sounds of the Tabata Timer app. The beep, bell and dings
+are synthesised: pitches and envelopes were measured from its audio — FFT for the
 partials, a smoothed amplitude envelope for attack and decay — and rebuilt with
-oscillators. That keeps the repo free of third-party audio, and there is nothing
-to ship, cache or lose offline.
+oscillators, so nothing from that app is bundled.
+
+The whistle is the exception, and the story is worth knowing before touching it.
+Five synthesis attempts were rejected. Measuring CC0 candidates against the Tabata
+whistle then found one identical on every figure, with a waveform correlation of
+0.992: **the Tabata app is playing a CC0 freesound recording**, so the app can ship
+the real thing. It does, at 44KB, with the best synthesised attempt kept as the
+fallback if the file fails to decode. See `samples.ts` for provenance and licence.
 
 Two findings shaped the result:
 

@@ -38,7 +38,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg}'],
+        // wav included for the whistle sample. Without it the sound is fetched at
+        // runtime and the app is silent-ish offline, which is the one place it
+        // matters: a gym with no signal.
+        globPatterns: ['**/*.{js,css,html,png,svg,wav}'],
         // A 42-minute routine can outlast a cached page, so take over
         // immediately rather than waiting for every tab to close.
         clientsClaim: true,
