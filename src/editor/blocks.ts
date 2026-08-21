@@ -1,4 +1,5 @@
-import type { Block, Repeat, Segment, SegmentRole } from '../engine'
+import type { Block, Ladder, Repeat, Section, Segment, SegmentRole } from '../engine'
+import { isGroup } from '../engine'
 
 /**
  * Pure edits on a routine's block tree.
@@ -75,6 +76,50 @@ export function newRepeat(
  * next, then a recovery interval. Exported so the app and its tests cannot
  * disagree about it.
  */
+/**
+ * A new ladder: three rungs of one exercise that scales with them.
+ *
+ * `5-10-15` rather than a symmetric pyramid, because a short ascending ladder is
+ * the easiest thing to read while learning what the control does — the real ones
+ * run to nine rungs and are easier to extend than to cut down.
+ */
+export function newLadder(children: Block[] = [newRungStep()], counts = [5, 10, 15]): Ladder {
+  return { kind: 'ladder', id: crypto.randomUUID(), counts, children, label: 'Set' }
+}
+
+/** A step whose rep count comes from the ladder around it. */
+export function newRungStep(): Segment {
+  return {
+    kind: 'segment',
+    id: crypto.randomUUID(),
+    name: DEFAULT_NAME.work,
+    role: 'work',
+    reps: { kind: 'rung' },
+  }
+}
+
+/** A self-paced step: a rep count and no clock. */
+export function newRepsStep(count = 10, role: SegmentRole = 'work'): Segment {
+  return {
+    kind: 'segment',
+    id: crypto.randomUUID(),
+    name: DEFAULT_NAME[role],
+    role,
+    reps: { kind: 'fixed', count },
+  }
+}
+
+/**
+ * A new section, in list mode.
+ *
+ * List rather than timer, because a section is only worth creating for a part of
+ * a routine that reads as a block of work — and an all-timed one is shown as a
+ * countdown anyway, whatever this says.
+ */
+export function newSection(name = 'Section', children: Block[] = [newRepsStep()]): Section {
+  return { kind: 'section', id: crypto.randomUUID(), name, display: 'list', children }
+}
+
 export function newRoutineBlocks(): Block[] {
   return [newSegment('prepare'), newRepeat(), newSegment('prepare'), newSegment('recover')]
 }
@@ -85,7 +130,7 @@ export function blockAt(blocks: readonly Block[], path: Path): Block | undefined
   const block = blocks[head!]
   if (!block) return undefined
   if (rest.length === 0) return block
-  return block.kind === 'repeat' ? blockAt(block.children, rest) : undefined
+  return isGroup(block) ? blockAt(block.children, rest) : undefined
 }
 
 /** Replaces the block at `path`; returning null removes it. */
@@ -102,7 +147,7 @@ function mapAt(
       const next = fn(block)
       return next ? [next] : []
     }
-    if (block.kind !== 'repeat') return [block]
+    if (!isGroup(block)) return [block]
     return [{ ...block, children: mapAt(block.children, rest, fn) }]
   })
 }
@@ -118,7 +163,7 @@ function withSiblings(
   if (path.length === 1) return fn([...blocks], index)
 
   return mapAt(blocks, path.slice(0, -1), (parent) => {
-    if (parent.kind !== 'repeat') return parent
+    if (!isGroup(parent)) return parent
     return { ...parent, children: fn([...parent.children], index) }
   })
 }
@@ -139,10 +184,10 @@ export function insertAt(blocks: readonly Block[], path: Path, block: Block): Bl
   })
 }
 
-/** Appends into a repeat's children. `path` must point at the repeat. */
+/** Appends into a group's children. `path` must point at the group. */
 export function appendTo(blocks: readonly Block[], path: Path, block: Block): Block[] {
   return mapAt(blocks, path, (target) =>
-    target.kind === 'repeat' ? { ...target, children: [...target.children, block] } : target,
+    isGroup(target) ? { ...target, children: [...target.children, block] } : target,
   )
 }
 
@@ -271,12 +316,82 @@ export function updateRepeat(
   )
 }
 
+export function updateLadder(
+  blocks: readonly Block[],
+  path: Path,
+  patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>,
+): Block[] {
+  return mapAt(blocks, path, (block) => (block.kind === 'ladder' ? { ...block, ...patch } : block))
+}
+
+export function updateSection(
+  blocks: readonly Block[],
+  path: Path,
+  patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>,
+): Block[] {
+  return mapAt(blocks, path, (block) => (block.kind === 'section' ? { ...block, ...patch } : block))
+}
+
+/**
+ * What a step asks of you, as one exclusive choice.
+ *
+ * The data model lets a step carry both a duration and a rep count; the editor
+ * does not, because a step that says "20 ×" and counts down 30 seconds cannot be
+ * obeyed. Switching between them therefore has to DELETE the other key rather
+ * than set it undefined — `exactOptionalPropertyTypes` is on, and a key present
+ * and undefined is not the same as absent, which is exactly what separates a
+ * self-paced step from a timed one.
+ */
+export type Timing =
+  | { kind: 'timed'; durationMs: number }
+  | { kind: 'reps'; count: number; perSide?: boolean }
+  | { kind: 'rung'; perSide?: boolean }
+
+export function setTiming(blocks: readonly Block[], path: Path, timing: Timing): Block[] {
+  return mapAt(blocks, path, (block) => {
+    if (block.kind !== 'segment') return block
+    const next = { ...block }
+    delete next.durationMs
+    delete next.reps
+
+    if (timing.kind === 'timed') return { ...next, durationMs: timing.durationMs }
+    if (timing.kind === 'rung') {
+      return { ...next, reps: { kind: 'rung', ...(timing.perSide ? { perSide: true } : {}) } }
+    }
+    return {
+      ...next,
+      reps: { kind: 'fixed', count: timing.count, ...(timing.perSide ? { perSide: true } : {}) },
+    }
+  })
+}
+
+/** Reads a step's current choice, for the control that sets it. */
+export function timingOf(segment: Segment): Timing {
+  if (segment.reps?.kind === 'rung') {
+    return { kind: 'rung', ...(segment.reps.perSide ? { perSide: true } : {}) }
+  }
+  if (segment.reps) {
+    return {
+      kind: 'reps',
+      count: segment.reps.count,
+      ...(segment.reps.perSide ? { perSide: true } : {}),
+    }
+  }
+  return { kind: 'timed', durationMs: segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000 }
+}
+
 /** Wraps a block in a new repeat, so a step becomes "3 rounds of that step". */
 export function wrapInRepeat(blocks: readonly Block[], path: Path, times = 3): Block[] {
   const target = blockAt(blocks, path)
-  // Nesting a repeat inside a repeat is refused: the editor only renders two
-  // levels, and a deeper tree would be invisible and un-editable.
-  if (!target || target.kind === 'repeat') return [...blocks]
+  /*
+   * A repeat may not wrap another repeat, nor a section.
+   *
+   * Two levels of counting nested inside each other are unreadable, and a
+   * section is a part of the routine rather than a piece of work — putting one
+   * inside a round would say the round contains a part of the routine. A LADDER
+   * may be wrapped: "3 rounds of this ladder" is a real thing to ask for.
+   */
+  if (!target || target.kind === 'repeat' || target.kind === 'section') return [...blocks]
   return mapAt(blocks, path, (block) => newRepeat([block], times))
 }
 
@@ -301,6 +416,6 @@ export function flatten(blocks: readonly Block[], prefix: Path = []): FlatBlock[
       first: index === 0,
       last: index === blocks.length - 1,
     }
-    return block.kind === 'repeat' ? [row, ...flatten(block.children, path)] : [row]
+    return isGroup(block) ? [row, ...flatten(block.children, path)] : [row]
   })
 }

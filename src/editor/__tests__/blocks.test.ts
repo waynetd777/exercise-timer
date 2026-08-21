@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Block, Repeat, Segment } from '../../engine'
+import type { Block, Ladder, Repeat, Section, Segment } from '../../engine'
 import { compile, totalDurationMs } from '../../engine'
 import {
   appendTo,
@@ -9,15 +9,23 @@ import {
   insertAfter,
   moveBy,
   moveStep,
+  newLadder,
   newRepeat,
   newRoutineBlocks,
+  newRungStep,
+  newSection,
   newSegment,
   removeAt,
+  setTiming,
+  timingOf,
   unwrapRepeat,
+  updateLadder,
   updateRepeat,
+  updateSection,
   updateSegment,
   wrapInRepeat,
 } from '../blocks'
+import type { Timing } from '../blocks'
 
 const seg = (name: string, seconds = 20): Segment => ({
   kind: 'segment',
@@ -425,5 +433,132 @@ describe('moveStep — moving through rounds, not just around them', () => {
     moveStep(original, [0], 1)
     expect(names(original)).toEqual(['A', '[R]', 'B', 'C', 'D'])
     expect(names(moveStep(original, [9], 1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
+  })
+})
+
+describe('the tree operations reach every kind of group', () => {
+  const routine = (): Block[] => [
+    newSection('Warm-up', [seg('Jog', 40)]),
+    newSection('Legs', [newLadder([newRungStep()], [5, 10])]),
+  ]
+
+  it('flattens a section and a ladder, not just a repeat', () => {
+    const rows = flatten(routine())
+    expect(rows.map((row) => `${'  '.repeat(row.depth)}${row.block.kind}`)).toEqual([
+      'section',
+      '  segment',
+      'section',
+      '  ladder',
+      '    segment',
+    ])
+  })
+
+  it('finds and edits a block three levels down', () => {
+    const blocks = routine()
+    const path = [1, 0, 0]
+
+    expect(blockAt(blocks, path)?.kind).toBe('segment')
+    const renamed = updateSegment(blocks, path, { name: 'Goblet Squats' })
+    expect((blockAt(renamed, path) as Segment).name).toBe('Goblet Squats')
+  })
+
+  it('removes, appends and reorders inside a section', () => {
+    const blocks = updateSection(routine(), [0], { name: 'Prep' })
+    expect((blockAt(blocks, [0]) as Section).name).toBe('Prep')
+
+    const added = appendTo(blocks, [0], seg('Jacks', 40))
+    expect((blockAt(added, [0]) as Section).children).toHaveLength(2)
+
+    const moved = moveBy(added, [0, 1], -1)
+    expect(((blockAt(moved, [0]) as Section).children[0] as Segment).name).toBe('Jacks')
+
+    const gone = removeAt(moved, [0, 0])
+    expect((blockAt(gone, [0]) as Section).children).toHaveLength(1)
+  })
+
+  it('edits a ladder\'s counts', () => {
+    const blocks = updateLadder(routine(), [1, 0], { counts: [3, 6, 9] })
+    expect((blockAt(blocks, [1, 0]) as Ladder).counts).toEqual([3, 6, 9])
+  })
+
+  it('duplicates a whole section with fresh ids all the way down', () => {
+    const blocks = duplicateAt(routine(), [1])
+    const original = blockAt(blocks, [1]) as Section
+    const copy = blockAt(blocks, [2]) as Section
+
+    expect(copy.name).toBe(original.name)
+    expect(copy.id).not.toBe(original.id)
+    expect((copy.children[0] as Ladder).id).not.toBe((original.children[0] as Ladder).id)
+  })
+})
+
+describe('setTiming — a step is timed OR counted, never both', () => {
+  const stepAt = (blocks: Block[]) => blockAt(blocks, [0]) as Segment
+
+  it('switching to reps DELETES the duration rather than blanking it', () => {
+    // Absent and present-but-undefined are different things to `compile()`: one
+    // is a self-paced step and the other would still be timed.
+    const blocks = setTiming([seg('Squats', 20)], [0], { kind: 'reps', count: 12 })
+
+    expect(stepAt(blocks).reps).toEqual({ kind: 'fixed', count: 12 })
+    expect('durationMs' in stepAt(blocks)).toBe(false)
+  })
+
+  it('switching back to timed deletes the reps', () => {
+    const reps = setTiming([seg('Squats', 20)], [0], { kind: 'reps', count: 12 })
+    const timed = setTiming(reps, [0], { kind: 'timed', durationMs: 30_000 })
+
+    expect(timed[0]).toMatchObject({ durationMs: 30_000 })
+    expect('reps' in (timed[0] as Segment)).toBe(false)
+  })
+
+  it('carries perSide, and drops it when it is not asked for', () => {
+    const on = setTiming([seg('Lunges', 20)], [0], { kind: 'reps', count: 5, perSide: true })
+    expect(stepAt(on).reps).toEqual({ kind: 'fixed', count: 5, perSide: true })
+
+    const off = setTiming(on, [0], { kind: 'reps', count: 5 })
+    expect(stepAt(off).reps).toEqual({ kind: 'fixed', count: 5 })
+  })
+
+  it('round-trips through timingOf', () => {
+    const cases: Timing[] = [
+      { kind: 'timed', durationMs: 45_000 },
+      { kind: 'reps', count: 12 },
+      { kind: 'reps', count: 5, perSide: true },
+      { kind: 'rung' },
+      { kind: 'rung', perSide: true },
+    ]
+    for (const timing of cases) {
+      expect(timingOf(stepAt(setTiming([seg('Step', 20)], [0], timing)))).toEqual(timing)
+    }
+  })
+
+  it('offers the role default to a step that has no duration to go back to', () => {
+    const restStep: Segment = { ...seg('Rest'), role: 'rest' }
+    const reps = setTiming([restStep], [0], { kind: 'reps', count: 1 })
+    expect(timingOf(stepAt(reps))).toEqual({ kind: 'reps', count: 1 })
+
+    const cleared = { ...stepAt(reps) }
+    delete cleared.reps
+    // 10s, the default for a rest — not the 20s of the work step it started as.
+    expect(timingOf(cleared)).toEqual({ kind: 'timed', durationMs: 10_000 })
+  })
+})
+
+describe('wrapInRepeat, with the new kinds around', () => {
+  it('wraps a ladder — "3 rounds of this ladder" is a real thing to ask for', () => {
+    const wrapped = wrapInRepeat([newLadder()], [0])
+    expect(wrapped[0]?.kind).toBe('repeat')
+    expect((wrapped[0] as Repeat).children[0]?.kind).toBe('ladder')
+  })
+
+  it('refuses a section, which is a part of the routine rather than work', () => {
+    const blocks = [newSection('Burnout')]
+    expect(wrapInRepeat(blocks, [0])).toEqual(blocks)
+  })
+
+  it('still refuses a repeat', () => {
+    const blocks = [newRepeat()]
+    expect(wrapInRepeat(blocks, [0])).toEqual(blocks)
   })
 })
