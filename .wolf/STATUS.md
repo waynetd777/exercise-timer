@@ -175,6 +175,7 @@
   - **The completion figure was being truncated** — 7 notes over 3.45s, firing at the same instant the workout completes and the scheduler re-runs. Cancellation now reasons per CUE rather than per note, with a 0.15s grace for clock skew and deduplication so a spared cue cannot play twice. See buglog `bug-021`.
   - **Audited every other cue** (`schedule.test.ts`, 12 tests): every cue of all three real routines schedules exactly once and in order, nothing is missed even arming at the full lookahead edge, arming every second never duplicates, every cue kind has a tone, and no two cues share a millisecond. **No other sound is clobbered.**
   - **273 tests green.**
+- **Outcome notices are now a dismissible modal** (user-reported) — `NoticeDialog`, a native `<dialog>`. Used for the save-images result, import results and the copied share link. While work is in flight it shows progress with no close affordance and swallows Escape; once there is a result it offers Close. The persistent load error stays inline, being a condition rather than an event.
 
 ---
 

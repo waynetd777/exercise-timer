@@ -13,6 +13,7 @@ import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
 import { duration } from './format'
 import { Menu } from './Menu'
+import { NoticeDialog } from './NoticeDialog'
 import {
   CheckIcon,
   CloseIcon,
@@ -162,6 +163,8 @@ export function LibraryScreen({
   const [sort, setSort] = useState<SortMode>('recent')
   const [dragging, setDragging] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  /** True while the reported work is still running, so there is nothing to dismiss yet. */
+  const [noticeBusy, setNoticeBusy] = useState(false)
   const picker = useRef<HTMLInputElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
 
@@ -191,6 +194,7 @@ export function LibraryScreen({
    * rather than thrown: one dead link should not abandon the rest.
    */
   const saveImagesOffline = async () => {
+    setNoticeBusy(true)
     setNotice('Saving images…')
     let pinned = 0
     let failed = 0
@@ -224,6 +228,7 @@ export function LibraryScreen({
         ? 'Every image is already saved.'
         : `Saved ${pinned} image${pinned === 1 ? '' : 's'}.${failed > 0 ? ` ${failed} could not be reached.` : ''}`,
     )
+    setNoticeBusy(false)
   }
 
   const ingest = async (files: readonly File[]) => {
@@ -353,11 +358,6 @@ export function LibraryScreen({
           {pull.busy ? 'Updating…' : pull.armed ? 'Release to update' : 'Pull to update'}
         </p>
 
-        {notice && (
-          <p className="library__notice label" role="status">
-            {notice}
-          </p>
-        )}
         {library.error && (
           <p className="library__notice library__notice--error label" role="alert">
             {library.error}
@@ -387,6 +387,17 @@ export function LibraryScreen({
           </ul>
         )}
       </div>
+
+      {notice !== null && (
+        <NoticeDialog
+          text={notice}
+          busy={noticeBusy}
+          onClose={() => {
+            setNotice(null)
+            setNoticeBusy(false)
+          }}
+        />
+      )}
 
       <div className="library__drop" aria-hidden="true">
         <ImportIcon />

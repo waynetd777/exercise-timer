@@ -9,11 +9,11 @@
     "anatomy_misses": 4,
     "repeated_reads_blocked": 0,
     "estimated_savings_vs_bare_cli": 0,
-    "real_input_tokens": 764,
-    "real_output_tokens": 654017,
-    "real_cache_read_tokens": 162549624,
-    "real_cache_creation_tokens": 750717,
-    "real_api_calls": 382,
+    "real_input_tokens": 784,
+    "real_output_tokens": 679915,
+    "real_cache_read_tokens": 170485108,
+    "real_cache_creation_tokens": 775554,
+    "real_api_calls": 392,
     "total_sessions": 1
   },
   "sessions": [
@@ -21,7 +21,7 @@
       "id": "session-2026-08-20-2242",
       "agent": "claude",
       "started": "2026-08-20T20:42:16.934Z",
-      "ended": "2026-08-21T00:25:04.583Z",
+      "ended": "2026-08-21T00:31:13.514Z",
       "reads": [
         {
           "file": "/Users/wayned/Projects/exercise-timer/public/favicon-64.png",
@@ -54,11 +54,11 @@
         "savings_estimated": 0
       },
       "real_usage": {
-        "input_tokens": 764,
-        "output_tokens": 654017,
-        "cache_read_input_tokens": 162549624,
-        "cache_creation_input_tokens": 750717,
-        "api_calls": 382
+        "input_tokens": 784,
+        "output_tokens": 679915,
+        "cache_read_input_tokens": 170485108,
+        "cache_creation_input_tokens": 775554,
+        "api_calls": 392
       }
     }
   ],
