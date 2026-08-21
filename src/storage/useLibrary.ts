@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
+import { orphanedHashes } from '../media/gc'
+import { forgetBlob } from '../media/resolveMedia'
+import { deleteBlob, storedHashes } from '../media/store'
 import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
@@ -84,8 +87,23 @@ export function useLibrary(seed: readonly Workout[]): Library {
 
   const remove = useCallback(async (id: string) => {
     await deleteWorkout(id)
-    setWorkouts((current) => current.filter((w) => w.id !== id))
-    // Phase 4: once images are stored locally, orphaned blobs get swept here.
+    const remaining = await listWorkouts()
+    setWorkouts(remaining)
+
+    /*
+     * Sweep blobs nothing references any more. Computed against the WHOLE
+     * remaining library, because storage is content-addressed: the deleted
+     * routine may well have shared images with one that is staying.
+     */
+    try {
+      for (const hash of orphanedHashes(await storedHashes(), remaining)) {
+        await deleteBlob(hash)
+        forgetBlob(hash)
+      }
+    } catch {
+      // A failed sweep leaves dead bytes behind, which is harmless — the same
+      // sweep runs on the next delete.
+    }
   }, [])
 
   const duplicate = useCallback(

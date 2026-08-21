@@ -6,6 +6,8 @@ import { bundleFilename, toBundle } from '../storage/bundle'
 import { copyText, downloadJson } from '../storage/download'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
 import { shareUrl } from '../storage/shareLink'
+import type { Block } from '../engine'
+import { pinRemote } from '../media/pin'
 import { updateApp } from '../state/updateApp'
 import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
@@ -16,6 +18,7 @@ import {
   CopyIcon,
   ExportIcon,
   ImportIcon,
+  PinIcon,
   PencilIcon,
   PlusIcon,
   ShareIcon,
@@ -179,6 +182,49 @@ export function LibraryScreen({
     )
   }
 
+  /**
+   * Stores a local copy of every linked image, so routines keep their pictures
+   * on gym wifi and survive the host eventually losing a file.
+   *
+   * Works because i.postimg.cc allows cross-origin reads. Failures are counted
+   * rather than thrown: one dead link should not abandon the rest.
+   */
+  const saveImagesOffline = async () => {
+    setNotice('Saving images…')
+    let pinned = 0
+    let failed = 0
+
+    for (const workout of library.workouts) {
+      let changed = false
+
+      const walk = async (blocks: readonly Block[]): Promise<Block[]> =>
+        Promise.all(
+          blocks.map(async (block) => {
+            if (block.kind === 'repeat') return { ...block, children: await walk(block.children) }
+            if (block.media?.source !== 'remote' || block.media.cachedHash) return block
+            try {
+              const media = await pinRemote(block.media)
+              changed = true
+              pinned += 1
+              return { ...block, media }
+            } catch {
+              failed += 1
+              return block
+            }
+          }),
+        )
+
+      const blocks = await walk(workout.blocks)
+      if (changed) await library.add({ ...workout, blocks })
+    }
+
+    setNotice(
+      pinned === 0 && failed === 0
+        ? 'Every image is already saved.'
+        : `Saved ${pinned} image${pinned === 1 ? '' : 's'}.${failed > 0 ? ` ${failed} could not be reached.` : ''}`,
+    )
+  }
+
   const ingest = async (files: readonly File[]) => {
     const candidates = files.filter(looksImportable)
     if (candidates.length === 0) {
@@ -256,6 +302,16 @@ export function LibraryScreen({
           >
             <ExportIcon />
             Export
+          </button>
+
+          <button
+            className="chip chip--action"
+            onClick={() => void saveImagesOffline()}
+            disabled={library.workouts.length === 0}
+            title="Store a copy of every linked image on this device"
+          >
+            <PinIcon />
+            Save images
           </button>
 
           <button className="chip chip--action" onClick={onNew}>

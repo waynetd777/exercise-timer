@@ -270,3 +270,12 @@ export function ShareIcon() {
     </Svg>
   )
 }
+
+export function PinIcon() {
+  return (
+    <Svg>
+      <path d="M12 21v-6.5" {...STROKE} />
+      <path d="M7.5 8.2 12 3.5l4.5 4.7v3.1a4.6 4.6 0 0 1-9 0z" {...STROKE} />
+    </Svg>
+  )
+}
