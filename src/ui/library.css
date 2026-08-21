@@ -481,6 +481,17 @@
  * They wrap rather than shrink on a narrow phone, since a chip below its
  * min-height stops being a reliable target.
  */
+/*
+ * Three buttons: the template, then Cancel and Add.
+ *
+ * With room they sit in one row, the template pushed left — it is a way in rather
+ * than a decision about this routine, and must not sit where Add is reached for.
+ * On a phone all three do not fit at the label size, and wrapping a right-aligned
+ * row that has an auto margin in it produced a staircase: each button on its own
+ * line, each aligned differently. So below the width where they fit they become a
+ * full-width stack in reading order, primary last — the phone convention, and a
+ * far bigger target than a chip.
+ */
 .paste__actions {
   display: flex;
   flex-wrap: wrap;
@@ -488,8 +499,24 @@
   gap: var(--step-3);
 }
 
-/* Utility left, decisions right: the template is a way in rather than a choice
-   about this routine, and it must not sit where Add to library is reached for. */
 .paste__template {
   margin-right: auto;
+}
+
+@container paste (max-width: 26rem) {
+  .paste__actions {
+    display: grid;
+    gap: var(--step-2);
+  }
+
+  .paste__actions .chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .paste__template {
+    margin-right: 0;
+    /* Last here: the two decisions about this routine come first. */
+    order: 1;
+  }
 }
