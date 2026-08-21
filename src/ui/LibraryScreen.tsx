@@ -5,6 +5,8 @@ import { importRoutineFiles, looksImportable } from '../routines/importFiles'
 import { PasteDialog } from './PasteDialog'
 import type { Library } from '../storage/useLibrary'
 import { bundleFilename, toBundle } from '../storage/bundle'
+import { collectMedia } from '../storage/bundleMedia'
+import { getBlob } from '../media/store'
 import { copyText, downloadJson } from '../storage/download'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
 import { shareUrl } from '../storage/shareLink'
@@ -46,12 +48,14 @@ function Row({
   onRun,
   onEdit,
   onShare,
+  onExport,
 }: {
   workout: Workout
   library: Library
   onRun: (workout: Workout) => void
   onEdit: (workout: Workout) => void
   onShare: (workout: Workout) => Promise<void>
+  onExport: (workout: Workout) => Promise<void>
 }) {
   const [confirming, setConfirming] = useState(false)
   const { totalMs, steps } = summary(workout)
@@ -138,9 +142,20 @@ function Row({
               className="btn btn--ghost"
               onClick={() => void onShare(workout)}
               aria-label="Copy a share link"
-              title="Copy a share link"
+              title="Copy a share link — steps only, no photos"
             >
               <ShareIcon />
+            </button>
+            {/* Beside the link, because they are the two ways to send a routine
+                and they differ in exactly one thing: a file carries the photos
+                you took, a link cannot. */}
+            <button
+              className="btn btn--ghost"
+              onClick={() => void onExport(workout)}
+              aria-label="Export as a file"
+              title="Export as a file — photos included"
+            >
+              <ExportIcon />
             </button>
             <button
               className="btn btn--ghost"
@@ -206,6 +221,36 @@ export function LibraryScreen({
    * Works because i.postimg.cc allows cross-origin reads. Failures are counted
    * rather than thrown: one dead link should not abandon the rest.
    */
+  /**
+   * Writes routines to a file, with their uploaded photos inside it.
+   *
+   * One function for both callers, so "Export" and a row's own export cannot
+   * drift into carrying different things. The photos are always included: an
+   * export that quietly loses a picture is the worse failure, and a whole library
+   * of them is a couple of megabytes.
+   *
+   * A bundled illustration needs no bytes here — the app on the other side has
+   * it. Only an uploaded photo has to travel, and since the image-link field went
+   * this is the only way one reaches another device.
+   */
+  const exportRoutines = async (workouts: readonly Workout[], name: string | null) => {
+    setNoticeBusy(true)
+    setNotice(workouts.length === 1 ? 'Preparing the routine…' : 'Preparing your routines…')
+
+    const media = await collectMedia(workouts, getBlob)
+    const photos = Object.keys(media).length
+    downloadJson(bundleFilename(name, new Date()), toBundle(workouts, Date.now(), media))
+
+    const subject =
+      workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
+    setNotice(
+      photos === 0
+        ? `Exported ${subject}`
+        : `Exported ${subject} with ${photos} photo${photos === 1 ? '' : 's'}`,
+    )
+    setNoticeBusy(false)
+  }
+
   const ingest = async (files: readonly File[]) => {
     const candidates = files.filter(looksImportable)
     if (candidates.length === 0) {
@@ -213,7 +258,7 @@ export function LibraryScreen({
       return
     }
 
-    const { imported, failed } = await importRoutineFiles(candidates, Date.now())
+    const { imported, failed, droppedImages } = await importRoutineFiles(candidates, Date.now())
     for (const workout of imported) await library.add(workout)
 
     const added = imported.length > 0 ? `Imported ${imported.length}` : null
@@ -221,7 +266,13 @@ export function LibraryScreen({
       failed.length > 0
         ? `${added ? 'skipped' : 'Skipped'} ${failed.map((file) => file.name).join(', ')}`
         : null
-    setNotice([added, skipped].filter(Boolean).join(' — ') || null)
+    // An image whose contents did not match its hash is worth saying out loud:
+    // the routine is here, but a step lost its picture.
+    const dropped =
+      droppedImages > 0
+        ? `${droppedImages} image${droppedImages === 1 ? '' : 's'} could not be read`
+        : null
+    setNotice([added, skipped, dropped].filter(Boolean).join(' — ') || null)
   }
 
   return (
@@ -281,15 +332,11 @@ export function LibraryScreen({
                 onSelect: () => setPasting(true),
               },
               {
-                label: 'Export',
+                label: 'Export all',
                 icon: <ExportIcon />,
-                title: 'Download every routine as one file',
+                title: 'Download every routine as one file, photos included',
                 disabled: library.workouts.length === 0,
-                onSelect: () =>
-                  downloadJson(
-                    bundleFilename(null, new Date()),
-                    toBundle(library.workouts, Date.now()),
-                  ),
+                onSelect: () => void exportRoutines(library.workouts, null),
               },
               // Development only, and the screen itself is not in a production
               // build — see the note in App.tsx.
@@ -366,6 +413,7 @@ export function LibraryScreen({
               onRun={onRun}
               onEdit={onEdit}
               onShare={share}
+              onExport={(workout) => exportRoutines([workout], workout.name)}
             />
             ))}
           </ul>

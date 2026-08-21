@@ -27,6 +27,13 @@ there is no guessing), the `.tabata` reader second, and the paste parser last,
 when the file turns out not to be JSON at all. It **collects failures instead of
 throwing**, so one bad file in a drop of ten does not lose the other nine.
 
+It is also where two things happen to a routine on the way in: every reader's
+output goes through `migrateWorkout` — which is what turns a `.tabata` file's
+image URLs into the illustrations the app ships — and a bundle's photos are
+written to the blob store first, so no step renders looking for bytes that have
+not landed. A photo the store already has is skipped: the key is the hash of the
+contents, so importing the same file twice cannot duplicate an image.
+
 Plain text is accepted because the routines arrive as email, and saving one to a
 file is often easier than getting at its text to copy — particularly on a phone.
 The file's own name becomes the routine's.
@@ -182,7 +189,7 @@ parallel list of names to keep in sync — the filenames are the exercise names.
 | `pasteFormat.ts` | The pasted-text parser: `parseRoutine`, `parseItem` |
 | `pasteTemplate.ts` | The example routine the paste dialog copies out; a test keeps it parseable |
 | `../../scripts/exercise_plates.py` | Regenerates `public/exercises/` from the Torus guide PDF |
-| `importFiles.ts` | Bundle-or-tabata dispatch over dropped files, failures collected |
+| `importFiles.ts` | Bundle-or-tabata-or-text dispatch, migration, and a bundle's photos into the store |
 | `samples.ts` | The two seeds, loaded from `*.routine.json` |
 | `strength-training.routine.json` | The generated strength seed — regenerate with the parser, never edit by hand |
 | `imageCatalogue.ts` | The 43 bundled illustration paths, in the note's original order and grouping |

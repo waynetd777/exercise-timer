@@ -32,7 +32,9 @@ outside Safari, and storing an oversized file beats storing nothing.
   of `public/exercises/`. Precached by the service worker, so it needs no network
   and no pinning: it is there the moment the app installs.
 - **`local`** — a photo uploaded here. Downscaled on the way in and stored by
-  content hash in IndexedDB. It never travels to another device on its own.
+  content hash in IndexedDB. It reaches another device only inside an export
+  file, which carries the bytes as a data URL — see `storage/bundleMedia.ts`. A
+  share link cannot take one, and says so.
 - **`remote`** — a link. **Nothing creates one any more.** The editor's link field
   and `pinRemote` are gone, and `.tabata` imports have their URLs rewritten to
   bundled paths on the way in (`storage/migrate.ts`). The branch stays in
@@ -68,3 +70,4 @@ on screen. The cache is bounded by the number of distinct images in a routine.
 | `store.ts` | IndexedDB blob access |
 | `downscale.ts` | Canvas → WebP |
 | `pin.ts` | `storeFile`, the one way an image now enters storage |
+| `dataUrl.ts` | Blob ↔ data URL, so a photo can travel inside an export file |

@@ -64,28 +64,41 @@ deleted stays deleted.
 
 ## The export format
 
-`bundle.ts` writes a versioned `davshack-timer-bundle`. Its `media` map was
-declared before anything could fill it, precisely so the media work would not
-force a second format or a migration.
+One JSON file, versioned from the start: `{ kind, version, exportedAt, workouts,
+media }`. `kind` is a marker so the importer never has to guess, and a file from a
+*newer* version is refused rather than half-read.
 
-Validation is deliberately asymmetric: forgiving about missing metadata — a
-routine with no `createdAt` is still a routine — and strict about the id, name and
-block tree, which are what the app would crash on. One corrupt routine in a file
-no longer loses the rest of it.
+**`media` carries the photos**, keyed by content hash, as data URLs
+(`bundleMedia.ts`). The split is the point:
 
-**`isBlock` is a whitelist, and that is the trap.** When ladders and sections were
-added it still accepted only segments and repeats, so every pasted routine
-exported perfectly and was silently filtered out on the way back in — a backup
-that restored nothing, which is worse than one that fails. A new block kind has to
-be added to `GROUP_KINDS` at the same time. `shareLink.ts` has no such list: it
-checks only that `blocks` is an array, so links were never affected.
+- A **bundled** illustration needs no bytes — it is a short path, and the app on
+  the other side already has the picture. This is what keeps an export small.
+- An **uploaded** photo exists nowhere but the device that took it, so it has to
+  travel in the file or it does not travel at all. Since the image-link field was
+  removed, this is the only route to another device.
+
+Base64 costs a third, so a photo lands at 80–130KB and a library of them is a
+couple of megabytes — an AirDrop, not an email. Photos are always included: an
+export that quietly loses a picture is the worse failure.
+
+Every entry is **re-hashed on the way in** and compared against its key. Storage
+is content-addressed, so a key that lied would poison the store for every routine
+sharing that hash, and re-hashing a file just read off disk costs a millisecond. A
+bad entry is skipped and counted, never thrown: the routines still import and the
+notice says how many pictures were dropped.
+
+Both exports go through one function in `LibraryScreen`, so **Export all** and a
+routine's own file button cannot drift into carrying different things.
 
 ## Share links
 
 `shareLink.ts` gzips a routine into a URL fragment, which takes a real 86-step
 routine under 4,000 characters. Local blobs are dropped, since a link cannot carry
-them, and counted so the sender can be told. The recipient gets a fresh id and
-none of the sender's favourites or run history: it is their copy now.
+them, and counted so the sender can be told — the routine's own **file** export is
+the one that takes photos, which is why the two buttons sit side by side on a row
+and their titles say which is which. The app's own illustrations travel fine in a
+link: they are a short path, not bytes. The recipient gets a fresh id and none of
+the sender's favourites or run history: it is their copy now.
 
 ## Files
 
@@ -98,5 +111,6 @@ none of the sender's favourites or run history: it is their copy now.
 | `useLibrary.ts` | React wiring, seeding, and the orphan sweep on delete |
 | `seeded.ts` | Which seeds have been offered |
 | `bundle.ts` | The versioned export format |
+| `bundleMedia.ts` | The photos in an export: collected on the way out, re-hashed on the way in |
 | `shareLink.ts` | Routine ↔ URL |
 | `download.ts` | Handing the user a file, and the clipboard |
