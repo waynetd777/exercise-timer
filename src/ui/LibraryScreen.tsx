@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Workout } from '../engine'
+import { SCHEMA_VERSION } from '../engine'
 import { importRoutineFiles, looksImportable } from '../routines/importFiles'
+import { PasteDialog } from './PasteDialog'
 import type { Library } from '../storage/useLibrary'
 import { bundleFilename, toBundle } from '../storage/bundle'
 import { copyText, downloadJson } from '../storage/download'
@@ -20,11 +22,12 @@ import {
   CopyIcon,
   ExportIcon,
   ImportIcon,
-  PinIcon,
-  SpeakerIcon,
+  PasteIcon,
   PencilIcon,
+  PinIcon,
   PlusIcon,
   ShareIcon,
+  SpeakerIcon,
   StarIcon,
   StopwatchIcon,
   TrashIcon,
@@ -170,6 +173,7 @@ export function LibraryScreen({
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
   const [dragging, setDragging] = useState(false)
+  const [pasting, setPasting] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   /** True while the reported work is still running, so there is nothing to dismiss yet. */
   const [noticeBusy, setNoticeBusy] = useState(false)
@@ -313,6 +317,12 @@ export function LibraryScreen({
                 onSelect: () => picker.current?.click(),
               },
               {
+                label: 'Paste',
+                icon: <PasteIcon />,
+                title: 'Paste a routine written as text',
+                onSelect: () => setPasting(true),
+              },
+              {
                 label: 'Export',
                 icon: <ExportIcon />,
                 title: 'Download every routine as one file',
@@ -397,6 +407,35 @@ export function LibraryScreen({
           </ul>
         )}
       </div>
+
+      {pasting && (
+        <PasteDialog
+          onCancel={() => setPasting(false)}
+          onImport={(parsed) => {
+            setPasting(false)
+            /*
+             * Into the library rather than the editor: the editor cannot show a
+             * section or a ladder yet, so it would open on a blank screen. The
+             * review the editor would have provided happens in the dialog, which
+             * lists every line the parser could not place.
+             */
+            const now = Date.now()
+            void library.add({
+              id: crypto.randomUUID(),
+              name: parsed.name,
+              blocks: parsed.blocks,
+              schemaVersion: SCHEMA_VERSION,
+              createdAt: now,
+              updatedAt: now,
+            })
+            setNotice(
+              parsed.skipped.length === 0
+                ? `Added ${parsed.name}`
+                : `Added ${parsed.name} — ${parsed.skipped.length} lines were not understood`,
+            )
+          }}
+        />
+      )}
 
       {notice !== null && (
         <NoticeDialog
