@@ -3,13 +3,16 @@ import { compile } from '../compile'
 import { cues, cuesBetween } from '../cues'
 import { rep, seg, tabata, workout } from './fixtures'
 
+const BOUNDARY = ['work-start', 'work-end'] as const
+const isBoundary = (kind: string) => (BOUNDARY as readonly string[]).includes(kind)
+
 describe('cues', () => {
-  it('emits a phase change at every step start and one completion cue', () => {
+  it('emits a boundary cue at every step start and one completion cue', () => {
     const timeline = compile(tabata())
     const all = cues(timeline)
 
-    const phaseChanges = all.filter((c) => c.kind === 'phase-change')
-    expect(phaseChanges.map((c) => c.atMs)).toEqual(timeline.entries.map((e) => e.startMs))
+    const boundaries = all.filter((c) => isBoundary(c.kind))
+    expect(boundaries.map((c) => c.atMs)).toEqual(timeline.entries.map((e) => e.startMs))
 
     const complete = all.filter((c) => c.kind === 'workout-complete')
     expect(complete).toHaveLength(1)
@@ -35,10 +38,10 @@ describe('cues', () => {
     // A 1s step gets no countdown at all — just its phase change.
     const blink = cues(compile(workout('Blink', [seg('Blink', 1)])))
     expect(blink.filter((c) => c.kind === 'countdown')).toEqual([])
-    expect(blink.map((c) => c.kind)).toEqual(['phase-change', 'workout-complete'])
+    expect(blink.map((c) => c.kind)).toEqual(['work-start', 'workout-complete'])
   })
 
-  it('sorts by time, with the completion cue ahead of a coincident phase change', () => {
+  it('sorts by time, with the completion cue ahead of a coincident boundary', () => {
     const all = cues(compile(tabata()))
     for (let i = 1; i < all.length; i++) {
       expect(all[i]!.atMs).toBeGreaterThanOrEqual(all[i - 1]!.atMs)
@@ -76,5 +79,35 @@ describe('cuesBetween', () => {
   it('returns nothing for an empty or inverted window', () => {
     expect(cuesBetween(all, 5_000, 5_000)).toEqual([])
     expect(cuesBetween(all, 9_000, 1_000)).toEqual([])
+  })
+})
+
+describe('which boundary cue is emitted', () => {
+  it('is a whistle entering work and a bell entering anything else', () => {
+    // Every boundary is both an end and a start, so what distinguishes them is
+    // the step being entered: starting work means play begins.
+    const timeline = compile(tabata())
+    const boundaries = cues(timeline).filter((c) => isBoundary(c.kind))
+
+    for (const cue of boundaries) {
+      const entry = timeline.entries[cue.entryIndex]!
+      expect(cue.kind).toBe(entry.role === 'work' ? 'work-start' : 'work-end')
+    }
+  })
+
+  it('gives a Tabata one whistle per round and a bell for every rest', () => {
+    const all = cues(compile(tabata()))
+    // 10s prepare, then 8 x (work, rest): 8 whistles, and 9 bells — the prepare
+    // plus the eight rests.
+    expect(all.filter((c) => c.kind === 'work-start')).toHaveLength(8)
+    expect(all.filter((c) => c.kind === 'work-end')).toHaveLength(9)
+  })
+
+  it('treats recover as the end of work, not the start of it', () => {
+    const timeline = compile(workout('Recovery', [seg('Work', 20), seg('Breathe', 60, 'recover')]))
+    const kinds = cues(timeline)
+      .filter((c) => isBoundary(c.kind))
+      .map((c) => c.kind)
+    expect(kinds).toEqual(['work-start', 'work-end'])
   })
 })

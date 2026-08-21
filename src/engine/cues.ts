@@ -4,7 +4,12 @@ import type { CuePoint, Timeline } from './types'
 export const COUNTDOWN_SECONDS = [3, 2, 1] as const
 
 /** Ordering for cues that land on the same millisecond. */
-const KIND_RANK = { 'workout-complete': 0, 'phase-change': 1, countdown: 2 } as const
+const KIND_RANK = {
+  'workout-complete': 0,
+  'work-start': 1,
+  'work-end': 1,
+  countdown: 2,
+} as const
 
 /**
  * Every audio cue for a workout, as absolute offsets from its start.
@@ -14,13 +19,19 @@ const KIND_RANK = { 'workout-complete': 0, 'phase-change': 1, countdown: 2 } as 
  *
  * A countdown beep is emitted only if it falls strictly after the step's start,
  * so a 2-second step gets "2, 1" rather than a beep colliding with its own
- * phase-change cue.
+ * boundary cue.
  */
 export function cues(timeline: Timeline): CuePoint[] {
   const out: CuePoint[] = []
 
   for (const entry of timeline.entries) {
-    out.push({ atMs: entry.startMs, kind: 'phase-change', entryIndex: entry.index })
+    // Keyed on the step being ENTERED: starting work is a whistle, and anything
+    // else means work has just finished, which is a bell.
+    out.push({
+      atMs: entry.startMs,
+      kind: entry.role === 'work' ? 'work-start' : 'work-end',
+      entryIndex: entry.index,
+    })
 
     for (const seconds of COUNTDOWN_SECONDS) {
       const atMs = entry.endMs - seconds * 1000

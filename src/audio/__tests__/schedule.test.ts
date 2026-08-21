@@ -66,9 +66,11 @@ describe('cue timing across a real routine', () => {
   const timeline = compile(BEGINNER_MIXED_CARDIO_2)
   const all = cues(timeline)
 
-  it('puts a phase change at every step boundary and nowhere else', () => {
-    const changes = all.filter((c) => c.kind === 'phase-change').map((c) => c.atMs)
-    expect(changes).toEqual(timeline.entries.map((e) => e.startMs))
+  it('puts a boundary cue at every step boundary and nowhere else', () => {
+    const boundaries = all
+      .filter((c) => c.kind === 'work-start' || c.kind === 'work-end')
+      .map((c) => c.atMs)
+    expect(boundaries).toEqual(timeline.entries.map((e) => e.startMs))
   })
 
   it('ends with exactly one completion cue, at the end', () => {
@@ -91,12 +93,16 @@ describe('cue timing across a real routine', () => {
     }
   })
 
-  it('gives the bell room to ring before the next cue, on every real step', () => {
-    // The phase change rings for 2050ms. On these routines the shortest step is
-    // 10s, so it always finishes well before the next countdown starts.
-    const bell = toneFor('phase-change')!.notes[0]!.durationMs
+  it('gives every boundary sound room to finish before the next cue', () => {
+    // The bell rings for 2050ms and the whistle for 620ms. On these routines the
+    // shortest step is 10s, so either finishes well before the next countdown.
+    const longest = Math.max(
+      ...(['work-start', 'work-end'] as const).flatMap((kind) =>
+        toneFor(kind)!.notes.map((note) => note.atMs + note.durationMs),
+      ),
+    )
     const shortest = Math.min(...timeline.entries.map((e) => e.durationMs))
-    expect(shortest).toBeGreaterThan(bell)
+    expect(shortest).toBeGreaterThan(longest)
   })
 
   it('does not let the completion figure run past the end of the audio', () => {

@@ -1,0 +1,98 @@
+.sounds {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--step-4);
+  height: 100%;
+  padding: var(--step-5);
+  overflow: hidden;
+  background: var(--ink-900);
+  background: radial-gradient(
+    140% 90% at 50% -10%,
+    color-mix(in oklab, var(--role-rest) 12%, var(--ink-900)),
+    var(--ink-900) 72%
+  );
+}
+
+.sounds__head {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 3.5rem;
+  align-items: center;
+}
+
+.sounds__head .btn {
+  width: 44px;
+  height: 44px;
+}
+
+.sounds__title {
+  margin: 0;
+  text-align: center;
+  font-size: var(--size-title);
+  font-weight: 700;
+  letter-spacing: var(--track-display);
+  color: var(--role-rest);
+}
+
+.sounds__scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--step-4);
+}
+
+.sounds__list {
+  display: grid;
+  gap: var(--step-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sound {
+  display: grid;
+  gap: var(--step-3);
+  padding: var(--step-4);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.sound__head {
+  display: grid;
+  gap: var(--step-1);
+}
+
+.sound__title {
+  margin: 0;
+  font-size: var(--size-name);
+  font-weight: 650;
+  letter-spacing: var(--track-name);
+}
+
+.sound__signals {
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--bone-dim);
+}
+
+.sound__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2);
+}
+
+/* The parameters, so a change can be asked for in the terms it will be made. */
+.sound__notes {
+  display: grid;
+  gap: var(--step-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(0.75rem, min(1.15cqi, 0.9rem));
+  line-height: 1.5;
+  color: var(--bone-faint);
+  overflow-wrap: anywhere;
+}

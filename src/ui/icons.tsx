@@ -279,3 +279,6 @@ export function PinIcon() {
     </Svg>
   )
 }
+
+/** The menu entry for the sound bench. */
+export const SpeakerIcon = SoundOnIcon
