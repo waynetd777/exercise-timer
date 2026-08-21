@@ -9,3 +9,8 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# OpenWolf per-session runtime state. The useful files in .wolf/ (STATUS,
+# cerebrum, buglog, memory) stay tracked; these two churn on every hook run.
+.wolf/hooks/_session.json
+.wolf/token-ledger.json
