@@ -52,9 +52,18 @@ Both return `cqi`, consumed as `calc(var(--fit) * 1cqi)` and paired with a heigh
 term — see `.panel__empty` and `.count__name`. A floor alone is not fitting: it
 just moves the overflow somewhere a grid row cannot absorb it.
 
-The list is the deliberate exception. Its rows keep one uniform size and the list
-scrolls, because a row shrunk to fit would be illegible at three metres and rows
-of differing sizes read as ragged. Below the fold beats unreadable.
+The list works the other way round: its rows GROW to fill the sheet. Four short
+exercises leave a lot of height going spare, and a row pinned to the 1rem floor
+is unreadable from where the phone is propped. `listLines()` estimates the lines
+the group needs and `.sheet__list` divides its height budget by that.
+
+Note that the width term is deliberately absent there. A `cqi` bound pinned a
+phone to the floor, because a narrow screen is exactly where the rows most need
+to be big — height is the constraint in a list, not width.
+
+Rows keep ONE size across the group, and the list scrolls when it must. A row
+shrunk to fit alone would be illegible, and rows of differing sizes read as
+ragged: below the fold beats unreadable.
 
 ## Traps this codebase has already hit
 
