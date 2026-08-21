@@ -250,6 +250,12 @@ export function sectionOf(entry: TimelineEntry): PathStep | null {
  *    all the same case.
  *  - A gate with nothing after it in its group is a countdown too: the list
  *    would be a column of struck-through text and one live row.
+ *
+ * The editor asks the same question of an unrun tree, to decide whether to offer
+ * a step an image at all — only the countdown has a media panel. That is
+ * `shownAsList()` in `editor/blocks.ts`, which mirrors the first two clauses and
+ * deliberately drops the third; this function is the authority, and a test binds
+ * the two. Change one, look at the other.
  */
 export function listMode(routine: Routine, entry: TimelineEntry): boolean {
   if (!entry.selfPaced) return false

@@ -13,8 +13,8 @@
   background: var(--ink-900);
   background: radial-gradient(
     140% 90% at 50% -10%,
-    color-mix(in oklab, var(--role-rest) 10%, var(--ink-900)),
-    var(--ink-900) 72%
+    color-mix(in oklab, var(--role-rest) 14%, var(--ink-900)),
+    var(--ink-900) 78%
   );
 }
 
@@ -26,7 +26,9 @@
 
 .editor__head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Back, name, Save, help. The name takes the slack; the three controls keep
+     their intrinsic widths. */
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: var(--step-3);
 }
@@ -198,6 +200,38 @@
 
 .erow__image .label {
   flex: none;
+  color: var(--bone-faint);
+}
+
+/*
+ * Remove the image, beside the image. Sized like the row's other icon buttons so
+ * it reads as one of them, and it warms towards the danger colour on hover — it
+ * throws something away, unlike the × in the box, which only clears a field.
+ */
+.erow__image .erow__unset {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.erow__image .erow__unset .icon {
+  width: 19px;
+  height: 19px;
+}
+
+.erow__image .erow__unset:hover {
+  color: var(--role-work);
+}
+
+/*
+ * Why this step's picture will not be seen. Only ever rendered for a listed step
+ * that already HAS an image — the row is absent altogether otherwise — so it
+ * explains a leftover rather than nagging about a choice.
+ */
+.erow__unseen {
+  flex: 1 1 12rem;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--bone-faint);
 }
 
@@ -411,6 +445,48 @@
   flex: 1 1 10rem;
 }
 
+/*
+ * The link field and its clear button share one box, so the × sits INSIDE the
+ * field. Beside it, it would be a fifth control in this row and push the
+ * thumbnail off a phone — and "clear this field" belongs to the field.
+ */
+.erow__image .erow__url {
+  position: relative;
+  display: flex;
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.erow__image .erow__url .efield {
+  flex: 1 1 auto;
+  /* Room for the button, so a long link cannot run underneath it. */
+  padding-right: 2.4rem;
+}
+
+.erow__clear {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  padding: 0;
+  color: var(--bone-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 150ms var(--ease);
+}
+
+.erow__clear:hover {
+  color: var(--bone);
+}
+
+.erow__clear .icon {
+  width: 16px;
+  height: 16px;
+}
+
 .esecs {
   display: flex;
   align-items: center;
@@ -429,9 +505,9 @@
   background:
     linear-gradient(
       165deg,
-      color-mix(in oklab, var(--tint) 11%, var(--ink-900)) 0%,
-      color-mix(in oklab, var(--tint) 4%, var(--ink-900)) 38%,
-      var(--ink-900) 72%
+      color-mix(in oklab, var(--tint) 15%, var(--ink-900)) 0%,
+      color-mix(in oklab, var(--tint) 6%, var(--ink-900)) 38%,
+      var(--ink-900) 78%
     );
 }
 

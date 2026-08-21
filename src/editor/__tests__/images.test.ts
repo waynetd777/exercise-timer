@@ -4,7 +4,7 @@ import { SCHEMA_VERSION } from '../../engine'
 import { SEED_ROUTINES } from '../../routines/samples'
 import { IMPORTED_ROUTINES } from '../../routines/__tests__/fixtures'
 import { IMAGE_CATALOGUE } from '../../routines/imageCatalogue'
-import { collectImages, labelFromUrl } from '../images'
+import { collectImages, labelFromUrl, refFor } from '../images'
 
 const seg = (name: string, url?: string): Block => ({
   kind: 'segment',
@@ -24,6 +24,16 @@ const routine = (name: string, blocks: Block[]): Workout => ({
   updatedAt: 0,
 })
 
+/** A step carrying a bundled image, the kind the catalogue holds now. */
+const bundled = (name: string, path: string): Block => ({
+  kind: 'segment',
+  id: `${name}-${path}`,
+  name,
+  durationMs: 20_000,
+  role: 'work',
+  media: { source: 'bundled', path },
+})
+
 const A = 'https://i.postimg.cc/aaa/Leg-Press.png'
 const B = 'https://i.postimg.cc/bbb/Cycling.png'
 
@@ -38,7 +48,9 @@ describe('collectImages', () => {
       routine('One', [seg('Leg Press', A), seg('Leg Press', A)]),
       routine('Two', [seg('Leg Press', A)]),
     ])
-    expect(images).toEqual([{ url: A, label: 'Leg Press', uses: 3 }])
+    expect(images).toEqual([
+      { id: A, ref: { source: 'remote', url: A }, src: A, label: 'Leg Press', uses: 3 },
+    ])
   })
 
   it('finds images inside repeat groups, at any depth', () => {
@@ -96,10 +108,10 @@ describe('collectImages', () => {
     // ships now, and each of its exercises appears once.
     const images = collectImages(IMPORTED_ROUTINES)
     expect(images.length).toBeGreaterThan(10)
-    expect(images.every((i) => i.url.startsWith('https://i.postimg.cc/'))).toBe(true)
+    expect(images.every((i) => i.id.startsWith('https://i.postimg.cc/'))).toBe(true)
     expect(images.some((i) => i.uses > 1)).toBe(true)
     // Sorted and unique.
-    expect(new Set(images.map((i) => i.url)).size).toBe(images.length)
+    expect(new Set(images.map((i) => i.id)).size).toBe(images.length)
   })
 
   it('reaches images nested inside a seeded routine\'s reps groups', () => {
@@ -107,7 +119,8 @@ describe('collectImages', () => {
     // walked top-level blocks would find nothing at all here.
     const images = collectImages(SEED_ROUTINES)
     expect(images.length).toBeGreaterThan(5)
-    expect(images.every((i) => i.url.startsWith('https://i.postimg.cc/'))).toBe(true)
+    // The seed ships bundled paths since the rehosting, not links.
+    expect(images.every((i) => i.id.startsWith('exercises/'))).toBe(true)
   })
 })
 
@@ -145,10 +158,12 @@ describe('collectImages with the catalogue', () => {
 
   it('keeps the catalogue label even when a routine uses it under another name', () => {
     // "Cycling" describes the picture better than the step name "Warm Up" does.
-    const cycling = 'https://i.postimg.cc/0yFGWd24/Cycling.png'
-    const images = collectImages([routine('R', [seg('Warm Up', cycling)])], IMAGE_CATALOGUE)
-    expect(images.find((i) => i.url === cycling)).toEqual({
-      url: cycling,
+    const cycling = 'exercises/Cycling.jpg'
+    const images = collectImages([routine('R', [bundled('Warm Up', cycling)])], IMAGE_CATALOGUE)
+    expect(images.find((i) => i.id === cycling)).toEqual({
+      id: cycling,
+      ref: { source: 'bundled', path: cycling },
+      src: `/${cycling}`,
       label: 'Cycling',
       uses: 1,
     })
@@ -158,7 +173,7 @@ describe('collectImages with the catalogue', () => {
     const odd = 'https://example.com/My-Own-Photo.png'
     const images = collectImages([routine('R', [seg('Squat', odd)])], IMAGE_CATALOGUE)
     expect(images).toHaveLength(IMAGE_CATALOGUE.length + 1)
-    expect(images.find((i) => i.url === odd)).toMatchObject({ label: 'Squat', uses: 1 })
+    expect(images.find((i) => i.id === odd)).toMatchObject({ label: 'Squat', uses: 1 })
   })
 
   it('counts uses across the real routines against the catalogue', () => {
@@ -166,7 +181,7 @@ describe('collectImages with the catalogue', () => {
     const used = images.filter((i) => i.uses > 0)
     expect(used.length).toBeGreaterThan(8)
     // No duplicates, and every entry has a label.
-    expect(new Set(images.map((i) => i.url)).size).toBe(images.length)
+    expect(new Set(images.map((i) => i.id)).size).toBe(images.length)
     expect(images.every((i) => i.label.length > 0)).toBe(true)
   })
 
@@ -183,7 +198,7 @@ describe('collectImages with the catalogue', () => {
       'https://i.postimg.cc/AAAAAAAA/Tricep-Press.png',
     ]
     const images = collectImages([], same)
-    expect(images.map((i) => i.url)).toEqual([
+    expect(images.map((i) => i.id)).toEqual([
       'https://i.postimg.cc/AAAAAAAA/Tricep-Press.png',
       'https://i.postimg.cc/BBBBBBBB/Tricep-Press.png',
     ])
@@ -195,5 +210,53 @@ describe('collectImages with the catalogue', () => {
     expect(labels).toEqual(
       [...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
     )
+  })
+})
+
+describe('bundled images, since the catalogue ships with the app', () => {
+  it('reads a path as bundled and a URL as remote', () => {
+    expect(refFor('exercises/Cable-Fly.jpg')).toEqual({
+      source: 'bundled',
+      path: 'exercises/Cable-Fly.jpg',
+    })
+    expect(refFor('https://i.postimg.cc/x/Cable-Fly.png')).toEqual({
+      source: 'remote',
+      url: 'https://i.postimg.cc/x/Cable-Fly.png',
+    })
+  })
+
+  it('stores a path but renders through the base, so a subpath host works', () => {
+    /*
+     * The distinction the picker depends on: `ref` is what a step keeps and `src`
+     * is where the thumbnail loads from. Baking the base into the ref would pin
+     * the routine to one host, which is the whole reason the catalogue holds
+     * paths.
+     */
+    const [image] = collectImages([], ['exercises/Knee-Raise.jpg'], '/exercise-timer/')
+    expect(image).toEqual({
+      id: 'exercises/Knee-Raise.jpg',
+      ref: { source: 'bundled', path: 'exercises/Knee-Raise.jpg' },
+      src: '/exercise-timer/exercises/Knee-Raise.jpg',
+      label: 'Knee Raise',
+      uses: 0,
+    })
+  })
+
+  it('counts a bundled image a routine uses against its catalogue entry', () => {
+    // One entry, not two: the same picture found twice under different sources
+    // would show up twice in the picker.
+    const images = collectImages(
+      [routine('R', [bundled('Squat', 'exercises/Leg-Press.jpg')])],
+      ['exercises/Leg-Press.jpg'],
+    )
+    expect(images).toHaveLength(1)
+    expect(images[0]!.uses).toBe(1)
+  })
+
+  it('labels every catalogue entry from its filename', () => {
+    const images = collectImages([], IMAGE_CATALOGUE)
+    expect(images).toHaveLength(IMAGE_CATALOGUE.length)
+    expect(images.every((i) => i.ref.source === 'bundled')).toBe(true)
+    expect(images.map((i) => i.label)).toContain('Seated Abdominal Crunch')
   })
 })
