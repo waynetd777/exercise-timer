@@ -109,7 +109,17 @@ export type Timeline = {
   totalMs: number
 }
 
-export type CueKind = 'phase-change' | 'countdown' | 'workout-complete'
+/**
+ * Every boundary is simultaneously the end of one step and the start of the
+ * next, so what distinguishes these is WHICH KIND of step is being entered:
+ *
+ *   `work-start`  entering a work step — a referee's whistle, play begins
+ *   `work-end`    entering anything else — a bell, the round is over
+ *
+ * That is why there is no single "phase change": the two moments mean opposite
+ * things to someone mid-effort and should not sound alike.
+ */
+export type CueKind = 'countdown' | 'work-start' | 'work-end' | 'workout-complete'
 
 /** An audio cue at an absolute offset from workout start. */
 export type CuePoint = {

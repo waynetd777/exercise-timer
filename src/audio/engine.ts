@@ -18,7 +18,9 @@ class AudioEngine {
    * start time. A cue can be several notes spread over seconds, and once it has
    * started the whole figure has to be allowed to finish.
    */
-  private pending = new Map<OscillatorNode, number>()
+  private pending = new Map<AudioScheduledSourceNode, number>()
+  /** One second of white noise, made once and reused for every breathy cue. */
+  private noiseBuffer: AudioBuffer | null = null
 
   /**
    * Must be called synchronously from a user gesture — mobile browsers refuse
@@ -80,6 +82,15 @@ class AudioEngine {
     }
   }
 
+  /**
+   * Plays a spec straight away. For the sound test panel — the running timer
+   * always schedules ahead instead.
+   */
+  preview(spec: ToneSpec): void {
+    this.unlock()
+    this.scheduleTone(this.now + 0.05, spec)
+  }
+
   /** Queues every note of a cue at an exact moment on the audio clock. */
   scheduleTone(at: number, spec: ToneSpec): void {
     const ctx = this.ctx
@@ -108,7 +119,59 @@ class AudioEngine {
           note.durationMs * (note.partial.decayScale ?? 1),
         )
       }
+      if (note.noise) this.breath(ctx, master, noteAt, note, note.noise)
     }
+  }
+
+  private noise(ctx: AudioContext): AudioBuffer {
+    if (!this.noiseBuffer) {
+      const length = Math.floor(ctx.sampleRate)
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1
+      this.noiseBuffer = buffer
+    }
+    return this.noiseBuffer
+  }
+
+  /**
+   * A short burst of band-passed noise, on the same envelope as its note.
+   *
+   * This is the breath in a whistle. Without it a whistle is a pure tone with a
+   * wobble, which reads as a synthesiser rather than as someone blowing.
+   */
+  private breath(
+    ctx: AudioContext,
+    master: GainNode,
+    at: number,
+    note: Note,
+    spec: NonNullable<Note['noise']>,
+  ): void {
+    const source = ctx.createBufferSource()
+    const band = ctx.createBiquadFilter()
+    const env = ctx.createGain()
+    const total = note.durationMs / 1000
+
+    source.buffer = this.noise(ctx)
+    source.loop = true
+    band.type = 'bandpass'
+    band.frequency.value = spec.centreHz
+    band.Q.value = spec.q
+
+    env.gain.setValueAtTime(0.0001, at)
+    env.gain.exponentialRampToValueAtTime(spec.gain, at + 0.01)
+    env.gain.exponentialRampToValueAtTime(0.0001, at + total)
+
+    source.connect(band).connect(env).connect(master)
+    source.start(at)
+    source.stop(at + total + 0.02)
+
+    this.pending.set(source, at)
+    source.addEventListener('ended', () => {
+      this.pending.delete(source)
+      env.disconnect()
+      band.disconnect()
+    })
   }
 
   /**
@@ -117,6 +180,10 @@ class AudioEngine {
    *
    * The tail is what makes it read as struck. A single exponential from peak
    * sounds like a tone being switched off.
+   *
+   * `warble` and `tremolo` add low-frequency modulation to pitch and level — the
+   * chop of a referee whistle's pea, which is the difference between a whistle
+   * and a test tone.
    */
   private play(
     ctx: AudioContext,
@@ -146,7 +213,37 @@ class AudioEngine {
     env.gain.exponentialRampToValueAtTime(sustain, at + attack + strike)
     env.gain.exponentialRampToValueAtTime(0.0001, at + total)
 
-    osc.connect(env).connect(master)
+    // Pitch wobble.
+    if (note.warble) {
+      const lfo = ctx.createOscillator()
+      const depth = ctx.createGain()
+      lfo.frequency.value = note.warble.hz
+      depth.gain.value = note.warble.depthHz
+      lfo.connect(depth).connect(osc.frequency)
+      lfo.start(at)
+      lfo.stop(at + total + 0.02)
+      lfo.addEventListener('ended', () => depth.disconnect())
+    }
+
+    // Level wobble, applied after the envelope so it rides on top of it.
+    let output: AudioNode = env
+    if (note.tremolo) {
+      const shaped = ctx.createGain()
+      const lfo = ctx.createOscillator()
+      const depth = ctx.createGain()
+      shaped.gain.value = 1 - note.tremolo.depth / 2
+      lfo.frequency.value = note.tremolo.hz
+      depth.gain.value = note.tremolo.depth / 2
+      lfo.connect(depth).connect(shaped.gain)
+      lfo.start(at)
+      lfo.stop(at + total + 0.02)
+      lfo.addEventListener('ended', () => depth.disconnect())
+      env.connect(shaped)
+      output = shaped
+    }
+
+    osc.connect(env)
+    output.connect(master)
     osc.start(at)
     osc.stop(at + total + 0.02)
 

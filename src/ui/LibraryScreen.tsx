@@ -21,6 +21,7 @@ import {
   ExportIcon,
   ImportIcon,
   PinIcon,
+  SpeakerIcon,
   PencilIcon,
   PlusIcon,
   ShareIcon,
@@ -153,11 +154,13 @@ export function LibraryScreen({
   onRun,
   onEdit,
   onNew,
+  onSounds,
 }: {
   library: Library
   onRun: (workout: Workout) => void
   onEdit: (workout: Workout) => void
   onNew: () => void
+  onSounds: () => void
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
@@ -315,6 +318,7 @@ export function LibraryScreen({
                     toBundle(library.workouts, Date.now()),
                   ),
               },
+              { label: 'Sounds', icon: <SpeakerIcon />, onSelect: onSounds },
               {
                 label: 'Save images',
                 icon: <PinIcon />,

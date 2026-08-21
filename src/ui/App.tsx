@@ -9,12 +9,14 @@ import { decodeRoutine, routineParam } from '../storage/shareLink'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { LibraryScreen } from './LibraryScreen'
+import { SoundsScreen } from './SoundsScreen'
 import { RunScreen } from './RunScreen'
 
 type View =
   | { screen: 'library' }
   | { screen: 'run'; workout: Workout }
   | { screen: 'edit'; workout: Workout }
+  | { screen: 'sounds' }
 
 function blankRoutine(): Workout {
   const now = Date.now()
@@ -91,6 +93,10 @@ export function App() {
     return <RunScreen workout={view.workout} onExit={toLibrary} onStarted={onStarted} />
   }
 
+  if (view.screen === 'sounds') {
+    return <SoundsScreen onExit={toLibrary} />
+  }
+
   if (view.screen === 'edit') {
     return (
       <EditorScreen
@@ -108,6 +114,7 @@ export function App() {
       onRun={(workout) => setView({ screen: 'run', workout })}
       onEdit={(workout) => setView({ screen: 'edit', workout })}
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
+      onSounds={() => setView({ screen: 'sounds' })}
     />
   )
 }
