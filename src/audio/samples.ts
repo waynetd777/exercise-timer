@@ -42,3 +42,57 @@ import whistleUrl from './referee-whistle-cc0.wav?url'
 export type SampleName = 'whistle'
 
 export const SAMPLES: Record<SampleName, string> = { whistle: whistleUrl }
+
+/**
+ * The download, started at module load rather than at the first tap.
+ *
+ * The two halves of getting a recording ready are the fetch and the decode, and
+ * only the decode needs an AudioContext — so only the decode has to wait for the
+ * gesture that creates one. Waiting for both is what made the first whistle of a
+ * cold start the fallback tone: `unlock()` started the fetch and the scheduler
+ * armed its first window in the same tick, long before the bytes landed, and a
+ * cue chooses recording or fallback when it is SCHEDULED.
+ *
+ * The decode is deliberately NOT also done eagerly, through an
+ * OfflineAudioContext, though it could be. Either that context is built at the
+ * file's own 22.05kHz, and the playback resampler makes up the difference on a
+ * sound that took five attempts to get right, or the real AudioContext is created
+ * outside a gesture to learn the hardware rate — and the gesture-to-audio path is
+ * the one part of this app that cannot be checked from a desktop browser. A few
+ * milliseconds of decode is not worth either.
+ */
+const BYTES = new Map<SampleName, Promise<ArrayBuffer | null>>()
+
+/**
+ * Never rejects: a dead network has to cost a worse whistle and nothing more, and
+ * an unhandled rejection at boot is noise in the one place it is hard to read.
+ *
+ * A failure is forgotten rather than remembered, so the next attempt fetches
+ * again. The alternative — one null kept for the life of the page — would mean a
+ * page that happened to load without signal sounded a plain tone for the whole
+ * session, which is the exact situation this app is built for.
+ */
+function download(name: SampleName): Promise<ArrayBuffer | null> {
+  const bytes = fetch(SAMPLES[name])
+    .then((response) => (response.ok ? response.arrayBuffer() : null))
+    .catch(() => null)
+
+  void bytes.then((got) => {
+    if (!got && BYTES.get(name) === bytes) BYTES.delete(name)
+  })
+
+  return bytes
+}
+
+/** The bytes of a sample once downloaded, or null if the download failed. */
+export function sampleBytes(name: SampleName): Promise<ArrayBuffer | null> {
+  let bytes = BYTES.get(name)
+  if (!bytes) {
+    bytes = download(name)
+    BYTES.set(name, bytes)
+  }
+  return bytes
+}
+
+// Now, not at the first tap: only the decode needs a gesture.
+void sampleBytes('whistle')
