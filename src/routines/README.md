@@ -81,15 +81,28 @@ A trap worth knowing: the dash characters are built into patterns two ways, as
 first inside another class silently yields `[\s[-–—]]`, which is what stopped
 "30-second Plank" reading as a duration for an afternoon.
 
-## The seeded routine
+## The seeded routines
 
-One routine, `beginner-full-body`, committed as an authored `Workout` rather than
+Two, and deliberately one of each KIND: `beginner-full-body`, a fully timed
+interval routine, and `strength-training`, a rep-based session. They are the two
+things the app does, and an install that only ever saw a countdown would never
+discover that a step can wait for you.
+
+The strength one is **generated**, by running `pasteFormat.ts` over
+`__tests__/emails/2026-07-20-general.txt` and committing the result — so it
+cannot drift from what the parser actually produces. It is the app's own worked
+example of a pasted routine, and one that no longer matched the parser would be
+worse than none; a test asserts they still agree, ignoring ids. That email of the
+three because it needs the least equipment: the others want a trampoline and a
+set of resistance bands.
+
+`beginner-full-body` is committed as an authored `Workout` rather than
 as a `.tabata` file put through the importer — its exercise runs are Reps groups,
 and the importer deliberately never infers those. The `.tabata` files still in
 this folder are importer test fixtures now; they are not in the app's import
 graph, so they cost nothing in the bundle.
 
-Its id is stable and deliberate, because seeding is keyed on it and recorded as
+Their ids are stable and deliberate, because seeding is keyed on them and recorded as
 "once, ever": the routine is offered a given install one time and stays deleted if
 deleted. Keeping the *old* id through the reps rewrite means an install that
 already has it is not offered the new version — nothing about what plays changed,
@@ -124,6 +137,7 @@ are already the exercise names.
 | `tabataFormat.ts` | The `.tabata` reader and its `TabataImportError` |
 | `pasteFormat.ts` | The pasted-text parser: `parseRoutine`, `parseItem` |
 | `importFiles.ts` | Bundle-or-tabata dispatch over dropped files, failures collected |
-| `samples.ts` | The seeded routine, loaded from `beginner-full-body.routine.json` |
+| `samples.ts` | The two seeds, loaded from `*.routine.json` |
+| `strength-training.routine.json` | The generated strength seed — regenerate with the parser, never edit by hand |
 | `imageCatalogue.ts` | The 27 URLs, in the note's own order and grouping |
 | `*.tabata.json` | Importer fixtures — not imported by the app |

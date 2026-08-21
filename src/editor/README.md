@@ -33,6 +33,18 @@ one. Same reason `clearMedia` exists.
 `timingOf` reads the choice back for the control that sets it, falling back to
 the role's default duration for a step with no duration to return to.
 
+## A step's note and alternative
+
+Both live on a line BELOW the step, shown only when the step has one or the note
+button asks for it. A routine runs to forty steps, and two more inputs on every
+row would bury the field anyone came to change — but a pasted step usually has a
+note, the instruction lifted out of its name, and losing it silently on the first
+edit is what this exists to prevent.
+
+Emptying either one calls `clearText`, which DELETES the key. Same reason as
+`clearMedia` and `setTiming`: `""` and absent are different, and the empty string
+would leave a blank line under the step for ever.
+
 ## Rules worth knowing
 
 - **`moveStep` moves a row through the routine as it *reads*.** Next to a reps
