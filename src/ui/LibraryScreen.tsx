@@ -428,11 +428,8 @@ export function LibraryScreen({
               createdAt: now,
               updatedAt: now,
             })
-            setNotice(
-              parsed.skipped.length === 0
-                ? `Added ${parsed.name}`
-                : `Added ${parsed.name} — ${parsed.skipped.length} lines were not understood`,
-            )
+            // No notice: the dialog already listed anything it could not place,
+            // before saving, and the routine appearing in the list says the rest.
           }}
         />
       )}
