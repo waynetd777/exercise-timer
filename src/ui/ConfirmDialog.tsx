@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { CheckIcon, CloseIcon } from './icons'
 
 /**
  * Asks before something that cannot be undone.
@@ -44,9 +45,11 @@ export function ConfirmDialog({
       <div className="notice__actions">
         {/* Cancel is focused, so a stray Enter or space keeps you where you are. */}
         <button type="button" className="chip" onClick={onCancel} autoFocus>
+          <CloseIcon />
           Cancel
         </button>
         <button type="button" className="chip chip--danger" onClick={onConfirm}>
+          <CheckIcon />
           {confirmLabel}
         </button>
       </div>
