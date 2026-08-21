@@ -511,3 +511,71 @@
 .erow[data-between-reps] .efield--secs {
   border-style: dashed;
 }
+
+/* ── Ladders and sections ──────────────────────────────────────────────────
+ * Two more group kinds beside `.erow--repeat`. Distinguished by the left rule
+ * and the ground, on the same principle as the role colours: the shape of the
+ * routine should be readable down the left edge without reading a word.
+ */
+.erow--ladder {
+  background: var(--ink-700);
+  border-left-color: var(--role-recover);
+}
+
+/*
+ * A section is the outermost thing in a routine, so it reads as a heading: the
+ * full width, no indent under it beyond what depth already gives, and a name
+ * field set at heading size rather than field size.
+ */
+.erow--section {
+  background: var(--ink-700);
+  border-left-color: var(--phase);
+}
+
+.efield--section {
+  font-size: max(1.1rem, min(2.2cqi, 1.5rem));
+  font-weight: 650;
+  letter-spacing: var(--track-name);
+}
+
+/* The section instruction, on its own line under the name and its buttons. */
+.efield--note {
+  width: 100%;
+  font-size: max(0.9rem, min(1.5cqi, 1.05rem));
+  color: var(--bone-dim);
+}
+
+/* Rungs are written as text — "5-10-15-20" — so this needs room to breathe. */
+.efield--counts {
+  flex: 1 1 8rem;
+  min-width: 6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.esecs--counts {
+  flex: 1 1 8rem;
+}
+
+.erow__count {
+  flex: none;
+  white-space: nowrap;
+  color: var(--bone-faint);
+}
+
+/*
+ * The unit doubles as the mode: seconds, reps, reps per side, or the ladder's
+ * rung. Sized to the longest of those so the row does not reflow when it
+ * changes, and left as a native select so the mobile picker still appears.
+ */
+.efield--unit {
+  flex: none;
+  min-width: 5.5rem;
+  padding-inline: var(--step-2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Three levels exist now: section → group → step. */
+.erow[data-depth='2'] {
+  margin-left: calc(2 * var(--step-5));
+}

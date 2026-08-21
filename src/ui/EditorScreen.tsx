@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Block, MediaRef, Repeat, RoutineColour, Segment, SegmentRole, Workout } from '../engine'
+import type { Block, Ladder, MediaRef, Repeat, RoutineColour, Section, Segment, SegmentRole, Workout } from '../engine'
 import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import {
   appendTo,
@@ -7,15 +7,24 @@ import {
   duplicateAt,
   flatten,
   insertAfter,
+  moveBy,
   moveStep,
+  newLadder,
   newRepeat,
+  newRepsStep,
+  newSection,
   newSegment,
   removeAt,
+  setTiming,
+  timingOf,
   unwrapRepeat,
+  updateLadder,
   updateRepeat,
+  updateSection,
   updateSegment,
   wrapInRepeat,
 } from '../editor/blocks'
+import type { Timing } from '../editor/blocks'
 import type { Path } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
@@ -183,6 +192,90 @@ type RowProps = {
   onRemove: (path: Path) => void
 }
 
+/**
+ * What a step asks of you, as one control.
+ *
+ * The unit IS the mode, which is why this is a single select rather than a mode
+ * switch plus a value plus a per-side toggle: "20 s", "12 ×", "5 × each side"
+ * and "rung" are four things a row can say, and an editor row has no space for
+ * three widgets to say them.
+ */
+const UNITS: { value: string; label: string; title: string }[] = [
+  { value: 'timed', label: 's', title: 'Seconds — the step times itself' },
+  { value: 'reps', label: '×', title: 'Reps — the step waits for Next' },
+  { value: 'reps-side', label: '× each side', title: 'Reps per side — the step waits for Next' },
+  { value: 'rung', label: 'rung', title: "Takes its count from the ladder's current rung" },
+  { value: 'rung-side', label: 'rung each side', title: "The ladder's rung, per side" },
+]
+
+function unitOf(timing: Timing): string {
+  if (timing.kind === 'timed') return 'timed'
+  return timing.perSide ? `${timing.kind}-side` : timing.kind
+}
+
+/** The number the field shows, and what a change to it means. */
+function TimingField({
+  segment,
+  onChange,
+}: {
+  segment: Segment
+  onChange: (timing: Timing) => void
+}) {
+  const timing = timingOf(segment)
+  const unit = unitOf(timing)
+  const counted = timing.kind === 'reps'
+
+  const retarget = (next: string) => {
+    const perSide = next.endsWith('-side')
+    if (next.startsWith('rung')) return onChange({ kind: 'rung', ...(perSide ? { perSide } : {}) })
+    if (next.startsWith('reps')) {
+      const count = counted ? timing.count : 10
+      return onChange({ kind: 'reps', count, ...(perSide ? { perSide } : {}) })
+    }
+    onChange({ kind: 'timed', durationMs: segment.durationMs ?? 20_000 })
+  }
+
+  const value = timing.kind === 'timed' ? Math.round(timing.durationMs / 1000) : counted ? timing.count : 0
+
+  return (
+    <label className="esecs">
+      {/* A rung has no number of its own — that is the point of it. */}
+      {timing.kind !== 'rung' && (
+        <input
+          className="efield efield--secs"
+          type="number"
+          min={1}
+          max={timing.kind === 'timed' ? 5999 : 999}
+          value={value}
+          aria-label={timing.kind === 'timed' ? 'Seconds' : 'Reps'}
+          onChange={(event) => {
+            const entered = Number(event.target.value)
+            if (!Number.isFinite(entered)) return
+            const rounded = Math.max(1, Math.round(entered))
+            onChange(
+              timing.kind === 'timed'
+                ? { kind: 'timed', durationMs: rounded * 1000 }
+                : { kind: 'reps', count: rounded, ...(timing.perSide ? { perSide: true } : {}) },
+            )
+          }}
+        />
+      )}
+      <select
+        className="efield efield--unit unit"
+        value={unit}
+        aria-label="Timed or counted"
+        onChange={(event) => retarget(event.target.value)}
+      >
+        {UNITS.map((option) => (
+          <option key={option.value} value={option.value} title={option.title}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 function SegmentRow({
   segment,
   path,
@@ -194,6 +287,7 @@ function SegmentRow({
   onDuplicate,
   onRemove,
   onPatch,
+  onTiming,
   onClearImage,
   onWrap,
   onPreview,
@@ -203,6 +297,7 @@ function SegmentRow({
   onAdd: (path: Path, role: SegmentRole) => void
   segment: Segment
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
+  onTiming: (path: Path, timing: Timing) => void
   onClearImage: (path: Path) => void
   onWrap: (path: Path) => void
   onPreview: (src: string, alt: string) => void
@@ -272,23 +367,7 @@ function SegmentRow({
           </span>
         )}
 
-        <label className="esecs">
-          <input
-            className="efield efield--secs"
-            type="number"
-            min={1}
-            max={5999}
-            value={Math.round((segment.durationMs ?? 0) / 1000)}
-            aria-label="Seconds"
-            onChange={(event) => {
-              const seconds = Number(event.target.value)
-              if (Number.isFinite(seconds)) {
-                onPatch(path, { durationMs: Math.max(1, Math.round(seconds)) * 1000 })
-              }
-            }}
-          />
-          <span className="unit">s</span>
-        </label>
+        <TimingField segment={segment} onChange={(timing) => onTiming(path, timing)} />
 
         <div className="erow__actions">
           {/*
@@ -515,6 +594,204 @@ function RepeatRow({
   )
 }
 
+/**
+ * A ladder's rungs, edited as the text they are written as.
+ *
+ * "5-10-15-20-15-10-5" is how the routines state a ladder and how anyone thinks
+ * about one; a row of number inputs would be nine controls for one idea. Parsed
+ * on every keystroke and left alone when it does not parse, so a half-typed
+ * "5-10-" does not wipe the rungs behind it.
+ */
+function LadderRow({
+  ladder,
+  path,
+  depth,
+  first,
+  last,
+  onMove,
+  onDuplicate,
+  onRemove,
+  onPatch,
+  onAddChild,
+}: RowProps & {
+  ladder: Ladder
+  onPatch: (path: Path, patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>) => void
+  onAddChild: (path: Path) => void
+}) {
+  const [draft, setDraft] = useState(ladder.counts.join('-'))
+
+  return (
+    <li className="erow erow--ladder" data-depth={depth}>
+      <div className="erow__main">
+        <input
+          className="efield efield--name"
+          value={ladder.label ?? 'Set'}
+          aria-label="Ladder label"
+          onChange={(event) => onPatch(path, { label: event.target.value })}
+        />
+
+        <label className="esecs esecs--counts">
+          <input
+            className="efield efield--counts"
+            value={draft}
+            inputMode="numeric"
+            aria-label="Reps at each rung"
+            placeholder="5-10-15"
+            onChange={(event) => {
+              setDraft(event.target.value)
+              const counts = event.target.value
+                .split(/[^0-9]+/)
+                .filter(Boolean)
+                .map(Number)
+              if (counts.length > 0) onPatch(path, { counts })
+            }}
+          />
+        </label>
+
+        <span className="erow__count label label--sm">
+          {ladder.counts.length} {ladder.counts.length === 1 ? 'set' : 'sets'}
+        </span>
+
+        <div className="erow__actions">
+          <button
+            className="btn btn--ghost"
+            onClick={() => onAddChild(path)}
+            aria-label="Add a step to this ladder"
+            title="Add a step inside"
+          >
+            <PlusIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onMove(path, -1)}
+            disabled={first && depth === 0}
+            aria-label="Move up"
+            title="Move up"
+          >
+            <UpIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onMove(path, 1)}
+            disabled={last && depth === 0}
+            aria-label="Move down"
+            title="Move down"
+          >
+            <DownIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onDuplicate(path)}
+            aria-label="Duplicate this ladder"
+            title="Duplicate ladder and steps"
+          >
+            <CopyIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onRemove(path)}
+            aria-label="Delete this ladder and its steps"
+            title="Delete ladder and steps"
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      </div>
+    </li>
+  )
+}
+
+/**
+ * A named part of the routine.
+ *
+ * The note is a field rather than something the editor hides, because a pasted
+ * section carries one — "No rest between exercises. Rest 45 seconds after each
+ * round." — and an editor that cannot show it is an editor that quietly loses it
+ * the first time someone rewrites the section.
+ */
+function SectionRow({
+  section,
+  path,
+  depth,
+  first,
+  last,
+  onMove,
+  onDuplicate,
+  onRemove,
+  onPatch,
+  onAddChild,
+}: RowProps & {
+  section: Section
+  onPatch: (path: Path, patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>) => void
+  onAddChild: (path: Path) => void
+}) {
+  return (
+    <li className="erow erow--section" data-depth={depth}>
+      <div className="erow__main">
+        <input
+          className="efield efield--name efield--section"
+          value={section.name}
+          aria-label="Section name"
+          onChange={(event) => onPatch(path, { name: event.target.value })}
+        />
+
+        <div className="erow__actions">
+          <button
+            className="btn btn--ghost"
+            onClick={() => onAddChild(path)}
+            aria-label="Add a step to this section"
+            title="Add a step inside"
+          >
+            <PlusIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onMove(path, -1)}
+            disabled={first}
+            aria-label="Move up"
+            title="Move up"
+          >
+            <UpIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onMove(path, 1)}
+            disabled={last}
+            aria-label="Move down"
+            title="Move down"
+          >
+            <DownIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onDuplicate(path)}
+            aria-label="Duplicate this section"
+            title="Duplicate section and everything in it"
+          >
+            <CopyIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
+            onClick={() => onRemove(path)}
+            aria-label="Delete this section and everything in it"
+            title="Delete section and everything in it"
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      </div>
+
+      <input
+        className="efield efield--note"
+        value={section.note ?? ''}
+        aria-label="Section instruction"
+        placeholder="Instruction for the whole section"
+        onChange={(event) => onPatch(path, { note: event.target.value })}
+      />
+    </li>
+  )
+}
+
 export function EditorScreen({
   workout,
   knownImages,
@@ -563,17 +840,6 @@ export function EditorScreen({
    * row yet. Saying so beats rendering an empty list and letting someone think
    * the routine was lost — it is all still there, and saving keeps it.
    */
-  const hasUneditable = useMemo(() => {
-    const any = (list: Block[]): boolean =>
-      list.some((block) =>
-        block.kind === 'section' || block.kind === 'ladder'
-          ? true
-          : block.kind === 'repeat'
-            ? any(block.children)
-            : false,
-      )
-    return any(blocks)
-  }, [blocks])
   /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
    * set to undefined is not the same as an absent key. So the untinted case
@@ -632,6 +898,17 @@ export function EditorScreen({
     editBlocks((current) => updateSegment(current, path, patch), patch.role === undefined)
   const patchRepeat = (path: Path, patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>) =>
     editBlocks((current) => updateRepeat(current, path, patch), true)
+  const patchLadder = (path: Path, patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>) =>
+    editBlocks((current) => updateLadder(current, path, patch), true)
+  const patchSection = (path: Path, patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>) =>
+    editBlocks((current) => updateSection(current, path, patch), true)
+  /*
+   * Not coalesced: switching a step between timed and counted is a discrete
+   * change, and undo should put it back in one press rather than unwinding it
+   * through whatever typing came before.
+   */
+  const patchTiming = (path: Path, timing: Timing) =>
+    editBlocks((current) => setTiming(current, path, timing))
 
   return (
     <main className="editor" data-colour={colour ?? undefined}>
@@ -736,13 +1013,7 @@ export function EditorScreen({
       </div>
 
       <div className="editor__scroll">
-        {hasUneditable && (
-          <p className="editor__empty label label--sm">
-            This routine has sections or ladders, which cannot be edited here yet. They are
-            still in the routine and saving will keep them.
-          </p>
-        )}
-        {rows.length === 0 && !hasUneditable ? (
+        {rows.length === 0 ? (
           <p className="editor__empty label label--sm">No steps yet — add one below</p>
         ) : (
           <ul className="editor__list">
@@ -753,8 +1024,35 @@ export function EditorScreen({
                * this branch is unreachable today; it is explicit rather than a
                * cast so adding a kind cannot silently render it as a repeat.
                */
-              block.kind === 'ladder' || block.kind === 'section' ? null : block.kind ===
-                'segment' ? (
+              block.kind === 'section' ? (
+                <SectionRow
+                  key={block.id}
+                  section={block}
+                  path={path}
+                  depth={depth}
+                  first={first}
+                  last={last}
+                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
+                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onPatch={patchSection}
+                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
+                />
+              ) : block.kind === 'ladder' ? (
+                <LadderRow
+                  key={block.id}
+                  ladder={block}
+                  path={path}
+                  depth={depth}
+                  first={first}
+                  last={last}
+                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
+                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onPatch={patchLadder}
+                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
+                />
+              ) : block.kind === 'segment' ? (
                 <SegmentRow
                   key={block.id}
                   segment={block}
@@ -767,6 +1065,7 @@ export function EditorScreen({
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
+                  onTiming={patchTiming}
                   onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                   onPreview={(src, alt) => setImagePreview({ src, alt })}
@@ -830,6 +1129,22 @@ export function EditorScreen({
         >
           <PlusIcon />
           Reps
+        </button>
+        <button
+          className="chip chip--action"
+          onClick={() => editBlocks((c) => insertAfter(c, [], newLadder()))}
+          title="A group whose rep count changes each set: 5-10-15"
+        >
+          <PlusIcon />
+          Ladder
+        </button>
+        <button
+          className="chip chip--action"
+          onClick={() => editBlocks((c) => insertAfter(c, [], newSection()))}
+          title="A named part of the routine, shown as a list while running"
+        >
+          <PlusIcon />
+          Section
         </button>
       </div>
     </main>
