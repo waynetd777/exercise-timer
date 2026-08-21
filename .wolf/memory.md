@@ -50,3 +50,4 @@
 | 10:20 | Phase 4 media pipeline (own photos, offline pinning, GC, real resolver; 18 tests); removed .codex/; wrote root + 8 folder READMEs | src/media/*, src/ui/*, README.md, src/*/README.md | 261/261 tests pass, build clean | ~110k |
 | 10:30 | Reordered library header chips to New/Import/Export/Save images; file picker now accepts .json bundles | src/ui/LibraryScreen.tsx | 261/261 tests pass, build clean | ~8k |
 | 10:50 | Collapsed the library toolbar into a menu + select (8 controls -> 3); fixed the truncated completion figure (cancel per cue, not per note) and audited all cues with a rolling-window replay test | src/ui/Menu.tsx, LibraryScreen.tsx, theme.css, src/audio/engine.ts, useCueScheduler.ts, schedule.ts | 273/273 tests pass, build clean | ~60k |
+| 11:00 | Outcome notices moved into a dismissible NoticeDialog modal (progress while busy, Close when done) | src/ui/NoticeDialog.tsx, LibraryScreen.tsx, library.css | 273/273 tests pass, build clean | ~12k |

@@ -176,6 +176,8 @@
 - [2026-08-21] **The rolling window is audited end to end in `schedule.test.ts`**: every cue of all three real routines is scheduled exactly once and in order, nothing is missed even when arming at the full lookahead edge (a throttled tab), and arming every second never double-schedules. Also asserted: every cue kind has a tone, no two cues share a millisecond, and the minimum gap between cues in the real routines is >= 1000ms. Re-run this after any change to cues or scheduling.
 - [2026-08-21] **Known acoustic limit, not a bug:** the phase-change bell rings 2050ms. Every step in the real routines is >= 10s so it always finishes first, but a step shorter than ~2s authored in the editor would have the bell still ringing under the next cue. Muddy, not broken.
 
+- [2026-08-21] **Outcome reports are a dismissible modal (`NoticeDialog`), not an inline line.** "Saved 24 images" is worth reading once and then clearing; an inline notice just sits there afterwards. While the work is still running there is nothing to dismiss, so no close button is offered and Escape is swallowed via `onCancel` + `preventDefault` — it acts as a progress report until it has a result. The persistent library LOAD ERROR stays inline, because that is a condition rather than an event.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
