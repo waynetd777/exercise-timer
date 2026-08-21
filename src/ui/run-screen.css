@@ -598,14 +598,20 @@
   /*
    * Three columns: the count, its per-side qualifier, then the name.
    *
-   * The qualifier is separate so the counts share a right edge with each other.
-   * In one column, "5 × each side" is three times the width of "12 ×" and a
-   * right-aligned column lines the digits up with the end of "side". The middle
-   * column collapses to nothing when no row in the group is per-side.
+   * The qualifier is separate because in one column "5 × each side" is three
+   * times the width of "12 ×", and the names would then start at a different
+   * place on every row. It collapses to nothing when no row in the group is
+   * per-side.
+   *
+   * The count column's minimum is what lines the NAMES up: each row is its own
+   * grid, so nothing else makes them share a left edge. It is only as wide as the
+   * widest thing that goes in it — "20 ×" for reps, "1:30" for a timed step
+   * counting down — because every em beyond that is indentation in front of the
+   * count, which is what it used to have with 3.4em and right alignment.
    *
    * In em, so the columns keep their proportion as the rows grow.
    */
-  grid-template-columns: minmax(3.4em, auto) auto minmax(0, 1fr);
+  grid-template-columns: minmax(2.6em, auto) auto minmax(0, 1fr);
   align-items: baseline;
   /*
    * Spacing by padding, not by column-gap. A gap applies between declared tracks
@@ -647,11 +653,19 @@
   color: var(--bone-dim);
 }
 
+/*
+ * Flush left, not right.
+ *
+ * Right alignment gave the counts a shared right edge — tidy as a table, but it
+ * pushed a single digit a long way in from the row's own edge, and a set is
+ * usually the same count all the way down anyway. Left, the digits share their
+ * edge with each other AND with the rest of the row, and the names still line up
+ * because the column keeps its minimum width.
+ */
 .sheet__effort {
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-name);
   white-space: nowrap;
-  text-align: right;
   color: var(--phase);
 }
 
