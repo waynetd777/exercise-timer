@@ -263,10 +263,20 @@ invisible in a desktop browser, which is why the workflow changed too.
   — then a fourth, `dvh` shrinking for the keyboard and never coming back. The
   shell is `100lvh` now (stable), and `.modal` alone uses `dvh` (tracks the
   keyboard). The document does not scroll at all.
+- **Speech is gesture-gated too** (bug-042): "Let's go!" was silent on the first
+  start after opening the app, because it fires from an effect plus a timeout and
+  iOS drops a page's first utterance outside a gesture. `unlockSpeech()` now runs
+  from every control beside `audio.unlock()`. **Confirmed working on the device**
+  from a cold start.
 - **Also**: scrollbars hidden on touch, iOS zoom stopped by giving the paste box
   16px, list rows given a width budget, count column tightened, per-kind colours
   on the add buttons, the note toggle moved out of the action cluster, and no more
   white flash on pull-to-refresh (an inline ground in `index.html`).
+
+**Still unverified on a device, and only training with it will answer:** whether
+the wake lock holds through a full session, and photo uploads — `crypto.subtle` is
+secure-context only, so those need the deployed HTTPS build rather than the LAN
+dev server.
 
 ### Done since the quest closed (2026-08-21, all pushed)
 - **The image-link capability is gone.** `.tabata` imports now run through
