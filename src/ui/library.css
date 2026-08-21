@@ -84,6 +84,16 @@
   gap: var(--step-3);
 }
 
+/*
+ * The build badge, beside the help button. Deliberately the quietest thing in the
+ * row: it is a diagnostic, read once when a test starts and ignored after.
+ */
+.library__version {
+  align-self: center;
+  color: var(--bone-faint);
+  white-space: nowrap;
+}
+
 .library__search {
   flex: 1 1 12rem;
   min-width: 0;

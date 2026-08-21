@@ -16,6 +16,7 @@ import type { SortMode } from '../storage/library'
 import { duration } from './format'
 import { Menu } from './Menu'
 import { HelpTray } from './HelpTray'
+import { APP_VERSION } from '../version'
 import { LIBRARY_HELP } from './help'
 import { NoticeDialog } from './NoticeDialog'
 import {
@@ -358,6 +359,16 @@ export function LibraryScreen({
           >
             <HelpIcon />
           </button>
+
+          {/*
+            Which build is loaded. An installed PWA is served by a service
+            worker, so without this "is my change on the phone yet" cannot be
+            answered by looking. The date comes from the build, so a forgotten
+            version bump still shows something new.
+          */}
+          <span className="library__version label label--sm" title={`Built ${__BUILD_DATE__}`}>
+            v{APP_VERSION}
+          </span>
 
           <input
             ref={picker}

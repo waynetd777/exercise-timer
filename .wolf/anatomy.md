@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T19:27:59.934Z
-> Files: 24 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T21:32:57.638Z
+> Files: 25 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -40,6 +40,10 @@
 ## scripts/
 
 - `exercise_plates.py` — page_text, exercise_names, slug, plate (~1651 tok)
+
+## src/
+
+- `version.ts` — What the home screen shows beside the help button. (~161 tok)
 
 ## src/editor/
 
