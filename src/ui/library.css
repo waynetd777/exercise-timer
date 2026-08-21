@@ -384,8 +384,17 @@
   margin: auto;
   padding: var(--step-5);
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-  gap: var(--step-4);
+  /*
+   * Three explicit tracks — title, name, text — and the rest implicit, so there
+   * are exactly as many as there are children. Declaring five left an empty
+   * track whenever the parse report was absent, and an empty track still takes
+   * its gap: a phantom row of space above the buttons that read as too much
+   * padding at the foot of the dialog.
+   */
+  grid-template-rows: auto auto minmax(0, 1fr);
+  /* Below the padding, so the gap next to an edge cannot compound with it and
+     make the top and bottom look deeper than the sides. */
+  gap: var(--step-3);
   color: var(--bone);
   container: paste / inline-size;
   background: var(--ink-800);
