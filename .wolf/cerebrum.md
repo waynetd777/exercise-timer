@@ -305,14 +305,15 @@
   `icons.tsx`, which supplies `className="icon"` that the `.btn`/`.chip` sizing
   rules depend on.
 
-- [2026-08-21] **A ladder rung is ONE gate: one Next clears every rep-based step
-  in it** (`Ladder.advance` defaults to `'set'`). Wayne's correction — tapping
-  through a rung's three exercises separately is three taps for one piece of
-  work. A TIMED step inside the rung keeps its own run, so a 10-second wall sit
-  still counts down. `gateKey()` in `compile.ts` decides this; a `Repeat` has no
-  equivalent yet because you do work a round exercise by exercise — but it could
-  gain the same field with no code change. Real effect: the 20 Jul routine went
-  from ~155 taps to 69.
+- [2026-08-21] **Every group ITERATION is one gate: one Next clears every
+  rep-based step in a round or a ladder rung.** `advance` is shared by `Repeat`
+  and `Ladder` and defaults to `'set'`; an inner opt-out beats an outer default.
+  A TIMED step inside the iteration keeps its own run, so a 45s rest and a 10s
+  wall sit still count down. A SECTION never collapses — it is a part of a
+  routine, not a piece of work. `gateKey()` in `compile.ts` decides all of it.
+  Real effect: the 20 Jul routine went from ~155 taps to 38.
+  **The pattern in Wayne's two corrections: he taps once per chunk of work, never
+  per exercise.** Assume that shape for anything similar.
 
 - [2026-08-21] **The list is shown only while it still has something to say.**
   When the current step is the last one left in the group, every other row is
