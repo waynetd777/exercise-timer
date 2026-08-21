@@ -6,6 +6,7 @@ import { migrateWorkout } from '../storage/migrate'
 import { hasBlob, putBlob } from '../media/store'
 import { parseRoutine } from './pasteFormat'
 import { importTabataFile, TabataImportError } from './tabataFormat'
+import { newId } from '../id'
 
 export type ImportResult = {
   imported: Workout[]
@@ -90,7 +91,7 @@ export async function importRoutineFiles(
        * and the share-link reader already migrate; this was the one entry point
        * that did not.
        */
-      imported.push(migrateWorkout({ ...importTabataFile(json, now), id: crypto.randomUUID() }))
+      imported.push(migrateWorkout({ ...importTabataFile(json, now), id: newId() }))
     } catch (cause) {
       failed.push({
         name: file.name,
@@ -115,7 +116,7 @@ function pasted(text: string, filename: string, now: number): Workout {
   const parsed = parseRoutine(text, name || 'Pasted routine')
   if (parsed.blocks.length === 0) throw new Error('No routine found in this file.')
   return {
-    id: crypto.randomUUID(),
+    id: newId(),
     name: parsed.name,
     blocks: parsed.blocks,
     schemaVersion: SCHEMA_VERSION,

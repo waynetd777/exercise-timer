@@ -1,5 +1,6 @@
 import type { Block, Ladder, Repeat, Section, Segment, SegmentRole } from '../engine'
 import { isGroup } from '../engine'
+import { newId } from '../id'
 
 /**
  * Pure edits on a routine's block tree.
@@ -50,7 +51,7 @@ const DEFAULT_NAME: Record<SegmentRole, string> = {
 export function newSegment(role: SegmentRole = 'work'): Segment {
   return {
     kind: 'segment',
-    id: crypto.randomUUID(),
+    id: newId(),
     name: DEFAULT_NAME[role],
     durationMs: DEFAULT_SECONDS[role] * 1000,
     role,
@@ -68,7 +69,7 @@ export function newRepeat(
   children: Block[] = [newSegment('work'), newSegment('rest')],
   times = 3,
 ): Repeat {
-  return { kind: 'repeat', id: crypto.randomUUID(), times, children, label: 'Reps' }
+  return { kind: 'repeat', id: newId(), times, children, label: 'Reps' }
 }
 
 /**
@@ -84,14 +85,14 @@ export function newRepeat(
  * run to nine rungs and are easier to extend than to cut down.
  */
 export function newLadder(children: Block[] = [newRungStep()], counts = [5, 10, 15]): Ladder {
-  return { kind: 'ladder', id: crypto.randomUUID(), counts, children, label: 'Set' }
+  return { kind: 'ladder', id: newId(), counts, children, label: 'Set' }
 }
 
 /** A step whose rep count comes from the ladder around it. */
 export function newRungStep(): Segment {
   return {
     kind: 'segment',
-    id: crypto.randomUUID(),
+    id: newId(),
     name: DEFAULT_NAME.work,
     role: 'work',
     reps: { kind: 'rung' },
@@ -102,7 +103,7 @@ export function newRungStep(): Segment {
 export function newRepsStep(count = 10, role: SegmentRole = 'work'): Segment {
   return {
     kind: 'segment',
-    id: crypto.randomUUID(),
+    id: newId(),
     name: DEFAULT_NAME[role],
     role,
     reps: { kind: 'fixed', count },
@@ -117,7 +118,7 @@ export function newRepsStep(count = 10, role: SegmentRole = 'work'): Segment {
  * countdown anyway, whatever this says.
  */
 export function newSection(name = 'Section', children: Block[] = [newRepsStep()]): Section {
-  return { kind: 'section', id: crypto.randomUUID(), name, display: 'list', children }
+  return { kind: 'section', id: newId(), name, display: 'list', children }
 }
 
 export function newRoutineBlocks(): Block[] {
@@ -198,8 +199,8 @@ export function appendTo(blocks: readonly Block[], path: Path, block: Block): Bl
  * kept them would give two rows the same key.
  */
 function withNewIds(block: Block): Block {
-  if (block.kind === 'segment') return { ...block, id: crypto.randomUUID() }
-  return { ...block, id: crypto.randomUUID(), children: block.children.map(withNewIds) }
+  if (block.kind === 'segment') return { ...block, id: newId() }
+  return { ...block, id: newId(), children: block.children.map(withNewIds) }
 }
 
 /** Inserts a copy immediately after the block, so duplicating twice stacks up. */

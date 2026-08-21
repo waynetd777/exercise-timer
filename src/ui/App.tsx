@@ -10,6 +10,7 @@ import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
+import { newId } from '../id'
 
 /**
  * The sound bench is a development tool and is not shipped.
@@ -37,7 +38,7 @@ type View =
 function blankRoutine(): Workout {
   const now = Date.now()
   return {
-    id: crypto.randomUUID(),
+    id: newId(),
     name: '',
     /*
      * Opens on the shape Wayne's routines actually take: get set, three reps
@@ -76,7 +77,7 @@ export function App() {
 
     void (async () => {
       try {
-        const workout = await decodeRoutine(param, Date.now(), crypto.randomUUID())
+        const workout = await decodeRoutine(param, Date.now(), newId())
         const saved = await library.add(workout)
         history.replaceState(null, '', `${location.pathname}${location.search}`)
         setView({ screen: 'edit', workout: saved })
