@@ -16,6 +16,7 @@ import {
   fitCqi,
   groupCaption,
   listLines,
+  nameLines,
   pathLabel,
   wordCount,
 } from './format'
@@ -428,7 +429,12 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
       {entry && !showList && (
         <div className="run__body">
-          <div className="count">
+          {/* The countdown and the name share this column, so both are sized
+              against how many lines the name takes. */}
+          <div
+            className="count"
+            style={{ ['--name-lines' as string]: nameLines(entry.name) }}
+          >
             {/* Grouped so the meta row below can be pinned to the bottom of the
                 column while this block stays vertically centred. */}
             <div className="count__lead">

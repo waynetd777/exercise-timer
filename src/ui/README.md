@@ -96,6 +96,13 @@ Each of these cost a real bug. They are recorded because they recur.
 - **CSS cannot divide one length by another**, so a ratio driven by a pixel
   distance needs that distance passed in unitless.
 - **A `<label>` must not wrap a button** — it forwards the click to its input.
+- **Two elements sharing a column must be sized against each other**, not each
+  against the column. The countdown and the step name each fitted the column on
+  their own and together did not, so a two-line name pushed the step counter
+  behind the media panel. `--name-lines` is what couples them.
+- **A bare `1fr` has a min-content floor.** A track that must be allowed to
+  shrink below its content is `minmax(0, 1fr)`, or the grid grows past its own
+  parent instead of giving way.
 - **Anything with auto grid rows gets stretched by whatever contains it.** A
   dialog is a child of the full-height grid that opened it, and a stretched
   dialog splits the spare height between its rows: title at the top, body
