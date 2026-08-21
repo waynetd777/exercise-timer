@@ -61,3 +61,18 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-08-21 17:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 19:06 | Created src/ui/HelpTray.tsx | — | ~713 |
+| 19:07 | Created src/ui/help.ts | — | ~1154 |
+| 19:11 | Created src/routines/pasteTemplate.ts | — | ~569 |
+| 19:11 | Created src/routines/__tests__/pasteTemplate.test.ts | — | ~1177 |
+| 19:19 | Whistle fallback fix (eager fetch + re-arm on decode), stronger gradients, session elapsed clock, help trays + paste template, image controls hidden for listed steps | src/audio/*, src/state/useTimer.ts, src/ui/* | all green: 473 tests, typecheck, build | ~180k |
+| 20:28 | Created scripts/exercise_plates.py | — | ~1651 |
+| 20:29 | Created src/routines/imageCatalogue.ts | — | ~1025 |
+| 20:30 | Created src/editor/images.ts | — | ~1416 |
+| 20:33 | Created src/storage/__tests__/migrate.test.ts | — | ~1336 |
+| 20:35 | Rehosted all 43 exercise illustrations into the app (extracted from the Torus PDF, 881px, precached), catalogue holds paths, migrate-on-read rewrites the old postimages URLs | scripts/exercise_plates.py, public/exercises/*, src/routines/imageCatalogue.ts, src/editor/images.ts, src/storage/migrate.ts, vite.config.ts | 495 tests green, precache 372KB -> 3.6MB | ~120k |

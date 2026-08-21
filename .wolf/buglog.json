@@ -562,6 +562,59 @@
       "timestamp": "2026-08-21T15:05:00+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T15:05:00+02:00"
+    },
+    {
+      "error_message": "The first whistle of a workout \u2014 the one at the end of the get-ready \u2014 played the plain 2900Hz fallback tone instead of the recording",
+      "file": "src/audio/engine.ts",
+      "root_cause": "A cue is BUILT when it is scheduled, not when it sounds: playNote reads this.samples.get(name) at schedule time and creates either a buffer source or the synthesised fallback there and then. unlock() starts the whistle fetch+decode without awaiting it, and useCueScheduler's first arm() runs synchronously in the same tick, queueing the whole 30s lookahead window before the bytes could possibly land. Dedup via `scheduled` then means those cues are never revisited, so every whistle in the first half-minute kept the fallback. It only looked intermittent because any clock mutation (pause, resume, skip, seek) bumps `generation`, which clears the dedup set and requeues with the recording.",
+      "fix": "Two parts. (1) samples.ts starts the download at module load and exposes sampleBytes() \u2014 the network is the slow half and needs no AudioContext, so it does not wait for the gesture. (2) engine.onSampleDecoded() notifies when a buffer lands; the scheduler cancels pending, forgets the keys requeueable() says were actually dropped, and re-arms. requeueable() shares CANCEL_GRACE_MS with cancelPending so a cue already sounding is spared rather than queued twice.",
+      "fix_rule": "Anything read at SCHEDULE time is frozen for up to LOOKAHEAD_MS. If a scheduling input can change after the fact (a decode, a setting, a tint), it must announce itself and the window must be re-armed \u2014 and any re-arm that clears the dedup set has to respect the same grace cancelPending() uses, or a sounding cue plays twice.",
+      "tags": [
+        "audio",
+        "scheduling",
+        "async",
+        "race",
+        "whistle"
+      ],
+      "id": "bug-033",
+      "timestamp": "2026-08-21T18:45:57+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T18:45:57+02:00"
+    },
+    {
+      "error_message": "Choosing images for two steps in a row shared ONE undo step \u2014 one press of undo took both pictures back",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "patchSegment passed `coalesce = patch.role === undefined`, i.e. 'anything that is not the role is text'. A media patch from the picker, the upload or the link field therefore coalesced, and history.push replaces the present when the previous push was also coalescible. So a second image pick overwrote the first entry, and any image pick following a typing run was absorbed into it. The coalescing flag was also a single global boolean, so typing in two different fields collapsed together.",
+      "fix": "history.push now takes the FIELD being typed into (string | null) instead of a boolean, and only replaces the present when the field matches. isTypedPatch (editor/blocks.ts) names the only keystroke-by-keystroke field on a step \u2014 name \u2014 so media, role, note and alternative are discrete. The timing NUMBER box now coalesces (it is typed) while the unit select stays discrete.",
+      "fix_rule": "Coalescing must be keyed on the field, never on a 'this was text' flag: a shared flag silently merges unrelated edits and swallows any non-typing action that rides the same path. When adding a patch route, ask whether the field fires per keystroke \u2014 if not, it is discrete.",
+      "tags": [
+        "editor",
+        "undo",
+        "history",
+        "coalescing",
+        "data-loss"
+      ],
+      "id": "bug-034",
+      "timestamp": "2026-08-21T19:31:41+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T19:31:41+02:00"
+    },
+    {
+      "error_message": "Focusing the image link field of a step with an uploaded photo and tabbing away deleted the photo; blurring an unchanged note left an undo step that undid nothing",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "Both fields commit on blur and committed unconditionally. commitUrl treated an empty box as 'clear the image' \u2014 but the box is ALWAYS empty for a local (uploaded) image, since mediaUrl() only returns a URL for source 'remote'. commitText re-patched the same note, and clearText on an absent field still returns a new tree, so either way push() stored a state identical to the present.",
+      "fix": "commitText returns when the trimmed value matches what is stored. commitUrl clears only when the media is source 'remote', returns on an unrecognised link, and writes only when the normalised URL differs from the current one. The new \u00d7 in the field is the deliberate way to remove any image, including an uploaded one.",
+      "fix_rule": "A blur-committed field must compare against stored state before writing, or focus alone becomes an edit. And never infer 'the user cleared it' from an empty control that was never populated for that data shape.",
+      "tags": [
+        "editor",
+        "undo",
+        "media",
+        "data-loss"
+      ],
+      "id": "bug-035",
+      "timestamp": "2026-08-21T19:31:41+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T19:31:41+02:00"
     }
   ]
 }
