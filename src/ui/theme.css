@@ -28,6 +28,23 @@
   --role-custom: #d8cfc0;
 
   /*
+   * Group kinds, which are containers rather than phases — so they take three
+   * hues the four roles do not use, and the routine reads down its left edge
+   * without a word being read.
+   *
+   * Reps and ladder borrow the routine tints, keeping one palette rather than
+   * two. Teal is only defined here: adding it to `--routine-*` would add a
+   * swatch to the colour picker, and that set is deliberately six.
+   *
+   * Colour is the second cue, never the only one: every row states its kind in a
+   * field or a select, and every add button carries the word. Luminance is spread
+   * as well as hue, so the seven stay distinguishable in greyscale.
+   */
+  --group-reps: var(--routine-orange);
+  --group-ladder: var(--routine-yellow);
+  --group-section: #35c6c0; /* teal — apart from both the green and the blue */
+
+  /*
    * Routine tints. Red, green, blue and purple reuse the phase hues so the app
    * has one palette rather than two; orange and yellow are added to complete the
    * spectrum. Only ever used as a low-percentage mix, never as a flat fill.

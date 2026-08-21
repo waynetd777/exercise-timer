@@ -36,7 +36,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
   {
     heading: 'While it runs',
     points: [
-      'Space starts and pauses. ← and → step back and forward. M mutes.',
+      'Space starts and pauses. ← and → step back and forward. M mutes. K works like Space.',
       'Three beeps lead every boundary: a whistle into work, a bell out of it.',
       'A counted step waits for Next, and shows its whole group so you can see what is coming.',
       'The clock in the header is time since you started, pauses excluded.',
@@ -58,8 +58,9 @@ export const EDITOR_HELP: readonly HelpSection[] = [
     heading: 'Steps',
     points: [
       'Add a step with Get ready, Work, Rest or Recover. The type sets its colour and which cue it sounds.',
+      'Every kind has its own colour: the bar on an add button matches the edge of the row it makes.',
       'The unit beside the number: s times the step, × waits for Next, × each side counts per side.',
-      'The note button adds a note or an alternative exercise. In a list, the alternative reads “or …” beside the step and the note shows on the step you are on.',
+      'The note button, beside a step’s reps or seconds, adds a note or an alternative exercise. In a list, the alternative reads “or …” beside the step and the note shows on the step you are on.',
       'Each row can move up or down, duplicate itself, add a step below, or delete.',
       'A step carries one image: paste a link, pick one already used in your routines, or upload a photo.',
       'Steps listed inside a section have no image field — a list has no room for a picture, so only steps that run as a countdown offer one.',
@@ -69,6 +70,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
     heading: 'Groups',
     points: [
       'Reps repeats everything inside it, captioned “Reps 3 of 8” while running — or whatever you name the group.',
+      'A row’s buttons always read the same way: add, move up, move down, group or ungroup, duplicate, delete.',
       'The reps button on a step wraps that one step in a group of its own.',
       'Ladder changes the count each time round: 5-10-15. A step set to rung takes its number from the ladder.',
       'Section is a named part of the routine, shown as a list while running.',

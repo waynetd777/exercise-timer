@@ -157,6 +157,43 @@ to recover. The values are chosen so the three separate by **lightness** as well
 as hue, and so each clears 4.5:1 against the dark text of the primary button —
 re-check that ratio if any role colour changes.
 
+## Seven kinds, seven colours
+
+The four roles above are phases. The three group kinds are containers, so they
+take hues the roles do not use: **reps orange, ladder yellow, section teal**
+(`--group-*` in `theme.css`). Reps and ladder borrow the routine tints, keeping
+one palette rather than two; teal is defined only as `--group-section`, because
+adding it to `--routine-*` would put an eighth swatch in the colour picker and
+that set is deliberately six.
+
+Both halves show up the same way — a 4px rule down the left edge of the row — so
+the shape of a routine is readable while scrolling without a word being read. Two
+of them used to lie: a ladder was violet like Recover, and a section took
+`--phase`, which is the Rest blue.
+
+Each **add button wears the same rule** on its left edge, via `data-kind`, so the
+button and the row it produces read as the same object. A swatch would say "this
+control is coloured"; a matching edge says "this makes that". The word stays on
+the button either way: colour is the second cue, never the only one, and seven
+hues cannot all survive a colour-vision deficiency. Luminance is spread as well
+as hue, so they also separate in greyscale.
+
+## The keyboard belongs to the screen, except where it does not
+
+`keys.ts` decides whether a run-screen shortcut may act, from what has focus:
+
+- a text field or a select takes **every** key — typing must not fire a shortcut,
+  and a select's arrows change its value;
+- a button takes **Space and Enter**, which activate it, so a press does one
+  thing rather than the button's action *and* play/pause;
+- the arrows, `m` and `k` are always the screen's.
+
+The rule it replaced ignored every key while a `<button>` had focus. Clicking a
+control leaves it focused, so starting a routine with the mouse silently disabled
+skipping, while starting it with the spacebar left focus on the body and the whole
+keyboard worked. Two ways to begin, two different keyboards, and nothing logged.
+A focus guard has to name the keys, not the tag.
+
 ## Help is a tray, and it is data
 
 Two screens carry a help button: the library, beside the Routines menu, and the
@@ -210,3 +247,4 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `library.css`, `run-screen.css`, `editor.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
 | `icons.tsx` | Inline SVG — inherits `currentColor`, no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs |
+| `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

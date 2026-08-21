@@ -71,6 +71,32 @@ would leave a blank line under the step for ever.
   repetitions. It is *data*, so renaming it in code is never enough; see
   `storage/migrate.ts`.
 
+## One grammar for every row
+
+Four kinds of row — step, reps, ladder, section — and one order for the buttons
+that act on them:
+
+    step     add · up · down · wrap    · duplicate · delete
+    reps     add · up · down · ungroup · duplicate · delete
+    ladder   add · up · down ·           duplicate · delete
+    section  add · up · down ·           duplicate · delete
+
+Add first, delete last, duplicate before it, up and down adjacent and in reading
+order. The cluster is right-aligned, so despite rows carrying five or six buttons
+the sequence is stable **counting from the right**: delete is always flush right
+and that is where muscle memory lands. Wrap and ungroup share a slot and an icon
+on purpose — on a step it makes a reps group, on a group it undoes one.
+
+The note toggle is deliberately **not** in that cluster; it sits at the end of the
+field run instead. Everything in the cluster acts on the row's position or
+existence and acts at once, while the note opens this step's own text and is a
+disclosure rather than a deed. It carries `aria-pressed`, and pressed is styled,
+so the fields it reveals visibly belong to it.
+
+One thing left alone: the plus means "add a sibling below" on a step and "add a
+child inside" on a group. Same icon, same slot, two mental models — the titles say
+which, and inventing a second glyph for a rare confusion seemed the worse trade.
+
 ## An image is only offered where it will be seen
 
 Only the countdown layout has a media panel. A step that runs as a row of its

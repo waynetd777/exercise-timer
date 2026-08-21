@@ -445,6 +445,26 @@ function SegmentRow({
           onChange={(timing, typed) => onTiming(path, timing, typed)}
         />
 
+        {/*
+          With the fields, not with the actions beside it. Everything in that
+          cluster acts on the row's position or existence and acts at once; this
+          opens this step's OWN text, and it is a disclosure rather than a deed.
+        */}
+        <button
+          className="btn btn--ghost erow__note"
+          onClick={() => setExtras((open) => !open)}
+          aria-pressed={showExtras}
+          disabled={hasExtras}
+          aria-label="Add a note or an alternative"
+          title={
+            hasExtras
+              ? 'Note and alternative are shown below — empty them to remove'
+              : 'Add a note or an alternative'
+          }
+        >
+          <NoteIcon />
+        </button>
+
         <div className="erow__actions">
           {/*
             Adds a FRESH step of the same type below, where duplicate beside it
@@ -459,20 +479,6 @@ function SegmentRow({
             title="Add a step below"
           >
             <PlusIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => setExtras((open) => !open)}
-            aria-pressed={showExtras}
-            disabled={hasExtras}
-            aria-label="Add a note or an alternative"
-            title={
-              hasExtras
-                ? 'Note and alternative are shown below — empty them to remove'
-                : 'Add a note or an alternative'
-            }
-          >
-            <NoteIcon />
           </button>
           <button
             className="btn btn--ghost"
@@ -1333,11 +1339,17 @@ export function EditorScreen({
         <HelpTray title="Help" sections={EDITOR_HELP} onClose={() => setHelping(false)} />
       )}
 
+      {/*
+        `data-kind` colours each button's left edge with the colour the row it
+        adds will carry — see `.editor__add .chip[data-kind]`. The word stays,
+        because the colour is the second cue and never the only one.
+      */}
       <div className="editor__add">
         {ROLES.map(({ role, label }) => (
           <button
             key={role}
             className="chip chip--action"
+            data-kind={role}
             onClick={() => editBlocks((c) => insertAfter(c, [], newSegment(role)))}
           >
             <PlusIcon />
@@ -1346,6 +1358,7 @@ export function EditorScreen({
         ))}
         <button
           className="chip chip--action"
+          data-kind="reps"
           onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
         >
           <PlusIcon />
@@ -1353,6 +1366,7 @@ export function EditorScreen({
         </button>
         <button
           className="chip chip--action"
+          data-kind="ladder"
           onClick={() => editBlocks((c) => insertAfter(c, [], newLadder()))}
           title="A group whose rep count changes each set: 5-10-15"
         >
@@ -1361,6 +1375,7 @@ export function EditorScreen({
         </button>
         <button
           className="chip chip--action"
+          data-kind="section"
           onClick={() => editBlocks((c) => insertAfter(c, [], newSection()))}
           title="A named part of the routine, shown as a list while running"
         >
