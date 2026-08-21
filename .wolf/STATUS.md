@@ -396,9 +396,9 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
 ### Resolved from the run-screen review
 - **Rounds collapse too.** Asked for after ladders: `advance` is now shared by
   `Repeat` and `Ladder`, defaulting to `'set'` on both. Every group ITERATION is
-  one tap; a section never collapses. The 20 July routine went from ~155 taps to
-  38. Still one tap per loose step in a section like "Final Burnout" — say if
-  that should collapse too.
+  one tap, and a section's loose steps collapse too ("complete without stopping").
+  `advance` lives on `Repeat`, `Ladder` and `Section`, defaulting to `'set'`.
+  Taps across the three real routines: 37 / 35 / 38, down from ~155 each.
 
 ### Still open
 - Trampoline warm-up (3 Aug) has a "Sprint Finish – Fast feet for 15 seconds"
