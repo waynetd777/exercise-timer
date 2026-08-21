@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { cues } from '../engine'
-import type { Timeline } from '../engine'
+import { finishesOnTap, runCues } from '../engine'
+import type { Routine } from '../engine'
 import { cueKey, dueCues, REARM_MS } from './schedule'
 import type { RunStatus } from '../state/useTimer'
 import { audio } from './engine'
 import { audioTimeFor, toneFor } from './tones'
 
 type Options = {
-  timeline: Timeline
+  routine: Routine
+  /** Which run the clock is measuring. Cues are armed one run at a time. */
+  runIndex: number
   status: RunStatus
   muted: boolean
   /** Reads current elapsed run time. Must be live, not a snapshot. */
@@ -24,13 +26,14 @@ type Options = {
  * orphaned beeps from a position the workout has left.
  */
 export function useCueScheduler({
-  timeline,
+  routine,
+  runIndex,
   status,
   muted,
   readElapsed,
   generation,
 }: Options): void {
-  const allCues = useMemo(() => cues(timeline), [timeline])
+  const allCues = useMemo(() => runCues(routine, runIndex), [routine, runIndex])
 
   /**
    * Cues already queued, so a re-arm adds only what is new.
@@ -87,4 +90,24 @@ export function useCueScheduler({
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [status, muted, allCues, readElapsed])
+
+  /*
+   * The finish, when the routine ends on a self-paced step.
+   *
+   * There is no final duration to hang it on — the routine ends when the user
+   * taps — so it cannot be queued on the audio clock ahead of time the way every
+   * other cue is. Fired here instead, which costs a few milliseconds of accuracy
+   * on a figure that is an announcement rather than a beat.
+   */
+  const finished = useRef(false)
+  useEffect(() => {
+    if (status !== 'complete') {
+      finished.current = false
+      return
+    }
+    if (finished.current || muted || !finishesOnTap(routine)) return
+    finished.current = true
+    const spec = toneFor('workout-complete')
+    if (spec) audio.scheduleTone(audio.now, spec)
+  }, [status, muted, routine])
 }

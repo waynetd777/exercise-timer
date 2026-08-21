@@ -8,7 +8,7 @@ export {
   TimelineTooLargeError,
 } from './compile'
 export { position, elapsedAtStepStart, skipForward, skipBack } from './runtime'
-export { cues, cuesBetween, COUNTDOWN_SECONDS } from './cues'
+export { cues, cuesBetween, finishesOnTap, runCues, COUNTDOWN_SECONDS } from './cues'
 export {
   advance,
   cursorForStep,

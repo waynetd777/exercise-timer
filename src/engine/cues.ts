@@ -1,4 +1,4 @@
-import type { CuePoint, Timeline } from './types'
+import type { CuePoint, Routine, Timeline } from './types'
 
 /** Seconds before the end of a step at which a countdown beep fires. */
 export const COUNTDOWN_SECONDS = [3, 2, 1] as const
@@ -61,4 +61,42 @@ export function cues(timeline: Timeline): CuePoint[] {
 export function cuesBetween(all: CuePoint[], fromMs: number, toMs: number): CuePoint[] {
   if (!(toMs > fromMs)) return []
   return all.filter((cue) => cue.atMs >= fromMs && cue.atMs < toMs)
+}
+
+/**
+ * The cues for ONE run, which is what the scheduler arms against.
+ *
+ * `cues()` describes a whole workout, and handing it a single run made it say
+ * three wrong things: the finishing dings landed at the end of every run — after
+ * the warm-up, after each 45-second rest — and a gate, whose steps all sit at
+ * time zero, emitted one boundary cue per step stacked on the same millisecond.
+ *
+ * A gate gets ONE cue, at the moment it opens: a whistle to start the set, which
+ * is the tap's answer. It has no end of its own to count down to, so there is
+ * nothing else to say until the user says it.
+ */
+export function runCues(routine: Routine, runIndex: number): CuePoint[] {
+  const run = routine.runs[runIndex]
+  if (!run) return []
+
+  if (run.selfPaced) {
+    const first = run.entries[0]
+    if (!first) return []
+    return [{ atMs: 0, kind: first.role === 'work' ? 'work-start' : 'work-end', entryIndex: 0 }]
+  }
+
+  const all = cues(run)
+  // The workout finishes once, at the end of the LAST run.
+  if (runIndex === routine.runs.length - 1) return all
+  return all.filter((cue) => cue.kind !== 'workout-complete')
+}
+
+/**
+ * Whether the finishing figure has to be fired by hand rather than scheduled.
+ *
+ * A routine ending on a gate has no final duration to hang it on: it finishes
+ * when the user taps, and a tap cannot be queued on the audio clock in advance.
+ */
+export function finishesOnTap(routine: Routine): boolean {
+  return routine.runs.at(-1)?.selfPaced === true
 }
