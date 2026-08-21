@@ -181,9 +181,9 @@
 - **Placeholder text no longer truncated** (user-reported on portrait iPad) — `fitCqi`'s coefficient was 161 from two compounded optimistic assumptions (a 0.62em advance, and the full width with fixed padding ignored). A portrait iPad puts the panel at ~250px wide, where 24px of padding is a tenth of it, so every fallback name overflowed ~20%. Padding is now proportional on both axes, the coefficient is an explicit 84-of-92 budget over a 0.72em advance, `overflow-wrap: anywhere` is a last-resort net, and the tests assert the fit against a **pessimistic** 0.78em advance. Verified across phone, both iPad orientations, laptop and a short window. See buglog `bug-022`. **285 tests green.**
 - **Three distinct cue endings, and a sound bench** (user-specified)
   - `CueKind` split: `work-start` (entering work → whistle) and `work-end` (entering anything else → bell) replace the single `phase-change`. Keyed on the step being ENTERED, since every boundary is both an end and a start.
-  - **Whistle** synthesised as a pea whistle: 3800Hz + hard 2nd harmonic, chopped 26Hz in pitch AND level, 5% band-passed breath, held not struck. Needed three new engine capabilities — `warble`, `tremolo`, `noise` — because a whistle without the chop is a test tone.
+  - **Whistle** synthesised as a pea whistle: 3800Hz + hard 2nd harmonic, chopped 26Hz in pitch AND level, 5% band-passed breath, held not struck. Needed three new engine capabilities — `warble`, `tremolo`, `noise` — because a whistle without the chop is a test tone. **(Superseded: the whistle is now the CC0 recording, and every synthesised version is deleted — see below.)**
   - **Three dings** for the finish: 3136Hz, inharmonic ×2.74, 520ms, struck at 0/260/520ms — brighter and shorter than the bell, as specified.
-  - **Sound bench at Routines → Sounds**: each cue plays as the full beep-beep-beep-X figure and as the terminal sound alone, with its parameters printed beside it so iteration is precise.
+  - **Sound bench at Routines → Sounds**: each cue plays as the full beep-beep-beep-X figure and as the terminal sound alone, with its parameters printed beside it so iteration is precise. **(Now dev-only — compiled out of production.)**
   - **289 tests green**, including that the whistle and bell cannot be confused and that every boundary sound fits inside the shortest real step.
 
 - **The whistle is the real thing, and it was CC0 all along** (after five rejected synthesis attempts)
@@ -205,39 +205,166 @@
 - **Two duplicate images removed, and a false claim corrected**
   - `imageCatalogue.ts` asserted the repeated Tricep Press and Standing Arm Curl were "genuinely different images". They are not, and it had never been checked. Aligned for a 1px crop they differ 1.8/255 and 3.3/255 where two genuinely different plates differ 16.6/255, and both are visibly the same photograph and station. **27 images now**, two guard tests added.
   - The dropped Tricep Press URL was referenced 6 times across two seeded routines; repointed at the canonical copy so the media store caches one blob, not two near-identical ones.
-- **Smaller asks**: dark scrollbars (`scrollbar-color` + `::-webkit-scrollbar`, thumb inset by a transparent border so the hit area stays 10px; iOS overlay scrollbars ignore both and that is fine); opening voice line **"Enjoy your workout, you've got this!"** 900ms after start (clears the whistle, the longest opening cue; once per run, never on resume, and the flag is set even when muted so unmuting cannot fire it late); **+ button on every step row** adding a fresh step of the same type below, distinct from duplicate beside it.
-- **303 tests green**, typecheck + build clean. **NOTHING COMMITTED** — standing instruction "don't keep pushing while we iterate" is still in force.
+- **Smaller asks**: dark scrollbars (`scrollbar-color` + `::-webkit-scrollbar`, thumb inset by a transparent border so the hit area stays 10px; iOS overlay scrollbars ignore both and that is fine); opening voice line **"Enjoy your workout, give it your all!"** 900ms after start (clears the whistle, the longest opening cue; once per run, never on resume, and the flag is set even when muted so unmuting cannot fire it late); **+ button on every step row** adding a fresh step of the same type below, distinct from duplicate beside it.
+- **One seeded routine, no synthesised whistle, bench out of the build** (commit `657af14`)
+  - The synthesised whistle and `scripts/gen_whistle.py` are **deleted**. They existed only because the reference recording could not be shipped, which turned out to be untrue — the recording IS the reference. A failed decode now sounds a plain 2900Hz tone from `WHISTLE`'s own envelope fields, pinned by a test so nobody strips them as decoration. `curve` support left the tone spec and the engine's `setValueCurveAtTime` branch with it.
+  - **The sound bench is dev-only.** `App.tsx` loads it through a dynamic import inside an `import.meta.env.DEV` branch, so Vite drops the branch and the chunk together — a *static* import would have kept `sounds.css`, a CSS import being a side effect. Verified absent from `dist` by grepping for bench-only strings.
+  - **The library seeds one routine**, the Beginner Full-Body Workout Routine, whose exercise runs are now Reps groups. It ships as an authored `Workout`, not a `.tabata` import, because the importer deliberately never infers reps. Converting it changed nothing about what plays: 69 steps, 24:50, before and after. The two other `.tabata` files stay as importer fixtures — real data no hand-written fixture replaces — and leave the app's import graph, dropping the bundle **295KB → 257KB**.
+- **Documentation refreshed to match the code** (2026-08-21)
+  - Root `README.md`: test count, reps terminology, routine colours, the three cue figures and the CC0 whistle, the dev-only bench. **"Licence and credits" removed at the user's request.**
+  - Folder READMEs: `engine` (the trailing-rest rule, the four `CueKind`s, `index.ts`), `audio` (the three figures, `schedule.ts`/`samples.ts`/the wav, the bench), `routines` (one seeded routine, 27 images and the corrected duplicate claim, `importFiles.ts`), `storage` (`migrate.ts` and read-time migration), `ui` (routine tints, the per-screen CSS split, `Menu`/`NoticeDialog`/`SoundsScreen`/`useMediaUrl`), `editor` and `media` (terminology and `useMediaUrl`'s real home).
+  - Stale "round" wording fixed in `engine/types.ts` and `editor/blocks.ts` doc comments; `migrate.ts`'s legacy-label references are deliberate and left alone.
+- **301 tests green**, typecheck + build clean. Everything above is committed and pushed through `657af14`.
 
 ---
 
-## 🚀 Next phase — pick one
+## 🚀 Next quest — strength routines: untimed steps, sections, ladders
 
-Everything in the original 7-phase plan is now done except phase 4, and the app
-is live, installed and in real use. Remaining work, roughly by value:
+**Agreed 2026-08-21 with Wayne. Steps 1–2 of the build order are DONE and green
+(347 tests, typecheck + build clean, uncommitted). Next: step 3, the run state.**
 
-### A. Export + backup (small)
-The library lives in one browser's IndexedDB. The three seeded routines are safe
-(committed in the repo) but edits, favourites and anything authored in the editor
-are not.
-- Export a single routine and a whole-library bundle as JSON; re-import both.
-- URL share links for routines whose images are all `remote`/`bundled` (they
-  export as short strings, so they fit).
+### Landed so far
+- **Step 1** — the three routines are saved verbatim as parser fixtures in
+  `src/routines/__tests__/emails/`, with a README. Only the CAUTION banner and
+  "Sent from my iPhone" were stripped; en-dashes, `×`, `→` and emoji are left as
+  they arrived, because the parser has to cope with the real thing.
+- **Step 2** — the engine. `durationMs` is optional (absent = self-paced; a
+  present non-positive one is still dropped, so a mistyped `0` cannot become a
+  gate), plus `Reps`, `Ladder`, `Section`, `Group`, and `isGroup()`.
+  `compile()` now returns a `Routine` — the same entry objects as a flat list and
+  partitioned into runs. `runtime.ts` and `cues.ts` were **not touched**: a `Run`
+  is structurally a `Timeline`, so the tested core still does all the work inside
+  a run. New `navigate.ts` holds everything that crosses one: `locate`, `advance`,
+  `retreat`, `runIsOver`, `nextRun`, `cursorForStep`, `groupEntries`, `sectionOf`.
+  **46 new tests** in `gates.test.ts` and `navigate.test.ts`.
+- The type change found every tree walker that assumed `kind === 'repeat'` meant
+  "group" — `media/gc.ts` most importantly, where missing a group kind would have
+  orphaned live images and deleted them. All now recurse on `!== 'segment'`.
+- `useTimer` explicitly takes `compile(workout).runs[0]`, with a comment saying
+  why that is still correct today and what replaces it in step 3.
 
-### B. Phase 4 — full media pipeline (medium)
-The service worker already caches `i.postimg.cc` images, so plain offline works.
-What is left is genuine ownership of the images:
-- IndexedDB blob store keyed by sha256 (the `media` store already exists at v1).
-- Pin-for-offline on a remote ref: fetch → hash → store → set `cachedHash`;
-  resolver prefers the local copy. Works because `i.postimg.cc` sends
-  `access-control-allow-origin: *` (VERIFIED).
-- Own-photo upload: decode → canvas resize to 1024px → WebP q0.8 → hash → store.
-- Replace and delete `src/ui/media.ts` (the phase-2 stopgap).
-- Media GC on routine delete — hook point marked in `useLibrary.remove`.
+Source material: three emails forwarded (20 Jul, 3 Aug, 17 Aug 2026),
+in `~/Downloads/*.eml`. **Written by her gym instructor, not by her** — so the
+wording is a class handout's shorthand, and neither the sender nor Wayne is the
+authority on an ambiguous line. They arrive on one template every week or two,
+which is what makes a parser worth building rather than hand-entering three
+routines. Copies of the text should be saved into the repo as parser fixtures
+before any code is written — Downloads is not a source of truth.
 
-### C. Polish (small)
-- Keyboard shortcuts (space to pause, arrows to skip).
-- The app's spoken "10 seconds left" cue as a new `CueKind`.
-- Verify the wake lock actually holds on Wayne's iPhone.
+### The problem
+The routines are mostly **rep-based, not timed**: the user must tap Next to
+advance. But they MIX — a 45s rest sits inside a rounds section, a `30-second
+Plank` sits inside a rep list, and the warm-up is fully timed. And the user must
+see **a whole section's instructions on screen at once**, not one step at a time.
+
+### The idea that preserves the engine
+**A routine is a sequence of timed RUNS separated by manual GATES.** Inside a run
+nothing changes: absolute timeline, `position()` binary search, pre-scheduled
+cues, drift immunity, a pocketed phone catching up across several auto-advancing
+steps. At a gate the clock parks until Next, and the next run is rebased from the
+tap. `compile()` emits runs; run state gains a gate index; `clock.ts` is untouched.
+
+### The six shapes in the source material
+| Shape | Example | Timing |
+|---|---|---|
+| Timed list | Warm-up: "40 sec each" ×6, then "30 sec each" ×4 | fully timed — works today |
+| Rounds | #2 Arms: 4 rounds of `12 × Hammer Curls`… | reps + a timed 45s rest per round |
+| Ladder | #1: `2-4-6-8-10-8-6-4-2` | reps, untimed |
+| Ladder + accessories | #3 Legs: Sumo Squats at each rung, fixed accessory list after every set | reps, untimed |
+| Burnout | "Complete without stopping: 20 × Sumo Squat Pulses…" | reps, untimed |
+| Timed step inside a rep list | `30-second Plank`, `10-second Wall Sit` | timed, mixed in |
+
+### Model changes
+```ts
+// Duration becomes OPTIONAL. No duration = self-paced, ends on Next.
+type Segment = { …; durationMs?: number; reps?: { count: number; perSide?: boolean }
+                 alternative?: string }   // "knees or toes", "step-back option"
+
+// A ladder is a repeat whose rep count varies per iteration.
+type Ladder = { kind: 'ladder'; counts: number[]; children: Block[] }
+
+// A section is a named top-level group with a display mode.
+type Section = { kind: 'section'; name: string; note?: string
+                 display: 'timer' | 'list'; children: Block[] }
+```
+Old routines need **no migration**: no sections = one implicit timer-mode section,
+and every existing step already has a duration.
+
+### Decisions taken (do not re-litigate)
+- **A ladder is a PER-RUNG CIRCUIT**, not a per-exercise ladder. Rung 2 = 2 reps of
+  every exercise, then rung 4 = 4 of every exercise. Confirmed by Wayne, and it is
+  the better reading of the emails' own note: "complete the full count of one
+  exercise before moving to the next" means finish your SET before starting the
+  next exercise — "the full count" is the count for that rung, not the whole
+  ladder. It is also the common convention for this kind of ladder.
+  One primitive covers #1 and #3: children either take the rung count (the main
+  lift) or carry a fixed count (the accessories).
+- **Accessories run after the FINAL rung too.** "After every set" includes the last
+  one. Deliberately unlike the trailing-rest rule, where a rest between reps is
+  dropped at the end.
+- **"3–5 Rounds" stores the MAX (5)**, with an "End section" control so Next past
+  the intended round finishes early. Nothing is asked before the run.
+- **Next is a big full-width button plus the spacebar.** Not tap-anywhere: a stray
+  touch skipping a set is worse than reaching for the phone. Existing keyboard
+  control maps onto it for free.
+- **Import is a PASTE BOX, not an `.eml` importer.** The grammar is consistent
+  enough to parse, paste also covers WhatsApp and Notes, and a dropped `.eml`/`.txt`
+  is sugar (take `text/plain`, strip the CAUTION banner and "Sent from my iPhone").
+  The parse lands in the EDITOR for review — never applied silently, same principle
+  as the `.tabata` importer refusing to infer reps.
+
+### Parser rules needed
+Section header (`#N Name`, `WARM-UP – ±8 MINUTES`, `FINAL BURNOUT – NO STOPPING`),
+counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
+`40 sec each` applying to the list that follows, list items (`* 12 × Hammer Curls`,
+`1. March → Jog`, `* 30-second Plank`, `(5 each leg)`), `Main Exercise:`,
+`After every set:`, `After Round N:`.
+
+### Run screen, two modes
+- **Timer mode** — today's screen, unchanged, for the warm-up and all-timed sections.
+- **List mode** — the section's steps on screen at once, current row highlighted,
+  done rows ticked and dimmed, header showing "Round 2 of 4" / "Set 5 of 9 · 15
+  reps", full-width NEXT pinned at the bottom. A row WITH a duration runs an inline
+  countdown when it becomes current and auto-advances itself. Five or six rows is
+  the realistic maximum, which is what keeps it legible at gym distance.
+
+### Known consequences
+- **Cue scheduling narrows** from whole-routine to per-run: a countdown cannot be
+  pre-armed across a gate. `audio/README.md` says "scheduled ahead on the audio
+  clock" — that claim needs narrowing when this lands.
+- **Total duration becomes an estimate** for any routine with gates. The library row
+  should show steps/sections, and only show a time when everything is timed.
+- **The wake lock now matters much more** — the user must reach the phone — and it
+  has still never been verified on Wayne's iPhone.
+- The 27-image catalogue is machine-based and covers almost none of these
+  exercises. Steps import image-less; list mode must look right with no pictures.
+
+### Build order
+1. ✅ Save the three routines as text fixtures in the repo.
+2. ✅ `engine`: optional `durationMs`, `reps`, `Ladder`, `Section`; `compile()` →
+   runs and gates. Pure, tested, no UI.
+3. ◀ **NEXT** — `state`: gate handling in `useTimer`. Hold a `Cursor` instead of a
+   bare elapsed; rebase the clock on every run change; `next`/`previous` call
+   `advance`/`retreat`; the tick calls `runIsOver` rather than comparing times
+   itself. Auto-advance must stay DERIVED — waking after ten minutes has to land
+   on the gate, not walk to it one step per tick.
+4. `ui`: list mode on the run screen.
+5. The paste parser, with the three emails as fixtures.
+6. `editor`: sections, ladders, rep fields, untimed steps. Biggest UI chunk, last.
+
+### Found while building step 2
+- **"Rest 45 seconds after each round" meets the trailing-rest rule.** A rest as
+  the last child of a reps group is dropped on the final iteration, so four rounds
+  give three rests. If the instructor means four, the parser must emit the rest
+  AFTER the group. Currently it drops — asserted in `gates.test.ts`, so whichever
+  way it is decided, the test says which was chosen.
+- A `reps: {kind:'rung'}` step outside a ladder resolves to NO count rather than
+  zero. Half-authored beats "0 ×".
+
+### Still open
+- Trampoline warm-up (3 Aug) has a "Sprint Finish – Fast feet for 15 seconds"
+  hanging off the timed list. Trivial, just noting it is a step not a section.
+- Whether a section can be re-entered / repeated. Nothing in the source needs it.
 
 ### Open decisions
 - Whether to keep the editor capped at two levels of nesting. `wrapInRepeat`
@@ -265,7 +392,7 @@ What is left is genuine ownership of the images:
 - **Mandatory downscale pipeline on import:** decode → canvas resize to 1024px long edge → WebP q0.8 → ~100KB Blob → hash → store. Never store the original phone photo (3-5MB). All input sources (photo picker, camera capture, drag-drop, clipboard paste) are just `Blob`s and feed this one path.
 - **Portability: export/import a single `.json` bundle** with images inline as base64 (~1-1.5MB for a 10-step workout), moved by AirDrop / Files. **No backend, no sync** — judged unjustified for a single-user timer, and a server would make the app offline-breakable.
 - **Share links now mostly work:** remote and bundled refs export as short strings, so only `local` photos force a large bundle. A routine built from postimages or bundled images fits in a URL.
-- **RESOLVED — hosting: GitHub Pages, repo goes PUBLIC once complete.** Pages is free for public repos, so the earlier Pro caveat falls away; `VITE_BASE=/exercise-timer/` is already wired. ⚠️ **PRE-PUBLIC CHECKLIST:** remove `src/audio/cues/*.mp3` (Tabata Timer's commercial assets) in favour of the synthesised fallback in `tones.ts`, and note that the postimages URLs become public too.
+- **RESOLVED — hosting: GitHub Pages, repo goes PUBLIC once complete.** Pages is free for public repos, so the earlier Pro caveat falls away; `VITE_BASE=/exercise-timer/` is already wired. ✅ **PRE-PUBLIC CHECKLIST DONE:** `src/audio/cues/*.mp3` (Tabata Timer's commercial assets) were removed and purged from history; the only shipped recording is the CC0 whistle. The postimages URLs are public, which was accepted.
 - **(superseded) Hosting deliberately left open.** All bundled asset paths go through `import.meta.env.BASE_URL` from phase 1, so a root-domain host and a subpath host (GitHub Pages `/exercise-timer/`) both work with no retrofit. Recommendation on record for phase 7: Cloudflare Pages — free tier deploys private repos, serves from the root, good SW caching. GitHub Pages needs Pro for a private repo and publishes a public site.
 - **RESOLVED phase 2 — styling: plain CSS + custom properties.** No Tailwind. A handful of screens, one token file, container queries for layout. CSS ships at ~1.7kB gzipped.
 - **RESOLVED phase 2 — images: bounded panel beside the countdown** on wide layouts, stacked below on phone portrait (a bounded panel is impossible "beside" a 390px-wide column).
@@ -287,19 +414,32 @@ What is left is genuine ownership of the images:
 
 ## 📁 Active architecture
 
-- **Stack:** React + TypeScript + Vite, vitest. IndexedDB for persistence. PWA (service worker) from phase 6. No backend.
-- **Key modules:**
-  - `src/engine/` — pure interval-timer core (compile / position / cues). DOM-free, unit-tested.
-  - `src/audio/` — `engine.ts` (context lifecycle, scheduling, cancellation), `tones.ts` (synthesised specs + `audioTimeFor`), `useCueScheduler.ts` (rolling lookahead), `useMuted.ts`.
-  - `src/media/` — `resolveMedia` (remote/bundled/local), postimages URL normaliser, import pipeline (downscale + hash), IndexedDB blob store, objectURL cache, offline pinning.
-  - `src/state/` — `clock.ts` (pure run clock), `useTimer` (timeout-scheduled, derives Position), `useWakeLock`; `storage` (IndexedDB workouts, versioned schema, export/import) lands phase 4.
-  - `src/routines/` — `tabataFormat.ts` (.tabata importer), `samples.ts`, Wayne's real routine as JSON.
-  - `src/ui/` — `RunScreen`, `EffortStrip`, `theme.css`/`run-screen.css`, `format.ts`, `media.ts` (stopgap). Still to come: `LibraryScreen` (phase 5), `WorkoutEditor`/`BlockRow`/`ImagePicker` (phase 6).
-- **Patterns:** engine stays pure and DOM-free; all time derived from timestamps, never accumulated; audio scheduled ahead on the audio clock, not fired from JS ticks; images content-addressed and always downscaled before storage.
+- **Stack:** React 19 + TypeScript + Vite, vitest. IndexedDB for persistence. Installable PWA with a service worker. No backend.
+- **Key modules** (each folder has a README covering its decisions):
+  - `src/engine/` — pure interval-timer core: `compile` / `position` / `cues`, plus the authoring and runtime types. DOM-free, unit-tested.
+  - `src/audio/` — `engine.ts` (context lifecycle, sample decode, scheduling, per-cue cancellation), `tones.ts` (measured specs + the three figures + `audioTimeFor`), `schedule.ts` (window arithmetic), `useCueScheduler.ts`, `samples.ts` + `referee-whistle-cc0.wav`, `useMuted.ts`, `speech.ts`/`useSpokenCues.ts`.
+  - `src/media/` — content-addressed blobs: `hash`, `gc`, `resolve`/`resolveMedia`, `store`, `downscale`, `pin`.
+  - `src/state/` — `clock.ts` (pure run clock), `useTimer` (self-scheduling timeout), `useWakeLock`, `updateApp`, `usePullToRefresh`.
+  - `src/editor/` — pure block-tree operations, undo with coalescing, dirty detection, the image sources.
+  - `src/storage/` — `db`, `workouts`, `library` (pure rules), `migrate` (forward-only, on read), `useLibrary`, `seeded`, `bundle`, `shareLink`, `download`.
+  - `src/routines/` — `tabataFormat.ts` (.tabata importer), `importFiles.ts`, the one seeded routine, the 27-image catalogue.
+  - `src/ui/` — `App`, `LibraryScreen`, `RunScreen`, `EditorScreen`, dev-only `SoundsScreen`, `Menu`, `NoticeDialog`, `useMediaUrl`, `theme.css` + one stylesheet per screen, `format.ts`, `icons.tsx`.
+- **Patterns:** engine stays pure and DOM-free; all time derived from timestamps, never accumulated; audio scheduled ahead on the audio clock, not fired from JS ticks; images content-addressed and always downscaled before storage; stored-data fixes applied on read rather than migrated in place.
 
 ### Build order
 | Phase | Deliverable |
 |---|---|
+| 1 | ✅ `engine/` + tests |
+| 2 | ✅ RunScreen + pure run clock + effort strip |
+| 3 | ✅ audio cues (pre-scheduled Web Audio, mute) |
+| 4 | ✅ Media pipeline — resolver over all 3 sources, IndexedDB blob store, downscale, content-hash, objectURL cache, pin-for-offline, next-image preload, GC on delete |
+| 5 | ✅ LibraryScreen + `.tabata` import + IndexedDB storage |
+| 6 | ✅ Editor — block tree editing, image picker, undo, routine colours |
+| 7 | ✅ PWA install, wake lock, offline, export/import, share links, design pass, GitHub Pages |
+
+All seven phases are shipped. Work is now user-requested rather than plan-driven.
+
+---|---|
 | 1 | ✅ `engine/` + tests |
 | 2 | ✅ RunScreen + pure run clock + effort strip |
 | 3 | ✅ audio cues (pre-scheduled Web Audio, mute) |
@@ -312,7 +452,7 @@ What is left is genuine ownership of the images:
 
 ## ⚠️ External blockers (don't block coding)
 
-- Hosting account not yet chosen (Cloudflare Pages recommended). Not blocking until phase 7 — `VITE_BASE` keeps both host shapes buildable.
+- _(none)_ — hosting resolved: GitHub Pages, public repo, deployed by workflow on push to `main` with `VITE_BASE=/exercise-timer/`.
 
 ---
 

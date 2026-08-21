@@ -12,7 +12,8 @@ export function liveHashes(workouts: readonly Workout[]): Set<string> {
 
   const walk = (blocks: readonly Block[]): void => {
     for (const block of blocks) {
-      if (block.kind === 'repeat') {
+      // Any group, not just `repeat` — missing one would orphan live images.
+      if (block.kind !== 'segment') {
         walk(block.children)
         continue
       }

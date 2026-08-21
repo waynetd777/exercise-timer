@@ -41,7 +41,7 @@ export function shareable(workout: Workout): { workout: Workout; droppedImages: 
 
   const strip = (blocks: readonly Block[]): Block[] =>
     blocks.map((block) => {
-      if (block.kind === 'repeat') return { ...block, children: strip(block.children) }
+      if (block.kind !== 'segment') return { ...block, children: strip(block.children) }
       if (block.media?.source !== 'local') return block
       dropped += 1
       const next = { ...block }
