@@ -208,8 +208,12 @@ Three decisions worth keeping:
 - **`<details>`, not an accordion.** A hand-rolled one needs state, a keyboard
   implementation and an aria contract, and would still lose to the element the
   browser ships — which finds text inside a *closed* section when the page is
-  searched. The first section is open, and because that never changes React leaves
-  the DOM alone and toggling stays the browser's business.
+  searched. **One section at a time**, via the shared `name` attribute: that is
+  the platform's own exclusive accordion, so the behaviour costs an attribute
+  rather than a reducer. The name comes from `useId`, so two trays could never
+  close each other's sections. The first section is open, and because that prop
+  never changes value React leaves the attribute alone after mount — which is
+  exactly what lets the browser close it when another section opens.
 - **The text lives in `help.ts`**, as data. A point can be added without touching
   a component, and the two trays cannot drift into two different voices. Every
   line has to describe something the app actually does: a help tray that
