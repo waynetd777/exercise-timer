@@ -9,7 +9,7 @@
  */
 /** Every phrase the app speaks, in one place so the bench and the timer agree. */
 export const SPOKEN = {
-  enjoy: 'Enjoy your workout, give it your all!',
+  start: "Let's go!",
   tenSecondsLeft: 'Ten seconds left',
   thatsAWrap: "That's a wrap, well done!",
 } as const
