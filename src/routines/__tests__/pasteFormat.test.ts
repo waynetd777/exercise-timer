@@ -50,6 +50,33 @@ describe('parseRoutine — the real emails', () => {
     expect(parseRoutine(text).skipped).toEqual([])
   })
 
+  it('opens with five seconds to get ready, which no email asks for', () => {
+    /*
+     * The one thing the parser adds. A person reading the email is already
+     * standing there; someone using the app has to put the phone down first.
+     */
+    const blocks = parseRoutine(general).blocks
+    expect(blocks[0]).toMatchObject({
+      kind: 'segment',
+      name: 'Get ready',
+      role: 'prepare',
+      durationMs: 5_000,
+    })
+  })
+
+  it('does not add one when the routine already starts with a prepare step', () => {
+    const own = parseRoutine('Warm-up\n30 sec each\n* Get set')
+    const steps = own.blocks.flatMap((block) =>
+      block.kind === 'segment' ? [block] : block.children,
+    )
+    expect(own.blocks.filter((block) => block.kind === 'segment')).toHaveLength(0)
+    expect(steps).toHaveLength(1)
+  })
+
+  it('adds nothing to text with no routine in it', () => {
+    expect(parseRoutine('shopping list\nmilk').blocks).toEqual([])
+  })
+
   it('reads the sections in order', () => {
     expect(sections(parseRoutine(general).blocks).map((s) => s.name)).toEqual([
       'Warm-up',
