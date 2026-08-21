@@ -156,6 +156,10 @@
   - Library: **Export** downloads the whole library; each row has a **Share** button that copies a link. Import now accepts both `.tabata` files and exported bundles, distinguished by the bundle's own marker rather than by guessing.
   - Opening a share link imports the routine, clears the fragment so a reload does not duplicate it, and drops you into the editor.
   - **243 tests green.**
+- **Polish pass + pull-to-update** (second of three)
+  - **Keyboard control** on the run screen: space/`k` start-pause-resume, arrows skip, `m` mutes. Shortcuts shown in the button tooltips. Handler in a ref with the listener registered once, so it neither re-attaches every render nor every tick.
+  - **Spoken "ten seconds left"** on steps of 20s or more, via the browser's own voice. Kept out of the scheduled cue system on purpose — speech cannot be queued on the audio clock — and keyed on step index so a pause or seek cannot repeat it. Respects mute.
+  - **Pull down on the home screen to update the app** (user-reported). `updateApp()` deletes only the `precache` caches, leaving **IndexedDB untouched** (the only copy of authored routines) and the `exercise-images` runtime cache intact. Touch listeners are attached natively with `{ passive: false }`, since React's `touchmove` is passive and would ignore `preventDefault`.
 
 ---
 

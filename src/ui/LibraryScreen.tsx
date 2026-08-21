@@ -6,6 +6,8 @@ import { bundleFilename, toBundle } from '../storage/bundle'
 import { copyText, downloadJson } from '../storage/download'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
 import { shareUrl } from '../storage/shareLink'
+import { updateApp } from '../state/updateApp'
+import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
 import { duration } from './format'
 import {
@@ -157,6 +159,11 @@ export function LibraryScreen({
   const [dragging, setDragging] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const picker = useRef<HTMLInputElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
+
+  /* Pull down from the top of the list to fetch the latest app. Routines are in
+     IndexedDB and are untouched by an update — only the cached shell is. */
+  const pull = usePullToRefresh(scroller, updateApp)
 
   const visible = useMemo(
     () => sortWorkouts(filterWorkouts(library.workouts, query), sort),
@@ -279,7 +286,17 @@ export function LibraryScreen({
         controls stay put. A wrapper rather than a grid row per element: the
         number of notices varies, and the scroll region must not depend on it.
       */}
-      <div className="library__scroll">
+      <div
+        className="library__scroll"
+        ref={scroller}
+        /* Unitless: CSS cannot divide one length by another to get the ratio
+           the indicator's opacity needs. */
+        style={{ ['--pull' as string]: pull.distance }}
+      >
+        <p className="library__pull label label--sm" aria-hidden={pull.distance === 0}>
+          {pull.busy ? 'Updating…' : pull.armed ? 'Release to update' : 'Pull to update'}
+        </p>
+
         {notice && (
           <p className="library__notice label" role="status">
             {notice}
