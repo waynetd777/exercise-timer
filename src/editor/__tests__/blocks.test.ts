@@ -32,7 +32,7 @@ const rep = (id: string, children: Block[], times = 3): Repeat => ({
   id,
   times,
   children,
-  label: 'Round',
+  label: 'Reps',
 })
 
 /** A: 0, R: 1 (children B: [1,0], C: [1,1]), D: 2 */
@@ -222,11 +222,11 @@ describe('constructors', () => {
     expect(compile({ ...base, blocks }).entries).toHaveLength(5)
   })
 
-  it('defaults a new round to 3 reps of a 20s exercise and a 10s rest', () => {
-    const round = newRepeat()
-    expect(round.times).toBe(3)
-    expect(round.label).toBe('Round')
-    expect(round.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null))).toEqual(
+  it('defaults a new group to 3 reps of a 20s exercise and a 10s rest', () => {
+    const reps = newRepeat()
+    expect(reps.times).toBe(3)
+    expect(reps.label).toBe('Reps')
+    expect(reps.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null))).toEqual(
       [
         ['work', 20_000],
         ['rest', 10_000],
@@ -258,33 +258,41 @@ describe('newRoutineBlocks — what a new routine opens on', () => {
     ])
   })
 
-  it('compiles to 9 steps totalling 3:30', () => {
-    // 30 + 3 x (20 + 10) + 30 + 60 = 210s
+  it('compiles to 8 steps totalling 3:20', () => {
+    // 30 + (20 + 10 + 20 + 10 + 20) + 30 + 60 = 200s. Five steps from the reps,
+    // not six: a rest belongs BETWEEN reps, so the third rep has none after it.
     const timeline = compile({ ...base, blocks: template })
-    expect(timeline.entries).toHaveLength(9)
-    expect(timeline.totalMs).toBe(210_000)
+    expect(timeline.entries).toHaveLength(8)
+    expect(timeline.totalMs).toBe(200_000)
   })
 
-  it('labels the rounds, so the run screen shows "Round 2 of 3"', () => {
+  it('ends the reps on work, never on a rest', () => {
+    const entries = compile({ ...base, blocks: template }).entries
+    const reps = entries.filter((entry) => entry.path.length > 0)
+    expect(reps.map((entry) => entry.role)).toEqual(['work', 'rest', 'work', 'rest', 'work'])
+  })
+
+  it('labels the reps, so the run screen shows "Reps 2 of 3"', () => {
     const entry = compile({ ...base, blocks: template }).entries[3]!
     expect(entry.path).toEqual([
-      { repeatId: expect.any(String), label: 'Round', iteration: 2, of: 3 },
+      { repeatId: expect.any(String), label: 'Reps', iteration: 2, of: 3 },
     ])
   })
 })
 
 describe('defaults, stated once', () => {
   it('holds every default the routines rely on', () => {
-    // Restated as a single guard: get ready 30s, round of 3 with 20s work and
+    // Restated as a single guard: get ready 30s, reps of 3 with 20s work and
     // 10s rest, rest 10s. Changing any of these should fail here first.
     expect(newSegment('prepare').durationMs).toBe(30_000)
     expect(newSegment('rest').durationMs).toBe(10_000)
     expect(newSegment('work').durationMs).toBe(20_000)
 
-    const round = newRepeat()
-    expect(round.times).toBe(3)
-    expect(round.children).toHaveLength(2)
-    expect(compile({ ...base, blocks: [round] }).totalMs).toBe(3 * 30_000)
+    const reps = newRepeat()
+    expect(reps.times).toBe(3)
+    expect(reps.children).toHaveLength(2)
+    // 3 works and 2 rests, not 3 of each: the last rep has no rest after it.
+    expect(compile({ ...base, blocks: [reps] }).totalMs).toBe(3 * 20_000 + 2 * 10_000)
   })
 })
 

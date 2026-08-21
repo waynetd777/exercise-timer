@@ -37,6 +37,28 @@ describe('isDirty', () => {
     expect(isDirty(w, 'Leg day 2', w.blocks)).toBe(true)
   })
 
+  it('notices a colour being chosen, changed and cleared', () => {
+    const plain = workout()
+    expect(isDirty(plain, plain.name, plain.blocks, 'blue')).toBe(true)
+
+    const blue: Workout = { ...plain, colour: 'blue' }
+    expect(isDirty(blue, blue.name, blue.blocks, 'blue')).toBe(false)
+    expect(isDirty(blue, blue.name, blue.blocks, 'red')).toBe(true)
+    expect(isDirty(blue, blue.name, blue.blocks, null)).toBe(true)
+  })
+
+  it('treats an absent colour and null as the same thing', () => {
+    const w = workout()
+    expect(isDirty(w, w.name, w.blocks, null)).toBe(false)
+  })
+
+  it('reports clean for a three-argument call on a coloured routine', () => {
+    // The colour argument defaults to the original's, so a caller that predates
+    // colours cannot be told a routine is dirty just for having one.
+    const blue: Workout = { ...workout(), colour: 'blue' }
+    expect(isDirty(blue, blue.name, blue.blocks)).toBe(false)
+  })
+
   it('notices every kind of block edit', () => {
     const w = workout()
     const cases: Record<string, ReturnType<typeof updateSegment>> = {

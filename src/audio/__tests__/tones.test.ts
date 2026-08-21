@@ -19,18 +19,6 @@ describe('toneFor', () => {
     expect(notes[0]!.durationMs).toBeLessThan(1000)
   })
 
-  it('builds the whistle as a chopped tone with breath, not a steady one', () => {
-    // A whistle without the pea's chop reads as a synthesiser test tone.
-    const note = toneFor('work-start')!.notes[0]!
-    expect(note.freq).toBeGreaterThan(3000)
-    expect(note.warble?.hz).toBeGreaterThan(15)
-    expect(note.warble?.depthHz).toBeGreaterThan(50)
-    expect(note.tremolo?.depth).toBeGreaterThan(0.1)
-    expect(note.noise?.gain).toBeGreaterThan(0)
-    // Blown, not struck — it holds rather than decaying away.
-    expect(note.sustain).toBeGreaterThan(0.6)
-  })
-
   it('builds the bell with an INHARMONIC partial and a long tail', () => {
     const note = toneFor('work-end')!.notes[0]!
     expect(note.freq).toBeCloseTo(2659, 0)
@@ -42,14 +30,17 @@ describe('toneFor', () => {
     expect(note.partial!.decayScale).toBeLessThan(1)
   })
 
-  it('ends the routine with three dings, brighter and shorter than the bell', () => {
+  it('ends the routine with three shorter strikes, not one long ring', () => {
+    // Deeper than the bell by request, so pitch is not what distinguishes them —
+    // three shorter strikes against one long ring is.
     const dings = toneFor('workout-complete')!.notes
     const bell = toneFor('work-end')!.notes[0]!
 
     expect(dings).toHaveLength(3)
     for (const ding of dings) {
-      expect(ding.freq).toBeGreaterThan(bell.freq)
       expect(ding.durationMs).toBeLessThan(bell.durationMs)
+      // Still clearly a different pitch from the bell, either way.
+      expect(Math.abs(ding.freq - bell.freq)).toBeGreaterThan(200)
     }
     // Struck in sequence, not at once.
     expect(dings.map((d) => d.atMs)).toEqual([...dings.map((d) => d.atMs)].sort((a, b) => a - b))
@@ -57,33 +48,49 @@ describe('toneFor', () => {
   })
 
   it('keeps the whistle and the bell clearly different sounds', () => {
-    // They mean opposite things mid-effort, so they must not be confusable.
+    // Close in pitch, so the difference has to come from how they behave: one
+    // follows a measured contour, the other is struck and rings on.
     const whistle = toneFor('work-start')!.notes[0]!
     const bell = toneFor('work-end')!.notes[0]!
-    expect(Math.abs(whistle.freq - bell.freq)).toBeGreaterThan(600)
-    expect(whistle.warble).toBeDefined()
-    expect(bell.warble).toBeUndefined()
+
+    expect(whistle.curve).toBeDefined()
+    expect(bell.curve).toBeUndefined()
+    expect(bell.durationMs).toBeGreaterThan(whistle.durationMs)
+    expect(bell.partial).toBeDefined()
   })
 
-  it('puts every boundary sound well above the countdown beep', () => {
+  it('puts every boundary sound well clear of the countdown beep', () => {
+    // The beep is a 523Hz C5; nothing that follows it should be confusable.
     const beep = toneFor('countdown')!.notes[0]!.freq
     for (const kind of ['work-start', 'work-end', 'workout-complete'] as const) {
       for (const note of toneFor(kind)!.notes) {
-        expect(note.freq, kind).toBeGreaterThan(beep * 3)
+        expect(note.freq, kind).toBeGreaterThan(beep * 4)
       }
     }
   })
 
-  it('gives every note a sane envelope', () => {
+  it('spaces the three dings slowly enough to hear as separate strikes', () => {
+    const dings = toneFor('workout-complete')!.notes
+    const gaps = dings.slice(1).map((d, i) => d.atMs - dings[i]!.atMs)
+    for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(300)
+    // Evenly spaced — an uneven gap reads as a mistake.
+    expect(new Set(gaps).size).toBe(1)
+  })
+
+  it('gives every note a sane envelope, or a curve instead', () => {
     for (const kind of KINDS) {
       for (const note of toneFor(kind)!.notes) {
         expect(note.gain).toBeGreaterThan(0)
         expect(note.gain).toBeLessThanOrEqual(1)
+
+        // A curve carries its own shape and needs no envelope fields.
+        if (note.curve) continue
+
         expect(note.sustain).toBeGreaterThan(0)
         expect(note.sustain).toBeLessThanOrEqual(1)
         // The strike must fit inside the note, or the envelope stages cross.
         expect(note.strikeMs).toBeGreaterThan(0)
-        expect(note.strikeMs).toBeLessThan(note.durationMs)
+        expect(note.strikeMs!).toBeLessThan(note.durationMs)
       }
     }
   })
@@ -129,5 +136,63 @@ describe('audioTimeFor', () => {
 
   it('is unaffected by the size of the audio clock offset', () => {
     expect(audioTimeFor(20_000, 17_000, 5_000) - 5_000).toBeCloseTo(3)
+  })
+})
+
+describe('the whistle is played from measured curves', () => {
+  it('follows amplitude and frequency contours rather than an envelope', () => {
+    /*
+     * Four parametric attempts failed, the last built on a spectral analysis
+     * that was right about the pitch and wrong about the chop. A whistle's
+     * character is the irregularity of the pea, which is a curve and not a
+     * parameter — so this pins the approach, not just the numbers.
+     */
+    const note = toneFor('work-start')!.notes[0]!
+    expect(note.curve).toBeDefined()
+    expect(note.curve!.amplitude.length).toBeGreaterThan(50)
+    expect(note.curve!.frequency.length).toBeGreaterThan(20)
+  })
+
+  it('holds its pitch in the measured band', () => {
+    // 98.3% of the real whistle's energy is inside 2400-3400Hz.
+    const { frequency } = toneFor('work-start')!.notes[0]!.curve!
+    for (const hz of frequency) {
+      expect(hz).toBeGreaterThan(2300)
+      expect(hz).toBeLessThan(3400)
+    }
+  })
+
+  it('has irregular dips rather than a regular gate', () => {
+    // The earlier versions used a 95% square chop, which buzzed. The real thing
+    // holds high with uneven dips — so consecutive gaps must NOT be uniform.
+    const { amplitude } = toneFor('work-start')!.notes[0]!.curve!
+    const loud = amplitude.filter((value) => value > 0.05)
+
+    expect(Math.max(...amplitude)).toBeCloseTo(1, 1)
+    // Mostly loud, not mostly gated.
+    expect(loud.filter((v) => v > 0.6).length).toBeGreaterThan(loud.length / 2)
+    // And genuinely uneven.
+    expect(new Set(amplitude.map((v) => v.toFixed(2))).size).toBeGreaterThan(20)
+  })
+
+  it('starts and ends at silence, so it cannot click', () => {
+    const { amplitude } = toneFor('work-start')!.notes[0]!.curve!
+    expect(amplitude[0]!).toBeLessThan(0.1)
+    expect(amplitude[amplitude.length - 1]!).toBe(0)
+  })
+
+  it('needs no envelope fields, since the curve replaces them', () => {
+    const note = toneFor('work-start')!.notes[0]!
+    expect(note.sustain).toBeUndefined()
+    expect(note.strikeMs).toBeUndefined()
+    expect(note.tremolo).toBeUndefined()
+  })
+
+  it('bundles no audio: every cue is synthesised', () => {
+    for (const kind of ['countdown', 'work-start', 'work-end', 'workout-complete'] as const) {
+      for (const note of toneFor(kind)!.notes) {
+        expect(note.freq).toBeGreaterThan(0)
+      }
+    }
   })
 })

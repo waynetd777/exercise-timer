@@ -1,18 +1,22 @@
 import type { CueKind } from '../engine'
+import { WHISTLE_AMPLITUDE, WHISTLE_DURATION_MS, WHISTLE_FREQUENCY } from './whistleCurve'
+import type { SampleName } from './samples'
 
 /**
- * Synthesised cues. Nothing is sampled, so there is no third-party audio in the
- * repo, nothing to attribute, and nothing to fetch or lose offline.
+ * Cue definitions. All synthesised except the whistle, which is a CC0 recording
+ * with the synthesised version kept as its fallback — see `samples.ts` for why
+ * that one gave up on synthesis and what licence lets it ship.
  *
  * The three-beep countdown always leads somewhere, and where it leads is what
  * changes:
  *
  *   work-start        beep beep beep WHISTLE   — a referee starting play
  *   work-end          beep beep beep BELL      — the round is over
- *   workout-complete  beep beep beep DING DING DING
+ *   workout-complete  beep beep beep DING DING DING, then the wrap-up line
  *
- * The beeps are measured from the app Wayne trains to (523Hz, a near-pure C5
- * with a 92ms decay). The whistle and dings are built for the metaphor.
+ * The beep and the bell are built from measurements of the app Wayne trains to.
+ * The whistle is a recording; its fallback is built from measured CURVES, for
+ * reasons in `whistleCurve.ts`.
  */
 
 export type Note = {
@@ -21,28 +25,59 @@ export type Note = {
   freq: number
   /** Total ringing time, to near-silence. */
   durationMs: number
-  /** Peak level of the strike, 0-1. */
+  /** Peak level, 0-1. */
   gain: number
-  /** Fraction of `gain` the strike falls to before the long tail begins. */
-  sustain: number
-  /** Milliseconds for the strike to fall to `sustain`. */
-  strikeMs: number
+  /** Fraction of `gain` the strike falls to. Unused by a curve note. */
+  sustain?: number
+  /** Milliseconds for the strike to fall to `sustain`. Unused by a curve note. */
+  strikeMs?: number
+  /**
+   * Milliseconds to reach full level. Struck sounds want the default few ms; a
+   * blown one takes far longer, because the pressure has to build.
+   */
+  attackMs?: number
   type?: OscillatorType
+  /**
+   * Play a recording instead of synthesising. Every other field on the note
+   * still describes the synthesised FALLBACK, used until the sample is decoded
+   * and if it never is.
+   */
+  sample?: SampleName
+  /** Sample only. Shifts pitch and length together, as blowing harder does. */
+  playbackRate?: number
   /**
    * An inharmonic partial, as a multiple of `freq` — what makes a tone read as
    * metallic. `decayScale` shortens it, since a real bell's high partials die
    * before its body stops ringing.
    */
   partial?: { ratio: number; gain: number; decayScale?: number }
-  /**
-   * Frequency wobble. A referee's pea whistle is not a steady tone: the pea
-   * chops the airflow, and without this it sounds like a test tone.
-   */
+  /** Frequency wobble, applied to the tone only. */
   warble?: { hz: number; depthHz: number }
-  /** Amplitude wobble, from the same pea. `depth` is 0-1 of the level. */
-  tremolo?: { hz: number; depth: number }
-  /** Band-passed noise mixed in — the breath in a whistle. */
-  noise?: { gain: number; centreHz: number; q: number }
+  /**
+   * Amplitude chop, applied to everything in the note. A square shape chops
+   * rather than swells.
+   */
+  tremolo?: { hz: number; depth: number; shape?: OscillatorType }
+  /**
+   * Noise through a band-pass filter. A high `q` turns noise into a pitched but
+   * airy sound.
+   */
+  resonances?: {
+    gain: number
+    centreHz: number
+    q: number
+    sweepFromHz?: number
+    wobbleHz?: number
+    wobbleDepthHz?: number
+  }[]
+  /**
+   * Measured amplitude and frequency contours, replacing the envelope entirely.
+   *
+   * For a sound whose character is its irregularity rather than any parameter,
+   * following the measured curves is the only thing that works. Both are stepped
+   * evenly across `durationMs`.
+   */
+  curve?: { amplitude: readonly number[]; frequency: readonly number[] }
 }
 
 export type ToneSpec = { notes: Note[] }
@@ -59,23 +94,37 @@ const BEEP: Note = {
 }
 
 /**
- * A pea whistle. Fundamental around 3.8kHz with a hard second harmonic, chopped
- * at ~26Hz in both pitch and level, over a little breath noise. It holds rather
- * than decays — a whistle is blown, not struck — so the sustain is high.
+ * A referee's pea whistle, played from its measured contours.
+ *
+ * Nearly a pure tone — spectral flatness 0.0014, with 98.3% of its energy inside
+ * 2400-3400Hz — so one oscillator following the curves reproduces it closely.
+ * Four parametric attempts failed first; see `whistleCurve.ts` for what they got
+ * wrong.
  */
-const WHISTLE: Note = {
+/** The synthesised whistle: the fallback, and still on the bench for comparison. */
+const WHISTLE_CURVE_NOTE: Note = {
   atMs: 0,
-  freq: 3800,
-  durationMs: 620,
-  gain: 0.3,
-  sustain: 0.82,
-  strikeMs: 30,
-  type: 'triangle',
-  partial: { ratio: 2, gain: 0.1 },
-  warble: { hz: 26, depthHz: 170 },
-  tremolo: { hz: 26, depth: 0.4 },
-  noise: { gain: 0.05, centreHz: 3800, q: 1.6 },
+  freq: 2900,
+  durationMs: WHISTLE_DURATION_MS,
+  gain: 0.42,
+  type: 'sine',
+  curve: { amplitude: WHISTLE_AMPLITUDE, frequency: WHISTLE_FREQUENCY },
 }
+
+/**
+ * What actually plays: the recording, carrying the whole synthesised note as its
+ * fallback.
+ *
+ * `gain` is set so the recording peaks where the synthesised whistle did, which
+ * nobody complained about: the file peaks at 0.92, and 0.92 x 0.46 lands on the
+ * 0.42 the contour reached. `playbackRate` is 1 — the recording is already the
+ * length and pitch of the reference, since it IS the reference.
+ */
+const WHISTLE: Note = { ...WHISTLE_CURVE_NOTE, sample: 'whistle', gain: 0.46 }
+
+/** Bench-only specs, so the two whistles can be heard back to back. */
+export const WHISTLE_RECORDED: ToneSpec = { notes: [WHISTLE] }
+export const WHISTLE_SYNTHESISED: ToneSpec = { notes: [WHISTLE_CURVE_NOTE] }
 
 /**
  * Measured from the app: 2659Hz with an INHARMONIC partial at x2.578 — the
@@ -93,13 +142,13 @@ const BELL: Note = {
   partial: { ratio: 2.578, gain: 0.14, decayScale: 0.45 },
 }
 
-/** A brighter, shorter bell, struck three times. */
+/** A shorter, deeper bell than the round bell, struck three times. */
 const ding = (atMs: number): Note => ({
   atMs,
-  freq: 3136,
-  durationMs: 520,
+  freq: 2350,
+  durationMs: 780,
   gain: 0.3,
-  sustain: 0.22,
+  sustain: 0.24,
   strikeMs: 10,
   type: 'sine',
   partial: { ratio: 2.74, gain: 0.11, decayScale: 0.5 },
@@ -107,10 +156,11 @@ const ding = (atMs: number): Note => ({
 
 /** The countdown, as its own cue — one beep, fired three times a second apart. */
 const COUNTDOWN: ToneSpec = { notes: [BEEP] }
-
 const WORK_START: ToneSpec = { notes: [WHISTLE] }
 const WORK_END: ToneSpec = { notes: [BELL] }
-const COMPLETE: ToneSpec = { notes: [ding(0), ding(260), ding(520)] }
+
+/** Spaced at 430ms: slow enough to read as three deliberate strikes. */
+const COMPLETE: ToneSpec = { notes: [ding(0), ding(430), ding(860)] }
 
 export function toneFor(kind: CueKind): ToneSpec | null {
   switch (kind) {
@@ -128,20 +178,24 @@ export function toneFor(kind: CueKind): ToneSpec | null {
 }
 
 /**
- * The full figure a cue kind belongs to: three beeps a second apart, then the
- * terminal sound. Used by the sound test panel, where hearing the whole
- * sequence is the only way to judge it.
+ * The full figure a cue belongs to: three beeps a second apart, then the terminal
+ * sound. Used by the sound bench, where hearing the whole sequence is the only
+ * way to judge it.
  */
 export function sequenceFor(kind: Exclude<CueKind, 'countdown'>): ToneSpec {
-  const terminal = toneFor(kind)!
   return {
     notes: [
       { ...BEEP, atMs: 0 },
       { ...BEEP, atMs: 1000 },
       { ...BEEP, atMs: 2000 },
-      ...terminal.notes.map((note) => ({ ...note, atMs: note.atMs + 3000 })),
+      ...toneFor(kind)!.notes.map((note) => ({ ...note, atMs: note.atMs + 3000 })),
     ],
   }
+}
+
+/** When the last note of a figure is struck — not when its tail dies away. */
+export function lastStrikeMs(spec: ToneSpec): number {
+  return Math.max(...spec.notes.map((note) => note.atMs))
 }
 
 /**

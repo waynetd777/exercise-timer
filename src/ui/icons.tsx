@@ -210,8 +210,8 @@ export function PlusIcon() {
   )
 }
 
-/** Wrap in rounds: a loop. */
-export function RoundsIcon() {
+/** Wrap in reps: a loop. */
+export function RepsIcon() {
   return (
     <Svg>
       <path d="M4.5 11a7.5 7.5 0 0 1 12.8-5.3" {...STROKE} />

@@ -397,6 +397,86 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T00:45:00Z"
+    },
+    {
+      "error_message": "Tinted library rows lost their hover feedback entirely",
+      "file": "src/ui/library.css",
+      "root_cause": "`.row[data-clickable='true']:hover` sets a flat `background`, and the new `.row[data-colour]:not([data-confirming='true'])` tint rule TIES with it on specificity. Source order alone decided it, and the tint came later, so hover never applied to a coloured row.",
+      "fix": "Added an explicit tinted-hover rule mixing the same wash into the lighter --ink-700 ground. Delete-confirm is excluded from the tint via :not() rather than by source order.",
+      "fix_rule": "When two rules tie on specificity, order decides. Encode precedence with :not() instead of relying on where a block sits in the file.",
+      "tags": [
+        "css",
+        "specificity",
+        "cascade"
+      ],
+      "id": "bug-023",
+      "timestamp": "2026-08-21T11:27:16",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T11:27:16"
+    },
+    {
+      "error_message": "A truncated download was read as a genuinely smaller image (179KB vs 477KB)",
+      "file": "src/routines/imageCatalogue.ts",
+      "root_cause": "A curl hit the 2-minute command timeout and left a partial PNG. Its size and sha256 were then compared as evidence, making two identical images look very different. PIL exposed it: 'image file is truncated'.",
+      "fix": "Re-downloaded with an explicit --max-time inside the command budget and decoded before comparing.",
+      "fix_rule": "Confirm a downloaded file DECODES before treating its size or hash as evidence of anything.",
+      "tags": [
+        "images",
+        "download",
+        "verification"
+      ],
+      "id": "bug-024",
+      "timestamp": "2026-08-21T11:27:16",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T11:27:16"
+    },
+    {
+      "error_message": "imageCatalogue.ts claimed duplicate-named images were 'genuinely different images'",
+      "file": "src/routines/imageCatalogue.ts",
+      "root_cause": "The claim was written when the file was created and never checked. Both pairs are re-uploads of one photograph: aligned for a 1px crop they differ 1.8/255 and 3.3/255 mean, where genuinely different plates differ 16.6/255.",
+      "fix": "Removed both duplicates (27 images), corrected the comment to state what was measured, repointed 6 references in two seeded routines at the canonical URL, added two guard tests.",
+      "fix_rule": "Never write a comment asserting a fact that was not measured. A confident comment outlives the assumption behind it.",
+      "tags": [
+        "documentation",
+        "unverified-claim",
+        "images"
+      ],
+      "id": "bug-025",
+      "timestamp": "2026-08-21T11:27:16",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T11:27:16"
+    },
+    {
+      "error_message": "Rattle rate reported as SLOWING to 9.6Hz when the time axis was compressed",
+      "file": "scripts/gen_whistle.py",
+      "root_cause": "Compressing time can only raise a modulation rate. The FFT window was the ~127ms compressed steady portion, too short to resolve 18Hz from 24Hz, so it locked onto an envelope component. A peak-counting cross-check was wrong twice too (115Hz, then 48Hz, against a true 18Hz) because one rattle cycle has several local maxima.",
+      "fix": "Measure the final tiled 700ms curve, and return NaN when the window is under 250ms rather than guessing. Peak-count measure deleted with a comment recording why. FFT validated by tracking RATTLE proportionally across x1.18/x1.32/x1.48.",
+      "fix_rule": "Check a measurement against the direction the physics demands. If a result is impossible, the instrument is wrong, not the signal.",
+      "tags": [
+        "audio",
+        "measurement",
+        "fft"
+      ],
+      "id": "bug-026",
+      "timestamp": "2026-08-21T11:27:16",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T11:27:16"
+    },
+    {
+      "error_message": "Committed generator could not run from the repo: FileNotFoundError 'amp.npy'",
+      "file": "scripts/gen_whistle.py",
+      "root_cause": "Hardcoded bare input filenames and an absolute output path, so it only ran from the scratchpad it was written in.",
+      "fix": "Paths resolved relative to __file__, ANALYSIS_DIR override, and a real error message instead of a numpy traceback. scripts/.analysis/ gitignored because full-rate amplitude+frequency of the Tabata mp3 is effectively a copy of it.",
+      "fix_rule": "A script committed to the repo must run from the repo. Resolve paths relative to __file__, never to the cwd it was authored in.",
+      "tags": [
+        "scripts",
+        "paths",
+        "licensing"
+      ],
+      "id": "bug-027",
+      "timestamp": "2026-08-21T11:27:16",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T11:27:16"
     }
   ]
 }
