@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { clock, clockWidth, duration, fitCqi, pathLabel, wordCount } from '../format'
+import {
+  clock,
+  clockWidth,
+  duration,
+  FIT_AVAILABLE,
+  fitCqi,
+  fitWidthUsed,
+  pathLabel,
+  wordCount,
+} from '../format'
 
 describe('clock', () => {
   it('shows bare seconds under a minute — faster to read at three metres', () => {
@@ -112,5 +121,57 @@ describe('wordCount', () => {
 
   it('collapses runs of whitespace', () => {
     expect(wordCount('  Get   ready  ')).toBe(2)
+  })
+})
+
+describe('fitCqi always fits its container', () => {
+  // The invariant the portrait-iPad truncation broke: whatever the text, the
+  // longest word must fit inside the width budget, expressed as a share of the
+  // container so it holds at any size.
+  const WORDS = [
+    'Rest',
+    'Go',
+    'Get ready',
+    'Cycling',
+    'Change Sides',
+    'Low Pulley Squat',
+    'Seated Abdominal Crunch',
+    'Cable Converging Shoulder Press',
+    'Extraordinarilylongexercisename',
+  ]
+
+  /**
+   * A pessimistic advance. The sizing maths is exact by construction, so
+   * asserting against the assumed advance would prove nothing — the real
+   * question is whether the text still fits when the font is wider than
+   * assumed, which is exactly how the portrait-iPad truncation happened.
+   */
+  const PESSIMISTIC = 0.78
+
+  it.each(WORDS)('fits “%s” even with a wider font than assumed', (text) => {
+    const longest = Math.max(...text.split(' ').map((word) => word.length))
+    const worstCase = longest * PESSIMISTIC * fitCqi(text)
+    expect(worstCase).toBeLessThanOrEqual(FIT_AVAILABLE)
+  })
+
+  it('claims less than the space available, so the slack is real', () => {
+    for (const text of WORDS) {
+      expect(fitWidthUsed(text)).toBeLessThan(FIT_AVAILABLE)
+    }
+  })
+
+  it('is bounded by the cap for very short words, still with headroom', () => {
+    expect(fitCqi('Go')).toBe(40)
+    expect(2 * PESSIMISTIC * fitCqi('Go')).toBeLessThanOrEqual(FIT_AVAILABLE)
+  })
+
+  it('still only ever steps down as words get longer', () => {
+    const sizes = WORDS.map((w) => fitCqi(w))
+    const longest = WORDS.map((w) => Math.max(...w.split(' ').map((p) => p.length)))
+    for (let i = 0; i < WORDS.length; i++) {
+      for (let j = 0; j < WORDS.length; j++) {
+        if (longest[i]! < longest[j]!) expect(sizes[i]!).toBeGreaterThanOrEqual(sizes[j]!)
+      }
+    }
   })
 })

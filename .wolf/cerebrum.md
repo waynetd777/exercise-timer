@@ -182,6 +182,9 @@
 
 - [2026-08-21] **No trailing periods in UI messages** (requested for modals; applied to all short status text for consistency). Where a message needed two sentences it was rewritten as one phrase joined with an em dash — "That image could not be read — try a JPEG, PNG or WebP" — rather than keeping an internal period. Questions keep their question mark, and an ellipsis on a progress message stays.
 
+- [2026-08-21] **`fitCqi` sizing: `FIT_BUDGET` (84) / `FIT_ADVANCE` (0.72), against `FIT_AVAILABLE` (92).** The maths is EXACT by construction — a word sized this way occupies precisely the budget — so all the safety is the gap between 84 and 92. The first version used 161 (100/0.62 with no padding allowance) and truncated every fallback name on a portrait iPad, where the panel is ~250px and fixed padding was a tenth of it. Padding is now proportional on both axes (`4cqh 4cqi`) so the available share is constant at any size. Tests assert the fit against a PESSIMISTIC 0.78em advance — asserting against the assumed advance would prove nothing. (`bug-022`)
+- [2026-08-21] **A portrait iPad (768px) lands in the WIDE two-column layout**, which gives the media panel only ~250x773 — narrow and very tall. That aspect is the reason near-square illustrations render small there. Lowering the panel's share or raising the 46rem breakpoint so 768px stacks would both help; not done, since it is a visible layout change rather than a bug.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
