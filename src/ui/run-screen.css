@@ -497,18 +497,27 @@
   gap: var(--step-2);
   /* Scrolled content must not sit under the Next button's edge. */
   scrollbar-gutter: stable;
+  /*
+   * Rows GROW to fill the sheet, rather than sitting at a floor in the middle of
+   * it. Sized off the list's own height budget divided by the estimated line
+   * count, the same move `.panel__empty` makes — the width term that used to
+   * govern here pinned a phone to the 1rem floor, which is unreadable from where
+   * the phone is propped.
+   */
+  font-size: clamp(1.05rem, calc(32cqh / var(--lines, 6)), 2.25rem);
 }
 
 .sheet__row {
   display: grid;
   /* The effort column is sized from its content but shares one width down the
      list, so the names line up however wide "5 × each side" turns out to be. */
-  grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+  /* In em, so the effort column keeps its proportion as the rows grow. */
+  grid-template-columns: minmax(3.4em, auto) minmax(0, 1fr);
   align-items: baseline;
   gap: var(--step-3);
   padding: var(--step-2) var(--step-3);
   border-radius: var(--radius);
-  font-size: clamp(1rem, 3.6cqi, 1.5rem);
+  /* Inherited from the list, which sizes the whole group at once. */
   line-height: 1.25;
   transition:
     background 200ms var(--ease),

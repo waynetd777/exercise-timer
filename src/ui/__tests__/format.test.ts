@@ -8,6 +8,7 @@ import {
   fitBlockCqi,
   fitCqi,
   fitWidthUsed,
+  listLines,
   pathLabel,
   wordCount,
 } from '../format'
@@ -205,5 +206,41 @@ describe('fitBlockCqi — text in a wide box', () => {
   it('handles empty and whitespace input without dividing by zero', () => {
     expect(fitBlockCqi('', 2, 11)).toBeGreaterThan(0)
     expect(Number.isFinite(fitBlockCqi('   ', 2, 11))).toBe(true)
+  })
+})
+
+describe('listLines — sizing a group to fill the sheet', () => {
+  const rows = [
+    { name: 'Bicep Curls' },
+    { name: 'Arnold Press' },
+    { name: 'Upright Rows' },
+    { name: 'Rest' },
+  ]
+
+  it('counts one line per short row', () => {
+    expect(listLines(rows)).toBe(4)
+  })
+
+  it('credits a long name the lines it will wrap to', () => {
+    expect(listLines([{ name: 'RB (resistance band) Lateral Walks – 5 each direction' }])).toBe(3)
+  })
+
+  it('charges less than a full line for a sub-line', () => {
+    const withAlt = listLines([{ name: 'Squat Jumps', alternative: 'squat + calf raise' }])
+    expect(withAlt).toBeGreaterThan(1)
+    expect(withAlt).toBeLessThan(2)
+  })
+
+  it('charges for a note only on the row showing one', () => {
+    const current = { name: 'Toy Soldier Kicks', note: 'straight-leg kicks with opposite hand' }
+    const others = [{ name: 'Butt Kicks', note: 'a note nobody is shown' }]
+    expect(listLines([current, ...others], current)).toBeGreaterThan(
+      listLines([current, ...others]),
+    )
+  })
+
+  it('never returns zero, so the divisor is always safe', () => {
+    expect(listLines([])).toBe(1)
+    expect(listLines([{ name: '' }])).toBe(1)
   })
 })
