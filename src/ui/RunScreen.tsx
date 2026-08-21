@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react'
-import type { Routine, RoutinePosition, Run, TimelineEntry, Workout } from '../engine'
+import type { Run, TimelineEntry, Workout } from '../engine'
 import { groupEntries, groupOf, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useSpokenCues } from '../audio/useSpokenCues'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
+import type { RunStatus } from '../state/useTimer'
 import {
   clock,
   clockWidth,
@@ -34,6 +35,20 @@ import './run-screen.css'
 /** The final three seconds of a step, where the countdown starts to pulse. */
 const URGENT_MS = 3_000
 
+/** The one control a rep-based routine is driven by. */
+function NextSlab({ onNext, status }: { onNext: () => void; status: RunStatus }) {
+  return (
+    <button
+      type="button"
+      className="chip chip--primary sheet__next"
+      onClick={onNext}
+      disabled={status !== 'running' && status !== 'paused'}
+    >
+      Next
+    </button>
+  )
+}
+
 /**
  * A whole group on screen at once: the round or rung being worked, every step in
  * it, with the current one marked.
@@ -47,21 +62,17 @@ const URGENT_MS = 3_000
  * one round of four, not all four rounds.
  */
 function SectionList({
-  routine,
+  rows,
   run,
-  at,
+  entry,
   secondsLeft,
 }: {
-  routine: Routine
+  rows: TimelineEntry[]
   run: Run
-  at: RoutinePosition
+  entry: TimelineEntry
   secondsLeft: number
 }) {
-  const entry = at.entry
-  if (!entry) return null
-
   const section = sectionOf(entry)
-  const rows = groupEntries(routine, entry)
   const caption = groupCaption(groupOf(entry))
 
   return (
@@ -221,7 +232,16 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
    * countdown for it and back would be disorienting. A self-paced step outside
    * any section has no other sensible rendering.
    */
-  const asList = entry !== null && (sectionOf(entry)?.display === 'list' || entry.selfPaced)
+  const inList = entry !== null && (sectionOf(entry)?.display === 'list' || entry.selfPaced)
+  const rows = entry ? groupEntries(routine, entry) : []
+
+  /*
+   * Once nothing is left but the step being worked, the list is a column of
+   * struck-through text and one live row — it has stopped telling you anything.
+   * The trailing rest of a round and the wall sit at the end of a rung both land
+   * here, and both are better as the countdown they are.
+   */
+  const showList = inList && rows.filter((row) => row.step >= entry!.step).length > 1
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''
@@ -374,21 +394,14 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         </div>
       )}
 
-      {entry && asList && (
+      {entry && showList && (
         <div className="run__sheet">
-          <SectionList routine={routine} run={run} at={at} secondsLeft={timer.secondsLeft} />
-          <button
-            type="button"
-            className="chip chip--primary sheet__next"
-            onClick={withAudio(timer.next)}
-            disabled={status !== 'running' && status !== 'paused'}
-          >
-            Next
-          </button>
+          <SectionList rows={rows} run={run} entry={entry} secondsLeft={timer.secondsLeft} />
+          <NextSlab onNext={withAudio(timer.next)} status={status} />
         </div>
       )}
 
-      {entry && !asList && (
+      {entry && !showList && (
         <div className="run__body">
           <div className="count">
             {/* Grouped so the meta row below can be pinned to the bottom of the
@@ -433,6 +446,10 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           </div>
 
           <MediaPanel entry={entry} next={at.nextEntry} />
+
+          {/* A self-paced step needs the slab wherever it is shown: the icon in
+              the control row is not a target you hit mid-effort at arm's length. */}
+          {entry.selfPaced && <NextSlab onNext={withAudio(timer.next)} status={status} />}
         </div>
       )}
 

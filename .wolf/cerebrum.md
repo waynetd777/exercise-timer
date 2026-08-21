@@ -313,3 +313,10 @@
   equivalent yet because you do work a round exercise by exercise — but it could
   gain the same field with no code change. Real effect: the 20 Jul routine went
   from ~155 taps to 69.
+
+- [2026-08-21] **The list is shown only while it still has something to say.**
+  When the current step is the last one left in the group, every other row is
+  struck through and the list is noise — the countdown layout takes over. The
+  trailing rest of a round and the wall sit at the end of a ladder rung both land
+  there. Consequence: the Next slab is needed in BOTH layouts, so it is a shared
+  `NextSlab` component, not a child of the list.
