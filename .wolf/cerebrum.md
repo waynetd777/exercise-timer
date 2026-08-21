@@ -309,9 +309,11 @@
   rep-based step in a round or a ladder rung.** `advance` is shared by `Repeat`
   and `Ladder` and defaults to `'set'`; an inner opt-out beats an outer default.
   A TIMED step inside the iteration keeps its own run, so a 45s rest and a 10s
-  wall sit still count down. A SECTION never collapses — it is a part of a
-  routine, not a piece of work. `gateKey()` in `compile.ts` decides all of it.
-  Real effect: the 20 Jul routine went from ~155 taps to 38.
+  wall sit still count down — which is why a burnout containing a wall sit is two
+  taps: the clock starts when you reach the hold, and the tap is what says you
+  have. A SECTION's loose steps collapse too ("complete without stopping").
+  `gateKey()` in `compile.ts` decides all of it. Real effect: the three real
+  routines went from ~155 taps each to 37 / 35 / 38.
   **The pattern in Wayne's two corrections: he taps once per chunk of work, never
   per exercise.** Assume that shape for anything similar.
 

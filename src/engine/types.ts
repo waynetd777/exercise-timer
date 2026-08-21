@@ -56,9 +56,14 @@ export type MediaRef =
 /**
  * Whether Next clears a whole iteration of a group or one step of it.
  *
- * `'set'` is the DEFAULT for every group, because a round or a rung is the unit
- * of work: "12 curls, 10 press, 12 flyes, 15 pull-aparts" is one round you do
- * and then tick off, not four prompts to tap through with your hands full.
+ * `'set'` is the DEFAULT for every group, because the group is the unit of work:
+ * "12 curls, 10 press, 12 flyes, 15 pull-aparts" is one round you do and then
+ * tick off, not four prompts to tap through with your hands full. The same is
+ * true of a ladder rung, and of a burnout block whose instruction is literally
+ * "complete without stopping".
+ *
+ * Nothing is hidden by this. The list shows every step of the gate at once, all
+ * of them marked as being worked — one tap says you have done the block.
  *
  * A TIMED step inside the iteration is never swallowed by the tap — it keeps its
  * own run, so the 45-second rest after a round and the 10-second wall sit after
@@ -179,6 +184,14 @@ export type Section = {
   name: string
   note?: string
   display: SectionDisplay
+  /**
+   * Whether Next clears the section's loose steps in one go. Defaults to
+   * `'set'`, which is what "complete without stopping" means.
+   *
+   * Only affects steps DIRECTLY in the section: anything inside a round or a
+   * rung is cleared by that instead.
+   */
+  advance?: Advance
   children: Block[]
 }
 
