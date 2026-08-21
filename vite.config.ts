@@ -38,10 +38,14 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // wav included for the whistle sample. Without it the sound is fetched at
-        // runtime and the app is silent-ish offline, which is the one place it
-        // matters: a gym with no signal.
-        globPatterns: ['**/*.{js,css,html,png,svg,wav}'],
+        /*
+         * wav for the whistle sample, jpg for the exercise illustrations.
+         * Without them the sound and the pictures are fetched at runtime, and the
+         * app goes quiet and blank in the one place it matters: a gym with no
+         * signal. The 43 plates are ~3MB, deliberately kept at 881px wide so that
+         * install stays reasonable — see `scripts/exercise_plates.py`.
+         */
+        globPatterns: ['**/*.{js,css,html,png,svg,wav,jpg}'],
         // A 42-minute routine can outlast a cached page, so take over
         // immediately rather than waiting for every tab to close.
         clientsClaim: true,
