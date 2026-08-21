@@ -170,6 +170,11 @@
   - Deleted `.codex/` (hooks, config, 3 prompt files) that OpenWolf added for Codex. `AGENTS.md` was LEFT in place — it is the cross-agent convention file rather than Codex-specific, and it is 4 lines pointing at `.wolf/OPENWOLF.md`. Say the word to remove it too.
   - **Root `README.md` plus a README for all 8 source folders** (559 lines total). Each documents the DECISIONS and the traps, not the code: why time is derived rather than counted, why a routine compiles to a flat timeline, why cues are pre-scheduled, why the tones are measured rather than sampled, why storage is content-addressed, and the eight CSS traps that each cost a real bug.
 - **Library header buttons reordered** (user-reported) — New, Import, Export, Save images. The file picker's `accept` also now lists `.json`, so exported bundles show in the dialog rather than only working by drag-and-drop.
+- **Toolbar collapsed into a menu and a select, and the completion cue fixed** (user-reported)
+  - Library toolbar: New/Import/Export/Save images became one **Routines** menu, and the three sort chips a native `<select>`. **8 controls → 3, about 52% narrower.** The menu is positioned from the trigger's bounding rect in viewport coordinates, because the library shell clips its overflow and an absolutely-positioned list would be cut off at the header's edge.
+  - **The completion figure was being truncated** — 7 notes over 3.45s, firing at the same instant the workout completes and the scheduler re-runs. Cancellation now reasons per CUE rather than per note, with a 0.15s grace for clock skew and deduplication so a spared cue cannot play twice. See buglog `bug-021`.
+  - **Audited every other cue** (`schedule.test.ts`, 12 tests): every cue of all three real routines schedules exactly once and in order, nothing is missed even arming at the full lookahead edge, arming every second never duplicates, every cue kind has a tone, and no two cues share a millisecond. **No other sound is clobbered.**
+  - **273 tests green.**
 
 ---
 

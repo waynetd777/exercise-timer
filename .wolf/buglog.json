@@ -360,6 +360,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-21T07:50:00Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-08-21T00:35:00Z",
+      "error_message": "USER REPORTED: 'the fourth sound after a round is also broken like the other one was' \u2014 the workout-complete figure was truncated",
+      "file": "src/audio/engine.ts",
+      "root_cause": "The completion cue is SEVEN notes spread over ~3.45s, queued as separate oscillators at future times. It fires at exactly totalMs \u2014 the same instant the timer sets status to 'complete', which re-runs the scheduler effect and called cancelPending(). The earlier fix spared oscillators whose OWN start time had passed, so the first note survived and every later note of the same figure was stopped. Per-note reasoning fixed the single-note bell and left the multi-note fanfare broken in exactly the same way.",
+      "fix": "Cancellation is judged per CUE, not per note: every oscillator is tagged with the moment its cue began, and a cue that has begun is left entirely alone including its remaining notes. Added a 0.15s grace so tick-versus-audio-clock skew cannot cancel a figure a hair before it starts, and added deduplication in the scheduler (keyed `kind@atMs`) so a spared cue cannot be re-queued by the next arm and played twice.",
+      "fix_rule": "When a cue is a FIGURE rather than a single sound, cancellation has to reason about the figure. Track the group, not the note.",
+      "tags": [
+        "audio",
+        "web-audio",
+        "scheduling",
+        "regression",
+        "user-reported"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T00:35:00Z"
     }
   ]
 }

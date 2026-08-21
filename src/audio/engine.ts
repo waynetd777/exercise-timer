@@ -13,7 +13,11 @@ import type { Note, ToneSpec } from './tones'
 class AudioEngine {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
-  /** Scheduled oscillators, mapped to the audio time they start at. */
+  /**
+   * Scheduled oscillators, mapped to the time their CUE began — not their own
+   * start time. A cue can be several notes spread over seconds, and once it has
+   * started the whole figure has to be allowed to finish.
+   */
   private pending = new Map<OscillatorNode, number>()
 
   /**
@@ -45,20 +49,28 @@ class AudioEngine {
   }
 
   /**
-   * Drops cues that are queued but have NOT started yet. Used on pause, seek,
-   * and every re-arm of the rolling window.
+   * Drops cues that have NOT begun. Used on pause, seek, and every re-arm of the
+   * rolling window.
    *
-   * Notes already sounding are deliberately left to ring out: cutting an
-   * oscillator mid-ring is itself an audible click, and since the window
-   * re-arms every ten seconds, stopping everything meant any cue unlucky enough
-   * to overlap a re-arm was truncated — which is exactly what turned the bell
-   * into a click.
+   * Judged per CUE, not per note. A cue already sounding is left alone entirely,
+   * including notes of it still to come — the completion figure is seven notes
+   * over three seconds, and the moment it starts the workout also completes,
+   * which re-runs the scheduler and cancelled every note but the first. Cutting
+   * an oscillator mid-ring is an audible click, so the earlier per-note version
+   * of this fixed the bell and left the fanfare broken in the same way.
    */
   cancelPending(): void {
     if (!this.ctx) return
     const now = this.ctx.currentTime
-    for (const [osc, startAt] of this.pending) {
-      if (startAt <= now + 0.01) continue
+    for (const [osc, cueStartedAt] of this.pending) {
+      /*
+       * A small grace, not zero. The completion cue fires at the same instant
+       * the workout completes and the scheduler re-runs, and the timer's tick
+       * and the audio clock can disagree by a few milliseconds — without slack
+       * the fanfare is cancelled a hair before it starts. Double-playing is
+       * prevented by the scheduler deduplicating instead.
+       */
+      if (cueStartedAt <= now + 0.15) continue
       try {
         osc.stop(now)
       } catch {
@@ -77,14 +89,19 @@ class AudioEngine {
     // A cue whose moment has already passed is dropped rather than played late.
     if (at < ctx.currentTime - 0.05) return
 
+    // Every note of this cue is tagged with the CUE's moment, so cancelling
+    // later cannot take the tail off a figure that has already begun.
+    const cueAt = Math.max(at, ctx.currentTime)
+
     for (const note of spec.notes) {
       const noteAt = Math.max(at + note.atMs / 1000, ctx.currentTime)
-      this.play(ctx, master, noteAt, note, note.freq, note.gain, note.durationMs)
+      this.play(ctx, master, noteAt, cueAt, note, note.freq, note.gain, note.durationMs)
       if (note.partial) {
         this.play(
           ctx,
           master,
           noteAt,
+          cueAt,
           note,
           note.freq * note.partial.ratio,
           note.partial.gain,
@@ -105,6 +122,7 @@ class AudioEngine {
     ctx: AudioContext,
     master: GainNode,
     at: number,
+    cueAt: number,
     note: Note,
     freq: number,
     gain: number,
@@ -132,7 +150,7 @@ class AudioEngine {
     osc.start(at)
     osc.stop(at + total + 0.02)
 
-    this.pending.set(osc, at)
+    this.pending.set(osc, cueAt)
     osc.addEventListener('ended', () => {
       this.pending.delete(osc)
       env.disconnect()

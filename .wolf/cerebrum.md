@@ -172,6 +172,10 @@
 - [2026-08-21] **The repo is documented: root `README.md` + one per source folder** (`engine`, `state`, `audio`, `editor`, `media`, `storage`, `routines`, `ui`). They record DECISIONS and traps rather than describing code. **Keep them current when a decision changes** — the `ui` one in particular is the canonical list of CSS traps this project has already paid for.
 - [2026-08-21] **`.codex/` was removed on request** (OpenWolf's Codex hooks, config and prompts). `AGENTS.md` was deliberately kept — it is the cross-agent convention file, not Codex-specific.
 
+- [2026-08-21] **Cue cancellation is per CUE, not per note.** Every oscillator is tagged with the moment its cue began; a cue that has begun is spared entirely, remaining notes included. The completion figure is 7 notes over 3.45s and fires at the same instant the workout completes, which re-runs the scheduler — per-note sparing fixed the bell and left the fanfare truncated in exactly the same way (`bug-021`). There is a 0.15s grace for tick-vs-audio-clock skew, and the scheduler DEDUPLICATES by `kind@atMs` so a spared cue cannot be re-queued and played twice. Do not remove the dedup without removing the grace.
+- [2026-08-21] **The rolling window is audited end to end in `schedule.test.ts`**: every cue of all three real routines is scheduled exactly once and in order, nothing is missed even when arming at the full lookahead edge (a throttled tab), and arming every second never double-schedules. Also asserted: every cue kind has a tone, no two cues share a millisecond, and the minimum gap between cues in the real routines is >= 1000ms. Re-run this after any change to cues or scheduling.
+- [2026-08-21] **Known acoustic limit, not a bug:** the phase-change bell rings 2050ms. Every step in the real routines is >= 10s so it always finishes first, but a step shorter than ~2s authored in the editor would have the bell still ringing under the next cue. Muddy, not broken.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
