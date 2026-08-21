@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { newRoutineBlocks } from '../editor/blocks'
 import { collectImages } from '../editor/images'
 import { IMAGE_CATALOGUE } from '../routines/imageCatalogue'
 import { SEED_ROUTINES } from '../routines/samples'
+import { decodeRoutine, routineParam } from '../storage/shareLink'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { LibraryScreen } from './LibraryScreen'
@@ -42,6 +43,30 @@ export function App() {
    * identity would recompile the timeline mid-workout.
    */
   const [view, setView] = useState<View>({ screen: 'library' })
+
+  /**
+   * A shared routine arriving in the URL fragment. Imported once, then the
+   * fragment is cleared so a reload does not add it again — and guarded by a ref
+   * because the library finishes loading after this effect first runs.
+   */
+  const consumedShare = useRef(false)
+  useEffect(() => {
+    if (consumedShare.current || library.loading) return
+    const param = routineParam(location.hash)
+    if (!param) return
+    consumedShare.current = true
+
+    void (async () => {
+      try {
+        const workout = await decodeRoutine(param, Date.now(), crypto.randomUUID())
+        const saved = await library.add(workout)
+        history.replaceState(null, '', `${location.pathname}${location.search}`)
+        setView({ screen: 'edit', workout: saved })
+      } catch {
+        history.replaceState(null, '', `${location.pathname}${location.search}`)
+      }
+    })()
+  }, [library])
 
   /** Every image already in use, so the editor can offer them for reuse. */
   const knownImages = useMemo(

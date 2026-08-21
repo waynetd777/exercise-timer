@@ -150,6 +150,12 @@
   - `moveStep` replaces `moveBy` in the editor: a step moves into an adjacent round (first child going down, last going up), swaps with an adjacent step, or steps out of a round at its edge. Rounds only ever swap — nesting stays refused. Up/down now disable only at `depth === 0`, since a nested step at an edge can always move out. An emptied round is left in place on purpose. **11 tests**, including reversibility and the fact that moving a step into a ×3 round triples its contribution.
   - `src/routines/imageCatalogue.ts` — the **29 URLs from the `Fitness. Workouts` vault note**, in its original order and grouping, all verified to resolve. Labels are derived by `labelFromUrl()` so there is no parallel list to maintain; a catalogue image keeps its filename label even where a routine uses it under a different step name. The picker now offers all 29 whether or not a routine uses them.
   - **214 tests green.**
+- **Export, import and share links** (first of three requested in parallel)
+  - `src/storage/bundle.ts` — versioned export format (`davshack-timer-bundle` v1) with a **`media` map declared but empty**, so the phase-4 media work fills it in without a format change. Validation is forgiving about missing metadata and strict about what would crash the app; one corrupt routine no longer loses the rest of the file. **16 tests.**
+  - `src/storage/shareLink.ts` — a routine gzipped and base64url'd into a URL fragment. An 86-step routine compresses to **under 4000 characters**. Local blobs are dropped (a link cannot carry them) and counted; the recipient gets a fresh id and none of the sender's run history. **13 tests.**
+  - Library: **Export** downloads the whole library; each row has a **Share** button that copies a link. Import now accepts both `.tabata` files and exported bundles, distinguished by the bundle's own marker rather than by guessing.
+  - Opening a share link imports the routine, clears the fragment so a reload does not duplicate it, and drops you into the editor.
+  - **243 tests green.**
 
 ---
 
