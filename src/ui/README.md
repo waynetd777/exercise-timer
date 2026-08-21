@@ -65,6 +65,10 @@ Which layout appears is `listMode()` in the engine, not a condition scattered
 through the component. Three clauses, and one is easy to get backwards:
 
 - A step outside a list-mode section is a countdown, as it always was.
+- **Space follows the big button.** On a self-paced step that is Next, not
+  pause: it is pressed once per set, whereas pausing there is the rare thing and
+  keeps `k` and the on-screen button. While paused, space resumes instead —
+  you asked to stop, so the next press should undo that rather than skip a step.
 - **A timed step is a countdown wherever it falls.** You are not reading a list
   while holding a wall sit — you are watching the clock. A rest between rounds, a
   hold at the end of a rung and one in the middle of a burnout are all this case.

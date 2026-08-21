@@ -45,6 +45,7 @@ function NextSlab({ onNext, status }: { onNext: () => void; status: RunStatus })
       className="chip chip--primary sheet__next"
       onClick={onNext}
       disabled={status !== 'running' && status !== 'paused'}
+      title="Next (space)"
     >
       Next
     </button>
@@ -239,6 +240,13 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const rows = entry ? groupEntries(routine, entry) : []
   const showList = entry !== null && listMode(routine, entry)
 
+  /*
+   * The Next slab is on screen for every self-paced step, in either layout —
+   * `listMode` already requires one. When it is there it is the primary action,
+   * so the primary key belongs to it.
+   */
+  const slab = entry?.selfPaced === true
+
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''
   /*
@@ -290,7 +298,17 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     }
 
     switch (event.key) {
+      /*
+       * Space follows the big button. On a self-paced step that is Next, which
+       * is what you press once per set — pausing there is the rare thing, and it
+       * keeps `k` and the on-screen button.
+       *
+       * While paused, space resumes rather than advancing: you asked to stop,
+       * and the next press should undo that rather than skip a step.
+       */
       case ' ':
+        if (slab && status === 'running') return act(timer.next)
+        return act(status === 'running' ? timer.pause : primaryAction)
       case 'k':
         return act(status === 'running' ? timer.pause : primaryAction)
       case 'ArrowRight':
@@ -511,7 +529,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           className="btn btn--primary"
           onClick={withAudio(status === 'running' ? timer.pause : primaryAction)}
           aria-label={primaryLabel}
-          title={`${primaryLabel} (space)`}
+          // Space belongs to the slab while one is on screen; k always pauses.
+          title={`${primaryLabel} (${slab && status === 'running' ? 'k' : 'space'})`}
         >
           {status === 'running' ? <PauseIcon /> : <PlayIcon />}
         </button>
