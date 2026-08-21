@@ -297,6 +297,27 @@ export function updateSegment(
  * patching a key to `undefined` — and deleting the key is what is actually
  * meant, so the property is absent rather than present-and-undefined.
  */
+/**
+ * Removes a step's note or alternative.
+ *
+ * A separate operation for the same reason as `clearMedia`: with
+ * `exactOptionalPropertyTypes` you cannot patch a key to `undefined`, and an
+ * empty string is not the same as absent — one renders an empty line under the
+ * step, the other renders nothing.
+ */
+export function clearText(
+  blocks: readonly Block[],
+  path: Path,
+  field: 'note' | 'alternative',
+): Block[] {
+  return mapAt(blocks, path, (block) => {
+    if (block.kind !== 'segment') return block
+    const next = { ...block }
+    delete next[field]
+    return next
+  })
+}
+
 export function clearMedia(blocks: readonly Block[], path: Path): Block[] {
   return mapAt(blocks, path, (block) => {
     if (block.kind !== 'segment') return block

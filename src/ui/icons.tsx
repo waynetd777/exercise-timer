@@ -296,3 +296,13 @@ export function PasteIcon() {
     </Svg>
   )
 }
+
+/** A note: lines on a page. */
+export function NoteIcon() {
+  return (
+    <Svg>
+      <path d="M6 4.5h12v15H6z" {...STROKE} />
+      <path d="M9 9h6M9 12.5h6M9 16h3.5" {...STROKE} />
+    </Svg>
+  )
+}

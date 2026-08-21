@@ -4,6 +4,7 @@ import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import {
   appendTo,
   clearMedia,
+  clearText,
   duplicateAt,
   flatten,
   insertAfter,
@@ -37,10 +38,11 @@ import {
   BackIcon,
   CheckIcon,
   CloseIcon,
-  ImageIcon,
-  ImportIcon,
   CopyIcon,
   DownIcon,
+  ImageIcon,
+  ImportIcon,
+  NoteIcon,
   PlusIcon,
   RedoIcon,
   RepsIcon,
@@ -288,6 +290,7 @@ function SegmentRow({
   onRemove,
   onPatch,
   onTiming,
+  onClearText,
   onClearImage,
   onWrap,
   onPreview,
@@ -298,6 +301,7 @@ function SegmentRow({
   segment: Segment
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onTiming: (path: Path, timing: Timing) => void
+  onClearText: (path: Path, field: 'note' | 'alternative') => void
   onClearImage: (path: Path) => void
   onWrap: (path: Path) => void
   onPreview: (src: string, alt: string) => void
@@ -329,6 +333,27 @@ function SegmentRow({
    * Same condition as the engine's: last child of a group, and the rest role.
    */
   const betweenRepsOnly = last && depth > 0 && segment.role === 'rest'
+
+  /*
+   * The how-to and the swap, on a line of their own BELOW the step.
+   *
+   * Shown only when the step has one, plus a button to add one, because a
+   * routine is forty steps long and giving every row two more inputs would bury
+   * the thing you came to change. A pasted step usually has a note — the
+   * instruction lifted out of its name — and losing it silently on the first
+   * edit is what this exists to prevent.
+   *
+   * Emptying a field DELETES it rather than storing "", so the line disappears
+   * again instead of leaving a blank one behind.
+   */
+  const [extras, setExtras] = useState(false)
+  const hasExtras = segment.note !== undefined || segment.alternative !== undefined
+  const showExtras = hasExtras || extras
+
+  const commitText = (field: 'note' | 'alternative', value: string) => {
+    if (value.trim() === '') onClearText(path, field)
+    else onPatch(path, { [field]: value })
+  }
 
   return (
     <li
@@ -386,6 +411,20 @@ function SegmentRow({
           </button>
           <button
             className="btn btn--ghost"
+            onClick={() => setExtras((open) => !open)}
+            aria-pressed={showExtras}
+            disabled={hasExtras}
+            aria-label="Add a note or an alternative"
+            title={
+              hasExtras
+                ? 'Note and alternative are shown below — empty them to remove'
+                : 'Add a note or an alternative'
+            }
+          >
+            <NoteIcon />
+          </button>
+          <button
+            className="btn btn--ghost"
             onClick={() => onMove(path, -1)}
             disabled={first && depth === 0}
             aria-label="Move up"
@@ -429,6 +468,31 @@ function SegmentRow({
           </button>
         </div>
       </div>
+
+      {showExtras && (
+        <div className="erow__extras">
+          <label className="erow__extra">
+            <span className="label label--sm">Note</span>
+            <input
+              className="efield"
+              defaultValue={segment.note ?? ''}
+              placeholder="How to do it"
+              aria-label="Note"
+              onBlur={(event) => commitText('note', event.target.value)}
+            />
+          </label>
+          <label className="erow__extra">
+            <span className="label label--sm">Or</span>
+            <input
+              className="efield"
+              defaultValue={segment.alternative ?? ''}
+              placeholder="Lower-impact swap"
+              aria-label="Alternative"
+              onBlur={(event) => commitText('alternative', event.target.value)}
+            />
+          </label>
+        </div>
+      )}
 
       {/* A div, not a label: a label wrapping the preview button would forward
           the button's click to the input. The input names itself instead. */}
@@ -1066,6 +1130,7 @@ export function EditorScreen({
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
                   onTiming={patchTiming}
+                  onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
                   onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                   onPreview={(src, alt) => setImagePreview({ src, alt })}

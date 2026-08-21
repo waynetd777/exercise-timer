@@ -579,3 +579,38 @@
 .erow[data-depth='2'] {
   margin-left: calc(2 * var(--step-5));
 }
+
+/*
+ * A step's note and its alternative, on a line below the step.
+ *
+ * Only rendered when the step has one or the button asks for it: a routine runs
+ * to forty steps, and two more inputs on every row would bury the field anyone
+ * actually came to change.
+ *
+ * They wrap rather than shrink, because "start standing, step out to one side,
+ * sink your hips into a squat" needs the width when it is there.
+ */
+.erow__extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2) var(--step-3);
+}
+
+.erow__extra {
+  flex: 1 1 14rem;
+  display: flex;
+  align-items: center;
+  gap: var(--step-2);
+  min-width: 0;
+}
+
+.erow__extra .label {
+  flex: none;
+  min-width: 2.5rem;
+  color: var(--bone-faint);
+}
+
+.erow__extra .efield {
+  flex: 1 1 auto;
+  min-width: 0;
+}

@@ -1,0 +1,486 @@
+{
+  "name": "Strength Training",
+  "colour": "purple",
+  "blocks": [
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxu-1",
+      "name": "Warm-up",
+      "display": "timer",
+      "children": [
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxv-2",
+          "name": "March → Jog on the spot",
+          "role": "work",
+          "durationMs": 40000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxv-3",
+          "name": "Jumping Jacks (floor or trampoline)",
+          "role": "work",
+          "durationMs": 40000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-4",
+          "name": "Butt Kicks",
+          "role": "work",
+          "durationMs": 40000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-5",
+          "name": "Side-to-Side Squats with a Reach",
+          "role": "work",
+          "durationMs": 40000,
+          "note": "start standing, step out to one side, sink your hips into a squat, and reach your arms across your body for an added stretch"
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-6",
+          "name": "Standing Knee Hugs (alternate legs)",
+          "role": "work",
+          "durationMs": 40000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-7",
+          "name": "Toy Soldier Kicks",
+          "role": "work",
+          "durationMs": 40000,
+          "note": "straight-leg kicks with opposite hand reach"
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-8",
+          "name": "World’s Greatest Stretch (alternate sides)",
+          "role": "work",
+          "durationMs": 30000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-9",
+          "name": "Inchworms",
+          "role": "work",
+          "durationMs": 30000,
+          "note": "walk hands out to a plank and back"
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-10",
+          "name": "Arm Circles",
+          "role": "work",
+          "durationMs": 30000,
+          "note": "15 sec forward, 15 sec backward"
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-11",
+          "name": "Torso Rotations with arms extended",
+          "role": "work",
+          "durationMs": 30000
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-12",
+      "name": "General Body",
+      "display": "list",
+      "children": [
+        {
+          "kind": "ladder",
+          "id": "lad-mt32kyxw-13",
+          "counts": [
+            2,
+            4,
+            6,
+            8,
+            10,
+            8,
+            6,
+            4,
+            2
+          ],
+          "children": [
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-14",
+              "name": "Squat + Shoulder Press",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-15",
+              "name": "Speed Skaters",
+              "role": "work",
+              "reps": {
+                "kind": "rung",
+                "perSide": true
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-16",
+              "name": "Push-ups (knees or toes)",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-17",
+              "name": "Mountain climbers",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-18",
+              "name": "V-Ups",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            }
+          ]
+        }
+      ],
+      "note": "Complete one exercise before moving to the next."
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-19",
+      "name": "Arms & Shoulders",
+      "display": "list",
+      "children": [
+        {
+          "kind": "repeat",
+          "id": "rep-mt32kyxw-20",
+          "times": 4,
+          "children": [
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-21",
+              "name": "Hammer Curls",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 12
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-22",
+              "name": "Shoulder Press",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 10
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-23",
+              "name": "Lateral Raises",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 8
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-24",
+              "name": "Bent-over Rows",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 6
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-25",
+              "name": "Front Punches",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 20
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-26",
+              "name": "Rest",
+              "role": "rest",
+              "durationMs": 45000
+            }
+          ],
+          "label": "Round"
+        }
+      ],
+      "note": "No rest between exercises. Rest 45 seconds after each round."
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-27",
+      "name": "Legs",
+      "display": "list",
+      "children": [
+        {
+          "kind": "ladder",
+          "id": "lad-mt32kyxw-28",
+          "counts": [
+            15,
+            12,
+            9,
+            6,
+            3,
+            6,
+            9,
+            12,
+            15
+          ],
+          "children": [
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-29",
+              "name": "Sumo Squats",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-30",
+              "name": "Walking Lunges",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 5,
+                "perSide": true
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-31",
+              "name": "Glute Kickbacks with resistance band",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 10,
+                "perSide": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-32",
+      "name": "Core",
+      "display": "list",
+      "children": [
+        {
+          "kind": "repeat",
+          "id": "rep-mt32kyxw-33",
+          "times": 5,
+          "children": [
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-34",
+              "name": "Bicycle Crunches",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 12
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-35",
+              "name": "Dead Bugs",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 10,
+                "perSide": true
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-36",
+              "name": "Russian Twists",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 12,
+                "perSide": true
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-37",
+              "name": "Reverse Crunches",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 10
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-38",
+              "name": "Plank",
+              "role": "work",
+              "durationMs": 30000
+            }
+          ],
+          "label": "Round"
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-39",
+      "name": "After Round 5",
+      "display": "list",
+      "children": [
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-40",
+          "name": "Flutter Kicks",
+          "role": "work",
+          "reps": {
+            "kind": "fixed",
+            "count": 20
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-41",
+          "name": "Hollow Hold",
+          "role": "work",
+          "durationMs": 20000
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-42",
+      "name": "Legs Finisher – Burnout Ladder",
+      "display": "list",
+      "children": [
+        {
+          "kind": "ladder",
+          "id": "lad-mt32kyxw-43",
+          "counts": [
+            5,
+            10,
+            15,
+            20,
+            15,
+            10,
+            5
+          ],
+          "children": [
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-44",
+              "name": "Squat Pulses",
+              "role": "work",
+              "reps": {
+                "kind": "rung"
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-45",
+              "name": "Alternating Jump Lunges",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 10
+              },
+              "alternative": "Reverse Lunges for low impact"
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-46",
+              "name": "Calf Raises",
+              "role": "work",
+              "reps": {
+                "kind": "fixed",
+                "count": 15
+              }
+            },
+            {
+              "kind": "segment",
+              "id": "seg-mt32kyxw-47",
+              "name": "Wall Sit",
+              "role": "work",
+              "durationMs": 10000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "section",
+      "id": "sec-mt32kyxw-48",
+      "name": "Final Burnout",
+      "display": "list",
+      "children": [
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-49",
+          "name": "Sumo Squat Pulses",
+          "role": "work",
+          "reps": {
+            "kind": "fixed",
+            "count": 20
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-50",
+          "name": "Alternating Curtsy Lunges",
+          "role": "work",
+          "reps": {
+            "kind": "fixed",
+            "count": 10,
+            "perSide": true
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-51",
+          "name": "Wall Sit",
+          "role": "work",
+          "durationMs": 30000
+        },
+        {
+          "kind": "segment",
+          "id": "seg-mt32kyxw-52",
+          "name": "Squat Pulses",
+          "role": "work",
+          "reps": {
+            "kind": "fixed",
+            "count": 30
+          }
+        }
+      ]
+    }
+  ]
+}
