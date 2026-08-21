@@ -169,6 +169,9 @@
 - [2026-08-21] **Run-screen keyboard control:** space or `k` = start/pause/resume, arrows = skip, `m` = mute. The handler lives in a ref with the listener registered ONCE — an effect with no dependency array re-attaches every render, and listing the dependencies re-attaches every tick. Keys are ignored when an input, button or select is focused.
 - [2026-08-21] **The spoken "ten seconds left" cue is deliberately NOT part of the scheduled cue system.** Speech cannot be queued against the audio clock, so it fires from the timer tick and may land slightly late — acceptable for information, not for a beat. It lives in `src/audio/speech.ts` + `useSpokenCues.ts` so nobody mistakes it for a scheduled cue; keyed on step index so a pause or seek cannot repeat it, and only on steps of 20s or more.
 
+- [2026-08-21] **The repo is documented: root `README.md` + one per source folder** (`engine`, `state`, `audio`, `editor`, `media`, `storage`, `routines`, `ui`). They record DECISIONS and traps rather than describing code. **Keep them current when a decision changes** — the `ui` one in particular is the canonical list of CSS traps this project has already paid for.
+- [2026-08-21] **`.codex/` was removed on request** (OpenWolf's Codex hooks, config and prompts). `AGENTS.md` was deliberately kept — it is the cross-agent convention file, not Codex-specific.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
