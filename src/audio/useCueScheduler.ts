@@ -1,15 +1,10 @@
-import { useEffect, useMemo } from 'react'
-import { cues, cuesBetween } from '../engine'
+import { useEffect, useMemo, useRef } from 'react'
+import { cues } from '../engine'
 import type { Timeline } from '../engine'
+import { cueKey, dueCues, REARM_MS } from './schedule'
 import type { RunStatus } from '../state/useTimer'
 import { audio } from './engine'
 import { audioTimeFor, toneFor } from './tones'
-
-/** How far ahead cues are queued on the audio clock. */
-const LOOKAHEAD_MS = 30_000
-
-/** Re-arm well inside the window so a throttled timer cannot open a gap. */
-const REARM_MS = LOOKAHEAD_MS / 3
 
 type Options = {
   timeline: Timeline
@@ -37,22 +32,40 @@ export function useCueScheduler({
 }: Options): void {
   const allCues = useMemo(() => cues(timeline), [timeline])
 
+  /**
+   * Cues already queued, so a re-arm adds only what is new.
+   *
+   * Necessary because cancellation spares a cue that has begun — or is about to
+   * — and without deduplication that same cue would be scheduled again by the
+   * arm that follows, and play twice.
+   */
+  const scheduled = useRef(new Set<string>())
+
+  // A clock jump abandons everything queued from the old position.
+  useEffect(() => {
+    audio.cancelPending()
+    scheduled.current.clear()
+  }, [generation])
+
   useEffect(() => {
     if (status !== 'running' || muted) {
       audio.cancelPending()
+      scheduled.current.clear()
       return
     }
 
     const arm = () => {
-      audio.cancelPending()
       if (!audio.ready) return
 
       const elapsed = readElapsed()
       const audioNow = audio.now
 
-      for (const cue of cuesBetween(allCues, elapsed, elapsed + LOOKAHEAD_MS)) {
+      for (const cue of dueCues(allCues, elapsed, scheduled.current)) {
         const spec = toneFor(cue.kind)
-        if (spec) audio.scheduleTone(audioTimeFor(cue.atMs, elapsed, audioNow), spec)
+        if (!spec) continue
+
+        audio.scheduleTone(audioTimeFor(cue.atMs, elapsed, audioNow), spec)
+        scheduled.current.add(cueKey(cue))
       }
     }
 
@@ -72,7 +85,6 @@ export function useCueScheduler({
     return () => {
       window.clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisible)
-      audio.cancelPending()
     }
-  }, [status, muted, allCues, readElapsed, generation])
+  }, [status, muted, allCues, readElapsed])
 }

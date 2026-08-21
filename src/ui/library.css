@@ -95,9 +95,8 @@
   color: var(--bone-faint);
 }
 
-.library__sorts {
+.library__sort {
   display: flex;
-  gap: var(--step-2);
 }
 
 /*
