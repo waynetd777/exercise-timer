@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { CloseIcon } from './icons'
 
 export type HelpSection = {
@@ -14,12 +14,19 @@ export type HelpSection = {
  * you memorise the answer before you can act on it. This slides in beside the
  * screen, and closing it puts you back exactly where you were.
  *
- * Sections are native `<details>`. A hand-rolled accordion would need state, a
- * keyboard implementation and an aria contract, and would still be worse than
- * the element browsers already ship — which finds text inside a closed section
- * when the page is searched. The first section starts open so the tray does not
- * read as a list of doors; because that `open` never changes, React leaves the
- * DOM alone afterwards and the toggling stays the browser's business.
+ * Sections are native `<details>`, and only one is open at a time — they share a
+ * `name`, which is the platform's own exclusive accordion. That is the whole
+ * implementation: no state, no keyboard handling, no aria contract, and in-page
+ * search still opens a closed section to show a match. A hand-rolled accordion
+ * would be more code and less correct.
+ *
+ * The `name` comes from `useId`, so two trays in one document could never close
+ * each other's sections.
+ *
+ * The first section starts open so the tray does not read as a list of doors.
+ * Because that `open` prop never changes value, React leaves the attribute alone
+ * after mount — which is what lets the browser close it when another section is
+ * opened, instead of React insisting it stay open.
  *
  * A modal `<dialog>` for the same reasons `NoticeDialog` is one: Escape, focus
  * trapping and the backdrop come for free and behave natively on every platform.
@@ -34,6 +41,7 @@ export function HelpTray({
   onClose: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const group = useId()
 
   useEffect(() => {
     if (!dialog.current?.open) dialog.current?.showModal()
@@ -65,7 +73,12 @@ export function HelpTray({
 
       <div className="tray__body">
         {sections.map((section, index) => (
-          <details key={section.heading} className="tray__section" open={index === 0}>
+          <details
+            key={section.heading}
+            className="tray__section"
+            name={group}
+            open={index === 0}
+          >
             <summary className="tray__summary">{section.heading}</summary>
             <ul className="tray__points">
               {section.points.map((point) => (
