@@ -37,7 +37,7 @@ going, from across a gym, with the phone propped against a rack.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 441 tests, no browser needed
+npm test           # 451 tests, no browser needed
 npm run typecheck
 npm run build
 ```
@@ -114,7 +114,7 @@ IndexedDB; images live beside them once pinned. Export, share links and the
 
 ## Testing
 
-441 tests, all of which run in Node in under a second — there is no browser in
+451 tests, all of which run in Node in under a second — there is no browser in
 the test setup and none is needed, because the parts worth testing do not touch
 the DOM. IndexedDB access, canvas encoding and Web Audio are deliberately thin
 wrappers around tested pure logic rather than being mocked.

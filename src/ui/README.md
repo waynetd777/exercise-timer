@@ -100,6 +100,10 @@ Each of these cost a real bug. They are recorded because they recur.
   against the column. The countdown and the step name each fitted the column on
   their own and together did not, so a two-line name pushed the step counter
   behind the media panel. `--name-lines` is what couples them.
+- **An empty grid track still costs its gap.** Declare only the tracks you always
+  have — an optional row or column that is sometimes absent leaves a gap behind
+  it, which reads as too much padding at that edge. Where a column is genuinely
+  optional, space the columns with padding on the items instead of `column-gap`.
 - **A bare `1fr` has a min-content floor.** A track that must be allowed to
   shrink below its content is `minmax(0, 1fr)`, or the grid grows past its own
   parent instead of giving way.
