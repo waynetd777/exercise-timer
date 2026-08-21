@@ -1,12 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { DownIcon } from './icons'
+import { CheckIcon, DownIcon } from './icons'
 
 export type MenuItem = {
   label: string
   icon?: ReactNode
   disabled?: boolean
   title?: string
+  /** Marks the active choice, for a menu that picks rather than acts. */
+  selected?: boolean
   onSelect: () => void
 }
 
@@ -116,6 +118,8 @@ export function Menu({
               className="menu__item"
               disabled={item.disabled ?? false}
               title={item.title ?? item.label}
+              aria-checked={item.selected}
+              data-selected={item.selected ?? false}
               onClick={() => {
                 setOpen(false)
                 item.onSelect()
@@ -123,6 +127,11 @@ export function Menu({
             >
               {item.icon}
               {item.label}
+              {item.selected && (
+                <span className="menu__tick" aria-hidden="true">
+                  <CheckIcon />
+                </span>
+              )}
             </button>
           ))}
         </div>
