@@ -17,8 +17,8 @@
   background: var(--ink-900);
   background: radial-gradient(
     140% 90% at 50% -10%,
-    color-mix(in oklab, var(--role-rest) 14%, var(--ink-900)),
-    var(--ink-900) 72%
+    color-mix(in oklab, var(--role-rest) 19%, var(--ink-900)),
+    var(--ink-900) 78%
   );
 }
 
@@ -253,8 +253,9 @@
 
 /*
  * A routine's own colour, as a wash that fades out across the row rather than a
- * flat fill: at 18% even the brightest tint stays a hint, and the gradient keeps
- * the right-hand side neutral so the meta text and buttons are unaffected.
+ * flat fill: at 24% even the brightest tint stays a wash rather than a fill, and
+ * the gradient keeps the right-hand side neutral so the meta text and buttons are
+ * unaffected.
  *
  * Excluded while confirming a delete on purpose, and by :not() rather than by
  * source order, so the red danger state cannot lose to a tint no matter where
@@ -264,9 +265,9 @@
   background:
     linear-gradient(
       100deg,
-      color-mix(in oklab, var(--tint) 18%, var(--ink-800)) 0%,
-      color-mix(in oklab, var(--tint) 7%, var(--ink-800)) 46%,
-      var(--ink-800) 78%
+      color-mix(in oklab, var(--tint) 24%, var(--ink-800)) 0%,
+      color-mix(in oklab, var(--tint) 10%, var(--ink-800)) 46%,
+      var(--ink-800) 82%
     );
   border-color: color-mix(in oklab, var(--tint) 24%, transparent);
 }
@@ -281,9 +282,9 @@
   background:
     linear-gradient(
       100deg,
-      color-mix(in oklab, var(--tint) 22%, var(--ink-700)) 0%,
-      color-mix(in oklab, var(--tint) 9%, var(--ink-700)) 46%,
-      var(--ink-700) 78%
+      color-mix(in oklab, var(--tint) 29%, var(--ink-700)) 0%,
+      color-mix(in oklab, var(--tint) 12%, var(--ink-700)) 46%,
+      var(--ink-700) 82%
     );
   border-color: var(--bone-faint);
 }
@@ -470,4 +471,10 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--step-3);
+}
+
+/* Utility left, decisions right: the template is a way in rather than a choice
+   about this routine, and it must not sit where Add to library is reached for. */
+.paste__template {
+  margin-right: auto;
 }

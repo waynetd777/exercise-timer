@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
 import type { ParsedRoutine } from '../routines/pasteFormat'
+import { PASTE_TEMPLATE } from '../routines/pasteTemplate'
 import { isoDate } from './format'
-import { CloseIcon, PlusIcon } from './icons'
+import { CopyIcon, CloseIcon, PlusIcon } from './icons'
+import { NoticeDialog } from './NoticeDialog'
 
 /**
  * What a pasted routine is called unless it is renamed.
@@ -40,10 +42,37 @@ export function PasteDialog({
   // Read once, on open: a dialog left open over midnight should not rename itself.
   const [fallback] = useState(() => defaultRoutineName(new Date()))
   const [name, setName] = useState(fallback)
+  /** The acknowledgement after copying the template, or null. */
+  const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
     dialog.current?.showModal()
   }, [])
+
+  /**
+   * Hands over an example of everything the parser understands.
+   *
+   * To the clipboard rather than into the box, so it can be edited where the
+   * routine actually lives — a phone's Notes, or the reply to the email it
+   * arrived in — and so it cannot overwrite something already typed here.
+   *
+   * A clipboard write can be refused: an insecure context, or a browser wanting
+   * a fresher gesture. The template is more use in the box than in an apology, so
+   * that is the fallback — but only when there is nothing there to lose.
+   */
+  const copyTemplate = async () => {
+    try {
+      await navigator.clipboard.writeText(PASTE_TEMPLATE)
+      setCopied('Template copied to the clipboard. Paste it here, or edit it wherever you keep your routines.')
+    } catch {
+      if (text.trim() === '') {
+        setText(PASTE_TEMPLATE)
+        setCopied('The clipboard was not available, so the template is in the box instead.')
+      } else {
+        setCopied('The clipboard was not available. Empty the box and try again to have the template put there instead.')
+      }
+    }
+  }
 
   // Parsing is pure and fast, so the preview updates as you type rather than
   // behind a button: you find out it did not understand line 45 immediately.
@@ -51,7 +80,8 @@ export function PasteDialog({
   const sections = parsed?.blocks.filter((block) => block.kind === 'section').length ?? 0
 
   return (
-    <dialog ref={dialog} className="paste" onCancel={onCancel} onClose={onCancel}>
+    <>
+      <dialog ref={dialog} className="paste" onCancel={onCancel} onClose={onCancel}>
       <h2 className="paste__title">Paste a routine</h2>
 
       <label className="paste__field">
@@ -96,6 +126,18 @@ export function PasteDialog({
       )}
 
       <div className="paste__actions">
+        {/* First, and not primary: it is the way in for someone who has nothing
+            to paste yet, and a distraction for everyone else. */}
+        <button
+          type="button"
+          className="chip chip--action paste__template"
+          onClick={() => void copyTemplate()}
+          title="An example using everything this box understands"
+        >
+          <CopyIcon />
+          Copy template
+        </button>
+
         <button type="button" className="chip" onClick={onCancel}>
           <CloseIcon />
           Cancel
@@ -112,6 +154,17 @@ export function PasteDialog({
           Add to library
         </button>
       </div>
-    </dialog>
+      </dialog>
+
+      {/*
+        A sibling of the paste dialog rather than a child: `close` reaches
+        React's handlers on the way up, so a notice nested inside would fire the
+        paste dialog's own onClose and cancel everything on dismissal. Opened
+        second, so it sits above it in the top layer.
+      */}
+      {copied !== null && (
+        <NoticeDialog text={copied} busy={false} onClose={() => setCopied(null)} />
+      )}
+    </>
   )
 }

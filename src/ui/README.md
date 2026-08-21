@@ -157,6 +157,37 @@ to recover. The values are chosen so the three separate by **lightness** as well
 as hue, and so each clears 4.5:1 against the dark text of the primary button —
 re-check that ratio if any role colour changes.
 
+## Help is a tray, and it is data
+
+Two screens carry a help button: the library, beside the Routines menu, and the
+editor, to the right of Save. Both open the same `HelpTray` — a modal `<dialog>`
+pinned to the right edge, with native `<details>` sections of bullet points.
+
+Three decisions worth keeping:
+
+- **A tray, not a page.** Help that replaces what you were looking at makes you
+  memorise the answer before you can act on it. Closing this puts you back exactly
+  where you were.
+- **`<details>`, not an accordion.** A hand-rolled one needs state, a keyboard
+  implementation and an aria contract, and would still lose to the element the
+  browser ships — which finds text inside a *closed* section when the page is
+  searched. The first section is open, and because that never changes React leaves
+  the DOM alone and toggling stays the browser's business.
+- **The text lives in `help.ts`**, as data. A point can be added without touching
+  a component, and the two trays cannot drift into two different voices. Every
+  line has to describe something the app actually does: a help tray that
+  overstates is worse than none, because it is believed.
+
+The paste dialog gets its help differently — **Copy template** hands over a
+routine written in every part of the grammar (`routines/pasteTemplate.ts`), which
+is the honest way to describe a parser that reads a human's handout. It goes to
+the clipboard rather than into the box, so it can be edited where the routine
+actually lives and cannot overwrite something already typed; if the clipboard is
+refused it lands in the box instead, but only when there is nothing there to lose.
+The acknowledgement is a `NoticeDialog` rendered as a SIBLING of the paste dialog,
+never a child: `close` reaches React's handlers on the way up, so a nested notice
+would cancel the whole paste when it was dismissed.
+
 ## Files
 
 Each screen owns its stylesheet and imports it itself; `theme.css` is imported
@@ -169,7 +200,8 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, reps, images, undo, the lightbox and image picker |
 | `SoundsScreen.tsx` | The cue bench. **Dev only** — `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
-| `PasteDialog.tsx` | Paste a routine as text; reports unparsed lines before saving |
+| `PasteDialog.tsx` | Paste a routine as text; reports unparsed lines before saving, and hands over the template |
+| `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |
 | `Menu.tsx` | The dropdown behind the collapsed toolbars. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger |
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
 | `ConfirmDialog.tsx` | Asks before something irreversible. A modal, unlike the editor's inline confirm, because it is answered mid-workout |
