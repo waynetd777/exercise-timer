@@ -8,6 +8,15 @@ import { VitePWA } from 'vite-plugin-pwa'
 // slash.
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
+  /*
+   * The build's own date, shown beside the version on the home screen. The
+   * version is bumped by hand (see `src/version.ts`); this is the backstop for
+   * the time it is forgotten, since an installed PWA is served by a service
+   * worker and "did my change reach the phone" is otherwise a guess.
+   */
+  define: {
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   plugins: [
     react(),
     VitePWA({

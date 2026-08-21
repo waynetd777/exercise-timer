@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-21T19:27:59.934Z",
-    "fileCount": 24,
+    "lastScanned": "2026-08-21T21:32:57.638Z",
+    "fileCount": 25,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "a0abd24eef3626ee78199efc2107173adac95f87f5450bdef9c7490f353adfe4",
-    "storeUpdatedAt": "2026-08-21T19:27:59.944Z"
+    "renderedHash": "cf03e64e961ab3d57cfd2983ed83eab3838abb580471d4a2c5323aa354f29fc0",
+    "storeUpdatedAt": "2026-08-21T21:32:57.658Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -354,6 +354,15 @@
       "size": 5726,
       "mtimeMs": 1787340479853.2935,
       "updatedAt": "2026-08-21T19:27:59.933Z",
+      "source": "hook"
+    },
+    "src/version.ts": {
+      "description": "What the home screen shows beside the help button.",
+      "tokens": 161,
+      "hash": "f5dd9e0e301d99f2",
+      "size": 565,
+      "mtimeMs": 1787347977568.2292,
+      "updatedAt": "2026-08-21T21:32:57.631Z",
       "source": "hook"
     }
   },
