@@ -124,6 +124,19 @@ export type Ladder = {
   label?: string
   /** Reps at each rung, in order. Non-integer or sub-1 rungs are dropped. */
   counts: number[]
+  /**
+   * Whether Next advances the whole rung or one exercise at a time.
+   *
+   * `'set'` is the DEFAULT, and is why a ladder is a ladder: the rung is the
+   * unit you work. "20 Goblet Squats, then 10 lateral walks and 10 kickbacks"
+   * is one piece of work you do and then tick off, not three prompts to tap
+   * through with your hands full.
+   *
+   * A timed step inside the rung still runs its own clock — a 10-second wall sit
+   * is worth counting down — so the rung's rep-based steps collapse into one
+   * tap and the timed one plays itself.
+   */
+  advance?: 'set' | 'step'
   children: Block[]
 }
 
@@ -216,6 +229,8 @@ export type PathStep = {
   of: number
   /** Ladder only: the rep count at this rung. */
   rung?: number
+  /** Ladder only: whether Next advances the whole rung. See `Ladder.advance`. */
+  advance?: 'set' | 'step'
   /** Section only. */
   display?: SectionDisplay
   /** Section only: the instruction covering the whole section. */
@@ -267,6 +282,11 @@ export type TimelineEntry = {
  */
 export type Run = {
   index: number
+  /**
+   * A timed run holds consecutive timed steps. A self-paced run holds ONE step,
+   * unless they belong to a group that advances as a whole — a ladder rung — in
+   * which case it holds all of them and one Next clears the lot.
+   */
   entries: TimelineEntry[]
   /** Length of the run. 0 when `selfPaced`. */
   totalMs: number

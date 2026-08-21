@@ -166,6 +166,60 @@ describe('ladders', () => {
   })
 })
 
+describe('a ladder rung clears with ONE tap', () => {
+  it('puts the whole rung in one gate', () => {
+    const routine = compile(
+      workout('Ladder', [ladder([20, 16], [step('Goblet Squats', 'rung'), step('Walks', 10), step('Kickbacks', 10)])]),
+    )
+
+    // Two rungs of three exercises: six steps, but two gates.
+    expect(routine.entries).toHaveLength(6)
+    expect(routine.runs).toHaveLength(2)
+    expect(routine.runs.map((run) => run.entries.map((entry) => entry.name))).toEqual([
+      ['Goblet Squats', 'Walks', 'Kickbacks'],
+      ['Goblet Squats', 'Walks', 'Kickbacks'],
+    ])
+  })
+
+  it('keeps a timed step inside the rung on its own clock', () => {
+    // A 10-second wall sit is worth counting down, so it is not swallowed by the
+    // tap that clears the reps — it plays itself and flows into the next rung.
+    const routine = compile(legsLadder())
+
+    expect(routine.runs.slice(0, 4).map((run) => ({
+      selfPaced: run.selfPaced,
+      names: run.entries.map((entry) => entry.name),
+    }))).toEqual([
+      { selfPaced: true, names: ['Goblet Squats', 'RB Lateral Walks'] },
+      { selfPaced: false, names: ['Breathe'] },
+      { selfPaced: true, names: ['Goblet Squats', 'RB Lateral Walks'] },
+      { selfPaced: false, names: ['Breathe'] },
+    ])
+  })
+
+  it('does not merge rungs, or two ladders, into one gate', () => {
+    const routine = compile(
+      workout('Two', [
+        ladder([5, 10], [step('Squats', 'rung')]),
+        ladder([5, 10], [step('Lunges', 'rung')]),
+      ]),
+    )
+    expect(routine.runs).toHaveLength(4)
+  })
+
+  it('advances one exercise at a time when the ladder asks for it', () => {
+    const group = ladder([20], [step('Squats', 'rung'), step('Walks', 10)])
+    const routine = compile(workout('Stepped', [{ ...group, advance: 'step' }]))
+
+    expect(routine.runs).toHaveLength(2)
+  })
+
+  it('leaves self-paced steps outside a ladder one to a gate', () => {
+    const routine = compile(workout('Loose', [step('Push-ups', 12), step('V-Ups', 10)]))
+    expect(routine.runs).toHaveLength(2)
+  })
+})
+
 describe('sections', () => {
   it('adds a path level carrying the display mode and the section note', () => {
     const routine = compile(armsSection())

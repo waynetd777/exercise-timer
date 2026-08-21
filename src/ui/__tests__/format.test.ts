@@ -231,12 +231,20 @@ describe('listLines — sizing a group to fill the sheet', () => {
     expect(withAlt).toBeLessThan(2)
   })
 
-  it('charges for a note only on the row showing one', () => {
+  it('charges for a note only on the rows showing one', () => {
     const current = { name: 'Toy Soldier Kicks', note: 'straight-leg kicks with opposite hand' }
     const others = [{ name: 'Butt Kicks', note: 'a note nobody is shown' }]
-    expect(listLines([current, ...others], current)).toBeGreaterThan(
+    expect(listLines([current, ...others], [current])).toBeGreaterThan(
       listLines([current, ...others]),
     )
+  })
+
+  it('charges for every row of a gate that clears at once, such as a ladder rung', () => {
+    const rung = [
+      { name: 'Goblet Squats', note: 'chest up, elbows inside the knees' },
+      { name: 'RB Lateral Walks', note: 'stay low throughout' },
+    ]
+    expect(listLines(rung, rung)).toBeGreaterThan(listLines(rung, [rung[0]!]))
   })
 
   it('never returns zero, so the divisor is always safe', () => {

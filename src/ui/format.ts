@@ -170,13 +170,14 @@ const SUB_LINE = 0.8
 
 export function listLines(
   rows: readonly { name: string; alternative?: string; note?: string }[],
-  showNotesFor?: { name: string; note?: string },
+  /** The rows showing their note — the whole current gate, which may be a rung. */
+  showNotesFor: readonly { note?: string }[] = [],
 ): number {
   const lines = (text: string) => Math.max(1, Math.ceil(text.length / CHARS_PER_LINE))
   return Math.max(
     1,
     rows.reduce((total, row) => {
-      const note = row === showNotesFor && row.note ? SUB_LINE * lines(row.note) : 0
+      const note = showNotesFor.includes(row) && row.note ? SUB_LINE * lines(row.note) : 0
       const alternative = row.alternative ? SUB_LINE * lines(row.alternative) : 0
       return total + lines(row.name) + note + alternative
     }, 0),

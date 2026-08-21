@@ -136,7 +136,25 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
     of,
     rung,
     label: block.label ?? 'Set',
+    ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
+}
+
+/**
+ * The group a self-paced step advances WITH, or `null` if it advances alone.
+ *
+ * Steps sharing a key are cleared by one Next. Only a ladder rung qualifies
+ * today, and by default: the rung is the unit of work, so tapping through its
+ * three exercises separately is three taps for one thing you just did. A repeat
+ * has no equivalent — you work a round exercise by exercise — though it could
+ * gain the same field without changing anything here.
+ */
+function gateKey(entry: TimelineEntry): string | null {
+  for (let i = entry.path.length - 1; i >= 0; i--) {
+    const step = entry.path[i]!
+    if (step.kind === 'ladder' && step.advance !== 'step') return `${step.id}@${step.iteration}`
+  }
+  return null
 }
 
 /**
@@ -230,18 +248,33 @@ function partition(entries: TimelineEntry[]): Routine {
   let totalMs = 0
   let hasGates = false
 
+  /** The open self-paced run and the group it belongs to, if any. */
+  let gate: { run: Run; key: string } | null = null
+
   for (const entry of entries) {
     if (entry.selfPaced) {
       hasGates = true
       current = null
-      const run: Run = { index: runList.length, entries: [entry], totalMs: 0, selfPaced: true }
+
+      const key = gateKey(entry)
+      // Steps of the same ladder rung share a gate: one Next clears them all.
+      const run: Run =
+        key !== null && gate?.key === key
+          ? gate.run
+          : { index: runList.length, entries: [], totalMs: 0, selfPaced: true }
+      if (run.entries.length === 0) runList.push(run)
+
       entry.runIndex = run.index
-      entry.index = 0
+      entry.index = run.entries.length
       entry.startMs = 0
       entry.endMs = 0
-      runList.push(run)
+      run.entries.push(entry)
+      gate = key === null ? null : { run, key }
       continue
     }
+
+    // A timed step ends the gate: the rung resumes in a new one after it.
+    gate = null
 
     if (current === null) {
       current = { index: runList.length, entries: [], totalMs: 0, selfPaced: false }

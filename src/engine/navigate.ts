@@ -73,11 +73,16 @@ export function locate(routine: Routine, cursor: Cursor): RoutinePosition {
   if (!run) return complete(routine)
 
   if (run.selfPaced) {
-    // Safe: a self-paced run is built with exactly one entry.
+    /*
+     * The FIRST step of the gate. A gate usually holds one step, but a ladder
+     * rung advances as a whole, so it can hold several — and then what comes
+     * next is what follows the RUN, not the next step inside it.
+     */
     const entry = run.entries[0]!
+    const last = run.entries.at(-1)!
     return {
       entry,
-      nextEntry: routine.entries[entry.step] ?? null,
+      nextEntry: routine.entries[last.step] ?? null,
       elapsedInEntryMs: elapsedInRunMs,
       remainingMs: null,
       step: entry.step,
