@@ -76,3 +76,4 @@
 | 20:30 | Created src/editor/images.ts | — | ~1416 |
 | 20:33 | Created src/storage/__tests__/migrate.test.ts | — | ~1336 |
 | 20:35 | Rehosted all 43 exercise illustrations into the app (extracted from the Torus PDF, 881px, precached), catalogue holds paths, migrate-on-read rewrites the old postimages URLs | scripts/exercise_plates.py, public/exercises/*, src/routines/imageCatalogue.ts, src/editor/images.ts, src/storage/migrate.ts, vite.config.ts | 495 tests green, precache 372KB -> 3.6MB | ~120k |
+| 20:55 | Created src/ui/keys.ts | — | ~422 |
