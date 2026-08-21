@@ -38,17 +38,47 @@ export function clockWidth(text: string): number {
 }
 
 /**
+ * Share of the container actually available: 100% less the 4% proportional
+ * padding either side.
+ */
+export const FIT_AVAILABLE = 92
+
+/**
+ * Share of the container the text is allowed to claim.
+ *
+ * Below `FIT_AVAILABLE` on purpose. The maths is exact by construction — a word
+ * sized this way occupies exactly the budget — so ALL the safety has to come
+ * from this gap. It is set so the text still fits even if a font advances
+ * noticeably wider than the estimate below.
+ */
+const FIT_BUDGET = 84
+
+/** Assumed advance of a bold uppercase glyph, in ems. */
+export const FIT_ADVANCE = 0.72
+
+/**
  * Font size in `cqi` for a headline that should fill its container, given that
  * it wraps between words. Sized off the LONGEST WORD, since that is what has to
  * fit on one line — so "REST" is set far larger than "LOW PULLEY SQUAT" and
  * both fill the frame.
  *
- * The 161 comes from 100cqi divided by an average uppercase bold advance of
- * ~0.62em. Same idea as `clockWidth`, applied to words instead of digits.
+ * The coefficient is the budget divided by the advance. The first version used
+ * 161, from assuming a 0.62em advance and the FULL container width — both
+ * optimistic. On a portrait iPad the panel is only ~250px wide and 24px of fixed
+ * padding is a tenth of that, so every fallback name overflowed and was clipped.
+ * Hence a measured-generously advance, and padding counted rather than ignored.
+ *
+ * Same idea as `clockWidth`, applied to words instead of digits.
  */
 export function fitCqi(text: string, max = 40): number {
   const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
-  return Math.min(max, 161 / longest)
+  return Math.min(max, FIT_BUDGET / FIT_ADVANCE / longest)
+}
+
+/** The width `fitCqi`'s result will occupy, as a share of the container. */
+export function fitWidthUsed(text: string, max = 40): number {
+  const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
+  return longest * FIT_ADVANCE * fitCqi(text, max)
 }
 
 /**
