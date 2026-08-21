@@ -393,6 +393,13 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
   characters — nesting the first inside another class yields `[\s[-–—]]`, which
   is what stopped "30-second Plank" parsing as a duration.
 
+### Open question from the run-screen review
+- **Should ROUNDS collapse the way ladder rungs now do?** "#2 Arms & Shoulders"
+  is 4 rounds of 6 exercises, so 24 taps. Wayne asked for it on ladders only, and
+  the reasoning differs — you work a round exercise by exercise, whereas a rung is
+  one piece of work. Adding `advance: 'set'` to `Repeat` and one line in
+  `gateKey()` would do it if he wants it.
+
 ### Still open
 - Trampoline warm-up (3 Aug) has a "Sprint Finish – Fast feet for 15 seconds"
   hanging off the timed list. Trivial, just noting it is a step not a section.

@@ -304,3 +304,12 @@
   the variants. Every icon component must go through the shared `Svg` wrapper in
   `icons.tsx`, which supplies `className="icon"` that the `.btn`/`.chip` sizing
   rules depend on.
+
+- [2026-08-21] **A ladder rung is ONE gate: one Next clears every rep-based step
+  in it** (`Ladder.advance` defaults to `'set'`). Wayne's correction — tapping
+  through a rung's three exercises separately is three taps for one piece of
+  work. A TIMED step inside the rung keeps its own run, so a 10-second wall sit
+  still counts down. `gateKey()` in `compile.ts` decides this; a `Repeat` has no
+  equivalent yet because you do work a round exercise by exercise — but it could
+  gain the same field with no code change. Real effect: the 20 Jul routine went
+  from ~155 taps to 69.
