@@ -81,7 +81,9 @@ export function PasteDialog({
 
   return (
     <>
-      <dialog ref={dialog} className="paste" onCancel={onCancel} onClose={onCancel}>
+      <dialog ref={dialog} className="modal" onCancel={onCancel} onClose={onCancel}>
+        {/* The panel is its own element — see `.modal` in theme.css. */}
+        <div className="paste">
       <h2 className="paste__title">Paste a routine</h2>
 
       <label className="paste__field">
@@ -154,6 +156,7 @@ export function PasteDialog({
           Add to library
         </button>
       </div>
+        </div>
       </dialog>
 
       {/*

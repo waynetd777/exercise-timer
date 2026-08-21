@@ -322,13 +322,18 @@
  * A native dialog, sized to nearly fill the viewport with the image contained,
  * so it shows as large as it can without cropping.
  */
+/*
+ * Already a transparent centring sheet, so it needs the insets rather than the
+ * `.modal` box rules: its close button was under the island.
+ */
 .lightbox {
-  width: min(96vw, 1600px);
-  height: min(92svh, 1200px);
+  width: 100%;
+  height: 100%;
   max-width: none;
   max-height: none;
-  margin: auto;
-  padding: 0;
+  margin: 0;
+  padding: calc(var(--safe-top) + var(--step-4)) calc(var(--safe-right) + var(--step-4))
+    calc(var(--safe-bottom) + var(--step-4)) calc(var(--safe-left) + var(--step-4));
   display: grid;
   place-items: center;
   background: none;
@@ -351,11 +356,10 @@
 }
 
 /* ── Image picker ────────────────────────────────────────────────────────── */
+/* The panel inside `.modal` — see theme.css for why that is two elements. */
 .picker {
-  width: min(94vw, 60rem);
-  max-width: none;
-  max-height: min(88svh, 44rem);
-  margin: auto;
+  width: min(100%, 60rem);
+  max-height: 100%;
   padding: var(--step-4);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -367,9 +371,6 @@
   overflow: hidden;
 }
 
-.picker::backdrop {
-  background: rgb(8 9 10 / 0.9);
-}
 
 .picker__head {
   display: grid;

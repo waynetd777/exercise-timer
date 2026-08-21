@@ -295,34 +295,56 @@ button {
  * irreversible. Both are shared components used from more than one screen, so
  * their styles belong here rather than in whichever screen happened to need one
  * first.
+ *
+ * TWO ELEMENTS, and it has to be two.
+ *
+ * The `<dialog>` is a transparent sheet filling the viewport whose only job is to
+ * centre the panel inside the safe area. The PANEL carries the box: the ground,
+ * the border, the padding, the rows.
+ *
+ * It was one element — the dialog styled as the panel, held to its content by
+ * `height: fit-content` plus `align-self` and `align-content`. That works in
+ * Chrome and does not on iOS, where the box takes the height available and its
+ * auto rows then stretch to fill it: the title pinned to the top, the detail
+ * marooned in the middle, the buttons a screen away, and Close drawn as a slab.
+ * Three attempts to tune that away failed, because the premise was wrong. A
+ * wrapper cannot be stretched by anything — the sheet fills the viewport by
+ * design, and the panel is sized by what is in it.
  */
-.notice {
-  width: min(90vw, 26rem);
+.modal {
+  /* The sheet: viewport-sized, no box of its own. */
+  width: 100%;
   max-width: none;
-  /*
-   * Three defences against being stretched, because a dialog is a child of
-   * whatever screen opened it and those screens are full-height grids. Stretched,
-   * its auto rows split the spare height between them: the title pinned to the
-   * top, the detail marooned in the middle, and the buttons pulled into slabs.
-   *
-   * `height: fit-content` keeps the box the size of its contents, `align-self`
-   * stops an ancestor grid overruling that, and `align-content` packs the rows
-   * so they cannot stretch even if something else does get through.
-   */
-  height: fit-content;
-  align-self: center;
-  margin: auto;
-  /*
-   * Kept clear of the island and the home indicator by shrinking rather than by
-   * moving: `margin: auto` centres it, so subtracting both insets from the height
-   * it may take means it can never reach either.
-   */
-  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--step-6));
-  /* Taller than that scrolls. It used to compress, and the keyboard coming up
-     drove the rows into each other. */
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  background: none;
+  /* Inside the hardware's cutouts, since nothing in the top layer is inside a
+     screen's band. */
+  padding: calc(var(--safe-top) + var(--step-4)) calc(var(--safe-right) + var(--step-4))
+    calc(var(--safe-bottom) + var(--step-4)) calc(var(--safe-left) + var(--step-4));
+  display: grid;
+  place-items: center;
+  /* A scroll gesture on the sheet must not move the screen behind it. */
+  overscroll-behavior: contain;
+}
+
+.modal::backdrop {
+  /* A literal colour: `::backdrop` does not inherit the page's custom
+     properties dependably. */
+  background: rgb(8 9 10 / 0.85);
+}
+
+.notice {
+  width: min(100%, 26rem);
+  /* Whatever is left of the sheet after its padding; taller content scrolls. */
+  max-height: 100%;
   overflow-y: auto;
   padding: var(--step-5);
   display: grid;
+  /* `start`, not `center`: rows must hug rather than share out spare height. */
+  align-content: start;
   justify-items: center;
   gap: var(--step-4);
   text-align: center;
@@ -330,10 +352,6 @@ button {
   background: var(--ink-800);
   border: var(--hairline);
   border-radius: var(--radius);
-}
-
-.notice::backdrop {
-  background: rgb(8 9 10 / 0.85);
 }
 
 .notice__text {
