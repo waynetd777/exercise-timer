@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { TimelineEntry, Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
+import { useSpokenCues } from '../audio/useSpokenCues'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
 import { clock, clockWidth, duration, fitCqi, pathLabel, wordCount } from './format'
@@ -89,6 +90,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     generation: timer.generation,
   })
 
+  useSpokenCues(at, status === 'running', muted)
+
   /**
    * Every control unlocks the AudioContext. It has to happen synchronously
    * inside a user gesture — mobile browsers refuse otherwise — and unlock() is
@@ -119,6 +122,48 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const clockChars = entry
     ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
     : 2
+
+  /*
+   * Keyboard control. A keydown IS a user gesture, so unlocking audio from here
+   * works exactly as a tap does.
+   *
+   * The handler is kept in a ref and the listener registered once: writing it
+   * straight into an effect with no dependency array would re-attach on every
+   * render, and listing the dependencies would re-attach on every tick.
+   */
+  const onKeyRef = useRef<(event: KeyboardEvent) => void>(() => {})
+  onKeyRef.current = (event: KeyboardEvent) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return
+    // Leave the key alone if something focused wants it — space on a button.
+    const tag = (event.target as HTMLElement | null)?.tagName
+    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT') return
+
+    const act = (run: () => void) => {
+      event.preventDefault()
+      audio.unlock()
+      run()
+    }
+
+    switch (event.key) {
+      case ' ':
+      case 'k':
+        return act(status === 'running' ? timer.pause : primaryAction)
+      case 'ArrowRight':
+        return act(timer.next)
+      case 'ArrowLeft':
+        return act(timer.previous)
+      case 'm':
+        return act(toggleMuted)
+      default:
+        return
+    }
+  }
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onKeyRef.current(event)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
 
   const begin = () => {
     onStarted?.()
@@ -249,7 +294,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           onClick={withAudio(timer.previous)}
           disabled={status === 'idle'}
           aria-label="Previous step"
-          title="Previous step"
+          title="Previous step (left arrow)"
         >
           <PrevIcon />
         </button>
@@ -260,7 +305,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           className="btn btn--primary"
           onClick={withAudio(status === 'running' ? timer.pause : primaryAction)}
           aria-label={primaryLabel}
-          title={primaryLabel}
+          title={`${primaryLabel} (space)`}
         >
           {status === 'running' ? <PauseIcon /> : <PlayIcon />}
         </button>
@@ -270,7 +315,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           onClick={withAudio(timer.next)}
           disabled={status === 'idle' || status === 'complete'}
           aria-label="Next step"
-          title="Next step"
+          title="Next step (right arrow)"
         >
           <NextIcon />
         </button>
@@ -290,7 +335,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           onClick={toggleMuted}
           aria-pressed={muted}
           aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
-          title={muted ? 'Turn sound on' : 'Turn sound off'}
+          title={muted ? 'Turn sound on (m)' : 'Turn sound off (m)'}
         >
           {muted ? <SoundOffIcon /> : <SoundOnIcon />}
         </button>
