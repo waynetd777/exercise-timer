@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { CuePoint } from '../../engine'
-import { compile, cues } from '../../engine'
+import { compile, cues, finishesOnTap, runCues } from '../../engine'
 import { IMPORTED_ROUTINES, MIXED_CARDIO_2 } from '../../routines/__tests__/fixtures'
+import { rep, seg, step, workout } from '../../engine/__tests__/fixtures'
 import { cueKey, dueCues, LOOKAHEAD_MS, REARM_MS } from '../schedule'
 import { toneFor } from '../tones'
 
@@ -110,5 +111,68 @@ describe('cue timing across a real routine', () => {
     const ends = Math.max(...figure.map((n) => n.atMs + n.durationMs))
     // Nothing follows it, so it only has to be a sane length.
     expect(ends).toBeLessThan(5000)
+  })
+})
+
+describe('runCues — one run at a time', () => {
+  /** Warm-up (2 timed), a rep gate, a rest, then a closing rep gate. */
+  const mixed = () =>
+    compile(
+      workout('Mixed', [
+        seg('Jog', 40),
+        seg('Jacks', 40),
+        rep(2, [step('Curls', 12), step('Press', 10), seg('Rest', 45, 'rest')], 'Round'),
+      ]),
+    )
+
+  it('gives a gate ONE cue, not one per step stacked on the same millisecond', () => {
+    const routine = mixed()
+    const gate = routine.runs.findIndex((run) => run.selfPaced)
+
+    expect(runCues(routine, gate)).toEqual([
+      { atMs: 0, kind: 'work-start', entryIndex: 0 },
+    ])
+  })
+
+  it('does not finish the workout at the end of every run', () => {
+    const routine = mixed()
+    const notLast = routine.runs.slice(0, -1)
+
+    for (const run of notLast) {
+      expect(runCues(routine, run.index).map((cue) => cue.kind)).not.toContain('workout-complete')
+    }
+  })
+
+  it('finishes at the end of the last run when that run is timed', () => {
+    const routine = compile(workout('Timed end', [step('Curls', 12), seg('Plank', 30)]))
+    const last = routine.runs.length - 1
+
+    expect(runCues(routine, last).map((cue) => cue.kind)).toContain('workout-complete')
+    expect(finishesOnTap(routine)).toBe(false)
+  })
+
+  it('leaves the finish to be fired by hand when the routine ends on a tap', () => {
+    const routine = mixed()
+    const last = routine.runs.length - 1
+
+    expect(routine.runs[last]!.selfPaced).toBe(true)
+    expect(runCues(routine, last).map((cue) => cue.kind)).not.toContain('workout-complete')
+    expect(finishesOnTap(routine)).toBe(true)
+  })
+
+  it('still counts a timed run down and rings its boundary', () => {
+    const routine = mixed()
+    const rest = routine.runs.find((run) => run.entries[0]?.name === 'Rest')!
+
+    expect(runCues(routine, rest.index).map((cue) => `${cue.kind}@${cue.atMs}`)).toEqual([
+      'work-end@0',
+      'countdown@42000',
+      'countdown@43000',
+      'countdown@44000',
+    ])
+  })
+
+  it('is empty for a run that does not exist', () => {
+    expect(runCues(mixed(), 99)).toEqual([])
   })
 })

@@ -199,8 +199,9 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const [muted, toggleMuted] = useMuted()
 
   useCueScheduler({
-    // The current RUN: cues are scheduled on one clock, and a gate ends it.
-    timeline: run,
+    // One run at a time: cues are scheduled on one clock, and a gate ends it.
+    routine,
+    runIndex: run.index,
     status,
     muted,
     readElapsed: timer.readElapsed,

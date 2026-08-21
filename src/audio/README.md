@@ -18,6 +18,29 @@ always lead somewhere:
 Entering work and leaving it mean opposite things mid-effort, which is the whole
 reason they must not sound alike.
 
+## One run at a time
+
+A routine that can wait for a tap is scheduled run by run: `runCues(routine, i)`
+gives the cues for the run the clock is currently measuring, and the window
+re-arms from scratch when the cursor crosses into the next one.
+
+`cues()` describes a WHOLE workout, so handing it a single run made it say three
+wrong things — worth knowing, because they are easy to reintroduce:
+
+- **The finishing dings landed at the end of every run**, after the warm-up and
+  after each 45-second rest. Completion belongs to the last run only.
+- **A gate emitted one boundary cue per step**, all stacked on the same
+  millisecond, because every step of a gate sits at time zero. A gate gets ONE
+  cue: a whistle as it opens, which is the tap's answer.
+- **A gate has no end to count down to**, so there is nothing more to say until
+  the user says it.
+
+The finish is the one cue that cannot always be scheduled. A routine ending on a
+self-paced step ends when the user taps, and a tap cannot be queued on the audio
+clock in advance — so `finishesOnTap()` says when the scheduler has to fire the
+figure by hand instead. That costs a few milliseconds on an announcement rather
+than a beat, which is the same trade `speech.ts` makes.
+
 ## Scheduled ahead, never ticked
 
 Beeps are queued on the `AudioContext` clock in a rolling 30-second window, and
