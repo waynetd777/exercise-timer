@@ -23,6 +23,9 @@
 }
 
 .library__scroll {
+  /* Follows the finger. The indicator sits in the space this opens up.
+     --pull is unitless, so it can also drive an opacity ratio. */
+  transform: translateY(calc(var(--pull, 0) * 1px));
   display: grid;
   align-content: start;
   gap: var(--step-4);
@@ -95,6 +98,24 @@
 .library__sorts {
   display: flex;
   gap: var(--step-2);
+}
+
+/*
+ * Pull-to-update indicator. Parked above the list and revealed by the same
+ * translate that moves the list, so no layout shifts as the finger travels.
+ */
+.library__pull {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding-bottom: var(--step-2);
+  text-align: center;
+  color: var(--bone-dim);
+  transform: translateY(calc(var(--pull, 0) * -1px));
+  opacity: clamp(0, calc(var(--pull, 0) / 60), 1);
+  pointer-events: none;
 }
 
 .library__notice {
