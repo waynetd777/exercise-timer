@@ -693,9 +693,10 @@ button {
  * desktop Safari. Both are declared; whichever the browser understands wins, and
  * they are kept to the same colours so it cannot matter which that is.
  *
- * iOS Safari draws overlay scrollbars that appear only while scrolling and ignore
- * both mechanisms. Nothing to do about that, and nothing lost: an overlay
- * scrollbar is already dark and transient.
+ * On a TOUCH screen they are hidden outright — see the block after these rules.
+ * The claim that used to be here, that an iOS overlay scrollbar ignores both
+ * mechanisms and is therefore harmless, was half right: it does ignore them, and
+ * `::-webkit-scrollbar { display: none }` removes it anyway.
  */
 :root {
   scrollbar-color: var(--ink-600) transparent;
@@ -731,4 +732,31 @@ button {
 /* Where two scrollbars meet; unstyled it is a pale square in the corner. */
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/*
+ * No scrollbars on a touch screen.
+ *
+ * There is nothing to drag and no pointer to aim with, so the bar is decoration
+ * that draws OVER the content — on iOS it was landing on the list's rows and the
+ * Next button. `scrollbar-width` is not inherited, hence the universal selector
+ * rather than `:root`; the WebKit pseudo-element is what iOS actually obeys.
+ *
+ * The gutter goes with it: reserving space for a bar that is never drawn is a
+ * strip of dead width down every scrolling list.
+ */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    scrollbar-width: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    inline-size: 0;
+    block-size: 0;
+  }
+
+  .sheet__list {
+    scrollbar-gutter: auto;
+  }
 }
