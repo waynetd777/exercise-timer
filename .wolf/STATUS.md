@@ -205,7 +205,7 @@
 - **Two duplicate images removed, and a false claim corrected**
   - `imageCatalogue.ts` asserted the repeated Tricep Press and Standing Arm Curl were "genuinely different images". They are not, and it had never been checked. Aligned for a 1px crop they differ 1.8/255 and 3.3/255 where two genuinely different plates differ 16.6/255, and both are visibly the same photograph and station. **27 images now**, two guard tests added.
   - The dropped Tricep Press URL was referenced 6 times across two seeded routines; repointed at the canonical copy so the media store caches one blob, not two near-identical ones.
-- **Smaller asks**: dark scrollbars (`scrollbar-color` + `::-webkit-scrollbar`, thumb inset by a transparent border so the hit area stays 10px; iOS overlay scrollbars ignore both and that is fine); opening voice line **"Enjoy your workout, give it your all!"** 900ms after start (clears the whistle, the longest opening cue; once per run, never on resume, and the flag is set even when muted so unmuting cannot fire it late); **+ button on every step row** adding a fresh step of the same type below, distinct from duplicate beside it.
+- **Smaller asks**: dark scrollbars (`scrollbar-color` + `::-webkit-scrollbar`, thumb inset by a transparent border so the hit area stays 10px; iOS overlay scrollbars ignore both and that is fine); opening voice line 900ms after start (**superseded: it is "Let's go!" now**) (clears the whistle, the longest opening cue; once per run, never on resume, and the flag is set even when muted so unmuting cannot fire it late); **+ button on every step row** adding a fresh step of the same type below, distinct from duplicate beside it.
 - **One seeded routine, no synthesised whistle, bench out of the build** (commit `657af14`)
   - The synthesised whistle and `scripts/gen_whistle.py` are **deleted**. They existed only because the reference recording could not be shipped, which turned out to be untrue — the recording IS the reference. A failed decode now sounds a plain 2900Hz tone from `WHISTLE`'s own envelope fields, pinned by a test so nobody strips them as decoration. `curve` support left the tone spec and the engine's `setValueCurveAtTime` branch with it.
   - **The sound bench is dev-only.** `App.tsx` loads it through a dynamic import inside an `import.meta.env.DEV` branch, so Vite drops the branch and the chunk together — a *static* import would have kept `sounds.css`, a CSS import being a side effect. Verified absent from `dist` by grepping for bench-only strings.
@@ -228,19 +228,34 @@ now, none started:
   or falls back to the plain tone. Neither can be checked from a desktop browser,
   and the physical interaction changed completely — you now reach for the phone
   once per set.
-- **Seed a strength routine.** The seed is still the old fully-timed one; a new
-  install would be better introduced by the kind of routine the app is now for.
-- **Show a step's note and alternative in the editor.** Both are preserved and
-  neither is visible in a row. Sections got a note field; step rows were already
-  dense, so this waited for the editor to be used in anger.
 - **Portrait iPad** puts the media panel at ~250x773, which renders near-square
   illustrations small. Known, deliberate, unfixed.
+- **"Rest 45 seconds after each round" gives three rests for four rounds**, since
+  the trailing-rest rule drops the last one. Raised twice and never decided; one
+  line in the parser moves the rest outside the group if four is wanted.
+
+### Done since the quest closed (2026-08-21, all pushed)
+- **Two seeds, one of each kind.** The strength one is GENERATED from the 20 July
+  email and a test asserts it still matches a fresh parse.
+- **Import reads plain-text routines**, and `bundle.ts`'s `isBlock` whitelist was
+  silently dropping every pasted routine on re-import (bug-032).
+- **The editor edits a step's note and alternative**, on a line below the step,
+  shown only when there is one. `clearText` deletes rather than blanks.
+- **A pasted routine opens with five seconds to get ready.** The one thing the
+  parser adds; it also learned the `prepare` role, which made the skip condition
+  reachable.
+- **Rep counts line up down the list** — the per-side qualifier has its own
+  column, spaced by padding because an empty column still costs a gap.
+- **Space is play/pause again.** It was briefly bound to Next; reverted on
+  request, and the arrows keep back/next.
+- **"Let's go!"** replaces the longer opening line; the `SPOKEN` key renamed to
+  match.
 
 ---
 
 ## ✅ Done — strength routines: untimed steps, sections, ladders
 
-**COMPLETE. All six steps of the build order are done, green (441 tests,
+**COMPLETE. All six steps of the build order are done, green (451 tests,
 typecheck + build clean) and pushed.** The app takes a pasted strength routine,
 runs it a set at a time, and edits it.
 

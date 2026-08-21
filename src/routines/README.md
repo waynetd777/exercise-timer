@@ -1,6 +1,7 @@
 # routines
 
-The `.tabata` importer, the seeded routine and the image catalogue.
+The `.tabata` importer, the paste parser, the seeded routines and the image
+catalogue.
 
 ## The `.tabata` format, decoded
 
