@@ -25,6 +25,48 @@ tries this app's own bundle first (it identifies itself with a marker, so there 
 no guessing) and the `.tabata` reader second, and **collects failures instead of
 throwing**, so one bad file in a drop of ten does not lose the other nine.
 
+## The paste parser
+
+`pasteFormat.ts` reads a strength routine pasted as text. The source is the
+weekly email in `__tests__/emails/`; paste rather than an `.eml` importer,
+because the same grammar arrives by WhatsApp and Notes too.
+
+Two rules govern it:
+
+1. **Never guess silently.** A line it cannot place goes into `skipped`, with its
+   number, rather than being dropped or approximated. Same principle as the
+   `.tabata` importer refusing to infer reps.
+2. **The result is a draft** for review in the editor, which is what makes rule 1
+   affordable — an imperfect parse costs a correction, not a bad workout.
+
+The test that matters asserts `skipped` is empty for all three routines. It is
+the first thing to fail when the instructor writes something new, and that is
+the point.
+
+**One rule covers every ladder in the source material:** inside a ladder, an item
+with no count of its own scales with the rung, and an item that states a count
+keeps it. That is "#1 General Body" (every exercise scales) and "#3 Legs" (main
+lift scales, accessories fixed) with no special case for either.
+
+Decisions the grammar encodes, each because the emails are inconsistent:
+
+- **A range takes its upper bound.** "3–5 Rounds" stores 5 and "Rest: 30–45
+  seconds" stores 45 — a runner can always end a section early, but cannot invent
+  a round that was never authored.
+- **A per-side count is the smaller, truer one.** "10 × Walking Lunges (5 each
+  leg)" is five a side, in either the bracketed or the dashed notation.
+- **A duration is looked for before a count**, because "30-second Plank" starts
+  with a number that is not a rep count.
+- **A line is split only when both halves state a count.** "20 × Front Punches +
+  20 × Uppercuts" is two movements; "Squat + Shoulder Press" is one.
+- **A section shows as a timer only when every step in it is timed**, which is
+  derived rather than guessed — the warm-up qualifies, nothing else does.
+
+A trap worth knowing: the dash characters are built into patterns two ways, as
+`DASH` (a complete class) and `DASH_CHARS` (the bare characters). Nesting the
+first inside another class silently yields `[\s[-–—]]`, which is what stopped
+"30-second Plank" reading as a duration for an afternoon.
+
 ## The seeded routine
 
 One routine, `beginner-full-body`, committed as an authored `Workout` rather than
@@ -66,6 +108,7 @@ are already the exercise names.
 | | |
 |---|---|
 | `tabataFormat.ts` | The `.tabata` reader and its `TabataImportError` |
+| `pasteFormat.ts` | The pasted-text parser: `parseRoutine`, `parseItem` |
 | `importFiles.ts` | Bundle-or-tabata dispatch over dropped files, failures collected |
 | `samples.ts` | The seeded routine, loaded from `beginner-full-body.routine.json` |
 | `imageCatalogue.ts` | The 27 URLs, in the note's own order and grouping |
