@@ -18,7 +18,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Tap a routine to open it, then Start.',
       'The star pins a favourite to the top of the list.',
-      'Each row also edits, duplicates, copies a share link, and deletes.',
+      'Each row also edits, duplicates, copies a share link, exports itself as a file, and deletes.',
       'Delete asks first, in the row itself — nothing goes without a second tap.',
       'Search filters by name. Sort by Recent, Name or Longest.',
     ],
@@ -29,8 +29,9 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'New — build one step by step.',
       'Paste — write or paste a routine as plain text; it opens with five seconds to get ready.',
       'Import — a .tabata file, an exported .json, or a plain-text routine. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',
-      'Export — every routine in one file, images included. That file is how a routine moves between devices intact.',
-      'A share link carries the steps, and any illustration that came with the app. A photo you uploaded stays on the device that took it.',
+      'Export all — every routine in one file, with the photos you uploaded inside it.',
+      'A routine’s own file button exports just that one, photos included. That file is how a routine moves between devices intact: export, AirDrop, then Import on the other one.',
+      'A share link carries the steps and the app’s own illustrations, but not a photo you uploaded — a picture will not fit in a link. Send the file for that.',
     ],
   },
   {

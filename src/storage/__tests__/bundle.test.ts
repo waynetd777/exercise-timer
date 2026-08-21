@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { Workout } from '../../engine'
 import { compile, SCHEMA_VERSION } from '../../engine'
 import { SEED_ROUTINES } from '../../routines/samples'
+import { sha256 } from '../../media/hash'
 import { BUNDLE_VERSION, BundleError, bundleFilename, fromBundle, toBundle } from '../bundle'
+import { collectMedia, restoreMedia } from '../bundleMedia'
 
 const NOW = 1_700_000_000_000
 
@@ -63,6 +65,66 @@ describe('round trip', () => {
     expect(back[0]!.blocks[0]).toMatchObject({
       media: { source: 'remote', url: 'https://i.postimg.cc/x/y.png' },
     })
+  })
+})
+
+describe('an uploaded photo travels in the file', () => {
+  /*
+   * The whole point of the media map. A bundled illustration is a path the app on
+   * the other side already has; a photo taken on this device exists nowhere else,
+   * so if it does not go in the file it does not go at all — and since the
+   * image-link field was removed, this is the only route to another device.
+   *
+   * Tested at the FORMAT seam rather than through `importRoutineFiles`, because
+   * the last step of an import is a write to IndexedDB and this project fakes no
+   * browser storage. What is asserted here is everything the file has to carry.
+   */
+  it('survives export, a real JSON serialise, and re-import', async () => {
+    const blob = new Blob([new Uint8Array(2048).fill(9)], { type: 'image/webp' })
+    const hash = await sha256(blob)
+
+    const routine = workout('Photo day')
+    routine.blocks[0] = {
+      kind: 'segment',
+      id: 's1',
+      name: 'My own lift',
+      durationMs: 20_000,
+      role: 'work',
+      media: { source: 'local', hash, mime: 'image/webp' },
+    }
+
+    const media = await collectMedia([routine], async () => blob)
+    const text = JSON.stringify(toBundle([routine], NOW, media))
+
+    const parsed = JSON.parse(text) as { media: unknown }
+    const back = fromBundle(parsed, NOW)
+    expect(back[0]!.blocks[0]).toMatchObject({ media: { source: 'local', hash } })
+
+    const restored = await restoreMedia(parsed.media)
+    expect(restored.skipped).toEqual([])
+    expect(restored.entries).toHaveLength(1)
+    expect(restored.entries[0]!.hash).toBe(hash)
+    // Byte for byte, and still an image rather than an octet stream.
+    expect(restored.entries[0]!.blob.size).toBe(2048)
+    expect(restored.entries[0]!.blob.type).toBe('image/webp')
+    expect(await sha256(restored.entries[0]!.blob)).toBe(hash)
+  })
+
+  it('carries nothing for a routine that only uses the app\'s own illustrations', async () => {
+    const routine = workout('Bundled only')
+    routine.blocks[0] = {
+      kind: 'segment',
+      id: 's1',
+      name: 'Cable fly',
+      durationMs: 20_000,
+      role: 'work',
+      media: { source: 'bundled', path: 'exercises/Cable-Fly.jpg' },
+    }
+
+    const bundle = toBundle([routine], NOW, await collectMedia([routine], async () => undefined))
+    expect(bundle.media).toEqual({})
+    // And the export stays small: a path rather than a hundred kilobytes.
+    expect(JSON.stringify(bundle).length).toBeLessThan(2000)
   })
 })
 

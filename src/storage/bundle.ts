@@ -5,10 +5,9 @@ import { migrateWorkout } from './migrate'
 /**
  * The export format: a routine, or a whole library, as one JSON file.
  *
- * Versioned from the start so a future reader can tell what it is holding. The
- * `media` map is declared now and left empty: nothing produces local image
- * blobs yet, and declaring it up front means the media work can start filling it
- * without a format change or a second migration.
+ * Versioned from the start so a future reader can tell what it is holding, and
+ * the `media` map was declared before anything filled it — which is why adding
+ * photos to an export needed no format change and no second migration.
  */
 export const BUNDLE_VERSION = 1 as const
 
@@ -18,9 +17,10 @@ export type Bundle = {
   exportedAt: number
   workouts: Workout[]
   /**
-   * Local image blobs, keyed by content hash, as data URLs. Remote and bundled
-   * images need nothing here — they are already a short string inside the
-   * routine, which is what keeps an export small enough to share.
+   * Uploaded photos, keyed by content hash, as data URLs — see
+   * `bundleMedia.ts`. A bundled illustration needs nothing here, since it is a
+   * short path and the app on the other side already has the picture; an
+   * uploaded photo has to carry its bytes or it does not travel at all.
    */
   media: Record<string, string>
 }
