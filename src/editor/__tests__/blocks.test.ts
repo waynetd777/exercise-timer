@@ -4,6 +4,7 @@ import { compile, totalDurationMs } from '../../engine'
 import {
   appendTo,
   blockAt,
+  clearText,
   duplicateAt,
   flatten,
   insertAfter,
@@ -560,5 +561,26 @@ describe('wrapInRepeat, with the new kinds around', () => {
   it('still refuses a repeat', () => {
     const blocks = [newRepeat()]
     expect(wrapInRepeat(blocks, [0])).toEqual(blocks)
+  })
+})
+
+describe('clearText — emptying a note removes it', () => {
+  const noted = (): Block[] => [{ ...seg('Squats'), note: 'chest up', alternative: 'box squat' }]
+
+  it('deletes the key rather than storing an empty string', () => {
+    // "" and absent are different: one renders an empty line under the step.
+    const blocks = clearText(noted(), [0], 'note')
+    expect('note' in (blocks[0] as Segment)).toBe(false)
+    expect((blocks[0] as Segment).alternative).toBe('box squat')
+  })
+
+  it('clears each field independently', () => {
+    const blocks = clearText(clearText(noted(), [0], 'note'), [0], 'alternative')
+    expect('alternative' in (blocks[0] as Segment)).toBe(false)
+  })
+
+  it('leaves a group alone', () => {
+    const blocks = [newSection('Burnout')]
+    expect(clearText(blocks, [0], 'note')).toEqual(blocks)
   })
 })
