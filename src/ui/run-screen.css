@@ -194,6 +194,21 @@
  * small wide-tracked labels.
  */
 .count {
+  /*
+   * Its own size container, so the countdown and the name are measured against
+   * the column they actually live in.
+   *
+   * They used to be sized in `cqh` of the whole BODY — which includes the media
+   * panel — as a hand-tuned fraction that had to stay "well under the row's
+   * share". It was within a few points of the edge, and the iOS header inset
+   * tipped it over: the lead outgrew its row and the step name landed on top of
+   * the time remaining. A budget expressed in the box's own height cannot drift
+   * like that when something above it changes.
+   *
+   * Safe for the same reason it is safe on `.run__body`: this is a fr row of a
+   * definite-height grid, so containment cannot collapse it.
+   */
+  container: count / size;
   display: grid;
   /*
    * Lead fills the column, meta takes the bottom edge.
@@ -233,14 +248,18 @@
  */
 .count__clock {
   --clock-coef: 140;
-  /* Stacked, the countdown only has the 56fr row, but cqh measures the whole
-     body — so this has to be well under the row's share. */
-  --clock-max: 34cqh;
+  /*
+   * Now a share of the COLUMN, not of the body. The column's budget: the meta row
+   * and the gap take about 20cqh, the label and the two gaps another 12, and the
+   * name up to 14 — which leaves this the rest with slack in hand for a wrapped
+   * title or a taller meta line.
+   */
+  --clock-max: 52cqh;
   /*
    * Every line the name wraps to is a line the countdown cannot have. They share
    * the column, and at the sizes both want, a two-line name overflows it.
    */
-  --clock-height: calc(var(--clock-max) - (var(--name-lines, 1) - 1) * 11cqh);
+  --clock-height: calc(var(--clock-max) - (var(--name-lines, 1) - 1) * 14cqh);
   --tracking: -0.045em;
   font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), var(--clock-height)));
   font-weight: 700;
@@ -283,7 +302,7 @@
    * fifty-character step name, and a floor alone would just push it out of a
    * grid row whose height is fixed by proportion.
    */
-  font-size: clamp(1.35rem, min(11cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
+  font-size: clamp(1.35rem, min(14cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
   font-weight: 650;
   letter-spacing: var(--track-name);
   text-wrap: balance;

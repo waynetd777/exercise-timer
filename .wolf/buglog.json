@@ -650,6 +650,25 @@
       "timestamp": "2026-08-21T21:57:54+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T21:57:54+02:00"
+    },
+    {
+      "error_message": "User-reported with a screenshot (iPhone, home-screen install): the time remaining collided with the step name, and a large empty band sat below the controls",
+      "file": "src/ui/theme.css",
+      "root_cause": "Two causes, one trigger. (1) `html, body, #root { height: 100% }` \u2014 on an iOS standalone install with viewport-fit=cover, a PERCENTAGE height resolves against the safe viewport (screen minus the 59pt status-bar strip) while the page paints under the island, so the app's box ended 59pt above the bottom of the screen. Measured from the screenshot: the hairline above the controls at 670pt, controls 108pt, safe-bottom 34pt = 812pt of content on an 874pt screen. (2) The countdown and the step name were sized in cqh of the BODY container, which includes the media panel, as a hand-tuned fraction that had to stay 'well under the row's share'. It was within a few points of overflowing, and the header's new safe-area inset tipped it over: the lead outgrew its row and the name's descenders landed on the meta row.",
+      "fix": "(1) `height: 100dvh` with the percentage kept as a fallback line. (2) `.count` is now its own `size` container, so the clock (52cqh) and the name (14cqh) are budgeted against the column they live in rather than a fraction of a bigger box.",
+      "fix_rule": "Never size a full-screen layout with percentage heights when viewport-fit=cover is set \u2014 use dvh, or the box is smaller than what you are painting on. And a proportional type budget must be expressed in the box's OWN height, or it drifts silently when anything above it changes size.",
+      "tags": [
+        "ios",
+        "pwa",
+        "layout",
+        "dvh",
+        "container-queries",
+        "safe-area"
+      ],
+      "id": "bug-038",
+      "timestamp": "2026-08-21T22:08:39+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:08:39+02:00"
     }
   ]
 }
