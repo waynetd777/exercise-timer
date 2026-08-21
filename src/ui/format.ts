@@ -13,6 +13,19 @@ export function duration(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
+/**
+ * A stopwatch reading: always `m:ss`, and floored rather than rounded.
+ *
+ * Not `duration()`, which is for labels — "45s" is the right thing for a label
+ * to say and the wrong thing for a clock in the corner, which would then change
+ * shape as the first minute passed. Floored because a stopwatch reports time
+ * completed: rounding shows 1:00 half a second early.
+ */
+export function stopwatch(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000))
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
 /** "Reps 3 of 8 · Set 2 of 2" from a timeline entry's repeat path. */
 export function pathLabel(path: { label?: string; iteration: number; of: number }[]): string {
   return path
