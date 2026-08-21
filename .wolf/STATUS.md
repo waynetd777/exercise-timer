@@ -246,10 +246,16 @@ now, none started:
   notice, the `i.postimg.cc` runtime-cache rule and `PinIcon`. `remote` stays in
   `MediaRef` as a legacy READ path: routines saved before the move still show
   their pictures, and `gc.ts` still counts a pinned blob as live.
-  **Known gap:** an uploaded photo still cannot travel between devices —
-  `toBundle` accepts a media map and nothing fills it, `fromBundle` ignores it.
-  That is now the only way to get an image onto a step that the catalogue lacks,
-  so it is the obvious next piece of work.
+  The gap it left — an uploaded photo could not travel — is closed below.
+- **Photos travel in an export file.** `bundleMedia.ts` fills the `media` map
+  that the format declared and nothing ever wrote: uploaded photos only, as data
+  URLs keyed by content hash, since a bundled illustration is a path the other
+  side already has. Every entry is **re-hashed on import** and compared against
+  its key, because the store is content-addressed and a key that lied would
+  poison it; a bad entry is skipped and counted rather than throwing. Each routine
+  row gained a file button beside its share button, and Export all goes through
+  the same function so the two cannot diverge. A share link still cannot carry a
+  photo and now says so in its title.
 - **Seven kinds, seven colours.** Reps was neutral, a ladder was violet like
   Recover, and a section took `--phase` (the Rest blue). Now `--group-reps` /
   `-ladder` / `-section` (orange, yellow, teal), shown as the row's 4px left rule

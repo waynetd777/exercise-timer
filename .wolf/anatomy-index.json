@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-21T18:55:52.997Z",
-    "fileCount": 21,
+    "lastScanned": "2026-08-21T19:27:59.934Z",
+    "fileCount": 24,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b18e2ee121ad710e5a37b22cfc0459e91441a4f0aa9d85027b714386e9f7d8cd",
-    "storeUpdatedAt": "2026-08-21T18:55:53.007Z"
+    "renderedHash": "a0abd24eef3626ee78199efc2107173adac95f87f5450bdef9c7490f353adfe4",
+    "storeUpdatedAt": "2026-08-21T19:27:59.944Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -295,6 +295,65 @@
       "size": 1479,
       "mtimeMs": 1787338552915.0764,
       "updatedAt": "2026-08-21T18:55:52.997Z",
+      "source": "hook"
+    },
+    "src/media/dataUrl.ts": {
+      "description": "Blobs as text, so an image can travel inside an export file.",
+      "tokens": 630,
+      "hash": "792d9fde74c3a24b",
+      "size": 2210,
+      "mtimeMs": 1787340349381.1477,
+      "updatedAt": "2026-08-21T19:25:49.455Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "blobToDataUrl",
+          "kind": "fn",
+          "startLine": 25,
+          "endLine": 43,
+          "tokens": 203
+        },
+        {
+          "name": "dataUrlToBlob",
+          "kind": "fn",
+          "startLine": 44,
+          "endLine": 60,
+          "tokens": 167
+        }
+      ]
+    },
+    "src/storage/bundleMedia.ts": {
+      "description": "The photos in an export file.",
+      "tokens": 890,
+      "hash": "2985f151c1fcd0a8",
+      "size": 3119,
+      "mtimeMs": 1787340366134.1836,
+      "updatedAt": "2026-08-21T19:26:06.225Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "collectMedia",
+          "kind": "fn",
+          "startLine": 31,
+          "endLine": 57,
+          "tokens": 290
+        },
+        {
+          "name": "restoreMedia",
+          "kind": "fn",
+          "startLine": 58,
+          "endLine": 85,
+          "tokens": 222
+        }
+      ]
+    },
+    "src/storage/__tests__/bundleMedia.test.ts": {
+      "description": "Declares photo",
+      "tokens": 1635,
+      "hash": "84de598601c52fd0",
+      "size": 5726,
+      "mtimeMs": 1787340479853.2935,
+      "updatedAt": "2026-08-21T19:27:59.933Z",
       "source": "hook"
     }
   },
