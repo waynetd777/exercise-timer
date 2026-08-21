@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { finishesOnTap, runCues } from '../engine'
 import type { Routine } from '../engine'
-import { cueKey, dueCues, REARM_MS } from './schedule'
+import { cueKey, dueCues, REARM_MS, requeueable } from './schedule'
 import type { RunStatus } from '../state/useTimer'
 import { audio } from './engine'
 import { audioTimeFor, toneFor } from './tones'
@@ -21,9 +21,10 @@ type Options = {
 /**
  * Keeps a rolling window of cues queued on the audio clock.
  *
- * Re-arms on a timer, on every clock mutation, and on return to visibility.
- * Each arm cancels what was pending first, so a pause or a skip cannot leave
- * orphaned beeps from a position the workout has left.
+ * Re-arms on a timer, on every clock mutation, on return to visibility, and when
+ * a recording finishes decoding. Each arm cancels what was pending first, so a
+ * pause or a skip cannot leave orphaned beeps from a position the workout has
+ * left.
  */
 export function useCueScheduler({
   routine,
@@ -72,6 +73,26 @@ export function useCueScheduler({
       }
     }
 
+    /*
+     * Queue again what the whistle recording has changed under us.
+     *
+     * A queued cue is already built, fallback tone and all (see
+     * `onSampleDecoded`), and on a cold start the whole first window was queued
+     * before the decode finished — including the whistle at the end of the
+     * get-ready. Cancelling and re-arming rebuilds them with the recording.
+     *
+     * Only what cancellation actually dropped is forgotten: a cue already
+     * sounding is spared, and forgetting it would queue it a second time.
+     */
+    const stopWaiting = audio.onSampleDecoded(() => {
+      const elapsed = readElapsed()
+      audio.cancelPending()
+      for (const key of requeueable(allCues, elapsed, scheduled.current)) {
+        scheduled.current.delete(key)
+      }
+      arm()
+    })
+
     arm()
     const interval = window.setInterval(arm, REARM_MS)
 
@@ -86,6 +107,7 @@ export function useCueScheduler({
     document.addEventListener('visibilitychange', onVisible)
 
     return () => {
+      stopWaiting()
       window.clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisible)
     }

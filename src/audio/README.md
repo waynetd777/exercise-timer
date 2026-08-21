@@ -44,8 +44,8 @@ than a beat, which is the same trade `speech.ts` makes.
 ## Scheduled ahead, never ticked
 
 Beeps are queued on the `AudioContext` clock in a rolling 30-second window, and
-the window is re-armed on a timer, on every clock mutation, and on return to
-visibility. They are never fired from a JavaScript tick, because the audio thread
+the window is re-armed on a timer, on every clock mutation, on return to
+visibility, and when the whistle recording finishes decoding. They are never fired from a JavaScript tick, because the audio thread
 keeps time when the main thread is throttled — which is exactly the situation a
 gym timer is in.
 
@@ -62,6 +62,16 @@ Two consequences worth knowing:
 - **The AudioContext must be unlocked from a user gesture**, so every control
   calls `unlock()`. It is idempotent, which is simpler than guessing which tap
   comes first.
+- **A cue is BUILT when it is queued, not when it sounds** — which is up to
+  thirty seconds earlier, and is why the first whistle of a cold start used to be
+  the fallback tone. The recording is chosen at that moment or not at all, and on
+  a cold start the first window is armed in the same tick the decode begins, so
+  every whistle in the first half-minute got the plain 2900Hz tone. Two things fix
+  it: the download starts at module load rather than at the first tap
+  (`samples.ts`), and `onSampleDecoded` tells the scheduler to cancel and queue
+  again when the buffer lands. `requeueable()` is what keeps that from playing a
+  cue twice — cancellation spares a cue that has begun, so the re-arm has to
+  forget only the cues it actually dropped. Both sides read `CANCEL_GRACE_MS`.
 
 ## The tones are measured, not invented
 
@@ -77,7 +87,8 @@ whistle then found one identical on every figure, with a waveform correlation of
 the real thing. It does, at 44KB. The synthesised versions and their generator are
 gone — keeping a second whistle implementation to guard against a decode failure
 on a precached file was not worth the code, so a failed decode sounds a plain
-2900Hz tone instead. See `samples.ts` for provenance and licence.
+2900Hz tone instead. See `samples.ts` for provenance and licence, and for why the
+decode waits for the gesture while the download does not.
 
 Two findings shaped the result:
 
@@ -117,7 +128,7 @@ scheduled cue.
 | `tones.ts` | The measured specs, the full figures, and the one subtraction mapping run time to audio time |
 | `schedule.ts` | The window arithmetic: `dueCues`, `cueKey`, the lookahead constants |
 | `useCueScheduler.ts` | The rolling window, wired to React |
-| `samples.ts` | The one recording: provenance, licence, and why it is not synthesised |
+| `samples.ts` | The one recording: provenance, licence, why it is not synthesised, and the download that starts before the first tap |
 | `referee-whistle-cc0.wav` | 44KB, 22.05kHz mono, CC0 — see `samples.ts` before touching it |
 | `useMuted.ts` | Mute, persisted to localStorage — the right home for a UI flag |
 | `speech.ts`, `useSpokenCues.ts` | The spoken lines, and why they are not scheduled cues |

@@ -1,5 +1,6 @@
 import type { Note, ToneSpec } from './tones'
-import { SAMPLES, type SampleName } from './samples'
+import { sampleBytes, type SampleName } from './samples'
+import { CANCEL_GRACE_MS } from './schedule'
 
 /**
  * Web Audio wrapper.
@@ -12,6 +13,11 @@ import { SAMPLES, type SampleName } from './samples'
  * recording (see `samples.ts`), decoded once at unlock and played from a buffer.
  * If that decode fails the note's own fields still make a plain tone, so a
  * missing sample costs fidelity and never a silent cue.
+ *
+ * Because a cue is BUILT when it is scheduled, that choice between recording and
+ * fallback is made up to thirty seconds before the cue sounds. A decode finishing
+ * in between therefore changes nothing on its own — hence `onSampleDecoded`, so
+ * whoever queued those cues can queue them again.
  *
  * A note is built as a small graph:
  *
@@ -33,6 +39,7 @@ class AudioEngine {
   private noiseBuffer: AudioBuffer | null = null
   private samples = new Map<SampleName, AudioBuffer>()
   private decoding = new Set<SampleName>()
+  private decodeListeners = new Set<() => void>()
 
   /**
    * Must be called synchronously from a user gesture — mobile browsers refuse
@@ -47,13 +54,15 @@ class AudioEngine {
       this.master.connect(this.ctx.destination)
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()
-    // Decoding needs a context, and unlock is the first moment one exists. Fired
-    // and forgotten: a cue arriving before it finishes uses the fallback.
+    // Decoding needs a context, and unlock is the first moment one exists. The
+    // bytes are already downloading (`samples.ts`), so this is short — but not
+    // short enough to beat the scheduler's first arm, which is why it announces
+    // itself when it lands.
     void this.decode('whistle')
   }
 
   /**
-   * Fetches and decodes a sample once. Failure is deliberately swallowed — every
+   * Decodes a downloaded sample once. Failure is deliberately swallowed — every
    * sampled note carries a synthesised fallback, so the cost of a dead network is
    * a slightly worse whistle rather than a missing one.
    */
@@ -62,12 +71,32 @@ class AudioEngine {
     if (!ctx || this.samples.has(name) || this.decoding.has(name)) return
     this.decoding.add(name)
     try {
-      const response = await fetch(SAMPLES[name])
-      this.samples.set(name, await ctx.decodeAudioData(await response.arrayBuffer()))
+      const bytes = await sampleBytes(name)
+      if (!bytes) return
+      // A copy per attempt: decodeAudioData detaches what it is handed, and the
+      // download is kept so a second attempt has something left to decode.
+      this.samples.set(name, await ctx.decodeAudioData(bytes.slice(0)))
+      for (const listener of this.decodeListeners) listener()
     } catch {
       // Fallback covers it.
     } finally {
       this.decoding.delete(name)
+    }
+  }
+
+  /**
+   * Subscribes to a recording becoming available, and returns the unsubscribe.
+   *
+   * Needed because a queued cue is already built. On a cold start the first
+   * window is armed in the same tick as the decode begins, so every cue in it —
+   * the whistle at the end of the get-ready among them — was built with the
+   * fallback tone, and stays that way for the first half-minute of the workout
+   * unless it is queued again.
+   */
+  onSampleDecoded(listener: () => void): () => void {
+    this.decodeListeners.add(listener)
+    return () => {
+      this.decodeListeners.delete(listener)
     }
   }
 
@@ -108,7 +137,7 @@ class AudioEngine {
        * a hair before it starts. Double-playing is prevented by the scheduler
        * deduplicating instead.
        */
-      if (cueStartedAt <= now + 0.15) continue
+      if (cueStartedAt <= now + CANCEL_GRACE_MS / 1000) continue
       try {
         source.stop(now)
       } catch {
