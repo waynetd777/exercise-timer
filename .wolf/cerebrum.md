@@ -178,6 +178,8 @@
 
 - [2026-08-21] **Outcome reports are a dismissible modal (`NoticeDialog`), not an inline line.** "Saved 24 images" is worth reading once and then clearing; an inline notice just sits there afterwards. While the work is still running there is nothing to dismiss, so no close button is offered and Escape is swallowed via `onCancel` + `preventDefault` — it acts as a progress report until it has a result. The persistent library LOAD ERROR stays inline, because that is a condition rather than an event.
 
+- [2026-08-21] **Both library toolbar controls are `Menu`s — "Sort" and "Routines".** Sort was briefly a native `<select>`, which was replaced because a select can only ever show its selected value, and the control needed to be *named*. The trade accepted: no native mobile picker, in exchange for a matching pair of controls and a tick showing the active sort. The button reads just "Sort", not "Sort: Recent" — say so if the current value should be visible on the button.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

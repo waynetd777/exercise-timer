@@ -282,20 +282,14 @@ export function LibraryScreen({
             onChange={(event) => setQuery(event.target.value)}
           />
 
-          <label className="library__sort">
-            <span className="visually-hidden">Sort routines</span>
-            <select
-              className="chip chip--select"
-              value={sort}
-              onChange={(event) => setSort(event.target.value as SortMode)}
-            >
-              {SORTS.map(({ mode, label }) => (
-                <option key={mode} value={mode}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Menu
+            label="Sort"
+            items={SORTS.map(({ mode, label }) => ({
+              label,
+              selected: sort === mode,
+              onSelect: () => setSort(mode),
+            }))}
+          />
 
           <Menu
             label="Routines"
