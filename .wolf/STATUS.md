@@ -220,8 +220,8 @@
 
 ## 🚀 Next quest — strength routines: untimed steps, sections, ladders
 
-**Agreed 2026-08-21 with Wayne. Steps 1–2 of the build order are DONE and green
-(347 tests, typecheck + build clean, uncommitted). Next: step 3, the run state.**
+**Agreed 2026-08-21 with Wayne. Steps 1–3 of the build order are DONE and green
+(356 tests, typecheck + build clean). Next: step 4, list mode on the run screen.**
 
 ### Landed so far
 - **Step 1** — the three routines are saved verbatim as parser fixtures in
@@ -240,8 +240,15 @@
 - The type change found every tree walker that assumed `kind === 'repeat'` meant
   "group" — `media/gc.ts` most importantly, where missing a group kind would have
   orphaned live images and deleted them. All now recurse on `!== 'segment'`.
-- `useTimer` explicitly takes `compile(workout).runs[0]`, with a comment saying
-  why that is still correct today and what replaces it in step 3.
+- **Step 3** — `useTimer` holds a `Cursor` and re-anchors the clock on every run
+  change; the tick decision is pure in `state/tick.ts`. `RunScreen` follows the
+  cursor: progress is by time while a routine is fully timed and by STEP once it
+  has gates, "time left" is hidden when gates make it unknowable, and a
+  self-paced step shows its rep target where the countdown would be.
+  **A run-local trap found on the way:** `useSpokenCues` keyed its
+  already-announced ref on `entry.index`, which is now run-local — every run's
+  first step is index 0, so each would have suppressed the next one's
+  announcement. It keys on `entry.step` now.
 
 Source material: three emails forwarded (20 Jul, 3 Aug, 17 Aug 2026),
 in `~/Downloads/*.eml`. **Written by her gym instructor, not by her** — so the
@@ -343,12 +350,15 @@ counting line (`2-4-6-8-…`, hyphen or en-dash), `N Rounds` / `3–5 Rounds`,
 1. ✅ Save the three routines as text fixtures in the repo.
 2. ✅ `engine`: optional `durationMs`, `reps`, `Ladder`, `Section`; `compile()` →
    runs and gates. Pure, tested, no UI.
-3. ◀ **NEXT** — `state`: gate handling in `useTimer`. Hold a `Cursor` instead of a
-   bare elapsed; rebase the clock on every run change; `next`/`previous` call
-   `advance`/`retreat`; the tick calls `runIsOver` rather than comparing times
-   itself. Auto-advance must stay DERIVED — waking after ten minutes has to land
-   on the gate, not walk to it one step per tick.
-4. `ui`: list mode on the run screen.
+3. ✅ `state`: gate handling in `useTimer`. Run state is a `Cursor`; every jump
+   goes through one `moveTo` that re-anchors the clock; `next`/`previous` call
+   `advance`/`retreat`. The decision itself is pure in the new `state/tick.ts`
+   (stay / move / complete + when the display next changes), tested without a
+   DOM — including that ten minutes asleep JUMPS to the gate in one move rather
+   than walking a step per tick.
+4. ◀ **NEXT** — `ui`: list mode on the run screen. `groupEntries()` already
+   returns exactly the rows to draw and `sectionOf()` the display mode; what is
+   missing is the component, the full-width NEXT button, and picking the mode.
 5. The paste parser, with the three emails as fixtures.
 6. `editor`: sections, ladders, rep fields, untimed steps. Biggest UI chunk, last.
 
