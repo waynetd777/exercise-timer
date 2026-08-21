@@ -181,8 +181,8 @@ export function LibraryScreen({
     const url = await shareUrl(workout, `${location.origin}${location.pathname}`)
     setNotice(
       (await copyText(url))
-        ? `Link to “${workout.name}” copied.`
-        : 'Could not reach the clipboard — copy the link from the address bar after opening it.',
+        ? `Link to “${workout.name}” copied`
+        : 'Could not reach the clipboard — open the link and copy it from the address bar',
     )
   }
 
@@ -225,8 +225,13 @@ export function LibraryScreen({
 
     setNotice(
       pinned === 0 && failed === 0
-        ? 'Every image is already saved.'
-        : `Saved ${pinned} image${pinned === 1 ? '' : 's'}.${failed > 0 ? ` ${failed} could not be reached.` : ''}`,
+        ? 'Every image is already saved'
+        : [
+            `Saved ${pinned} image${pinned === 1 ? '' : 's'}`,
+            failed > 0 && `${failed} could not be reached`,
+          ]
+            .filter(Boolean)
+            .join(' — '),
     )
     setNoticeBusy(false)
   }
@@ -234,21 +239,19 @@ export function LibraryScreen({
   const ingest = async (files: readonly File[]) => {
     const candidates = files.filter(looksImportable)
     if (candidates.length === 0) {
-      setNotice('Only .tabata files can be imported.')
+      setNotice('Only .tabata files and exported routines can be imported')
       return
     }
 
     const { imported, failed } = await importRoutineFiles(candidates, Date.now())
     for (const workout of imported) await library.add(workout)
 
-    setNotice(
-      [
-        imported.length > 0 && `Imported ${imported.length}.`,
-        failed.length > 0 && `Skipped ${failed.map((file) => file.name).join(', ')}.`,
-      ]
-        .filter(Boolean)
-        .join(' ') || null,
-    )
+    const added = imported.length > 0 ? `Imported ${imported.length}` : null
+    const skipped =
+      failed.length > 0
+        ? `${added ? 'skipped' : 'Skipped'} ${failed.map((file) => file.name).join(', ')}`
+        : null
+    setNotice([added, skipped].filter(Boolean).join(' — ') || null)
   }
 
   return (
@@ -363,8 +366,8 @@ export function LibraryScreen({
         ) : visible.length === 0 ? (
           <p className="library__empty label">
             {query
-            ? `Nothing matches “${query}”.`
-            : 'Drop a .tabata or exported .json file here to add a routine.'}
+            ? `Nothing matches “${query}”`
+            : 'Drop a .tabata or exported .json file here to add a routine'}
           </p>
         ) : (
           <ul className="library__list">
