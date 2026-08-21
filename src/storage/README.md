@@ -27,6 +27,22 @@ The rules that earned tests:
   "Leg day (copy) (copy)".
 - **`markRun` must not touch `updatedAt`.** Running a routine is not editing it.
 
+## Migration happens on read, not in place
+
+`migrate.ts` applies forward-only fixes as a routine *enters* the app, at all
+three entry points — IndexedDB, an imported bundle, a share link. Nothing is
+rewritten in place, so an export opened next year is fixed exactly the way today's
+stored routines are, and no schema step has to run before anything can be read. It
+returns its input unchanged when there is nothing to fix, so React sees no
+needless new objects.
+
+The fix that exists today: repeat groups were called "rounds", and every one the
+editor created stored the literal label `'Round'`. The label is **data**, so a
+code-only rename would have left existing routines saying "Round 2 of 3" forever.
+Only the exact former defaults are renamed — a group someone deliberately called
+"Round 1" keeps its name. Any future rename of a stored label needs the same
+treatment.
+
 ## Seeding is once per id
 
 Tracked in `seeded.ts` rather than "seed when the library is empty". That way a
@@ -57,6 +73,7 @@ none of the sender's favourites or run history: it is their copy now.
 |---|---|
 | `db.ts` | Connection, stores, persistence request |
 | `library.ts` | Pure ordering, naming and stamping rules |
+| `migrate.ts` | Forward-only fixes applied on read |
 | `workouts.ts` | IndexedDB CRUD |
 | `useLibrary.ts` | React wiring, seeding, and the orphan sweep on delete |
 | `seeded.ts` | Which seeds have been offered |

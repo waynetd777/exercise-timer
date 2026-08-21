@@ -14,8 +14,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png', 'favicon.svg', 'favicon-32.png', 'favicon-64.png'],
       manifest: {
-        name: 'DavShack Timer',
-        short_name: 'DavShack',
+        name: 'Exercise Timer',
+        short_name: 'Exercise',
         description: 'Interval timer for gym routines',
         // Matches --ink-900 so the shell does not flash a different colour.
         theme_color: '#121314',
