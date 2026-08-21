@@ -2,7 +2,7 @@
 
 You are working in an OpenWolf-managed project. These rules apply every turn.
 
-OpenWolf's hooks handle the bookkeeping: they maintain `.wolf/anatomy.md` and `.wolf/memory.md` after writes, track reads, and surface anatomy hints when you read files. Do not update those two files manually unless your agent has no OpenWolf hooks installed (Gemini CLI, Cursor).
+OpenWolf's hooks handle the bookkeeping: they maintain `.wolf/anatomy.md` and `.wolf/memory.md` after writes, track reads, and surface anatomy hints when you read files. Do not update those two files manually — this project is wired for Claude Code only, and its hooks are installed.
 
 ## STATUS.md: read first, keep fresh
 
