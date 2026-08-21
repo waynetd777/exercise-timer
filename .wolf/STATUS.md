@@ -166,6 +166,9 @@
   - **Upload your own photo** per step in the editor (downscaled, hashed, stored). **Save images** in the library header pins every linked image locally — possible only because `i.postimg.cc` allows cross-origin reads.
   - **Media GC on delete**, computed against the whole remaining library because storage is content-addressed and a deleted routine may share images with one that stays.
   - **261 tests green.**
+- **Removed `.codex/` and documented the repo** (user-reported)
+  - Deleted `.codex/` (hooks, config, 3 prompt files) that OpenWolf added for Codex. `AGENTS.md` was LEFT in place — it is the cross-agent convention file rather than Codex-specific, and it is 4 lines pointing at `.wolf/OPENWOLF.md`. Say the word to remove it too.
+  - **Root `README.md` plus a README for all 8 source folders** (559 lines total). Each documents the DECISIONS and the traps, not the code: why time is derived rather than counted, why a routine compiles to a flat timeline, why cues are pre-scheduled, why the tones are measured rather than sampled, why storage is content-addressed, and the eight CSS traps that each cost a real bug.
 
 ---
 
