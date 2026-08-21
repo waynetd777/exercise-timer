@@ -249,6 +249,19 @@ button {
 .notice {
   width: min(90vw, 26rem);
   max-width: none;
+  /*
+   * Three defences against being stretched, because a dialog is a child of
+   * whatever screen opened it and those screens are full-height grids. Stretched,
+   * its auto rows split the spare height between them: the title pinned to the
+   * top, the detail marooned in the middle, and the buttons pulled into slabs.
+   *
+   * `height: fit-content` keeps the box the size of its contents, `align-self`
+   * stops an ancestor grid overruling that, and `align-content` packs the rows
+   * so they cannot stretch even if something else does get through.
+   */
+  height: fit-content;
+  align-self: center;
+  align-content: center;
   margin: auto;
   padding: var(--step-5);
   display: grid;
@@ -284,6 +297,9 @@ button {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  /* Chips keep their own height: a flex item defaults to stretching, which is
+     what turned two buttons into full-height columns. */
+  align-items: center;
   gap: var(--step-3);
 }
 

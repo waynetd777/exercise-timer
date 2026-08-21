@@ -96,6 +96,13 @@ Each of these cost a real bug. They are recorded because they recur.
 - **CSS cannot divide one length by another**, so a ratio driven by a pixel
   distance needs that distance passed in unitless.
 - **A `<label>` must not wrap a button** — it forwards the click to its input.
+- **Anything with auto grid rows gets stretched by whatever contains it.** A
+  dialog is a child of the full-height grid that opened it, and a stretched
+  dialog splits the spare height between its rows: title at the top, body
+  marooned in the middle, buttons pulled into slabs. Flex children stretch the
+  same way, which is what turns two chips into full-height columns. Give a box
+  `height: fit-content` and `align-content` / `align-items` that pack, rather
+  than trusting it to be sized by its contents.
 - **Never fade a saturated colour toward a near-black ground** to show an inactive
   state. Dark plus desaturated red is brown. Mix toward a mid neutral instead, or
   drop the hue.
