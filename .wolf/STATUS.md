@@ -179,6 +179,12 @@
 - **Sort control renamed** (user-reported) — it is now a **Sort** menu matching the Routines one, with a tick on the active mode. It had been a native `<select>`, which can only ever display its selected value; the trade is losing the native mobile picker. The dead `.chip--select` and `.library__sort` rules were removed.
 - **No trailing periods in messages** (user-reported for modals; applied to all short status text so the app does not read two ways). Two-sentence messages were rewritten as a single em-dashed phrase rather than keeping an internal period.
 - **Placeholder text no longer truncated** (user-reported on portrait iPad) — `fitCqi`'s coefficient was 161 from two compounded optimistic assumptions (a 0.62em advance, and the full width with fixed padding ignored). A portrait iPad puts the panel at ~250px wide, where 24px of padding is a tenth of it, so every fallback name overflowed ~20%. Padding is now proportional on both axes, the coefficient is an explicit 84-of-92 budget over a 0.72em advance, `overflow-wrap: anywhere` is a last-resort net, and the tests assert the fit against a **pessimistic** 0.78em advance. Verified across phone, both iPad orientations, laptop and a short window. See buglog `bug-022`. **285 tests green.**
+- **Three distinct cue endings, and a sound bench** (user-specified)
+  - `CueKind` split: `work-start` (entering work → whistle) and `work-end` (entering anything else → bell) replace the single `phase-change`. Keyed on the step being ENTERED, since every boundary is both an end and a start.
+  - **Whistle** synthesised as a pea whistle: 3800Hz + hard 2nd harmonic, chopped 26Hz in pitch AND level, 5% band-passed breath, held not struck. Needed three new engine capabilities — `warble`, `tremolo`, `noise` — because a whistle without the chop is a test tone.
+  - **Three dings** for the finish: 3136Hz, inharmonic ×2.74, 520ms, struck at 0/260/520ms — brighter and shorter than the bell, as specified.
+  - **Sound bench at Routines → Sounds**: each cue plays as the full beep-beep-beep-X figure and as the terminal sound alone, with its parameters printed beside it so iteration is precise.
+  - **289 tests green**, including that the whistle and bell cannot be confused and that every boundary sound fits inside the shortest real step.
 
 ---
 
