@@ -236,3 +236,23 @@ export function sectionOf(entry: TimelineEntry): PathStep | null {
   }
   return null
 }
+
+/**
+ * Whether a step is shown as a LIST of its group, or as the countdown.
+ *
+ * Pure and here rather than in the component, because it is a real rule with
+ * three clauses and one of them is easy to get backwards.
+ *
+ *  - A step outside a list-mode section is a countdown, as it always was.
+ *  - A TIMED step is a countdown wherever it falls. You are not reading a list
+ *    while holding a wall sit — you are watching the clock. A rest between
+ *    rounds, a hold at the end of a rung and one in the middle of a burnout are
+ *    all the same case.
+ *  - A gate with nothing after it in its group is a countdown too: the list
+ *    would be a column of struck-through text and one live row.
+ */
+export function listMode(routine: Routine, entry: TimelineEntry): boolean {
+  if (!entry.selfPaced) return false
+  if (sectionOf(entry)?.display !== 'list') return false
+  return groupEntries(routine, entry).filter((row) => row.step >= entry.step).length > 1
+}

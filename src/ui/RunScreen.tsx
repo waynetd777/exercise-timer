@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { Run, TimelineEntry, Workout } from '../engine'
-import { groupEntries, groupOf, sectionOf, stepCount, totalDurationMs } from '../engine'
+import { groupEntries, groupOf, listMode, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useSpokenCues } from '../audio/useSpokenCues'
@@ -232,16 +232,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
    * countdown for it and back would be disorienting. A self-paced step outside
    * any section has no other sensible rendering.
    */
-  const inList = entry !== null && (sectionOf(entry)?.display === 'list' || entry.selfPaced)
   const rows = entry ? groupEntries(routine, entry) : []
-
-  /*
-   * Once nothing is left but the step being worked, the list is a column of
-   * struck-through text and one live row — it has stopped telling you anything.
-   * The trailing rest of a round and the wall sit at the end of a rung both land
-   * here, and both are better as the countdown they are.
-   */
-  const showList = inList && rows.filter((row) => row.step >= entry!.step).length > 1
+  const showList = entry !== null && listMode(routine, entry)
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''

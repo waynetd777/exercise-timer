@@ -61,11 +61,15 @@ Note that the width term is deliberately absent there. A `cqi` bound pinned a
 phone to the floor, because a narrow screen is exactly where the rows most need
 to be big — height is the constraint in a list, not width.
 
-The list is shown only while it still has something to say. Once the step being
-worked is the last one left, the list is a column of struck-through text and one
-live row, so the countdown layout takes over — the trailing rest of a round and
-the wall sit at the end of a rung both land there, and both are better as the
-countdown they are.
+Which layout appears is `listMode()` in the engine, not a condition scattered
+through the component. Three clauses, and one is easy to get backwards:
+
+- A step outside a list-mode section is a countdown, as it always was.
+- **A timed step is a countdown wherever it falls.** You are not reading a list
+  while holding a wall sit — you are watching the clock. A rest between rounds, a
+  hold at the end of a rung and one in the middle of a burnout are all this case.
+- A gate with nothing after it in its group is a countdown too, since the list
+  would be a column of struck-through text and one live row.
 
 Rows keep ONE size across the group, and the list scrolls when it must. A row
 shrunk to fit alone would be illegible, and rows of differing sizes read as

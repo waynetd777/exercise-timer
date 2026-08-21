@@ -14,6 +14,7 @@ export {
   cursorForStep,
   groupEntries,
   groupOf,
+  listMode,
   locate,
   nextRun,
   retreat,
