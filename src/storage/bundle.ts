@@ -46,11 +46,22 @@ export function toBundle(
   }
 }
 
+/** Every group kind, so adding one cannot silently make routines unreadable. */
+const GROUP_KINDS = new Set(['repeat', 'ladder', 'section'])
+
+/**
+ * Validation is a WHITELIST, which is the trap to remember here.
+ *
+ * When ladders and sections were added this still accepted only segments and
+ * repeats, so `isWorkout` rejected every pasted routine and `fromBundle`
+ * filtered it out — an export that wrote perfectly well and restored nothing.
+ * A new block kind has to be added here at the same time.
+ */
 function isBlock(value: unknown): value is Block {
   if (typeof value !== 'object' || value === null) return false
   const block = value as { kind?: unknown; children?: unknown }
   if (block.kind === 'segment') return true
-  if (block.kind !== 'repeat') return false
+  if (typeof block.kind !== 'string' || !GROUP_KINDS.has(block.kind)) return false
   return Array.isArray(block.children) && block.children.every(isBlock)
 }
 

@@ -1,5 +1,7 @@
 import type { Workout } from '../engine'
+import { SCHEMA_VERSION } from '../engine'
 import { fromBundle } from '../storage/bundle'
+import { parseRoutine } from './pasteFormat'
 import { importTabataFile, TabataImportError } from './tabataFormat'
 
 export type ImportResult = {
@@ -10,9 +12,14 @@ export type ImportResult = {
 /**
  * Reads dropped or picked routine files.
  *
- * Two formats are accepted: this app's own export bundle, and the Tabata Timer
- * app's `.tabata` export. The bundle is tried first because it identifies itself
- * with a marker, so there is no guessing.
+ * Three formats: this app's own export bundle, the Tabata Timer app's `.tabata`
+ * export, and plain text in the format the paste dialog accepts. The bundle is
+ * tried first because it identifies itself with a marker, so there is no
+ * guessing; text is tried last, when the file is not JSON at all.
+ *
+ * Text is worth accepting because the routines arrive as email, and saving one
+ * to a file is often easier than getting at its text to copy — particularly on a
+ * phone. The file's own name becomes the routine's.
  *
  * Every file is attempted and failures are collected rather than thrown, so one
  * bad file in a drop of ten does not lose the other nine.
@@ -26,7 +33,15 @@ export async function importRoutineFiles(
 
   for (const file of files) {
     try {
-      const json: unknown = JSON.parse(await file.text())
+      const text = await file.text()
+      let json: unknown
+      try {
+        json = JSON.parse(text)
+      } catch {
+        // Not JSON, so read it the way the paste dialog would.
+        imported.push(pasted(text, file.name, now))
+        continue
+      }
 
       if (
         typeof json === 'object' &&
@@ -59,8 +74,30 @@ export async function importRoutineFiles(
   return { imported, failed }
 }
 
+/** Turns a plain-text routine into a workout, named after its file. */
+function pasted(text: string, filename: string, now: number): Workout {
+  const name = filename.replace(/\.[^.]+$/, '').trim()
+  const parsed = parseRoutine(text, name || 'Pasted routine')
+  if (parsed.blocks.length === 0) throw new Error('No routine found in this file.')
+  return {
+    id: crypto.randomUUID(),
+    name: parsed.name,
+    blocks: parsed.blocks,
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: now,
+    updatedAt: now,
+  }
+}
+
 /** Routine files are JSON, and browsers often report no MIME type for them. */
 export function looksImportable(file: File): boolean {
   const name = file.name.toLowerCase()
-  return name.endsWith('.tabata') || name.endsWith('.json') || file.type === 'application/json'
+  return (
+    name.endsWith('.tabata') ||
+    name.endsWith('.json') ||
+    name.endsWith('.txt') ||
+    name.endsWith('.md') ||
+    file.type === 'application/json' ||
+    file.type.startsWith('text/')
+  )
 }
