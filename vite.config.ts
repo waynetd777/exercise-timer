@@ -50,22 +50,6 @@ export default defineConfig({
         // immediately rather than waiting for every tab to close.
         clientsClaim: true,
         skipWaiting: true,
-        runtimeCaching: [
-          {
-            // Exercise illustrations. Cache-first because they never change —
-            // postimages serves them with a ten-year max-age — and because gym
-            // wifi is the whole reason this app has to work offline.
-            urlPattern: /^https:\/\/i\.postimg\.cc\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'exercise-images',
-              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              // 0 covers an opaque response, in case a host without CORS is
-              // ever used for images.
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
       },
     }),
   ],
