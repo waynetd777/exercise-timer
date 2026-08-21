@@ -77,6 +77,15 @@
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */
+/*
+ * A self-paced step in the countdown layout carries the Next slab as a third,
+ * auto-sized row below the media panel. The two proportional rows share what is
+ * left, so the picture and the numerals keep their relationship to each other.
+ */
+.run__body > .sheet__next {
+  align-self: end;
+}
+
 .run__body {
   /* `size`, not `inline-size`: the countdown has to be sized against the
      available HEIGHT as well as width, or it overflows on a short window.

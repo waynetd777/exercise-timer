@@ -61,6 +61,12 @@ Note that the width term is deliberately absent there. A `cqi` bound pinned a
 phone to the floor, because a narrow screen is exactly where the rows most need
 to be big — height is the constraint in a list, not width.
 
+The list is shown only while it still has something to say. Once the step being
+worked is the last one left, the list is a column of struck-through text and one
+live row, so the countdown layout takes over — the trailing rest of a round and
+the wall sit at the end of a rung both land there, and both are better as the
+countdown they are.
+
 Rows keep ONE size across the group, and the list scrolls when it must. A row
 shrunk to fit alone would be illegible, and rows of differing sizes read as
 ragged: below the fold beats unreadable.
