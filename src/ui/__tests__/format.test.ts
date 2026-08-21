@@ -8,10 +8,12 @@ import {
   fitBlockCqi,
   fitCqi,
   fitWidthUsed,
+  isoDate,
   listLines,
   pathLabel,
   wordCount,
 } from '../format'
+import { defaultRoutineName } from '../PasteDialog'
 
 describe('clock', () => {
   it('shows bare seconds under a minute — faster to read at three metres', () => {
@@ -250,5 +252,25 @@ describe('listLines — sizing a group to fill the sheet', () => {
   it('never returns zero, so the divisor is always safe', () => {
     expect(listLines([])).toBe(1)
     expect(listLines([{ name: '' }])).toBe(1)
+  })
+})
+
+describe('isoDate', () => {
+  it('formats the LOCAL date, not the UTC one', () => {
+    // 01:00 on the 22nd in Johannesburg is still the 21st in UTC, and a routine
+    // pasted then must not be dated the day before.
+    const afterMidnight = new Date(2026, 7, 22, 1, 0, 0)
+    expect(isoDate(afterMidnight)).toBe('2026-08-22')
+  })
+
+  it('pads months and days', () => {
+    expect(isoDate(new Date(2026, 0, 5))).toBe('2026-01-05')
+    expect(isoDate(new Date(2026, 11, 31))).toBe('2026-12-31')
+  })
+})
+
+describe('defaultRoutineName', () => {
+  it('dates the routine, since they arrive weekly on one template', () => {
+    expect(defaultRoutineName(new Date(2026, 6, 20))).toBe('Strength Training - 2026-07-20')
   })
 })

@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
 import type { ParsedRoutine } from '../routines/pasteFormat'
+import { isoDate } from './format'
 import { CloseIcon, PlusIcon } from './icons'
+
+/**
+ * What a pasted routine is called unless it is renamed.
+ *
+ * Dated because they arrive weekly on one template and are otherwise
+ * indistinguishable in the library — "Strength training" four times over tells
+ * you nothing about which is this week's.
+ */
+export function defaultRoutineName(now: Date): string {
+  return `Strength Training - ${isoDate(now)}`
+}
 
 /**
  * Paste a routine in as text.
@@ -25,7 +37,9 @@ export function PasteDialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [text, setText] = useState('')
-  const [name, setName] = useState('')
+  // Read once, on open: a dialog left open over midnight should not rename itself.
+  const [fallback] = useState(() => defaultRoutineName(new Date()))
+  const [name, setName] = useState(fallback)
 
   useEffect(() => {
     dialog.current?.showModal()
@@ -33,7 +47,7 @@ export function PasteDialog({
 
   // Parsing is pure and fast, so the preview updates as you type rather than
   // behind a button: you find out it did not understand line 45 immediately.
-  const parsed = text.trim() === '' ? null : parseRoutine(text, name.trim() || 'Pasted routine')
+  const parsed = text.trim() === '' ? null : parseRoutine(text, name.trim() || fallback)
   const sections = parsed?.blocks.filter((block) => block.kind === 'section').length ?? 0
 
   return (
@@ -45,7 +59,7 @@ export function PasteDialog({
         <input
           className="paste__name"
           value={name}
-          placeholder="Strength training"
+          placeholder={fallback}
           onChange={(event) => setName(event.target.value)}
         />
       </label>
