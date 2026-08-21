@@ -12,6 +12,7 @@ import {
   clockWidth,
   duration,
   effortLabel,
+  effortSuffix,
   fitBlockCqi,
   fitCqi,
   groupCaption,
@@ -112,6 +113,9 @@ function SectionList({
               <span className="sheet__effort">
                 {current && row.durationMs !== undefined ? clock(secondsLeft) : effortLabel(row)}
               </span>
+              {/* Its own column, so the counts line up with each other rather
+                  than with the end of "each side". */}
+              <span className="sheet__side">{effortSuffix(row)}</span>
               <span className="sheet__name">
                 {row.name}
                 {row.alternative && <em className="sheet__alt">or {row.alternative}</em>}

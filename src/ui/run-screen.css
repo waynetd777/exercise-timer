@@ -533,12 +533,26 @@
 
 .sheet__row {
   display: grid;
-  /* The effort column is sized from its content but shares one width down the
-     list, so the names line up however wide "5 × each side" turns out to be. */
-  /* In em, so the effort column keeps its proportion as the rows grow. */
-  grid-template-columns: minmax(3.4em, auto) minmax(0, 1fr);
+  /*
+   * Three columns: the count, its per-side qualifier, then the name.
+   *
+   * The qualifier is separate so the counts share a right edge with each other.
+   * In one column, "5 × each side" is three times the width of "12 ×" and a
+   * right-aligned column lines the digits up with the end of "side". The middle
+   * column collapses to nothing when no row in the group is per-side.
+   *
+   * In em, so the columns keep their proportion as the rows grow.
+   */
+  grid-template-columns: minmax(3.4em, auto) auto minmax(0, 1fr);
   align-items: baseline;
-  gap: var(--step-3);
+  /*
+   * Spacing by padding, not by column-gap. A gap applies between declared tracks
+   * whether or not anything is in them, so the qualifier column would cost a
+   * second gap on every row that has no qualifier — exactly the phantom the
+   * paste dialog had. Padding travels with the element instead, so a column with
+   * nothing in it takes no room at all.
+   */
+  column-gap: 0;
   padding: var(--step-2) var(--step-3);
   border-radius: var(--radius);
   /* Inherited from the list, which sizes the whole group at once. */
@@ -583,7 +597,27 @@
   color: inherit;
 }
 
+/*
+ * Secondary: it qualifies the count rather than being part of it, and dimming it
+ * keeps the numbers the thing the eye lands on down the column.
+ */
+.sheet__side {
+  padding-left: 0.45em;
+  white-space: nowrap;
+  font-size: 0.72em;
+  color: var(--bone-faint);
+}
+
+.sheet__side:empty {
+  display: none;
+}
+
+.sheet__row[data-state='done'] .sheet__side {
+  color: inherit;
+}
+
 .sheet__name {
+  padding-left: var(--step-3);
   min-width: 0;
   text-wrap: pretty;
   /* Long names wrap; they are never clipped and never shrink out of step with

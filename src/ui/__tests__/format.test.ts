@@ -3,6 +3,8 @@ import {
   clock,
   clockWidth,
   duration,
+  effortLabel,
+  effortSuffix,
   FIT_ADVANCE,
   FIT_AVAILABLE,
   fitBlockCqi,
@@ -293,5 +295,25 @@ describe('nameLines', () => {
   it('never returns zero, so the countdown cannot claim a negative height', () => {
     expect(nameLines('')).toBe(1)
     expect(nameLines('   ')).toBe(1)
+  })
+})
+
+describe('effortLabel and effortSuffix', () => {
+  it('keeps the count and its qualifier apart, so counts can share a column', () => {
+    const step = { reps: { count: 5, perSide: true } }
+    expect(effortLabel(step)).toBe('5 ×')
+    expect(effortSuffix(step)).toBe('each side')
+  })
+
+  it('has no suffix for a plain count or a duration', () => {
+    expect(effortLabel({ reps: { count: 12 } })).toBe('12 ×')
+    expect(effortSuffix({ reps: { count: 12 } })).toBe('')
+    expect(effortLabel({ durationMs: 45_000 })).toBe('45s')
+    expect(effortSuffix({ durationMs: 45_000 })).toBe('')
+  })
+
+  it('prefers reps over a duration, and is empty when a step has neither', () => {
+    expect(effortLabel({ durationMs: 30_000, reps: { count: 8 } })).toBe('8 ×')
+    expect(effortLabel({})).toBe('')
   })
 })
