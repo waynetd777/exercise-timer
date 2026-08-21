@@ -81,3 +81,4 @@
 | 21:26 | Created src/storage/bundleMedia.ts | — | ~890 |
 | 21:27 | Created src/storage/__tests__/bundleMedia.test.ts | — | ~1635 |
 | 23:32 | Created src/version.ts | — | ~161 |
+| 00:17 | iOS pass on the device: safe areas, dialog structure (sheet+panel), lvh shell, no document scroll, newId for insecure contexts, version badge, touch scrollbars, iOS zoom | src/ui/*, src/id.ts, src/version.ts, index.html | 13 commits, 511 tests green | ~200k |

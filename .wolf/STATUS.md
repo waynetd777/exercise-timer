@@ -238,6 +238,36 @@ now, none started:
   the trailing-rest rule drops the last one. Raised twice and never decided; one
   line in the parser moves the rest outside the group if four is wanted.
 
+### The iOS pass (2026-08-22)
+Everything below was found on the device and fixed; the whole class of bug was
+invisible in a desktop browser, which is why the workflow changed too.
+
+- **Test on the phone against the LAN dev server**, not the deploy:
+  `npm run dev -- --host 0.0.0.0 --port 5180` → `http://<mac-ip>:5180/`, and Add
+  to Home Screen from that URL for standalone/notch behaviour with HMR.
+- **The version badge** (`src/version.ts`, shown beside the help button) exists
+  because an installed PWA keeps its assets until properly relaunched. It caught a
+  reported "gap" that had already been fixed. **Bump it every build you test.**
+- **Safe-area insets** on every band that holds controls, plus the top layer,
+  which is inside no band at all (bug-037). Check the `@container` overrides: a
+  bare padding there cancels the inset on an iPhone in landscape.
+- **A dialog is two elements** — `.modal` sheet + panel div (bug-041). Never style
+  a `<dialog>` as the box: `height: fit-content` does not hug on iOS and its auto
+  rows stretch, which pins the title up and draws buttons as slabs.
+- **`crypto.randomUUID` is secure-context only** (bug-040), so New / Duplicate /
+  paste / import all threw on the plain-HTTP dev origin. Use `newId()` from
+  `src/id.ts`. `crypto.subtle` has the same limit, so photo uploads still cannot
+  be tested over plain HTTP.
+- **Three different causes produced "a gap at the bottom"**: `height: 100%`
+  resolving against the safe viewport, a stale PWA build, and a scrolled document
+  — then a fourth, `dvh` shrinking for the keyboard and never coming back. The
+  shell is `100lvh` now (stable), and `.modal` alone uses `dvh` (tracks the
+  keyboard). The document does not scroll at all.
+- **Also**: scrollbars hidden on touch, iOS zoom stopped by giving the paste box
+  16px, list rows given a width budget, count column tightened, per-kind colours
+  on the add buttons, the note toggle moved out of the action cluster, and no more
+  white flash on pull-to-refresh (an inline ground in `index.html`).
+
 ### Done since the quest closed (2026-08-21, all pushed)
 - **The image-link capability is gone.** `.tabata` imports now run through
   `migrateWorkout`, so their URLs — all of which are in `REHOSTED` — become
