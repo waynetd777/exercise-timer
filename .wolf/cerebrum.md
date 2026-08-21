@@ -323,3 +323,11 @@
   nothing after it in its group, where every other row would be struck through.
   Consequence: the Next slab is needed in BOTH layouts, so it is a shared
   `NextSlab` component, not a child of the list.
+
+- [2026-08-21] **Cues are armed ONE RUN at a time (`runCues`), not per routine.**
+  `cues()` describes a whole workout, so feeding it a single run put the finishing
+  dings at the end of every run and gave a gate one boundary cue per step, all
+  stacked at time zero. A gate gets ONE cue — a whistle as it opens — and no
+  countdown, having no end of its own. The finish is fired BY HAND when a routine
+  ends on a gate (`finishesOnTap`), because a tap cannot be queued on the audio
+  clock ahead of time.
