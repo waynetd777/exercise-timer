@@ -62,7 +62,7 @@ export function useSpokenCues(
     if (status !== 'running' || greeted.current) return
     greeted.current = true
     if (muted || !canSpeak()) return
-    const timer = window.setTimeout(() => speak(SPOKEN.enjoy), AFTER_START_CUE_MS)
+    const timer = window.setTimeout(() => speak(SPOKEN.start), AFTER_START_CUE_MS)
     return () => window.clearTimeout(timer)
   }, [status, muted])
 

@@ -118,10 +118,10 @@ function VoiceCard() {
         <button
           className="chip chip--action"
           disabled={!available}
-          onClick={() => speak(SPOKEN.enjoy)}
+          onClick={() => speak(SPOKEN.start)}
         >
           <PlayIcon />
-          “{SPOKEN.enjoy}”
+          “{SPOKEN.start}”
         </button>
         <button
           className="chip chip--action"
@@ -143,7 +143,7 @@ function VoiceCard() {
 
       <ul className="sound__notes">
         <li>
-          “{SPOKEN.enjoy}” — just after the routine starts, once per run, not on
+          “{SPOKEN.start}” — just after the routine starts, once per run, not on
           resume from a pause
         </li>
         <li>“{SPOKEN.tenSecondsLeft}” — at ten seconds left, on steps of 20s or more</li>
