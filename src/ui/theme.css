@@ -167,8 +167,22 @@ body,
    *
    * The percentage stays as a fallback line for anything without `dvh`.
    */
+  /*
+   * `lvh`, not `dvh`.
+   *
+   * The dynamic viewport shrinks when the keyboard comes up — so the app relaid
+   * itself at keyboard height, and iOS did not always tell it when the keyboard
+   * went away again. That left a band of nothing at the bottom that no amount of
+   * scrolling could shift, because there is nothing to scroll. The LARGE viewport
+   * is the screen with the dynamic UI retracted: a stable box that the keyboard
+   * cannot resize, which is what an installed app wants — the keyboard should
+   * cover the screen, not reflow it.
+   *
+   * The percentage stays as the fallback. A dialog is the one thing that DOES
+   * want to track the keyboard, and `.modal` asks for `dvh` itself.
+   */
   height: 100%;
-  height: 100dvh;
+  height: 100lvh;
   /*
    * The document itself never scrolls. Every screen is a full-height grid with
    * its own scroller inside it, and a dialog scrolls its own panel — so a
@@ -327,7 +341,12 @@ button {
   /* The sheet: viewport-sized, no box of its own. */
   width: 100%;
   max-width: none;
-  height: 100%;
+  /*
+   * `dvh` here, where the shell uses `lvh`: this is the one thing that SHOULD
+   * shrink when the keyboard appears, so the panel stays centred in what can
+   * actually be seen rather than behind it.
+   */
+  height: 100dvh;
   max-height: none;
   margin: 0;
   border: 0;
