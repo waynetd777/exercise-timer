@@ -169,6 +169,7 @@
 - **Removed `.codex/` and documented the repo** (user-reported)
   - Deleted `.codex/` (hooks, config, 3 prompt files) that OpenWolf added for Codex. `AGENTS.md` was LEFT in place — it is the cross-agent convention file rather than Codex-specific, and it is 4 lines pointing at `.wolf/OPENWOLF.md`. Say the word to remove it too.
   - **Root `README.md` plus a README for all 8 source folders** (559 lines total). Each documents the DECISIONS and the traps, not the code: why time is derived rather than counted, why a routine compiles to a flat timeline, why cues are pre-scheduled, why the tones are measured rather than sampled, why storage is content-addressed, and the eight CSS traps that each cost a real bug.
+- **Library header buttons reordered** (user-reported) — New, Import, Export, Save images. The file picker's `accept` also now lists `.json`, so exported bundles show in the dialog rather than only working by drag-and-drop.
 
 ---
 
