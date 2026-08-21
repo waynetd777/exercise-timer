@@ -349,7 +349,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         <div className="run__sheet">
           <SectionList routine={routine} at={at} secondsLeft={timer.secondsLeft} />
           <button
-            className="btn btn--primary btn--next"
+            type="button"
+            className="chip chip--primary sheet__next"
             onClick={withAudio(timer.next)}
             disabled={status !== 'running' && status !== 'paused'}
           >

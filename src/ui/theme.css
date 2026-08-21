@@ -211,6 +211,29 @@ button {
   color: var(--bone);
 }
 
+/*
+ * The affirmative chip, alongside `.chip--danger`.
+ *
+ * `--phase` has a root default for exactly this reason: an undefined custom
+ * property invalidates the whole background declaration, which is how the
+ * editor's Save button once became dark text on a dark ground.
+ */
+.chip--primary {
+  color: var(--ink-900);
+  background: var(--phase);
+  border-color: transparent;
+}
+
+.chip--primary:hover:not(:disabled) {
+  color: var(--ink-900);
+  background: color-mix(in oklab, var(--phase) 88%, var(--bone));
+}
+
+.chip:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .chip .icon {
   width: 18px;
   height: 18px;

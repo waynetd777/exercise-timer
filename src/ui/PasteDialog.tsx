@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
 import type { ParsedRoutine } from '../routines/pasteFormat'
-import { CloseIcon } from './icons'
+import { CloseIcon, PlusIcon } from './icons'
 
 /**
  * Paste a routine in as text.
@@ -38,12 +38,7 @@ export function PasteDialog({
 
   return (
     <dialog ref={dialog} className="paste" onCancel={onCancel} onClose={onCancel}>
-      <header className="paste__head">
-        <h2 className="paste__title">Paste a routine</h2>
-        <button className="btn btn--ghost" onClick={onCancel} aria-label="Close">
-          <CloseIcon />
-        </button>
-      </header>
+      <h2 className="paste__title">Paste a routine</h2>
 
       <label className="paste__field">
         <span className="label label--sm">Name</span>
@@ -88,16 +83,19 @@ export function PasteDialog({
       )}
 
       <div className="paste__actions">
-        <button className="btn btn--ghost" onClick={onCancel}>
+        <button type="button" className="chip" onClick={onCancel}>
+          <CloseIcon />
           Cancel
         </button>
         {/* Importing with unread lines is allowed — they are listed above, and a
             routine with one odd line should not be unimportable. */}
         <button
-          className="btn btn--primary"
+          type="button"
+          className="chip chip--primary"
           disabled={!parsed || parsed.blocks.length === 0}
           onClick={() => parsed && onImport(parsed)}
         >
+          <PlusIcon />
           Add to library
         </button>
       </div>

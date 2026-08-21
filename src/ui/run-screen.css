@@ -552,11 +552,23 @@
  * Next is deliberately a slab rather than another icon in the control row. It
  * is pressed once per exercise with sweaty hands at arm's length, which makes
  * it the most-used control in the app and the one worth the space.
+ *
+ * A CHIP, not a `.btn`: `.btn` is a fixed-size icon square, and the app's text
+ * buttons are chips. This only widens one and steps its type up the scale.
  */
-.btn--next {
+.sheet__next {
   width: 100%;
+  justify-content: center;
   min-height: clamp(3.25rem, 11cqh, 4.5rem);
-  font-size: clamp(1.05rem, 4cqi, 1.5rem);
-  font-weight: 650;
-  letter-spacing: var(--track-name);
+  font-size: var(--label-size-sm);
+  /* Letter-spacing is applied after the LAST glyph too, so centred text sits
+     half a tracking-unit left of true. Documented in ui/README.md. */
+  padding-left: calc(var(--step-4) + var(--label-tracking));
+}
+
+/* Roomy enough to step the label up a size without crowding. */
+@container sheet (min-height: 26rem) {
+  .sheet__next {
+    font-size: clamp(1.05rem, 2.6cqi, 1.5rem);
+  }
 }

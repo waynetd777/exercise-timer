@@ -283,12 +283,16 @@ export function PinIcon() {
 /** The menu entry for the sound bench. */
 export const SpeakerIcon = SoundOnIcon
 
+/** Paste: a clipboard. Stroked, like the other utilities. */
 export function PasteIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="M9 4h6v3H9z" strokeLinejoin="round" />
-      <path d="M9 5.5H6.5A1.5 1.5 0 0 0 5 7v12.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V7a1.5 1.5 0 0 0-1.5-1.5H15" strokeLinecap="round" />
-      <path d="M8.5 12h7M8.5 16h4" strokeLinecap="round" />
-    </svg>
+    <Svg>
+      <path d="M9 4.5h6v3H9z" {...STROKE} />
+      <path
+        d="M9 6H6.5A1.5 1.5 0 0 0 5 7.5v12A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 17.5 6H15"
+        {...STROKE}
+      />
+      <path d="M8.5 12h7M8.5 16h4" {...STROKE} />
+    </Svg>
   )
 }
