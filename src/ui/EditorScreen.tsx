@@ -32,7 +32,6 @@ import type { Path } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
-import { normaliseImageUrl } from '../editor/postimages'
 import { HelpTray } from './HelpTray'
 import { EDITOR_HELP } from './help'
 import { storeFile } from '../media/pin'
@@ -142,7 +141,7 @@ function ImagePicker({
       }}
     >
       <header className="picker__head">
-        <h2 className="picker__title label label--sm">Images in your routines</h2>
+        <h2 className="picker__title label label--sm">Choose an image</h2>
         <input
           className="efield"
           type="search"
@@ -165,7 +164,7 @@ function ImagePicker({
       {shown.length === 0 ? (
         <p className="picker__empty label label--sm">
           {images.length === 0
-            ? 'No routine uses an image yet — paste a link instead'
+            ? 'No illustrations available'
             : `Nothing matches “${query}”`}
         </p>
       ) : (
@@ -184,11 +183,6 @@ function ImagePicker({
       )}
     </dialog>
   )
-}
-
-/** The URL currently on a segment, for the image field. */
-function mediaUrl(media: MediaRef | undefined): string {
-  return media?.source === 'remote' ? media.url : ''
 }
 
 type RowProps = {
@@ -325,7 +319,6 @@ function SegmentRow({
   onChoose: (path: Path) => void
   onUpload: (path: Path, file: File) => Promise<void>
 }) {
-  const [urlDraft, setUrlDraft] = useState(mediaUrl(segment.media))
   const upload = useRef<HTMLInputElement>(null)
   const imageUrl = useMediaUrl(segment.media)
 
@@ -336,33 +329,9 @@ function SegmentRow({
    * two places to reach it, because the picture is what people look at and the
    * link box is empty for a picked or uploaded image.
    */
+  /** Takes the image off the step, whatever kind it is. */
   const clearImage = () => {
-    setUrlDraft('')
-    // Only touch the routine when there is something to remove: clearing a
-    // half-typed link changes the field, not the step.
     if (segment.media !== undefined) onClearImage(path)
-  }
-
-  const commitUrl = () => {
-    const url = normaliseImageUrl(urlDraft)
-
-    if (urlDraft.trim() === '') {
-      /*
-       * Emptying the box clears the link it was showing. An uploaded photo never
-       * had a link in here — the box is empty for one — so a stray focus and blur
-       * must not delete it. The × does that, deliberately.
-       */
-      if (segment.media?.source === 'remote') onClearImage(path)
-      return
-    }
-
-    // Anything unrecognised is left alone, so a half-typed paste cannot wipe what
-    // was there.
-    if (!url) return
-
-    // Show the tidied form either way; only write when it actually differs.
-    setUrlDraft(url)
-    if (url !== mediaUrl(segment.media)) onPatch(path, { media: { source: 'remote', url } })
   }
 
   /*
@@ -553,53 +522,19 @@ function SegmentRow({
 
       {/*
         The image row, offered only where an image can actually be seen.
-        
+
         A listed step is drawn as a row of its group and has no media panel, so
         the controls would set something nobody will ever look at. An image that
         is ALREADY set still gets its row: hiding it would trap data — the step
         would carry a picture with nothing in the app able to remove it.
 
-        A div, not a label: a label wrapping the preview button would forward the
-        button's click to the input. The input names itself instead.
+        There is no link field. Pasting a URL only made sense while the
+        illustrations lived on someone else's server; they ship with the app now,
+        so an image comes from the catalogue or from this device.
       */}
       {(!listed || segment.media !== undefined) && (
         <div className="erow__image">
           <span className="label label--sm">Image</span>
-          <span className="erow__url">
-            <input
-              className="efield"
-              value={urlDraft}
-              placeholder="Paste an image link"
-              aria-label="Image link"
-              onChange={(event) => setUrlDraft(event.target.value)}
-              onBlur={commitUrl}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') commitUrl()
-              }}
-            />
-            {/* Only when there is text to clear. It used to show for a picked
-                or uploaded image too — an × inside an empty box, which is not
-                where anyone looks to remove a picture they can see. That job
-                belongs to the button beside the thumbnail. */}
-            {urlDraft.trim() !== '' && (
-              <button
-                type="button"
-                className="erow__clear"
-                /*
-                 * Keeps focus in the field, which is what stops the blur above
-                 * from committing the link a fraction before this clears it —
-                 * an edit and an undo step for a button that means "remove".
-                 * The click still fires.
-                 */
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={clearImage}
-                aria-label={`Clear the image link for ${segment.name}`}
-                title="Clear the link"
-              >
-                <CloseIcon />
-              </button>
-            )}
-          </span>
           {/* Adding one is what a listed step has no use for; clearing the one it
               has is exactly what it needs. */}
           {!listed && (
@@ -608,7 +543,7 @@ function SegmentRow({
                 type="button"
                 className="chip chip--action"
                 onClick={() => onChoose(path)}
-                aria-label="Choose an image already used in your routines"
+                aria-label="Choose one of the app's illustrations"
               >
                 <ImageIcon />
                 Choose
