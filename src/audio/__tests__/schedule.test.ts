@@ -3,7 +3,7 @@ import type { CuePoint } from '../../engine'
 import { compile, cues, finishesOnTap, runCues } from '../../engine'
 import { IMPORTED_ROUTINES, MIXED_CARDIO_2 } from '../../routines/__tests__/fixtures'
 import { rep, seg, step, workout } from '../../engine/__tests__/fixtures'
-import { cueKey, dueCues, LOOKAHEAD_MS, REARM_MS } from '../schedule'
+import { CANCEL_GRACE_MS, cueKey, dueCues, LOOKAHEAD_MS, REARM_MS, requeueable } from '../schedule'
 import { toneFor } from '../tones'
 
 /**
@@ -174,5 +174,73 @@ describe('runCues — one run at a time', () => {
 
   it('is empty for a run that does not exist', () => {
     expect(runCues(mixed(), 99)).toEqual([])
+  })
+})
+
+describe('a recording that lands after its cue was queued', () => {
+  /** What a pasted routine opens with: five seconds to get ready, then work. */
+  const getReady = () =>
+    compile(workout('Pasted', [seg('Get ready', 5, 'prepare'), seg('Jog', 40)]))
+
+  const armed = (all: CuePoint[], elapsed = 0) =>
+    new Set(dueCues(all, elapsed, new Set<string>()).map(cueKey))
+
+  it('queues the first whistle before any decode could finish', () => {
+    // The whole bug in one line: 5s is deep inside a 30s window armed at zero,
+    // in the same tick as the fetch and decode start.
+    expect([...armed(cues(getReady()))]).toContain('work-start@5000')
+  })
+
+  it('forgets it, so the arm that follows queues it again with the recording', () => {
+    const all = cues(getReady())
+    const scheduled = armed(all)
+
+    const stale = requeueable(all, 200, scheduled)
+    expect(stale).toContain('work-start@5000')
+
+    for (const key of stale) scheduled.delete(key)
+    expect(dueCues(all, 200, scheduled).map(cueKey)).toContain('work-start@5000')
+  })
+
+  it('spares a cue that is already sounding, which would otherwise play twice', () => {
+    // Cancellation keeps anything within the grace, so the re-arm must not
+    // forget it — the pair have to draw the line in the same place.
+    const all = cues(getReady())
+    const scheduled = armed(all)
+
+    expect(requeueable(all, 5000, scheduled)).not.toContain('work-start@5000')
+    expect(requeueable(all, 5000 - CANCEL_GRACE_MS, scheduled)).not.toContain('work-start@5000')
+    expect(requeueable(all, 5000 - CANCEL_GRACE_MS - 1, scheduled)).toContain('work-start@5000')
+  })
+
+  it('never returns a cue that was not queued in the first place', () => {
+    const all = cues(getReady())
+    expect(requeueable(all, 0, new Set())).toEqual([])
+  })
+
+  it('still queues every cue of the routine, and only the requeued ones twice', () => {
+    const timeline = getReady()
+    const all = cues(timeline)
+    const scheduled = new Set<string>()
+    const queued: string[] = []
+
+    const arm = (elapsed: number) => {
+      for (const cue of dueCues(all, elapsed, scheduled)) {
+        scheduled.add(cueKey(cue))
+        queued.push(cueKey(cue))
+      }
+    }
+
+    arm(0)
+    // 200ms in, the whistle decodes: cancel, forget what was cancelled, re-arm.
+    const requeued = requeueable(all, 200, scheduled)
+    for (const key of requeued) scheduled.delete(key)
+    arm(200)
+    for (let elapsed = REARM_MS; elapsed <= timeline.totalMs + REARM_MS; elapsed += REARM_MS) {
+      arm(elapsed)
+    }
+
+    expect(new Set(queued).size).toBe(all.length)
+    expect(queued.filter((key, i) => queued.indexOf(key) !== i)).toEqual(requeued)
   })
 })
