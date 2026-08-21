@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { Routine, RoutinePosition, TimelineEntry, Workout } from '../engine'
+import type { Routine, RoutinePosition, Run, TimelineEntry, Workout } from '../engine'
 import { groupEntries, groupOf, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
@@ -48,10 +48,12 @@ const URGENT_MS = 3_000
  */
 function SectionList({
   routine,
+  run,
   at,
   secondsLeft,
 }: {
   routine: Routine
+  run: Run
   at: RoutinePosition
   secondsLeft: number
 }) {
@@ -74,11 +76,16 @@ function SectionList({
           exercises has height going spare, and the rows should use it. */}
       <ol
         className="sheet__list"
-        style={{ ['--lines' as string]: listLines(rows, rows.find((row) => row.step === entry.step)) }}
+        style={{ ['--lines' as string]: listLines(rows, run.entries) }}
       >
         {rows.map((row) => {
           const done = row.step < entry.step
-          const current = row.step === entry.step
+          /*
+           * Membership of the current RUN, not equality with one step: a ladder
+           * rung is cleared by a single Next, so every exercise in it is being
+           * worked at once and all of them are marked.
+           */
+          const current = run.entries.includes(row)
           return (
             <li
               key={`${row.step}`}
@@ -369,7 +376,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
       {entry && asList && (
         <div className="run__sheet">
-          <SectionList routine={routine} at={at} secondsLeft={timer.secondsLeft} />
+          <SectionList routine={routine} run={run} at={at} secondsLeft={timer.secondsLeft} />
           <button
             type="button"
             className="chip chip--primary sheet__next"
