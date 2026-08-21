@@ -3,7 +3,9 @@ import {
   clock,
   clockWidth,
   duration,
+  FIT_ADVANCE,
   FIT_AVAILABLE,
+  fitBlockCqi,
   fitCqi,
   fitWidthUsed,
   pathLabel,
@@ -173,5 +175,35 @@ describe('fitCqi always fits its container', () => {
         if (longest[i]! < longest[j]!) expect(sizes[i]!).toBeGreaterThanOrEqual(sizes[j]!)
       }
     }
+  })
+})
+
+describe('fitBlockCqi — text in a wide box', () => {
+  it('leaves a short heading at full size', () => {
+    expect(fitBlockCqi('Rest', 3, 11)).toBe(11)
+  })
+
+  it('shrinks with total length, not with word count', () => {
+    // Five short words pack onto a line or two, so this stays large; the
+    // one-word-per-line assumption behind fitCqi would set it absurdly small.
+    expect(fitBlockCqi('Side-to-Side Squats with a Reach', 3, 11)).toBeGreaterThan(9)
+  })
+
+  it('sizes a long name down far enough to fit its line budget', () => {
+    const text =
+      'Side-to-Side Squats with a Reach (start standing, step out to one side, sink your hips into a squat)'
+    const size = fitBlockCqi(text, 3, 11)
+    // Three lines at this size must hold every character.
+    expect(size * FIT_ADVANCE * text.length).toBeLessThanOrEqual(FIT_AVAILABLE * 3)
+  })
+
+  it('never lets an unbreakable word overflow, however few lines are needed', () => {
+    const size = fitBlockCqi('Supercalifragilistic', 4, 11)
+    expect(size * FIT_ADVANCE * 'Supercalifragilistic'.length).toBeLessThanOrEqual(FIT_AVAILABLE)
+  })
+
+  it('handles empty and whitespace input without dividing by zero', () => {
+    expect(fitBlockCqi('', 2, 11)).toBeGreaterThan(0)
+    expect(Number.isFinite(fitBlockCqi('   ', 2, 11))).toBe(true)
   })
 })

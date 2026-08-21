@@ -221,6 +221,51 @@ describe('parseItem', () => {
     ).toMatchObject({ name: 'Bulgarian Split Squats', alternative: 'perform half the reps per leg' })
   })
 
+  it('lifts a long trailing instruction out of the name', () => {
+    // 159 characters as one step name, which no amount of sizing renders
+    // legibly across a gym. The instruction is kept, just not in the name.
+    const item = parseItem(
+      'Side-to-Side Squats with a Reach (start standing, step out to one side, sink your hips into a squat, and reach your arms across your body for an added stretch)',
+    )
+    expect(item.name).toBe('Side-to-Side Squats with a Reach')
+    expect(item.note).toContain('start standing')
+  })
+
+  it('keeps a short trailing parenthetical, which is part of the name', () => {
+    expect(parseItem('Easy Bounce (basic)').name).toBe('Easy Bounce (basic)')
+    expect(parseItem('Jumping Jacks (floor or trampoline)').note).toBeUndefined()
+  })
+
+  it('keeps a parenthetical that glosses a term mid-name', () => {
+    // Only a TRAILING one is a description.
+    expect(parseItem('10 × RB (resistance band) Lateral Walks').name).toBe(
+      'RB (resistance band) Lateral Walks',
+    )
+  })
+
+  it('drops a bracketed per-side note, which the effort column already says', () => {
+    // "12 × each side  Speed Skaters (each side)" would print it twice.
+    expect(parseItem('12 × Speed Skaters (each side)')).toMatchObject({
+      name: 'Speed Skaters',
+      perSide: true,
+    })
+    // A dashed one reads as part of the name, and cutting it leaves a dangling dash.
+    expect(parseItem('12 × Plank Shoulder Taps – each side').name).toBe(
+      'Plank Shoulder Taps – each side',
+    )
+  })
+
+  it('leaves no step name long enough to be unreadable', () => {
+    // The guard on the whole pipeline: 159 characters was the worst case before
+    // descriptions were lifted out, and it broke every box it was put in.
+    for (const text of Object.values(EMAILS)) {
+      const longest = Math.max(
+        ...steps(parseRoutine(text).blocks).map((step) => step.name.length),
+      )
+      expect(longest).toBeLessThanOrEqual(60)
+    }
+  })
+
   it('leaves a compound exercise name alone', () => {
     expect(parseItem('Thrusters – squat + press').name).toBe('Thrusters – squat + press')
     expect(parseItem('Squat + Shoulder Press').name).toBe('Squat + Shoulder Press')

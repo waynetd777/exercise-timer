@@ -75,6 +75,30 @@ export function fitCqi(text: string, max = 40): number {
   return Math.min(max, FIT_BUDGET / FIT_ADVANCE / longest)
 }
 
+/**
+ * Font size in `cqi` for text in a WIDE box, where words pack several to a line
+ * rather than each taking its own.
+ *
+ * Two bounds, whichever is smaller. A word cannot break, so the longest one caps
+ * the size exactly as in `fitCqi`. And at size `s` a line holds
+ * `FIT_BUDGET / (s * FIT_ADVANCE)` characters, so fitting `total` characters
+ * into `maxLines` lines needs `s <= FIT_BUDGET * maxLines / (FIT_ADVANCE * total)`.
+ *
+ * `fitCqi` is the narrow-box case of this — one word per line — and is right for
+ * the media panel. This is right for a heading across a full-width column, where
+ * assuming a line per word would set a five-word name absurdly small.
+ */
+export function fitBlockCqi(text: string, maxLines: number, max: number): number {
+  const trimmed = text.trim()
+  const longest = Math.max(1, ...trimmed.split(/\s+/).map((word) => word.length))
+  const total = Math.max(1, trimmed.length)
+  return Math.min(
+    max,
+    FIT_BUDGET / FIT_ADVANCE / longest,
+    (FIT_BUDGET * Math.max(1, maxLines)) / (FIT_ADVANCE * total),
+  )
+}
+
 /** The width `fitCqi`'s result will occupy, as a share of the container. */
 export function fitWidthUsed(text: string, max = 40): number {
   const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
