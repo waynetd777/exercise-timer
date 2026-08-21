@@ -16,6 +16,3 @@ coverage/
 .wolf/hooks/_precompact-snapshot.json
 .wolf/token-ledger.json
 
-# Analysis arrays for scripts/gen_whistle.py — derived from a local copy of the
-# Tabata app's whistle at full resolution, so never committed. See that script.
-scripts/.analysis/

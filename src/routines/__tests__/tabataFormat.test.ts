@@ -4,6 +4,7 @@ import raw from '../beginner-mixed-cardio-2.tabata.json'
 import rawFullBody from '../beginner-full-body.tabata.json'
 import rawMixedCardio1 from '../beginner-mixed-cardio-1.tabata.json'
 import { SEED_ROUTINES } from '../samples'
+import { IMPORTED_ROUTINES } from './fixtures'
 import { importTabataFile, TabataImportError } from '../tabataFormat'
 
 describe('importTabataFile', () => {
@@ -108,12 +109,22 @@ describe('the other seeded routines', () => {
     for (const id of ids) expect(id).toMatch(/^seed-/)
   })
 
-  it('seeds only imported routines, which are always flat', () => {
-    // Nothing seeded uses repeat groups any more. The "Round 3 of 8" path is
-    // still covered by the engine and format tests, not by a seeded routine.
-    for (const workout of SEED_ROUTINES) {
-      expect(workout.blocks.every((b) => b.kind === 'segment')).toBe(true)
+  it('ships exactly one routine, and it uses reps groups', () => {
+    expect(SEED_ROUTINES).toHaveLength(1)
+    const [seed] = SEED_ROUTINES
+    expect(seed!.name).toBe('Beginner Full-Body Workout Routine')
+    expect(seed!.blocks.filter((b) => b.kind === 'repeat').length).toBeGreaterThan(5)
+  })
+
+  it('never INFERS reps when importing, however repetitive the file', () => {
+    /*
+     * The seed has reps groups because it was authored that way, not because the
+     * importer found them. This is the invariant that matters: the same exercise
+     * three times in a row is not proof of intent, and guessing would silently
+     * change someone's workout — a trailing rest is dropped inside a group.
+     */
+    for (const workout of IMPORTED_ROUTINES) {
+      expect(workout.blocks.every((b) => b.kind === 'segment'), workout.name).toBe(true)
     }
-    expect(SEED_ROUTINES).toHaveLength(3)
   })
 })

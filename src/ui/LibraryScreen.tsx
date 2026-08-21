@@ -323,7 +323,11 @@ export function LibraryScreen({
                     toBundle(library.workouts, Date.now()),
                   ),
               },
-              { label: 'Sounds', icon: <SpeakerIcon />, onSelect: onSounds },
+              // Development only, and the screen itself is not in a production
+              // build — see the note in App.tsx.
+              ...(import.meta.env.DEV
+                ? [{ label: 'Sounds', icon: <SpeakerIcon />, onSelect: onSounds }]
+                : []),
               {
                 label: 'Save images',
                 icon: <PinIcon />,
