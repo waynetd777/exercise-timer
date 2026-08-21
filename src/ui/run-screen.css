@@ -604,14 +604,18 @@
    * per-side.
    *
    * The count column's minimum is what lines the NAMES up: each row is its own
-   * grid, so nothing else makes them share a left edge. It is only as wide as the
-   * widest thing that goes in it — "20 ×" for reps, "1:30" for a timed step
-   * counting down — because every em beyond that is indentation in front of the
-   * count, which is what it used to have with 3.4em and right alignment.
+   * grid, so nothing else makes them share a left edge. Every em of it beyond the
+   * count's own width is a gap between the number and the exercise, so it is cut
+   * to what the widest thing in it needs — 2em holds "12 ×" and the "1:30" a
+   * timed step counts down through.
+   *
+   * A minimum rather than plain `auto`, precisely because of that countdown: an
+   * auto column would be re-measured every second as "1:30" became "9", and the
+   * name would step sideways on each tick.
    *
    * In em, so the columns keep their proportion as the rows grow.
    */
-  grid-template-columns: minmax(2.6em, auto) auto minmax(0, 1fr);
+  grid-template-columns: minmax(2em, auto) auto minmax(0, 1fr);
   align-items: baseline;
   /*
    * Spacing by padding, not by column-gap. A gap applies between declared tracks
@@ -697,7 +701,8 @@
 }
 
 .sheet__name {
-  padding-left: var(--step-3);
+  /* The whole gap after the count is this plus whatever slack the column has. */
+  padding-left: var(--step-2);
   min-width: 0;
   text-wrap: pretty;
   /* Long names wrap; they are never clipped and never shrink out of step with
