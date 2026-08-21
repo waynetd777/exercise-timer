@@ -178,6 +178,15 @@ the button either way: colour is the second cue, never the only one, and seven
 hues cannot all survive a colour-vision deficiency. Luminance is spread as well
 as hue, so they also separate in greyscale.
 
+## The build badge
+
+The home screen shows `v<version>` beside the help button, from `src/version.ts`,
+with the build date in its title attribute (stamped by `vite.config.ts`).
+**Bump the version on every build you intend to test on a device.** An installed
+PWA is served by a service worker, so "did my change actually reach the phone" is
+otherwise a guess — and the failure mode is debugging a layout that was fixed two
+deploys ago.
+
 ## The hardware takes a bite out of every screen
 
 Installed to an iPhone home screen, the app owns the whole display:
