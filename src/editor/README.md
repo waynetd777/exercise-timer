@@ -10,6 +10,29 @@ block, `[1, 0]` the first child of the second. Every operation returns a new tre
 and never mutates its input, which is what lets undo keep old trees rather than
 replaying inverse operations.
 
+## Three levels, three group kinds
+
+A routine can now be `section > round or ladder > step`, so every tree walk here
+recurses on `isGroup` rather than on `kind === 'repeat'`. That was a real bug
+before it was a rule: `flatten` rendered a ladder as one childless row, and
+`blockAt` could not reach anything inside a section.
+
+`wrapInRepeat` refuses a section — a part of the routine rather than a piece of
+work, so a round cannot contain one — but allows a ladder, since "3 rounds of
+this ladder" is a real thing to ask for.
+
+## A step is timed OR counted, never both
+
+The data model lets a step carry a duration and a rep count at once; the editor
+does not, because a step that says "20 ×" and counts down 30 seconds cannot be
+obeyed. `setTiming` therefore **deletes** the other key rather than setting it
+undefined — `exactOptionalPropertyTypes` is on, and absent versus
+present-and-undefined is exactly what separates a self-paced step from a timed
+one. Same reason `clearMedia` exists.
+
+`timingOf` reads the choice back for the control that sets it, falling back to
+the role's default duration for a step with no duration to return to.
+
 ## Rules worth knowing
 
 - **`moveStep` moves a row through the routine as it *reads*.** Next to a reps
@@ -57,7 +80,7 @@ therefore cannot quietly bypass undo.
 
 | | |
 |---|---|
-| `blocks.ts` | The tree operations, the constructors, and the new-routine template |
+| `blocks.ts` | The tree operations, the constructors, `setTiming`, and the new-routine template |
 | `history.ts` | Undo/redo with coalescing |
 | `dirty.ts` | Unsaved-change detection, compared **field by field** — `JSON.stringify` depends on key insertion order, and patching an object reorders keys |
 | `images.ts` | The images a step can be given: the catalogue merged with library usage |

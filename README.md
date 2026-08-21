@@ -12,13 +12,22 @@ going, from across a gym, with the phone propped against a rack.
 
 ## What it does
 
-- **Runs a routine** — big countdown, colour-coded phase, the exercise
+- **Runs a timed routine** — big countdown, colour-coded phase, the exercise
   illustration beside it, audio cues that stay on the beat even after the phone
   has been in a pocket.
+- **Runs a rep-based one too** — a strength session is mostly not timed, so a
+  step can wait for you. The whole round or ladder rung is on screen at once and
+  one Next clears it, while the timed steps mixed in — a 45-second rest, a
+  30-second plank — still count themselves down.
 - **Holds a library** of routines in the browser, searchable, with favourites and
   a colour per routine.
-- **Imports** the `.tabata` exports of the Tabata Timer app, and its own bundles.
-- **Edits** routines: steps, durations, reps, images — with undo.
+- **Takes a routine as pasted text**, which is how they arrive: an email from a
+  gym instructor, parsed into sections, rounds and ladders, reporting any line it
+  could not place before saving anything.
+- **Imports** the `.tabata` exports of the Tabata Timer app, its own bundles, and
+  plain-text routines.
+- **Edits** routines: steps, durations, reps, ladders, sections, images — with
+  undo.
 - **Shares** a routine as a URL, or exports the whole library as one file.
 - **Owns its images** — stores local copies so a routine survives gym wifi and
   the image host eventually losing a file.
@@ -28,7 +37,7 @@ going, from across a gym, with the phone propped against a rack.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 301 tests, no browser needed
+npm test           # 441 tests, no browser needed
 npm run typecheck
 npm run build
 ```
@@ -56,13 +65,13 @@ tangled up in a component.
 
 ```
 src/
-  engine/     The timer core: routine -> timeline -> position. No React, no DOM.
+  engine/     The timer core: routine -> runs -> position. No React, no DOM.
   state/      The run clock, and the React hooks that drive a workout.
   audio/      Cues, pre-scheduled on the Web Audio clock.
   editor/     Pure operations on a routine's block tree, plus undo.
   media/      Images: content-addressed storage, downscaling, offline pinning.
   storage/    IndexedDB, the library, the export format, share links, read-time migration.
-  routines/   The .tabata importer, the seeded routine, the image catalogue.
+  routines/   The .tabata importer, the paste parser, the seed, the image catalogue.
   ui/         Screens, the type scale, the design tokens.
 ```
 
@@ -76,9 +85,15 @@ throttled tab, a backgrounded phone or a ten-minute pocket cannot cause drift �
 coming back simply tells the truth.
 
 **A routine compiles to a flat timeline once.** `compile()` expands the recursive
-tree of steps and reps into absolute-time entries; the runner is then a pure
-binary search over it. That makes seeking and skipping trivial and the whole
-engine testable against a fake clock.
+tree of steps, rounds and ladders into absolute-time entries; the runner is then
+a pure binary search over it. That makes seeking and skipping trivial and the
+whole engine testable against a fake clock.
+
+**A routine that waits is a sequence of timed runs separated by gates.** Not
+every step has a duration: a rep-based one ends when you tap Next. Inside a run
+nothing changes — absolute timeline, binary search, pre-scheduled cues, a
+pocketed phone catching up — and at a gate the clock parks until you tap. A fully
+timed routine compiles to exactly one run and behaves as it always did.
 
 **Cues are scheduled ahead on the audio clock**, never fired from a JavaScript
 tick, because the audio thread keeps time when the main thread is throttled. Each
@@ -99,7 +114,7 @@ IndexedDB; images live beside them once pinned. Export, share links and the
 
 ## Testing
 
-301 tests, all of which run in Node in under a second — there is no browser in
+441 tests, all of which run in Node in under a second — there is no browser in
 the test setup and none is needed, because the parts worth testing do not touch
 the DOM. IndexedDB access, canvas encoding and Web Audio are deliberately thin
 wrappers around tested pure logic rather than being mocked.
