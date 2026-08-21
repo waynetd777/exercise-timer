@@ -317,9 +317,9 @@
   **The pattern in Wayne's two corrections: he taps once per chunk of work, never
   per exercise.** Assume that shape for anything similar.
 
-- [2026-08-21] **The list is shown only while it still has something to say.**
-  When the current step is the last one left in the group, every other row is
-  struck through and the list is noise — the countdown layout takes over. The
-  trailing rest of a round and the wall sit at the end of a ladder rung both land
-  there. Consequence: the Next slab is needed in BOTH layouts, so it is a shared
+- [2026-08-21] **`listMode()` in `engine/navigate.ts` decides list vs countdown**,
+  not the component. A TIMED step is always a countdown, wherever it falls — you
+  watch the clock during a hold, you do not read a list — and so is a gate with
+  nothing after it in its group, where every other row would be struck through.
+  Consequence: the Next slab is needed in BOTH layouts, so it is a shared
   `NextSlab` component, not a child of the list.
