@@ -55,7 +55,6 @@ export function PasteDialog({
         <textarea
           className="paste__text"
           value={text}
-          rows={14}
           autoFocus
           placeholder={'#1 General Body\nCounting: 2-4-6-8-10-8-6-4-2\n\n* Squat + Shoulder Press\n…'}
           onChange={(event) => setText(event.target.value)}

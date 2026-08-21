@@ -404,8 +404,16 @@
   letter-spacing: var(--track-name);
 }
 
+/*
+ * Label sized to its text, control taking the rest.
+ *
+ * Without the explicit tracks both children are `auto` rows, and a grid stretches
+ * auto tracks to absorb spare height — so the field's label row grew with the
+ * dialog and left the label marooned at the top of it.
+ */
 .paste__field {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-2);
   min-height: 0;
 }
