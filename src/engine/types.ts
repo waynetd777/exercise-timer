@@ -54,6 +54,21 @@ export type MediaRef =
   | { source: 'local'; hash: string; mime: string; w?: number; h?: number }
 
 /**
+ * Whether Next clears a whole iteration of a group or one step of it.
+ *
+ * `'set'` is the DEFAULT for every group, because a round or a rung is the unit
+ * of work: "12 curls, 10 press, 12 flyes, 15 pull-aparts" is one round you do
+ * and then tick off, not four prompts to tap through with your hands full.
+ *
+ * A TIMED step inside the iteration is never swallowed by the tap — it keeps its
+ * own run, so the 45-second rest after a round and the 10-second wall sit after
+ * a rung still count themselves down.
+ *
+ * `'step'` opts a group out, one exercise at a time.
+ */
+export type Advance = 'set' | 'step'
+
+/**
  * How many reps a step calls for.
  *
  * Display only — the app cannot count reps, and a rep-based step ends when the
@@ -99,6 +114,8 @@ export type Repeat = {
   label?: string
   /** Iteration count. Floored; anything below 1 contributes nothing. */
   times: number
+  /** Whether Next advances the whole round. See `Advance`; defaults to `'set'`. */
+  advance?: Advance
   children: Block[]
 }
 
@@ -132,11 +149,9 @@ export type Ladder = {
    * is one piece of work you do and then tick off, not three prompts to tap
    * through with your hands full.
    *
-   * A timed step inside the rung still runs its own clock — a 10-second wall sit
-   * is worth counting down — so the rung's rep-based steps collapse into one
-   * tap and the timed one plays itself.
+   * See `Advance`; defaults to `'set'`.
    */
-  advance?: 'set' | 'step'
+  advance?: Advance
   children: Block[]
 }
 
@@ -229,8 +244,8 @@ export type PathStep = {
   of: number
   /** Ladder only: the rep count at this rung. */
   rung?: number
-  /** Ladder only: whether Next advances the whole rung. See `Ladder.advance`. */
-  advance?: 'set' | 'step'
+  /** Repeat and ladder: whether Next clears the whole iteration. See `Advance`. */
+  advance?: Advance
   /** Section only. */
   display?: SectionDisplay
   /** Section only: the instruction covering the whole section. */

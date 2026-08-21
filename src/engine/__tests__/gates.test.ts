@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { compile, hasGates, stepCount, totalDurationMs } from '../compile'
 import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'
-import type { Segment } from '../types'
+import type { Repeat, Segment } from '../types'
 
 describe('self-paced steps', () => {
   it('keeps a step with no duration, and marks it self-paced', () => {
@@ -163,6 +163,56 @@ describe('ladders', () => {
     const routine = compile(legsLadder())
     const walks = routine.entries.find((e) => e.name === 'RB Lateral Walks')!
     expect(walks.reps).toEqual({ count: 5, perSide: true })
+  })
+})
+
+describe('a round clears with ONE tap', () => {
+  it('puts a round\'s rep-based steps in one gate, and keeps its rest on the clock', () => {
+    const routine = compile(armsSection())
+
+    expect(
+      routine.runs.map((run) => ({
+        selfPaced: run.selfPaced,
+        names: run.entries.map((entry) => entry.name),
+      })),
+    ).toEqual([
+      { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
+      { selfPaced: false, names: ['Rest'] },
+      { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
+      { selfPaced: false, names: ['Rest'] },
+      { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
+      { selfPaced: false, names: ['Rest'] },
+      // The fourth round has no rest after it — the trailing-rest rule.
+      { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
+    ])
+  })
+
+  it('does not merge one round into the next', () => {
+    const routine = compile(
+      workout('Rounds', [rep(3, [step('Curls', 12), step('Press', 10)], 'Round')]),
+    )
+    expect(routine.runs).toHaveLength(3)
+  })
+
+  it('never collapses a whole SECTION, only an iteration within one', () => {
+    // "Complete without stopping" is still four separate steps: a section is a
+    // part of a routine, not a piece of work, and hiding a screenful behind one
+    // tap would lose the point of showing the list.
+    const routine = compile(
+      workout('Burnout', [
+        section('Final Burnout', [step('Sumo Squats', 20), step('Curtsy Lunges', 20)]),
+      ]),
+    )
+    expect(routine.runs).toHaveLength(2)
+  })
+
+  it('lets an inner opt-out beat an outer default', () => {
+    const inner: Repeat = { ...rep(2, [step('Curls', 12), step('Press', 10)]), advance: 'step' }
+    const routine = compile(workout('Mixed', [ladder([5], [inner])]))
+
+    // Four steps, four taps: the inner "one at a time" is not overruled by the
+    // ladder enclosing it.
+    expect(routine.runs).toHaveLength(4)
   })
 })
 

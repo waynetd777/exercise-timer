@@ -125,6 +125,7 @@ function repeatStep(block: Repeat, iteration: number, of: number): PathStep {
     iteration,
     of,
     ...(block.label !== undefined ? { label: block.label } : {}),
+    ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
 }
 
@@ -143,16 +144,20 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
 /**
  * The group a self-paced step advances WITH, or `null` if it advances alone.
  *
- * Steps sharing a key are cleared by one Next. Only a ladder rung qualifies
- * today, and by default: the rung is the unit of work, so tapping through its
- * three exercises separately is three taps for one thing you just did. A repeat
- * has no equivalent — you work a round exercise by exercise — though it could
- * gain the same field without changing anything here.
+ * Steps sharing a key are cleared by one Next. The innermost round or rung wins,
+ * and both collapse by default, because the ITERATION is the unit of work —
+ * tapping through a round's five exercises separately is five taps for one thing
+ * you just did. A section does not qualify: it is a part of a routine, not a
+ * piece of work, and collapsing one would hide a whole screen behind one tap.
  */
 function gateKey(entry: TimelineEntry): string | null {
   for (let i = entry.path.length - 1; i >= 0; i--) {
     const step = entry.path[i]!
-    if (step.kind === 'ladder' && step.advance !== 'step') return `${step.id}@${step.iteration}`
+    if (step.kind === 'section') continue
+    // An explicit opt-out wins over an outer group's default: asking for one
+    // exercise at a time must not be overruled by the group enclosing it.
+    if (step.advance === 'step') return null
+    return `${step.id}@${step.iteration}`
   }
   return null
 }
