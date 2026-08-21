@@ -1,6 +1,7 @@
 # ui
 
-The three screens, the design tokens and the type scale.
+The screens — library, run, edit, plus a dev-only sound bench — the design tokens
+and the type scale.
 
 ## One type scale, in `theme.css`
 
@@ -57,6 +58,20 @@ Each of these cost a real bug. They are recorded because they recur.
   state. Dark plus desaturated red is brown. Mix toward a mid neutral instead, or
   drop the hue.
 
+## Routine colours are labels, not phases
+
+A routine can carry one of six tints, and they stop at the **library row and the
+editor**. The run screen is never tinted: there, green/red/blue already mean get
+ready / work / rest, and a second colour system on top of the one thing readable
+across a gym would break it.
+
+Red, green, blue and purple reuse the phase hues so the app has one palette rather
+than two; orange and yellow complete the spectrum. A tint is only ever a
+low-percentage mix, never a flat fill — and note the trap it already caused: a new
+`[data-colour]` rule tied on specificity with the existing `:hover` rule and, being
+later in the file, silently killed hover on tinted rows. Encode precedence with
+`:not()` rather than relying on source order.
+
 ## Phase colours
 
 Traffic light, by request: green to get ready, red to work, blue to rest, violet
@@ -66,12 +81,20 @@ re-check that ratio if any role colour changes.
 
 ## Files
 
+Each screen owns its stylesheet and imports it itself; `theme.css` is imported
+first, from `main.tsx`, so the base layer always lands before the modifiers.
+
 | | |
 |---|---|
 | `App.tsx` | Routing between library, run and edit; consumes a shared routine from the URL |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
-| `LibraryScreen.tsx` | Routines, import, export, share, pull-to-update |
+| `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, reps, images, undo, the lightbox and image picker |
-| `theme.css` | Tokens, the type scale, and the shared `.label` / `.btn` / `.chip` classes |
+| `SoundsScreen.tsx` | The cue bench. **Dev only** — `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
+| `Menu.tsx` | The dropdown behind the collapsed toolbars. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger |
+| `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
+| `useMediaUrl.ts` | Resolves a `MediaRef` to a URL — synchronous pass first, so a step change cannot flash blank |
+| `theme.css` | Tokens, the type scale, the routine tints, and the shared `.label` / `.btn` / `.chip` classes |
+| `library.css`, `run-screen.css`, `editor.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
 | `icons.tsx` | Inline SVG — inherits `currentColor`, no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs |

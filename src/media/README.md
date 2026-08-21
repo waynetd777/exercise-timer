@@ -38,8 +38,9 @@ image icon.
 ## Resolution, in two passes
 
 `resolvePlan` is pure and decides *what* a ref resolves to. `resolveMedia` then
-reads the blob if needed. `useMediaUrl` calls the synchronous path first and the
-asynchronous one second — without that first pass, every image flashes blank on a
+reads the blob if needed. `ui/useMediaUrl.ts` — the hook lives with the components
+that use it, not here — calls the synchronous path first and the asynchronous one
+second — without that first pass, every image flashes blank on a
 step change while IndexedDB is read.
 
 Object URLs are cached per hash and not revoked while the app lives: a routine

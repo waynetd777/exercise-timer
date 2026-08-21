@@ -12,17 +12,17 @@ replaying inverse operations.
 
 ## Rules worth knowing
 
-- **`moveStep` moves a row through the routine as it *reads*.** Next to a round it
-  moves *into* it — first child going down, last going up; next to a step it swaps;
-  at the edge of a round it steps *outside*. `moveBy` only reorders among
-  siblings, which left a step trapped inside or outside a round.
-- **Rounds only ever swap.** `wrapInRepeat` refuses to nest a round inside a
-  round: the editor renders two levels, and a deeper tree would be invisible and
+- **`moveStep` moves a row through the routine as it *reads*.** Next to a reps
+  group it moves *into* it — first child going down, last going up; next to a step
+  it swaps; at the edge of a group it steps *outside*. `moveBy` only reorders among
+  siblings, which left a step trapped inside or outside a group.
+- **Reps groups only ever swap.** `wrapInRepeat` refuses to nest a group inside a
+  group: the editor renders two levels, and a deeper tree would be invisible and
   un-editable. The *data model* supports any depth, so lifting this is a UI
   decision, not a schema one.
 - **A move past either end is a no-op** rather than an error, so holding a button
   cannot corrupt the tree.
-- **A round left empty by a departing step is kept, not pruned.** A group
+- **A group left empty by a departing step is kept, not pruned.** A group
   vanishing under you is more surprising than an empty one you can delete.
 - **`duplicateAt` deep-copies with fresh ids.** The editor keys its rows by
   `block.id`, so a copy that kept them would give two rows the same React key.
@@ -30,8 +30,11 @@ replaying inverse operations.
   patch a key to `undefined`, and clearing an image means *deleting* the key so
   the property is absent rather than present-and-undefined.
 - **Defaults match the real routines**: 30s to get set, 20s of work, 10s rest, 60s
-  recovery. An added step usually needs no editing. Don't tidy these to round
-  numbers.
+  recovery, and a new group is three reps of work-then-rest. An added step usually
+  needs no editing. Don't tidy these to round numbers.
+- **The label a new group stores is `'Reps'`, always plural** — short for
+  repetitions. It is *data*, so renaming it in code is never enough; see
+  `storage/migrate.ts`.
 
 ## Undo, and why typing collapses
 
