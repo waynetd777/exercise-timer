@@ -155,7 +155,20 @@
 html,
 body,
 #root {
+  /*
+   * `dvh`, not a percentage.
+   *
+   * On an iOS home-screen install with `viewport-fit=cover`, a percentage height
+   * resolves against the SAFE viewport — the screen less the status-bar strip —
+   * while the page paints under the island regardless. The app was therefore 59pt
+   * shorter than the screen it was drawn on, which is the band of dead space that
+   * appeared below the controls the moment the header claimed its own inset: the
+   * inset pushed content down inside a box that stopped early.
+   *
+   * The percentage stays as a fallback line for anything without `dvh`.
+   */
   height: 100%;
+  height: 100dvh;
 }
 
 body {
