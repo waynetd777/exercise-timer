@@ -249,3 +249,24 @@ export function ImageIcon() {
     </Svg>
   )
 }
+
+export function ExportIcon() {
+  return (
+    <Svg>
+      <path d="M12 16V5.5" {...STROKE} />
+      <polyline points="7.5 10 12 5.5 16.5 10" {...STROKE} />
+      <path d="M4.5 17v2.5h15V17" {...STROKE} />
+    </Svg>
+  )
+}
+
+export function ShareIcon() {
+  return (
+    <Svg>
+      <circle cx="6" cy="12" r="2.6" {...STROKE} />
+      <circle cx="18" cy="6" r="2.6" {...STROKE} />
+      <circle cx="18" cy="18" r="2.6" {...STROKE} />
+      <path d="M8.3 10.8 15.7 7.2M8.3 13.2l7.4 3.6" {...STROKE} />
+    </Svg>
+  )
+}

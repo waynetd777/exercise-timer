@@ -1,17 +1,22 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Workout } from '../engine'
-import { importTabataFiles, looksImportable } from '../routines/importFiles'
+import { importRoutineFiles, looksImportable } from '../routines/importFiles'
 import type { Library } from '../storage/useLibrary'
+import { bundleFilename, toBundle } from '../storage/bundle'
+import { copyText, downloadJson } from '../storage/download'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
+import { shareUrl } from '../storage/shareLink'
 import type { SortMode } from '../storage/library'
 import { duration } from './format'
 import {
   CheckIcon,
   CloseIcon,
   CopyIcon,
+  ExportIcon,
   ImportIcon,
   PencilIcon,
   PlusIcon,
+  ShareIcon,
   StarIcon,
   StopwatchIcon,
   TrashIcon,
@@ -29,11 +34,13 @@ function Row({
   library,
   onRun,
   onEdit,
+  onShare,
 }: {
   workout: Workout
   library: Library
   onRun: (workout: Workout) => void
   onEdit: (workout: Workout) => void
+  onShare: (workout: Workout) => Promise<void>
 }) {
   const [confirming, setConfirming] = useState(false)
   const { totalMs, steps } = summary(workout)
@@ -113,6 +120,14 @@ function Row({
             </button>
             <button
               className="btn btn--ghost"
+              onClick={() => void onShare(workout)}
+              aria-label="Copy a share link"
+              title="Copy a share link"
+            >
+              <ShareIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
               onClick={() => setConfirming(true)}
               aria-label="Delete"
               title="Delete"
@@ -148,6 +163,15 @@ export function LibraryScreen({
     [library.workouts, query, sort],
   )
 
+  const share = async (workout: Workout) => {
+    const url = await shareUrl(workout, `${location.origin}${location.pathname}`)
+    setNotice(
+      (await copyText(url))
+        ? `Link to “${workout.name}” copied.`
+        : 'Could not reach the clipboard — copy the link from the address bar after opening it.',
+    )
+  }
+
   const ingest = async (files: readonly File[]) => {
     const candidates = files.filter(looksImportable)
     if (candidates.length === 0) {
@@ -155,13 +179,13 @@ export function LibraryScreen({
       return
     }
 
-    const { imported, failed } = await importTabataFiles(candidates, Date.now())
+    const { imported, failed } = await importRoutineFiles(candidates, Date.now())
     for (const workout of imported) await library.add(workout)
 
     setNotice(
       [
         imported.length > 0 && `Imported ${imported.length}.`,
-        failed.length > 0 && `Skipped ${failed.map((f) => f.name).join(', ')}.`,
+        failed.length > 0 && `Skipped ${failed.map((file) => file.name).join(', ')}.`,
       ]
         .filter(Boolean)
         .join(' ') || null,
@@ -212,6 +236,21 @@ export function LibraryScreen({
             ))}
           </div>
 
+          <button
+            className="chip chip--action"
+            onClick={() =>
+              downloadJson(
+                bundleFilename(null, new Date()),
+                toBundle(library.workouts, Date.now()),
+              )
+            }
+            disabled={library.workouts.length === 0}
+            title="Download every routine as one file"
+          >
+            <ExportIcon />
+            Export
+          </button>
+
           <button className="chip chip--action" onClick={onNew}>
             <PlusIcon />
             New
@@ -256,7 +295,9 @@ export function LibraryScreen({
           <p className="library__empty label">Opening your routines…</p>
         ) : visible.length === 0 ? (
           <p className="library__empty label">
-            {query ? `Nothing matches “${query}”.` : 'Drop a .tabata file here to add a routine.'}
+            {query
+            ? `Nothing matches “${query}”.`
+            : 'Drop a .tabata or exported .json file here to add a routine.'}
           </p>
         ) : (
           <ul className="library__list">
@@ -267,6 +308,7 @@ export function LibraryScreen({
               library={library}
               onRun={onRun}
               onEdit={onEdit}
+              onShare={share}
             />
             ))}
           </ul>
