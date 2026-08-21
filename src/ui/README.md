@@ -72,6 +72,24 @@ low-percentage mix, never a flat fill — and note the trap it already caused: a
 later in the file, silently killed hover on tinted rows. Encode precedence with
 `:not()` rather than relying on source order.
 
+## Buttons: `.btn` is an icon, `.chip` is a word
+
+Two classes, and picking the wrong one is not a style slip — it is a broken
+control:
+
+- **`.btn`** is a fixed 56×56 square (`.btn--primary` 68×68) built for a single
+  icon. Put text in one and it is crammed into a square.
+- **`.chip`** is the text button: 44px min-height, padding on the inline axis,
+  uppercase at `--label-size-sm` with `--label-tracking`. Variants are
+  `--action` (brighter), `--primary` (phase ground, dark text) and `--danger`.
+
+Every dialog action, every toolbar word and the run screen's Next are chips. A
+chip can carry an icon *and* a word; a `.btn` may only ever carry the icon.
+
+`.chip--primary` uses `var(--phase)`, which is why that token has a root default
+— an undefined custom property invalidates the whole declaration, and that is
+how the editor's Save button once rendered as dark text on a dark ground.
+
 ## Phase colours
 
 Traffic light, by request: green to get ready, red to work, blue to rest, violet
@@ -91,6 +109,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, reps, images, undo, the lightbox and image picker |
 | `SoundsScreen.tsx` | The cue bench. **Dev only** — `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
+| `PasteDialog.tsx` | Paste a routine as text; reports unparsed lines before saving |
 | `Menu.tsx` | The dropdown behind the collapsed toolbars. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger |
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL — synchronous pass first, so a step change cannot flash blank |

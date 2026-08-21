@@ -296,3 +296,11 @@
   class, `DASH_CHARS` is the bare characters. Nesting the first inside another
   class silently gives `[\s[-–—]]`, which matches a literal bracket — it is what
   stopped "30-second Plank" being read as a duration.
+
+- [2026-08-21] **`.btn` is an ICON square (56×56), `.chip` is the text button.**
+  Putting a word in a `.btn` crams it into a square — it is what made the first
+  paste dialog and Next button look wrong. Dialog actions, toolbar words and the
+  run screen's Next are all chips; `chip--primary` / `--danger` / `--action` are
+  the variants. Every icon component must go through the shared `Svg` wrapper in
+  `icons.tsx`, which supplies `className="icon"` that the `.btn`/`.chip` sizing
+  rules depend on.
