@@ -139,6 +139,37 @@
   border-top: var(--hairline);
 }
 
+/*
+ * Each add button wears the colour of the thing it adds, as a rule down its left
+ * edge — the same 4px rule the row itself gets, so the button and the row it
+ * produces are visibly the same object. A swatch or a tinted ground would say
+ * "this control is coloured"; a matching edge says "this makes that".
+ */
+.editor__add .chip[data-kind] {
+  position: relative;
+  padding-left: calc(var(--step-4) + 6px);
+}
+
+.editor__add .chip[data-kind]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  /* Follows the chip's own rounding, or it overhangs the corner. */
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: var(--kind, var(--bone-faint));
+}
+
+.editor__add .chip[data-kind='prepare'] { --kind: var(--role-prepare); }
+.editor__add .chip[data-kind='work'] { --kind: var(--role-work); }
+.editor__add .chip[data-kind='rest'] { --kind: var(--role-rest); }
+.editor__add .chip[data-kind='recover'] { --kind: var(--role-recover); }
+.editor__add .chip[data-kind='reps'] { --kind: var(--group-reps); }
+.editor__add .chip[data-kind='ladder'] { --kind: var(--group-ladder); }
+.editor__add .chip[data-kind='section'] { --kind: var(--group-section); }
+
 /* ── Rows ─────────────────────────────────────────────────────────────────
  * A left border in the step's own phase colour, which makes the shape of a
  * routine readable while scrolling without adding any extra furniture.
@@ -165,7 +196,7 @@
 
 .erow--repeat {
   background: var(--ink-700);
-  border-left-color: var(--bone-dim);
+  border-left-color: var(--group-reps);
 }
 
 .erow__main {
@@ -173,6 +204,29 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--step-2);
+}
+
+/*
+ * The note toggle, which lives with the FIELDS rather than in the action cluster
+ * — it opens this step's own text, where every button in that cluster acts on the
+ * row's position or existence. Sized like those buttons anyway, so the row still
+ * reads as one band of controls rather than two.
+ */
+.erow__main > .erow__note {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.erow__note .icon {
+  width: 19px;
+  height: 19px;
+}
+
+/* Open is a state, not a hover: the fields below belong to this button. */
+.erow__note[aria-pressed='true']:not(:disabled) {
+  color: var(--bone);
+  background: var(--ink-600);
 }
 
 .erow__actions {
@@ -592,10 +646,14 @@
  * Two more group kinds beside `.erow--repeat`. Distinguished by the left rule
  * and the ground, on the same principle as the role colours: the shape of the
  * routine should be readable down the left edge without reading a word.
+ *
+ * Both used to borrow a role's colour — a ladder was violet like Recover, and a
+ * section took `--phase`, which is the Rest blue by default. Seven kinds, seven
+ * colours, or the left edge says something untrue.
  */
 .erow--ladder {
   background: var(--ink-700);
-  border-left-color: var(--role-recover);
+  border-left-color: var(--group-ladder);
 }
 
 /*
@@ -605,7 +663,7 @@
  */
 .erow--section {
   background: var(--ink-700);
-  border-left-color: var(--phase);
+  border-left-color: var(--group-section);
 }
 
 .efield--section {
