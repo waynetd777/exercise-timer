@@ -104,7 +104,7 @@ guessed at. It is reached at Routines → Sounds under `npm run dev` only, and t
 
 `speech.ts` and `useSpokenCues.ts` sit outside the scheduling system, because
 speech cannot be queued against the audio clock. The spoken lines — the opening
-"enjoy your workout", "ten seconds left", the wrap-up — fire from the timer's tick
+"Let's go!", "ten seconds left", the wrap-up — fire from the timer's tick
 and may land a fraction late, which is fine for information and would not be for a
 beat. Keeping them in their own module is what stops anyone mistaking one for a
 scheduled cue.
