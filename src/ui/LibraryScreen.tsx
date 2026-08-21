@@ -36,6 +36,7 @@ import {
   TrashIcon,
 } from './icons'
 import './library.css'
+import { newId } from '../id'
 
 const SORTS: { mode: SortMode; label: string }[] = [
   { mode: 'recent', label: 'Recent' },
@@ -444,7 +445,7 @@ export function LibraryScreen({
              */
             const now = Date.now()
             void library.add({
-              id: crypto.randomUUID(),
+              id: newId(),
               name: parsed.name,
               blocks: parsed.blocks,
               schemaVersion: SCHEMA_VERSION,

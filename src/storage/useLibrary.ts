@@ -7,8 +7,8 @@ import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
 import { deleteWorkout, listWorkouts, putWorkout, saveWorkout } from './workouts'
+import { newId } from '../id'
 
-const newId = () => crypto.randomUUID()
 const now = () => Date.now()
 
 export type Library = {
