@@ -311,8 +311,16 @@ button {
    */
   height: fit-content;
   align-self: center;
-  align-content: center;
   margin: auto;
+  /*
+   * Kept clear of the island and the home indicator by shrinking rather than by
+   * moving: `margin: auto` centres it, so subtracting both insets from the height
+   * it may take means it can never reach either.
+   */
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--step-6));
+  /* Taller than that scrolls. It used to compress, and the keyboard coming up
+     drove the rows into each other. */
+  overflow-y: auto;
   padding: var(--step-5);
   display: grid;
   justify-items: center;
@@ -397,12 +405,21 @@ button {
   background: rgb(8 9 10 / 0.7);
 }
 
+/*
+ * The head carries the top inset itself.
+ *
+ * Nothing in the top layer sits inside a screen's band, so the padding the
+ * screens gained does nothing for a tray — and this one is pinned to all four
+ * edges. Its close button was under the island, which on iOS means unreachable
+ * rather than merely half-hidden: the system takes those touches.
+ */
 .tray__head {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--step-3);
-  padding: var(--step-3) var(--step-3) var(--step-3) var(--step-4);
+  padding: calc(var(--step-3) + var(--safe-top)) calc(var(--step-3) + var(--safe-right))
+    var(--step-3) var(--step-4);
   border-bottom: var(--hairline);
 }
 
@@ -421,7 +438,9 @@ button {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 var(--step-4) var(--step-5);
+  /* The home indicator, and the island again in landscape. */
+  padding: 0 calc(var(--step-4) + var(--safe-right)) calc(var(--step-5) + var(--safe-bottom))
+    var(--step-4);
 }
 
 .tray__section {
