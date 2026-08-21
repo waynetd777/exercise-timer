@@ -16,7 +16,7 @@ export type KnownImage = {
 
 function walk(blocks: readonly Block[], visit: (url: string, name: string) => void): void {
   for (const block of blocks) {
-    if (block.kind === 'repeat') {
+    if (block.kind !== 'segment') {
       walk(block.children, visit)
       continue
     }

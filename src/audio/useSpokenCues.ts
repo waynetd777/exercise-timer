@@ -86,7 +86,7 @@ export function useSpokenCues(
   useEffect(() => {
     if (status !== 'running' || muted || !canSpeak()) return
     const entry = at.entry
-    if (!entry || entry.durationMs < MIN_STEP_MS) return
+    if (!entry || entry.durationMs === undefined || entry.durationMs < MIN_STEP_MS) return
 
     const secondsLeft = Math.ceil(at.remainingMs / 1000)
     if (secondsLeft !== ANNOUNCE_AT) return

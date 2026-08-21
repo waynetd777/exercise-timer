@@ -59,7 +59,10 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
       <p className="panel__next label">
         {next ? (
           <>
-            Next <b>{next.name}</b> <span className="unit">{duration(next.durationMs)}</span>
+            Next <b>{next.name}</b>{' '}
+            {next.durationMs !== undefined && (
+              <span className="unit">{duration(next.durationMs)}</span>
+            )}
           </>
         ) : (
           'Last step'
@@ -119,9 +122,10 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
    * drops from 3.5 units to 2 and the numerals jump ~75% larger mid-step.
    * Constant within a step, so the countdown never changes size while running.
    */
-  const clockChars = entry
-    ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
-    : 2
+  const clockChars =
+    entry && entry.durationMs !== undefined
+      ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
+      : 2
 
   /*
    * Keyboard control. A keydown IS a user gesture, so unlocking audio from here

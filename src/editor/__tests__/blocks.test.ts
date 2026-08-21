@@ -275,7 +275,7 @@ describe('newRoutineBlocks — what a new routine opens on', () => {
   it('labels the reps, so the run screen shows "Reps 2 of 3"', () => {
     const entry = compile({ ...base, blocks: template }).entries[3]!
     expect(entry.path).toEqual([
-      { repeatId: expect.any(String), label: 'Reps', iteration: 2, of: 3 },
+      { kind: 'repeat', id: expect.any(String), label: 'Reps', iteration: 2, of: 3 },
     ])
   })
 })

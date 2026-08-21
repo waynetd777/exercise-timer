@@ -101,7 +101,7 @@ describe('cue timing across a real routine', () => {
         toneFor(kind)!.notes.map((note) => note.atMs + note.durationMs),
       ),
     )
-    const shortest = Math.min(...timeline.entries.map((e) => e.durationMs))
+    const shortest = Math.min(...timeline.entries.map((e) => e.durationMs ?? Infinity))
     expect(shortest).toBeGreaterThan(longest)
   })
 

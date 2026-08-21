@@ -28,7 +28,7 @@ describe('compile', () => {
     timeline.entries.forEach((entry, i) => {
       expect(entry.index).toBe(i)
       expect(entry.startMs).toBe(expectedStart)
-      expect(entry.endMs).toBe(entry.startMs + entry.durationMs)
+      expect(entry.endMs).toBe(entry.startMs + entry.durationMs!)
       expectedStart = entry.endMs
     })
     expect(expectedStart).toBe(timeline.totalMs)
@@ -39,7 +39,7 @@ describe('compile', () => {
 
     // Third round's work step: index 1 + (3 - 1) * 2 = 5
     expect(timeline.entries[5]!.path).toEqual([
-      { repeatId: expect.any(String), label: 'Reps', iteration: 3, of: 8 },
+      { kind: 'repeat', id: expect.any(String), label: 'Reps', iteration: 3, of: 8 },
     ])
   })
 
@@ -51,8 +51,8 @@ describe('compile', () => {
     const entry = timeline.entries.find((e) => e.startMs === 55_000)
     expect(entry).toMatchObject({ name: 'Work' })
     expect(entry!.path).toEqual([
-      { repeatId: expect.any(String), label: 'Set', iteration: 2, of: 2 },
-      { repeatId: expect.any(String), label: 'Reps', iteration: 1, of: 3 },
+      { kind: 'repeat', id: expect.any(String), label: 'Set', iteration: 2, of: 2 },
+      { kind: 'repeat', id: expect.any(String), label: 'Reps', iteration: 1, of: 3 },
     ])
 
     // The recover step sits inside Set only, not inside Reps.
@@ -109,8 +109,9 @@ describe('compile', () => {
   })
 
   it('handles an empty workout and empty repeat bodies', () => {
-    expect(compile(workout('Empty', []))).toEqual({ entries: [], totalMs: 0 })
-    expect(compile(workout('Hollow', [rep(5, [])]))).toEqual({ entries: [], totalMs: 0 })
+    const empty = { entries: [], runs: [], totalMs: 0, hasGates: false }
+    expect(compile(workout('Empty', []))).toEqual(empty)
+    expect(compile(workout('Hollow', [rep(5, [])]))).toEqual(empty)
   })
 
   it('throws a clear error rather than expanding a pathological tree', () => {

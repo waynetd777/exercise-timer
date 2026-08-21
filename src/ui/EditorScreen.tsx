@@ -278,7 +278,7 @@ function SegmentRow({
             type="number"
             min={1}
             max={5999}
-            value={Math.round(segment.durationMs / 1000)}
+            value={Math.round((segment.durationMs ?? 0) / 1000)}
             aria-label="Seconds"
             onChange={(event) => {
               const seconds = Number(event.target.value)
@@ -724,7 +724,14 @@ export function EditorScreen({
         ) : (
           <ul className="editor__list">
             {rows.map(({ block, path, depth, first, last }) =>
-              block.kind === 'segment' ? (
+              /*
+               * Ladders and sections have no row yet — the editor gains them with
+               * the strength-routine work. Nothing in the app can author one, so
+               * this branch is unreachable today; it is explicit rather than a
+               * cast so adding a kind cannot silently render it as a repeat.
+               */
+              block.kind === 'ladder' || block.kind === 'section' ? null : block.kind ===
+                'segment' ? (
                 <SegmentRow
                   key={block.id}
                   segment={block}
