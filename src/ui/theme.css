@@ -303,6 +303,146 @@ button {
   gap: var(--step-3);
 }
 
+/* ── Help tray ─────────────────────────────────────────────────────────────
+ * A modal dialog pinned to the right edge rather than centred: help is read
+ * alongside the thing it describes, and a centred box covers exactly what is
+ * being asked about. On a phone there is no beside, so it takes the full width.
+ */
+.tray {
+  /*
+   * Positioned explicitly rather than by `margin: auto` or a parent's grid. A
+   * dialog is a child of whichever screen opened it, both of those screens are
+   * full-height grids, and `.notice` above records what they do to a box that
+   * lets them decide. `inset` with `left: auto` is the whole layout: pinned
+   * right, top to bottom.
+   */
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(100vw, 24rem);
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  /* Head fixed, body scrolling. */
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  color: var(--bone);
+  background: var(--ink-800);
+  border: 0;
+  border-left: var(--hairline);
+  animation: tray-in 180ms var(--ease);
+}
+
+/* Slides from the edge it is attached to, so where it came from is obvious. */
+@keyframes tray-in {
+  from {
+    transform: translateX(1.5rem);
+    opacity: 0;
+  }
+}
+
+.tray::backdrop {
+  /* A literal colour: `::backdrop` does not inherit the page's custom
+     properties dependably — the same reason `.lightbox::backdrop` uses one. */
+  background: rgb(8 9 10 / 0.7);
+}
+
+.tray__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--step-3);
+  padding: var(--step-3) var(--step-3) var(--step-3) var(--step-4);
+  border-bottom: var(--hairline);
+}
+
+.tray__title {
+  margin: 0;
+  font-size: var(--label-size-sm);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.tray__body {
+  display: grid;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--step-4) var(--step-5);
+}
+
+.tray__section {
+  border-bottom: var(--hairline);
+}
+
+.tray__section:last-of-type {
+  border-bottom: 0;
+}
+
+/*
+ * The disclosure row. The marker is a rotating chevron rather than two glyphs,
+ * so opening reads as a movement, and the native triangle is dropped in both
+ * spellings — Safari still wants the WebKit pseudo-element.
+ */
+.tray__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--step-3);
+  min-height: 44px;
+  font-size: var(--label-size-sm);
+  font-weight: 650;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--bone);
+  cursor: pointer;
+  list-style: none;
+}
+
+.tray__summary::-webkit-details-marker {
+  display: none;
+}
+
+.tray__summary::before {
+  content: '';
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--bone-faint);
+  border-bottom: 2px solid var(--bone-faint);
+  transform: rotate(-45deg);
+  transition: transform 150ms var(--ease);
+}
+
+.tray__section[open] > .tray__summary::before {
+  transform: rotate(45deg);
+}
+
+.tray__summary:hover {
+  color: var(--phase);
+}
+
+/*
+ * The points themselves: sentence case, not uppercase like the headings, and
+ * left at a readable size rather than scaled with the viewport — this is the one
+ * text in the app meant to be read at arm's length rather than across a room.
+ */
+.tray__points {
+  margin: 0 0 var(--step-4);
+  padding-left: 1.15rem;
+  display: grid;
+  gap: var(--step-2);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--bone-dim);
+}
+
+.tray__points li::marker {
+  color: var(--bone-faint);
+}
+
 /* ── Menu ──────────────────────────────────────────────────────────────────
  * A chip that opens a short list of actions. Positioned against its own
  * wrapper rather than in the top layer, so it needs no anchor positioning.

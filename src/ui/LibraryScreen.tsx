@@ -15,12 +15,15 @@ import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
 import { duration } from './format'
 import { Menu } from './Menu'
+import { HelpTray } from './HelpTray'
+import { LIBRARY_HELP } from './help'
 import { NoticeDialog } from './NoticeDialog'
 import {
   CheckIcon,
   CloseIcon,
   CopyIcon,
   ExportIcon,
+  HelpIcon,
   ImportIcon,
   PasteIcon,
   PencilIcon,
@@ -172,6 +175,7 @@ export function LibraryScreen({
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
+  const [helping, setHelping] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [pasting, setPasting] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -348,6 +352,19 @@ export function LibraryScreen({
             ]}
           />
 
+          {/* Beside the Routines menu, since most of what it explains is in
+              there. Icon-only: a question mark needs no word, and the row is
+              already carrying two labelled chips. */}
+          <button
+            type="button"
+            className="chip chip--action library__help"
+            onClick={() => setHelping(true)}
+            aria-label="Help"
+            title="What this screen can do"
+          >
+            <HelpIcon />
+          </button>
+
           <input
             ref={picker}
             className="visually-hidden"
@@ -443,6 +460,10 @@ export function LibraryScreen({
             setNoticeBusy(false)
           }}
         />
+      )}
+
+      {helping && (
+        <HelpTray title="Help" sections={LIBRARY_HELP} onClose={() => setHelping(false)} />
       )}
 
       <div className="library__drop" aria-hidden="true">
