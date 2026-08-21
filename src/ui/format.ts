@@ -91,3 +91,37 @@ export function fitWidthUsed(text: string, max = 40): number {
 export function wordCount(text: string): number {
   return Math.max(1, text.trim().split(/\s+/).filter(Boolean).length)
 }
+
+/**
+ * What a step asks of you: "12 ×", "5 × each side", or a duration.
+ *
+ * Reps come first because a rep-based step is the common case in a strength
+ * routine, and a step can carry both only by accident of editing.
+ */
+export function effortLabel(step: {
+  durationMs?: number
+  reps?: { count: number; perSide?: boolean }
+}): string {
+  if (step.reps) return `${step.reps.count} ×${step.reps.perSide ? ' each side' : ''}`
+  if (step.durationMs !== undefined) return duration(step.durationMs)
+  return ''
+}
+
+/**
+ * The caption for the group being shown in list mode: "Round 2 of 4",
+ * "Set 5 of 9 · 15 reps".
+ *
+ * A section contributes `of: 1` and so captions as nothing — its name is already
+ * the heading above the list.
+ */
+export function groupCaption(group: {
+  kind: 'section' | 'repeat' | 'ladder'
+  label?: string
+  iteration: number
+  of: number
+  rung?: number
+} | null): string {
+  if (!group || group.of <= 1) return ''
+  const position = `${group.label ?? 'Reps'} ${group.iteration} of ${group.of}`
+  return group.rung === undefined ? position : `${position} · ${group.rung} reps`
+}

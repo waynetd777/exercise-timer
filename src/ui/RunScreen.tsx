@@ -1,12 +1,21 @@
 import { useEffect, useRef } from 'react'
-import type { TimelineEntry, Workout } from '../engine'
-import { stepCount, totalDurationMs } from '../engine'
+import type { Routine, RoutinePosition, TimelineEntry, Workout } from '../engine'
+import { groupEntries, groupOf, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
 import { useCueScheduler } from '../audio/useCueScheduler'
 import { useSpokenCues } from '../audio/useSpokenCues'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
-import { clock, clockWidth, duration, fitCqi, pathLabel, wordCount } from './format'
+import {
+  clock,
+  clockWidth,
+  duration,
+  effortLabel,
+  fitCqi,
+  groupCaption,
+  pathLabel,
+  wordCount,
+} from './format'
 import {
   BackIcon,
   NextIcon,
@@ -22,6 +31,70 @@ import './run-screen.css'
 
 /** The final three seconds of a step, where the countdown starts to pulse. */
 const URGENT_MS = 3_000
+
+/**
+ * A whole group on screen at once: the round or rung being worked, every step in
+ * it, with the current one marked.
+ *
+ * This is what a rep-based routine needs and a countdown cannot give. You are
+ * not told one exercise at a time — you read the next four while you are still
+ * on the first, which is how the source handouts are written and how people
+ * actually work through them.
+ *
+ * The list is the innermost group (see `groupEntries`), never the whole section:
+ * one round of four, not all four rounds.
+ */
+function SectionList({
+  routine,
+  at,
+  secondsLeft,
+}: {
+  routine: Routine
+  at: RoutinePosition
+  secondsLeft: number
+}) {
+  const entry = at.entry
+  if (!entry) return null
+
+  const section = sectionOf(entry)
+  const rows = groupEntries(routine, entry)
+  const caption = groupCaption(groupOf(entry))
+
+  return (
+    <div className="sheet">
+      <div className="sheet__head">
+        {section && <h2 className="sheet__title">{section.label}</h2>}
+        {caption && <p className="sheet__caption label">{caption}</p>}
+        {section?.note && <p className="sheet__note label label--sm">{section.note}</p>}
+      </div>
+
+      <ol className="sheet__list">
+        {rows.map((row) => {
+          const done = row.step < entry.step
+          const current = row.step === entry.step
+          return (
+            <li
+              key={`${row.step}`}
+              className="sheet__row"
+              data-state={current ? 'current' : done ? 'done' : 'todo'}
+              aria-current={current ? 'step' : undefined}
+            >
+              {/* A timed step counts down once it is the one being worked; until
+                  then it shows the time it will take. */}
+              <span className="sheet__effort">
+                {current && row.durationMs !== undefined ? clock(secondsLeft) : effortLabel(row)}
+              </span>
+              <span className="sheet__name">
+                {row.name}
+                {row.alternative && <em className="sheet__alt">or {row.alternative}</em>}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
+}
 
 function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry | null }) {
   const src = useMediaUrl(entry.media)
@@ -112,6 +185,14 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   // idle renders the ready panel and a live countdown at the same time.
   const isRunning = status === 'running' || status === 'paused'
   const entry = isRunning ? at.entry : null
+
+  /*
+   * The section decides, not the step: a 45-second rest inside a rep-based
+   * section is still a row in that section's list, and flipping to a full-screen
+   * countdown for it and back would be disorienting. A self-paced step outside
+   * any section has no other sensible rendering.
+   */
+  const asList = entry !== null && (sectionOf(entry)?.display === 'list' || entry.selfPaced)
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''
@@ -264,7 +345,20 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         </div>
       )}
 
-      {entry && (
+      {entry && asList && (
+        <div className="run__sheet">
+          <SectionList routine={routine} at={at} secondsLeft={timer.secondsLeft} />
+          <button
+            className="btn btn--primary btn--next"
+            onClick={withAudio(timer.next)}
+            disabled={status !== 'running' && status !== 'paused'}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {entry && !asList && (
         <div className="run__body">
           <div className="count">
             {/* Grouped so the meta row below can be pinned to the bottom of the
