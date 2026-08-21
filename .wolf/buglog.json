@@ -687,6 +687,23 @@
       "timestamp": "2026-08-21T22:20:42+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T22:20:42+02:00"
+    },
+    {
+      "error_message": "User-reported: New routine, Duplicate routine and paste-import did nothing on laptop, iPhone and iPad alike",
+      "file": "src/id.ts",
+      "root_cause": "Every id came from `crypto.randomUUID()`, which is SECURE-CONTEXT ONLY. All three devices were testing against the dev server over the LAN \u2014 a plain-HTTP origin \u2014 where the method is undefined, so each of those paths threw. It worked on the deployed HTTPS site, which is why it read as 'broken everywhere' rather than 'broken on one platform'.",
+      "fix": "`newId()` in src/id.ts: randomUUID when available, otherwise a real version-4 UUID built from getRandomValues (no secure-context restriction), and Math.random as a last resort. All 14 call sites now use it.",
+      "fix_rule": "Anything under `crypto` that is secure-context only \u2014 randomUUID, subtle \u2014 will be undefined on the plain-HTTP origin used for device testing. Wrap it with a fallback, or the app is broken in the one place it most needs trying out. `crypto.subtle` (image hashing) still has this problem: uploads fail over plain HTTP.",
+      "tags": [
+        "crypto",
+        "secure-context",
+        "dev-workflow",
+        "ids"
+      ],
+      "id": "bug-040",
+      "timestamp": "2026-08-21T23:59:25+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T23:59:25+02:00"
     }
   ]
 }
