@@ -545,6 +545,23 @@
       "timestamp": "2026-08-21T14:30:00+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T14:30:00+02:00"
+    },
+    {
+      "error_message": "Exporting a pasted routine and re-importing it silently dropped it: 'no readable routines'",
+      "file": "src/storage/bundle.ts",
+      "root_cause": "isBlock is a WHITELIST - it accepted only 'segment' and 'repeat'. When ladders and sections were added it was not updated, so isWorkout rejected every pasted routine and fromBundle's .filter(isWorkout) discarded it. The export itself wrote the routine out perfectly, so the backup looked valid and restored nothing.",
+      "fix": "isBlock accepts every kind in GROUP_KINDS (repeat, ladder, section) and validates their children. Round-trip test added over a real pasted routine.",
+      "fix_rule": "Adding a block kind means updating every whitelist that validates one - bundle.ts is the only strict validator; shareLink.ts checks only that blocks is an array.",
+      "tags": [
+        "storage",
+        "export",
+        "validation",
+        "data-loss"
+      ],
+      "id": "bug-032",
+      "timestamp": "2026-08-21T15:05:00+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T15:05:00+02:00"
     }
   ]
 }
