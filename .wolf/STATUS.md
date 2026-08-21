@@ -160,6 +160,12 @@
   - **Keyboard control** on the run screen: space/`k` start-pause-resume, arrows skip, `m` mutes. Shortcuts shown in the button tooltips. Handler in a ref with the listener registered once, so it neither re-attaches every render nor every tick.
   - **Spoken "ten seconds left"** on steps of 20s or more, via the browser's own voice. Kept out of the scheduled cue system on purpose — speech cannot be queued on the audio clock — and keyed on step index so a pause or seek cannot repeat it. Respects mute.
   - **Pull down on the home screen to update the app** (user-reported). `updateApp()` deletes only the `precache` caches, leaving **IndexedDB untouched** (the only copy of authored routines) and the `exercise-images` runtime cache intact. Touch listeners are attached natively with `{ passive: false }`, since React's `touchmove` is passive and would ignore `preventDefault`.
+- **Phase 4 COMPLETE — media pipeline** (third of three)
+  - `src/media/hash.ts` sha256 content addressing; `gc.ts` pure `liveHashes`/`orphanedHashes`; `resolve.ts` pure `resolvePlan` (a pinned remote prefers its local copy, and falls back to the network if the blob was evicted); `store.ts` IndexedDB blobs; `downscale.ts` canvas → WebP at 1024px, skipping files already under 300KB and keeping whichever is smaller; `pin.ts` `pinRemote` + `storeFile`; `resolveMedia.ts` objectURL cache. **18 tests** on the pure parts, including the known sha256("abc") digest so the algorithm cannot change silently.
+  - **The phase-2 stopgap `src/ui/media.ts` is deleted.** `useMediaUrl` resolves synchronously first so a remote image paints immediately, then asynchronously for blobs — without that, every image flashes blank on a step change.
+  - **Upload your own photo** per step in the editor (downscaled, hashed, stored). **Save images** in the library header pins every linked image locally — possible only because `i.postimg.cc` allows cross-origin reads.
+  - **Media GC on delete**, computed against the whole remaining library because storage is content-addressed and a deleted routine may share images with one that stays.
+  - **261 tests green.**
 
 ---
 
