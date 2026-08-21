@@ -289,6 +289,16 @@ export function LibraryScreen({
             ))}
           </div>
 
+          <button className="chip chip--action" onClick={onNew}>
+            <PlusIcon />
+            New
+          </button>
+
+          <button className="chip chip--action" onClick={() => picker.current?.click()}>
+            <ImportIcon />
+            Import
+          </button>
+
           <button
             className="chip chip--action"
             onClick={() =>
@@ -314,20 +324,11 @@ export function LibraryScreen({
             Save images
           </button>
 
-          <button className="chip chip--action" onClick={onNew}>
-            <PlusIcon />
-            New
-          </button>
-
-          <button className="chip chip--action" onClick={() => picker.current?.click()}>
-            <ImportIcon />
-            Import
-          </button>
           <input
             ref={picker}
             className="visually-hidden"
             type="file"
-            accept=".tabata,application/json"
+            accept=".tabata,.json,application/json"
             multiple
             onChange={(event) => {
               void ingest(Array.from(event.target.files ?? []))
