@@ -180,6 +180,8 @@
 
 - [2026-08-21] **Both library toolbar controls are `Menu`s — "Sort" and "Routines".** Sort was briefly a native `<select>`, which was replaced because a select can only ever show its selected value, and the control needed to be *named*. The trade accepted: no native mobile picker, in exchange for a matching pair of controls and a tick showing the active sort. The button reads just "Sort", not "Sort: Recent" — say so if the current value should be visible on the button.
 
+- [2026-08-21] **No trailing periods in UI messages** (requested for modals; applied to all short status text for consistency). Where a message needed two sentences it was rewritten as one phrase joined with an em dash — "That image could not be read — try a JPEG, PNG or WebP" — rather than keeping an internal period. Questions keep their question mark, and an ellipsis on a progress message stays.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->

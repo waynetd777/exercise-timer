@@ -149,8 +149,8 @@ function ImagePicker({
       {shown.length === 0 ? (
         <p className="picker__empty label label--sm">
           {images.length === 0
-            ? 'No routine uses an image yet. Paste a link instead.'
-            : `Nothing matches “${query}”.`}
+            ? 'No routine uses an image yet — paste a link instead'
+            : `Nothing matches “${query}”`}
         </p>
       ) : (
         <ul className="picker__grid">
@@ -545,7 +545,7 @@ export function EditorScreen({
       const media = await storeFile(file)
       patchSegment(path, { media })
     } catch {
-      setUploadError('That image could not be read. Try a JPEG, PNG or WebP.')
+      setUploadError('That image could not be read — try a JPEG, PNG or WebP')
     }
   }
 
@@ -641,9 +641,7 @@ export function EditorScreen({
 
       <div className="editor__scroll">
         {rows.length === 0 ? (
-          <p className="editor__empty label label--sm">
-            No steps yet. Add one below.
-          </p>
+          <p className="editor__empty label label--sm">No steps yet — add one below</p>
         ) : (
           <ul className="editor__list">
             {rows.map(({ block, path, depth, first, last }) =>
