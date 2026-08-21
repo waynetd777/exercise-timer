@@ -33,6 +33,7 @@ import {
   SoundOnIcon,
 } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
+import { shortcutApplies } from './keys'
 import { useMediaUrl } from './useMediaUrl'
 import './run-screen.css'
 
@@ -285,9 +286,9 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     if (event.metaKey || event.ctrlKey || event.altKey) return
     // The dialog owns the keyboard while it is open.
     if (leaving) return
-    // Leave the key alone if something focused wants it — space on a button.
-    const tag = (event.target as HTMLElement | null)?.tagName
-    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT') return
+    // Leave the key alone only if what has focus actually uses it: a button
+    // takes Space and Enter, a field takes everything. See `shortcutApplies`.
+    if (!shortcutApplies((event.target as HTMLElement | null)?.tagName, event.key)) return
 
     const act = (run: () => void) => {
       event.preventDefault()
