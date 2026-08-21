@@ -231,9 +231,18 @@
    * that has to give way on a short window, so it needs the cqh term the scale
    * tokens do not carry. A card's row name has no such constraint.
    */
-  font-size: max(2.5rem, min(11cqi, 11cqh));
+  /*
+   * Bounded on both axes, like the media panel's fallback. `--fit` sizes the
+   * text so it fits three lines of THIS box — a pasted routine can carry a
+   * fifty-character step name, and a floor alone would just push it out of a
+   * grid row whose height is fixed by proportion.
+   */
+  font-size: clamp(1.35rem, min(11cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
   font-weight: 650;
   letter-spacing: var(--track-name);
+  text-wrap: balance;
+  /* Last resort: the sizing above should mean no word needs breaking. */
+  overflow-wrap: anywhere;
   margin: 0;
 }
 
@@ -472,6 +481,12 @@
   letter-spacing: 0;
 }
 
+/*
+ * The list scrolls rather than shrinking its rows. A row too small to read from
+ * three metres has failed at its only job, so when a group genuinely will not
+ * fit, the right answer is that some of it is below the fold — not that all of
+ * it is illegible.
+ */
 .sheet__list {
   list-style: none;
   margin: 0;
@@ -537,6 +552,9 @@
 
 .sheet__name {
   min-width: 0;
+  text-wrap: pretty;
+  /* Long names wrap; they are never clipped and never shrink out of step with
+     the rows around them, which would make the list read as ragged. */
   overflow-wrap: anywhere;
 }
 
@@ -544,8 +562,14 @@
   display: block;
   font-size: 0.72em;
   font-style: normal;
+  line-height: 1.3;
   color: var(--bone-faint);
   text-decoration: none;
+}
+
+/* The current row's instruction is worth reading, so it is not as dim. */
+.sheet__row[data-state='current'] .sheet__alt {
+  color: var(--bone-dim);
 }
 
 /*

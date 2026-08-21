@@ -59,6 +59,15 @@ Decisions the grammar encodes, each because the emails are inconsistent:
   with a number that is not a rep count.
 - **A line is split only when both halves state a count.** "20 × Front Punches +
   20 × Uppercuts" is two movements; "Squat + Shoulder Press" is one.
+- **A long trailing parenthetical is a description, not part of the name.** One
+  step arrived as 159 characters — "Side-to-Side Squats with a Reach (start
+  standing, step out to one side, …)" — which no amount of sizing renders legibly
+  across a gym. Over 24 characters it moves to the step's `note`; shorter ones
+  like "(basic)" are part of what the exercise *is*, and only a TRAILING one
+  counts, since "RB (resistance band) Lateral Walks" glosses a term mid-name.
+- **A bracketed per-side note is dropped from the name**, because the effort
+  column already says "each side" and it would otherwise print twice. Only the
+  bracketed form: cutting "– each side" would leave a dangling dash.
 - **A section shows as a timer only when every step in it is timed**, which is
   derived rather than guessed — the warm-up qualifies, nothing else does.
 

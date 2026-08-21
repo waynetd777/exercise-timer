@@ -11,6 +11,7 @@ import {
   clockWidth,
   duration,
   effortLabel,
+  fitBlockCqi,
   fitCqi,
   groupCaption,
   pathLabel,
@@ -87,6 +88,10 @@ function SectionList({
               <span className="sheet__name">
                 {row.name}
                 {row.alternative && <em className="sheet__alt">or {row.alternative}</em>}
+                {/* The how-to only on the row being worked: it is guidance for
+                    what you are doing NOW, and printing every step's would push
+                    the rest of the group off the screen the list exists to show. */}
+                {current && row.note && <em className="sheet__alt">{row.note}</em>}
               </span>
             </li>
           )
@@ -99,6 +104,17 @@ function SectionList({
 function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry | null }) {
   const src = useMediaUrl(entry.media)
   const nextSrc = useMediaUrl(next?.media)
+
+  /*
+   * The instruction when there is one, the name otherwise.
+   *
+   * The name is already the heading beside this panel, so repeating it wastes
+   * the largest text box on the screen. These routines carry their how-to in a
+   * trailing parenthetical — "start standing, step out to one side, sink your
+   * hips…" — and an exercise you have not done before is exactly when the panel
+   * is empty, because it has no illustration either.
+   */
+  const fallback = entry.note ?? entry.name
 
   // Decode the next step's image while this one is still running, or the
   // transition lands on a blank frame at exactly the wrong moment.
@@ -120,12 +136,12 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
           <span
             className="panel__empty"
             style={{
-              ['--fit' as string]: fitCqi(entry.name),
-              ['--lines' as string]: wordCount(entry.name),
+              ['--fit' as string]: fitCqi(fallback),
+              ['--lines' as string]: wordCount(fallback),
             }}
             aria-hidden="true"
           >
-            {entry.name}
+            {fallback}
           </span>
         )}
       </div>
@@ -382,7 +398,12 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
               >
                 {clockText}
               </p>
-              <h1 className="count__name">{entry.name}</h1>
+              <h1
+                className="count__name"
+                style={{ ['--fit' as string]: fitBlockCqi(entry.name, 3, 11) }}
+              >
+                {entry.name}
+              </h1>
             </div>
 
             {/* No "Paused" chip — the primary button already reads "Resume". */}

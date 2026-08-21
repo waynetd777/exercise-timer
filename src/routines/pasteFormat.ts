@@ -131,6 +131,38 @@ type Item = {
   count?: number
   perSide: boolean
   alternative?: string
+  /** A trailing description, lifted out of the name — see `splitDescription`. */
+  note?: string
+}
+
+/**
+ * How long a trailing parenthetical may be before it stops being part of the
+ * name and becomes a description.
+ *
+ * "(basic)" and "(floor or trampoline)" are part of what the exercise IS.
+ * "(start standing, step out to one side, sink your hips into a squat, and
+ * reach your arms across your body for an added stretch)" is instructions, and
+ * leaving it in makes a 159-character step name that no amount of sizing can
+ * render legibly across a gym.
+ */
+const DESCRIPTION_CHARS = 24
+
+/** A trailing "(…)", which is where these routines put their instructions. */
+const TRAILING_PAREN = /^(.*?)\s*\(([^()]*)\)\s*$/
+
+/**
+ * Splits "Name (long instruction)" into a name and a note.
+ *
+ * Only a TRAILING parenthetical, and only a long one: "RB (resistance band)
+ * Lateral Walks" glosses a term mid-name and has to stay where it is.
+ */
+function splitDescription(name: string): { name: string; note?: string } {
+  const match = TRAILING_PAREN.exec(name)
+  if (!match) return { name }
+  const head = match[1]!.trim()
+  const inner = match[2]!.trim()
+  if (head === '' || inner.length < DESCRIPTION_CHARS) return { name }
+  return { name: head, note: inner }
 }
 
 function tidy(text: string): string {
@@ -166,39 +198,42 @@ export function parseItem(text: string): Item {
   const perSideCount = PER_SIDE_COUNT.exec(rest)
   const perSide = PER_SIDE.test(rest)
 
-  const leadingSeconds = LEADING_SECONDS.exec(rest)
-  if (leadingSeconds) {
+  /*
+   * "Speed Skaters (each side)" already says "each side" in its effort column
+   * once `perSide` is set, so leaving it in the name prints it twice. Only the
+   * bracketed form goes: "Plank Shoulder Taps – each side" reads as part of the
+   * name, and removing a dashed clause would leave a dangling dash.
+   */
+  if (perSide) rest = tidy(rest.replace(/\s*\((?:\d+\s*)?each\s+(?:side|leg|arm|direction)\)/i, ''))
+
+  const done = (name: string, extra: Partial<Item> = {}): Item => {
+    const split = splitDescription(name)
     return {
-      name: tidy(leadingSeconds[2]!),
-      durationMs: Number(leadingSeconds[1]) * 1000,
+      ...split,
       perSide,
+      ...extra,
       ...(alternative ? { alternative } : {}),
     }
   }
 
+  const leadingSeconds = LEADING_SECONDS.exec(rest)
+  if (leadingSeconds) {
+    return done(tidy(leadingSeconds[2]!), { durationMs: Number(leadingSeconds[1]) * 1000 })
+  }
+
   const trailingSeconds = TRAILING_SECONDS.exec(rest)
   if (trailingSeconds) {
-    return {
-      name: tidy(trailingSeconds[1]!),
-      durationMs: Number(trailingSeconds[2]) * 1000,
-      perSide,
-      ...(alternative ? { alternative } : {}),
-    }
+    return done(tidy(trailingSeconds[1]!), { durationMs: Number(trailingSeconds[2]) * 1000 })
   }
 
   const leadingCount = LEADING_COUNT.exec(rest)
   if (leadingCount) {
     // "10 × Walking Lunges (5 each leg)" is five a side, not ten.
     const count = perSideCount ? Number(perSideCount[1]) : Number(leadingCount[1])
-    return {
-      name: tidy(leadingCount[2]!),
-      count,
-      perSide,
-      ...(alternative ? { alternative } : {}),
-    }
+    return done(tidy(leadingCount[2]!), { count })
   }
 
-  return { name: tidy(rest), perSide, ...(alternative ? { alternative } : {}) }
+  return done(tidy(rest))
 }
 
 // ── Blocks ──────────────────────────────────────────────────────────────────
@@ -213,6 +248,7 @@ function segment(item: Item, durationMs: number | undefined, reps: Reps | undefi
     ...(durationMs !== undefined ? { durationMs } : {}),
     ...(reps ? { reps } : {}),
     ...(item.alternative ? { alternative: item.alternative } : {}),
+    ...(item.note !== undefined ? { note: item.note } : {}),
   }
 }
 
