@@ -33,6 +33,29 @@ step will show*, not the current one — otherwise a step counting through 1:00 
 rather than letting the countdown take what it needs, so the image never resizes
 with it.
 
+## Text always fits its box
+
+Nothing is clipped and nothing is truncated, so anything that can receive an
+arbitrary string is **sized to fit on both axes**. Pasted routines make this
+non-negotiable: a step name arrived at 159 characters.
+
+`format.ts` has two fitters, and picking the wrong one is the mistake to avoid:
+
+- **`fitCqi`** sizes off the LONGEST WORD, assuming the worst — one word per
+  line. Right for a narrow box like the media panel, where that really happens.
+- **`fitBlockCqi(text, maxLines, max)`** bounds by the longest word *and* by
+  total length over a line budget. Right for a heading across a full-width
+  column, where words pack and the one-per-line assumption would set a five-word
+  name absurdly small.
+
+Both return `cqi`, consumed as `calc(var(--fit) * 1cqi)` and paired with a height
+term — see `.panel__empty` and `.count__name`. A floor alone is not fitting: it
+just moves the overflow somewhere a grid row cannot absorb it.
+
+The list is the deliberate exception. Its rows keep one uniform size and the list
+scrolls, because a row shrunk to fit would be illegible at three metres and rows
+of differing sizes read as ragged. Below the fold beats unreadable.
+
 ## Traps this codebase has already hit
 
 Each of these cost a real bug. They are recorded because they recur.
