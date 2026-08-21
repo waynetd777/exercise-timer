@@ -213,7 +213,7 @@ export function LibraryScreen({
       const walk = async (blocks: readonly Block[]): Promise<Block[]> =>
         Promise.all(
           blocks.map(async (block) => {
-            if (block.kind === 'repeat') return { ...block, children: await walk(block.children) }
+            if (block.kind !== 'segment') return { ...block, children: await walk(block.children) }
             if (block.media?.source !== 'remote' || block.media.cachedHash) return block
             try {
               const media = await pinRemote(block.media)
@@ -280,7 +280,7 @@ export function LibraryScreen({
       <header className="library__head">
         <h1 className="library__title">
           <StopwatchIcon />
-          DavShack Timer
+          Exercise Timer
         </h1>
 
         <div className="library__tools">

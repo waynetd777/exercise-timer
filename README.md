@@ -1,4 +1,4 @@
-# DavShack Timer
+# Exercise Timer
 
 An interval timer for gym routines. Runs in the browser, installs to a phone home
 screen, and works offline.
@@ -15,9 +15,10 @@ going, from across a gym, with the phone propped against a rack.
 - **Runs a routine** — big countdown, colour-coded phase, the exercise
   illustration beside it, audio cues that stay on the beat even after the phone
   has been in a pocket.
-- **Holds a library** of routines in the browser, searchable, with favourites.
+- **Holds a library** of routines in the browser, searchable, with favourites and
+  a colour per routine.
 - **Imports** the `.tabata` exports of the Tabata Timer app, and its own bundles.
-- **Edits** routines: steps, durations, rounds, images — with undo.
+- **Edits** routines: steps, durations, reps, images — with undo.
 - **Shares** a routine as a URL, or exports the whole library as one file.
 - **Owns its images** — stores local copies so a routine survives gym wifi and
   the image host eventually losing a file.
@@ -27,10 +28,14 @@ going, from across a gym, with the phone propped against a rack.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 261 tests, no browser needed
+npm test           # 301 tests, no browser needed
 npm run typecheck
 npm run build
 ```
+
+`npm run dev` also unlocks the sound bench, at Routines → Sounds: every cue as
+the full figure and as its terminal sound alone, with the parameters printed
+beside it. It is dev-only and compiled out of a production build.
 
 Deployment is automatic: a push to `main` builds and publishes to GitHub Pages,
 gated on typecheck and tests, because a broken timer is worse than a stale one.
@@ -56,8 +61,8 @@ src/
   audio/      Cues, pre-scheduled on the Web Audio clock.
   editor/     Pure operations on a routine's block tree, plus undo.
   media/      Images: content-addressed storage, downscaling, offline pinning.
-  storage/    IndexedDB, the library, the export format, share links.
-  routines/   The .tabata importer, the seeded routines, the image catalogue.
+  storage/    IndexedDB, the library, the export format, share links, read-time migration.
+  routines/   The .tabata importer, the seeded routine, the image catalogue.
   ui/         Screens, the type scale, the design tokens.
 ```
 
@@ -71,14 +76,17 @@ throttled tab, a backgrounded phone or a ten-minute pocket cannot cause drift �
 coming back simply tells the truth.
 
 **A routine compiles to a flat timeline once.** `compile()` expands the recursive
-tree of steps and rounds into absolute-time entries; the runner is then a pure
+tree of steps and reps into absolute-time entries; the runner is then a pure
 binary search over it. That makes seeking and skipping trivial and the whole
 engine testable against a fake clock.
 
 **Cues are scheduled ahead on the audio clock**, never fired from a JavaScript
-tick, because the audio thread keeps time when the main thread is throttled. The
-tones are synthesised from measurements of the app Wayne already trains to —
-pitch, partials and envelope — so nothing third-party is bundled.
+tick, because the audio thread keeps time when the main thread is throttled. Each
+boundary sounds like what it means: three beeps then a **whistle** into work,
+three beeps then a **bell** out of it, three beeps then a triple **ding** at the
+end. Everything but the whistle is synthesised from measurements of the app Wayne
+already trains to; the whistle is a CC0 recording, which measurement showed is
+the very recording that app plays.
 
 **The UI is sized for viewing distance, not convention.** Secondary text starts
 around 1rem and scales with the container; the countdown fills its box on both
@@ -91,16 +99,10 @@ IndexedDB; images live beside them once pinned. Export, share links and the
 
 ## Testing
 
-261 tests, all of which run in Node in under a second — there is no browser in
+301 tests, all of which run in Node in under a second — there is no browser in
 the test setup and none is needed, because the parts worth testing do not touch
 the DOM. IndexedDB access, canvas encoding and Web Audio are deliberately thin
 wrappers around tested pure logic rather than being mocked.
 
 Several tests are named after the bug they exist to prevent. That is on purpose:
 `.wolf/buglog.json` records every one, and the interesting ones earned a test.
-
-## Licence and credits
-
-Personal project. The exercise illustrations are Wayne's own uploads. The cue
-tones are synthesised, not sampled — see `src/audio/README.md` for why that
-matters.

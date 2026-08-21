@@ -57,11 +57,11 @@ export function newSegment(role: SegmentRole = 'work'): Segment {
 }
 
 /**
- * A new round: three reps of a 20s exercise and a 10s rest.
+ * A new reps group: three reps of a 20s exercise and a 10s rest.
  *
- * The default children matter — adding "Rounds" in the editor should give a
- * usable round, not an empty one or a bare exercise. `wrapInRepeat` passes its
- * own children, so the default only applies when a round is created fresh.
+ * The default children matter — adding "Reps" in the editor should give a usable
+ * group, not an empty one or a bare exercise. `wrapInRepeat` passes its own
+ * children, so the default only applies when a group is created fresh.
  */
 export function newRepeat(
   children: Block[] = [newSegment('work'), newSegment('rest')],
@@ -188,16 +188,16 @@ export function moveBy(blocks: readonly Block[], path: Path, delta: number): Blo
  * `moveBy` only reorders among siblings, which leaves a step trapped inside or
  * outside a round. This walks the visual order instead:
  *
- *   - next to a round      -> move INTO it (first child going down, last going up)
+ *   - next to a group      -> move INTO it (first child going down, last going up)
  *   - next to a step       -> swap with it
- *   - at the edge, nested  -> move OUT, landing beside the round
+ *   - at the edge, nested  -> move OUT, landing beside the group
  *   - at the edge, top     -> nothing to do
  *
- * Rounds themselves only ever swap with their siblings: `wrapInRepeat` refuses
- * to nest a round in a round, so moving one into another would build a tree the
- * editor cannot show.
+ * Reps groups themselves only ever swap with their siblings: `wrapInRepeat`
+ * refuses to nest a group in a group, so moving one into another would build a
+ * tree the editor cannot show.
  *
- * A round left empty by a departing step is kept rather than pruned — a group
+ * A group left empty by a departing step is kept rather than pruned — a group
  * vanishing under you is more surprising than an empty one you can delete.
  */
 export function moveStep(blocks: readonly Block[], path: Path, delta: 1 | -1): Block[] {
