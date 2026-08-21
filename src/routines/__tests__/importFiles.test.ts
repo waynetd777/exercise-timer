@@ -84,3 +84,48 @@ describe('exporting and re-importing a pasted routine', () => {
     expect(imported[0]!.blocks.filter((block) => block.kind === 'section')).toHaveLength(8)
   })
 })
+
+describe('importing a .tabata file', () => {
+  /*
+   * The real ones, which is the point: all three carry their illustrations as
+   * postimages URLs, and those are the pictures the app ships now. An import that
+   * kept the links would go to the network for an image already on the device.
+   */
+  const FIXTURES = Object.entries(
+    import.meta.glob('../*.tabata.json', { eager: true, import: 'default' }),
+  ) as [string, unknown][]
+
+  const mediaOf = (workout: { blocks: unknown[] }): { source: string }[] => {
+    const walk = (blocks: any[]): { source: string }[] =>
+      blocks.flatMap((b) => (b.kind === 'segment' ? (b.media ? [b.media] : []) : walk(b.children)))
+    return walk(workout.blocks as any[])
+  }
+
+  it('has fixtures that actually carry images', () => {
+    // Guards the guard: if the fixtures lose their urls, the test below passes
+    // for the wrong reason.
+    expect(FIXTURES.length).toBeGreaterThan(0)
+    for (const [name, json] of FIXTURES) {
+      const urls = (json as { workout: { intervals: { url?: string }[] } }).workout.intervals
+        .map((i) => i.url)
+        .filter(Boolean)
+      expect(urls.length, name).toBeGreaterThan(5)
+    }
+  })
+
+  it('rehosts every image on the way in', async () => {
+    for (const [path, json] of FIXTURES) {
+      const { imported, failed } = await importRoutineFiles(
+        [file(path.split('/').pop()!, JSON.stringify(json), 'application/json')],
+        NOW,
+      )
+      expect(failed, path).toEqual([])
+      const media = mediaOf(imported[0]! as { blocks: unknown[] })
+      expect(media.length, path).toBeGreaterThan(5)
+      expect(
+        media.filter((m) => m.source !== 'bundled'),
+        `${path} still points somewhere else`,
+      ).toEqual([])
+    }
+  })
+})

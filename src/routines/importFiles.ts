@@ -1,6 +1,7 @@
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { fromBundle } from '../storage/bundle'
+import { migrateWorkout } from '../storage/migrate'
 import { parseRoutine } from './pasteFormat'
 import { importTabataFile, TabataImportError } from './tabataFormat'
 
@@ -53,9 +54,18 @@ export async function importRoutineFiles(
         continue
       }
 
-      // A fresh id per file: the tabata importer derives one from the timestamp,
-      // which would collide across a multi-file drop.
-      imported.push({ ...importTabataFile(json, now), id: crypto.randomUUID() })
+      /*
+       * A fresh id per file: the tabata importer derives one from the timestamp,
+       * which would collide across a multi-file drop.
+       *
+       * Migrated like every other way in. A `.tabata` file carries an image as a
+       * URL, and those URLs are the postimages links the app used to load — the
+       * same pictures it now ships. Without this the import would reach for the
+       * network for an illustration sitting in `public/exercises`. `fromBundle`
+       * and the share-link reader already migrate; this was the one entry point
+       * that did not.
+       */
+      imported.push(migrateWorkout({ ...importTabataFile(json, now), id: crypto.randomUUID() }))
     } catch (cause) {
       failed.push({
         name: file.name,
