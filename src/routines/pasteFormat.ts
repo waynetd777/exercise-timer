@@ -8,6 +8,9 @@ import type { Block, Ladder, Repeat, Reps, Section, SectionDisplay, Segment } fr
  * one template, which is what makes parsing worth doing rather than typing each
  * routine in by hand.
  *
+ * The one thing it ADDS to the text is five seconds to get ready at the start —
+ * see `getReady`. Everything else is read, never invented.
+ *
  * TWO RULES GOVERN EVERYTHING HERE.
  *
  * 1. **Never guess silently.** A line the parser does not understand is reported
@@ -26,6 +29,16 @@ export type ParsedRoutine = {
   /** Lines that could not be placed. Show these; do not hide them. */
   skipped: { line: number; text: string }[]
 }
+
+/**
+ * Time to prop the phone up before anything starts.
+ *
+ * Five seconds: long enough to put it down and step back, short enough that
+ * nobody waits through it twice. The emails never mention it because a person
+ * reading one is already standing there — the app is not, and starting a jog the
+ * instant you press Start means missing the first few seconds of it.
+ */
+export const GET_READY_MS = 5_000
 
 let sequence = 0
 const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(sequence += 1)}`
@@ -238,8 +251,16 @@ export function parseItem(text: string): Item {
 
 // ── Blocks ──────────────────────────────────────────────────────────────────
 
+/** A step that is the routine getting you ready rather than working you. */
+const PREPARE_NAME = /^(get (ready|set)|prepare|set ?up)\b/i
+const REST_NAME = /\brest\b/i
+
 function segment(item: Item, durationMs: number | undefined, reps: Reps | undefined): Segment {
-  const role = /\brest\b/i.test(item.name) ? 'rest' : 'work'
+  const role = REST_NAME.test(item.name)
+    ? 'rest'
+    : PREPARE_NAME.test(item.name)
+      ? 'prepare'
+      : 'work'
   return {
     kind: 'segment',
     id: nextId('seg'),
@@ -281,6 +302,33 @@ type Target =
  * handout, not a format, so recovering from an odd line matters more than
  * elegance. Every line either lands somewhere or is reported in `skipped`.
  */
+/**
+ * The step the app adds, unless the routine already opens with one.
+ *
+ * Top level rather than inside the first section: it is not part of the warm-up,
+ * it is the app giving you a moment before the warm-up. And it is skipped when
+ * the text already starts with a prepare step, so a routine that says "30 sec to
+ * get set" is not made to wait twice.
+ */
+function getReady(blocks: readonly Block[]): Segment | null {
+  const first = (list: readonly Block[]): Segment | undefined => {
+    for (const block of list) {
+      if (block.kind === 'segment') return block
+      const inner = first(block.children)
+      if (inner) return inner
+    }
+    return undefined
+  }
+  if (first(blocks)?.role === 'prepare') return null
+  return {
+    kind: 'segment',
+    id: nextId('seg'),
+    name: 'Get ready',
+    role: 'prepare',
+    durationMs: GET_READY_MS,
+  }
+}
+
 export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRoutine {
   const skipped: ParsedRoutine['skipped'] = []
   const blocks: Block[] = []
@@ -476,5 +524,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
   })
 
   closeSection()
-  return { name, blocks, skipped }
+
+  const prepare = blocks.length > 0 ? getReady(blocks) : null
+  return { name, blocks: prepare ? [prepare, ...blocks] : blocks, skipped }
 }

@@ -36,7 +36,15 @@ The file's own name becomes the routine's.
 weekly email in `__tests__/emails/`; paste rather than an `.eml` importer,
 because the same grammar arrives by WhatsApp and Notes too.
 
-Two rules govern it:
+The one thing it ADDS to the text is **five seconds to get ready** at the start:
+long enough to prop the phone up and step back, short enough that nobody waits
+through it twice. The emails never mention it because a person reading one is
+already standing there. It goes at the top level rather than inside the first
+section — it is not part of the warm-up, it is the moment before it — and it is
+skipped when the text already opens with a prepare step, so a routine that says
+"30 sec to get set" is not made to wait twice.
+
+Two rules govern everything else:
 
 1. **Never guess silently.** A line it cannot place goes into `skipped`, with its
    number, rather than being dropped or approximated. Same principle as the
@@ -73,6 +81,9 @@ Decisions the grammar encodes, each because the emails are inconsistent:
 - **A bracketed per-side note is dropped from the name**, because the effort
   column already says "each side" and it would otherwise print twice. Only the
   bracketed form: cutting "– each side" would leave a dangling dash.
+- **A step named "Get ready", "Get set" or "Prepare" takes the prepare role**, so
+  it reads as green rather than as work. Everything else is work, or rest if it
+  says "rest".
 - **A section shows as a timer only when every step in it is timed**, which is
   derived rather than guessed — the warm-up qualifies, nothing else does.
 

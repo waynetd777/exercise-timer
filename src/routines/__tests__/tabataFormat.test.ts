@@ -124,7 +124,9 @@ describe('the other seeded routines', () => {
     expect(timed!.blocks.filter((b) => b.kind === 'repeat').length).toBeGreaterThan(5)
     expect(compile(timed!).hasGates).toBe(false)
 
-    expect(strength!.blocks.every((b) => b.kind === 'section')).toBe(true)
+    // Five seconds to get ready, then the sections the email describes.
+    expect(strength!.blocks[0]).toMatchObject({ kind: 'segment', role: 'prepare' })
+    expect(strength!.blocks.slice(1).every((b) => b.kind === 'section')).toBe(true)
     expect(compile(strength!).hasGates).toBe(true)
   })
 
