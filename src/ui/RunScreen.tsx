@@ -14,6 +14,7 @@ import {
   fitBlockCqi,
   fitCqi,
   groupCaption,
+  listLines,
   pathLabel,
   wordCount,
 } from './format'
@@ -69,7 +70,12 @@ function SectionList({
         {section?.note && <p className="sheet__note label label--sm">{section.note}</p>}
       </div>
 
-      <ol className="sheet__list">
+      {/* Sized to fill the sheet: see `listLines`. A group of four short
+          exercises has height going spare, and the rows should use it. */}
+      <ol
+        className="sheet__list"
+        style={{ ['--lines' as string]: listLines(rows, rows.find((row) => row.step === entry.step)) }}
+      >
         {rows.map((row) => {
           const done = row.step < entry.step
           const current = row.step === entry.step

@@ -149,3 +149,36 @@ export function groupCaption(group: {
   const position = `${group.label ?? 'Reps'} ${group.iteration} of ${group.of}`
   return group.rung === undefined ? position : `${position} · ${group.rung} reps`
 }
+
+/**
+ * Roughly how many lines a group needs in list mode, so the rows can be sized to
+ * FILL the sheet rather than sitting small in the middle of it.
+ *
+ * With four or five short exercises there is a lot of height going spare, and a
+ * row set at a phone's 1rem floor is unreadable from where the phone is propped.
+ * Dividing the height budget by an estimated line count is the same move
+ * `.panel__empty` makes with `wordCount`, and errs the same way — generously, so
+ * a wrapped row costs space rather than overflowing.
+ *
+ * `CHARS_PER_LINE` is deliberately pessimistic: at the sizes this produces, a
+ * row's name column holds more than that, so a name is more likely to be
+ * credited two lines and use one than the reverse.
+ */
+const CHARS_PER_LINE = 24
+/** A sub-line is 0.72em, so it costs less than a full line of the row's type. */
+const SUB_LINE = 0.8
+
+export function listLines(
+  rows: readonly { name: string; alternative?: string; note?: string }[],
+  showNotesFor?: { name: string; note?: string },
+): number {
+  const lines = (text: string) => Math.max(1, Math.ceil(text.length / CHARS_PER_LINE))
+  return Math.max(
+    1,
+    rows.reduce((total, row) => {
+      const note = row === showNotesFor && row.note ? SUB_LINE * lines(row.note) : 0
+      const alternative = row.alternative ? SUB_LINE * lines(row.alternative) : 0
+      return total + lines(row.name) + note + alternative
+    }, 0),
+  )
+}
