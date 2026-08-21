@@ -1,13 +1,7 @@
 import type { CueKind } from '../engine'
 import { audio } from '../audio/engine'
 import { canSpeak, speak, SPOKEN, VOICE } from '../audio/speech'
-import {
-  lastStrikeMs,
-  sequenceFor,
-  toneFor,
-  WHISTLE_RECORDED,
-  WHISTLE_SYNTHESISED,
-} from '../audio/tones'
+import { lastStrikeMs, sequenceFor, toneFor } from '../audio/tones'
 import type { Note, ToneSpec } from '../audio/tones'
 import { BackIcon, PlayIcon } from './icons'
 import './sounds.css'
@@ -32,16 +26,6 @@ function describe(note: Note): string {
       audio.sampleReady(note.sample)
         ? 'decoded, so this is what plays'
         : 'not decoded yet — the synthesised contour plays until it is',
-    ].join(' · ')
-  }
-
-  if (note.curve) {
-    return [
-      `${note.durationMs}ms`,
-      `gain ${note.gain}`,
-      `measured contour: ${note.curve.amplitude.length} amplitude points, ` +
-        `${note.curve.frequency.length} frequency points`,
-      `${Math.min(...note.curve.frequency)}-${Math.max(...note.curve.frequency)}Hz`,
     ].join(' · ')
   }
 
@@ -228,26 +212,6 @@ export function SoundsScreen({ onExit }: { onExit: () => void }) {
               signals={signals}
               spec={toneFor(kind)!}
               sequence={sequenceFor(kind)}
-              extra={
-                kind === 'work-start' ? (
-                  <>
-                    <button
-                      className="chip chip--action"
-                      onClick={() => audio.preview(WHISTLE_RECORDED)}
-                    >
-                      <PlayIcon />
-                      Recording
-                    </button>
-                    <button
-                      className="chip chip--action"
-                      onClick={() => audio.preview(WHISTLE_SYNTHESISED)}
-                    >
-                      <PlayIcon />
-                      Synthesised
-                    </button>
-                  </>
-                ) : undefined
-              }
             />
           ))}
 

@@ -1,31 +1,36 @@
-import type { Workout } from '../engine'
-import rawFullBody from './beginner-full-body.tabata.json'
-import rawMixedCardio1 from './beginner-mixed-cardio-1.tabata.json'
-import rawMixedCardio2 from './beginner-mixed-cardio-2.tabata.json'
-import { importTabataFile } from './tabataFormat'
+import type { Block, RoutineColour, Workout } from '../engine'
+import { SCHEMA_VERSION } from '../engine'
+import rawFullBody from './beginner-full-body.routine.json'
 
 /**
- * Routines seeded into the library.
+ * The routine seeded into an empty library.
  *
- * Wayne's real routines, exported from the Tabata Timer app and committed so
- * they double as test fixtures. Their ids are STABLE and deliberate: seeding is
- * keyed on them, so a routine is offered once and stays deleted if deleted.
+ * One routine, not three. It ships as an authored `Workout` — name, colour and
+ * block tree — rather than as a `.tabata` file put through the importer, because
+ * it is no longer a straight import: its exercise runs are Reps groups, which the
+ * importer deliberately never infers (guessing a routine's shape would silently
+ * change someone's workout).
+ *
+ * The `.tabata` files that used to be seeded are still in this folder as test
+ * fixtures for the importer, which is a live feature — see `__tests__/fixtures`.
+ * They are not in the app's import graph, so they add nothing to the bundle.
+ *
+ * The id is STABLE and deliberate: seeding is keyed on it and recorded as "once,
+ * ever", so this routine is offered a given install one time and stays deleted if
+ * deleted. Keeping the old id means an install that already had it is NOT offered
+ * this version — the reps rewrite changes nothing about what plays, so quietly
+ * replacing a routine someone may have edited would be the worse trade.
  */
+const authored = rawFullBody as { name: string; colour: string; blocks: Block[] }
 
-export const BEGINNER_FULL_BODY = importTabataFile(rawFullBody, 0, 'seed-beginner-full-body')
-export const BEGINNER_MIXED_CARDIO_1 = importTabataFile(
-  rawMixedCardio1,
-  0,
-  'seed-beginner-mixed-cardio-1',
-)
-export const BEGINNER_MIXED_CARDIO_2 = importTabataFile(
-  rawMixedCardio2,
-  0,
-  'seed-beginner-mixed-cardio-2',
-)
+export const BEGINNER_FULL_BODY: Workout = {
+  id: 'seed-beginner-full-body',
+  name: authored.name,
+  colour: authored.colour as RoutineColour,
+  blocks: authored.blocks,
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 0,
+  updatedAt: 0,
+}
 
-export const SEED_ROUTINES: readonly Workout[] = [
-  BEGINNER_MIXED_CARDIO_2,
-  BEGINNER_MIXED_CARDIO_1,
-  BEGINNER_FULL_BODY,
-]
+export const SEED_ROUTINES: readonly Workout[] = [BEGINNER_FULL_BODY]

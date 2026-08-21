@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Workout } from '../../engine'
 import { compile, SCHEMA_VERSION } from '../../engine'
-import { BEGINNER_MIXED_CARDIO_2, SEED_ROUTINES } from '../../routines/samples'
+import { IMPORTED_ROUTINES, MIXED_CARDIO_2 } from '../../routines/__tests__/fixtures'
 import { decodeRoutine, encodeRoutine, routineParam, shareable, shareUrl } from '../shareLink'
 
 const NOW = 1_700_000_000_000
@@ -57,15 +57,15 @@ describe('share links', () => {
   })
 
   it('compresses a real 86-step routine down to a pasteable size', async () => {
-    const param = await encodeRoutine(BEGINNER_MIXED_CARDIO_2)
-    const raw = JSON.stringify(BEGINNER_MIXED_CARDIO_2).length
+    const param = await encodeRoutine(MIXED_CARDIO_2)
+    const raw = JSON.stringify(MIXED_CARDIO_2).length
     expect(param.length).toBeLessThan(raw / 4)
     // Comfortably inside any practical URL limit.
     expect(param.length).toBeLessThan(4000)
   })
 
   it('round-trips every real routine identically', async () => {
-    for (const routine of SEED_ROUTINES) {
+    for (const routine of IMPORTED_ROUTINES) {
       const back = await decodeRoutine(await encodeRoutine(routine), NOW, 'x')
       expect(compile(back).totalMs).toBe(compile(routine).totalMs)
       expect(compile(back).entries.length).toBe(compile(routine).entries.length)
