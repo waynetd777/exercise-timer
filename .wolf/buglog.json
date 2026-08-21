@@ -632,6 +632,24 @@
       "timestamp": "2026-08-21T20:56:21+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T20:56:21+02:00"
+    },
+    {
+      "error_message": "User-reported (iPhone, installed to the home screen): the top of the screen sits behind the camera indent, and the run screen's back button cannot be tapped while a routine is running",
+      "file": "src/ui/theme.css",
+      "root_cause": "index.html sets viewport-fit=cover with apple-mobile-web-app-status-bar-style=black-translucent, so a standalone install owns the full display \u2014 but only .run inset anything, and only its bottom (the home indicator). Everything else painted under the notch. The unclickable back button is the same cause rather than a second bug: iOS consumes touches in the status bar region, so a control there is not merely clipped, it is unreachable.",
+      "fix": "--safe-top/right/bottom/left tokens in theme.css, applied to the band that holds controls: .run__header, .library, .editor (plus its bottom add bar), .sounds. Every @container (min-width: 46rem) override had to carry them too \u2014 a bare padding there undid the inset on an iPhone in landscape, which is over 46rem and still has an island.",
+      "fix_rule": "With viewport-fit=cover, EVERY screen owes an inset, and a wide-layout padding override silently cancels one. Inset the band that holds controls, never a wrapper around the screen, or the background gradient stops short of the edge.",
+      "tags": [
+        "ios",
+        "pwa",
+        "safe-area",
+        "layout",
+        "unreachable-control"
+      ],
+      "id": "bug-037",
+      "timestamp": "2026-08-21T21:57:54+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T21:57:54+02:00"
     }
   ]
 }

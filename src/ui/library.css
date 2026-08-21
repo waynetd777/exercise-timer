@@ -10,7 +10,9 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-4);
   height: 100%;
-  padding: var(--step-5);
+  /* Insets so the title and the tools clear the island — see `--safe-*`. */
+  padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
+    calc(var(--step-5) + var(--safe-bottom)) calc(var(--step-5) + var(--safe-left));
   overflow: hidden;
   /* Same wash as the run screen, in the mark's blue. Fallback first, for any
      browser without color-mix. */
@@ -39,7 +41,10 @@
 
 @container (min-width: 46rem) {
   .library {
-    padding: var(--step-6) var(--step-7);
+    /* The insets survive the wider padding: an iPhone in landscape is over 46rem
+       and still has an island, at the side now. */
+    padding: calc(var(--step-6) + var(--safe-top)) calc(var(--step-7) + var(--safe-right))
+      calc(var(--step-6) + var(--safe-bottom)) calc(var(--step-7) + var(--safe-left));
   }
 }
 
