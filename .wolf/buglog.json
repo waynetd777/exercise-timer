@@ -704,6 +704,24 @@
       "timestamp": "2026-08-21T23:59:25+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T23:59:25+02:00"
+    },
+    {
+      "error_message": "User-reported on iOS and iPadOS: dialogs rendered nearly full-height with the title at the top, the detail in the middle, the buttons at the bottom, and Close drawn as a tall slab",
+      "file": "src/ui/theme.css",
+      "root_cause": "The panel WAS the <dialog>, held to its content by `height: fit-content` plus `align-self: center` and `align-content: center`. On iOS that box takes the height available instead of hugging, and the implicit auto rows then stretch (align-content: normal behaves as stretch in grid) to share out the spare height. Removing align-content made the stretch obvious; keeping it made the content overflow a scroll container upward so the title was clipped. Both symptoms, one wrong premise.",
+      "fix": "Two elements. `.modal` is a transparent sheet filling the viewport whose job is to centre a panel inside the safe area (and to carry overscroll-behavior: contain, so the screen behind cannot move). The panel is a plain div with the ground, border, padding and rows, and `align-content: start` so rows hug. Applied to the notice, confirm, paste and picker dialogs; the lightbox was already a sheet and only needed the insets.",
+      "fix_rule": "Never style a <dialog> as the panel. Make it the sheet and put the box in a child \u2014 `height: fit-content` on the dialog is not dependable, and a stretched grid row turns every button into a slab. A third round of tuning a layout means the structure is wrong, not the numbers.",
+      "tags": [
+        "ios",
+        "dialog",
+        "grid",
+        "layout",
+        "top-layer"
+      ],
+      "id": "bug-041",
+      "timestamp": "2026-08-22T00:02:27+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-22T00:02:27+02:00"
     }
   ]
 }
