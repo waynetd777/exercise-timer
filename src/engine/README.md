@@ -23,13 +23,20 @@ A fully timed routine compiles to exactly **one** run and behaves identically to
 before any of this existed. That is the point of the shape: the tested core is
 untouched, and `runtime.ts` and `cues.ts` never learned that gates exist.
 
-A gate usually holds one step. The exception is a group that advances as a
-whole — a **ladder rung** — where one Next clears every rep-based step in it,
-because the rung is the unit of work: "20 goblet squats, then 10 lateral walks
-and 10 kickbacks" is one thing you do and tick off, not three prompts to tap
-through with your hands full. A timed step inside the rung still gets its own
-run, so a 10-second wall sit counts itself down and flows on without a tap.
-`Ladder.advance: 'step'` opts out.
+A gate usually holds one step. The exception is a group iteration — a **round**
+or a **ladder rung** — where one Next clears every rep-based step in it, because
+the iteration is the unit of work: "12 curls, 10 press, 12 flyes" is one round
+you do and tick off, not three prompts to tap through with your hands full. Both
+collapse by default; `advance: 'step'` opts a group out, and an inner opt-out
+beats an outer group's default.
+
+A TIMED step inside the iteration is never swallowed by the tap — it keeps its
+own run, so the 45-second rest after a round and the 10-second wall sit after a
+rung still count themselves down and flow on without one.
+
+A **section** never collapses. It is a part of a routine rather than a piece of
+work, and hiding a screenful behind one tap would lose the point of showing the
+list.
 
 Two consequences:
 
@@ -48,7 +55,7 @@ are three group kinds, and each earns its place:
 | | |
 |---|---|
 | `repeat` | The same children N times. `repeat×8 [work 20s, rest 10s]` is Tabata; a circuit is the same shape with named steps |
-| `ladder` | A repeat whose rep count changes each iteration: `2-4-6-8-10-8-6-4-2`. Children marked `reps: {kind:'rung'}` take the rung; children with a fixed count keep it, which is how "after every set: 10 × Walking Lunges" works. The rung advances as a whole |
+| `ladder` | A repeat whose rep count changes each iteration: `2-4-6-8-10-8-6-4-2`. Children marked `reps: {kind:'rung'}` take the rung; children with a fixed count keep it, which is how "after every set: 10 × Walking Lunges" works |
 | `section` | A named part of a routine with its own display mode — what the run screen shows whole |
 
 **Runtime** (`Routine`, `Run`, `TimelineEntry`) is the same steps seen two ways:
