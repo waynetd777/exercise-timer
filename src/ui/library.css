@@ -10,9 +10,16 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-4);
   height: 100%;
-  /* Insets so the title and the tools clear the island — see `--safe-*`. */
+  /*
+   * Insets so the title and the tools clear the island — see `--safe-*`.
+   *
+   * The bottom is the inset ALONE: the scroller already carries a step-4 of its
+   * own so the last card is not flush against the edge, and a full step-5 on top
+   * of that plus the home indicator's inset was 74pt of reserved space at the
+   * foot of a list that wants every point it can get.
+   */
   padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
-    calc(var(--step-5) + var(--safe-bottom)) calc(var(--step-5) + var(--safe-left));
+    var(--safe-bottom) calc(var(--step-5) + var(--safe-left));
   overflow: hidden;
   /* Same wash as the run screen, in the mark's blue. Fallback first, for any
      browser without color-mix. */
@@ -44,7 +51,7 @@
     /* The insets survive the wider padding: an iPhone in landscape is over 46rem
        and still has an island, at the side now. */
     padding: calc(var(--step-6) + var(--safe-top)) calc(var(--step-7) + var(--safe-right))
-      calc(var(--step-6) + var(--safe-bottom)) calc(var(--step-7) + var(--safe-left));
+      var(--safe-bottom) calc(var(--step-7) + var(--safe-left));
   }
 }
 
