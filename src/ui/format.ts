@@ -195,3 +195,24 @@ export function isoDate(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
+
+/**
+ * Chars a full-width step name fits on one line at its usual size.
+ *
+ * Mixed case at 650 weight, so a good deal narrower than `FIT_ADVANCE`, which is
+ * measured for bold uppercase. Used only to decide how many lines the name will
+ * take, not to size it.
+ */
+const NAME_CHARS_PER_LINE = 17
+
+/**
+ * How many lines the step name will wrap to, capped at three.
+ *
+ * The countdown and the name SHARE one column, so the clock has to know: a
+ * two-line name is another 11cqh, and at the sizes they both want that is more
+ * than the column has. Without this the name pushed "step 8 / 179" out from
+ * under it and behind the media panel.
+ */
+export function nameLines(text: string): number {
+  return Math.min(3, Math.max(1, Math.ceil(text.trim().length / NAME_CHARS_PER_LINE)))
+}

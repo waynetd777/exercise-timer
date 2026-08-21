@@ -527,6 +527,24 @@
       "timestamp": "2026-08-21T14:10:00+02:00",
       "occurrences": 1,
       "last_seen": "2026-08-21T14:10:00+02:00"
+    },
+    {
+      "error_message": "On a short narrow window the step name pushed 'Step 8 / 179' out of the count column and behind the media panel",
+      "file": "src/ui/run-screen.css",
+      "root_cause": "The countdown and the step name share one column but were sized independently: the clock claimed 34cqh and a two-line name another 22cqh, more than the 56fr row holds. .count's lead track was a bare 1fr, whose min-content floor meant the grid grew past its parent row rather than giving way, so the meta row landed under the panel below.",
+      "fix": "A --name-lines custom property, set from nameLines(entry.name), subtracts 11cqh from the clock's cap for every line past the first - in the stacked layout and the two-column one. .count's lead track is minmax(0, 1fr) so it can shrink.",
+      "fix_rule": "Two elements sharing a column must be sized against each other, not each against the column. A bare 1fr has a min-content floor; use minmax(0, 1fr) wherever the content may be taller than the track.",
+      "tags": [
+        "css",
+        "grid",
+        "layout",
+        "container-queries",
+        "run-screen"
+      ],
+      "id": "bug-031",
+      "timestamp": "2026-08-21T14:30:00+02:00",
+      "occurrences": 1,
+      "last_seen": "2026-08-21T14:30:00+02:00"
     }
   ]
 }

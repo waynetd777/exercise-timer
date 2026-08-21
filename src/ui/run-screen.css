@@ -114,7 +114,8 @@
  *
  * Viewport media queries rather than a container query, because a container
  * cannot query its own size. Declared BEFORE the wide block on purpose: the
- * two-column layout overrides both rows and --clock-height, so it is unaffected.
+ * two-column layout sets --clock-height itself rather than --clock-max, so it is
+ * unaffected by these.
  */
 @media (max-height: 700px) {
   .run__body {
@@ -122,7 +123,7 @@
   }
 
   .count__clock {
-    --clock-height: 28cqh;
+    --clock-max: 28cqh;
   }
 }
 
@@ -132,7 +133,7 @@
   }
 
   .count__clock {
-    --clock-height: 22cqh;
+    --clock-max: 22cqh;
   }
 
   /* At this height the name and label FLOORS are what crowd the countdown out,
@@ -142,7 +143,8 @@
   }
 
   .count__name {
-    font-size: max(1.5rem, min(11cqi, 11cqh));
+    /* Floor comes down, but the fit cap stays: a long name must still fit. */
+    font-size: clamp(1.15rem, min(11cqh, calc(var(--fit, 11) * 1cqi)), 4.5rem);
   }
 
   .count {
@@ -169,8 +171,14 @@
  */
 .count {
   display: grid;
-  /* Lead fills the column, meta takes the bottom edge. */
-  grid-template-rows: 1fr auto;
+  /*
+   * Lead fills the column, meta takes the bottom edge.
+   *
+   * `minmax(0, …)`, not a bare `1fr`: a bare one has a min-content floor, so a
+   * lead too tall for the column pushed the meta row out of the body and behind
+   * the media panel instead of the column giving way.
+   */
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: var(--step-4);
   min-width: 0;
 }
@@ -203,7 +211,12 @@
   --clock-coef: 140;
   /* Stacked, the countdown only has the 56fr row, but cqh measures the whole
      body — so this has to be well under the row's share. */
-  --clock-height: 34cqh;
+  --clock-max: 34cqh;
+  /*
+   * Every line the name wraps to is a line the countdown cannot have. They share
+   * the column, and at the sizes both want, a two-line name overflows it.
+   */
+  --clock-height: calc(var(--clock-max) - (var(--name-lines, 1) - 1) * 11cqh);
   --tracking: -0.045em;
   font-size: max(3rem, min(calc(var(--clock-coef) * 1cqi / var(--chars, 2)), var(--clock-height)));
   font-weight: 700;
@@ -305,7 +318,9 @@
      does stacked, so both terms change. */
   .count__clock {
     --clock-coef: 88;
-    --clock-height: 74cqh;
+    /* Sets --clock-height rather than --clock-max on purpose, so the short-screen
+       queries above cannot reach it — but it still owes the name its lines. */
+    --clock-height: calc(74cqh - (var(--name-lines, 1) - 1) * 11cqh);
   }
 }
 

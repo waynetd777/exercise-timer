@@ -10,6 +10,7 @@ import {
   fitWidthUsed,
   isoDate,
   listLines,
+  nameLines,
   pathLabel,
   wordCount,
 } from '../format'
@@ -272,5 +273,25 @@ describe('isoDate', () => {
 describe('defaultRoutineName', () => {
   it('dates the routine, since they arrive weekly on one template', () => {
     expect(defaultRoutineName(new Date(2026, 6, 20))).toBe('Strength Training - 2026-07-20')
+  })
+})
+
+describe('nameLines', () => {
+  it('is one line for a short name', () => {
+    expect(nameLines('Rest')).toBe(1)
+    expect(nameLines('Hammer Curls')).toBe(1)
+  })
+
+  it('is two for the name that pushed the step counter off screen', () => {
+    expect(nameLines('Inchworm + Shoulder Tap')).toBe(2)
+  })
+
+  it('caps at three, however long the name is', () => {
+    expect(nameLines('RB (resistance band) Lateral Walks – 5 each direction')).toBe(3)
+  })
+
+  it('never returns zero, so the countdown cannot claim a negative height', () => {
+    expect(nameLines('')).toBe(1)
+    expect(nameLines('   ')).toBe(1)
   })
 })
