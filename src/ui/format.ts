@@ -116,19 +116,28 @@ export function wordCount(text: string): number {
   return Math.max(1, text.trim().split(/\s+/).filter(Boolean).length)
 }
 
+type Effort = { durationMs?: number; reps?: { count: number; perSide?: boolean } }
+
 /**
- * What a step asks of you: "12 ×", "5 × each side", or a duration.
+ * What a step asks of you, WITHOUT its per-side qualifier: "12 ×", or "45s".
+ *
+ * Split from the qualifier so a list can put the numbers in a column of their
+ * own. As one string, "5 × each side" is three times the width of "12 ×", and a
+ * right-aligned column then lines the digits up with the end of "side" instead
+ * of with each other.
  *
  * Reps come first because a rep-based step is the common case in a strength
  * routine, and a step can carry both only by accident of editing.
  */
-export function effortLabel(step: {
-  durationMs?: number
-  reps?: { count: number; perSide?: boolean }
-}): string {
-  if (step.reps) return `${step.reps.count} ×${step.reps.perSide ? ' each side' : ''}`
+export function effortLabel(step: Effort): string {
+  if (step.reps) return `${step.reps.count} ×`
   if (step.durationMs !== undefined) return duration(step.durationMs)
   return ''
+}
+
+/** "each side", or nothing. Its own column beside `effortLabel`. */
+export function effortSuffix(step: Effort): string {
+  return step.reps?.perSide ? 'each side' : ''
 }
 
 /**
