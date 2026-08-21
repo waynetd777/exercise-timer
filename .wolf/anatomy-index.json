@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-20T20:42:04.303Z",
-    "fileCount": 12,
+    "lastScanned": "2026-08-21T18:33:42.622Z",
+    "fileCount": 20,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "a247ba80e035c7b664b24070ae12248ecbdedbdd6c66155b8e6653399fdfdec2",
-    "storeUpdatedAt": "2026-08-20T20:42:04.303Z"
+    "renderedHash": "b6aa4ed1f86244bcafc9404edba3e046159052a77869a7e899d5fb7200486cab",
+    "storeUpdatedAt": "2026-08-21T18:33:42.631Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -116,6 +116,177 @@
       "mtimeMs": 1787258524257.3098,
       "updatedAt": "2026-08-20T20:42:04.302Z",
       "source": "scan"
+    },
+    "src/ui/HelpTray.tsx": {
+      "description": "One line each. If a point needs a paragraph it belongs somewhere else.",
+      "tokens": 713,
+      "hash": "0efb71cdd5dc3261",
+      "size": 2497,
+      "mtimeMs": 1787332013046.7622,
+      "updatedAt": "2026-08-21T17:06:53.130Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "HelpTray",
+          "kind": "fn",
+          "startLine": 27,
+          "endLine": 81,
+          "tokens": 386
+        }
+      ]
+    },
+    "src/ui/help.ts": {
+      "description": "The help text, kept out of the screens that show it.",
+      "tokens": 1154,
+      "hash": "4e08b9ee45695104",
+      "size": 4062,
+      "mtimeMs": 1787332036226.7686,
+      "updatedAt": "2026-08-21T17:07:16.302Z",
+      "source": "hook"
+    },
+    "src/routines/pasteTemplate.ts": {
+      "description": "A routine written in every part of the grammar the paste parser understands,",
+      "tokens": 569,
+      "hash": "02eb36f84cf30dc3",
+      "size": 1998,
+      "mtimeMs": 1787332282470.0042,
+      "updatedAt": "2026-08-21T17:11:22.543Z",
+      "source": "hook"
+    },
+    "src/routines/__tests__/pasteTemplate.test.ts": {
+      "description": "The template is shipped help: the app offers it as the example of what it can",
+      "tokens": 1177,
+      "hash": "54bb10b7eff38a70",
+      "size": 4125,
+      "mtimeMs": 1787332302333.3286,
+      "updatedAt": "2026-08-21T17:11:42.430Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "parsed",
+          "kind": "fn",
+          "startLine": 13,
+          "endLine": 17,
+          "tokens": 60
+        },
+        {
+          "name": "named",
+          "kind": "fn",
+          "startLine": 18,
+          "endLine": 109,
+          "tokens": 961
+        }
+      ]
+    },
+    "scripts/exercise_plates.py": {
+      "description": "page_text, exercise_names, slug, plate",
+      "tokens": 1651,
+      "hash": "30e12cddafb23b3c",
+      "size": 5790,
+      "mtimeMs": 1787336885306.2766,
+      "updatedAt": "2026-08-21T18:28:05.376Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "page_text",
+          "kind": "fn",
+          "startLine": 63,
+          "endLine": 69,
+          "tokens": 66
+        },
+        {
+          "name": "exercise_names",
+          "kind": "fn",
+          "startLine": 70,
+          "endLine": 92,
+          "tokens": 316
+        },
+        {
+          "name": "slug",
+          "kind": "fn",
+          "startLine": 93,
+          "endLine": 96,
+          "tokens": 38
+        },
+        {
+          "name": "plate",
+          "kind": "fn",
+          "startLine": 97,
+          "endLine": 116,
+          "tokens": 247
+        },
+        {
+          "name": "main",
+          "kind": "fn",
+          "startLine": 117,
+          "endLine": 145,
+          "tokens": 304
+        }
+      ]
+    },
+    "src/routines/imageCatalogue.ts": {
+      "description": "Exercise illustrations available to every routine.",
+      "tokens": 1025,
+      "hash": "c573793c8e21918d",
+      "size": 3595,
+      "mtimeMs": 1787336953763.2617,
+      "updatedAt": "2026-08-21T18:29:13.852Z",
+      "source": "hook"
+    },
+    "src/editor/images.ts": {
+      "description": "An image a step can be given, whether it ships with the app or a routine",
+      "tokens": 1416,
+      "hash": "2dddc7c3ae2fff3a",
+      "size": 4964,
+      "mtimeMs": 1787337015506.8953,
+      "updatedAt": "2026-08-21T18:30:15.589Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "refFor",
+          "kind": "fn",
+          "startLine": 29,
+          "endLine": 35,
+          "tokens": 73
+        },
+        {
+          "name": "idOf",
+          "kind": "fn",
+          "startLine": 36,
+          "endLine": 41,
+          "tokens": 45
+        },
+        {
+          "name": "walk",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 65,
+          "tokens": 291
+        },
+        {
+          "name": "labelFromUrl",
+          "kind": "fn",
+          "startLine": 66,
+          "endLine": 80,
+          "tokens": 172
+        },
+        {
+          "name": "collectImages",
+          "kind": "fn",
+          "startLine": 81,
+          "endLine": 134,
+          "tokens": 565
+        }
+      ]
+    },
+    "src/storage/__tests__/migrate.test.ts": {
+      "description": "Declares workout",
+      "tokens": 1336,
+      "hash": "c242c8c7276e4e00",
+      "size": 4674,
+      "mtimeMs": 1787337222551.4827,
+      "updatedAt": "2026-08-21T18:33:42.622Z",
+      "source": "hook"
     }
   },
   "preamble": [

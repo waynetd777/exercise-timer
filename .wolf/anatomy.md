@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-20T20:42:04.303Z
-> Files: 12 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T18:33:42.622Z
+> Files: 20 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -36,3 +36,29 @@
 - `designqc.md` (~343 tok)
 - `reframe.md` — Mode: migrate [framework] (~551 tok)
 - `security-audit.md` — Layer 1 — Dependencies (~510 tok)
+
+## scripts/
+
+- `exercise_plates.py` — page_text, exercise_names, slug, plate (~1651 tok)
+
+## src/editor/
+
+- `images.ts` — An image a step can be given, whether it ships with the app or a routine (~1416 tok)
+
+## src/routines/
+
+- `imageCatalogue.ts` — Exercise illustrations available to every routine. (~1025 tok)
+- `pasteTemplate.ts` — A routine written in every part of the grammar the paste parser understands, (~569 tok)
+
+## src/routines/__tests__/
+
+- `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
+
+## src/storage/__tests__/
+
+- `migrate.test.ts` — Declares workout (~1336 tok)
+
+## src/ui/
+
+- `help.ts` — The help text, kept out of the screens that show it. (~1154 tok)
+- `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)

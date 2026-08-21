@@ -227,7 +227,11 @@ now, none started:
   Wayne's iPhone through a full session, and whether the whistle decodes on iOS
   or falls back to the plain tone. Neither can be checked from a desktop browser,
   and the physical interaction changed completely — you now reach for the phone
-  once per set.
+  once per set. **Listen to the first whistle specifically** — see the fix below;
+  it was wrong on every cold start and the correction is unverified on a phone.
+- **Eyes on the washes.** The screen and routine-colour gradients were just made
+  ~a third more prominent, unverified visually. `npm run dev` → the library, the
+  editor with a routine colour set, and a running routine as the phase changes.
 - **Portrait iPad** puts the media panel at ~250x773, which renders near-square
   illustrations small. Known, deliberate, unfixed.
 - **"Rest 45 seconds after each round" gives three rests for four rounds**, since
@@ -235,6 +239,71 @@ now, none started:
   line in the parser moves the rest outside the group if four is wanted.
 
 ### Done since the quest closed (2026-08-21, all pushed)
+- **Two ways to clear a step's image, each where you would look for it.** The ×
+  in the link box now clears the TEXT and only appears when there is text; a
+  second × sits beside the thumbnail and removes the image itself, whatever its
+  source. It is keyed on the ref rather than the thumbnail, so an image whose
+  local copy has gone can still be removed. Not committed yet.
+- **The illustrations ship with the app.** 43 images in `public/exercises/` (41
+  regenerated from the Torus guide PDF by `scripts/exercise_plates.py` at 881px /
+  ~65KB, plus the two cardio photos), precached — the build's precache went from
+  20 entries / 372KB to 63 / 3.6MB. `IMAGE_CATALOGUE` holds PATHS now, resolved
+  through `BASE_URL` at render time so a routine survives a change of host;
+  `KnownImage` gained `ref` / `id` / `src` because the stored ref and the
+  thumbnail src are no longer the same string. `storage/migrate.ts` rewrites all
+  29 postimages URLs the catalogue ever held onto bundled paths on read, so saved
+  routines and old exports keep their pictures. Postimages is no longer a
+  dependency (its runtime-cache rule stays for pasted links). Not committed yet.
+- **`migrateBlocks` now walks every group**, not just repeats — it used to return a
+  section or ladder untouched, so a nested repeat never had its label fixed and the
+  image rewrite would have missed every pasted routine.
+- **Undo/redo audit of the edit page.** Nothing bypasses the stack (`setHistory`
+  is touched only by undo/redo; every mutation goes through `edit`/`editBlocks`),
+  but coalescing was swallowing edits: `history.push` now takes the FIELD being
+  typed into rather than a boolean, `isTypedPatch` marks only `name` as
+  keystroke-typed, and the timing number box coalesces while its unit select does
+  not. Two bugs logged — bug-034 (two image picks shared one undo step) and
+  bug-035 (blurring the image field deleted an uploaded photo; unchanged blurs
+  left empty undo steps). Not committed yet.
+- **An × in the image field clears it** — including an uploaded photo, which had
+  no visible way to be removed. `onMouseDown` preventDefault keeps focus so the
+  blur cannot commit the link a moment before the click clears it. Not committed
+  yet.
+- **No image controls for a step that runs as a list row** — only the countdown
+  has a media panel, so `shownAsList(blocks, path)` (`editor/blocks.ts`) decides
+  whether to offer one. It is the enclosing SECTION's display that decides, not
+  the group kind: a ladder or reps group on its own runs as the countdown. A step
+  that already HAS an image keeps the row (field to clear it, plus a "not shown"
+  line) so no picture gets trapped. `listMode()` stays the authority and a test
+  asserts runtime-listed ⊆ editor-listed. Not committed yet.
+- **Help trays on the library and the editor** — a `?` beside the Routines menu
+  and to the right of Save, both opening `HelpTray`: a modal `<dialog>` pinned to
+  the right edge with native `<details>` sections of bullets. The copy lives in
+  `ui/help.ts` as data. Not committed yet.
+- **Copy template in the paste dialog** — hands over `routines/pasteTemplate.ts`,
+  a routine using every part of the grammar, then acknowledges with a
+  `NoticeDialog` rendered as a SIBLING (a nested one's `close` would cancel the
+  paste). `__tests__/pasteTemplate.test.ts` asserts it parses with nothing
+  skipped, and asserts the shape. Not committed yet.
+- **An elapsed clock on the run screen** — a second `Clock` in `useTimer`
+  (`sessionMs`): wall time since Start, less pauses, stopped at the finish, and
+  deliberately NOT re-anchored by `moveTo`, so a skip does not move it. Shown as
+  a stopwatch in the header's right slot, which was an empty spacer, so it serves
+  the list layout too — a rep-based routine had no clock at all. The finished
+  screen's Elapsed stat now reports the real time rather than the routine's
+  scheduled length, and shows for gated routines as well. Not committed yet.
+- **The first whistle of a cold start was the fallback tone** — the plain 2900Hz
+  one, not the recording, on every fresh page load (bug-033). A cue is BUILT when
+  it is scheduled, so the whole first 30-second window chose synth-or-recording
+  before the decode could land, and dedup never revisited it. Now the bytes
+  download at module load (only the DECODE needs a gesture) and
+  `engine.onSampleDecoded()` makes the scheduler cancel and queue again;
+  `requeueable()` shares `CANCEL_GRACE_MS` with `cancelPending()` so a sounding
+  cue is spared rather than played twice. Not committed yet.
+- **The colour gradients are ~a third stronger** — the four screen washes
+  (run 19%, library 19%, sounds 16%, editor 14%) and the three routine-colour
+  washes, all fading out at 78-82% instead of 72-78%. Hierarchy unchanged.
+  Not committed yet.
 - **Two seeds, one of each kind.** The strength one is GENERATED from the 20 July
   email and a test asserts it still matches a fresh parse.
 - **Import reads plain-text routines**, and `bundle.ts`'s `isBlock` whitelist was
