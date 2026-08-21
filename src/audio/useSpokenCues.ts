@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { Position } from '../engine'
+import type { RoutinePosition } from '../engine'
 import { canSpeak, speak, SPOKEN } from './speech'
 import { lastStrikeMs, toneFor } from './tones'
 
@@ -37,7 +37,7 @@ const AFTER_START_CUE_MS = 900
  * why it lives apart from the scheduled cues.
  */
 export function useSpokenCues(
-  at: Position,
+  at: RoutinePosition,
   status: 'idle' | 'running' | 'paused' | 'complete',
   muted: boolean,
 ): void {
@@ -86,13 +86,17 @@ export function useSpokenCues(
   useEffect(() => {
     if (status !== 'running' || muted || !canSpeak()) return
     const entry = at.entry
-    if (!entry || entry.durationMs === undefined || entry.durationMs < MIN_STEP_MS) return
+    // A self-paced step has no end to count down to, so nothing to announce.
+    if (!entry || at.remainingMs === null) return
+    if (entry.durationMs === undefined || entry.durationMs < MIN_STEP_MS) return
 
     const secondsLeft = Math.ceil(at.remainingMs / 1000)
     if (secondsLeft !== ANNOUNCE_AT) return
-    if (announced.current === entry.index) return
+    // `step`, not `index`: index is RUN-LOCAL, so the first step of every run
+    // shares index 0 and each would suppress the next one's announcement.
+    if (announced.current === entry.step) return
 
-    announced.current = entry.index
+    announced.current = entry.step
     speak(SPOKEN.tenSecondsLeft)
   }, [at, status, muted])
 }

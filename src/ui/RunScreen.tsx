@@ -82,11 +82,12 @@ type Props = {
 
 export function RunScreen({ workout, onExit, onStarted }: Props) {
   const timer = useTimer(workout)
-  const { at, status, timeline } = timer
+  const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
 
   useCueScheduler({
-    timeline,
+    // The current RUN: cues are scheduled on one clock, and a gate ends it.
+    timeline: run,
     status,
     muted,
     readElapsed: timer.readElapsed,
@@ -114,7 +115,17 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''
-  const clockText = clock(timer.secondsLeft)
+  /*
+   * A timed step counts down. A self-paced one has nothing to count down to, so
+   * it shows its rep target instead — the number the user is actually working
+   * to — falling back to time on the step when there is no target either.
+   */
+  const selfPaced = entry?.selfPaced === true
+  const clockText = selfPaced
+    ? entry.reps
+      ? String(entry.reps.count)
+      : clock(timer.secondsSpent)
+    : clock(timer.secondsLeft)
 
   /*
    * Sized from the step's LONGEST string — the value at its top — not from what
@@ -125,7 +136,9 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const clockChars =
     entry && entry.durationMs !== undefined
       ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
-      : 2
+      : selfPaced && entry.reps
+        ? clockWidth(String(entry.reps.count))
+        : 2
 
   /*
    * Keyboard control. A keydown IS a user gesture, so unlocking audio from here
@@ -205,18 +218,12 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
       */}
       <div
         className="run__progress"
-        style={{
-          ['--progress' as string]: timeline.totalMs
-            ? at.totalElapsedMs / timeline.totalMs
-            : 0,
-        }}
+        style={{ ['--progress' as string]: timer.progress }}
         role="progressbar"
         aria-label="Workout progress"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={Math.round(
-          timeline.totalMs ? (at.totalElapsedMs / timeline.totalMs) * 100 : 0,
-        )}
+        aria-valuenow={Math.round(timer.progress * 100)}
       >
         <span />
       </div>
@@ -241,12 +248,16 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         <div className="rest-state">
           <p className="rest-state__title">Done</p>
           <div className="rest-state__stats">
+            {/* A gated routine has no elapsed time to report: the clock only
+                ever measured one run at a time. */}
+            {!routine.hasGates && (
+              <span className="stat">
+                <b>{duration(routine.totalMs)}</b>
+                <span className="label">Elapsed</span>
+              </span>
+            )}
             <span className="stat">
-              <b>{duration(timeline.totalMs)}</b>
-              <span className="label">Elapsed</span>
-            </span>
-            <span className="stat">
-              <b>{timeline.entries.length}</b>
+              <b>{routine.entries.length}</b>
               <span className="label">Steps</span>
             </span>
           </div>
@@ -268,7 +279,9 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
                 // lands on the beat instead of drifting against the countdown.
                 key={timer.secondsLeft}
                 className="count__clock"
-                data-urgent={status === 'running' && at.remainingMs <= URGENT_MS}
+                data-urgent={
+                  status === 'running' && at.remainingMs !== null && at.remainingMs <= URGENT_MS
+                }
                 style={{ ['--chars' as string]: clockChars }}
                 aria-live="off"
               >
@@ -279,11 +292,13 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
             {/* No "Paused" chip — the primary button already reads "Resume". */}
             <p className="count__meta label">
+              {timer.totalRemainingMs !== null && (
+                <span>
+                  <span className="unit">{duration(timer.totalRemainingMs)}</span> left
+                </span>
+              )}
               <span>
-                <span className="unit">{duration(at.totalRemainingMs)}</span> left
-              </span>
-              <span>
-                Step {at.index + 1} / {timeline.entries.length}
+                Step {at.step} / {routine.entries.length}
               </span>
             </p>
           </div>
