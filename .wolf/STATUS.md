@@ -221,12 +221,15 @@
 ## 🚀 Next quest — strength routines: untimed steps, sections, ladders
 
 **Agreed 2026-08-21 with Wayne. Steps 1–5 of the build order are DONE, committed
-and green (380 tests, typecheck + build clean). Only the EDITOR is left.**
+and green (423 tests, typecheck + build clean). Only the EDITOR is left.**
 
-**AWAITING REVIEW IN THE BROWSER** — dev server on http://localhost:5175/. Two
-things to check: (1) the seeded routine still runs correctly, since the whole run
-loop changed underneath it; (2) Routines → Paste, paste one of the emails in
-`src/routines/__tests__/emails/`, add it, and run it to see list mode.
+**REVIEWED IN THE BROWSER and signed off** — "looking very good now" after a
+round of run-screen fixes: one tap per round / rung / burnout block, a timed step
+always taking the countdown, long text sized to fit, the list growing to fill the
+sheet, cues rearmed per run, and a pause-and-confirm on Back.
+
+⚠️ **23 commits sit on `main`, UNPUSHED.** Standing instruction is not to push
+while iterating; the live site is therefore several days behind the repo.
 
 ### Landed so far
 - **Step 1** — the three routines are saved verbatim as parser fixtures in
