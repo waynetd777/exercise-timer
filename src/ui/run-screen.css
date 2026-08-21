@@ -14,8 +14,8 @@
   background:
     radial-gradient(
       140% 90% at 50% -10%,
-      color-mix(in oklab, var(--phase) 14%, var(--ink-900)),
-      var(--ink-900) 72%
+      color-mix(in oklab, var(--phase) 19%, var(--ink-900)),
+      var(--ink-900) 78%
     );
   transition: background 400ms var(--ease);
   padding-bottom: env(safe-area-inset-bottom);
@@ -27,9 +27,11 @@
  */
 .run__header {
   /* Three columns so the title stays optically centred with a back button
-     beside it, rather than being pushed off-centre by it. */
+     beside it, rather than being pushed off-centre by it. Both side columns
+     widened together for the elapsed clock: only widening its own would move the
+     title off centre, which is the thing this layout exists to prevent. */
   display: grid;
-  grid-template-columns: 3.5rem 1fr 3.5rem;
+  grid-template-columns: 4.5rem 1fr 4.5rem;
   align-items: center;
   padding: var(--step-2) var(--step-5);
   border-bottom: var(--hairline);
@@ -55,6 +57,19 @@
   line-height: 1.25;
   text-transform: uppercase;
   color: var(--bone-dim);
+}
+
+/*
+ * The session stopwatch. Dim and tabular: it is reference rather than the number
+ * being counted, and fixed-width digits keep it from twitching every second.
+ */
+.run__elapsed {
+  justify-self: end;
+  font-size: var(--label-size-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--label-tracking);
+  color: var(--bone-faint);
 }
 
 /* ── Progress ──────────────────────────────────────────────────────────────
