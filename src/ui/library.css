@@ -455,6 +455,21 @@
   overflow: auto;
 }
 
+/*
+ * 16px on a touch screen, whatever the compact size says.
+ *
+ * iOS zooms the page in on focusing any control whose text is smaller than that,
+ * and in a standalone install it does not zoom back out afterwards — so tapping
+ * the routine box left the whole app magnified until it was pinched back by hand.
+ * The compact 0.85rem is kept where there is no such behaviour, since forty lines
+ * of pasted routine are easier to judge small.
+ */
+@media (hover: none) and (pointer: coarse) {
+  .paste__text {
+    font-size: 1rem;
+  }
+}
+
 .paste__name:focus-visible,
 .paste__text:focus-visible {
   outline: 2px solid var(--phase);
