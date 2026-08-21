@@ -1,13 +1,21 @@
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { fromBundle } from '../storage/bundle'
+import { restoreMedia } from '../storage/bundleMedia'
 import { migrateWorkout } from '../storage/migrate'
+import { hasBlob, putBlob } from '../media/store'
 import { parseRoutine } from './pasteFormat'
 import { importTabataFile, TabataImportError } from './tabataFormat'
 
 export type ImportResult = {
   imported: Workout[]
   failed: { name: string; reason: string }[]
+  /**
+   * Photos in a bundle that could not be trusted — a key that does not match its
+   * contents, or something that is not a readable image. The routines still
+   * import; those steps simply arrive without a picture.
+   */
+  droppedImages: number
 }
 
 /**
@@ -31,6 +39,7 @@ export async function importRoutineFiles(
 ): Promise<ImportResult> {
   const imported: Workout[] = []
   const failed: ImportResult['failed'] = []
+  let droppedImages = 0
 
   for (const file of files) {
     try {
@@ -51,6 +60,22 @@ export async function importRoutineFiles(
       ) {
         // A bundle may hold a whole library, and each routine keeps its own id.
         for (const workout of fromBundle(json, now)) imported.push(workout)
+
+        /*
+         * The uploaded photos it carries, stored BEFORE the routines are saved so
+         * a step never renders looking for bytes that have not landed yet. Each
+         * one has already been checked against its own hash — see `restoreMedia`.
+         *
+         * A photo the store already has is skipped rather than rewritten. The key
+         * IS the hash of the bytes, so an image cannot be duplicated by importing
+         * it twice — the second write would land on the same key — and this saves
+         * doing it at all. Same check `storeFile` makes on the way in.
+         */
+        const media = await restoreMedia((json as { media?: unknown }).media)
+        for (const { hash, blob } of media.entries) {
+          if (!(await hasBlob(hash))) await putBlob(hash, blob)
+        }
+        droppedImages += media.skipped.length
         continue
       }
 
@@ -81,7 +106,7 @@ export async function importRoutineFiles(
     }
   }
 
-  return { imported, failed }
+  return { imported, failed, droppedImages }
 }
 
 /** Turns a plain-text routine into a workout, named after its file. */
