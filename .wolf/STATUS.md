@@ -239,6 +239,17 @@ now, none started:
   line in the parser moves the rest outside the group if four is wanted.
 
 ### Done since the quest closed (2026-08-21, all pushed)
+- **The image-link capability is gone.** `.tabata` imports now run through
+  `migrateWorkout`, so their URLs — all of which are in `REHOSTED` — become
+  bundled paths on the way in. With no producer left, out went the editor's link
+  field, `editor/postimages.ts`, `pinRemote`, the Save images menu item and its
+  notice, the `i.postimg.cc` runtime-cache rule and `PinIcon`. `remote` stays in
+  `MediaRef` as a legacy READ path: routines saved before the move still show
+  their pictures, and `gc.ts` still counts a pinned blob as live.
+  **Known gap:** an uploaded photo still cannot travel between devices —
+  `toBundle` accepts a media map and nothing fills it, `fromBundle` ignores it.
+  That is now the only way to get an image onto a step that the catalogue lacks,
+  so it is the obvious next piece of work.
 - **Seven kinds, seven colours.** Reps was neutral, a ladder was violet like
   Recover, and a section took `--phase` (the Rest blue). Now `--group-reps` /
   `-ladder` / `-section` (orange, yellow, teal), shown as the row's 4px left rule
