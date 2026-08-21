@@ -32,8 +32,10 @@ The whistle is the exception, and the story is worth knowing before touching it.
 Five synthesis attempts were rejected. Measuring CC0 candidates against the Tabata
 whistle then found one identical on every figure, with a waveform correlation of
 0.992: **the Tabata app is playing a CC0 freesound recording**, so the app can ship
-the real thing. It does, at 44KB, with the best synthesised attempt kept as the
-fallback if the file fails to decode. See `samples.ts` for provenance and licence.
+the real thing. It does, at 44KB. The synthesised versions and their generator are
+gone — keeping a second whistle implementation to guard against a decode failure
+on a precached file was not worth the code, so a failed decode sounds a plain
+2900Hz tone instead. See `samples.ts` for provenance and licence.
 
 Two findings shaped the result:
 

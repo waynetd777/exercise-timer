@@ -48,13 +48,13 @@ describe('toneFor', () => {
   })
 
   it('keeps the whistle and the bell clearly different sounds', () => {
-    // Close in pitch, so the difference has to come from how they behave: one
-    // follows a measured contour, the other is struck and rings on.
+    // Close in pitch, so the difference has to come from how they behave: one is
+    // a blown recording, the other is struck and rings on.
     const whistle = toneFor('work-start')!.notes[0]!
     const bell = toneFor('work-end')!.notes[0]!
 
-    expect(whistle.curve).toBeDefined()
-    expect(bell.curve).toBeUndefined()
+    expect(whistle.sample).toBe('whistle')
+    expect(bell.sample).toBeUndefined()
     expect(bell.durationMs).toBeGreaterThan(whistle.durationMs)
     expect(bell.partial).toBeDefined()
   })
@@ -77,14 +77,11 @@ describe('toneFor', () => {
     expect(new Set(gaps).size).toBe(1)
   })
 
-  it('gives every note a sane envelope, or a curve instead', () => {
+  it('gives every note a sane envelope', () => {
     for (const kind of KINDS) {
       for (const note of toneFor(kind)!.notes) {
         expect(note.gain).toBeGreaterThan(0)
         expect(note.gain).toBeLessThanOrEqual(1)
-
-        // A curve carries its own shape and needs no envelope fields.
-        if (note.curve) continue
 
         expect(note.sustain).toBeGreaterThan(0)
         expect(note.sustain).toBeLessThanOrEqual(1)
@@ -138,61 +135,20 @@ describe('audioTimeFor', () => {
     expect(audioTimeFor(20_000, 17_000, 5_000) - 5_000).toBeCloseTo(3)
   })
 })
-
-describe('the whistle is played from measured curves', () => {
-  it('follows amplitude and frequency contours rather than an envelope', () => {
-    /*
-     * Four parametric attempts failed, the last built on a spectral analysis
-     * that was right about the pitch and wrong about the chop. A whistle's
-     * character is the irregularity of the pea, which is a curve and not a
-     * parameter — so this pins the approach, not just the numbers.
-     */
+describe('the whistle is the recording', () => {
+  it('plays the CC0 sample rather than anything synthesised', () => {
+    // The synthesised whistle and its generator were deleted once the recording
+    // was proved to BE the reference sound. This pins that decision: drop the
+    // sample field and the cue quietly degrades to a plain tone.
     const note = toneFor('work-start')!.notes[0]!
-    expect(note.curve).toBeDefined()
-    expect(note.curve!.amplitude.length).toBeGreaterThan(50)
-    expect(note.curve!.frequency.length).toBeGreaterThan(20)
+    expect(note.sample).toBe('whistle')
   })
 
-  it('holds its pitch in the measured band', () => {
-    // 98.3% of the real whistle's energy is inside 2400-3400Hz.
-    const { frequency } = toneFor('work-start')!.notes[0]!.curve!
-    for (const hz of frequency) {
-      expect(hz).toBeGreaterThan(2300)
-      expect(hz).toBeLessThan(3400)
-    }
-  })
-
-  it('has irregular dips rather than a regular gate', () => {
-    // The earlier versions used a 95% square chop, which buzzed. The real thing
-    // holds high with uneven dips — so consecutive gaps must NOT be uniform.
-    const { amplitude } = toneFor('work-start')!.notes[0]!.curve!
-    const loud = amplitude.filter((value) => value > 0.05)
-
-    expect(Math.max(...amplitude)).toBeCloseTo(1, 1)
-    // Mostly loud, not mostly gated.
-    expect(loud.filter((v) => v > 0.6).length).toBeGreaterThan(loud.length / 2)
-    // And genuinely uneven.
-    expect(new Set(amplitude.map((v) => v.toFixed(2))).size).toBeGreaterThan(20)
-  })
-
-  it('starts and ends at silence, so it cannot click', () => {
-    const { amplitude } = toneFor('work-start')!.notes[0]!.curve!
-    expect(amplitude[0]!).toBeLessThan(0.1)
-    expect(amplitude[amplitude.length - 1]!).toBe(0)
-  })
-
-  it('needs no envelope fields, since the curve replaces them', () => {
+  it('keeps envelope fields as a fallback for a failed decode', () => {
+    // Not decoration: without them a failed fetch would leave the boundary
+    // silent instead of sounding a plain tone in the right register.
     const note = toneFor('work-start')!.notes[0]!
-    expect(note.sustain).toBeUndefined()
-    expect(note.strikeMs).toBeUndefined()
-    expect(note.tremolo).toBeUndefined()
-  })
-
-  it('bundles no audio: every cue is synthesised', () => {
-    for (const kind of ['countdown', 'work-start', 'work-end', 'workout-complete'] as const) {
-      for (const note of toneFor(kind)!.notes) {
-        expect(note.freq).toBeGreaterThan(0)
-      }
-    }
+    expect(note.sustain).toBeGreaterThan(0)
+    expect(note.strikeMs!).toBeLessThan(note.durationMs)
   })
 })

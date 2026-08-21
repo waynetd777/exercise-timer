@@ -1,0 +1,399 @@
+{
+  "name": "Beginner Full-Body Workout Routine",
+  "colour": "yellow",
+  "blocks": [
+    {
+      "kind": "segment",
+      "id": "imported-0",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "77c76caf-e6c0-4e52-825e-d9f113593d9a",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-1",
+          "name": "Leg Press",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/TPg0hk3q/Leg-Press.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-2",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-6",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-7",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "b7f36729-c15b-41a9-84db-3bd23467652a",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-8",
+          "name": "Chest Press",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/fy8xjvPR/Standard-Chest-Press.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-9",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-13",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-14",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "c93c7cbe-f8d6-4bfa-ae58-8969645eecad",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-15",
+          "name": "Lat Pulldown",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/0yLZkgPy/Lat-Pulldown.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-16",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-20",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-21",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "1208b3f4-8162-44bb-a683-679b3cdb9e26",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-22",
+          "name": "Seated Row",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/sXzcWpBF/Seated-Row.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-23",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-27",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-28",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "efa6f941-0334-495b-a9c6-4ab21eb8a1b9",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-29",
+          "name": "Seated Abdominal Crunch",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/Znb8dQVQ/Seated-Ab-Crunch.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-30",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-34",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-35",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "77b0ee7d-b5db-4816-9917-6782c7d5081f",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-36",
+          "name": "Shoulder Press",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/Y9c6xc3V/Standing-Shoulder-Press.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-37",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-41",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-42",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "0f740d23-9ace-4abf-b7f0-0df580ee3a4e",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-43",
+          "name": "Cable Bicep Curl",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/4d11QmtY/Standing-Arm-Curl.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-44",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-48",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-49",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "1541bd21-68e3-49b0-97ba-599a1529306e",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-50",
+          "name": "Cable Tricep Pushdown",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/Gt7J6VXr/Tricep-Press.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-51",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-55",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-56",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "0961305e-eed1-4126-86fa-a6fac65cc502",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-57",
+          "name": "Seated Leg Extension",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/0jpgwZM1/Seated-Leg-Extension.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-58",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    },
+    {
+      "kind": "segment",
+      "id": "imported-62",
+      "name": "Recover",
+      "durationMs": 60000,
+      "role": "recover"
+    },
+    {
+      "kind": "segment",
+      "id": "imported-63",
+      "name": "Get ready",
+      "durationMs": 15000,
+      "role": "prepare"
+    },
+    {
+      "kind": "repeat",
+      "id": "c55ada29-7eff-4e6d-a444-594ff6d29088",
+      "label": "Reps",
+      "times": 3,
+      "children": [
+        {
+          "kind": "segment",
+          "id": "imported-64",
+          "name": "Toe Raise",
+          "durationMs": 20000,
+          "role": "work",
+          "media": {
+            "source": "remote",
+            "url": "https://i.postimg.cc/3rSS6RxS/Toe-Raise.png"
+          }
+        },
+        {
+          "kind": "segment",
+          "id": "imported-65",
+          "name": "Rest",
+          "durationMs": 10000,
+          "role": "rest"
+        }
+      ]
+    }
+  ]
+}

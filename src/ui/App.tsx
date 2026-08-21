@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { newRoutineBlocks } from '../editor/blocks'
@@ -9,8 +9,24 @@ import { decodeRoutine, routineParam } from '../storage/shareLink'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { LibraryScreen } from './LibraryScreen'
-import { SoundsScreen } from './SoundsScreen'
 import { RunScreen } from './RunScreen'
+
+/**
+ * The sound bench is a development tool and is not shipped.
+ *
+ * Loaded through a DYNAMIC import inside a `DEV` branch, not a static one. Vite
+ * replaces `import.meta.env.DEV` with `false` in a production build and drops the
+ * dead branch, which takes the dynamic import — and therefore the whole chunk —
+ * with it. A static import would NOT do this: `SoundsScreen.tsx` imports
+ * `sounds.css`, and a CSS import is a side effect, so the stylesheet would be
+ * bundled even with the component unused.
+ *
+ * Reach it with `npm run dev`. Add `-- --host` to open it from a phone on the
+ * same network.
+ */
+const SoundsScreen = import.meta.env.DEV
+  ? lazy(() => import('./SoundsScreen').then((module) => ({ default: module.SoundsScreen })))
+  : null
 
 type View =
   | { screen: 'library' }
@@ -93,8 +109,13 @@ export function App() {
     return <RunScreen workout={view.workout} onExit={toLibrary} onStarted={onStarted} />
   }
 
-  if (view.screen === 'sounds') {
-    return <SoundsScreen onExit={toLibrary} />
+  if (view.screen === 'sounds' && SoundsScreen) {
+    // No fallback worth showing: it is a local chunk on a development server.
+    return (
+      <Suspense fallback={null}>
+        <SoundsScreen onExit={toLibrary} />
+      </Suspense>
+    )
   }
 
   if (view.screen === 'edit') {

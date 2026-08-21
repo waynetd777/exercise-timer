@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { SEED_ROUTINES } from '../../routines/samples'
+import { IMPORTED_ROUTINES } from '../../routines/__tests__/fixtures'
 import { IMAGE_CATALOGUE } from '../../routines/imageCatalogue'
 import { collectImages, labelFromUrl } from '../images'
 
@@ -89,15 +90,24 @@ describe('collectImages', () => {
     expect(collectImages([routine('R', [local])])).toEqual([])
   })
 
-  it('finds every image in the real seeded routines', () => {
-    // The three imported routines share illustrations, so the distinct count is
-    // well below the total number of steps that carry one.
-    const images = collectImages(SEED_ROUTINES)
+  it('finds every image across real routines, counting shared uses', () => {
+    // Run against the imported fixtures rather than the seed: three routines share
+    // illustrations, which is what makes `uses > 1` meaningful. Only one routine
+    // ships now, and each of its exercises appears once.
+    const images = collectImages(IMPORTED_ROUTINES)
     expect(images.length).toBeGreaterThan(10)
     expect(images.every((i) => i.url.startsWith('https://i.postimg.cc/'))).toBe(true)
     expect(images.some((i) => i.uses > 1)).toBe(true)
     // Sorted and unique.
     expect(new Set(images.map((i) => i.url)).size).toBe(images.length)
+  })
+
+  it('reaches images nested inside a seeded routine\'s reps groups', () => {
+    // The seed's exercises live inside Reps groups, so a collector that only
+    // walked top-level blocks would find nothing at all here.
+    const images = collectImages(SEED_ROUTINES)
+    expect(images.length).toBeGreaterThan(5)
+    expect(images.every((i) => i.url.startsWith('https://i.postimg.cc/'))).toBe(true)
   })
 })
 

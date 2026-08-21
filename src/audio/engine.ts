@@ -10,8 +10,8 @@ import { SAMPLES, type SampleName } from './samples'
  *
  * Nearly everything is synthesised. The one exception is the whistle, a CC0
  * recording (see `samples.ts`), decoded once at unlock and played from a buffer.
- * If that decode fails the whistle falls back to its synthesised contour, so a
- * missing or unfetchable sample costs fidelity and never a silent cue.
+ * If that decode fails the note's own fields still make a plain tone, so a
+ * missing sample costs fidelity and never a silent cue.
  *
  * A note is built as a small graph:
  *
@@ -243,34 +243,6 @@ class AudioEngine {
         this.pending.delete(source)
         level.disconnect()
       })
-      return
-    }
-
-    /*
-     * ── A measured contour ────────────────────────────────────────────────
-     * The curve IS the envelope and the pitch, so nothing else applies. This
-     * exists because a whistle's character is its irregularity, which no
-     * arrangement of oscillator, chop and envelope reproduced.
-     */
-    if (note.curve) {
-      const osc = ctx.createOscillator()
-      const level = ctx.createGain()
-      osc.type = note.type ?? 'sine'
-
-      osc.frequency.setValueCurveAtTime(
-        new Float32Array(note.curve.frequency),
-        at,
-        total,
-      )
-      level.gain.setValueCurveAtTime(
-        new Float32Array(note.curve.amplitude.map((value) => value * note.gain)),
-        at,
-        total,
-      )
-
-      osc.connect(level)
-      level.connect(bus)
-      track(osc, () => level.disconnect())
       return
     }
 

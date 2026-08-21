@@ -4,11 +4,13 @@ import whistleUrl from './referee-whistle-cc0.wav?url'
  * The app's only recorded sound.
  *
  * Everything else is synthesised, and for a long time the whistle was too. Five
- * synthesis attempts were rejected as not sounding like a whistle: as resonant
- * noise, as a measured carrier with a chop and an envelope, and finally as a pair
- * of measured contours driving one oscillator. That last one is still here as the
- * fallback and got closest, but a pea whistle's character is the irregular motion
- * of the pea, and reproducing irregularity is what parameters cannot do.
+ * attempts were rejected as not sounding like a whistle: as resonant noise, as a
+ * measured carrier with a chop and an envelope, and finally as a pair of measured
+ * contours driving one oscillator. The last got closest and has since been
+ * deleted along with its generator — a pea whistle's character is the irregular
+ * motion of the pea, and reproducing irregularity is what parameters cannot do.
+ * If this file ever fails to decode, the cue falls back to a plain 2900Hz tone
+ * from `WHISTLE`'s own fields rather than to a second synthesis engine.
  *
  * Synthesis was chosen for LICENSING, never for preference. The reference was the
  * Tabata Timer app's whistle, which cannot ship — its audio was purged from this

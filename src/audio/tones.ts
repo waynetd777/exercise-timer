@@ -1,5 +1,4 @@
 import type { CueKind } from '../engine'
-import { WHISTLE_AMPLITUDE, WHISTLE_DURATION_MS, WHISTLE_FREQUENCY } from './whistleCurve'
 import type { SampleName } from './samples'
 
 /**
@@ -15,8 +14,7 @@ import type { SampleName } from './samples'
  *   workout-complete  beep beep beep DING DING DING, then the wrap-up line
  *
  * The beep and the bell are built from measurements of the app Wayne trains to.
- * The whistle is a recording; its fallback is built from measured CURVES, for
- * reasons in `whistleCurve.ts`.
+ * The whistle is a recording — see `samples.ts`.
  */
 
 export type Note = {
@@ -27,9 +25,9 @@ export type Note = {
   durationMs: number
   /** Peak level, 0-1. */
   gain: number
-  /** Fraction of `gain` the strike falls to. Unused by a curve note. */
+  /** Fraction of `gain` the strike falls to. */
   sustain?: number
-  /** Milliseconds for the strike to fall to `sustain`. Unused by a curve note. */
+  /** Milliseconds for the strike to fall to `sustain`. */
   strikeMs?: number
   /**
    * Milliseconds to reach full level. Struck sounds want the default few ms; a
@@ -70,14 +68,6 @@ export type Note = {
     wobbleHz?: number
     wobbleDepthHz?: number
   }[]
-  /**
-   * Measured amplitude and frequency contours, replacing the envelope entirely.
-   *
-   * For a sound whose character is its irregularity rather than any parameter,
-   * following the measured curves is the only thing that works. Both are stepped
-   * evenly across `durationMs`.
-   */
-  curve?: { amplitude: readonly number[]; frequency: readonly number[] }
 }
 
 export type ToneSpec = { notes: Note[] }
@@ -94,37 +84,30 @@ const BEEP: Note = {
 }
 
 /**
- * A referee's pea whistle, played from its measured contours.
+ * A referee's pea whistle: the CC0 recording, which IS the sound the app was
+ * built to match. See `samples.ts` for provenance and for why five synthesis
+ * attempts were abandoned.
  *
- * Nearly a pure tone — spectral flatness 0.0014, with 98.3% of its energy inside
- * 2400-3400Hz — so one oscillator following the curves reproduces it closely.
- * Four parametric attempts failed first; see `whistleCurve.ts` for what they got
- * wrong.
+ * `gain` puts the recording's peak where the last synthesised version sat, which
+ * nobody complained about: the file peaks at 0.92, and 0.92 x 0.46 lands on 0.42.
+ *
+ * The remaining fields are a LAST-RESORT fallback, used only if the recording
+ * cannot be fetched or decoded. They make a plain 2900Hz tone — an audible cue in
+ * the right register, and honestly not a whistle. Silence would be worse; a
+ * second synthesis engine to avoid it would be worse still.
  */
-/** The synthesised whistle: the fallback, and still on the bench for comparison. */
-const WHISTLE_CURVE_NOTE: Note = {
+const WHISTLE: Note = {
   atMs: 0,
   freq: 2900,
-  durationMs: WHISTLE_DURATION_MS,
-  gain: 0.42,
+  durationMs: 700,
+  gain: 0.46,
   type: 'sine',
-  curve: { amplitude: WHISTLE_AMPLITUDE, frequency: WHISTLE_FREQUENCY },
+  sample: 'whistle',
+  attackMs: 25,
+  sustain: 0.9,
+  strikeMs: 40,
 }
 
-/**
- * What actually plays: the recording, carrying the whole synthesised note as its
- * fallback.
- *
- * `gain` is set so the recording peaks where the synthesised whistle did, which
- * nobody complained about: the file peaks at 0.92, and 0.92 x 0.46 lands on the
- * 0.42 the contour reached. `playbackRate` is 1 — the recording is already the
- * length and pitch of the reference, since it IS the reference.
- */
-const WHISTLE: Note = { ...WHISTLE_CURVE_NOTE, sample: 'whistle', gain: 0.46 }
-
-/** Bench-only specs, so the two whistles can be heard back to back. */
-export const WHISTLE_RECORDED: ToneSpec = { notes: [WHISTLE] }
-export const WHISTLE_SYNTHESISED: ToneSpec = { notes: [WHISTLE_CURVE_NOTE] }
 
 /**
  * Measured from the app: 2659Hz with an INHARMONIC partial at x2.578 — the

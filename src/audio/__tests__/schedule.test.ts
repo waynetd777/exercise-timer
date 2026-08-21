@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CuePoint } from '../../engine'
 import { compile, cues } from '../../engine'
-import { BEGINNER_MIXED_CARDIO_2, SEED_ROUTINES } from '../../routines/samples'
+import { IMPORTED_ROUTINES, MIXED_CARDIO_2 } from '../../routines/__tests__/fixtures'
 import { cueKey, dueCues, LOOKAHEAD_MS, REARM_MS } from '../schedule'
 import { toneFor } from '../tones'
 
@@ -23,7 +23,7 @@ function replay(all: CuePoint[], totalMs: number, step = REARM_MS): CuePoint[] {
 }
 
 describe('the rolling window covers a whole routine', () => {
-  it.each(SEED_ROUTINES.map((r) => [r.name, r] as const))(
+  it.each(IMPORTED_ROUTINES.map((r) => [r.name, r] as const))(
     'schedules every cue of %s exactly once',
     (_name, routine) => {
       const timeline = compile(routine)
@@ -38,7 +38,7 @@ describe('the rolling window covers a whole routine', () => {
   )
 
   it('misses nothing even if a re-arm is late — a throttled tab', () => {
-    const timeline = compile(BEGINNER_MIXED_CARDIO_2)
+    const timeline = compile(MIXED_CARDIO_2)
     const all = cues(timeline)
     // Arming at the very edge of the window is the worst legitimate case.
     const played = replay(all, timeline.totalMs, LOOKAHEAD_MS)
@@ -46,7 +46,7 @@ describe('the rolling window covers a whole routine', () => {
   })
 
   it('never double-schedules when armed far more often than needed', () => {
-    const timeline = compile(BEGINNER_MIXED_CARDIO_2)
+    const timeline = compile(MIXED_CARDIO_2)
     const all = cues(timeline)
     const played = replay(all, timeline.totalMs, 1_000)
     expect(played).toHaveLength(all.length)
@@ -54,7 +54,7 @@ describe('the rolling window covers a whole routine', () => {
 
   it('has a tone for every cue a real routine produces', () => {
     // A cue with no tone would be silence where a sound belongs.
-    for (const routine of SEED_ROUTINES) {
+    for (const routine of IMPORTED_ROUTINES) {
       for (const cue of cues(compile(routine))) {
         expect(toneFor(cue.kind), `${cue.kind} has no tone`).not.toBeNull()
       }
@@ -63,7 +63,7 @@ describe('the rolling window covers a whole routine', () => {
 })
 
 describe('cue timing across a real routine', () => {
-  const timeline = compile(BEGINNER_MIXED_CARDIO_2)
+  const timeline = compile(MIXED_CARDIO_2)
   const all = cues(timeline)
 
   it('puts a boundary cue at every step boundary and nowhere else', () => {
