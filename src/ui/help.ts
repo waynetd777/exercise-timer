@@ -28,9 +28,9 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'New — build one step by step.',
       'Paste — write or paste a routine as plain text; it opens with five seconds to get ready.',
-      'Import — a .tabata file, an exported .json, or a plain-text routine. Dropping a file anywhere on this screen does the same.',
+      'Import — a .tabata file, an exported .json, or a plain-text routine. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',
       'Export — every routine in one file, images included. That file is how a routine moves between devices intact.',
-      'A share link carries the steps but not the images, so it stays short enough to send.',
+      'A share link carries the steps, and any illustration that came with the app. A photo you uploaded stays on the device that took it.',
     ],
   },
   {
@@ -48,7 +48,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Routines live on this device. Nothing is uploaded and there is no account.',
       'Installing the app to the home screen makes it work with no signal.',
-      'Save images stores a copy of every linked illustration here, for a gym with no reception.',
+      'The exercise illustrations come with the app, so they need no connection at all.',
     ],
   },
 ]
@@ -62,7 +62,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'The unit beside the number: s times the step, × waits for Next, × each side counts per side.',
       'The note button, beside a step’s reps or seconds, adds a note or an alternative exercise. In a list, the alternative reads “or …” beside the step and the note shows on the step you are on.',
       'Each row can move up or down, duplicate itself, add a step below, or delete.',
-      'A step carries one image: paste a link, pick one already used in your routines, or upload a photo.',
+      'A step carries one image: Choose picks from the illustrations that come with the app, Upload takes a photo from this device.',
       'Steps listed inside a section have no image field — a list has no room for a picture, so only steps that run as a countdown offer one.',
     ],
   },

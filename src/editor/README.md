@@ -114,9 +114,14 @@ Two details it would be easy to get wrong:
   watch the clock through a wall sit rather than reading a list. Its image shows,
   so its controls stay.
 
-An image that is ALREADY set keeps its row, with the field to clear it and a line
+An image that is ALREADY set keeps its row, with the × that removes it and a line
 saying it will not be shown. Hiding it would trap data: a step carrying a picture
 that nothing in the app can remove.
+
+There is no link field. Pasting a URL only made sense while the illustrations
+lived on someone else's server — an image now comes from the catalogue (Choose) or
+from this device (Upload), and `editor/postimages.ts`, which parsed postimages
+share links and bare ids, went with it.
 
 `engine/navigate.ts`'s `listMode()` is the authority — it has a third, positional
 clause (the last remaining row of a group runs as the countdown) that this
@@ -173,4 +178,3 @@ not close a dialog.
 | `history.ts` | Undo/redo with coalescing |
 | `dirty.ts` | Unsaved-change detection, compared **field by field** — `JSON.stringify` depends on key insertion order, and patching an object reorders keys |
 | `images.ts` | The images a step can be given: the catalogue merged with library usage |
-| `postimages.ts` | Accepts a direct link, a share link or a bare id |

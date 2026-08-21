@@ -37,16 +37,19 @@
 export type SegmentRole = 'prepare' | 'work' | 'rest' | 'recover' | 'custom'
 
 /**
- * Where a step's image comes from. Three sources, resolved to a URL by
- * `resolveMedia()` in src/media — the UI never branches on this itself.
+ * Where a step's image comes from. Resolved to a URL by `resolveMedia()` in
+ * src/media — the UI never branches on this itself.
  *
- *  - `remote`  the primary source; user's own postimages links. `cachedHash`
- *              is set once the blob has been pinned into IndexedDB, after
- *              which the local copy is preferred (offline + link-rot safety).
- *  - `bundled` curated images committed to `public/exercises/`, addressed
- *              relative to `import.meta.env.BASE_URL`. Exports as a short
- *              path, which is what keeps URL share links small.
+ *  - `bundled` the illustrations committed to `public/exercises/`, addressed
+ *              relative to `import.meta.env.BASE_URL`. The primary source, and
+ *              the reason a routine survives a change of host: it stores a short
+ *              base-less path, which also keeps a URL share link small.
  *  - `local`   own photos, content-addressed by sha256 of the stored blob.
+ *  - `remote`  a link. LEGACY: nothing creates one any more — the editor's link
+ *              field is gone and `.tabata` imports are rewritten to bundled
+ *              paths by `storage/migrate.ts`. It stays readable because routines
+ *              saved before the move carry it, `cachedHash` included, and those
+ *              have to keep showing their pictures.
  */
 export type MediaRef =
   | { source: 'remote'; url: string; cachedHash?: string; w?: number; h?: number }

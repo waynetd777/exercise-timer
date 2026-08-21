@@ -495,52 +495,6 @@
   margin: 0;
 }
 
-.erow__image .efield {
-  flex: 1 1 10rem;
-}
-
-/*
- * The link field and its clear button share one box, so the × sits INSIDE the
- * field. Beside it, it would be a fifth control in this row and push the
- * thumbnail off a phone — and "clear this field" belongs to the field.
- */
-.erow__image .erow__url {
-  position: relative;
-  display: flex;
-  flex: 1 1 10rem;
-  min-width: 0;
-}
-
-.erow__image .erow__url .efield {
-  flex: 1 1 auto;
-  /* Room for the button, so a long link cannot run underneath it. */
-  padding-right: 2.4rem;
-}
-
-.erow__clear {
-  position: absolute;
-  inset-block: 0;
-  right: 0;
-  display: grid;
-  place-items: center;
-  width: 2.4rem;
-  padding: 0;
-  color: var(--bone-faint);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  transition: color 150ms var(--ease);
-}
-
-.erow__clear:hover {
-  color: var(--bone);
-}
-
-.erow__clear .icon {
-  width: 16px;
-  height: 16px;
-}
-
 .esecs {
   display: flex;
   align-items: center;
