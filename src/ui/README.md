@@ -178,6 +178,31 @@ the button either way: colour is the second cue, never the only one, and seven
 hues cannot all survive a colour-vision deficiency. Luminance is spread as well
 as hue, so they also separate in greyscale.
 
+## The hardware takes a bite out of every screen
+
+Installed to an iPhone home screen, the app owns the whole display:
+`index.html` sets `viewport-fit=cover` and a translucent status bar, which is what
+lets the phase wash run under the island instead of stopping at a grey bar. The
+cost is that **every screen has to inset its own controls**, and it is not a
+cosmetic matter — iOS takes touches in the status bar, so a button up there cannot
+be pressed at all. That is how the run screen's back button became unusable
+mid-workout while the routine kept going.
+
+`--safe-top` / `-right` / `-bottom` / `-left` in `theme.css` wrap the `env()`
+values so the intent is greppable and a new screen can copy it. Two things to
+remember when using them:
+
+- **Inset the band, not the shell.** The wash belongs edge to edge, so the padding
+  goes on the header, the container's own padding, or the bottom bar — not on a
+  wrapper around the screen, which would leave a flat strip above the gradient.
+- **A wide-layout override must carry them too.** Each screen re-declares its
+  padding inside a `@container (min-width: 46rem)` query, and a bare
+  `padding: var(--step-6) var(--step-7)` there silently undoes the inset — on an
+  iPhone in landscape, which is over 46rem and still has an island, at the side.
+
+All four sides, because the island moves and the home indicator follows it. Every
+token is zero on hardware without them, and zero in a browser tab.
+
 ## The keyboard belongs to the screen, except where it does not
 
 `keys.ts` decides whether a run-screen shortcut may act, from what has focus:

@@ -4,7 +4,8 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--step-4);
   height: 100%;
-  padding: var(--step-5);
+  padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
+    calc(var(--step-5) + var(--safe-bottom)) calc(var(--step-5) + var(--safe-left));
   overflow: hidden;
   background: var(--ink-900);
   background: radial-gradient(

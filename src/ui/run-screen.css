@@ -18,7 +18,9 @@
       var(--ink-900) 78%
     );
   transition: background 400ms var(--ease);
-  padding-bottom: env(safe-area-inset-bottom);
+  /* The home indicator. The top and the sides are inset per band, so the phase
+     wash still runs edge to edge behind them. */
+  padding-bottom: var(--safe-bottom);
 }
 
 /* ── Header ────────────────────────────────────────────────────────────────
@@ -33,7 +35,12 @@
   display: grid;
   grid-template-columns: 4.5rem 1fr 4.5rem;
   align-items: center;
-  padding: var(--step-2) var(--step-5);
+  /*
+   * The back button lives here. Under the status bar it was not just clipped —
+   * iOS takes those touches, so it could not be pressed while a routine ran.
+   */
+  padding: calc(var(--step-2) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
+    var(--step-2) calc(var(--step-5) + var(--safe-left));
   border-bottom: var(--hairline);
 }
 
@@ -44,7 +51,9 @@
 
 @container shell (min-width: 46rem) {
   .run__header {
-    padding-inline: var(--step-7);
+    /* The insets survive the wider padding: an iPhone in landscape is over 46rem
+       and still has an island, at the side now. */
+    padding-inline: calc(var(--step-7) + var(--safe-left)) calc(var(--step-7) + var(--safe-right));
   }
 }
 
@@ -436,7 +445,7 @@
 
 @container shell (min-width: 46rem) {
   .rest-state {
-    padding-inline: var(--step-7);
+    padding-inline: calc(var(--step-7) + var(--safe-left)) calc(var(--step-7) + var(--safe-right));
   }
 }
 

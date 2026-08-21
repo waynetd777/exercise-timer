@@ -8,7 +8,8 @@
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: var(--step-3);
   height: 100%;
-  padding: var(--step-4) var(--step-4) 0;
+  padding: calc(var(--step-4) + var(--safe-top)) calc(var(--step-4) + var(--safe-right)) 0
+    calc(var(--step-4) + var(--safe-left));
   overflow: hidden;
   background: var(--ink-900);
   background: radial-gradient(
@@ -20,7 +21,8 @@
 
 @container (min-width: 46rem) {
   .editor {
-    padding: var(--step-5) var(--step-6) 0;
+    padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-6) + var(--safe-right)) 0
+      calc(var(--step-6) + var(--safe-left));
   }
 }
 
@@ -135,7 +137,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--step-2);
-  padding: var(--step-3) 0 var(--step-4);
+  padding: var(--step-3) 0 calc(var(--step-4) + var(--safe-bottom));
   border-top: var(--hairline);
 }
 
