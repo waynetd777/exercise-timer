@@ -13,11 +13,11 @@ export function duration(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
-/** "Round 3 of 8 · Set 2 of 2" from a timeline entry's repeat path. */
+/** "Reps 3 of 8 · Set 2 of 2" from a timeline entry's repeat path. */
 export function pathLabel(path: { label?: string; iteration: number; of: number }[]): string {
   return path
     .filter((step) => step.of > 1)
-    .map((step) => `${step.label ?? 'Round'} ${step.iteration} of ${step.of}`)
+    .map((step) => `${step.label ?? 'Reps'} ${step.iteration} of ${step.of}`)
     .join(' · ')
 }
 

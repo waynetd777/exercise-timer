@@ -161,10 +161,29 @@ describe('collectImages with the catalogue', () => {
   })
 
   it('orders duplicate labels stably by url', () => {
-    // The catalogue holds two Tricep Press machines and two Standing Arm Curls.
-    const images = collectImages([], IMAGE_CATALOGUE)
-    const labels = images.map((i) => i.label)
-    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })))
-    expect(new Set(labels).size).toBeLessThan(labels.length)
+    /*
+     * Fed synthetic duplicates rather than the catalogue. This used to rely on the
+     * catalogue holding two Tricep Presses and two Standing Arm Curls, which were
+     * re-uploads of the same photographs and have since been removed — so the
+     * behaviour needs its own input, or it silently stops being tested. It still
+     * matters: a routine of Wayne's can reference two ids with the same filename.
+     */
+    const same = [
+      'https://i.postimg.cc/BBBBBBBB/Tricep-Press.png',
+      'https://i.postimg.cc/AAAAAAAA/Tricep-Press.png',
+    ]
+    const images = collectImages([], same)
+    expect(images.map((i) => i.url)).toEqual([
+      'https://i.postimg.cc/AAAAAAAA/Tricep-Press.png',
+      'https://i.postimg.cc/BBBBBBBB/Tricep-Press.png',
+    ])
+  })
+
+  it('now has no duplicate labels in the catalogue itself', () => {
+    const labels = collectImages([], IMAGE_CATALOGUE).map((i) => i.label)
+    expect(new Set(labels).size).toBe(labels.length)
+    expect(labels).toEqual(
+      [...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
+    )
   })
 })

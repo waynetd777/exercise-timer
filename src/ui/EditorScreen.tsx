@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Block, MediaRef, Repeat, Segment, SegmentRole, Workout } from '../engine'
-import { stepCount, totalDurationMs } from '../engine'
+import type { Block, MediaRef, Repeat, RoutineColour, Segment, SegmentRole, Workout } from '../engine'
+import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import {
   appendTo,
   clearMedia,
@@ -34,15 +34,15 @@ import {
   DownIcon,
   PlusIcon,
   RedoIcon,
-  RoundsIcon,
+  RepsIcon,
   TrashIcon,
   UndoIcon,
   UpIcon,
 } from './icons'
 import './editor.css'
 
-/** One undo step: name and steps together, so they cannot drift apart. */
-type Draft = { name: string; blocks: Block[] }
+/** One undo step: name, colour and steps together, so they cannot drift apart. */
+type Draft = { name: string; blocks: Block[]; colour: RoutineColour | null }
 
 const ROLES: { role: SegmentRole; label: string }[] = [
   { role: 'prepare', label: 'Get ready' },
@@ -190,6 +190,7 @@ function SegmentRow({
   first,
   last,
   onMove,
+  onAdd,
   onDuplicate,
   onRemove,
   onPatch,
@@ -199,6 +200,7 @@ function SegmentRow({
   onChoose,
   onUpload,
 }: RowProps & {
+  onAdd: (path: Path, role: SegmentRole) => void
   segment: Segment
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onClearImage: (path: Path) => void
@@ -223,8 +225,23 @@ function SegmentRow({
     }
   }
 
+  /*
+   * The rest that does not run after the final rep. Marked in the row itself
+   * rather than explained in a help text somewhere: the rule is invisible in a
+   * flat list of steps, and "3 reps of work and rest" reads as six steps until
+   * something says otherwise.
+   *
+   * Same condition as the engine's: last child of a group, and the rest role.
+   */
+  const betweenRepsOnly = last && depth > 0 && segment.role === 'rest'
+
   return (
-    <li className="erow" data-depth={depth} data-role={segment.role}>
+    <li
+      className="erow"
+      data-depth={depth}
+      data-role={segment.role}
+      data-between-reps={betweenRepsOnly || undefined}
+    >
       <div className="erow__main">
         <select
           className="efield efield--role"
@@ -246,6 +263,15 @@ function SegmentRow({
           onChange={(event) => onPatch(path, { name: event.target.value })}
         />
 
+        {betweenRepsOnly && (
+          <span
+            className="erow__between label label--sm"
+            title="A rest belongs between reps, so this one does not run after the last rep. To rest at the end too, put a rest step after the group."
+          >
+            between reps
+          </span>
+        )}
+
         <label className="esecs">
           <input
             className="efield efield--secs"
@@ -265,12 +291,26 @@ function SegmentRow({
         </label>
 
         <div className="erow__actions">
+          {/*
+            Adds a FRESH step of the same type below, where duplicate beside it
+            copies this one. Same type because that is what "another" means on a
+            row: plus on a 20s work step gives another work step at its default
+            length, not a copy of this one's name and image.
+          */}
+          <button
+            className="btn btn--ghost"
+            onClick={() => onAdd(path, segment.role)}
+            aria-label={`Add a ${segment.role} step below`}
+            title="Add a step below"
+          >
+            <PlusIcon />
+          </button>
           <button
             className="btn btn--ghost"
             onClick={() => onMove(path, -1)}
             disabled={first && depth === 0}
             aria-label="Move up"
-            title={first && depth > 0 ? 'Move out of the round' : 'Move up'}
+            title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
           >
             <UpIcon />
           </button>
@@ -279,7 +319,7 @@ function SegmentRow({
             onClick={() => onMove(path, 1)}
             disabled={last && depth === 0}
             aria-label="Move down"
-            title={last && depth > 0 ? 'Move out of the round' : 'Move down'}
+            title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
           >
             <DownIcon />
           </button>
@@ -288,9 +328,9 @@ function SegmentRow({
             onClick={() => onWrap(path)}
             disabled={depth > 0}
             aria-label="Repeat this step"
-            title={depth > 0 ? 'Already inside rounds' : 'Repeat this step'}
+            title={depth > 0 ? 'Already inside reps' : 'Repeat this step'}
           >
-            <RoundsIcon />
+            <RepsIcon />
           </button>
           <button
             className="btn btn--ghost"
@@ -397,8 +437,8 @@ function RepeatRow({
       <div className="erow__main">
         <input
           className="efield efield--name"
-          value={repeat.label ?? 'Round'}
-          aria-label="Round label"
+          value={repeat.label ?? 'Reps'}
+          aria-label="Reps label"
           onChange={(event) => onPatch(path, { label: event.target.value })}
         />
 
@@ -410,7 +450,7 @@ function RepeatRow({
             min={1}
             max={99}
             value={repeat.times}
-            aria-label="Number of rounds"
+            aria-label="Number of reps"
             onChange={(event) => {
               const times = Number(event.target.value)
               if (Number.isFinite(times)) onPatch(path, { times: Math.max(1, Math.round(times)) })
@@ -422,7 +462,7 @@ function RepeatRow({
           <button
             className="btn btn--ghost"
             onClick={() => onAddChild(path)}
-            aria-label="Add a step to these rounds"
+            aria-label="Add a step to these reps"
             title="Add a step inside"
           >
             <PlusIcon />
@@ -432,7 +472,7 @@ function RepeatRow({
             onClick={() => onMove(path, -1)}
             disabled={first && depth === 0}
             aria-label="Move up"
-            title={first && depth > 0 ? 'Move out of the round' : 'Move up'}
+            title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
           >
             <UpIcon />
           </button>
@@ -441,31 +481,31 @@ function RepeatRow({
             onClick={() => onMove(path, 1)}
             disabled={last && depth === 0}
             aria-label="Move down"
-            title={last && depth > 0 ? 'Move out of the round' : 'Move down'}
+            title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
           >
             <DownIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onUnwrap(path)}
-            aria-label="Ungroup these rounds"
+            aria-label="Ungroup these reps"
             title="Ungroup — keeps the steps, drops the repeat"
           >
-            <RoundsIcon />
+            <RepsIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onDuplicate(path)}
-            aria-label="Duplicate these rounds"
-            title="Duplicate rounds and steps"
+            aria-label="Duplicate these reps"
+            title="Duplicate reps and steps"
           >
             <CopyIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onRemove(path)}
-            aria-label="Delete these rounds and their steps"
-            title="Delete rounds and steps"
+            aria-label="Delete these reps and their steps"
+            title="Delete reps and steps"
           >
             <TrashIcon />
           </button>
@@ -492,9 +532,13 @@ export function EditorScreen({
    * draft rather than two states that can drift apart.
    */
   const [history, setHistory] = useState(() =>
-    initHistory<Draft>({ name: workout.name, blocks: workout.blocks }),
+    initHistory<Draft>({
+      name: workout.name,
+      blocks: workout.blocks,
+      colour: workout.colour ?? null,
+    }),
   )
-  const { name, blocks } = history.present
+  const { name, blocks, colour } = history.present
   const [confirmingExit, setConfirmingExit] = useState(false)
   const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null)
   /** The step whose image is being chosen, or null when the picker is closed. */
@@ -513,8 +557,20 @@ export function EditorScreen({
     edit((draft) => ({ ...draft, blocks: op(draft.blocks) }), coalesce)
 
   const rows = useMemo(() => flatten(blocks), [blocks])
-  const preview = useMemo(() => ({ ...workout, name, blocks }), [workout, name, blocks])
-  const dirty = useMemo(() => isDirty(workout, name, blocks), [workout, name, blocks])
+  /*
+   * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
+   * set to undefined is not the same as an absent key. So the untinted case
+   * DELETES the key rather than assigning undefined, which also keeps exported
+   * JSON free of `"colour": null`.
+   */
+  const preview = useMemo(() => {
+    const { colour: _previous, ...rest } = workout
+    return colour ? { ...rest, name, blocks, colour } : { ...rest, name, blocks }
+  }, [workout, name, blocks, colour])
+  const dirty = useMemo(
+    () => isDirty(workout, name, blocks, colour),
+    [workout, name, blocks, colour],
+  )
 
   // Also catch a reload or a closed tab, not just the back button.
   useEffect(() => {
@@ -561,7 +617,7 @@ export function EditorScreen({
     editBlocks((current) => updateRepeat(current, path, patch), true)
 
   return (
-    <main className="editor">
+    <main className="editor" data-colour={colour ?? undefined}>
       <header className="editor__head" data-confirming={confirmingExit}>
         {confirmingExit ? (
           /* Two-step in place, matching how deleting a routine confirms, rather
@@ -625,6 +681,29 @@ export function EditorScreen({
           </button>
         </div>
 
+        <div className="editor__colours" role="group" aria-label="Routine colour">
+          <button
+            className="swatch swatch--none"
+            data-selected={colour === null}
+            aria-pressed={colour === null}
+            aria-label="No colour"
+            title="No colour"
+            onClick={() => edit((draft) => ({ ...draft, colour: null }))}
+          />
+          {ROUTINE_COLOURS.map((option) => (
+            <button
+              key={option}
+              className="swatch"
+              data-colour={option}
+              data-selected={colour === option}
+              aria-pressed={colour === option}
+              aria-label={option}
+              title={option}
+              onClick={() => edit((draft) => ({ ...draft, colour: option }))}
+            />
+          ))}
+        </div>
+
         {uploadError && (
           <p className="editor__error label label--sm" role="alert">
             {uploadError}
@@ -654,6 +733,7 @@ export function EditorScreen({
                   first={first}
                   last={last}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
+                  onAdd={(p, role) => editBlocks((c) => insertAfter(c, p, newSegment(role)))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
                   onPatch={patchSegment}
@@ -719,7 +799,7 @@ export function EditorScreen({
           onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
         >
           <PlusIcon />
-          Rounds
+          Reps
         </button>
       </div>
     </main>

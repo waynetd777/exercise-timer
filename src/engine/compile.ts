@@ -22,6 +22,25 @@ function segmentDurationMs(segment: Segment): number {
   return Math.round(segment.durationMs)
 }
 
+/**
+ * The trailing rest of a reps group, which does NOT run after the final rep.
+ *
+ * A rest belongs BETWEEN reps: three reps of work-then-rest is work rest work
+ * rest work, five steps, not six. A trailing rest would leave the routine resting
+ * into whatever comes next, which is usually another rest or the finish.
+ *
+ * Only the last child, and only the `rest` role. `recover` is a deliberate long
+ * interval that someone put at the end on purpose, and anything before the last
+ * child is inside the rep rather than after it.
+ *
+ * To rest after the last rep as well, put a rest step AFTER the group rather than
+ * inside it. That reads as what it is, and it survives a change to the rep count.
+ */
+function trailingRest(children: Block[]): Segment | null {
+  const last = children.at(-1)
+  return last?.kind === 'segment' && last.role === 'rest' ? last : null
+}
+
 /** A repeat contributes nothing unless it runs at least once. */
 function repeatTimes(times: number): number {
   if (!Number.isFinite(times)) return 0
@@ -33,7 +52,7 @@ function repeatTimes(times: number): number {
  * Flattens the recursive authoring tree into an absolute-time timeline.
  *
  * Expands every `repeat` into its iterations, accumulates offsets, and records
- * the repeat path on each entry so the UI can render "Round 3 of 8". Media refs
+ * the repeat path on each entry so the UI can render "Reps 3 of 8". Media refs
  * pass straight through, so the runner reads `entry.media` without walking back
  * up to the authoring model.
  *
@@ -70,8 +89,10 @@ export function compile(workout: Workout): Timeline {
       }
 
       const times = repeatTimes(block.times)
+      const drop = trailingRest(block.children) !== null
       for (let i = 0; i < times; i++) {
-        walk(block.children, [
+        const children = drop && i === times - 1 ? block.children.slice(0, -1) : block.children
+        walk(children, [
           ...path,
           {
             repeatId: block.id,
@@ -98,10 +119,15 @@ export function totalDurationMs(workout: Workout): number {
   const sum = (blocks: Block[]): number => {
     let total = 0
     for (const block of blocks) {
-      total +=
-        block.kind === 'segment'
-          ? segmentDurationMs(block)
-          : repeatTimes(block.times) * sum(block.children)
+      if (block.kind === 'segment') {
+        total += segmentDurationMs(block)
+        continue
+      }
+      const times = repeatTimes(block.times)
+      total += times * sum(block.children)
+      // The final rep's trailing rest never runs, so it is not in the total.
+      const rest = times > 0 ? trailingRest(block.children) : null
+      if (rest) total -= segmentDurationMs(rest)
     }
     return total
   }
@@ -113,12 +139,15 @@ export function stepCount(workout: Workout): number {
   const count = (blocks: Block[]): number => {
     let total = 0
     for (const block of blocks) {
-      total +=
-        block.kind === 'segment'
-          ? segmentDurationMs(block) > 0
-            ? 1
-            : 0
-          : repeatTimes(block.times) * count(block.children)
+      if (block.kind === 'segment') {
+        total += segmentDurationMs(block) > 0 ? 1 : 0
+        continue
+      }
+      const times = repeatTimes(block.times)
+      total += times * count(block.children)
+      const rest = times > 0 ? trailingRest(block.children) : null
+      // A zero-length rest was never counted, so there is nothing to take off.
+      if (rest && segmentDurationMs(rest) > 0) total -= 1
     }
     return total
   }

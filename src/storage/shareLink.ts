@@ -1,5 +1,6 @@
 import type { Block, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
+import { migrateWorkout } from './migrate'
 
 /**
  * A routine encoded into a URL.
@@ -67,7 +68,9 @@ export async function decodeRoutine(param: string, now: number, id: string): Pro
     throw new Error('not a routine')
   }
 
-  return {
+  // Migrated like the other two entry points — a link shared before a rename
+  // should not arrive speaking the old vocabulary.
+  return migrateWorkout({
     ...workout,
     id,
     name: workout.name,
@@ -75,7 +78,7 @@ export async function decodeRoutine(param: string, now: number, id: string): Pro
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,
-  }
+  })
 }
 
 export async function shareUrl(workout: Workout, base: string): Promise<string> {

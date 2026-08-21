@@ -2,13 +2,22 @@
  * Exercise illustrations available to every routine.
  *
  * Taken from Wayne's "Fitness. Workouts" note, which is the master list, and
- * kept in its original order and grouping. All 29 were verified to resolve when
- * this file was written.
+ * kept in its original order and grouping.
  *
  * Only URLs are stored: labels are derived from the filename by
- * `labelFromUrl()`, so there is nothing to keep in sync. A few names repeat
- * (there are two Tricep Press machines, and two Standing Arm Curl) — those are
- * genuinely different images, so the duplicate labels are honest.
+ * `labelFromUrl()`, so there is nothing to keep in sync.
+ *
+ * 27 of the note's 29 URLs are here. Two were dropped as duplicates: a second
+ * Tricep Press and a second Standing Arm Curl, each a re-upload of the image
+ * already listed. This file previously claimed they were genuinely different
+ * images — they are not, and the claim was never checked. Fetched and compared:
+ * after aligning for a 1px crop difference they differ by 1.8/255 and 3.3/255
+ * mean, where two genuinely different plates in this set differ by 16.6/255, and
+ * both pairs are visibly the same photograph and station number.
+ *
+ * The dropped URLs still work; they are simply not offered twice in the picker.
+ * A routine that already references one keeps loading it, since steps store a URL
+ * rather than a catalogue index.
  */
 export const IMAGE_CATALOGUE: readonly string[] = [
   // group 1
@@ -24,12 +33,10 @@ export const IMAGE_CATALOGUE: readonly string[] = [
   'https://i.postimg.cc/TPg0hk3q/Leg-Press.png',
   'https://i.postimg.cc/sXzcWpBF/Seated-Row.png',
   'https://i.postimg.cc/4d11QmtY/Standing-Arm-Curl.png',
-  'https://i.postimg.cc/Gt7J6VXr/Tricep-Press.png',
   // group 3
   'https://i.postimg.cc/tgRC2Nrd/Cable-Lateral-Shoulder-Raise.png',
   'https://i.postimg.cc/rphybRbB/Cable-Row.png',
   'https://i.postimg.cc/C1XhMTwJ/Incline-Chest-Press.png',
-  'https://i.postimg.cc/RFNCzVxN/Standing-Arm-Curl.png',
   // group 4
   'https://i.postimg.cc/kgwmsjjn/Calf-Press.png',
   'https://i.postimg.cc/VvyQv2NF/Deadlift.png',

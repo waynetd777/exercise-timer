@@ -27,6 +27,20 @@
   --role-recover: #9080e8; /* violet — the long recovery interval, distinct from all three */
   --role-custom: #d8cfc0;
 
+  /*
+   * Routine tints. Red, green, blue and purple reuse the phase hues so the app
+   * has one palette rather than two; orange and yellow are added to complete the
+   * spectrum. Only ever used as a low-percentage mix, never as a flat fill.
+   */
+  --routine-red: var(--role-work);
+  --routine-orange: #f2913c;
+  --routine-yellow: #e8c341;
+  --routine-green: var(--role-prepare);
+  --routine-blue: var(--role-rest);
+  --routine-purple: var(--role-recover);
+  /* Resolved per element by [data-colour]; untinted elements stay neutral. */
+  --tint: transparent;
+
   /* Relative height of a step in the effort strip. */
   --effort-prepare: 0.3;
   --effort-work: 1;
@@ -364,4 +378,81 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Routine tints ─────────────────────────────────────────────────────────
+ *
+ * One declaration block, used by the library row and the editor. Setting only a
+ * custom property means the surfaces keep their own backgrounds and decide how
+ * strongly to mix the tint in.
+ */
+[data-colour='red'] {
+  --tint: var(--routine-red);
+}
+[data-colour='orange'] {
+  --tint: var(--routine-orange);
+}
+[data-colour='yellow'] {
+  --tint: var(--routine-yellow);
+}
+[data-colour='green'] {
+  --tint: var(--routine-green);
+}
+[data-colour='blue'] {
+  --tint: var(--routine-blue);
+}
+[data-colour='purple'] {
+  --tint: var(--routine-purple);
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────────
+ *
+ * A default scrollbar is a light-grey plank down the side of a near-black app,
+ * and it is the one piece of chrome the browser draws that the design otherwise
+ * never touches.
+ *
+ * Two mechanisms, because no single one covers the targets: `scrollbar-color`
+ * and `scrollbar-width` are the standard properties (Firefox, and Chromium since
+ * 121), while the `::-webkit-scrollbar` pseudo-elements cover older Chromium and
+ * desktop Safari. Both are declared; whichever the browser understands wins, and
+ * they are kept to the same colours so it cannot matter which that is.
+ *
+ * iOS Safari draws overlay scrollbars that appear only while scrolling and ignore
+ * both mechanisms. Nothing to do about that, and nothing lost: an overlay
+ * scrollbar is already dark and transient.
+ */
+:root {
+  scrollbar-color: var(--ink-600) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  inline-size: 10px;
+  block-size: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  /*
+   * Inset via a transparent border rather than by making the bar narrower, so
+   * the hit area stays a full 10px while the visible thumb reads as 6px. Dragging
+   * a 6px target on a trackpad is unpleasant.
+   */
+  background: var(--ink-600);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bone-faint);
+  background-clip: padding-box;
+}
+
+/* Where two scrollbars meet; unstyled it is a pale square in the corner. */
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

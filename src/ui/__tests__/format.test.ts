@@ -61,17 +61,17 @@ describe('pathLabel', () => {
     expect(
       pathLabel([
         { label: 'Set', iteration: 2, of: 3 },
-        { label: 'Round', iteration: 1, of: 8 },
+        { label: 'Reps', iteration: 1, of: 8 },
       ]),
-    ).toBe('Set 2 of 3 · Round 1 of 8')
+    ).toBe('Set 2 of 3 · Reps 1 of 8')
   })
 
   it('hides a repeat that only runs once — it carries no information', () => {
     expect(pathLabel([{ label: 'Circuit', iteration: 1, of: 1 }])).toBe('')
   })
 
-  it('falls back to "Round" when a repeat has no label', () => {
-    expect(pathLabel([{ iteration: 3, of: 8 }])).toBe('Round 3 of 8')
+  it('falls back to "Reps" when a repeat has no label', () => {
+    expect(pathLabel([{ iteration: 3, of: 8 }])).toBe('Reps 3 of 8')
   })
 
   it('returns empty for a step outside any repeat', () => {

@@ -3,11 +3,12 @@ import { compile, MAX_TIMELINE_ENTRIES, stepCount, TimelineTooLargeError, totalD
 import { CABLE_FLY, circuit, nested, rep, seg, tabata, workout } from './fixtures'
 
 describe('compile', () => {
-  it('expands classic Tabata into 17 steps of the right shape', () => {
+  it('expands classic Tabata into 16 steps of the right shape', () => {
     const timeline = compile(tabata())
 
-    expect(timeline.entries).toHaveLength(1 + 8 * 2)
-    expect(timeline.totalMs).toBe((10 + 8 * 30) * 1000)
+    // 8 works and 7 rests, plus the prepare: the eighth rep has no rest after it.
+    expect(timeline.entries).toHaveLength(1 + 8 + 7)
+    expect(timeline.totalMs).toBe((10 + 8 * 20 + 7 * 10) * 1000)
 
     expect(timeline.entries[0]).toMatchObject({
       name: 'Get ready',
@@ -33,27 +34,28 @@ describe('compile', () => {
     expect(expectedStart).toBe(timeline.totalMs)
   })
 
-  it('records the repeat path so the UI can render "Round 3 of 8"', () => {
+  it('records the repeat path so the UI can render "Reps 3 of 8"', () => {
     const timeline = compile(tabata())
 
     // Third round's work step: index 1 + (3 - 1) * 2 = 5
     expect(timeline.entries[5]!.path).toEqual([
-      { repeatId: expect.any(String), label: 'Round', iteration: 3, of: 8 },
+      { repeatId: expect.any(String), label: 'Reps', iteration: 3, of: 8 },
     ])
   })
 
   it('nests paths outermost-first', () => {
     const timeline = compile(nested())
 
-    // Set 2 -> Round 1 -> Work. Set 1 is 3*(5+5) + 30 = 60s, so this starts at 60_000.
-    const entry = timeline.entries.find((e) => e.startMs === 60_000)
+    // Set 2 -> Reps 1 -> Work. Set 1 is 3 works + 2 rests + 30 = 55s, since the
+    // third rep has no rest after it, so this starts at 55_000.
+    const entry = timeline.entries.find((e) => e.startMs === 55_000)
     expect(entry).toMatchObject({ name: 'Work' })
     expect(entry!.path).toEqual([
       { repeatId: expect.any(String), label: 'Set', iteration: 2, of: 2 },
-      { repeatId: expect.any(String), label: 'Round', iteration: 1, of: 3 },
+      { repeatId: expect.any(String), label: 'Reps', iteration: 1, of: 3 },
     ])
 
-    // The recover step sits inside Set only, not inside Round.
+    // The recover step sits inside Set only, not inside Reps.
     const recover = timeline.entries.find((e) => e.role === 'recover')!
     expect(recover.path.map((p) => p.label)).toEqual(['Set'])
   })

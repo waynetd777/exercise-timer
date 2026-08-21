@@ -67,7 +67,7 @@ export function newRepeat(
   children: Block[] = [newSegment('work'), newSegment('rest')],
   times = 3,
 ): Repeat {
-  return { kind: 'repeat', id: crypto.randomUUID(), times, children, label: 'Round' }
+  return { kind: 'repeat', id: crypto.randomUUID(), times, children, label: 'Reps' }
 }
 
 /**

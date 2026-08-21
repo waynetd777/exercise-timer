@@ -95,12 +95,12 @@ describe('which boundary cue is emitted', () => {
     }
   })
 
-  it('gives a Tabata one whistle per round and a bell for every rest', () => {
+  it('gives a Tabata one whistle per rep and a bell for every rest', () => {
     const all = cues(compile(tabata()))
-    // 10s prepare, then 8 x (work, rest): 8 whistles, and 9 bells — the prepare
-    // plus the eight rests.
+    // 8 whistles, one into each work step. 8 bells: the prepare plus SEVEN rests,
+    // because the eighth rep has no rest after it.
     expect(all.filter((c) => c.kind === 'work-start')).toHaveLength(8)
-    expect(all.filter((c) => c.kind === 'work-end')).toHaveLength(9)
+    expect(all.filter((c) => c.kind === 'work-end')).toHaveLength(8)
   })
 
   it('treats recover as the end of work, not the start of it', () => {

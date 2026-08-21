@@ -1,5 +1,6 @@
 import type { Block, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
+import { migrateWorkout } from './migrate'
 
 /**
  * The export format: a routine, or a whole library, as one JSON file.
@@ -85,12 +86,14 @@ export function fromBundle(json: unknown, now: number): Workout[] {
   const workouts = bundle.workouts.filter(isWorkout)
   if (workouts.length === 0) throw new BundleError('no readable routines')
 
-  return workouts.map((workout) => ({
-    ...workout,
-    schemaVersion: SCHEMA_VERSION,
-    createdAt: workout.createdAt ?? now,
-    updatedAt: now,
-  }))
+  return workouts.map((workout) =>
+    migrateWorkout({
+      ...workout,
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: workout.createdAt ?? now,
+      updatedAt: now,
+    }),
+  )
 }
 
 /** A filesystem-safe filename for an export. */

@@ -24,9 +24,9 @@ function blankRoutine(): Workout {
     id: crypto.randomUUID(),
     name: '',
     /*
-     * Opens on the shape Wayne's routines actually take: get set, three rounds
+     * Opens on the shape Wayne's routines actually take: get set, three reps
      * of work and rest, then get set for whatever comes next. Building the next
-     * exercise is then a matter of adding a round after that second prepare,
+     * exercise is then a matter of adding reps after that second prepare,
      * rather than starting from an empty list.
      */
     blocks: newRoutineBlocks(),

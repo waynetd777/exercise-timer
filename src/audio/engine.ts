@@ -1,4 +1,5 @@
 import type { Note, ToneSpec } from './tones'
+import { SAMPLES, type SampleName } from './samples'
 
 /**
  * Web Audio wrapper.
@@ -7,20 +8,31 @@ import type { Note, ToneSpec } from './tones'
  * audio thread keeps time even when the main thread is throttled, so a beep
  * lands on the beat after the tab has been backgrounded for ten minutes.
  *
- * Everything is synthesised — no samples to fetch, decode, cache or lose
- * offline, and no third-party audio in the repo.
+ * Nearly everything is synthesised. The one exception is the whistle, a CC0
+ * recording (see `samples.ts`), decoded once at unlock and played from a buffer.
+ * If that decode fails the whistle falls back to its synthesised contour, so a
+ * missing or unfetchable sample costs fidelity and never a silent cue.
+ *
+ * A note is built as a small graph:
+ *
+ *   oscillators ─┐
+ *                ├─ each with its own envelope ─→ tremolo ─→ master
+ *   resonances  ─┘
+ *
+ * Envelopes are per source, because a bell's high partial has to die before its
+ * body stops ringing. The tremolo is shared, because it is one physical thing —
+ * the pea in a whistle chopping the airflow — and it must modulate the noise as
+ * well as the tone. Modulating only the tone was why the first whistle sounded
+ * like a synthesiser.
  */
 class AudioEngine {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
-  /**
-   * Scheduled oscillators, mapped to the time their CUE began — not their own
-   * start time. A cue can be several notes spread over seconds, and once it has
-   * started the whole figure has to be allowed to finish.
-   */
   private pending = new Map<AudioScheduledSourceNode, number>()
-  /** One second of white noise, made once and reused for every breathy cue. */
+  /** A second of white noise, made once and reused by every resonance. */
   private noiseBuffer: AudioBuffer | null = null
+  private samples = new Map<SampleName, AudioBuffer>()
+  private decoding = new Set<SampleName>()
 
   /**
    * Must be called synchronously from a user gesture — mobile browsers refuse
@@ -35,6 +47,33 @@ class AudioEngine {
       this.master.connect(this.ctx.destination)
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()
+    // Decoding needs a context, and unlock is the first moment one exists. Fired
+    // and forgotten: a cue arriving before it finishes uses the fallback.
+    void this.decode('whistle')
+  }
+
+  /**
+   * Fetches and decodes a sample once. Failure is deliberately swallowed — every
+   * sampled note carries a synthesised fallback, so the cost of a dead network is
+   * a slightly worse whistle rather than a missing one.
+   */
+  private async decode(name: SampleName): Promise<void> {
+    const ctx = this.ctx
+    if (!ctx || this.samples.has(name) || this.decoding.has(name)) return
+    this.decoding.add(name)
+    try {
+      const response = await fetch(SAMPLES[name])
+      this.samples.set(name, await ctx.decodeAudioData(await response.arrayBuffer()))
+    } catch {
+      // Fallback covers it.
+    } finally {
+      this.decoding.delete(name)
+    }
+  }
+
+  /** Whether a sampled cue will actually use its recording. For the bench. */
+  sampleReady(name: SampleName): boolean {
+    return this.samples.has(name)
   }
 
   /** iOS suspends the context when the page hides; call this on the way back. */
@@ -55,36 +94,33 @@ class AudioEngine {
    * rolling window.
    *
    * Judged per CUE, not per note. A cue already sounding is left alone entirely,
-   * including notes of it still to come — the completion figure is seven notes
-   * over three seconds, and the moment it starts the workout also completes,
-   * which re-runs the scheduler and cancelled every note but the first. Cutting
-   * an oscillator mid-ring is an audible click, so the earlier per-note version
-   * of this fixed the bell and left the fanfare broken in the same way.
+   * including notes of it still to come — the completion figure is three dings
+   * over a second, and the moment it starts the workout also completes, which
+   * re-runs the scheduler.
    */
   cancelPending(): void {
     if (!this.ctx) return
     const now = this.ctx.currentTime
-    for (const [osc, cueStartedAt] of this.pending) {
+    for (const [source, cueStartedAt] of this.pending) {
       /*
-       * A small grace, not zero. The completion cue fires at the same instant
-       * the workout completes and the scheduler re-runs, and the timer's tick
-       * and the audio clock can disagree by a few milliseconds — without slack
-       * the fanfare is cancelled a hair before it starts. Double-playing is
-       * prevented by the scheduler deduplicating instead.
+       * A small grace, not zero: the timer's tick and the audio clock can
+       * disagree by a few milliseconds, and without slack a figure is cancelled
+       * a hair before it starts. Double-playing is prevented by the scheduler
+       * deduplicating instead.
        */
       if (cueStartedAt <= now + 0.15) continue
       try {
-        osc.stop(now)
+        source.stop(now)
       } catch {
         // Already stopped; nothing to do.
       }
-      this.pending.delete(osc)
+      this.pending.delete(source)
     }
   }
 
   /**
-   * Plays a spec straight away. For the sound test panel — the running timer
-   * always schedules ahead instead.
+   * Plays a spec straight away. For the sound bench — the running timer always
+   * schedules ahead instead.
    */
   preview(spec: ToneSpec): void {
     this.unlock()
@@ -105,21 +141,7 @@ class AudioEngine {
     const cueAt = Math.max(at, ctx.currentTime)
 
     for (const note of spec.notes) {
-      const noteAt = Math.max(at + note.atMs / 1000, ctx.currentTime)
-      this.play(ctx, master, noteAt, cueAt, note, note.freq, note.gain, note.durationMs)
-      if (note.partial) {
-        this.play(
-          ctx,
-          master,
-          noteAt,
-          cueAt,
-          note,
-          note.freq * note.partial.ratio,
-          note.partial.gain,
-          note.durationMs * (note.partial.decayScale ?? 1),
-        )
-      }
-      if (note.noise) this.breath(ctx, master, noteAt, note, note.noise)
+      this.playNote(ctx, master, Math.max(at + note.atMs / 1000, ctx.currentTime), cueAt, note)
     }
   }
 
@@ -134,124 +156,199 @@ class AudioEngine {
     return this.noiseBuffer
   }
 
-  /**
-   * A short burst of band-passed noise, on the same envelope as its note.
-   *
-   * This is the breath in a whistle. Without it a whistle is a pure tone with a
-   * wobble, which reads as a synthesiser rather than as someone blowing.
-   */
-  private breath(
-    ctx: AudioContext,
-    master: GainNode,
-    at: number,
-    note: Note,
-    spec: NonNullable<Note['noise']>,
-  ): void {
-    const source = ctx.createBufferSource()
-    const band = ctx.createBiquadFilter()
-    const env = ctx.createGain()
-    const total = note.durationMs / 1000
-
-    source.buffer = this.noise(ctx)
-    source.loop = true
-    band.type = 'bandpass'
-    band.frequency.value = spec.centreHz
-    band.Q.value = spec.q
-
-    env.gain.setValueAtTime(0.0001, at)
-    env.gain.exponentialRampToValueAtTime(spec.gain, at + 0.01)
-    env.gain.exponentialRampToValueAtTime(0.0001, at + total)
-
-    source.connect(band).connect(env).connect(master)
-    source.start(at)
-    source.stop(at + total + 0.02)
-
-    this.pending.set(source, at)
-    source.addEventListener('ended', () => {
-      this.pending.delete(source)
-      env.disconnect()
-      band.disconnect()
-    })
-  }
-
-  /**
-   * One oscillator with a strike-then-ring envelope: up over a few ms, down to
-   * the sustain level over `strikeMs`, then a long exponential tail to silence.
-   *
-   * The tail is what makes it read as struck. A single exponential from peak
-   * sounds like a tone being switched off.
-   *
-   * `warble` and `tremolo` add low-frequency modulation to pitch and level — the
-   * chop of a referee whistle's pea, which is the difference between a whistle
-   * and a test tone.
-   */
-  private play(
+  private playNote(
     ctx: AudioContext,
     master: GainNode,
     at: number,
     cueAt: number,
     note: Note,
-    freq: number,
-    gain: number,
-    durationMs: number,
   ): void {
-    const osc = ctx.createOscillator()
-    const env = ctx.createGain()
+    const total = note.durationMs / 1000
 
-    const attack = 0.006
-    const total = durationMs / 1000
-    // Keep the stages strictly ordered even for a very short note.
-    const strike = Math.min(note.strikeMs / 1000, Math.max(0.005, total - attack - 0.01))
-    // Exponential ramps cannot reach or start from zero.
-    const sustain = Math.max(0.0002, gain * note.sustain)
-
-    osc.type = note.type ?? 'sine'
-    osc.frequency.setValueAtTime(freq, at)
-
-    env.gain.setValueAtTime(0.0001, at)
-    env.gain.exponentialRampToValueAtTime(gain, at + attack)
-    env.gain.exponentialRampToValueAtTime(sustain, at + attack + strike)
-    env.gain.exponentialRampToValueAtTime(0.0001, at + total)
-
-    // Pitch wobble.
-    if (note.warble) {
-      const lfo = ctx.createOscillator()
-      const depth = ctx.createGain()
-      lfo.frequency.value = note.warble.hz
-      depth.gain.value = note.warble.depthHz
-      lfo.connect(depth).connect(osc.frequency)
-      lfo.start(at)
-      lfo.stop(at + total + 0.02)
-      lfo.addEventListener('ended', () => depth.disconnect())
-    }
-
-    // Level wobble, applied after the envelope so it rides on top of it.
-    let output: AudioNode = env
+    // ── Shared chop, if any ────────────────────────────────────────────────
+    let bus: AudioNode = master
     if (note.tremolo) {
-      const shaped = ctx.createGain()
+      const trem = ctx.createGain()
+      const half = note.tremolo.depth / 2
+      trem.gain.value = 1 - half
+
       const lfo = ctx.createOscillator()
       const depth = ctx.createGain()
-      shaped.gain.value = 1 - note.tremolo.depth / 2
+      lfo.type = note.tremolo.shape ?? 'sine'
       lfo.frequency.value = note.tremolo.hz
-      depth.gain.value = note.tremolo.depth / 2
-      lfo.connect(depth).connect(shaped.gain)
+      depth.gain.value = half
+      lfo.connect(depth).connect(trem.gain)
       lfo.start(at)
       lfo.stop(at + total + 0.02)
       lfo.addEventListener('ended', () => depth.disconnect())
-      env.connect(shaped)
-      output = shaped
+
+      trem.connect(master)
+      bus = trem
     }
 
-    osc.connect(env)
-    output.connect(master)
-    osc.start(at)
-    osc.stop(at + total + 0.02)
+    // ── Envelope shared in SHAPE, applied per source ───────────────────────
+    const envelope = (level: number, seconds: number): GainNode => {
+      const attack = (note.attackMs ?? 6) / 1000
+      const strike = Math.min(
+        (note.strikeMs ?? 45) / 1000,
+        Math.max(0.005, seconds - attack - 0.01),
+      )
+      const env = ctx.createGain()
+      // Exponential ramps cannot reach or start from zero.
+      env.gain.setValueAtTime(0.0001, at)
+      env.gain.exponentialRampToValueAtTime(level, at + attack)
+      env.gain.exponentialRampToValueAtTime(
+        Math.max(0.0002, level * (note.sustain ?? 0.15)),
+        at + attack + strike,
+      )
+      env.gain.exponentialRampToValueAtTime(0.0001, at + seconds)
+      env.connect(bus)
+      return env
+    }
 
-    this.pending.set(osc, cueAt)
-    osc.addEventListener('ended', () => {
-      this.pending.delete(osc)
-      env.disconnect()
-    })
+    const track = (source: AudioScheduledSourceNode, cleanup: () => void) => {
+      source.start(at)
+      source.stop(at + total + 0.02)
+      this.pending.set(source, cueAt)
+      source.addEventListener('ended', () => {
+        this.pending.delete(source)
+        cleanup()
+      })
+    }
+
+    /*
+     * ── A recording ────────────────────────────────────────────────────────
+     * Played flat: the recording already has the envelope and the pitch, and
+     * imposing ours on top is what made the synthesised attempts sound wrong.
+     * `playbackRate` is the one liberty, since it shifts pitch and length
+     * together exactly as blowing harder does.
+     */
+    const buffer = note.sample ? this.samples.get(note.sample) : undefined
+    if (buffer) {
+      const source = ctx.createBufferSource()
+      const level = ctx.createGain()
+      const rate = note.playbackRate ?? 1
+
+      source.buffer = buffer
+      source.playbackRate.value = rate
+      level.gain.value = note.gain
+      source.connect(level)
+      level.connect(bus)
+
+      // Its own duration, not the note's: the note's is the fallback's length.
+      source.start(at)
+      source.stop(at + buffer.duration / rate + 0.02)
+      this.pending.set(source, cueAt)
+      source.addEventListener('ended', () => {
+        this.pending.delete(source)
+        level.disconnect()
+      })
+      return
+    }
+
+    /*
+     * ── A measured contour ────────────────────────────────────────────────
+     * The curve IS the envelope and the pitch, so nothing else applies. This
+     * exists because a whistle's character is its irregularity, which no
+     * arrangement of oscillator, chop and envelope reproduced.
+     */
+    if (note.curve) {
+      const osc = ctx.createOscillator()
+      const level = ctx.createGain()
+      osc.type = note.type ?? 'sine'
+
+      osc.frequency.setValueCurveAtTime(
+        new Float32Array(note.curve.frequency),
+        at,
+        total,
+      )
+      level.gain.setValueCurveAtTime(
+        new Float32Array(note.curve.amplitude.map((value) => value * note.gain)),
+        at,
+        total,
+      )
+
+      osc.connect(level)
+      level.connect(bus)
+      track(osc, () => level.disconnect())
+      return
+    }
+
+    // ── Tone ───────────────────────────────────────────────────────────────
+    const tone = (freq: number, level: number, seconds: number) => {
+      const osc = ctx.createOscillator()
+      osc.type = note.type ?? 'sine'
+      osc.frequency.setValueAtTime(freq, at)
+
+      if (note.warble) {
+        const lfo = ctx.createOscillator()
+        const depth = ctx.createGain()
+        lfo.frequency.value = note.warble.hz
+        depth.gain.value = note.warble.depthHz
+        lfo.connect(depth).connect(osc.frequency)
+        lfo.start(at)
+        lfo.stop(at + total + 0.02)
+        lfo.addEventListener('ended', () => depth.disconnect())
+      }
+
+      const env = envelope(level, seconds)
+      osc.connect(env)
+      track(osc, () => env.disconnect())
+    }
+
+    if (note.gain > 0) tone(note.freq, note.gain, total)
+    if (note.partial) {
+      tone(
+        note.freq * note.partial.ratio,
+        note.partial.gain,
+        total * (note.partial.decayScale ?? 1),
+      )
+    }
+
+    // ── Resonances: noise through a high-Q filter ──────────────────────────
+    /*
+     * This is what makes a whistle a whistle. A pea whistle is an air-jet edge
+     * tone — mostly turbulence, given its pitch by a sharp resonance rather than
+     * by an oscillator. A tone with a little noise on top sounds synthetic; noise
+     * through a Q of twenty sounds blown.
+     */
+    for (const resonance of note.resonances ?? []) {
+      const source = ctx.createBufferSource()
+      const band = ctx.createBiquadFilter()
+
+      source.buffer = this.noise(ctx)
+      source.loop = true
+      band.type = 'bandpass'
+      band.Q.value = resonance.q
+
+      // A short upward sweep is the sound of air pressure building.
+      if (resonance.sweepFromHz !== undefined) {
+        band.frequency.setValueAtTime(resonance.sweepFromHz, at)
+        band.frequency.exponentialRampToValueAtTime(resonance.centreHz, at + 0.03)
+      } else {
+        band.frequency.setValueAtTime(resonance.centreHz, at)
+      }
+
+      // The pea shifting the cavity resonance — the trill, as opposed to the
+      // level chop. Added to whatever the sweep left the frequency at.
+      if (resonance.wobbleHz !== undefined && resonance.wobbleDepthHz !== undefined) {
+        const lfo = ctx.createOscillator()
+        const depth = ctx.createGain()
+        lfo.frequency.value = resonance.wobbleHz
+        depth.gain.value = resonance.wobbleDepthHz
+        lfo.connect(depth).connect(band.frequency)
+        lfo.start(at)
+        lfo.stop(at + total + 0.02)
+        lfo.addEventListener('ended', () => depth.disconnect())
+      }
+
+      const env = envelope(resonance.gain, total)
+      source.connect(band).connect(env)
+      track(source, () => {
+        env.disconnect()
+        band.disconnect()
+      })
+    }
   }
 }
 

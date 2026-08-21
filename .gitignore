@@ -13,4 +13,9 @@ coverage/
 # OpenWolf per-session runtime state. The useful files in .wolf/ (STATUS,
 # cerebrum, buglog, memory) stay tracked; these two churn on every hook run.
 .wolf/hooks/_session.json
+.wolf/hooks/_precompact-snapshot.json
 .wolf/token-ledger.json
+
+# Analysis arrays for scripts/gen_whistle.py — derived from a local copy of the
+# Tabata app's whistle at full resolution, so never committed. See that script.
+scripts/.analysis/

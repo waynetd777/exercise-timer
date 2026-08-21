@@ -90,7 +90,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     generation: timer.generation,
   })
 
-  useSpokenCues(at, status === 'running', muted)
+  useSpokenCues(at, status, muted)
 
   /**
    * Every control unlocks the AudioContext. It has to happen synchronously
@@ -110,7 +110,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const entry = isRunning ? at.entry : null
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
-  const rounds = entry ? pathLabel(entry.path) : ''
+  const reps = entry ? pathLabel(entry.path) : ''
   const clockText = clock(timer.secondsLeft)
 
   /*
@@ -255,10 +255,10 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
             {/* Grouped so the meta row below can be pinned to the bottom of the
                 column while this block stays vertically centred. */}
             <div className="count__lead">
-              {/* Rounds only — the routine name is in the header now. Omitted
+              {/* Reps only — the routine name is in the header now. Omitted
                   entirely for a flat routine, so the row collapses rather than
                   reserving empty space. */}
-              {rounds && <p className="label">{rounds}</p>}
+              {reps && <p className="label">{reps}</p>}
               <p
                 // Remounting each second restarts the pulse animation, so it
                 // lands on the beat instead of drifting against the countdown.

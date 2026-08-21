@@ -156,7 +156,7 @@
 .erow[data-role='rest'] { border-left-color: var(--role-rest); }
 .erow[data-role='recover'] { border-left-color: var(--role-recover); }
 
-/* Indented so a step inside rounds is visibly inside them. */
+/* Indented so a step inside reps is visibly inside them. */
 .erow[data-depth='1'] {
   margin-left: var(--step-5);
 }
@@ -416,4 +416,98 @@
   align-items: center;
   gap: var(--step-1);
   color: var(--bone-dim);
+}
+
+/* ── Routine colour ────────────────────────────────────────────────────────
+ *
+ * The editor surface carries the same wash as the library row, so the choice is
+ * judged where it will be seen rather than guessed from a swatch. Kept fainter
+ * than the row's: this covers the whole screen, and what reads as subtle on a
+ * 72px row would be a coloured page here.
+ */
+.editor[data-colour] {
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in oklab, var(--tint) 11%, var(--ink-900)) 0%,
+      color-mix(in oklab, var(--tint) 4%, var(--ink-900)) 38%,
+      var(--ink-900) 72%
+    );
+}
+
+.editor__colours {
+  display: flex;
+  align-items: center;
+  gap: var(--step-2);
+}
+
+/*
+ * Sized in rem, not cq: this is a control in a toolbar next to other controls,
+ * and the previous round of type work established that the bottom bar is judged
+ * as a toolbar rather than scaled with the viewport.
+ */
+.swatch {
+  inline-size: 2.1rem;
+  block-size: 2.1rem;
+  padding: 0;
+  border: 2px solid color-mix(in oklab, var(--tint) 55%, transparent);
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--tint) 62%, var(--ink-800));
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+/* A diagonal through an empty circle: the absence of colour, drawn. */
+.swatch--none {
+  border-color: var(--bone-faint);
+  background:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 1px),
+      var(--bone-faint) calc(50% - 1px),
+      var(--bone-faint) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+}
+
+.swatch:hover {
+  transform: scale(1.08);
+}
+
+/*
+ * Selection is a ring OUTSIDE the swatch, not a border change: altering the
+ * border would change the colour patch's size and make the row jitter as the
+ * selection moves.
+ */
+.swatch[data-selected='true'] {
+  box-shadow:
+    0 0 0 2px var(--ink-900),
+    0 0 0 4px var(--bone);
+}
+
+.swatch:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}
+
+/* ── The rest that only runs between reps ──────────────────────────────────
+ *
+ * A chip on the row, not a footnote: the rule decides how long the routine is,
+ * so it has to be visible where the step is, at the moment the count is changed.
+ */
+.erow__between {
+  padding: 0.15em 0.6em;
+  color: var(--role-rest);
+  white-space: nowrap;
+  background: color-mix(in oklab, var(--role-rest) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--role-rest) 34%, transparent);
+  border-radius: 999px;
+}
+
+/*
+ * The row is dimmed slightly on its last-rep meaning, so a glance down the list
+ * shows which step is the odd one out without reading the chip.
+ */
+.erow[data-between-reps] .efield--secs {
+  border-style: dashed;
 }

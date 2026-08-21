@@ -50,7 +50,7 @@ export const CABLE_FLY: MediaRef = {
 export function tabata(): Workout {
   return workout('Tabata', [
     seg('Get ready', 10, 'prepare'),
-    rep(8, [seg('Work', 20, 'work'), seg('Rest', 10, 'rest')], 'Round'),
+    rep(8, [seg('Work', 20, 'work'), seg('Rest', 10, 'rest')], 'Reps'),
   ])
 }
 
@@ -73,6 +73,6 @@ export function circuit(): Workout {
 /** Two levels of repeat nesting, to exercise the `path` chain. */
 export function nested(): Workout {
   return workout('Pyramid', [
-    rep(2, [rep(3, [seg('Work', 5), seg('Rest', 5, 'rest')], 'Round'), seg('Recover', 30, 'recover')], 'Set'),
+    rep(2, [rep(3, [seg('Work', 5), seg('Rest', 5, 'rest')], 'Reps'), seg('Recover', 30, 'recover')], 'Set'),
   ])
 }
