@@ -16,3 +16,6 @@ coverage/
 .wolf/hooks/_precompact-snapshot.json
 .wolf/token-ledger.json
 
+
+# Local tooling scratch, not part of the project.
+.gastown-ignore
