@@ -538,6 +538,29 @@ above "What it does" so the pitch is shown before it is described.
 - Source files: `~/Downloads/Home.png`, `Workout.png`, `Workout 2.png`,
   `Editor.png`. Re-run the cwebp commands above to replace any of them.
 
+### The paste format doc (2026-08-22)
+
+`docs/paste-format.md`: what the paste parser reads, with one example routine
+using every part of the grammar. Linked from the "Takes a routine as pasted text"
+bullet in the root README, and cross-referenced from `src/routines/README.md`.
+
+- **The example IS `PASTE_TEMPLATE`,** the routine the paste dialog's Copy template
+  already hands out, and a new test asserts the doc's fenced block matches it
+  byte for byte. So the doc cannot drift into describing a grammar the parser no
+  longer reads, and there is only one example to maintain.
+- The test reads the file with `import.meta.glob('/docs/paste-format.md',
+  { query: '?raw' })` rather than `node:fs`, the same reason as
+  `imageCatalogue.test.ts`: `src` is typechecked with only `vite/client` types,
+  and pulling Node's in would let app code reach for `fs` by accident.
+- **Verified the guard actually fails on drift** by editing one line of the doc
+  and watching it go red, then restoring. A test that cannot fail is worse than no
+  test.
+- Two prose details corrected against the regexes while writing: `40 sec each`
+  does not have to be alone on its line (`EACH_FOR` is unanchored), and the
+  parenthetical threshold is 24 characters or more, not over 24
+  (`inner.length < DESCRIPTION_CHARS` is the no-split case).
+- 514 tests, typecheck and build green.
+
 ### Done since the quest closed (2026-08-21, all pushed)
 - **The image-link capability is gone.** `.tabata` imports now run through
   `migrateWorkout`, so their URLs — all of which are in `REHOSTED` — become

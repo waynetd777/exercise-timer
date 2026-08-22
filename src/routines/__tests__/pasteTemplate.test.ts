@@ -23,6 +23,29 @@ describe('the pasted-routine template', () => {
     expect(parsed().skipped).toEqual([])
   })
 
+  it('is the example printed in docs/paste-format.md', () => {
+    /*
+     * The doc teaches the format by showing this routine, so a template that
+     * moved and a doc that did not would leave the documentation describing a
+     * grammar the app no longer reads.
+     *
+     * `import.meta.glob` rather than `node:fs`, for the same reason as
+     * `imageCatalogue.test.ts`: `src` is typechecked with only `vite/client`
+     * types, and pulling Node's in so a test could read a file would let app code
+     * reach for `fs` by accident.
+     */
+    const docs = import.meta.glob('/docs/paste-format.md', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>
+    const doc = Object.values(docs)[0]!
+    const fenced = /```\n([\s\S]*?)```/.exec(doc)
+
+    expect(fenced, 'the doc has no fenced example block').not.toBeNull()
+    expect(fenced![1]).toBe(PASTE_TEMPLATE)
+  })
+
   it('opens with the five seconds the parser adds, then five sections', () => {
     const blocks = parsed().blocks
     const first = blocks[0] as Segment
