@@ -12,12 +12,12 @@ since 2013.
 
 HOW A PLATE IS FOUND
 
-The guide is an InDesign document with one exercise per page, pages 3 to 43 —
-page 1 is the cover and page 2 is "how to use this guide". Every exercise page
+The guide is an InDesign document with one exercise per page, pages 3 to 43.
+Page 1 is the cover and page 2 is "how to use this guide". Every exercise page
 has the same furniture: a grey "TRAINING INSTRUCTION" strip, then a coloured
 title band, then one photo of the machine with the movement ghosted onto it.
 
-The crop is the title band plus the photo, full page width, at 881:800 — measured
+The crop is the title band plus the photo, full page width, at 881:800, measured
 from the original screenshots so the new plates are framed exactly like the ones
 already in use. It is anchored on the GREY strip rather than the coloured band,
 because the band's colour codes the muscle group: yellow for upper body, green
@@ -29,8 +29,8 @@ not an accident: the whole set is precached by the service worker, so it lands o
 the phone at install and a gym with no signal cannot take an illustration away
 mid-set. Doubling the resolution would quadruple that install.
 
-The two images that are NOT in this guide — the recumbent bike and the cycling
-photo — are left alone; they are not the manual's and cannot be regenerated from
+The two images that are NOT in this guide, the recumbent bike and the cycling
+photo, are left alone. They are not the manual's and cannot be regenerated from
 it.
 
 Requires poppler (`brew install poppler`) for pdftoppm, and Pillow.
@@ -72,7 +72,7 @@ def exercise_names(pdf: pathlib.Path, pages: int) -> list[tuple[int, str]]:
     The exercise on each page, from its heading.
 
     A heading is the text before "STATION" on the line carrying it, plus the next
-    line when the name wraps — "CABLE CONVERGING / SHOULDER PRESS" is one
+    line when the name wraps. "CABLE CONVERGING / SHOULDER PRESS" is one
     exercise, and the two Cable Converging pages differ only in that second line.
     """
     found = []
@@ -80,7 +80,7 @@ def exercise_names(pdf: pathlib.Path, pages: int) -> list[tuple[int, str]]:
         lines = [line.strip() for line in page_text(pdf, page).split('\n') if line.strip()]
         head = next((line for line in lines if 'STATION' in line), None)
         if head is None:
-            raise SystemExit(f'page {page} has no STATION heading — is this the right guide?')
+            raise SystemExit(f'page {page} has no STATION heading. Is this the right guide?')
         name = head.split('STATION')[0].strip()
         after = lines[lines.index(head) + 1:]
         tail = next((t for t in after if not re.match(r'^\d+\.?$', t)), '')
@@ -137,7 +137,7 @@ def main() -> None:
             print(f'p{page:<3} {name:<44} {path.name}')
 
     print(f'\n{len(names)} plates, {total // 1024}KB total, into {OUT}')
-    print('Catalogue entries live in src/routines/imageCatalogue.ts — add any new plate there.')
+    print('Catalogue entries live in src/routines/imageCatalogue.ts. Add any new plate there.')
 
 
 if __name__ == '__main__':

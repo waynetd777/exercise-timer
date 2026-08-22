@@ -1,8 +1,8 @@
 /**
  * The run clock, as pure data plus transitions.
  *
- * Elapsed time is always DERIVED from a monotonic timestamp — nothing
- * accumulates ticks — so a throttled, backgrounded or sleeping tab cannot cause
+ * Elapsed time is always DERIVED from a monotonic timestamp and nothing
+ * accumulates ticks, so a throttled, backgrounded or sleeping tab cannot cause
  * drift. Extracted from the React hook because this arithmetic is the most
  * bug-prone part of the app and deserves tests that need no DOM.
  */

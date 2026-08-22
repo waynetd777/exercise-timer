@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-21
+> Last updated: 2026-08-22
 
 ---
 
@@ -261,7 +261,8 @@ invisible in a desktop browser, which is why the workflow changed too.
 - **Three different causes produced "a gap at the bottom"**: `height: 100%`
   resolving against the safe viewport, a stale PWA build, and a scrolled document
   — then a fourth, `dvh` shrinking for the keyboard and never coming back. The
-  shell is `100lvh` now (stable), and `.modal` alone uses `dvh` (tracks the
+  shell is `100svh` now (stable — it was `lvh`, see the 2.2 entry), and `.modal`
+  alone uses `dvh` (tracks the
   keyboard). The document does not scroll at all.
 - **Speech is gesture-gated too** (bug-042): "Let's go!" was silent on the first
   start after opening the app, because it fires from an effect plus a timeout and
@@ -277,6 +278,265 @@ invisible in a desktop browser, which is why the workflow changed too.
 the wake lock holds through a full session, and photo uploads — `crypto.subtle` is
 secure-context only, so those need the deployed HTTPS build rather than the LAN
 dev server.
+
+### The iPad portrait layout (2026-08-22) — version badge 1.5
+
+On an iPad in portrait the run screen put the countdown and the picture side by
+side, where an iPhone stacks them. The cause was the breakpoint reading SIZE when
+the layout depends on SHAPE: a portrait iPad is 768–1024px wide, so it passed
+`min-width: 46rem` despite having no height to give away.
+
+- `src/ui/run-screen.css` — both blocks that define the two-column layout
+  (`.run__body`'s columns, and `.count__clock`'s column-specific `--clock-coef`
+  / `--clock-height`) are now `@container shell (min-width: 46rem)` with a nested
+  `@media (orientation: landscape)`. A portrait iPad stacks; an iPhone in
+  landscape is wide AND landscape, so it keeps the columns; a laptop is
+  unaffected.
+- It must be a viewport media query, not an aspect-ratio container query: `.run`
+  is an `inline-size` container, so it cannot be asked about its height. The
+  shell is pinned to the viewport, so the two agree on orientation.
+- The two blocks must carry the SAME gate. Gating only the columns would size the
+  clock for a column it is no longer in.
+- The width-based `46rem` overrides that only widen padding (`.run__header`,
+  `.rest-state`, library, editor) were left alone: a portrait iPad can afford the
+  wider padding, and those insets still matter in landscape.
+- Documented in `src/ui/README.md` ("A wide layout is about shape, not size") and
+  cerebrum. Typecheck, build and 513 tests green.
+
+**Unverified on the device** — needs a look on the iPad in portrait, and a check
+that landscape iPad and iPhone are unchanged.
+
+### The editor's image control (2026-08-22) — version badge 1.6
+
+The image row under every step is gone. It is one button in the row's control
+band now, immediately left of the note button, with two states in one slot:
+
+- **No image** → an image button that opens the chooser. That is the existing
+  `ImagePicker` modal, which now also carries **Upload a photo** in a footer row
+  (`.picker__actions`, a third `auto` row on `.picker`) — one dialog for one
+  question, instead of Choose and Upload as two chips in the row.
+- **An image** → the 42px thumbnail itself, which opens `ImageDialog`: the
+  picture, the step's name, **Close** and **Remove image**. This replaces the old
+  full-bleed `Lightbox`, whose CSS is gone.
+- Both dialogs are `.modal` sheet + panel child, and the preview's panel is
+  `.notice` verbatim — the layout already proven on iOS. No bespoke boxes, which
+  is what cost hours on bug-041.
+- The upload error moved from the inline `.editor__error` line in the header (it
+  would now be behind the dialog) to a `NoticeDialog` rendered as a SIBLING of the
+  chooser — nesting it would fire the chooser's own `onClose` on dismissal. On
+  failure the chooser stays open so another file can be tried; on success it
+  closes, since a stored photo IS the answer.
+- The thumbnail is keyed on `segment.media`, not on the resolved URL: a ref whose
+  file is not on this device opens an empty frame with Remove and a line saying
+  why. Keying it on the picture would strand the step that most needs clearing.
+- A LISTED step (runs as a row of its section's list) gets no button, but keeps
+  its thumbnail if it already has an image — the same no-trapped-data rule as
+  before, with the "not shown while running" line moved into the dialog.
+- Dead code removed: `.lightbox*`, `.erow__unseen`, `.erow__unset`, the
+  `.erow__image` row rules, `.editor__error`, and `SegmentRow`'s `onClearImage` /
+  `onUpload` props. Help text and `src/editor/README.md` rewritten to match.
+- Typecheck, build and 513 tests green.
+
+**Unverified on a device** — needs a pass on the iPhone and the iPad: the chooser,
+an upload, the preview, Remove, and a listed step that already has an image.
+
+### The step row's controls (2026-08-22) — version badge 2.4
+
+Three rounds. A step row wants four fields and eight 42px buttons — about 380pt of
+buttons against a phone row's ~313pt — and that 70pt gap cannot be closed by
+arranging things better. Both attempts to arrange a way out are recorded in
+`src/editor/README.md` so nobody retries them:
+
+1. Pair the buttons, keep them loose in the wrap flow → still three and four lines
+   with holes.
+2. Gather all eight into one `.erow__band` → **worse**, four lines. A flex item is
+   placed by its MAX-CONTENT width and only then shrunk, so the ~380pt band could
+   never share the phone's line: it took one of its own and split inside it.
+   Grouping items can only make them harder to place.
+
+One real waste was found and fixed on its own merits along the way: a native
+`<select>` takes the width of its widest option, so the unit select showed `s`
+while holding the width of `rung each side` — ~140pt of a 313pt row. It is sized by
+the label it shows now (`data-unit` plus three `em` widths in `.efield--unit`),
+worth ~50pt.
+
+**What shipped** — the user's suggestion: the buttons leave the row when there is
+no room. `.erow__tools` holds all eight and has two jobs, chosen by CSS alone:
+
+| Container | `.erow__tools` | `.erow__more` |
+|---|---|---|
+| under 64rem | absolutely-positioned panel off the row's bottom-right, hidden until ⋯ opens it | the ⋯ trigger |
+| 64rem and over | inline at the trailing edge, always visible | `display: none` |
+
+- Phone: two lines — `[role][name]` then `[secs][unit] … [⋯]`. Narrow laptop
+  window: one line. iPad portrait: one line. iPad landscape and up: everything
+  inline on one line.
+- **64rem, not the true minimum of ~53rem** — the deepest indent takes 48px and the
+  name should not sit at its 9rem floor. Even a two-level-nested row has ~44px
+  spare at 64rem.
+- **No width measured in JS.** The `tools` flag is inert above the breakpoint, so
+  nothing needs correcting on a resize and there is one source of truth.
+- `[data-open]` is repeated inside the container query — it beats the bare class on
+  specificity, and without it a row left open would keep `display: grid` when the
+  window grew.
+- The panel is `position: absolute` against `.erow`, not viewport-fixed like
+  `Menu`, so it travels with its row on a scroll and needs no close-on-scroll. The
+  row takes `z-index` while open (`.erow[data-tools]`) or the next row paints over
+  it. It closes on any click inside it — every button in it is a deed.
+- New `src/ui/useDismiss.ts` (Escape + press-outside), extracted from `Menu` and
+  now used by both. New `MoreIcon`.
+- Typecheck, build and 513 tests green. Logged on bug-044 (third occurrence).
+
+**Then, badge 2.0 — press-outside did not close the panel** (bug-045, introduced
+with the panel). `useDismiss`'s `inside` predicate was the whole `<li>`, so every
+press within the step's own row counted as inside — its name field included — and
+the panel hung open over the row below. Now scoped to the panel and its trigger.
+The trigger has to stay inside: otherwise `pointerdown` closes it and the following
+`click` toggles it back open, so it never appears to close at all.
+
+**One row per step: asked, declined.** A phone step row has ~313pt and the fixed
+controls come to 370pt before the name field gets a pixel — role select 136,
+seconds 72, unit 88, ⋯ 42, four gaps 32. A single row is only reachable by moving
+the ROLE select into the panel (the coloured left border already carries it, and the
+coloured add buttons already set it at creation) plus trimming the unit and seconds
+boxes, which buys the name back to ~127pt — about 15 characters. The two-line row
+keeps it at ~169pt. **User chose two lines**, so the layout is unchanged; recorded
+in cerebrum's Decision Log so it is not re-proposed.
+
+**Then, badge 2.1 — the panel opens upward when there is no room below**
+(bug-046), for the last rows of the list where a downward panel was clipped by the
+scroller. A `useLayoutEffect` measures the row's box against `.editor__scroll`'s
+visible box plus the panel's own height and sets `data-up`, which swaps `top` for
+`bottom`. `useLayoutEffect` rather than `useEffect` so the flip lands in the frame
+the panel first paints instead of showing it in the wrong place and jumping. It
+flips only when that helps — with too little room either side, downward can at
+least be scrolled to, and a first row will not flip up into the scroller's edge.
+The gap is `--step-1` in the CSS and 4px in the measurement; they have to agree.
+
+**Then, badge 2.3 — the panel is anchored to the BUTTON, not the row.**
+`.erow__menu` wraps the panel and the ⋯ button and is `position: relative`; on a
+narrow screen the button is its only in-flow child, so the wrapper's box is the
+button's box and `top: 100%` / `right: 0` land the panel directly under it. Under
+the row meant under both of a phone row's lines, and under the note fields too when
+those were open. The flip measurement moved to the button's rect for the same
+reason. The wrapper carries the trailing-edge auto margin in both modes, so
+`.erow__tools` no longer needs one. The cluster may now wrap inside the panel
+(never in the row) under a `100vw`-based cap, for a phone too narrow for six in a
+line — undone above the breakpoint in case a row was opened narrow and then widened.
+
+**Then, badge 2.4 — the panel had collapsed to a vertical column.** Caused by 2.3:
+an absolutely positioned box with `width: auto` is shrink-to-fit sized against its
+CONTAINING BLOCK, which the re-anchor made the 42px `.erow__menu`. Shrink-to-fit
+then falls back to min-content — and the `flex-wrap: wrap` added to the cluster as
+insurance had made min-content one button wide, so eight buttons stacked. Fixed with
+`width: max-content` on the panel (which does not care what it is anchored to) and
+by dropping the wrap and its wide-mode undo. The panel is 288px against a phone's
+~361px of list, so the wrap was never needed.
+
+It is two horizontal rows — `[img][note]` above the six actions — not one row of
+eight. One row does not fit: eight 42px buttons plus gaps and padding is ~380px
+against ~361px of list. Say so if a single row matters more than the panel staying
+inside the list.
+
+**Unverified on a device.** Worth checking: the ⋯ panel on an iPhone — press
+outside it, press the row's own name field, and open one on a row near the bottom
+of the list and on a two-level-nested row; that iPad landscape still shows the
+buttons inline; and one step on `× each side` plus one on `rung each side`, to
+confirm the select widths do not clip.
+
+### The shell's height (2026-08-22) — version badge 2.2
+
+Reported on the iPhone **in a Safari tab**: the editor's add-button footer sat
+partly below the bottom of the screen, and after showing and dismissing the
+keyboard the footer became fully visible while the fixed header went off the top,
+with no way to scroll back to it and leave the editor.
+
+One cause for both halves. The shell was `100lvh` — the LARGE viewport, which is
+the screen with the browser UI **retracted**. In a tab, with Safari's address bar
+and toolbar showing, the shell was therefore taller than the screen by their
+height, and:
+
+- the bottom band of every screen sat under the toolbar, cut off; and
+- content taller than the viewport is scrollable **overflow**, which
+  `overflow: hidden` only CLIPS. So the keyboard's focus-reveal scrolled the
+  document and left it scrolled — footer in view, header gone, and `hidden` meant
+  the user could not scroll back what the browser had scrolled.
+
+`100svh` instead: the small viewport is the screen with that UI **showing**, so the
+shell always fits what can be seen and there is no overflow to be left scrolled in.
+Nothing here scrolls, so the browser UI never retracts and leaves a gap either.
+
+- **`svh` keeps everything `lvh` was chosen for.** The keyboard bug that motivated
+  `lvh` was a `dvh` problem — `svh` and `lvh` are BOTH stable and neither responds
+  to the keyboard.
+- **The home-screen install is unaffected**: with no browser UI, svh, lvh and dvh
+  are the same number.
+- `.modal` keeps `100dvh` on purpose — a dialog is the one thing that should track
+  the keyboard.
+- The lesson, written into theme.css: `overflow: hidden` clips overflow, it does not
+  prevent it, and **the browser can still scroll what the user cannot**. The two
+  rules — a height the screen can show, and a document that does not scroll — only
+  work together.
+
+Logged as bug-047. Typecheck, build and 513 tests green.
+
+**Unverified on a device.** The whole point of this one is the browser tab, so:
+in Safari, check the editor's footer is fully visible, then focus the routine name,
+dismiss the keyboard, and confirm the header is still there. Then the same on the
+home-screen install, which should be unchanged.
+
+### Documentation and help rewrite (2026-08-22) - version badge 2.5
+
+Reworded the documentation and in-app help to be shorter and plainer, and removed
+every em dash from the project.
+
+- **In-app help** (`src/ui/help.ts`) rewritten. Long bullets split into sentences,
+  the `New / Paste / Import / Export all` bullets now use a colon instead of a
+  dash, and the paste bullet's "It opens with five seconds to get ready." was
+  removed on request. (The parser still adds those five seconds; only the help
+  line went.)
+- **Every user-visible string** carrying an em dash was reworded, not just
+  repunctuated: option titles, aria-labels, button titles, the upload error, the
+  empty-list line, the clipboard failure notice, the sound descriptions.
+- **All ten README files** rewritten for concision, including the root one, whose
+  test count was stale (451, now 513).
+- **Every code comment** in `src/`, plus `index.html`, `vite.config.ts` and
+  `scripts/exercise_plates.py`. Roughly 600 em dashes in total.
+- Stale documentation found and fixed on the way: the editor README still
+  described the reverted "control band" and the removed lightbox, and its undo
+  section still listed the lightbox as excluded screen state.
+- **Four em dashes remain, all functional and all deliberate:** `DASH_CHARS` in
+  `routines/pasteFormat.ts`, the `[\s:–—-]` class in its `.replace`, and the
+  `[\s[-–—]]` pattern quoted in a comment there and in `routines/README.md`. En
+  dashes inside the email fixtures and `strength-training.routine.json` are
+  verbatim source data and stay too.
+- Recorded as a standing preference in cerebrum's User Preferences, so it applies
+  to everything written from here on.
+- Typecheck, build and 513 tests green.
+
+**One mistake worth remembering.** The first pass at the test titles used
+`re.match` and rebuilt each line from the captured groups, which silently dropped
+the `, () => {` tail and broke 13 files. `re.sub` on the whole line is the right
+tool; never reconstruct a line from a partial match. Caught by typecheck, fixed by
+reverting the test files and redoing the pass.
+
+### README screenshots (2026-08-22)
+
+Four screenshots added to the root README in a "What it looks like" section, placed
+above "What it does" so the pitch is shown before it is described.
+
+- `docs/screenshots/`, **not** `public/`. Anything under `public/` is copied into
+  `dist` and precached by the service worker, so these would have bloated every
+  offline install. Verified: the build's precache line still reads 63 entries.
+- Converted with `cwebp -q 88 -resize 900 0`, taking 3.2MB of PNG to 188KB of
+  WebP. Stored at 900px, which is sharp at the ~420px the README renders them at.
+- Laid out as a 2x2 HTML table, since markdown has no side-by-side syntax. Each has
+  real alt text and a caption naming what it demonstrates.
+- Order is deliberate: the timed countdown first, because it is the README's
+  one-sentence pitch as a picture, then the rep-based list, then the library, then
+  the editor.
+- Source files: `~/Downloads/Home.png`, `Workout.png`, `Workout 2.png`,
+  `Editor.png`. Re-run the cwebp commands above to replace any of them.
 
 ### Done since the quest closed (2026-08-21, all pushed)
 - **The image-link capability is gone.** `.tabata` imports now run through

@@ -1,7 +1,7 @@
 /*
  * Inline SVG rather than an icon font or emoji: it inherits `currentColor`,
  * stays crisp at any size, renders identically on every platform, and ships no
- * extra request — which matters for something that has to work offline.
+ * extra request, which matters for something that has to work offline.
  *
  * Transport icons are filled, utilities are stroked; that is the usual split
  * and keeps the row from looking uniformly heavy.
@@ -156,7 +156,7 @@ export function HelpIcon() {
   return (
     <Svg>
       <circle cx="12" cy="12" r="8.6" {...STROKE} />
-      {/* The hook of a question mark, then its dot as a short stroke — a dot
+      {/* The hook of a question mark, then its dot as a short stroke. A dot
           drawn as a circle would fill in at 18px. */}
       <path d="M9.7 9.6a2.4 2.4 0 1 1 3.4 2.2c-.8.4-1.1 1-1.1 1.8" {...STROKE} />
       <path d="M12 16.6v.2" {...STROKE} />
@@ -302,6 +302,17 @@ export function PasteIcon() {
 }
 
 /** A note: lines on a page. */
+/* Filled dots rather than stroked circles: at 19px a stroked ring reads as mush. */
+export function MoreIcon() {
+  return (
+    <Svg>
+      <circle cx="5.5" cy="12" r="1.7" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.7" fill="currentColor" />
+      <circle cx="18.5" cy="12" r="1.7" fill="currentColor" />
+    </Svg>
+  )
+}
+
 export function NoteIcon() {
   return (
     <Svg>

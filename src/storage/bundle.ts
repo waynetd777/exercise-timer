@@ -6,7 +6,7 @@ import { migrateWorkout } from './migrate'
  * The export format: a routine, or a whole library, as one JSON file.
  *
  * Versioned from the start so a future reader can tell what it is holding, and
- * the `media` map was declared before anything filled it — which is why adding
+ * the `media` map was declared before anything filled it, which is why adding
  * photos to an export needed no format change and no second migration.
  */
 export const BUNDLE_VERSION = 1 as const
@@ -17,7 +17,7 @@ export type Bundle = {
   exportedAt: number
   workouts: Workout[]
   /**
-   * Uploaded photos, keyed by content hash, as data URLs — see
+   * Uploaded photos, keyed by content hash, as data URLs. See
    * `bundleMedia.ts`. A bundled illustration needs nothing here, since it is a
    * short path and the app on the other side already has the picture; an
    * uploaded photo has to carry its bytes or it does not travel at all.
@@ -54,7 +54,7 @@ const GROUP_KINDS = new Set(['repeat', 'ladder', 'section'])
  *
  * When ladders and sections were added this still accepted only segments and
  * repeats, so `isWorkout` rejected every pasted routine and `fromBundle`
- * filtered it out — an export that wrote perfectly well and restored nothing.
+ * filtered it out: an export that wrote perfectly well and restored nothing.
  * A new block kind has to be added here at the same time.
  */
 function isBlock(value: unknown): value is Block {
@@ -79,8 +79,8 @@ function isWorkout(value: unknown): value is Workout {
 /**
  * Validates and normalises a parsed export.
  *
- * Deliberately forgiving about missing metadata — a routine with no
- * `createdAt` is still a routine — and strict about the parts the app would
+ * Deliberately forgiving about missing metadata, since a routine with no
+ * `createdAt` is still a routine, and strict about the parts the app would
  * crash on: the id, the name, and the block tree.
  */
 export function fromBundle(json: unknown, now: number): Workout[] {

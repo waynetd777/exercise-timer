@@ -12,7 +12,7 @@ export type ImportResult = {
   imported: Workout[]
   failed: { name: string; reason: string }[]
   /**
-   * Photos in a bundle that could not be trusted — a key that does not match its
+   * Photos in a bundle that could not be trusted: a key that does not match its
    * contents, or something that is not a readable image. The routines still
    * import; those steps simply arrive without a picture.
    */
@@ -28,7 +28,7 @@ export type ImportResult = {
  * guessing; text is tried last, when the file is not JSON at all.
  *
  * Text is worth accepting because the routines arrive as email, and saving one
- * to a file is often easier than getting at its text to copy — particularly on a
+ * to a file is often easier than getting at its text to copy, particularly on a
  * phone. The file's own name becomes the routine's.
  *
  * Every file is attempted and failures are collected rather than thrown, so one
@@ -65,11 +65,11 @@ export async function importRoutineFiles(
         /*
          * The uploaded photos it carries, stored BEFORE the routines are saved so
          * a step never renders looking for bytes that have not landed yet. Each
-         * one has already been checked against its own hash — see `restoreMedia`.
+         * one has already been checked against its own hash. See `restoreMedia`.
          *
          * A photo the store already has is skipped rather than rewritten. The key
          * IS the hash of the bytes, so an image cannot be duplicated by importing
-         * it twice — the second write would land on the same key — and this saves
+         * it twice, since the second write would land on the same key, and this saves
          * doing it at all. Same check `storeFile` makes on the way in.
          */
         const media = await restoreMedia((json as { media?: unknown }).media)
@@ -85,7 +85,7 @@ export async function importRoutineFiles(
        * which would collide across a multi-file drop.
        *
        * Migrated like every other way in. A `.tabata` file carries an image as a
-       * URL, and those URLs are the postimages links the app used to load — the
+       * URL, and those URLs are the postimages links the app used to load, so the
        * same pictures it now ships. Without this the import would reach for the
        * network for an illustration sitting in `public/exercises`. `fromBundle`
        * and the share-link reader already migrate; this was the one entry point

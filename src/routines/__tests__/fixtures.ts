@@ -7,8 +7,8 @@ import { importTabataFile } from '../tabataFormat'
  * Wayne's real `.tabata` exports, put through the importer.
  *
  * These were seeded into the library once and are now fixtures only. They are
- * kept because they are REAL data — 69 to 86 steps, images on some exercises and
- * not others, odd durations like a 29s prepare — and no hand-written fixture
+ * kept because they are REAL data: 69 to 86 steps, images on some exercises and
+ * not others, odd durations like a 29s prepare. No hand-written fixture
  * would have caught what these have.
  *
  * Imported here rather than in `samples.ts` so the app's bundle cannot include

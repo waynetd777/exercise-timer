@@ -17,7 +17,7 @@ export type Timer = {
   at: RoutinePosition
   /** Whole seconds left on a timed step. 0 on a self-paced one, which has no end. */
   secondsLeft: number
-  /** Whole seconds spent on the current step — what a self-paced step counts up. */
+  /** Whole seconds spent on the current step, which is what a self-paced step counts up. */
   secondsSpent: number
   /** 0..1 through the routine. By time when it is fully timed, by step when not. */
   progress: number
@@ -28,7 +28,7 @@ export type Timer = {
    * stopped at the finish.
    *
    * A different axis from `totalRemainingMs`, which is a position in the routine
-   * — skip four steps and the routine is four steps further on while this is
+   * Skip four steps and the routine is four steps further on while this is
    * unmoved. That is the point: this is how long you have been training, and for
    * a gated routine it is the only time there is.
    */
@@ -53,7 +53,7 @@ const EMPTY_RUN: Run = { index: 0, entries: [], totalMs: 0, selfPaced: false }
 
 /**
  * Owns run state as a cursor plus a clock, and DERIVES elapsed from the clock.
- * Nothing accumulates ticks, so a throttled or backgrounded tab cannot drift —
+ * Nothing accumulates ticks, so a throttled or backgrounded tab cannot drift.
  * coming back after ten minutes simply shows the truth.
  *
  * The clock measures ONE RUN, not the whole routine, and is re-anchored every
@@ -77,7 +77,7 @@ export function useTimer(workout: Workout): Timer {
   const readElapsed = useCallback(() => elapsed(clock.current, now()), [])
 
   /**
-   * The whole workout, on the same data and transitions — minus the seeking.
+   * The whole workout, on the same data and transitions, minus the seeking.
    *
    * The run clock is re-anchored at every gate and every skip, which is what
    * makes it trustworthy for the step you are on and useless for the session:
@@ -104,7 +104,7 @@ export function useTimer(workout: Workout): Timer {
   /**
    * Moves to a cursor and re-anchors the clock to it.
    *
-   * One path for every jump — tick, skip, seek — because the clock and the
+   * One path for every jump, whether tick, skip or seek, because the clock and the
    * cursor drifting apart is the bug class this whole module exists to avoid.
    * `freeze` must be true unless the run is actively going, or the clock keeps
    * advancing while the UI says paused and the next resume credits a bogus pause.
@@ -218,7 +218,7 @@ export function useTimer(workout: Workout): Timer {
   }, [status, routine, here, moveTo])
 
   /*
-   * Progress by TIME while every step is timed — it is smooth, and it is what
+   * Progress by TIME while every step is timed. It is smooth, and it is what
    * the bar has always shown. Once a routine can wait for a tap there is no
    * honest time axis, so it counts steps instead.
    */
@@ -245,8 +245,8 @@ export function useTimer(workout: Workout): Timer {
     totalRemainingMs: routine.hasGates ? null : Math.max(0, routine.totalMs - timedElapsedMs),
     /*
      * Read at render rather than held in state. A value derived from a monotonic
-     * clock is only true at the moment it is read — the same reason nothing here
-     * accumulates ticks — and the display already re-renders every second while
+     * clock is only true at the moment it is read, the same reason nothing here
+     * accumulates ticks, and the display already re-renders every second while
      * the workout runs, on a self-paced step as much as a timed one.
      */
     sessionMs: elapsed(session.current, now()),

@@ -144,7 +144,7 @@ function Row({
               className="btn btn--ghost"
               onClick={() => void onShare(workout)}
               aria-label="Copy a share link"
-              title="Copy a share link — steps only, no photos"
+              title="Copy a share link. Steps only, no photos."
             >
               <ShareIcon />
             </button>
@@ -155,7 +155,7 @@ function Row({
               className="btn btn--ghost"
               onClick={() => void onExport(workout)}
               aria-label="Export as a file"
-              title="Export as a file — photos included"
+              title="Export as a file. Photos included."
             >
               <ExportIcon />
             </button>
@@ -199,7 +199,7 @@ export function LibraryScreen({
   const scroller = useRef<HTMLDivElement>(null)
 
   /* Pull down from the top of the list to fetch the latest app. Routines are in
-     IndexedDB and are untouched by an update — only the cached shell is. */
+     IndexedDB and are untouched by an update. Only the cached shell is. */
   const pull = usePullToRefresh(scroller, updateApp)
 
   const visible = useMemo(
@@ -212,7 +212,7 @@ export function LibraryScreen({
     setNotice(
       (await copyText(url))
         ? `Link to “${workout.name}” copied`
-        : 'Could not reach the clipboard — open the link and copy it from the address bar',
+        : 'Could not reach the clipboard. Open the link and copy it from the address bar.',
     )
   }
 
@@ -231,7 +231,7 @@ export function LibraryScreen({
    * export that quietly loses a picture is the worse failure, and a whole library
    * of them is a couple of megabytes.
    *
-   * A bundled illustration needs no bytes here — the app on the other side has
+   * A bundled illustration needs no bytes here, because the app on the other side has
    * it. Only an uploaded photo has to travel, and since the image-link field went
    * this is the only way one reaches another device.
    */
@@ -274,7 +274,7 @@ export function LibraryScreen({
       droppedImages > 0
         ? `${droppedImages} image${droppedImages === 1 ? '' : 's'} could not be read`
         : null
-    setNotice([added, skipped, dropped].filter(Boolean).join(' — ') || null)
+    setNotice([added, skipped, dropped].filter(Boolean).join('. ') || null)
   }
 
   return (
@@ -341,7 +341,7 @@ export function LibraryScreen({
                 onSelect: () => void exportRoutines(library.workouts, null),
               },
               // Development only, and the screen itself is not in a production
-              // build — see the note in App.tsx.
+              // build. See the note in App.tsx.
               ...(import.meta.env.DEV
                 ? [{ label: 'Sounds', icon: <SpeakerIcon />, onSelect: onSounds }]
                 : []),

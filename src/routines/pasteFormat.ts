@@ -3,12 +3,12 @@ import type { Block, Ladder, Repeat, Reps, Section, SectionDisplay, Segment } fr
 /**
  * Reads a strength routine pasted as text.
  *
- * The source is a weekly email from Deidre's gym instructor — see
+ * The source is a weekly email from Deidre's gym instructor. See
  * `__tests__/emails/` for the three the grammar was built against. They arrive on
  * one template, which is what makes parsing worth doing rather than typing each
  * routine in by hand.
  *
- * The one thing it ADDS to the text is five seconds to get ready at the start —
+ * The one thing it ADDS to the text is five seconds to get ready at the start.
  * see `getReady`. Everything else is read, never invented.
  *
  * TWO RULES GOVERN EVERYTHING HERE.
@@ -19,7 +19,7 @@ import type { Block, Ladder, Repeat, Reps, Section, SectionDisplay, Segment } fr
  *    quietly changes someone's workout, and the reviewer cannot see what they
  *    were not told.
  * 2. **The result is a DRAFT.** It lands in the editor for review. That is what
- *    makes rule 1 affordable — an imperfect parse costs a correction, not a bad
+ *    makes rule 1 affordable. An imperfect parse costs a correction, not a bad
  *    workout.
  */
 
@@ -35,7 +35,7 @@ export type ParsedRoutine = {
  *
  * Five seconds: long enough to put it down and step back, short enough that
  * nobody waits through it twice. The emails never mention it because a person
- * reading one is already standing there — the app is not, and starting a jog the
+ * reading one is already standing there. The app is not, and starting a jog the
  * instant you press Start means missing the first few seconds of it.
  */
 export const GET_READY_MS = 5_000
@@ -53,7 +53,7 @@ const nextId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(sequ
  * Two forms, because they are NOT interchangeable: `DASH` is a complete class
  * for use on its own, `DASH_CHARS` is the bare characters for building a larger
  * one. Nesting `DASH` inside another class silently produces `[\s[-–—]]`, which
- * matches a literal bracket and not much else — it is what stopped
+ * matches a literal bracket and not much else. It is what stopped
  * "30-second Plank" being read as a duration.
  */
 const DASH_CHARS = '-–—'
@@ -65,7 +65,7 @@ const NUMBERED_SECTION = /^#\s*\d+\s*(.+)$/
 /** "🔥 Final Burnout", "🔥 After Round 5:". */
 const FLAME_SECTION = /^🔥\s*(.+?):?$/
 
-/** "After Round 4" — the same idea without the emoji. */
+/** "After Round 4", the same idea without the emoji. */
 const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
 
 /**
@@ -78,7 +78,7 @@ const NAMED_SECTION =
 /** "40 sec each", "30 seconds each – continuous movement", "Mobility – 30 seconds each". */
 const EACH_FOR = new RegExp(`(\\d+)\\s*(?:sec|secs|second|seconds)\\s+each`, 'i')
 
-/** "4 Rounds", "3–5 Rounds:" — the upper bound wins, as agreed. */
+/** "4 Rounds", "3-5 Rounds:". The upper bound wins, as agreed. */
 const ROUNDS = new RegExp(`^(\\d+)\\s*(?:${DASH}\\s*(\\d+))?\\s*rounds?\\b`, 'i')
 
 /** "Counting: 2-4-6-8-10-8-6-4-2", or the bare "15-12-9-6-3-6-9-12-15". */
@@ -133,7 +133,7 @@ const LEADING_COUNT = /^(\d+)\s*(?:[×x]\s*|\s)(.+)$/
 
 /**
  * "20 × Front Punches + 20 × Uppercuts" is two exercises on one line. Split only
- * when the right-hand side states its own count — "Squat + Shoulder Press" and
+ * when the right-hand side states its own count. "Squat + Shoulder Press" and
  * "Thrusters – squat + press" are single movements and must survive intact.
  */
 const JOINED_ITEMS = /\s\+\s(?=\d+\s*[×x]\s*\S)/
@@ -144,7 +144,7 @@ type Item = {
   count?: number
   perSide: boolean
   alternative?: string
-  /** A trailing description, lifted out of the name — see `splitDescription`. */
+  /** A trailing description, lifted out of the name. See `splitDescription`. */
   note?: string
 }
 
@@ -292,7 +292,7 @@ type Target =
   | { kind: 'rounds'; group: Repeat }
   /** The ladder's main exercise: no count of its own, so it takes the rung. */
   | { kind: 'ladder-main'; group: Ladder }
-  /** "After every set" — fixed counts, and they run on the final rung too. */
+  /** "After every set": fixed counts, and they run on the final rung too. */
   | { kind: 'ladder-accessory'; group: Ladder }
 
 /**

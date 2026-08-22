@@ -5,7 +5,7 @@ import type { MediaRef } from '../engine'
  * it can be tested on its own.
  *
  * A pinned remote image prefers its LOCAL copy: that is the whole point of
- * pinning — the routine keeps working when the gym wifi does not, and when
+ * pinning, so the routine keeps working when the gym wifi does not, and when
  * postimages eventually loses the file.
  */
 export type Plan =

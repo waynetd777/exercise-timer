@@ -189,7 +189,7 @@ describe('collectImages with the catalogue', () => {
     /*
      * Fed synthetic duplicates rather than the catalogue. This used to rely on the
      * catalogue holding two Tricep Presses and two Standing Arm Curls, which were
-     * re-uploads of the same photographs and have since been removed — so the
+     * re-uploads of the same photographs and have since been removed, so the
      * behaviour needs its own input, or it silently stops being tested. It still
      * matters: a routine of Wayne's can reference two ids with the same filename.
      */

@@ -5,7 +5,7 @@ import type { Block, MediaRef, RoutineColour, Workout } from '../engine'
  *
  * Compared field by field rather than by serialising: `JSON.stringify` depends
  * on key insertion order, and an edit that spreads an object then patches it can
- * reorder keys — which would report a false change. A false "dirty" only costs a
+ * reorder keys, which would report a false change. A false "dirty" only costs a
  * needless prompt, but the comparison should still be honest.
  */
 function sameMedia(a: MediaRef | undefined, b: MediaRef | undefined): boolean {
@@ -57,7 +57,7 @@ export function isDirty(
   colour: RoutineColour | null = original.colour ?? null,
 ): boolean {
   // Trimmed, because leading or trailing space in the name field is not a change
-  // worth warning about — saving trims it anyway.
+  // worth warning about, since saving trims it anyway.
   if (name.trim() !== original.name.trim()) return true
   if (colour !== (original.colour ?? null)) return true
   return !sameBlocks(blocks, original.blocks)

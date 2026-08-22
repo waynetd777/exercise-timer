@@ -11,7 +11,7 @@
   gap: var(--step-4);
   height: 100%;
   /*
-   * Insets so the title and the tools clear the island — see `--safe-*`.
+   * Insets so the title and the tools clear the island. See `--safe-*`.
    *
    * The bottom is the inset ALONE: the scroller already carries a step-4 of its
    * own so the last card is not flush against the edge, and a full step-5 on top
@@ -247,7 +247,7 @@
   flex-wrap: wrap;
   gap: var(--step-2) var(--step-4);
   margin: 0;
-  /* Steps the shared label down via the token — the routine name above must
+  /* Steps the shared label down via the token, because the routine name above must
      stay the larger of the two. */
   --label-size: var(--label-size-sm);
   color: var(--bone-dim);
@@ -296,7 +296,7 @@
 
 /*
  * Hover for a tinted row. Needed because the plain hover rule sets a flat
- * `background`, and it ties with the tint rule on specificity — so whichever is
+ * `background`, and it ties with the tint rule on specificity, so whichever is
  * written later wins outright and a tinted row would otherwise have NO hover
  * feedback at all. Same wash, mixed into the lighter hover ground.
  */
@@ -378,7 +378,7 @@
  * a routine pasted in from an email is forty-odd lines.
  *
  * The panel inside `.modal`, which is the sheet that centres it inside the safe
- * area — a separate element because a <dialog> styled as the box does not hug its
+ * area. A separate element, because a <dialog> styled as the box does not hug its
  * content on iOS. See theme.css.
  */
 .paste {
@@ -393,7 +393,7 @@
   padding: var(--step-5);
   display: grid;
   /*
-   * Three explicit tracks — title, name, text — and the rest implicit, so there
+   * Three explicit tracks (title, name, text) and the rest implicit, so there
    * are exactly as many as there are children. Declaring five left an empty
    * track whenever the parse report was absent, and an empty track still takes
    * its gap: a phantom row of space above the buttons that read as too much
@@ -422,7 +422,7 @@
  * Label sized to its text, control taking the rest.
  *
  * Without the explicit tracks both children are `auto` rows, and a grid stretches
- * auto tracks to absorb spare height — so the field's label row grew with the
+ * auto tracks to absorb spare height, so the field's label row grew with the
  * dialog and left the label marooned at the top of it.
  */
 .paste__field {
@@ -444,7 +444,7 @@
 }
 
 .paste__text {
-  /* Monospace so the pasted structure — bullets, counts, indentation — reads as
+  /* Monospace so the pasted structure of bullets, counts and indentation reads as
      the parser sees it rather than as prose. */
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.85rem;
@@ -459,7 +459,7 @@
  * 16px on a touch screen, whatever the compact size says.
  *
  * iOS zooms the page in on focusing any control whose text is smaller than that,
- * and in a standalone install it does not zoom back out afterwards — so tapping
+ * and in a standalone install it does not zoom back out afterwards, so tapping
  * the routine box left the whole app magnified until it was pinched back by hand.
  * The compact 0.85rem is kept where there is no such behaviour, since forty lines
  * of pasted routine are easier to judge small.
@@ -504,20 +504,20 @@
 }
 
 /*
- * Chips, like every other text button in the app — `.btn` is the icon square.
+ * Chips, like every other text button in the app. `.btn` is the icon square.
  * They wrap rather than shrink on a narrow phone, since a chip below its
  * min-height stops being a reliable target.
  */
 /*
  * Three buttons: the template, then Cancel and Add.
  *
- * With room they sit in one row, the template pushed left — it is a way in rather
+ * With room they sit in one row, the template pushed left. It is a way in rather
  * than a decision about this routine, and must not sit where Add is reached for.
  * On a phone all three do not fit at the label size, and wrapping a right-aligned
  * row that has an auto margin in it produced a staircase: each button on its own
  * line, each aligned differently. So below the width where they fit they become a
- * full-width stack in reading order, primary last — the phone convention, and a
- * far bigger target than a chip.
+ * full-width stack in reading order, primary last. That is the phone convention,
+ * and a far bigger target than a chip.
  */
 .paste__actions {
   display: flex;

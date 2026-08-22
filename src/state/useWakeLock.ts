@@ -29,7 +29,7 @@ export function useWakeLock(active: boolean): void {
           sentinel.current = null
         })
       } catch {
-        // Denied or unavailable (often a non-visible page). Nothing to do —
+        // Denied or unavailable (often a non-visible page). Nothing to do:
         // the workout still runs, the screen just may dim.
       }
     }

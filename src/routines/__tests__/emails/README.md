@@ -11,8 +11,8 @@ here verbatim as the source material for the paste parser.
 
 Only two edits were made to the email bodies: the corporate "CAUTION" banner and
 the trailing "Sent from my iPhone" are removed. **Everything else is verbatim,
-including en-dashes, `×`, `→`, emoji and inconsistent capitalisation** — the
-parser has to cope with the real thing, so do not tidy these files.
+including en-dashes, `×`, `→`, emoji and inconsistent capitalisation.** The parser
+has to cope with the real thing, so do not tidy these files.
 
 They arrive on one template every week or two, which is why parsing is worth
 doing rather than typing three routines in by hand.

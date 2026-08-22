@@ -52,7 +52,7 @@ describe('speech', () => {
     unlockSpeech()
     unlockSpeech()
 
-    // One utterance, silent — enough to be the page's first, which is what iOS
+    // One utterance, silent, and enough to be the page's first, which is what iOS
     // drops when it does not come from a gesture.
     expect(state.spoken).toHaveLength(1)
     expect(state.spoken[0]!.volume).toBe(0)

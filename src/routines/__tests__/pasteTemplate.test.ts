@@ -6,7 +6,7 @@ import { PASTE_TEMPLATE } from '../pasteTemplate'
 
 /**
  * The template is shipped help: the app offers it as the example of what it can
- * read. So the grammar and the example are bound together here — a change to
+ * read. So the grammar and the example are bound together here, and a change to
  * either that leaves them disagreeing fails, rather than shipping an example the
  * app itself chokes on.
  */
@@ -18,7 +18,7 @@ const steps = (blocks: readonly Block[]): Segment[] =>
 const named = (name: string) => steps(parsed().blocks).find((step) => step.name === name)
 
 describe('the pasted-routine template', () => {
-  it('is understood in full — every line lands somewhere', () => {
+  it('is understood in full: every line lands somewhere', () => {
     // The one assertion that matters. Everything below says what it landed as.
     expect(parsed().skipped).toEqual([])
   })

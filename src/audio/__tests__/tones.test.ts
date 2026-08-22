@@ -31,7 +31,7 @@ describe('toneFor', () => {
   })
 
   it('ends the routine with three shorter strikes, not one long ring', () => {
-    // Deeper than the bell by request, so pitch is not what distinguishes them —
+    // Deeper than the bell by request, so pitch is not what distinguishes them.
     // three shorter strikes against one long ring is.
     const dings = toneFor('workout-complete')!.notes
     const bell = toneFor('work-end')!.notes[0]!
@@ -73,7 +73,7 @@ describe('toneFor', () => {
     const dings = toneFor('workout-complete')!.notes
     const gaps = dings.slice(1).map((d, i) => d.atMs - dings[i]!.atMs)
     for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(300)
-    // Evenly spaced — an uneven gap reads as a mistake.
+    // Evenly spaced. An uneven gap reads as a mistake.
     expect(new Set(gaps).size).toBe(1)
   })
 

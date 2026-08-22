@@ -11,8 +11,8 @@ import { newId } from '../id'
  * history by keeping old trees.
  *
  * Kept apart from React for the same reason as the run clock and the library:
- * this is where the fiddly cases live — reordering across the ends, removing a
- * block from inside a repeat, wrapping and unwrapping — and it should be
+ * this is where the fiddly cases live: reordering across the ends, removing a
+ * block from inside a repeat, wrapping and unwrapping. It should be
  * testable without a browser.
  */
 export type Path = readonly number[]
@@ -61,7 +61,7 @@ export function newSegment(role: SegmentRole = 'work'): Segment {
 /**
  * A new reps group: three reps of a 20s exercise and a 10s rest.
  *
- * The default children matter — adding "Reps" in the editor should give a usable
+ * The default children matter. Adding "Reps" in the editor should give a usable
  * group, not an empty one or a bare exercise. `wrapInRepeat` passes its own
  * children, so the default only applies when a group is created fresh.
  */
@@ -81,7 +81,7 @@ export function newRepeat(
  * A new ladder: three rungs of one exercise that scales with them.
  *
  * `5-10-15` rather than a symmetric pyramid, because a short ascending ladder is
- * the easiest thing to read while learning what the control does — the real ones
+ * the easiest thing to read while learning what the control does. The real ones
  * run to nine rungs and are easier to extend than to cut down.
  */
 export function newLadder(children: Block[] = [newRungStep()], counts = [5, 10, 15]): Ladder {
@@ -114,7 +114,7 @@ export function newRepsStep(count = 10, role: SegmentRole = 'work'): Segment {
  * A new section, in list mode.
  *
  * List rather than timer, because a section is only worth creating for a part of
- * a routine that reads as a block of work — and an all-timed one is shown as a
+ * a routine that reads as a block of work. An all-timed one is shown as a
  * countdown anyway, whatever this says.
  */
 export function newSection(name = 'Section', children: Block[] = [newRepsStep()]): Section {
@@ -243,7 +243,7 @@ export function moveBy(blocks: readonly Block[], path: Path, delta: number): Blo
  * refuses to nest a group in a group, so moving one into another would build a
  * tree the editor cannot show.
  *
- * A group left empty by a departing step is kept rather than pruned — a group
+ * A group left empty by a departing step is kept rather than pruned. A group
  * vanishing under you is more surprising than an empty one you can delete.
  */
 export function moveStep(blocks: readonly Block[], path: Path, delta: 1 | -1): Block[] {
@@ -295,7 +295,7 @@ export function updateSegment(
  * Removes a segment's image.
  *
  * Separate from `updateSegment` because `exactOptionalPropertyTypes` forbids
- * patching a key to `undefined` — and deleting the key is what is actually
+ * patching a key to `undefined`, and deleting the key is what is actually
  * meant, so the property is absent rather than present-and-undefined.
  */
 /**
@@ -303,7 +303,7 @@ export function updateSegment(
  *
  * A separate operation for the same reason as `clearMedia`: with
  * `exactOptionalPropertyTypes` you cannot patch a key to `undefined`, and an
- * empty string is not the same as absent — one renders an empty line under the
+ * empty string is not the same as absent. One renders an empty line under the
  * step, the other renders nothing.
  */
 export function clearText(
@@ -360,7 +360,7 @@ export function updateSection(
  * The data model lets a step carry both a duration and a rep count; the editor
  * does not, because a step that says "20 ×" and counts down 30 seconds cannot be
  * obeyed. Switching between them therefore has to DELETE the other key rather
- * than set it undefined — `exactOptionalPropertyTypes` is on, and a key present
+ * than set it undefined. `exactOptionalPropertyTypes` is on, and a key present
  * and undefined is not the same as absent, which is exactly what separates a
  * self-paced step from a timed one.
  */
@@ -409,7 +409,7 @@ export function wrapInRepeat(blocks: readonly Block[], path: Path, times = 3): B
    * A repeat may not wrap another repeat, nor a section.
    *
    * Two levels of counting nested inside each other are unreadable, and a
-   * section is a part of the routine rather than a piece of work — putting one
+   * section is a part of the routine rather than a piece of work, so putting one
    * inside a round would say the round contains a part of the routine. A LADDER
    * may be wrapped: "3 rounds of this ladder" is a real thing to ask for.
    */
@@ -434,7 +434,7 @@ export function unwrapRepeat(blocks: readonly Block[], path: Path): Block[] {
  * Deliberately just the one. Coalescing exists because a field bound to
  * `onChange` produces a state per keystroke, and undoing a rename letter by
  * letter is useless. Nothing else on a step is like that: a note, an alternative
- * and an image link are committed on blur — one state each — a role comes from a
+ * and an image link are committed on blur, one state each, while a role comes from a
  * select, and an image chosen from the picker or uploaded is not typing at all.
  *
  * The rule this replaces was "anything that is not the role", which quietly gave
@@ -455,7 +455,7 @@ export function isTypedPatch(patch: Partial<Omit<Segment, 'kind' | 'id'>>): bool
 
 /**
  * Whether this step will be shown as a row in a list rather than as the
- * countdown — which is the same as asking whether its image can ever be seen,
+ * countdown, which is the same as asking whether its image can ever be seen,
  * since only the countdown layout has a media panel.
  *
  * The authoring-time counterpart of `listMode()` in `engine/navigate.ts`, which
@@ -470,8 +470,8 @@ export function isTypedPatch(patch: Partial<Omit<Segment, 'kind' | 'id'>>): bool
  * inside a list section its steps are listed. So this deliberately asks about
  * ancestry, not about the group a step happens to sit in.
  *
- * The third condition is positional — the LAST remaining row of a group is shown
- * as the countdown, so its image does appear — and is left out on purpose. A
+ * The third condition is positional: the LAST remaining row of a group is shown as
+ * the countdown, so its image does appear. It is left out on purpose. A
  * control that materialised on whichever step happened to be last, and moved
  * when the steps were reordered, would be worse than one that is simply absent.
  * Callers therefore treat this as "the image will not be seen", and must still

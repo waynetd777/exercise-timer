@@ -5,8 +5,8 @@
  * its own mime, so an export cannot lose track of what an image was, and the
  * value works directly as an `<img src>` while debugging one.
  *
- * Base64 costs a third in size. A downscaled photo is 60–100KB, so it lands at
- * 80–130KB in the file — a whole library of them is a couple of megabytes, which
+ * Base64 costs a third in size. A downscaled photo is 60 to 100KB, so it lands at
+ * 80 to 130KB in the file. A whole library of them is a couple of megabytes, which
  * is what an AirDrop is for.
  */
 

@@ -17,7 +17,7 @@ import { newId } from '../id'
  *
  * Loaded through a DYNAMIC import inside a `DEV` branch, not a static one. Vite
  * replaces `import.meta.env.DEV` with `false` in a production build and drops the
- * dead branch, which takes the dynamic import — and therefore the whole chunk —
+ * dead branch, which takes the dynamic import, and therefore the whole chunk,
  * with it. A static import would NOT do this: `SoundsScreen.tsx` imports
  * `sounds.css`, and a CSS import is a side effect, so the stylesheet would be
  * bundled even with the component unused.
@@ -65,7 +65,7 @@ export function App() {
 
   /**
    * A shared routine arriving in the URL fragment. Imported once, then the
-   * fragment is cleared so a reload does not add it again — and guarded by a ref
+   * fragment is cleared so a reload does not add it again, and guarded by a ref
    * because the library finishes loading after this effect first runs.
    */
   const consumedShare = useRef(false)
@@ -89,7 +89,7 @@ export function App() {
 
   /**
    * Every image already in use, so the editor can offer them for reuse. The base
-   * is needed because a catalogue entry is a PATH now — see `imageCatalogue`.
+   * is needed because a catalogue entry is a PATH now. See `imageCatalogue`.
    */
   const knownImages = useMemo(
     () => collectImages(library.workouts, IMAGE_CATALOGUE, import.meta.env.BASE_URL),

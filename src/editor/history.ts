@@ -2,15 +2,15 @@
  * Undo/redo as pure data.
  *
  * The interesting rule is COALESCING. Every keystroke in a text field produces a
- * new state, and undoing a rename one character at a time is useless — so a run
+ * new state, and undoing a rename one character at a time is useless, so a run
  * of keystrokes collapses into a single step. The caller says which FIELD it is
  * typing into; that keeps the decision where the context is, and keeps this
  * module free of timers.
  *
  * A field rather than a flag, because a flag collapses too much: with one shared
  * "this was text" bit, renaming the routine and then renaming a step became a
- * single undo step, and every non-typing edit that rode the same path — choosing
- * an image, above all — was absorbed into whatever typing came before it.
+ * single undo step, and every non-typing edit that rode the same path, choosing an
+ * image above all, was absorbed into whatever typing came before it.
  */
 export type History<T> = {
   past: readonly T[]
@@ -33,8 +33,8 @@ export function initHistory<T>(present: T): History<T> {
 /**
  * Adds a state.
  *
- * `typing` names the field the keystroke belongs to — anything stable and unique
- * to it — or is left out for a discrete edit, which always gets its own step.
+ * `typing` names the field the keystroke belongs to, meaning anything stable and
+ * unique to it. It is left out for a discrete edit, which always gets its own step.
  */
 export function push<T>(history: History<T>, next: T, typing: string | null = null): History<T> {
   // A continuing run of keystrokes in the same field replaces the present rather

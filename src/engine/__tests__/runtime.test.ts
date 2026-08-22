@@ -20,7 +20,7 @@ describe('position', () => {
     expect(at.nextEntry!.name).toBe('Work')
   })
 
-  it('owns [startMs, endMs) — a boundary belongs to the step that starts there', () => {
+  it('owns [startMs, endMs): a boundary belongs to the step that starts there', () => {
     // Prepare ends at 10_000, so 9_999 is still prepare and 10_000 is work.
     expect(position(TABATA, 9_999).entry!.name).toBe('Get ready')
     expect(position(TABATA, 9_999).remainingMs).toBe(1)
