@@ -45,6 +45,10 @@ file's own name becomes the routine's.
 email in `__tests__/emails/`. It is a paste box rather than an `.eml` importer,
 because the same grammar arrives by WhatsApp and Notes too.
 
+`docs/paste-format.md` is the user-facing description of the grammar. Its example
+block IS `PASTE_TEMPLATE`, asserted by a test, so the doc cannot drift into
+describing a grammar the parser no longer reads.
+
 The one thing it ADDS to the text is **five seconds to get ready** at the start:
 long enough to prop the phone up and step back, short enough that nobody waits
 through it twice. The emails never mention it because a person reading one is
