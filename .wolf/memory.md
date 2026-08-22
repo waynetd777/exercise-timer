@@ -130,3 +130,14 @@
 | 21:33 | Created src/media/__tests__/pin.test.ts | — | ~334 |
 | 21:41 | Created src/ui/__tests__/EditorScreen.test.tsx | — | ~1052 |
 | 21:50 | Fixed all 36 review findings + hook-layer test gap (engine gates/guards, iOS audio lifecycle, timer chain, SW precache, IDB self-heal, import validation, editor dirty/move/undo) | src/** (39 files), .wolf/* | 617 tests green, typecheck+build clean | ~350k |
+| 21:52 | Session end: 32 writes across 18 files (vite.config.ts, engine.ts, useCueScheduler.ts, useSpokenCues.ts, useCueScheduler.test.ts) | 25 reads | ~65404 tok |
+
+## Session: 2026-08-22 21:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-22 21:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
