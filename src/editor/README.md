@@ -47,11 +47,13 @@ would leave a blank line under the step for ever.
 
 ## Rules worth knowing
 
-- **`moveStep` moves a row through the routine as it *reads*.** Next to a reps
-  group it moves *into* it, as the first child going down or the last going up.
-  Next to a step it swaps. At the edge of a group it steps *outside*. `moveBy` only
-  reorders among siblings, which left a step trapped inside or outside a group.
-- **Reps groups only ever swap.** `wrapInRepeat` refuses to nest a group inside a
+- **`moveStep` moves a row through the routine as it *reads*.** Next to a group
+  (reps, ladder or section alike) it moves *into* it, as the first child going down
+  or the last going up. Next to a step it swaps. At the edge of a group it steps
+  *outside*. `moveBy` only reorders among siblings, which left a step trapped
+  inside or outside a group. Sibling resolution covers every group kind: it once
+  covered only reps, and moving a step inside a section ejected it.
+- **Groups themselves only ever swap.** `wrapInRepeat` refuses to nest a group inside a
   group, because the editor renders two levels and a deeper tree would be invisible
   and un-editable. The *data model* supports any depth, so lifting this is a UI
   decision, not a schema one.

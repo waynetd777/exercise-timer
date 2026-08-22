@@ -12,7 +12,8 @@
  * scales and accessories that do not; a bonus after the ladder; a rounds group
  * with a rest between rounds and a note that applies to the whole section; a
  * flame section with a numbered list; a long parenthetical that becomes the
- * step's note; and a cool-down. The five seconds to get ready are NOT in it,
+ * step's note; a bulleted step that keeps its own per-side time under a
+ * directive; a duration in minutes; and a cool-down. The five seconds to get ready are NOT in it,
  * because the parser adds those itself.
  *
  * A test parses this and asserts nothing is skipped. It is deliberately coupled:
@@ -25,6 +26,7 @@ export const PASTE_TEMPLATE = `Warm-up
 * Arm Circles
 * Bodyweight Squats (basic)
 or March in Place
+* Side Plank - 30 seconds each side
 
 #1 Full Body Ladder
 Counting: 10-8-6-4-2
@@ -53,5 +55,6 @@ Cool-down
 30 sec each
 * Hamstring Stretch
 * Chest Opener
+* Child's Pose - 1 minute
 * Deep Breathing
 `

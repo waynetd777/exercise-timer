@@ -68,7 +68,7 @@ across a gym, with the phone propped against a rack.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 513 tests, no browser needed
+npm test           # 617 tests, no browser needed
 npm run typecheck
 npm run build
 ```
@@ -147,10 +147,13 @@ IndexedDB, and images live beside them once pinned. Export, share links and the
 
 ## Testing
 
-513 tests, all of which run in Node in under a second. There is no browser in the
-test setup and none is needed, because the parts worth testing do not touch the
-DOM. IndexedDB access, canvas encoding and Web Audio are deliberately thin
-wrappers around tested pure logic rather than being mocked.
+617 tests, all of which run in Node in a couple of seconds. There is no browser in
+the test setup and none is needed. The parts with rules in them are pure and
+tested directly; the hooks that own timers, listeners and external handles (the
+tick chain, the cue scheduler, the wake lock, IndexedDB's connection) are tested
+in jsdom, because that seam is where a full review found every serious bug hiding.
+IndexedDB access, canvas encoding and Web Audio stay thin wrappers around tested
+pure logic rather than being mocked wholesale.
 
 Several tests are named after the bug they exist to prevent. That is on purpose:
 `.wolf/buglog.json` records every one, and the interesting ones earned a test.

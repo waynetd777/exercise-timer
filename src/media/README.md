@@ -16,6 +16,12 @@ because another routine may point at the same bytes. `gc.ts` computes the live s
 across the *whole remaining library* and deletes only the orphans. It is pure set
 arithmetic, which is the only safe way to decide it.
 
+The sweep also respects **draft pins** (`pin.ts`): a blob held by an unsaved
+editor draft, or one just written during an import before its routine lands, is
+referenced by nothing persisted yet, and without a pin a concurrent delete would
+collect the bytes a routine is about to point at. Pins are counted, not boolean,
+because storage is content-addressed and two drafts can hold the same image.
+
 ## Downscaling is not optional
 
 A phone camera file is 3 to 5MB, and a handful would exhaust the origin's storage
@@ -69,5 +75,5 @@ screen. The cache is bounded by the number of distinct images in a routine.
 | `resolveMedia.ts` | Blob reads and the object URL cache |
 | `store.ts` | IndexedDB blob access |
 | `downscale.ts` | Canvas to WebP |
-| `pin.ts` | `storeFile`, the one way an image now enters storage |
+| `pin.ts` | `storeFile`, the one way an image now enters storage, and the draft pins the sweep respects |
 | `dataUrl.ts` | Blob to data URL and back, so a photo can travel inside an export file |

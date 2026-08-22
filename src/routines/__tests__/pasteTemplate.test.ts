@@ -65,11 +65,13 @@ describe('the pasted-routine template', () => {
     const warmUp = parsed().blocks[1] as Section
     const rows = warmUp.children as Segment[]
 
-    expect(rows.map((step) => step.durationMs)).toEqual([40_000, 40_000, 40_000])
+    // The last step states its own per-side time; the directive fills the rest.
+    expect(rows.map((step) => step.durationMs)).toEqual([40_000, 40_000, 40_000, 30_000])
     // A section of nothing but timed steps counts itself down rather than listing.
     expect(warmUp.display).toBe('timer')
     expect(rows[2]!.name).toBe('Bodyweight Squats (basic)')
     expect(rows[2]!.alternative).toBe('March in Place')
+    expect(rows[3]!.name).toBe('Side Plank')
   })
 
   it('scales the ladder’s main lift and fixes its accessories', () => {
