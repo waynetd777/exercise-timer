@@ -40,7 +40,7 @@ export function ConfirmDialog({
       }}
     >
       {/* The panel is its own element: a <dialog> styled as the box does not hug
-          its content on iOS — see `.modal` in theme.css. */}
+          its content on iOS. See `.modal` in theme.css. */}
       <div className="notice">
         <p className="notice__text">{question}</p>
         {detail && <p className="notice__detail label label--sm">{detail}</p>}

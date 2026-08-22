@@ -15,7 +15,7 @@ describe('newId', () => {
     /*
      * The whole reason this module exists: `crypto.randomUUID` is secure-context
      * only, so on the plain-HTTP origin a phone uses to reach a dev server it is
-     * undefined — and every New, Duplicate, paste and import threw.
+     * undefined, and every New, Duplicate, paste and import threw.
      */
     const real = globalThis.crypto.randomUUID
     try {

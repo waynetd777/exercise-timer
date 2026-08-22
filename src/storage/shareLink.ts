@@ -7,7 +7,7 @@ import { migrateWorkout } from './migrate'
  *
  * Gzipped and base64url'd, because the raw JSON of a real routine is tens of
  * kilobytes and would not survive being pasted into a message. Local image blobs
- * are dropped — a link cannot carry them — but remote and bundled images are
+ * are dropped, since a link cannot carry them, but remote and bundled images are
  * already just strings inside the routine, so a routine built from postimages
  * links shares completely.
  */
@@ -68,7 +68,7 @@ export async function decodeRoutine(param: string, now: number, id: string): Pro
     throw new Error('not a routine')
   }
 
-  // Migrated like the other two entry points — a link shared before a rename
+  // Migrated like the other two entry points. A link shared before a rename
   // should not arrive speaking the old vocabulary.
   return migrateWorkout({
     ...workout,

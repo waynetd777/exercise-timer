@@ -5,7 +5,7 @@
  * `resolvePlan` turns into `${BASE_URL}${path}` at render time. Keeping the path
  * relative and applying the base late is what lets one routine work on a root
  * domain, on a subpath host like `/exercise-timer/`, and inside an export opened
- * on another device — an absolute URL in every step would pin the routine to one
+ * on another device. An absolute URL in every step would pin the routine to one
  * host forever.
  *
  * They were 27 postimages links until 2026-08-21. That worked, but it made the
@@ -21,9 +21,9 @@
  * the note never included.
  *
  * Only paths are stored: labels come from the filename via `labelFromUrl()`, so
- * there is nothing to keep in sync. Two of the note's 29 URLs were duplicates — a
+ * there is nothing to keep in sync. Two of the note's 29 URLs were duplicates, a
  * second Tricep Press and a second Standing Arm Curl, verified as re-uploads of
- * the same photograph — and are not offered twice here. `storage/migrate.ts` maps
+ * the same photograph, and are not offered twice here. `storage/migrate.ts` maps
  * all 29 of the old URLs onto these paths, so a routine saved when they were
  * links keeps its picture.
  */
@@ -54,7 +54,7 @@ export const IMAGE_CATALOGUE: readonly string[] = [
   'exercises/Standing-Leg-Curl.jpg',
   'exercises/Standing-Leg-Extension.jpg',
   'exercises/Toe-Raise.jpg',
-  // group 5 — the cardio machine, which is not part of the Torus guide
+  // group 5: the cardio machine, which is not part of the Torus guide
   'exercises/horizon-5-0-r-recumbent-bike.jpg',
   'exercises/Cycling.jpg',
   // group 6
@@ -62,7 +62,7 @@ export const IMAGE_CATALOGUE: readonly string[] = [
   // group 7
   'exercises/Hip-Abductor-Leg-Raise.jpg',
   'exercises/Side-Cable-Bends.jpg',
-  // group 8 — the rest of the guide's 41 stations, added with the rehosting
+  // group 8: the rest of the guide's 41 stations, added with the rehosting
   'exercises/Abdominal-Oblique-Crunch.jpg',
   'exercises/Bentover-Row.jpg',
   'exercises/Cable-Converging-Chest-Press.jpg',

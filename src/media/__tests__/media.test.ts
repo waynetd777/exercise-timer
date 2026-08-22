@@ -68,7 +68,7 @@ describe('liveHashes', () => {
     expect(liveHashes([routine('R', nested)]).has('deep')).toBe(true)
   })
 
-  it('ignores an unpinned remote image — it owns no blob', () => {
+  it('ignores an unpinned remote image: it owns no blob', () => {
     const unpinned: Block = {
       kind: 'segment',
       id: 's',
@@ -138,7 +138,7 @@ describe('resolvePlan', () => {
     })
   })
 
-  it('prefers the local copy of a pinned image — that is the point of pinning', () => {
+  it('prefers the local copy of a pinned image: that is the point of pinning', () => {
     expect(
       resolvePlan({ source: 'remote', url: 'https://x/y.png', cachedHash: 'h' }, has('h'), BASE),
     ).toEqual({ kind: 'blob', hash: 'h' })
@@ -153,7 +153,7 @@ describe('resolvePlan', () => {
   it('serves a local image from its blob, or nothing if it is gone', () => {
     const ref = { source: 'local' as const, hash: 'h', mime: 'image/webp' }
     expect(resolvePlan(ref, has('h'), BASE)).toEqual({ kind: 'blob', hash: 'h' })
-    // No network fallback exists for a local image — better nothing than a
+    // No network fallback exists for a local image. Better nothing than a
     // broken image icon.
     expect(resolvePlan(ref, has(), BASE)).toEqual({ kind: 'none' })
   })

@@ -64,7 +64,7 @@ describe('clock', () => {
     expect(elapsed(clock, 999_000)).toBe(42_000)
   })
 
-  it('resumes correctly after a frozen seek — the bug this file exists for', () => {
+  it('resumes correctly after a frozen seek: the bug this file exists for', () => {
     // Seek while paused, sit there for a minute, then resume: elapsed must pick
     // up from the seek target, not jump by the time spent sitting.
     let clock = seeked(10_000, 42_000, true)

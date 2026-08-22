@@ -69,7 +69,7 @@ describe('data URLs', () => {
   })
 })
 
-describe('collectMedia — what an export carries', () => {
+describe('collectMedia: what an export carries', () => {
   it('takes uploaded photos and nothing else', async () => {
     const blob = photo(64)
     const hash = await sha256(blob)
@@ -117,7 +117,7 @@ describe('collectMedia — what an export carries', () => {
   })
 })
 
-describe('restoreMedia — what an import will trust', () => {
+describe('restoreMedia: what an import will trust', () => {
   it('accepts an entry whose contents match its key', async () => {
     const blob = photo(96)
     const hash = await sha256(blob)
@@ -132,7 +132,7 @@ describe('restoreMedia — what an import will trust', () => {
   it('refuses an entry filed under the wrong hash', async () => {
     /*
      * The invariant the whole media store rests on. Storage is content-addressed,
-     * so a key that lies would poison every routine that shares the hash — and
+     * so a key that lies would poison every routine that shares the hash, and
      * re-hashing a file just read off disk costs a millisecond.
      */
     const report = await restoreMedia({ ['0'.repeat(64)]: await blobToDataUrl(photo(16)) })

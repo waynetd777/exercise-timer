@@ -1,12 +1,12 @@
 /*
- * Tokens. Dark ground for gym lighting — a NEUTRAL grey ramp, faintly cool.
+ * Tokens. Dark ground for gym lighting: a NEUTRAL grey ramp, faintly cool.
  * (It was warm-neutral; the brown cast was not wanted.)
  *
  * Phase colours follow traffic-light convention by request: green to get ready,
  * red to work, blue to rest.
  *
- * The three are separated by LIGHTNESS as well as hue — green 0.48, blue 0.29,
- * red 0.24 relative luminance — so they stay distinguishable peripherally, and
+ * The three are separated by LIGHTNESS as well as hue (green 0.48, blue 0.29 and
+ * red 0.24 relative luminance), so they stay distinguishable peripherally, and
  * for anyone who reads red and green as similar hues. Each also clears 4.5:1
  * against the dark button text it sits behind (green 9.6, blue 6.1, red 5.2).
  */
@@ -21,14 +21,14 @@
   /* Light enough to clear 4.5:1 on the ground even at phone label sizes. */
   --bone-faint: #7e838a;
 
-  --role-prepare: #4fd07e; /* green  — get ready */
-  --role-work: #ef4a3f; /* red    — work */
-  --role-rest: #4a93f5; /* blue   — rest */
-  --role-recover: #9080e8; /* violet — the long recovery interval, distinct from all three */
+  --role-prepare: #4fd07e; /* green:  get ready */
+  --role-work: #ef4a3f; /* red:    work */
+  --role-rest: #4a93f5; /* blue:   rest */
+  --role-recover: #9080e8; /* violet: the long recovery interval, distinct from all three */
   --role-custom: #d8cfc0;
 
   /*
-   * Group kinds, which are containers rather than phases — so they take three
+   * Group kinds, which are containers rather than phases, so they take three
    * hues the four roles do not use, and the routine reads down its left edge
    * without a word being read.
    *
@@ -42,7 +42,7 @@
    */
   --group-reps: var(--routine-orange);
   --group-ladder: var(--routine-yellow);
-  --group-section: #35c6c0; /* teal — apart from both the green and the blue */
+  --group-section: #35c6c0; /* teal: apart from both the green and the blue */
 
   /*
    * Routine tints. Red, green, blue and purple reuse the phase hues so the app
@@ -79,7 +79,7 @@
   --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /*
-   * Wide-tracked uppercase — the counterweight to the huge numerals. Sized
+   * Wide-tracked uppercase, the counterweight to the huge numerals. Sized
    * fluidly rather than fixed: this has to be readable across a gym, so it was
    * far too small at the 0.7rem a label would get on a desktop dashboard.
    * cqi resolves against whichever container the label sits in (shell or body);
@@ -118,7 +118,7 @@
    *
    * A default is NOT optional: `.btn--primary` is `background: var(--phase)`
    * with dark text, and an undefined custom property makes the whole background
-   * declaration invalid — so the Save button in the editor rendered as dark text
+   * declaration invalid, so the Save button in the editor rendered as dark text
    * on a dark ground, i.e. invisible.
    */
   --phase: var(--role-rest);
@@ -129,7 +129,7 @@
    * The notch, the Dynamic Island and the home indicator.
    *
    * `index.html` sets `viewport-fit=cover` and a translucent status bar, so an
-   * app installed to a home screen owns the WHOLE screen — which is right for the
+   * app installed to a home screen owns the WHOLE screen, which is right for the
    * phase wash, and means every screen has to keep its own controls out from
    * under the hardware itself. iOS takes touches in the status bar, so a button
    * up there is not merely half-hidden: it cannot be pressed at all. That is what
@@ -159,7 +159,7 @@ body,
    * `dvh`, not a percentage.
    *
    * On an iOS home-screen install with `viewport-fit=cover`, a percentage height
-   * resolves against the SAFE viewport — the screen less the status-bar strip —
+   * resolves against the SAFE viewport, meaning the screen less the status-bar strip,
    * while the page paints under the island regardless. The app was therefore 59pt
    * shorter than the screen it was drawn on, which is the band of dead space that
    * appeared below the controls the moment the header claimed its own inset: the
@@ -168,31 +168,53 @@ body,
    * The percentage stays as a fallback line for anything without `dvh`.
    */
   /*
-   * `lvh`, not `dvh`.
+   * `svh`, the SMALL viewport. Not `dvh`, and no longer `lvh`.
    *
-   * The dynamic viewport shrinks when the keyboard comes up — so the app relaid
-   * itself at keyboard height, and iOS did not always tell it when the keyboard
-   * went away again. That left a band of nothing at the bottom that no amount of
-   * scrolling could shift, because there is nothing to scroll. The LARGE viewport
-   * is the screen with the dynamic UI retracted: a stable box that the keyboard
-   * cannot resize, which is what an installed app wants — the keyboard should
-   * cover the screen, not reflow it.
+   * Not `dvh`, because the dynamic viewport shrinks when the keyboard comes up: the
+   * app relaid itself at keyboard height, and iOS did not always say when the
+   * keyboard went away. That left a band of nothing at the bottom that no amount of
+   * scrolling could shift, because there is nothing to scroll. `svh` and `lvh` are
+   * both stable, and neither responds to the keyboard, so that stays fixed.
    *
-   * The percentage stays as the fallback. A dialog is the one thing that DOES
-   * want to track the keyboard, and `.modal` asks for `dvh` itself.
+   * Not `lvh`, which was the first answer and was wrong in a browser TAB. The large
+   * viewport is the screen with the browser UI RETRACTED, so with Safari's address
+   * bar and toolbar showing the shell was taller than the screen by their height,
+   * and two things followed from that one fact:
+   *
+   *   - the bottom band of every screen, such as the editor's add buttons or the
+   *     run screen's controls, sat below the toolbar, cut off;
+   *   - content taller than the viewport is scrollable OVERFLOW, and `overflow:
+   *     hidden` only clips it. So when the keyboard came up, iOS scrolled the
+   *     document to reveal the field and left it scrolled: the footer came into
+   *     view, the header went off the top, and there was no way back, because
+   *     `hidden` means the user cannot scroll what the browser just did.
+   *
+   * The small viewport is the screen with that UI SHOWING, so the shell always fits
+   * what can actually be seen and there is no overflow to be left scrolled in. And
+   * nothing here scrolls, so the browser UI never retracts and leaves a gap. On a
+   * home-screen install there is no browser UI at all, which makes svh, lvh and dvh
+   * the same number, so the install behaves exactly as it did.
+   *
+   * The percentage stays as the fallback. A dialog is the one thing that DOES want
+   * to track the keyboard, and `.modal` asks for `dvh` itself.
    */
   height: 100%;
-  height: 100lvh;
+  height: 100svh;
   /*
    * The document itself never scrolls. Every screen is a full-height grid with
-   * its own scroller inside it, and a dialog scrolls its own panel — so a
+   * its own scroller inside it, and a dialog scrolls its own panel, so a
    * scrollable document can only ever be a mistake.
    *
    * It was one: focusing the paste box brought the keyboard up, iOS scrolled the
    * DOCUMENT to reveal the field, and closing the dialog left it scrolled. The
    * home screen then had a band of nothing at the bottom until it was dragged
    * back down by hand. With nothing scrollable there is nothing to leave scrolled
-   * — iOS moves the visual viewport instead, which snaps back on its own.
+   * iOS moves the visual viewport instead, which snaps back on its own.
+   *
+   * `hidden` is only half of that promise, though: it clips overflow, it does not
+   * prevent it, and the browser can still scroll what the user cannot. The other
+   * half is the height above being one the screen can actually show, which is why
+   * it is `svh`. The two rules only work together.
    */
   overflow: hidden;
 }
@@ -221,7 +243,7 @@ button {
 
 /*
  * Shared text utilities. These live here, not in a screen's stylesheet, because
- * both screens use them — and they use LONGHAND properties on purpose: the
+ * both screens use them. They use LONGHAND properties on purpose: the
  * `font:` shorthand resets font-size, so a component setting its own size was
  * silently clobbered depending on CSS import order.
  *
@@ -328,13 +350,13 @@ button {
  * centre the panel inside the safe area. The PANEL carries the box: the ground,
  * the border, the padding, the rows.
  *
- * It was one element — the dialog styled as the panel, held to its content by
+ * It was one element, the dialog styled as the panel, held to its content by
  * `height: fit-content` plus `align-self` and `align-content`. That works in
  * Chrome and does not on iOS, where the box takes the height available and its
  * auto rows then stretch to fill it: the title pinned to the top, the detail
  * marooned in the middle, the buttons a screen away, and Close drawn as a slab.
  * Three attempts to tune that away failed, because the premise was wrong. A
- * wrapper cannot be stretched by anything — the sheet fills the viewport by
+ * wrapper cannot be stretched by anything. The sheet fills the viewport by
  * design, and the panel is sized by what is in it.
  */
 .modal {
@@ -450,7 +472,7 @@ button {
 
 .tray::backdrop {
   /* A literal colour: `::backdrop` does not inherit the page's custom
-     properties dependably — the same reason `.lightbox::backdrop` uses one. */
+     properties dependably. */
   background: rgb(8 9 10 / 0.7);
 }
 
@@ -458,7 +480,7 @@ button {
  * The head carries the top inset itself.
  *
  * Nothing in the top layer sits inside a screen's band, so the padding the
- * screens gained does nothing for a tray — and this one is pinned to all four
+ * screens gained does nothing for a tray, and this one is pinned to all four
  * edges. Its close button was under the island, which on iOS means unreachable
  * rather than merely half-hidden: the system takes those touches.
  */
@@ -503,7 +525,7 @@ button {
 /*
  * The disclosure row. The marker is a rotating chevron rather than two glyphs,
  * so opening reads as a movement, and the native triangle is dropped in both
- * spellings — Safari still wants the WebKit pseudo-element.
+ * spellings, because Safari still wants the WebKit pseudo-element.
  */
 .tray__summary {
   display: flex;
@@ -544,7 +566,7 @@ button {
 
 /*
  * The points themselves: sentence case, not uppercase like the headings, and
- * left at a readable size rather than scaled with the viewport — this is the one
+ * left at a readable size rather than scaled with the viewport. This is the one
  * text in the app meant to be read at arm's length rather than across a room.
  */
 .tray__points {
@@ -652,7 +674,7 @@ button {
 
 /* ── Buttons ───────────────────────────────────────────────────────────────
  * Shared by the run, library and editor screens, so they live here rather than
- * in any one screen's stylesheet — the same reason as `.label`. Previously in
+ * in any one screen's stylesheet, the same reason as `.label`. Previously in
  * run-screen.css, which worked only because the bundler concatenates all CSS.
  */
 /*
@@ -761,7 +783,7 @@ button {
  * desktop Safari. Both are declared; whichever the browser understands wins, and
  * they are kept to the same colours so it cannot matter which that is.
  *
- * On a TOUCH screen they are hidden outright — see the block after these rules.
+ * On a TOUCH screen they are hidden outright. See the block after these rules.
  * The claim that used to be here, that an iOS overlay scrollbar ignores both
  * mechanisms and is therefore harmless, was half right: it does ignore them, and
  * `::-webkit-scrollbar { display: none }` removes it anyway.
@@ -806,7 +828,7 @@ button {
  * No scrollbars on a touch screen.
  *
  * There is nothing to drag and no pointer to aim with, so the bar is decoration
- * that draws OVER the content — on iOS it was landing on the list's rows and the
+ * that draws OVER the content. On iOS it was landing on the list's rows and the
  * Next button. `scrollbar-width` is not inherited, hence the universal selector
  * rather than `:root`; the WebKit pseudo-element is what iOS actually obeys.
  *

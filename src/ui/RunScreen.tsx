@@ -61,7 +61,7 @@ function NextSlab({ onNext, status }: { onNext: () => void; status: RunStatus })
  * it, with the current one marked.
  *
  * This is what a rep-based routine needs and a countdown cannot give. You are
- * not told one exercise at a time — you read the next four while you are still
+ * not told one exercise at a time. You read the next four while you are still
  * on the first, which is how the source handouts are written and how people
  * actually work through them.
  *
@@ -144,8 +144,8 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
    *
    * The name is already the heading beside this panel, so repeating it wastes
    * the largest text box on the screen. These routines carry their how-to in a
-   * trailing parenthetical — "start standing, step out to one side, sink your
-   * hips…" — and an exercise you have not done before is exactly when the panel
+   * trailing parenthetical, like "start standing, step out to one side, sink your
+   * hips…", and an exercise you have not done before is exactly when the panel
    * is empty, because it has no illustration either.
    */
   const fallback = entry.note ?? entry.name
@@ -223,8 +223,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
   /**
    * Every control unlocks the AudioContext and primes the voice. Both have to
-   * happen synchronously inside a user gesture — mobile browsers refuse
-   * otherwise — and both are idempotent, so wrapping all of them is simpler than
+   * happen synchronously inside a user gesture, since mobile browsers refuse
+   * otherwise, and both are idempotent, so wrapping all of them is simpler than
    * guessing which tap comes first.
    *
    * The voice needs it for the same reason and in a worse way: the opening line
@@ -256,8 +256,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const reps = entry ? pathLabel(entry.path) : ''
   /*
    * A timed step counts down. A self-paced one has nothing to count down to, so
-   * it shows its rep target instead — the number the user is actually working
-   * to — falling back to time on the step when there is no target either.
+   * it shows its rep target instead, the number the user is actually working to,
+   * falling back to time on the step when there is no target either.
    */
   const selfPaced = entry?.selfPaced === true
   const clockText = selfPaced
@@ -267,7 +267,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     : clock(timer.secondsLeft)
 
   /*
-   * Sized from the step's LONGEST string — the value at its top — not from what
+   * Sized from the step's LONGEST string, the value at its top, not from what
    * is on screen right now. Otherwise a 90s step counting through 1:00 to 59
    * drops from 3.5 units to 2 and the numerals jump ~75% larger mid-step.
    * Constant within a step, so the countdown never changes size while running.
@@ -335,7 +335,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
    *
    * The clock stops the moment Back is pressed rather than when the question is
    * answered, so the seconds spent reading it are not charged to the step. If
-   * the answer is no, a workout that was running goes back to running — Back was
+   * the answer is no, a workout that was running goes back to running. Back was
    * a mistake, and nothing about the run should have changed.
    */
   const wasRunning = useRef(false)
@@ -380,8 +380,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
         {/*
           The session stopwatch, in the slot the layout already kept empty for
-          symmetry. Peripheral on purpose — the countdown is the number that
-          holds the eye — but it is the ONLY clock a rep-based routine has, since
+          symmetry. Peripheral on purpose, since the countdown is the number that
+          holds the eye, but it is the ONLY clock a rep-based routine has, since
           those run in the list layout with no countdown at all.
         */}
         {status === 'idle' ? (
@@ -400,7 +400,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
       {/*
         Whole-workout progress, edge to edge under the header rule. Driven by a
         scaled inner element rather than a gradient stop, because a transform
-        transitions smoothly and a gradient stop does not — the value only
+        transitions smoothly and a gradient stop does not. The value only
         changes once a second.
       */}
       <div
@@ -437,7 +437,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           <div className="rest-state__stats">
             {/* The time it actually took, which is what the session clock is
                 for. It used to be the routine's scheduled length, and was
-                omitted entirely for a gated routine — where the question "how
+                omitted entirely for a gated routine, where the question "how
                 long did that take" is the only one time can answer. */}
             <span className="stat">
               <b>{duration(timer.sessionMs)}</b>
@@ -469,7 +469,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
             {/* Grouped so the meta row below can be pinned to the bottom of the
                 column while this block stays vertically centred. */}
             <div className="count__lead">
-              {/* Reps only — the routine name is in the header now. Omitted
+              {/* Reps only, since the routine name is in the header now. Omitted
                   entirely for a flat routine, so the row collapses rather than
                   reserving empty space. */}
               {reps && <p className="label">{reps}</p>}
@@ -494,7 +494,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
               </h1>
             </div>
 
-            {/* No "Paused" chip — the primary button already reads "Resume". */}
+            {/* No "Paused" chip: the primary button already reads "Resume". */}
             <p className="count__meta label">
               {timer.totalRemainingMs !== null && (
                 <span>

@@ -16,7 +16,7 @@ import { CANCEL_GRACE_MS } from './schedule'
  *
  * Because a cue is BUILT when it is scheduled, that choice between recording and
  * fallback is made up to thirty seconds before the cue sounds. A decode finishing
- * in between therefore changes nothing on its own — hence `onSampleDecoded`, so
+ * in between therefore changes nothing on its own. Hence `onSampleDecoded`, so
  * whoever queued those cues can queue them again.
  *
  * A note is built as a small graph:
@@ -26,8 +26,8 @@ import { CANCEL_GRACE_MS } from './schedule'
  *   resonances  ─┘
  *
  * Envelopes are per source, because a bell's high partial has to die before its
- * body stops ringing. The tremolo is shared, because it is one physical thing —
- * the pea in a whistle chopping the airflow — and it must modulate the noise as
+ * body stops ringing. The tremolo is shared, because it is one physical thing, the
+ * pea in a whistle chopping the airflow, and it must modulate the noise as
  * well as the tone. Modulating only the tone was why the first whistle sounded
  * like a synthesiser.
  */
@@ -42,7 +42,7 @@ class AudioEngine {
   private decodeListeners = new Set<() => void>()
 
   /**
-   * Must be called synchronously from a user gesture — mobile browsers refuse
+   * Must be called synchronously from a user gesture, since mobile browsers refuse
    * to start an AudioContext otherwise. Idempotent, so wiring it to every
    * control is fine.
    */
@@ -55,14 +55,14 @@ class AudioEngine {
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()
     // Decoding needs a context, and unlock is the first moment one exists. The
-    // bytes are already downloading (`samples.ts`), so this is short — but not
+    // bytes are already downloading (`samples.ts`), so this is short, but not
     // short enough to beat the scheduler's first arm, which is why it announces
     // itself when it lands.
     void this.decode('whistle')
   }
 
   /**
-   * Decodes a downloaded sample once. Failure is deliberately swallowed — every
+   * Decodes a downloaded sample once. Failure is deliberately swallowed, because every
    * sampled note carries a synthesised fallback, so the cost of a dead network is
    * a slightly worse whistle rather than a missing one.
    */
@@ -88,8 +88,8 @@ class AudioEngine {
    * Subscribes to a recording becoming available, and returns the unsubscribe.
    *
    * Needed because a queued cue is already built. On a cold start the first
-   * window is armed in the same tick as the decode begins, so every cue in it —
-   * the whistle at the end of the get-ready among them — was built with the
+   * window is armed in the same tick as the decode begins, so every cue in it,
+   * the whistle at the end of the get-ready among them, was built with the
    * fallback tone, and stays that way for the first half-minute of the workout
    * unless it is queued again.
    */
@@ -123,7 +123,7 @@ class AudioEngine {
    * rolling window.
    *
    * Judged per CUE, not per note. A cue already sounding is left alone entirely,
-   * including notes of it still to come — the completion figure is three dings
+   * including notes of it still to come. The completion figure is three dings
    * over a second, and the moment it starts the workout also completes, which
    * re-runs the scheduler.
    */
@@ -148,7 +148,7 @@ class AudioEngine {
   }
 
   /**
-   * Plays a spec straight away. For the sound bench — the running timer always
+   * Plays a spec straight away. For the sound bench: the running timer always
    * schedules ahead instead.
    */
   preview(spec: ToneSpec): void {
@@ -309,7 +309,7 @@ class AudioEngine {
     // ── Resonances: noise through a high-Q filter ──────────────────────────
     /*
      * This is what makes a whistle a whistle. A pea whistle is an air-jet edge
-     * tone — mostly turbulence, given its pitch by a sharp resonance rather than
+     * tone, mostly turbulence, given its pitch by a sharp resonance rather than
      * by an oscillator. A tone with a little noise on top sounds synthetic; noise
      * through a Q of twenty sounds blown.
      */
@@ -330,7 +330,7 @@ class AudioEngine {
         band.frequency.setValueAtTime(resonance.centreHz, at)
       }
 
-      // The pea shifting the cavity resonance — the trill, as opposed to the
+      // The pea shifting the cavity resonance: the trill, as opposed to the
       // level chop. Added to whatever the sweep left the frequency at.
       if (resonance.wobbleHz !== undefined && resonance.wobbleDepthHz !== undefined) {
         const lfo = ctx.createOscillator()

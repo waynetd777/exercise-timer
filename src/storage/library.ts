@@ -2,7 +2,7 @@ import type { Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
 
 /**
- * Pure library operations — sorting, filtering, naming, stamping.
+ * Pure library operations: sorting, filtering, naming, stamping.
  *
  * Kept apart from IndexedDB for the same reason the run clock is kept apart
  * from React: this is where the fiddly rules live, and it should be testable

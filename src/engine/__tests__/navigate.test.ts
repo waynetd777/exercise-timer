@@ -172,7 +172,7 @@ describe('cursorForStep', () => {
   })
 })
 
-describe('groupEntries — what list mode draws', () => {
+describe('groupEntries: what list mode draws', () => {
   it('gives the current round of a repeat, and only that round', () => {
     const routine = compile(armsSection())
     const secondRound = routine.entries.filter((e) => groupOf(e)!.iteration === 2)

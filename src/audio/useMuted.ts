@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 const KEY = 'exercise-timer:muted'
 
 /**
- * Mute preference, persisted. localStorage is the right home for a UI flag —
+ * Mute preference, persisted. localStorage is the right home for a UI flag:
  * the IndexedDB decision was about routines and images, which have size and
  * dedupe requirements a boolean does not.
  */

@@ -7,23 +7,23 @@ import whistleUrl from './referee-whistle-cc0.wav?url'
  * attempts were rejected as not sounding like a whistle: as resonant noise, as a
  * measured carrier with a chop and an envelope, and finally as a pair of measured
  * contours driving one oscillator. The last got closest and has since been
- * deleted along with its generator — a pea whistle's character is the irregular
+ * deleted along with its generator. A pea whistle's character is the irregular
  * motion of the pea, and reproducing irregularity is what parameters cannot do.
  * If this file ever fails to decode, the cue falls back to a plain 2900Hz tone
  * from `WHISTLE`'s own fields rather than to a second synthesis engine.
  *
  * Synthesis was chosen for LICENSING, never for preference. The reference was the
- * Tabata Timer app's whistle, which cannot ship — its audio was purged from this
+ * Tabata Timer app's whistle, which cannot ship, since its audio was purged from this
  * repo's history before it went public.
  *
  * That turned out to be unnecessary. Measuring CC0 candidates against the Tabata
- * whistle found one matching on every figure — 852ms sounding, 2902Hz peak, 98.4%
- * of energy in the fundamental, 9.9Hz rattle — and a waveform cross-correlation of
+ * whistle found one matching on every figure (852ms sounding, 2902Hz peak, 98.4%
+ * of energy in the fundamental, 9.9Hz rattle) with a waveform cross-correlation of
  * 0.992 at a 0.2ms lag confirmed it: the Tabata app is playing THIS recording. The
  * sound behind five failed synthesis attempts was public domain the whole time.
  *
  * PROVENANCE
- *   "Referee whistle blow, gymnasium.wav" — SpliceSound, freesound.org sound 218318
+ *   "Referee whistle blow, gymnasium.wav" by SpliceSound, freesound.org sound 218318
  *   https://freesound.org/people/SpliceSound/sounds/218318/
  *   Licence: Creative Commons 0 1.0 (public domain dedication), confirmed against
  *   the licence link in the page markup, not a search summary.
@@ -47,7 +47,7 @@ export const SAMPLES: Record<SampleName, string> = { whistle: whistleUrl }
  * The download, started at module load rather than at the first tap.
  *
  * The two halves of getting a recording ready are the fetch and the decode, and
- * only the decode needs an AudioContext — so only the decode has to wait for the
+ * only the decode needs an AudioContext, so only the decode has to wait for the
  * gesture that creates one. Waiting for both is what made the first whistle of a
  * cold start the fallback tone: `unlock()` started the fetch and the scheduler
  * armed its first window in the same tick, long before the bytes landed, and a
@@ -57,7 +57,7 @@ export const SAMPLES: Record<SampleName, string> = { whistle: whistleUrl }
  * OfflineAudioContext, though it could be. Either that context is built at the
  * file's own 22.05kHz, and the playback resampler makes up the difference on a
  * sound that took five attempts to get right, or the real AudioContext is created
- * outside a gesture to learn the hardware rate — and the gesture-to-audio path is
+ * outside a gesture to learn the hardware rate, and the gesture-to-audio path is
  * the one part of this app that cannot be checked from a desktop browser. A few
  * milliseconds of decode is not worth either.
  */
@@ -68,7 +68,7 @@ const BYTES = new Map<SampleName, Promise<ArrayBuffer | null>>()
  * an unhandled rejection at boot is noise in the one place it is hard to read.
  *
  * A failure is forgotten rather than remembered, so the next attempt fetches
- * again. The alternative — one null kept for the life of the page — would mean a
+ * again. The alternative, one null kept for the life of the page, would mean a
  * page that happened to load without signal sounded a plain tone for the whole
  * session, which is the exact situation this app is built for.
  */

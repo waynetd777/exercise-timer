@@ -39,8 +39,8 @@ export function useCueScheduler({
   /**
    * Cues already queued, so a re-arm adds only what is new.
    *
-   * Necessary because cancellation spares a cue that has begun — or is about to
-   * — and without deduplication that same cue would be scheduled again by the
+   * Necessary because cancellation spares a cue that has begun, or is about to,
+   * and without deduplication that same cue would be scheduled again by the
    * arm that follows, and play twice.
    */
   const scheduled = useRef(new Set<string>())
@@ -78,7 +78,7 @@ export function useCueScheduler({
      *
      * A queued cue is already built, fallback tone and all (see
      * `onSampleDecoded`), and on a cold start the whole first window was queued
-     * before the decode finished — including the whistle at the end of the
+     * before the decode finished, including the whistle at the end of the
      * get-ready. Cancelling and re-arming rebuilds them with the recording.
      *
      * Only what cancellation actually dropped is forgotten: a cue already
@@ -98,7 +98,7 @@ export function useCueScheduler({
 
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
-        // iOS suspends the context while hidden — resume before re-arming, or
+        // iOS suspends the context while hidden. Resume before re-arming, or
         // every cue is scheduled against a frozen clock.
         audio.resume()
         arm()
@@ -116,8 +116,8 @@ export function useCueScheduler({
   /*
    * The finish, when the routine ends on a self-paced step.
    *
-   * There is no final duration to hang it on — the routine ends when the user
-   * taps — so it cannot be queued on the audio clock ahead of time the way every
+   * There is no final duration to hang it on, because the routine ends when the
+   * user taps, so it cannot be queued on the audio clock ahead of time the way every
    * other cue is. Fired here instead, which costs a few milliseconds of accuracy
    * on a figure that is an announcement rather than a beat.
    */

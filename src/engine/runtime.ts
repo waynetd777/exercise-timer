@@ -37,7 +37,7 @@ function completed(timeline: Timeline): Position {
 }
 
 /**
- * Locates a moment in a compiled timeline. Pure — the caller owns the clock.
+ * Locates a moment in a compiled timeline. Pure: the caller owns the clock.
  *
  * Boundary semantics: each entry owns `[startMs, endMs)`, so at exactly
  * `entry.startMs` you are at the top of that entry with `remainingMs` equal to
@@ -88,7 +88,7 @@ export function skipForward(timeline: Timeline, elapsedMs: number): number {
 
 /**
  * Music-player convention: restart the current step, unless you are only just
- * into it — then go back to the previous step.
+ * into it, then go back to the previous step.
  */
 export function skipBack(timeline: Timeline, elapsedMs: number, restartThresholdMs = 1500): number {
   const current = position(timeline, elapsedMs)

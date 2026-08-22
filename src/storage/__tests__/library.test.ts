@@ -153,7 +153,7 @@ describe('duplicate', () => {
 
 describe('markRun / toggleFavourite', () => {
   it('stamps the run time without touching updatedAt', () => {
-    // Running a routine is not editing it — it must not jump up a "recently
+    // Running a routine is not editing it, so it must not jump up a "recently
     // edited" sort or change what is saved.
     const original = make('Legs', { updatedAt: 100 })
     const ran = markRun(original, 8000)

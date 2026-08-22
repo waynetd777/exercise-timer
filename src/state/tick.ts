@@ -7,7 +7,7 @@ import type { Cursor, Routine } from '../engine'
  * Pulled out of `useTimer` because this is the arithmetic that has to be right:
  * it decides when a run has expired, how far to jump when the tab has been
  * asleep, and when the display next changes. All three are pure functions of
- * (routine, cursor) and deserve tests that need no DOM — the same reason
+ * (routine, cursor) and deserve tests that need no DOM, the same reason
  * `clock.ts` is not inside the hook either.
  */
 export type Tick =
@@ -44,7 +44,7 @@ export function tick(routine: Routine, runIndex: number, elapsedInRunMs: number)
   /*
    * Wake for the instant the DISPLAY changes, not on an interval. A timed step
    * changes when its next whole second is reached; a self-paced one counts up,
-   * so it changes on the whole second too — but it has no end to stop at.
+   * so it changes on the whole second too, but it has no end to stop at.
    */
   const nextChangeAt =
     at.remainingMs === null

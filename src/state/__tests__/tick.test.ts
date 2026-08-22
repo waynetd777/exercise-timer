@@ -43,7 +43,7 @@ describe('tick', () => {
 
   it('JUMPS to the gate after ten minutes asleep, rather than walking to it', () => {
     // The property the whole derived-clock design exists for. One move, and the
-    // overshoot is discarded — arrive at the rep step ready to go.
+    // overshoot is discarded, so you arrive at the rep step ready to go.
     const routine = mixed()
     const woken = tick(routine, 0, 10 * 60_000)
 

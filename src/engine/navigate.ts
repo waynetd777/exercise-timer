@@ -6,7 +6,7 @@ import type { PathStep, Routine, Run, TimelineEntry } from './types'
  *
  * `runtime.ts` handles everything INSIDE a run and knows nothing about gates.
  * This is the layer above: which run are we in, and what happens at its edges.
- * Both are pure — the caller owns the clock.
+ * Both are pure: the caller owns the clock.
  */
 
 /** Where the runner is: which run, and how far into it. */
@@ -21,7 +21,7 @@ export const START: Cursor = { runIndex: 0, elapsedInRunMs: 0 }
 export type RoutinePosition = {
   /** `null` once the routine is complete. */
   entry: TimelineEntry | null
-  /** The step after `entry`, ACROSS runs — for preloading the next image. */
+  /** The step after `entry`, ACROSS runs, for preloading the next image. */
   nextEntry: TimelineEntry | null
   elapsedInEntryMs: number
   /** `null` for a self-paced step, which has nothing to count down. */
@@ -62,7 +62,7 @@ function complete(routine: Routine): RoutinePosition {
  *
  * A self-paced run holds its single step for as long as it takes: elapsed keeps
  * climbing and the step never ends by itself. A timed run defers entirely to
- * `position()`, so boundary semantics inside one are unchanged — and a cursor
+ * `position()`, so boundary semantics inside one are unchanged, and a cursor
  * past the end of a timed run reports the run's LAST step rather than falling
  * through, because only `advance()` may cross a gate. Nothing should skip a step
  * because a timeout fired late.
@@ -75,7 +75,7 @@ export function locate(routine: Routine, cursor: Cursor): RoutinePosition {
   if (run.selfPaced) {
     /*
      * The FIRST step of the gate. A gate usually holds one step, but a ladder
-     * rung advances as a whole, so it can hold several — and then what comes
+     * rung advances as a whole, so it can hold several, and then what comes
      * next is what follows the RUN, not the next step inside it.
      */
     const entry = run.entries[0]!
@@ -105,7 +105,7 @@ export function locate(routine: Routine, cursor: Cursor): RoutinePosition {
 }
 
 /**
- * Has the current run finished on its own? Only a timed run ever can — a
+ * Has the current run finished on its own? Only a timed run ever can, since a
  * self-paced one waits however long it waits.
  *
  * The tick calls this rather than comparing times itself, so "the run is over"
@@ -123,7 +123,7 @@ export function runIsOver(routine: Routine, cursor: Cursor): boolean {
  *
  * **Overshoot is deliberately discarded.** A phone that spent ten minutes in a
  * pocket during the warm-up arrives at the next step ready to go, rather than
- * silently burning the rest of the routine — and the step after a timed run is
+ * silently burning the rest of the routine. And the step after a timed run is
  * always a gate, since runs are maximal, so there is nothing to carry the
  * overshoot into anyway.
  */
@@ -137,7 +137,7 @@ export function nextRun(routine: Routine, cursor: Cursor): Cursor {
  * step.
  *
  * Inside a timed run this is the existing music-player skip. At the last step of
- * a run — and always, for a self-paced step — it crosses into the next run.
+ * a run, and always for a self-paced step, it crosses into the next run.
  */
 export function advance(routine: Routine, cursor: Cursor): Cursor {
   const clamped = clampCursor(cursor)
@@ -155,7 +155,7 @@ export function advance(routine: Routine, cursor: Cursor): Cursor {
  * restart the current step unless you have only just started it.
  *
  * At the top of a run that means landing on the LAST step of the previous run,
- * which is the step the user actually just left — not the top of it.
+ * which is the step the user actually just left, not the top of it.
  */
 export function retreat(routine: Routine, cursor: Cursor, restartThresholdMs = 1500): Cursor {
   const clamped = clampCursor(cursor)
@@ -204,8 +204,8 @@ function sameLevel(a: PathStep, b: PathStep): boolean {
  * The steps shown together in list mode: everything belonging to the same
  * innermost group iteration as `entry`.
  *
- * That is one round of a repeat, one rung of a ladder, or — where a section has
- * no group inside it — the whole section. It is the unit the source routines are
+ * That is one round of a repeat, one rung of a ladder, or, where a section has no
+ * group inside it, the whole section. It is the unit the source routines are
  * written in ("4 Rounds: 12 × Hammer Curls, 10 × Shoulder Press, …") and the unit
  * a user needs on screen at once.
  *
@@ -245,14 +245,14 @@ export function sectionOf(entry: TimelineEntry): PathStep | null {
  *
  *  - A step outside a list-mode section is a countdown, as it always was.
  *  - A TIMED step is a countdown wherever it falls. You are not reading a list
- *    while holding a wall sit — you are watching the clock. A rest between
+ *    while holding a wall sit. You are watching the clock. A rest between
  *    rounds, a hold at the end of a rung and one in the middle of a burnout are
  *    all the same case.
  *  - A gate with nothing after it in its group is a countdown too: the list
  *    would be a column of struck-through text and one live row.
  *
  * The editor asks the same question of an unrun tree, to decide whether to offer
- * a step an image at all — only the countdown has a media panel. That is
+ * a step an image at all, since only the countdown has a media panel. That is
  * `shownAsList()` in `editor/blocks.ts`, which mirrors the first two clauses and
  * deliberately drops the third; this function is the authority, and a test binds
  * the two. Change one, look at the other.

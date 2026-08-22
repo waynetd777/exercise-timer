@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Ladder, MediaRef, Repeat, RoutineColour, Section, Segment, SegmentRole, Workout } from '../engine'
 import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import {
@@ -33,10 +33,12 @@ import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
 import { HelpTray } from './HelpTray'
+import { NoticeDialog } from './NoticeDialog'
 import { EDITOR_HELP } from './help'
 import { storeFile } from '../media/pin'
 import { duration } from './format'
 import { useMediaUrl } from './useMediaUrl'
+import { useDismiss } from './useDismiss'
 import {
   BackIcon,
   CheckIcon,
@@ -46,6 +48,7 @@ import {
   HelpIcon,
   ImageIcon,
   ImportIcon,
+  MoreIcon,
   NoteIcon,
   PlusIcon,
   RedoIcon,
@@ -67,59 +70,120 @@ const ROLES: { role: SegmentRole; label: string }[] = [
 ]
 
 /**
- * Full-size image preview.
+ * A step's image, as the preview dialog needs it.
  *
- * A native `<dialog>` opened with `showModal()`, so Escape, focus trapping and
- * the backdrop are the browser's job rather than mine. A click that lands on the
- * dialog itself is a backdrop click — the image and the close button are
- * children, so they never match.
+ * Carries the `path` because Remove lives in the dialog now rather than in the
+ * row. `src` may be null: a stored ref whose file is not on this device still has
+ * to be viewable enough to be removed.
  */
-function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+type ImageView = { path: Path; src: string | null; alt: string; unseen: boolean }
+
+/**
+ * A step's picture, and the way to take it off.
+ *
+ * Both in one dialog because they are the same errand: you open the preview to
+ * see what the step is carrying, and the only thing you might want to do about it
+ * is get rid of it. The row shows a 42px thumbnail, which is enough to recognise
+ * an image and not enough to check it.
+ *
+ * The `.modal` sheet plus a panel of its own, like every other dialog here. A
+ * `<dialog>` styled as the box does not hug its content on iOS, and the panel is
+ * `.notice` because that layout is already known to survive it. A click that
+ * lands on the sheet is a backdrop click; the panel and its children never match.
+ */
+function ImageDialog({
+  view,
+  onRemove,
+  onClose,
+}: {
+  view: ImageView
+  onRemove: () => void
+  onClose: () => void
+}) {
   const dialog = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
-    dialog.current?.showModal()
+    if (!dialog.current?.open) dialog.current?.showModal()
   }, [])
 
   return (
     <dialog
       ref={dialog}
-      className="lightbox"
+      className="modal"
       onClose={onClose}
       onClick={(event) => {
         if (event.target === dialog.current) onClose()
       }}
     >
-      <img src={src} alt={alt} />
-      <button
-        type="button"
-        className="btn btn--ghost lightbox__close"
-        onClick={onClose}
-        aria-label="Close preview"
-        title="Close"
-      >
-        <CloseIcon />
-      </button>
+      {/* The panel is its own element. See `.modal` in theme.css. */}
+      <div className="notice imgview">
+        {view.src ? (
+          <img className="imgview__img" src={view.src} alt={view.alt} />
+        ) : (
+          /*
+           * The step carries a ref whose file is not here: an uploaded photo
+           * that arrived in an export without its blob. Saying so beats an empty
+           * frame, and Remove is offered anyway: the alternative is a step with a
+           * picture nothing can show and nothing can take off.
+           */
+          <p className="imgview__missing label label--sm">
+            This image is not on this device, so it cannot be shown.
+          </p>
+        )}
+
+        {view.alt !== '' && <p className="notice__text">{view.alt}</p>}
+
+        {/* Only for a step that runs as a row of its section's list, where the
+            picture it is holding will never be drawn. */}
+        {view.unseen && (
+          <p className="notice__detail label label--sm">
+            Not shown while running. This step appears as a row in its section’s list.
+          </p>
+        )}
+
+        <div className="notice__actions">
+          {/* Close first and focused, so a stray Enter or space keeps the picture.
+              The same order, for the same reason, as ConfirmDialog. */}
+          <button type="button" className="chip" onClick={onClose} autoFocus>
+            <CloseIcon />
+            Close
+          </button>
+          {/* A trash can is unambiguous HERE: the row's own trash can, which
+              deletes the whole step, is nowhere in sight, and the word says what
+              goes. In the row itself it could only have meant one of the two. */}
+          <button type="button" className="chip chip--danger" onClick={onRemove}>
+            <TrashIcon />
+            Remove image
+          </button>
+        </div>
+      </div>
     </dialog>
   )
 }
 
 /**
- * Pick from the images already used somewhere in the library.
+ * Where a step's image comes from: the catalogue, or this device.
  *
  * Visual rather than a list of urls: the point is to recognise the machine, not
  * to read a postimages id. Filtered by name once there are enough to scroll.
+ *
+ * Both ways in live in one dialog because the question is one question, "what
+ * picture goes on this step", and splitting it across two buttons in the row is
+ * what made the old image row a row.
  */
 function ImagePicker({
   images,
   onPick,
+  onUpload,
   onClose,
 }: {
   images: readonly KnownImage[]
   onPick: (ref: MediaRef) => void
+  onUpload: (file: File) => void
   onClose: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const upload = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
 
   useEffect(() => {
@@ -140,10 +204,10 @@ function ImagePicker({
         if (event.target === dialog.current) onClose()
       }}
     >
-      {/* The panel is its own element — see `.modal` in theme.css. */}
+      {/* The panel is its own element. See `.modal` in theme.css. */}
       <div className="picker">
       <header className="picker__head">
-        <h2 className="picker__title label label--sm">Choose an image</h2>
+        <h2 className="picker__title label label--sm">Add an image</h2>
         <input
           className="efield"
           type="search"
@@ -183,6 +247,36 @@ function ImagePicker({
           ))}
         </ul>
       )}
+
+      {/*
+        Under the grid rather than beside the search box: it is the way in for the
+        exercise the catalogue does not have, and a distraction for everyone else.
+        The same placement, for the same reason, as Copy template in the paste
+        dialog.
+      */}
+      <div className="picker__actions">
+        <button
+          type="button"
+          className="chip chip--action"
+          onClick={() => upload.current?.click()}
+          title="Use a photo from this device"
+        >
+          <ImportIcon />
+          Upload a photo
+        </button>
+        <input
+          ref={upload}
+          className="visually-hidden"
+          type="file"
+          accept="image/*"
+          onChange={(event) => {
+            const file = event.target.files?.[0]
+            // Cleared so choosing the SAME file again still fires a change.
+            event.target.value = ''
+            if (file) onUpload(file)
+          }}
+        />
+      </div>
       </div>
     </dialog>
   )
@@ -207,9 +301,9 @@ type RowProps = {
  * three widgets to say them.
  */
 const UNITS: { value: string; label: string; title: string }[] = [
-  { value: 'timed', label: 's', title: 'Seconds — the step times itself' },
-  { value: 'reps', label: '×', title: 'Reps — the step waits for Next' },
-  { value: 'reps-side', label: '× each side', title: 'Reps per side — the step waits for Next' },
+  { value: 'timed', label: 's', title: 'Seconds. The step times itself.' },
+  { value: 'reps', label: '×', title: 'Reps. The step waits for Next.' },
+  { value: 'reps-side', label: '× each side', title: 'Reps per side. The step waits for Next.' },
   { value: 'rung', label: 'rung', title: "Takes its count from the ladder's current rung" },
   { value: 'rung-side', label: 'rung each side', title: "The ladder's rung, per side" },
 ]
@@ -251,7 +345,7 @@ function TimingField({
 
   return (
     <label className="esecs">
-      {/* A rung has no number of its own — that is the point of it. */}
+      {/* A rung has no number of its own. That is the point of it. */}
       {timing.kind !== 'rung' && (
         <input
           className="efield efield--secs"
@@ -273,8 +367,12 @@ function TimingField({
           }}
         />
       )}
+      {/* `data-unit` is for the stylesheet: a native select is as wide as its
+          LONGEST option, which is how showing "s" cost the width of "rung each
+          side". See `.efield--unit` in editor.css. */}
       <select
         className="efield efield--unit unit"
+        data-unit={unit}
         value={unit}
         aria-label="Timed or counted"
         onChange={(event) => retarget(event.target.value)}
@@ -303,11 +401,9 @@ function SegmentRow({
   onPatch,
   onTiming,
   onClearText,
-  onClearImage,
   onWrap,
   onPreview,
   onChoose,
-  onUpload,
 }: RowProps & {
   onAdd: (path: Path, role: SegmentRole) => void
   segment: Segment
@@ -316,26 +412,11 @@ function SegmentRow({
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onTiming: (path: Path, timing: Timing, typed?: boolean) => void
   onClearText: (path: Path, field: 'note' | 'alternative') => void
-  onClearImage: (path: Path) => void
   onWrap: (path: Path) => void
-  onPreview: (src: string, alt: string) => void
+  onPreview: (view: ImageView) => void
   onChoose: (path: Path) => void
-  onUpload: (path: Path, file: File) => Promise<void>
 }) {
-  const upload = useRef<HTMLInputElement>(null)
   const imageUrl = useMediaUrl(segment.media)
-
-  /**
-   * Takes the image off the step, whatever kind it is.
-   *
-   * Shared by the × in the link box and the one beside the thumbnail: same act,
-   * two places to reach it, because the picture is what people look at and the
-   * link box is empty for a picked or uploaded image.
-   */
-  /** Takes the image off the step, whatever kind it is. */
-  const clearImage = () => {
-    if (segment.media !== undefined) onClearImage(path)
-  }
 
   /*
    * The rest that does not run after the final rep. Marked in the row itself
@@ -352,9 +433,9 @@ function SegmentRow({
    *
    * Shown only when the step has one, plus a button to add one, because a
    * routine is forty steps long and giving every row two more inputs would bury
-   * the thing you came to change. A pasted step usually has a note — the
-   * instruction lifted out of its name — and losing it silently on the first
-   * edit is what this exists to prevent.
+   * the thing you came to change. But a pasted step usually has a note, the
+   * instruction lifted out of its name, and losing it silently on the first edit
+   * is what this exists to prevent.
    *
    * Emptying a field DELETES it rather than storing "", so the line disappears
    * again instead of leaving a blank one behind.
@@ -364,7 +445,71 @@ function SegmentRow({
   const showExtras = hasExtras || extras
 
   /*
-   * Blur commits, so nothing is written until the field is left — and nothing at
+   * Whether this row's controls are showing, which only means anything on a
+   * narrow screen. Above the breakpoint in editor.css they are laid out inline
+   * and always visible, and this flag is inert. CSS decides which of the two
+   * the row is, so there is no width to measure here and nothing to get wrong on
+   * a resize.
+   */
+  const [tools, setTools] = useState(false)
+  /** True when the panel opens upward, because there is no room below the row. */
+  const [toolsUp, setToolsUp] = useState(false)
+  const panel = useRef<HTMLDivElement>(null)
+  const more = useRef<HTMLButtonElement>(null)
+  const toolsId = useId()
+
+  /*
+   * Which way the panel opens, decided once per opening from the room actually
+   * available.
+   *
+   * `useLayoutEffect`, so the flip is applied in the same frame the panel first
+   * paints. A plain effect would show it hanging off the bottom for a frame and
+   * then jump. Measured rather than expressed in CSS because CSS cannot ask; the
+   * one thing that could, anchor positioning, is the reason `Menu` is hand-rolled
+   * in the first place.
+   *
+   * The limit is the SCROLLER's visible box, not the viewport: the panel is
+   * absolutely positioned inside `.editor__scroll`, so that is what clips it. And
+   * it is measured against the BUTTON's box, because that is what the panel is
+   * positioned against. The row is two lines tall on a phone, and taller again
+   * with the note fields open, so its edges are nowhere near the button's.
+   */
+  useLayoutEffect(() => {
+    if (!tools) return
+    const box = more.current?.getBoundingClientRect()
+    const height = panel.current?.offsetHeight
+    if (!box || height === undefined) return
+
+    const scroller = more.current?.closest('.editor__scroll')?.getBoundingClientRect()
+    const top = scroller?.top ?? 0
+    const bottom = scroller?.bottom ?? window.innerHeight
+
+    // The gap in the CSS, so both agree on what "just below the row" means.
+    const needed = height + 4
+    const below = bottom - box.bottom
+    const above = box.top - top
+    // Only flip if it genuinely helps: with too little room on both sides, down
+    // is the direction that can at least be scrolled to.
+    setToolsUp(below < needed && above > below)
+  }, [tools])
+  /*
+   * The panel and its trigger are "inside"; everything else, INCLUDING the rest
+   * of this row, is outside and closes it. Scoping this to the whole row was
+   * wrong: pressing the step's own name field left the panel hanging open over
+   * the row below.
+   *
+   * The trigger has to count as inside, or the press would close the panel and
+   * the click that follows would toggle it straight back open.
+   */
+  useDismiss(
+    tools,
+    () => setTools(false),
+    (target) =>
+      panel.current?.contains(target) === true || more.current?.contains(target) === true,
+  )
+
+  /*
+   * Blur commits, so nothing is written until the field is left, and nothing at
    * all if it comes back unchanged. Without that guard, tabbing through a step
    * left an undo step that undid nothing visible.
    */
@@ -381,6 +526,9 @@ function SegmentRow({
       data-depth={depth}
       data-role={segment.role}
       data-between-reps={betweenRepsOnly || undefined}
+      /* Lifts this row over the ones below it, so an open panel is not painted
+         under the next row, since later siblings paint on top by default. */
+      data-tools={tools || undefined}
     >
       <div className="erow__main">
         <select
@@ -418,83 +566,169 @@ function SegmentRow({
         />
 
         {/*
-          With the fields, not with the actions beside it. Everything in that
-          cluster acts on the row's position or existence and acts at once; this
-          opens this step's OWN text, and it is a disclosure rather than a deed.
+          Every button the row has, in one group. On a narrow screen, a group that
+          is not in the row at all.
+
+          Below the breakpoint in editor.css this is a panel: hidden until the ⋯
+          button opens it, absolutely positioned, so it is out of the row's flow
+          and the row itself is just its fields. Above the breakpoint it is laid
+          out inline at the trailing edge and the ⋯ button is gone. CSS decides
+          which, so there is no width measured in JS and nothing to correct on a
+          resize.
+
+          Wrapping the buttons like this is only safe BECAUSE of that split. As a
+          wrapping flex item inside the row it was a disaster. A flex item is
+          placed by its max-content width, ~380pt here, so it could never share a
+          phone's line and took one of its own. Above the breakpoint the whole row
+          fits on one line by construction, so there is no wrapping left to get
+          wrong.
+        */}
+        {/*
+          Exists to be the panel's anchor: the panel is positioned against THIS,
+          so it opens directly under (or over) the ⋯ button rather than under the
+          whole row. Above the breakpoint the panel is laid out inline inside it
+          and the wrapper is just the flex item that holds the trailing edge.
+        */}
+        <div className="erow__menu">
+        <div
+          ref={panel}
+          id={toolsId}
+          className="erow__tools"
+          data-open={tools || undefined}
+          data-up={(tools && toolsUp) || undefined}
+          role="group"
+          aria-label={`Controls for ${segment.name}`}
+          /* Anything in here is a deed, and a panel left open over a row that has
+             just moved, or been deleted, points at nothing. Inert above the
+             breakpoint, where the panel is the row and nothing is open. */
+          onClick={() => setTools(false)}
+        >
+          <div className="erow__own">
+            {segment.media !== undefined ? (
+              <button
+                type="button"
+                className="erow__thumb"
+                onClick={() =>
+                  onPreview({ path, src: imageUrl, alt: segment.name, unseen: listed })
+                }
+                aria-label={`Image for ${segment.name}. Preview or remove it.`}
+                title="Preview image"
+              >
+                {/* Empty frame when the ref is set and its file is not on this
+                    device. The button still opens, because that is the only way
+                    left to remove it. */}
+                {imageUrl && <img src={imageUrl} alt="" />}
+              </button>
+            ) : (
+              !listed && (
+                <button
+                  type="button"
+                  className="btn btn--ghost erow__image"
+                  onClick={() => onChoose(path)}
+                  aria-label={`Add an image to ${segment.name}`}
+                  title="Add an image"
+                >
+                  <ImageIcon />
+                </button>
+              )
+            )}
+
+            <button
+              className="btn btn--ghost erow__note"
+              onClick={() => setExtras((open) => !open)}
+              aria-pressed={showExtras}
+              disabled={hasExtras}
+              aria-label="Add a note or an alternative"
+              title={
+                hasExtras
+                  ? 'Note and alternative are shown below. Empty them to remove.'
+                  : 'Add a note or an alternative'
+              }
+            >
+              <NoteIcon />
+            </button>
+          </div>
+
+          <div className="erow__actions">
+            {/*
+              Adds a FRESH step of the same type below, where duplicate beside it
+              copies this one. Same type because that is what "another" means on a
+              row: plus on a 20s work step gives another work step at its default
+              length, not a copy of this one's name and image.
+            */}
+            <button
+              className="btn btn--ghost"
+              onClick={() => onAdd(path, segment.role)}
+              aria-label={`Add a ${segment.role} step below`}
+              title="Add a step below"
+            >
+              <PlusIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => onMove(path, -1)}
+              disabled={first && depth === 0}
+              aria-label="Move up"
+              title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
+            >
+              <UpIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => onMove(path, 1)}
+              disabled={last && depth === 0}
+              aria-label="Move down"
+              title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
+            >
+              <DownIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => onWrap(path)}
+              disabled={depth > 0}
+              aria-label="Repeat this step"
+              title={depth > 0 ? 'Already inside reps' : 'Repeat this step'}
+            >
+              <RepsIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => onDuplicate(path)}
+              aria-label="Duplicate step"
+              title="Duplicate step"
+            >
+              <CopyIcon />
+            </button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => onRemove(path)}
+              aria-label="Delete step"
+              title="Delete step"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        </div>
+
+        {/*
+          Opens the panel, and only exists while there is no room to show it. The
+          eight buttons need about 380pt of a row; a phone has about 311pt, and
+          shrinking them to fit lands at 36px, well under the touch guideline. So
+          on a narrow screen the row shows its fields and one way in to the rest.
         */}
         <button
-          className="btn btn--ghost erow__note"
-          onClick={() => setExtras((open) => !open)}
-          aria-pressed={showExtras}
-          disabled={hasExtras}
-          aria-label="Add a note or an alternative"
-          title={
-            hasExtras
-              ? 'Note and alternative are shown below — empty them to remove'
-              : 'Add a note or an alternative'
-          }
+          ref={more}
+          type="button"
+          className="btn btn--ghost erow__more"
+          aria-haspopup="true"
+          aria-expanded={tools}
+          aria-controls={toolsId}
+          onClick={() => setTools((open) => !open)}
+          aria-label={`Controls for ${segment.name}`}
+          title="Image, note and step controls"
         >
-          <NoteIcon />
+          <MoreIcon />
         </button>
-
-        <div className="erow__actions">
-          {/*
-            Adds a FRESH step of the same type below, where duplicate beside it
-            copies this one. Same type because that is what "another" means on a
-            row: plus on a 20s work step gives another work step at its default
-            length, not a copy of this one's name and image.
-          */}
-          <button
-            className="btn btn--ghost"
-            onClick={() => onAdd(path, segment.role)}
-            aria-label={`Add a ${segment.role} step below`}
-            title="Add a step below"
-          >
-            <PlusIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, -1)}
-            disabled={first && depth === 0}
-            aria-label="Move up"
-            title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
-          >
-            <UpIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, 1)}
-            disabled={last && depth === 0}
-            aria-label="Move down"
-            title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
-          >
-            <DownIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onWrap(path)}
-            disabled={depth > 0}
-            aria-label="Repeat this step"
-            title={depth > 0 ? 'Already inside reps' : 'Repeat this step'}
-          >
-            <RepsIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onDuplicate(path)}
-            aria-label="Duplicate step"
-            title="Duplicate step"
-          >
-            <CopyIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onRemove(path)}
-            aria-label="Delete step"
-            title="Delete step"
-          >
-            <TrashIcon />
-          </button>
         </div>
       </div>
 
@@ -520,97 +754,6 @@ function SegmentRow({
               onBlur={(event) => commitText('alternative', event.target.value)}
             />
           </label>
-        </div>
-      )}
-
-      {/*
-        The image row, offered only where an image can actually be seen.
-
-        A listed step is drawn as a row of its group and has no media panel, so
-        the controls would set something nobody will ever look at. An image that
-        is ALREADY set still gets its row: hiding it would trap data — the step
-        would carry a picture with nothing in the app able to remove it.
-
-        There is no link field. Pasting a URL only made sense while the
-        illustrations lived on someone else's server; they ship with the app now,
-        so an image comes from the catalogue or from this device.
-      */}
-      {(!listed || segment.media !== undefined) && (
-        <div className="erow__image">
-          <span className="label label--sm">Image</span>
-          {/* Adding one is what a listed step has no use for; clearing the one it
-              has is exactly what it needs. */}
-          {!listed && (
-            <>
-              <button
-                type="button"
-                className="chip chip--action"
-                onClick={() => onChoose(path)}
-                aria-label="Choose one of the app's illustrations"
-              >
-                <ImageIcon />
-                Choose
-              </button>
-
-              <button
-                type="button"
-                className="chip chip--action"
-                onClick={() => upload.current?.click()}
-                aria-label="Upload your own photo for this step"
-                title="Upload your own photo"
-              >
-                <ImportIcon />
-                Upload
-              </button>
-              <input
-                ref={upload}
-                className="visually-hidden"
-                type="file"
-                accept="image/*"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  event.target.value = ''
-                  if (file) void onUpload(path, file)
-                }}
-              />
-            </>
-          )}
-
-          {listed && (
-            <span className="erow__unseen label label--sm">
-              Not shown — this step runs as a row in its section’s list
-            </span>
-          )}
-
-          {imageUrl && (
-            <button
-              type="button"
-              className="erow__thumb"
-              onClick={() => onPreview(imageUrl, segment.name)}
-              aria-label={`Preview the image for ${segment.name}`}
-              title="Preview image"
-            >
-              <img src={imageUrl} alt="" />
-            </button>
-          )}
-
-          {/* Beside the picture, because that is where you are looking when you
-              decide to get rid of it. Keyed on the ref rather than on the
-              thumbnail, so an image whose local copy has gone can still be
-              removed rather than being stuck on the step. */}
-          {segment.media !== undefined && (
-            <button
-              type="button"
-              className="btn btn--ghost erow__unset"
-              onClick={clearImage}
-              aria-label={`Remove the image from ${segment.name}`}
-              title="Remove image"
-            >
-              {/* Not a trash can: this row already has one, and it deletes the
-                  whole step. Within a row an icon has to mean one thing. */}
-              <CloseIcon />
-            </button>
-          )}
         </div>
       )}
     </li>
@@ -692,7 +835,7 @@ function RepeatRow({
             className="btn btn--ghost"
             onClick={() => onUnwrap(path)}
             aria-label="Ungroup these reps"
-            title="Ungroup — keeps the steps, drops the repeat"
+            title="Ungroup. Keeps the steps, drops the repeat."
           >
             <RepsIcon />
           </button>
@@ -829,8 +972,8 @@ function LadderRow({
  * A named part of the routine.
  *
  * The note is a field rather than something the editor hides, because a pasted
- * section carries one — "No rest between exercises. Rest 45 seconds after each
- * round." — and an editor that cannot show it is an editor that quietly loses it
+ * section carries one, such as "No rest between exercises. Rest 45 seconds after
+ * each round.", and an editor that cannot show it is an editor that quietly loses it
  * the first time someone rewrites the section.
  */
 function SectionRow({
@@ -942,16 +1085,16 @@ export function EditorScreen({
   const { name, blocks, colour } = history.present
   const [confirmingExit, setConfirmingExit] = useState(false)
   const [helping, setHelping] = useState(false)
-  const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null)
+  const [imagePreview, setImagePreview] = useState<ImageView | null>(null)
   /** The step whose image is being chosen, or null when the picker is closed. */
   const [choosingFor, setChoosingFor] = useState<Path | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   /**
    * `typing` names the field a keystroke belongs to, so a run in ONE field
-   * collapses into a single undo step. Everything else — adding, deleting,
-   * reordering, changing a step's type, choosing an image — is discrete and gets
-   * a step of its own.
+   * collapses into a single undo step. Everything else is discrete and gets a step
+   * of its own: adding, deleting, reordering, changing a step's type, choosing an
+   * image.
    */
   const edit = (next: (draft: Draft) => Draft, typing: string | null = null) =>
     setHistory((current) => push(current, next(current.present), typing))
@@ -972,7 +1115,7 @@ export function EditorScreen({
   /*
    * A pasted strength routine is built from sections and ladders, which have no
    * row yet. Saying so beats rendering an empty list and letting someone think
-   * the routine was lost — it is all still there, and saving keeps it.
+   * the routine was lost. It is all still there, and saving keeps it.
    */
   /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
@@ -1013,12 +1156,19 @@ export function EditorScreen({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  /*
+   * Reached only from the chooser, which is why it closes it: a stored photo IS
+   * the answer to the question the dialog was asking. A failure leaves it open
+   * instead, so the next file can be tried without reopening anything. The notice
+   * explaining why sits above it in the top layer.
+   */
   const upload = async (path: Path, file: File) => {
     try {
       const media = await storeFile(file)
       patchSegment(path, { media })
+      setChoosingFor(null)
     } catch {
-      setUploadError('That image could not be read — try a JPEG, PNG or WebP')
+      setUploadError('That image could not be read. Try a JPEG, PNG or WebP.')
     }
   }
 
@@ -1028,7 +1178,7 @@ export function EditorScreen({
   }
 
   /*
-   * Only a keystroke-by-keystroke field coalesces — see `isTypedPatch`. Anything
+   * Only a keystroke-by-keystroke field coalesces. See `isTypedPatch`. Anything
    * else, an image above all, is one deliberate act and gets one undo step.
    */
   const patchSegment = (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) =>
@@ -1037,7 +1187,7 @@ export function EditorScreen({
       isTypedPatch(patch) ? typingIn(path, 'name') : null,
     )
   /*
-   * Every field on a group is typed straight into, so all three coalesce — keyed
+   * Every field on a group is typed straight into, so all three coalesce, keyed
    * on the field, so a label and a rep count do not share a step.
    */
   const patchRepeat = (path: Path, patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>) =>
@@ -1049,7 +1199,7 @@ export function EditorScreen({
   /*
    * Switching a step between timed and counted is discrete, and undo should put
    * it back in one press rather than unwinding it through whatever typing came
-   * before. TYPING the number is the other case — a run of keystrokes, which
+   * before. TYPING the number is the other case: a run of keystrokes, which
    * collapses like any other, or "45" would cost two undos to take back.
    */
   const patchTiming = (path: Path, timing: Timing, typed = false) =>
@@ -1157,12 +1307,6 @@ export function EditorScreen({
           ))}
         </div>
 
-        {uploadError && (
-          <p className="editor__error label label--sm" role="alert">
-            {uploadError}
-          </p>
-        )}
-
         <p className="editor__stats label label--sm">
           <span>
             <span className="unit">{duration(totalDurationMs(preview))}</span> total
@@ -1173,12 +1317,12 @@ export function EditorScreen({
 
       <div className="editor__scroll">
         {rows.length === 0 ? (
-          <p className="editor__empty label label--sm">No steps yet — add one below</p>
+          <p className="editor__empty label label--sm">No steps yet. Add one below.</p>
         ) : (
           <ul className="editor__list">
             {rows.map(({ block, path, depth, first, last }) =>
               /*
-               * Ladders and sections have no row yet — the editor gains them with
+               * Ladders and sections have no row yet. The editor gains them with
                * the strength-routine work. Nothing in the app can author one, so
                * this branch is unreachable today; it is explicit rather than a
                * cast so adding a kind cannot silently render it as a repeat.
@@ -1227,11 +1371,9 @@ export function EditorScreen({
                   onPatch={patchSegment}
                   onTiming={patchTiming}
                   onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
-                  onClearImage={(p) => editBlocks((c) => clearMedia(c, p))}
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
-                  onPreview={(src, alt) => setImagePreview({ src, alt })}
+                  onPreview={setImagePreview}
                   onChoose={setChoosingFor}
-                  onUpload={upload}
                 />
               ) : (
                 <RepeatRow
@@ -1261,14 +1403,28 @@ export function EditorScreen({
             patchSegment(choosingFor, { media: ref })
             setChoosingFor(null)
           }}
+          onUpload={(file) => void upload(choosingFor, file)}
           onClose={() => setChoosingFor(null)}
         />
       )}
 
+      {/*
+        A SIBLING of the chooser, never a child: `close` reaches React's handlers
+        on the way up, so a notice nested inside would fire the chooser's own
+        onClose and shut it on dismissal. Rendered after it, so it sits above it
+        in the top layer.
+      */}
+      {uploadError !== null && (
+        <NoticeDialog text={uploadError} busy={false} onClose={() => setUploadError(null)} />
+      )}
+
       {imagePreview && (
-        <Lightbox
-          src={imagePreview.src}
-          alt={imagePreview.alt}
+        <ImageDialog
+          view={imagePreview}
+          onRemove={() => {
+            editBlocks((c) => clearMedia(c, imagePreview.path))
+            setImagePreview(null)
+          }}
           onClose={() => setImagePreview(null)}
         />
       )}
@@ -1279,7 +1435,7 @@ export function EditorScreen({
 
       {/*
         `data-kind` colours each button's left edge with the colour the row it
-        adds will carry — see `.editor__add .chip[data-kind]`. The word stays,
+        adds will carry. See `.editor__add .chip[data-kind]`. The word stays,
         because the colour is the second cue and never the only one.
       */}
       <div className="editor__add">

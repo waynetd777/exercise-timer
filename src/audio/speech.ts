@@ -4,7 +4,7 @@
  * Deliberately NOT part of the pre-scheduled cue system: speech cannot be queued
  * against the audio clock, so it is fired from the timer's tick instead and may
  * land a fraction of a second late. That is fine for "ten seconds left", which is
- * information rather than a beat, and it is why it lives in its own module — so
+ * information rather than a beat, and it is why it lives in its own module, so
  * nobody mistakes it for a scheduled cue.
  */
 /** Every phrase the app speaks, in one place so the bench and the timer agree. */
@@ -25,7 +25,7 @@ export function canSpeak(): boolean {
  * Primes the synthesiser from a user gesture.
  *
  * iOS drops the FIRST utterance a page makes unless the call happens inside a
- * gesture — and the opening line does not: it fires from an effect and then a
+ * gesture, and the opening line does not: it fires from an effect and then a
  * timeout, a beat after the tap. So "Let's go!" was silent the first time a
  * routine was started after opening the app, and fine every time after, which is
  * exactly what a dropped first utterance looks like.

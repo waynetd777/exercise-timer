@@ -4,7 +4,7 @@ import { SCHEMA_VERSION } from '../engine'
 /**
  * Importer for the `.tabata` export format used by the Tabata Timer app.
  *
- * `workout.intervals` is the FULLY EXPANDED sequence — the sibling fields
+ * `workout.intervals` is the FULLY EXPANDED sequence. The sibling fields
  * (`cycles`, `work`, `rest`, `prepare`, `restBetweenTabatas`, …) are the
  * template defaults the routine was generated from, not multipliers. Applying
  * `cycles` would triple a 42-minute workout. They are deliberately ignored.

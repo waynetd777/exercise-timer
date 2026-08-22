@@ -2,8 +2,8 @@
  * A unique id for a routine or a block.
  *
  * `crypto.randomUUID()` is **secure-context only**: on a plain-HTTP origin it is
- * `undefined`, and every call site here — New, Duplicate, paste, import, adding a
- * step — threw. That is exactly the origin a phone uses to test against a dev
+ * `undefined`, and every call site here threw: New, Duplicate, paste, import and
+ * adding a step. That is exactly the origin a phone uses to test against a dev
  * server on the LAN, so the app was unusable in the one place it most needs
  * trying out, while working perfectly over HTTPS.
  *
@@ -24,7 +24,7 @@ export function newId(): string {
     for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256)
   }
 
-  // Version 4, variant 1 — the two fields a v4 UUID is required to pin.
+  // Version 4, variant 1: the two fields a v4 UUID is required to pin.
   bytes[6] = (bytes[6]! & 0x0f) | 0x40
   bytes[8] = (bytes[8]! & 0x3f) | 0x80
 

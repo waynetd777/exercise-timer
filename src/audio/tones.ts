@@ -3,18 +3,18 @@ import type { SampleName } from './samples'
 
 /**
  * Cue definitions. All synthesised except the whistle, which is a CC0 recording
- * with the synthesised version kept as its fallback — see `samples.ts` for why
+ * with the synthesised version kept as its fallback. See `samples.ts` for why
  * that one gave up on synthesis and what licence lets it ship.
  *
  * The three-beep countdown always leads somewhere, and where it leads is what
  * changes:
  *
- *   work-start        beep beep beep WHISTLE   — a referee starting play
- *   work-end          beep beep beep BELL      — the round is over
+ *   work-start        beep beep beep WHISTLE   (a referee starting play)
+ *   work-end          beep beep beep BELL      (the round is over)
  *   workout-complete  beep beep beep DING DING DING, then the wrap-up line
  *
  * The beep and the bell are built from measurements of the app Wayne trains to.
- * The whistle is a recording — see `samples.ts`.
+ * The whistle is a recording. See `samples.ts`.
  */
 
 export type Note = {
@@ -44,7 +44,7 @@ export type Note = {
   /** Sample only. Shifts pitch and length together, as blowing harder does. */
   playbackRate?: number
   /**
-   * An inharmonic partial, as a multiple of `freq` — what makes a tone read as
+   * An inharmonic partial, as a multiple of `freq`. This is what makes a tone read as
    * metallic. `decayScale` shortens it, since a real bell's high partials die
    * before its body stops ringing.
    */
@@ -92,7 +92,7 @@ const BEEP: Note = {
  * nobody complained about: the file peaks at 0.92, and 0.92 x 0.46 lands on 0.42.
  *
  * The remaining fields are a LAST-RESORT fallback, used only if the recording
- * cannot be fetched or decoded. They make a plain 2900Hz tone — an audible cue in
+ * cannot be fetched or decoded. They make a plain 2900Hz tone: an audible cue in
  * the right register, and honestly not a whistle. Silence would be worse; a
  * second synthesis engine to avoid it would be worse still.
  */
@@ -110,8 +110,8 @@ const WHISTLE: Note = {
 
 
 /**
- * Measured from the app: 2659Hz with an INHARMONIC partial at x2.578 — the
- * inharmonicity is what makes it metallic rather than a plain tone — dropping to
+ * Measured from the app: 2659Hz with an INHARMONIC partial at x2.578. The
+ * inharmonicity is what makes it metallic rather than a plain tone, and dropping to
  * a third of peak within 25ms and still audible at 1.2s.
  */
 const BELL: Note = {
@@ -137,7 +137,7 @@ const ding = (atMs: number): Note => ({
   partial: { ratio: 2.74, gain: 0.11, decayScale: 0.5 },
 })
 
-/** The countdown, as its own cue — one beep, fired three times a second apart. */
+/** The countdown, as its own cue: one beep, fired three times a second apart. */
 const COUNTDOWN: ToneSpec = { notes: [BEEP] }
 const WORK_START: ToneSpec = { notes: [WHISTLE] }
 const WORK_END: ToneSpec = { notes: [BELL] }
@@ -176,7 +176,7 @@ export function sequenceFor(kind: Exclude<CueKind, 'countdown'>): ToneSpec {
   }
 }
 
-/** When the last note of a figure is struck — not when its tail dies away. */
+/** When the last note of a figure is struck, not when its tail dies away. */
 export function lastStrikeMs(spec: ToneSpec): number {
   return Math.max(...spec.notes.map((note) => note.atMs))
 }

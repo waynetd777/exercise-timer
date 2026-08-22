@@ -15,7 +15,7 @@ import type { Block, Segment, Workout } from '../engine'
  * code-only rename would leave existing routines saying "Round 2 of 3" forever.
  *
  * Only exact former defaults are renamed. A group someone deliberately named
- * "Round 1" or "Rounds" keeps its name — theirs to choose, not ours to correct.
+ * "Round 1" or "Rounds" keeps its name. Theirs to choose, not ours to correct.
  *
  * `'Rep'` is in the list because it was briefly the default during the rename:
  * short for repetitions, so it should always have been plural. It never shipped,
@@ -29,13 +29,13 @@ const REPEAT_LABEL = 'Reps'
  *
  * Every URL the catalogue has ever held, including the two duplicate uploads it
  * briefly listed and the four whose filenames changed when the set was
- * regenerated from the guide — "Seated Ab Crunch" is "Seated Abdominal Crunch"
+ * regenerated from the guide, so "Seated Ab Crunch" is "Seated Abdominal Crunch"
  * there, and "Cable Row" is "Seated Cable Row".
  *
  * Rewritten on READ, which is the whole reason this module exists: a routine
  * saved on the phone last week, and an export made last year, both come back with
  * pictures instead of dead links, with nothing to migrate in place. The old links
- * still work today — this is not a repair, it is cutting the dependency.
+ * still work today. This is not a repair, it is cutting the dependency.
  *
  * A pinned copy is dropped along with the URL. That is not a loss: a bundled
  * image is precached by the service worker, so it is available offline without
@@ -84,7 +84,7 @@ function migrateSegment(segment: Segment): Segment {
  * Every group is recursed into, not just repeats.
  *
  * It used to return a section or a ladder untouched, so a repeat nested in one
- * never had its label fixed — and now that steps carry images to rewrite, a
+ * never had its label fixed. And now that steps carry images to rewrite, a
  * pasted routine is nothing BUT sections, which would have made this migration
  * do nothing at all where it matters most.
  */

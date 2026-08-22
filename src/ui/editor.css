@@ -1,5 +1,5 @@
 /* ── Editor ────────────────────────────────────────────────────────────────
- * Header and add-buttons fixed, the step list scrolling between them — same
+ * Header and add-buttons fixed, the step list scrolling between them. The same
  * shape as the library, so the two screens behave alike.
  */
 .editor {
@@ -100,11 +100,6 @@
   height: 19px;
 }
 
-.editor__error {
-  margin: 0;
-  color: var(--role-work);
-}
-
 .editor__stats {
   display: flex;
   flex-wrap: wrap;
@@ -143,7 +138,7 @@
 
 /*
  * Each add button wears the colour of the thing it adds, as a rule down its left
- * edge — the same 4px rule the row itself gets, so the button and the row it
+ * edge, the same 4px rule the row itself gets, so the button and the row it
  * produces are visibly the same object. A swatch or a tinted ground would say
  * "this control is coloured"; a matching edge says "this makes that".
  */
@@ -177,6 +172,9 @@
  * routine readable while scrolling without adding any extra furniture.
  */
 .erow {
+  /* The containing block for its own controls panel, which hangs off the bottom
+     right on a narrow screen. */
+  position: relative;
   display: grid;
   gap: var(--step-2);
   padding: var(--step-3);
@@ -190,6 +188,14 @@
 .erow[data-role='work'] { border-left-color: var(--role-work); }
 .erow[data-role='rest'] { border-left-color: var(--role-rest); }
 .erow[data-role='recover'] { border-left-color: var(--role-recover); }
+
+/*
+ * An open panel has to paint over the rows below it, and a later sibling paints
+ * on top by default, so the row holding it is lifted for as long as it is open.
+ */
+.erow[data-tools] {
+  z-index: 2;
+}
 
 /* Indented so a step inside reps is visibly inside them. */
 .erow[data-depth='1'] {
@@ -209,26 +215,163 @@
 }
 
 /*
- * The note toggle, which lives with the FIELDS rather than in the action cluster
- * — it opens this step's own text, where every button in that cluster acts on the
- * row's position or existence. Sized like those buttons anyway, so the row still
- * reads as one band of controls rather than two.
+ * Every button the row has, in one group, with two entirely different jobs.
+ *
+ * BELOW the breakpoint it is a panel: out of the row's flow, hanging off the
+ * bottom-right corner, shown only when the ⋯ button opens it. The row itself is
+ * then just its fields, which is the only way it fits. The eight buttons want
+ * about 380pt; a phone row has about 311pt, and shrinking them to fit lands at
+ * 36px, well under the touch guideline. Two earlier attempts tried to win those
+ * 70pt back by rearranging the wrap, and both failed. A flex item is placed by
+ * its MAX-CONTENT width, so grouping buttons can only ever make them harder to
+ * place, never easier.
+ *
+ * ABOVE the breakpoint it is laid out inline at the trailing edge and the ⋯ button
+ * is gone. Which is also why grouping is safe up there: the breakpoint is set so
+ * the whole row fits on one line, so there is no wrapping left to get wrong.
+ *
+ * 64rem, not the row's true minimum of ~53rem: the deepest indent (two levels)
+ * takes 48px off the row, and the name field needs room to breathe rather than
+ * sitting at its 9rem floor.
  */
-.erow__main > .erow__note {
+/*
+ * The panel's anchor, and nothing else.
+ *
+ * Its only in-flow child on a narrow screen is the ⋯ button, so its box IS the
+ * button's box, which is what lets the panel open directly under or over the
+ * button instead of under the whole row. A row is two lines tall on a phone, and
+ * taller again with the note fields open, so those are not the same place.
+ *
+ * Above the breakpoint it holds the panel inline and carries the auto margin, so
+ * the trailing edge is the wrapper's job in both modes and `.erow__tools` never
+ * needs one.
+ */
+.erow__menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.erow__tools {
+  display: none;
+  position: absolute;
+  /* Directly below the ⋯ button and right-aligned to it. `100%` and `0` are the
+     button's own edges, since it is all `.erow__menu` contains. `--step-1` is the
+     gap the flip measurement in EditorScreen.tsx assumes; keep the two in step. */
+  top: calc(100% + var(--step-1));
+  right: 0;
+  /*
+   * `max-content`, and not left to `width: auto`.
+   *
+   * An absolutely positioned box with `auto` width is shrink-to-fit, sized against
+   * its CONTAINING BLOCK, which is now `.erow__menu`, all of 42px wide. So the
+   * available width is 42px, and shrink-to-fit then falls back to the content's
+   * min-content width. That is how this panel collapsed into a single vertical
+   * column of buttons the moment the cluster was allowed to wrap: wrapping made
+   * min-content one button wide.
+   *
+   * `max-content` says what is actually meant, as wide as the buttons need, and it
+   * does not care what it is anchored to. The cluster stays `nowrap` for the same
+   * reason: it is what holds the panel's width up.
+   *
+   * The button sits at the row's right edge whatever the row's indent, so the panel
+   * has the full list width to grow leftward into: 288px against a phone's ~361px.
+   */
+  width: max-content;
+  z-index: 2;
+  /* Its own two rows: the step's content, then the row's actions. */
+  gap: var(--step-2);
+  justify-items: end;
+  padding: var(--step-2);
+  background: var(--ink-700);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+
+.erow__tools[data-open] {
+  display: grid;
+}
+
+
+/*
+ * Opens upward instead, for a row with no room below it: the last few rows of the
+ * list, where a panel hanging off the bottom would be clipped by the scroller.
+ * Which rows those are is measured in `SegmentRow`; CSS cannot ask.
+ */
+.erow__tools[data-up] {
+  top: auto;
+  bottom: calc(100% + var(--step-1));
+}
+
+/* The panel already sits at the trailing edge; a second auto margin inside it
+   would strand the cluster against its right wall. */
+.erow__tools > .erow__actions {
+  margin-left: 0;
+}
+
+/*
+ * This step's own content, its picture and its words, as a pair, so they read
+ * as one thing beside the cluster that acts on the row itself.
+ */
+.erow__own {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--step-2);
+}
+
+/* Sized like the action cluster's buttons, so the group reads as one run of
+   controls rather than two kinds of thing. */
+.erow__own > .erow__note {
   flex: none;
   width: 42px;
   height: 42px;
 }
 
-.erow__note .icon {
+/* The way in to the panel, and only while there is no room to show it. */
+.erow__more {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.erow__more .icon {
   width: 19px;
   height: 19px;
 }
 
-/* Open is a state, not a hover: the fields below belong to this button. */
-.erow__note[aria-pressed='true']:not(:disabled) {
+.erow__more[aria-expanded='true'] {
   color: var(--bone);
   background: var(--ink-600);
+}
+
+@container (min-width: 64rem) {
+  /*
+   * `[data-open]` is repeated on purpose: it wins on specificity over the bare
+   * class, so without it a row whose panel happened to be open would keep the
+   * panel's `display: grid` up here and lose the inline layout.
+   */
+  .erow__tools,
+  .erow__tools[data-open] {
+    display: flex;
+    position: static;
+    align-items: center;
+    /* The wide gap is the whole visual argument for the grouping: it is what
+       separates the step's own buttons from the row's. */
+    gap: var(--step-4);
+    padding: 0;
+    width: auto;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .erow__more {
+    display: none;
+  }
 }
 
 .erow__actions {
@@ -248,56 +391,29 @@
   height: 19px;
 }
 
-.erow__image {
-  display: flex;
-  align-items: center;
-  gap: var(--step-2);
-}
-
-.erow__image .label {
-  flex: none;
-  color: var(--bone-faint);
-}
-
-/*
- * Remove the image, beside the image. Sized like the row's other icon buttons so
- * it reads as one of them, and it warms towards the danger colour on hover — it
- * throws something away, unlike the × in the box, which only clears a field.
- */
-.erow__image .erow__unset {
+/* Add an image. Beside the note toggle and sized like it: same kind of thing. */
+.erow__own > .erow__image {
   flex: none;
   width: 42px;
   height: 42px;
 }
 
-.erow__image .erow__unset .icon {
+.erow__image .icon {
   width: 19px;
   height: 19px;
 }
 
-.erow__image .erow__unset:hover {
-  color: var(--role-work);
-}
-
 /*
- * Why this step's picture will not be seen. Only ever rendered for a listed step
- * that already HAS an image — the row is absent altogether otherwise — so it
- * explains a leftover rather than nagging about a choice.
+ * The image it already has, in the same slot the add button occupied, so the
+ * band does not reflow when one arrives. 42px to match its neighbours: it is a
+ * hit target for the preview, not the preview itself.
  */
-.erow__unseen {
-  flex: 1 1 12rem;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--bone-faint);
-}
-
-/* Back to 44px — it is a hit target for the full-size preview, not the preview. */
-.erow__thumb {
+.erow__own > .erow__thumb {
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   padding: 0;
   overflow: hidden;
   background: var(--ink-900);
@@ -318,51 +434,16 @@
   object-fit: contain;
 }
 
-/* ── Lightbox ──────────────────────────────────────────────────────────────
- * A native dialog, sized to nearly fill the viewport with the image contained,
- * so it shows as large as it can without cropping.
- */
-/*
- * Already a transparent centring sheet, so it needs the insets rather than the
- * `.modal` box rules: its close button was under the island.
- */
-.lightbox {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: calc(var(--safe-top) + var(--step-4)) calc(var(--safe-right) + var(--step-4))
-    calc(var(--safe-bottom) + var(--step-4)) calc(var(--safe-left) + var(--step-4));
-  display: grid;
-  place-items: center;
-  background: none;
-  border: 0;
-  overflow: visible;
-}
-
-.lightbox::backdrop {
-  /* A literal colour: ::backdrop inheritance is not dependable enough to rely
-     on a custom property here. */
-  background: rgb(8 9 10 / 0.9);
-}
-
-.lightbox img {
-  /* max-* rather than 100%, so a small image is shown at its own size instead
-     of being scaled up into a blur. */
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: var(--radius);
-}
-
 /* ── Image picker ────────────────────────────────────────────────────────── */
-/* The panel inside `.modal` — see theme.css for why that is two elements. */
+/* The panel inside `.modal`. See theme.css for why that is two elements. */
 .picker {
   width: min(100%, 60rem);
   max-height: 100%;
   padding: var(--step-4);
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  /* head, grid, actions. The grid is the only row allowed to take the slack, so
+     the head and the Upload footer keep their heights whatever is scrolling. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: var(--step-4);
   color: var(--bone);
   background: var(--ink-800);
@@ -435,6 +516,20 @@
   border-radius: 6px;
 }
 
+/*
+ * The Upload footer. Centred and on its own line: it is the alternative to
+ * everything above it, not one more thing in the grid.
+ */
+.picker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  /* Chips keep their own height. A flex item defaults to stretching, which is
+     what turns a chip into a full-height slab. */
+  align-items: center;
+  justify-content: center;
+  gap: var(--step-3);
+}
+
 .picker__label {
   font-size: max(0.85rem, min(1.3cqi, 1rem));
   font-weight: 650;
@@ -443,13 +538,36 @@
   overflow-wrap: anywhere;
 }
 
-.lightbox__close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 48px;
-  height: 48px;
-  background: var(--ink-800);
+/* ── Image preview ─────────────────────────────────────────────────────────
+ * A `.notice` panel with a picture in it, so the layout that already survives
+ * iOS carries this too. See `.modal` in theme.css. Only the width and the
+ * picture itself are this dialog's own.
+ */
+.imgview {
+  /* Wider than a notice: this one is here to be looked at. */
+  width: min(100%, 34rem);
+}
+
+.imgview__img {
+  display: block;
+  /* `max-*`, so a small photo is shown at its own size rather than scaled up
+     into a blur. Capped in `dvh` to leave the name and the buttons room on a
+     short window. The panel scrolls if they still do not fit. */
+  max-width: 100%;
+  max-height: 58dvh;
+  object-fit: contain;
+  /* The illustrations are line art on transparency, so they need a light ground
+     to be legible, the same one the picker's tiles give them. */
+  background: var(--bone);
+  border-radius: 6px;
+}
+
+/* Stands in for the picture when the ref is set and its file is not here. */
+.imgview__missing {
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--bone-faint);
 }
 
 /* ── Fields ───────────────────────────────────────────────────────────── */
@@ -481,7 +599,7 @@
 /*
  * No spinner buttons: they are fiddly at this size and the field is edited by
  * typing. `type="number"` is kept, so arrow keys still nudge the value and
- * mobile still gets a numeric keypad — only the arrows are hidden.
+ * mobile still gets a numeric keypad. Only the arrows are hidden.
  */
 .efield--secs {
   width: 4.5rem;
@@ -604,7 +722,7 @@
  * and the ground, on the same principle as the role colours: the shape of the
  * routine should be readable down the left edge without reading a word.
  *
- * Both used to borrow a role's colour — a ladder was violet like Recover, and a
+ * Both used to borrow a role's colour. A ladder was violet like Recover, and a
  * section took `--phase`, which is the Rest blue by default. Seven kinds, seven
  * colours, or the left edge says something untrue.
  */
@@ -636,7 +754,7 @@
   color: var(--bone-dim);
 }
 
-/* Rungs are written as text — "5-10-15-20" — so this needs room to breathe. */
+/* Rungs are written as text, like "5-10-15-20", so this needs room to breathe. */
 .efield--counts {
   flex: 1 1 8rem;
   min-width: 6rem;
@@ -658,12 +776,33 @@
  * rung. Sized to the longest of those so the row does not reflow when it
  * changes, and left as a native select so the mobile picker still appears.
  */
+/*
+ * Sized for the label it SHOWS, not for the longest one in the list.
+ *
+ * A native select takes the width of its widest option, so a step reading "s"
+ * was holding the width of "rung each side": about 140pt of a phone's 311pt row,
+ * most of it empty. That was what pushed the button band onto lines of its own:
+ * the row was 7pt short of fitting the timing fields and the step's two buttons
+ * together, and the whole shortfall was in here.
+ *
+ * `em`, not `rem`, so each width tracks the type scale rather than pinning the
+ * field while its text grows. The two long labels get their own, and everything
+ * else fits the short one, since `s`, `×` and `rung` are 1 to 4 characters.
+ */
 .efield--unit {
   flex: none;
-  min-width: 5.5rem;
+  width: 5.5em;
   padding-inline: var(--step-2);
   text-transform: none;
   letter-spacing: 0;
+}
+
+.efield--unit[data-unit='reps-side'] {
+  width: 9em;
+}
+
+.efield--unit[data-unit='rung-side'] {
+  width: 10.5em;
 }
 
 /* Three levels exist now: section → group → step. */

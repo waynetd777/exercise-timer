@@ -12,7 +12,7 @@ import './sounds.css'
  * Each cue plays as the full figure, because timing is most of how a cue reads,
  * and as the terminal sound alone, because that is the part worth tuning. The
  * parameters are printed beside each one so a change can be asked for in the
- * terms it will be made in — "chop slower", "whistle deeper" — rather than
+ * terms it will be made in ("chop slower", "whistle deeper") rather than
  * described and guessed at.
  */
 
@@ -25,7 +25,7 @@ function describe(note: Note): string {
       `rate ${note.playbackRate ?? 1}`,
       audio.sampleReady(note.sample)
         ? 'decoded, so this is what plays'
-        : 'not decoded yet — the synthesised contour plays until it is',
+        : 'not decoded yet, so the synthesised contour plays until it is',
     ].join(' · ')
   }
 
@@ -100,7 +100,7 @@ function Card({
  * The spoken cues, which are a different mechanism entirely: speech cannot be
  * scheduled against the audio clock, so it is fired from the timer's tick and may
  * land a fraction late. Worth checking here because the voice is the browser's,
- * not ours — it differs by device and can be missing altogether.
+ * not ours. It differs by device and can be missing altogether.
  */
 function VoiceCard() {
   const available = canSpeak()
@@ -143,11 +143,11 @@ function VoiceCard() {
 
       <ul className="sound__notes">
         <li>
-          “{SPOKEN.start}” — just after the routine starts, once per run, not on
+          “{SPOKEN.start}”, just after the routine starts, once per run, not on
           resume from a pause
         </li>
-        <li>“{SPOKEN.tenSecondsLeft}” — at ten seconds left, on steps of 20s or more</li>
-        <li>“{SPOKEN.thatsAWrap}” — after the three dings, at the end of a routine</li>
+        <li>“{SPOKEN.tenSecondsLeft}”, at ten seconds left, on steps of 20s or more</li>
+        <li>“{SPOKEN.thatsAWrap}”, after the three dings, at the end of a routine</li>
         <li>
           rate {VOICE.rate} · volume {VOICE.volume} ·{' '}
           {available
@@ -163,12 +163,12 @@ const BENCH: { kind: Exclude<CueKind, 'countdown'>; title: string; signals: stri
   {
     kind: 'work-start',
     title: 'Whistle',
-    signals: 'Counting into a work step — a referee starting play, from a CC0 recording',
+    signals: 'Counting into a work step, like a referee starting play. From a CC0 recording.',
   },
   {
     kind: 'work-end',
     title: 'Bell',
-    signals: 'Counting out of a work step — the reps are over',
+    signals: 'Counting out of a work step. The reps are over.',
   },
 ]
 

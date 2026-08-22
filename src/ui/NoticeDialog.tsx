@@ -10,7 +10,7 @@ import { CloseIcon } from './icons'
  * inline notice just sits there afterwards with no way to clear it.
  *
  * While the work is still running there is nothing to dismiss, so no close
- * affordance is offered and Escape is swallowed — the dialog becomes a progress
+ * affordance is offered and Escape is swallowed. The dialog becomes a progress
  * report until it has something to say.
  */
 export function NoticeDialog({
@@ -44,7 +44,7 @@ export function NoticeDialog({
       }}
     >
       {/* The panel is its own element: a <dialog> styled as the box does not hug
-          its content on iOS — see `.modal` in theme.css. */}
+          its content on iOS. See `.modal` in theme.css. */}
       <div className="notice">
         <p className="notice__text">{text}</p>
 

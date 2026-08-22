@@ -6,7 +6,7 @@ import { hasBlob, putBlob } from './store'
 /**
  * Stores a file the user picked, ready to attach to a step.
  *
- * The only way an image enters storage now. `pinRemote` used to live here too —
+ * The only way an image enters storage now. `pinRemote` used to live here too,
  * it fetched a linked image and kept a local copy, which was the whole answer to
  * "what happens in a gym with no signal" while the illustrations were hosted
  * elsewhere. They ship with the app and are precached, so there is nothing left

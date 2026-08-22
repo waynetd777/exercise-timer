@@ -25,7 +25,7 @@ export type Library = {
 /**
  * The routine library, backed by IndexedDB.
  *
- * Seeds are offered ONCE EACH, tracked by id in `seeded.ts` — not "when the
+ * Seeds are offered ONCE EACH, tracked by id in `seeded.ts`, not "when the
  * library is empty". That way a newly added seed reaches an existing install,
  * and a seeded routine that gets deleted stays deleted. The pure operations
  * live in `library.ts`; this only wires them to storage and React state.
@@ -101,7 +101,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
         forgetBlob(hash)
       }
     } catch {
-      // A failed sweep leaves dead bytes behind, which is harmless — the same
+      // A failed sweep leaves dead bytes behind, which is harmless, the same
       // sweep runs on the next delete.
     }
   }, [])

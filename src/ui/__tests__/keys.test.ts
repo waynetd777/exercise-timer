@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { shortcutApplies } from '../keys'
 
-describe('shortcutApplies — which keys the run screen may take', () => {
+describe('shortcutApplies: which keys the run screen may take', () => {
   it('takes everything when nothing is focused', () => {
     for (const key of [' ', 'k', 'm', 'ArrowRight', 'ArrowLeft', 'Enter']) {
       expect(shortcutApplies(undefined, key), key).toBe(true)
@@ -12,7 +12,7 @@ describe('shortcutApplies — which keys the run screen may take', () => {
   it('still takes the arrows while a button has focus', () => {
     /*
      * The bug this exists for: clicking Play leaves the button focused, and the
-     * old rule ignored EVERY key while a button had focus — so skipping silently
+     * old rule ignored EVERY key while a button had focus, so skipping silently
      * stopped working unless the routine had been started with the spacebar.
      */
     expect(shortcutApplies('BUTTON', 'ArrowRight')).toBe(true)

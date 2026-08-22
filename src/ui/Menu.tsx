@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { CheckIcon, DownIcon } from './icons'
+import { useDismiss } from './useDismiss'
 
 export type MenuItem = {
   label: string
@@ -20,7 +21,7 @@ export type MenuItem = {
  * positioning, which is not dependable enough yet. This is a handful of lines
  * and behaves the same everywhere.
  *
- * Closes on selection, on Escape, and on a pointer down outside — `pointerdown`
+ * Closes on selection, on Escape, and on a pointer down outside. `pointerdown`
  * rather than `click`, so it closes on the press instead of waiting for the
  * release.
  */
@@ -55,32 +56,33 @@ export function Menu({
     })
   }
 
+  /*
+   * The list is placed in viewport coordinates, so a scroll or a resize leaves it
+   * pointing at nothing. That is this menu's own problem, since a popover
+   * positioned inside the thing it belongs to travels with it. So it stays here
+   * rather than
+   * going into `useDismiss`.
+   */
   useEffect(() => {
     if (!open) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node
-      if (!wrapper.current?.contains(target) && !document.getElementById(id)?.contains(target)) {
-        setOpen(false)
-      }
-    }
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    // A menu left behind by a scroll or a resize would point at nothing.
     const onMove = () => setOpen(false)
-
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKey)
     window.addEventListener('resize', onMove)
     window.addEventListener('scroll', onMove, true)
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKey)
       window.removeEventListener('resize', onMove)
       window.removeEventListener('scroll', onMove, true)
     }
-  }, [open, id])
+  }, [open])
+
+  // Both the trigger's wrapper and the list count as inside; the list is not a
+  // descendant of the wrapper, so it has to be found by id.
+  useDismiss(
+    open,
+    () => setOpen(false),
+    (target) =>
+      wrapper.current?.contains(target) === true ||
+      document.getElementById(id)?.contains(target) === true,
+  )
 
   return (
     <div className="menu" ref={wrapper}>

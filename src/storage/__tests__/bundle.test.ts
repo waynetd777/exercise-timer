@@ -32,7 +32,7 @@ describe('round trip', () => {
     expect(back).toHaveLength(1)
     expect(back[0]!.name).toBe('Leg day')
     expect(back[0]!.blocks).toEqual(workout().blocks)
-    // The timeline is what actually matters — it must compile identically.
+    // The timeline is what actually matters. It must compile identically.
     expect(compile(back[0]!)).toEqual(compile(workout()))
   })
 
@@ -72,7 +72,7 @@ describe('an uploaded photo travels in the file', () => {
   /*
    * The whole point of the media map. A bundled illustration is a path the app on
    * the other side already has; a photo taken on this device exists nowhere else,
-   * so if it does not go in the file it does not go at all — and since the
+   * so if it does not go in the file it does not go at all, and since the
    * image-link field was removed, this is the only route to another device.
    *
    * Tested at the FORMAT seam rather than through `importRoutineFiles`, because

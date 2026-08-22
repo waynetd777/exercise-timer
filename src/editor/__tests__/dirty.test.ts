@@ -93,7 +93,7 @@ describe('isDirty', () => {
     expect(isDirty(w, w.name, back)).toBe(false)
   })
 
-  it('is not fooled by key order — a patched object is compared by field', () => {
+  it('is not fooled by key order: a patched object is compared by field', () => {
     const w = workout()
     // Patching to the SAME value rewrites the object without changing content.
     const repatched = updateSegment(w.blocks, [0], { name: 'Get ready' })

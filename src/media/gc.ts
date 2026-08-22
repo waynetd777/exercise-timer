@@ -5,14 +5,14 @@ import type { Block, Workout } from '../engine'
  *
  * Content-addressed storage means a blob can be shared by several routines, so
  * deleting a routine must not delete an image another one still points at. This
- * is pure set arithmetic over the whole library — the only safe way to decide.
+ * is pure set arithmetic over the whole library, the only safe way to decide.
  */
 export function liveHashes(workouts: readonly Workout[]): Set<string> {
   const live = new Set<string>()
 
   const walk = (blocks: readonly Block[]): void => {
     for (const block of blocks) {
-      // Any group, not just `repeat` — missing one would orphan live images.
+      // Any group, not just `repeat`. Missing one would orphan live images.
       if (block.kind !== 'segment') {
         walk(block.children)
         continue
@@ -34,7 +34,7 @@ export function liveHashes(workouts: readonly Workout[]): Set<string> {
  *
  * Narrower than `liveHashes` on purpose: that one also counts a pinned copy of a
  * linked image, because the sweep must not delete a cache something still points
- * at. An export wants only what nothing else has — the illustrations that ship
+ * at. An export wants only what nothing else has, meaning the illustrations that ship
  * with the app need no bytes in the file, and a pinned copy of a link is a cache
  * rather than the original.
  */

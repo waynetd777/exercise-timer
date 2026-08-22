@@ -14,7 +14,7 @@ export type HelpSection = {
  * you memorise the answer before you can act on it. This slides in beside the
  * screen, and closing it puts you back exactly where you were.
  *
- * Sections are native `<details>`, and only one is open at a time — they share a
+ * Sections are native `<details>`, and only one is open at a time. They share a
  * `name`, which is the platform's own exclusive accordion. That is the whole
  * implementation: no state, no keyboard handling, no aria contract, and in-page
  * search still opens a closed section to show a match. A hand-rolled accordion
@@ -25,7 +25,7 @@ export type HelpSection = {
  *
  * The first section starts open so the tray does not read as a list of doors.
  * Because that `open` prop never changes value, React leaves the attribute alone
- * after mount — which is what lets the browser close it when another section is
+ * after mount, which is what lets the browser close it when another section is
  * opened, instead of React insisting it stay open.
  *
  * A modal `<dialog>` for the same reasons `NoticeDialog` is one: Escape, focus

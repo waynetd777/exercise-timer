@@ -3,7 +3,7 @@ import type { RoutinePosition } from '../engine'
 import { canSpeak, speak, SPOKEN } from './speech'
 import { lastStrikeMs, toneFor } from './tones'
 
-/** Steps shorter than this never announce — the countdown beeps cover them. */
+/** Steps shorter than this never announce: the countdown beeps cover them. */
 const MIN_STEP_MS = 20_000
 
 /** Announced when this many seconds remain. */
@@ -33,7 +33,7 @@ const AFTER_START_CUE_MS = 900
  *
  * These are a different mechanism from the beeps and bells. Speech cannot be
  * queued against the audio clock, so it is fired from the timer's tick and may
- * land a fraction late — fine for information, and not fine for a beat, which is
+ * land a fraction late. Fine for information, and not fine for a beat, which is
  * why it lives apart from the scheduled cues.
  */
 export function useSpokenCues(

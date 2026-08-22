@@ -20,7 +20,7 @@ import {
 import { defaultRoutineName } from '../PasteDialog'
 
 describe('clock', () => {
-  it('shows bare seconds under a minute — faster to read at three metres', () => {
+  it('shows bare seconds under a minute: faster to read at three metres', () => {
     expect(clock(0)).toBe('0')
     expect(clock(9)).toBe('9')
     expect(clock(59)).toBe('59')
@@ -95,7 +95,7 @@ describe('pathLabel', () => {
     ).toBe('Set 2 of 3 · Reps 1 of 8')
   })
 
-  it('hides a repeat that only runs once — it carries no information', () => {
+  it('hides a repeat that only runs once: it carries no information', () => {
     expect(pathLabel([{ label: 'Circuit', iteration: 1, of: 1 }])).toBe('')
   })
 
@@ -143,7 +143,7 @@ describe('wordCount', () => {
   })
 
   it('never returns zero, so it is safe as a divisor', () => {
-    // It divides the height budget in CSS — a zero would blow the font size up.
+    // It divides the height budget in CSS, and a zero would blow the font size up.
     expect(wordCount('')).toBe(1)
     expect(wordCount('   ')).toBe(1)
   })
@@ -171,7 +171,7 @@ describe('fitCqi always fits its container', () => {
 
   /**
    * A pessimistic advance. The sizing maths is exact by construction, so
-   * asserting against the assumed advance would prove nothing — the real
+   * asserting against the assumed advance would prove nothing. The real
    * question is whether the text still fits when the font is wider than
    * assumed, which is exactly how the portrait-iPad truncation happened.
    */
@@ -205,7 +205,7 @@ describe('fitCqi always fits its container', () => {
   })
 })
 
-describe('fitBlockCqi — text in a wide box', () => {
+describe('fitBlockCqi: text in a wide box', () => {
   it('leaves a short heading at full size', () => {
     expect(fitBlockCqi('Rest', 3, 11)).toBe(11)
   })
@@ -235,7 +235,7 @@ describe('fitBlockCqi — text in a wide box', () => {
   })
 })
 
-describe('listLines — sizing a group to fill the sheet', () => {
+describe('listLines: sizing a group to fill the sheet', () => {
   const rows = [
     { name: 'Bicep Curls' },
     { name: 'Arnold Press' },

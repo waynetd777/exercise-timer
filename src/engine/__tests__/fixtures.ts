@@ -65,7 +65,7 @@ export function tabata(): Workout {
   ])
 }
 
-/** A named circuit — the case a fixed Tabata timer cannot express. */
+/** A named circuit: the case a fixed Tabata timer cannot express. */
 export function circuit(): Workout {
   return workout('Upper body circuit', [
     rep(
@@ -137,7 +137,7 @@ export function section(
 }
 
 /**
- * "#2 ARMS & SHOULDERS — 4 Rounds", from the 17 Aug routine, trimmed to three
+ * "#2 ARMS & SHOULDERS", 4 rounds, from the 17 Aug routine, trimmed to three
  * exercises. Rep-based steps with a timed rest after each round: the mixed case
  * the whole runs-and-gates design exists for.
  */
@@ -164,7 +164,7 @@ export function armsSection(): Workout {
 }
 
 /**
- * "#3 LEGS — 20–16–12–8–4", the main-lift ladder with fixed accessories after
+ * "#3 LEGS", the 20-16-12-8-4 main-lift ladder with fixed accessories after
  * every set, including the last.
  */
 export function legsLadder(): Workout {

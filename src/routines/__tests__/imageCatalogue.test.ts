@@ -40,7 +40,7 @@ describe('IMAGE_CATALOGUE', () => {
    * What is actually in `public/exercises`, resolved by Vite at transform time.
    *
    * `import.meta.glob` rather than `node:fs` because `src` is typechecked with
-   * only `vite/client` types — pulling Node's in so a test could read a directory
+   * only `vite/client` types. Pulling Node's in so a test could read a directory
    * would let app code reach for `fs` by accident. The loaders are never called,
    * so nothing here ends up in a bundle.
    */
