@@ -6,7 +6,7 @@ import { sha256 } from '../media/hash'
 /**
  * The photos in an export file.
  *
- * The illustrations that ship with the app need nothing here — a bundled ref is
+ * The illustrations that ship with the app need nothing here. A bundled ref is
  * already a short path, and the picture is in the app on the other side. An
  * UPLOADED photo is different: its bytes live in this device's IndexedDB and
  * nothing else has them, so if they do not travel in the file they do not travel
@@ -50,7 +50,7 @@ export async function collectMedia(
  *
  * Every entry is re-hashed and compared against its key. The store is
  * content-addressed, so a key that lies about its contents would poison it for
- * every routine that shares the hash — and re-hashing costs a millisecond on a
+ * every routine that shares the hash, and re-hashing costs a millisecond on a
  * file that has just been read off disk. A bad entry is skipped and reported; the
  * routines still import, and a step whose photo was dropped shows no picture
  * rather than the wrong one.

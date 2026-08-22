@@ -35,7 +35,7 @@ describe('cues', () => {
     const short = cues(compile(workout('Short', [seg('Blip', 3)])))
     expect(short.filter((c) => c.kind === 'countdown').map((c) => c.value)).toEqual([2, 1])
 
-    // A 1s step gets no countdown at all — just its phase change.
+    // A 1s step gets no countdown at all, just its phase change.
     const blink = cues(compile(workout('Blink', [seg('Blink', 1)])))
     expect(blink.filter((c) => c.kind === 'countdown')).toEqual([])
     expect(blink.map((c) => c.kind)).toEqual(['work-start', 'workout-complete'])

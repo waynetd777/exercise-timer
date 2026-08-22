@@ -7,8 +7,8 @@ import { resolvePlan } from '../media/resolve'
  *
  * `ref` is what gets stored and `src` is what the picker renders; they are not
  * the same thing for a bundled image, whose ref is a base-less path so the
- * routine survives a change of host. `id` is the stable identity — the path or
- * the URL — used for deduplication and as the React key.
+ * routine survives a change of host. `id` is the stable identity, the path or the
+ * URL, used for deduplication and as the React key.
  */
 export type KnownImage = {
   id: string
@@ -47,7 +47,7 @@ function walk(blocks: readonly Block[], visit: (ref: MediaRef, name: string) => 
     }
     /*
      * Bundled as well as remote, or every catalogue image a routine actually uses
-     * would look unused — and an image a routine brought would be missing from
+     * would look unused, and an image a routine brought would be missing from
      * the picker entirely. An uploaded photo is deliberately left out: its bytes
      * live in IndexedDB, so it has no src to show without reading storage, and
      * the picker resolves synchronously.
@@ -60,7 +60,7 @@ function walk(blocks: readonly Block[], visit: (ref: MediaRef, name: string) => 
  * A readable name from an image path or URL: the filename, without its extension,
  * with separators turned back into spaces. "Cable-Fly.jpg" -> "Cable Fly".
  *
- * Deriving beats storing a parallel list of names — there is nothing to keep in
+ * Deriving beats storing a parallel list of names, since there is nothing to keep in
  * sync, and the catalogue's filenames are already the exercise names.
  */
 export function labelFromUrl(url: string): string {
@@ -74,7 +74,7 @@ export function labelFromUrl(url: string): string {
  * already uses that is not in it.
  *
  * A catalogue entry keeps its filename label even when a routine uses it under
- * some other step name — "Cycling" describes the picture better than "Warm Up"
+ * some other step name. "Cycling" describes the picture better than "Warm Up"
  * does. Anything outside the catalogue falls back to the step name it appears
  * under most often.
  */

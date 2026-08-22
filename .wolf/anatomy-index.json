@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-21T21:32:57.638Z",
-    "fileCount": 25,
+    "lastScanned": "2026-08-22T15:32:41.959Z",
+    "fileCount": 26,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "cf03e64e961ab3d57cfd2983ed83eab3838abb580471d4a2c5323aa354f29fc0",
-    "storeUpdatedAt": "2026-08-21T21:32:57.658Z"
+    "renderedHash": "1403795c0304d1e6c1cca7f946d33aa985ee5569b2522d410680822627c54b2d",
+    "storeUpdatedAt": "2026-08-22T15:32:41.965Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -363,6 +363,15 @@
       "size": 565,
       "mtimeMs": 1787347977568.2292,
       "updatedAt": "2026-08-21T21:32:57.631Z",
+      "source": "hook"
+    },
+    "src/ui/useDismiss.ts": {
+      "description": "Closes a transient overlay — a menu, a popover — on Escape or a press outside",
+      "tokens": 448,
+      "hash": "798841ea6d89bd17",
+      "size": 1569,
+      "mtimeMs": 1787412761898.082,
+      "updatedAt": "2026-08-22T15:32:41.958Z",
       "source": "hook"
     }
   },

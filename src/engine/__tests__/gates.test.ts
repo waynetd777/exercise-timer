@@ -182,7 +182,7 @@ describe('a round clears with ONE tap', () => {
       { selfPaced: false, names: ['Rest'] },
       { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
       { selfPaced: false, names: ['Rest'] },
-      // The fourth round has no rest after it — the trailing-rest rule.
+      // The fourth round has no rest after it, by the trailing-rest rule.
       { selfPaced: true, names: ['Bicep Curls', 'Arnold Press', 'Upright Rows'] },
     ])
   })
@@ -253,7 +253,7 @@ describe('a ladder rung clears with ONE tap', () => {
 
   it('keeps a timed step inside the rung on its own clock', () => {
     // A 10-second wall sit is worth counting down, so it is not swallowed by the
-    // tap that clears the reps — it plays itself and flows into the next rung.
+    // tap that clears the reps. It plays itself and flows into the next rung.
     const routine = compile(legsLadder())
 
     expect(routine.runs.slice(0, 4).map((run) => ({

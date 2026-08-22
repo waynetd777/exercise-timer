@@ -3,7 +3,7 @@
  *
  * A temporary anchor rather than anything cleverer: it is the only approach that
  * works in every browser, including an installed PWA. The object URL is revoked
- * on the next tick — revoking it immediately can cancel the download in some
+ * on the next tick. Revoking it immediately can cancel the download in some
  * browsers before it has started reading.
  */
 export function downloadJson(filename: string, data: unknown): void {

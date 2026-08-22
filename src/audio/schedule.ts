@@ -28,7 +28,7 @@ export function cueKey(cue: CuePoint): string {
  * The cues an arm should queue: everything inside the lookahead window that has
  * not been queued already.
  *
- * Extracted from the hook so the rolling window can be simulated end to end —
+ * Extracted from the hook so the rolling window can be simulated end to end:
  * every cue of a real routine scheduled exactly once, none missed, none twice.
  */
 export function dueCues(
@@ -43,7 +43,7 @@ export function dueCues(
 
 /**
  * The keys to forget after a cancellation, so the next arm queues those cues
- * again — used when the SOUND of a queued cue has changed under it, which is what
+ * again. Used when the SOUND of a queued cue has changed under it, which is what
  * happens when a recording finishes decoding mid-window.
  *
  * Not simply all of them: `cancelPending` spares a cue that has begun or is about

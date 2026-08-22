@@ -9,7 +9,7 @@
  *
  * What a focused control actually consumes is narrower than that:
  *
- * - A text field or a select takes every key — typing must never trigger a
+ * - A text field or a select takes every key. Typing must never trigger a
  *   shortcut, and a select's own arrow keys change its value.
  * - A button takes Space and Enter, which activate it. Those are left alone, so
  *   the press does one thing rather than the button's action AND play/pause.

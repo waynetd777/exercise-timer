@@ -3,25 +3,25 @@
  *
  * Two models live here:
  *
- *  - The AUTHORING model (`Workout`, `Block`) — a recursive tree the user edits.
+ *  - The AUTHORING model (`Workout`, `Block`), a recursive tree the user edits.
  *    Three group primitives cover everything seen so far: `repeat` (Tabata,
  *    circuits, nested sets), `ladder` (a repeat whose rep count changes each
  *    iteration) and `section` (a named part of a routine, with its own display
  *    mode).
  *
- *  - The RUNTIME model (`Routine`, `Run`, `TimelineEntry`) — flat arrays produced
+ *  - The RUNTIME model (`Routine`, `Run`, `TimelineEntry`), flat arrays produced
  *    once by `compile()`. Everything the runner does is a pure lookup against
  *    them, which is what makes seek/skip trivial and the whole engine testable
  *    with a fake clock.
  *
- * RUNS AND GATES — the one idea to understand before changing anything here.
+ * RUNS AND GATES: the one idea to understand before changing anything here.
  *
  * A step either has a duration and advances itself, or is SELF-PACED and waits
  * for the user to tap Next. Not every routine is a timer: a strength session is
  * mostly rep-based, with timed steps (a 45s rest, a 30s plank) mixed in.
  *
  * So a routine compiles to a sequence of RUNS. A run is a maximal span of
- * consecutive timed steps, and it is an ordinary absolute-time timeline — inside
+ * consecutive timed steps, and it is an ordinary absolute-time timeline. Inside
  * one, everything works exactly as it always has: `position()` is a binary search,
  * cues pre-schedule on the audio clock, and a phone that has been in a pocket for
  * ten minutes lands on the right step rather than the next one. Between runs sit
@@ -38,14 +38,14 @@ export type SegmentRole = 'prepare' | 'work' | 'rest' | 'recover' | 'custom'
 
 /**
  * Where a step's image comes from. Resolved to a URL by `resolveMedia()` in
- * src/media — the UI never branches on this itself.
+ * src/media, and the UI never branches on this itself.
  *
  *  - `bundled` the illustrations committed to `public/exercises/`, addressed
  *              relative to `import.meta.env.BASE_URL`. The primary source, and
  *              the reason a routine survives a change of host: it stores a short
  *              base-less path, which also keeps a URL share link small.
  *  - `local`   own photos, content-addressed by sha256 of the stored blob.
- *  - `remote`  a link. LEGACY: nothing creates one any more — the editor's link
+ *  - `remote`  a link. LEGACY: nothing creates one any more. The editor's link
  *              field is gone and `.tabata` imports are rewritten to bundled
  *              paths by `storage/migrate.ts`. It stays readable because routines
  *              saved before the move carry it, `cachedHash` included, and those
@@ -66,9 +66,9 @@ export type MediaRef =
  * "complete without stopping".
  *
  * Nothing is hidden by this. The list shows every step of the gate at once, all
- * of them marked as being worked — one tap says you have done the block.
+ * of them marked as being worked, and one tap says you have done the block.
  *
- * A TIMED step inside the iteration is never swallowed by the tap — it keeps its
+ * A TIMED step inside the iteration is never swallowed by the tap. It keeps its
  * own run, so the 45-second rest after a round and the 10-second wall sit after
  * a rung still count themselves down.
  *
@@ -79,7 +79,7 @@ export type Advance = 'set' | 'step'
 /**
  * How many reps a step calls for.
  *
- * Display only — the app cannot count reps, and a rep-based step ends when the
+ * Display only: the app cannot count reps, and a rep-based step ends when the
  * user taps Next. `perSide` records that the count is PER SIDE ("10 × Walking
  * Lunges (5 each leg)" is `{ count: 5, perSide: true }`), which is information
  * the user needs and the app must not silently double.
@@ -139,7 +139,7 @@ export type Repeat = {
  * whole ladder before the next begins.
  *
  * Unlike a repeat's trailing rest, everything in a ladder runs on the FINAL rung
- * too — "after every set" includes the last set. Two similar-looking rules with
+ * too, because "after every set" includes the last set. Two similar-looking rules with
  * opposite answers, both deliberate.
  */
 export type Ladder = {
@@ -167,18 +167,18 @@ export type Ladder = {
 export type SectionDisplay = 'timer' | 'list'
 
 /**
- * A named part of a routine — "#2 Arms & Shoulders", "Warm-up", "Final Burnout".
+ * A named part of a routine: "#2 Arms & Shoulders", "Warm-up", "Final Burnout".
  *
  * Sections exist for the RUN SCREEN. `display: 'timer'` is the original one-step
  * countdown; `display: 'list'` shows the whole group on screen at once with the
- * current row highlighted, which is what a rep-based section needs — you have to
+ * current row highlighted, which is what a rep-based section needs. You have to
  * read the next four exercises, not be told them one at a time.
  *
  * `note` carries the instruction that applies to the whole section, e.g.
  * "No rest between exercises. Rest 45 seconds after each round."
  *
  * The data model allows a section anywhere; the editor only offers them at the
- * top level. Same arrangement as the two-level nesting cap — a UI decision, not a
+ * top level. Same arrangement as the two-level nesting cap: a UI decision, not a
  * schema one.
  */
 export type Section = {
@@ -215,7 +215,7 @@ export const SCHEMA_VERSION = 1 as const
  * the picker reads as a palette instead of a list.
  *
  * These are labels, not phase colours. The run screen's green/red/blue mean get
- * ready/work/rest and a routine's tint deliberately does NOT override them —
+ * ready/work/rest, and a routine's tint deliberately does NOT override them.
  * recolouring the countdown would break the one thing that is readable across a
  * gym at a glance.
  */
@@ -243,7 +243,7 @@ export type Workout = {
 }
 
 /**
- * One level of grouping above a timeline entry — a section, a repeat iteration or
+ * One level of grouping above a timeline entry: a section, a repeat iteration or
  * a ladder rung. Renders as "Reps 3 of 8", "Set 4 of 9".
  *
  * A section contributes a level with `iteration: 1, of: 1`, which `pathLabel()`
@@ -272,7 +272,7 @@ export type PathStep = {
  * A single step of a compiled routine.
  *
  * A TIMED step occupies the half-open interval `[startMs, endMs)`. **Those are
- * relative to the start of the step's RUN, not the routine** — a routine with
+ * relative to the start of the step's RUN, not the routine**. A routine with
  * gates has no single time axis to be absolute against. For a fully timed
  * routine there is one run, so the two are the same thing.
  *
@@ -315,7 +315,7 @@ export type Run = {
   index: number
   /**
    * A timed run holds consecutive timed steps. A self-paced run holds ONE step,
-   * unless they belong to a group that advances as a whole — a ladder rung — in
+   * unless they belong to a group that advances as a whole, such as a ladder rung, in
    * which case it holds all of them and one Next clears the lot.
    */
   entries: TimelineEntry[]
@@ -350,8 +350,8 @@ export type Routine = {
  * Every boundary is simultaneously the end of one step and the start of the
  * next, so what distinguishes these is WHICH KIND of step is being entered:
  *
- *   `work-start`  entering a work step — a referee's whistle, play begins
- *   `work-end`    entering anything else — a bell, the round is over
+ *   `work-start`  entering a work step: a referee's whistle, play begins
+ *   `work-end`    entering anything else: a bell, the round is over
  *
  * That is why there is no single "phase change": the two moments mean opposite
  * things to someone mid-effort and should not sound alike.
@@ -371,7 +371,7 @@ export type CuePoint = {
 export type Position = {
   /** `null` once the workout is complete, or if the timeline is empty. */
   entry: TimelineEntry | null
-  /** The step after `entry` — used to preload its image before the transition. */
+  /** The step after `entry`, used to preload its image before the transition. */
   nextEntry: TimelineEntry | null
   /** Index of `entry`, or `entries.length` when complete. */
   index: number

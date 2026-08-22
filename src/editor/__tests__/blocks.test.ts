@@ -107,7 +107,7 @@ describe('appendTo', () => {
     expect(names(appendTo(tree(), [1], seg('X')))).toEqual(['A', '[R]', 'B', 'C', 'X', 'D'])
   })
 
-  it('leaves a segment alone — it has no children to append to', () => {
+  it('leaves a segment alone: it has no children to append to', () => {
     expect(names(appendTo(tree(), [0], seg('X')))).toEqual(['A', '[R]', 'B', 'C', 'D'])
   })
 })
@@ -145,7 +145,7 @@ describe('moveBy', () => {
   })
 
   it('does not move a block out of its repeat', () => {
-    // Moving the first child up stays inside — it does not become a sibling of
+    // Moving the first child up stays inside. It does not become a sibling of
     // the repeat itself.
     expect(names(moveBy(tree(), [1, 0], -1))).toEqual(['A', '[R]', 'B', 'C', 'D'])
   })
@@ -254,7 +254,7 @@ const base = {
   updatedAt: 0,
 }
 
-describe('newRoutineBlocks — what a new routine opens on', () => {
+describe('newRoutineBlocks: what a new routine opens on', () => {
   const template = newRoutineBlocks()
 
   it('is get set, three rounds of work and rest, get set again, then recover', () => {
@@ -368,7 +368,7 @@ describe('duplicateAt', () => {
   })
 })
 
-describe('moveStep — moving through rounds, not just around them', () => {
+describe('moveStep: moving through rounds, not just around them', () => {
   // A: 0, R: 1 (B: [1,0], C: [1,1]), D: 2
   it('moves a step down INTO the round that follows it', () => {
     expect(names(moveStep(tree(), [0], 1))).toEqual(['[R]', 'A', 'B', 'C', 'D'])
@@ -417,7 +417,7 @@ describe('moveStep — moving through rounds, not just around them', () => {
     expect(blockAt(blocks, [2])).toMatchObject({ kind: 'repeat', children: [] })
   })
 
-  it('only swaps rounds — it never nests one inside another', () => {
+  it('only swaps rounds: it never nests one inside another', () => {
     const two = [rep('R1', [seg('A')]), rep('R2', [seg('B')])]
     const moved = moveStep(two, [0], 1)
     expect(moved.map((b) => b.id)).toEqual(['R2', 'R1'])
@@ -495,7 +495,7 @@ describe('the tree operations reach every kind of group', () => {
   })
 })
 
-describe('setTiming — a step is timed OR counted, never both', () => {
+describe('setTiming: a step is timed OR counted, never both', () => {
   const stepAt = (blocks: Block[]) => blockAt(blocks, [0]) as Segment
 
   it('switching to reps DELETES the duration rather than blanking it', () => {
@@ -543,13 +543,13 @@ describe('setTiming — a step is timed OR counted, never both', () => {
 
     const cleared = { ...stepAt(reps) }
     delete cleared.reps
-    // 10s, the default for a rest — not the 20s of the work step it started as.
+    // 10s, the default for a rest, not the 20s of the work step it started as.
     expect(timingOf(cleared)).toEqual({ kind: 'timed', durationMs: 10_000 })
   })
 })
 
 describe('wrapInRepeat, with the new kinds around', () => {
-  it('wraps a ladder — "3 rounds of this ladder" is a real thing to ask for', () => {
+  it('wraps a ladder: "3 rounds of this ladder" is a real thing to ask for', () => {
     const wrapped = wrapInRepeat([newLadder()], [0])
     expect(wrapped[0]?.kind).toBe('repeat')
     expect((wrapped[0] as Repeat).children[0]?.kind).toBe('ladder')
@@ -566,7 +566,7 @@ describe('wrapInRepeat, with the new kinds around', () => {
   })
 })
 
-describe('clearText — emptying a note removes it', () => {
+describe('clearText: emptying a note removes it', () => {
   const noted = (): Block[] => [{ ...seg('Squats'), note: 'chest up', alternative: 'box squat' }]
 
   it('deletes the key rather than storing an empty string', () => {
@@ -587,7 +587,7 @@ describe('clearText — emptying a note removes it', () => {
   })
 })
 
-describe('shownAsList — where an image can never be seen', () => {
+describe('shownAsList: where an image can never be seen', () => {
   /** A counted step: no duration, so it waits for a tap. */
   const counted = (name: string): Segment => ({
     kind: 'segment',
@@ -610,7 +610,7 @@ describe('shownAsList — where an image can never be seen', () => {
     expect(shownAsList(blocks, [0, 0])).toBe(true)
   })
 
-  it('is false for a TIMED step in the same section — it runs as the countdown', () => {
+  it('is false for a TIMED step in the same section: it runs as the countdown', () => {
     const blocks = [section([seg('Plank', 30), counted('Press')])]
     expect(shownAsList(blocks, [0, 0])).toBe(false)
   })
@@ -640,8 +640,8 @@ describe('shownAsList — where an image can never be seen', () => {
     /*
      * The property that matters, checked against the authority: every entry the
      * runtime draws as a list row must be one the editor calls listed. The
-     * converse does not hold — the last remaining row of a group runs as the
-     * countdown — so this is a one-way check by design.
+     * converse does not hold, because the last remaining row of a group runs as
+     * the countdown, so this is a one-way check by design.
      */
     const blocks: Block[] = [
       seg('Get ready', 5),
@@ -673,7 +673,7 @@ describe('shownAsList — where an image can never be seen', () => {
   })
 })
 
-describe('isTypedPatch — which edits share an undo step', () => {
+describe('isTypedPatch: which edits share an undo step', () => {
   it('coalesces a name, which is bound to every keystroke', () => {
     expect(isTypedPatch({ name: 'Squa' })).toBe(true)
   })
@@ -695,7 +695,7 @@ describe('isTypedPatch — which edits share an undo step', () => {
     expect(isTypedPatch({ alternative: 'box squat' })).toBe(false)
   })
 
-  it('treats a mixed patch as discrete — all of it has to be typing', () => {
+  it('treats a mixed patch as discrete: all of it has to be typing', () => {
     expect(isTypedPatch({ name: 'Squats', role: 'work' })).toBe(false)
   })
 

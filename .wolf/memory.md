@@ -83,3 +83,10 @@
 | 23:32 | Created src/version.ts | — | ~161 |
 | 00:17 | iOS pass on the device: safe areas, dialog structure (sheet+panel), lvh shell, no document scroll, newId for insecure contexts, version badge, touch scrollbars, iOS zoom | src/ui/*, src/id.ts, src/version.ts, index.html | 13 commits, 511 tests green | ~200k |
 | 00:35 | Primed speech from the gesture so the first "Let's go!" plays; confirmed on the device from a cold start | src/audio/speech.ts, src/ui/RunScreen.tsx | bug-042 fixed, v1.4 deployed | ~15k |
+| 01:43 | Session end: 13 writes across 13 files (HelpTray.tsx, help.ts, pasteTemplate.ts, pasteTemplate.test.ts, exercise_plates.py) | 6 reads | ~12779 tok |
+
+## Session: 2026-08-21 01:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:32 | Created src/ui/useDismiss.ts | — | ~448 |

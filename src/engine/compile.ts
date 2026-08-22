@@ -151,8 +151,8 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
  * "complete without stopping". Tapping through those separately is five taps for
  * one thing you just did.
  *
- * Nothing is hidden — the list draws every step of the gate, all marked as being
- * worked — so the only cost of collapsing is losing per-exercise progress, which
+ * Nothing is hidden. The list draws every step of the gate, all marked as being
+ * worked, so the only cost of collapsing is losing per-exercise progress, which
  * is not progress anyone is tracking mid-set.
  */
 function gateKey(entry: TimelineEntry): string | null {
@@ -172,7 +172,7 @@ function gateKey(entry: TimelineEntry): string | null {
  * into runs.
  *
  * Expands every repeat and ladder into its iterations and records the group path
- * on each entry, so the UI can render "Reps 3 of 8" and — more importantly — find
+ * on each entry, so the UI can render "Reps 3 of 8" and, more importantly, find
  * the other entries of the innermost group, which is what list mode draws. Media
  * refs pass straight through, so the runner reads `entry.media` without walking
  * back up to the authoring model.
@@ -249,7 +249,7 @@ export function compile(workout: Workout): Routine {
  * that exists once a routine can wait for a tap. A fully timed routine yields
  * exactly one run, and then run time and routine time are the same thing.
  *
- * The entry objects are shared between `routine.entries` and `run.entries` — the
+ * The entry objects are shared between `routine.entries` and `run.entries`. The
  * same steps seen two ways, never copied.
  */
 function partition(entries: TimelineEntry[]): Routine {
@@ -306,7 +306,7 @@ function partition(entries: TimelineEntry[]): Routine {
 }
 
 /**
- * Total TIMED length without building a routine — cheap enough to call for every
+ * Total TIMED length without building a routine, cheap enough to call for every
  * row of the library list. Agrees with `compile(workout).totalMs` by
  * construction; asserted in the tests.
  *

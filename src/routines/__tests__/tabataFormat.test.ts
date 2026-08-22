@@ -22,7 +22,7 @@ describe('importTabataFile', () => {
     expect(totalDurationMs(workout)).toBe(2_529_000)
   })
 
-  it('ignores `cycles` — the intervals are already expanded', () => {
+  it('ignores `cycles`: the intervals are already expanded', () => {
     // The file says cycles: 3. Honouring it would produce a 126-minute workout.
     expect(totalDurationMs(workout)).toBeLessThan(60 * 60 * 1000)
   })
@@ -83,7 +83,7 @@ describe('importTabataFile', () => {
 
 describe('the other seeded routines', () => {
   it('imports the full-body routine, including its type-3 recovery intervals', () => {
-    // type 3 is 60s with no description and matches restBetweenTabatas: 60 —
+    // type 3 is 60s with no description and matches restBetweenTabatas: 60,
     // the long recovery between exercises, mapped to the `recover` role.
     const workout = importTabataFile(rawFullBody)
     const timeline = compile(workout)
@@ -153,7 +153,7 @@ describe('the other seeded routines', () => {
      * The seed has reps groups because it was authored that way, not because the
      * importer found them. This is the invariant that matters: the same exercise
      * three times in a row is not proof of intent, and guessing would silently
-     * change someone's workout — a trailing rest is dropped inside a group.
+     * change someone's workout. A trailing rest is dropped inside a group.
      */
     for (const workout of IMPORTED_ROUTINES) {
       expect(workout.blocks.every((b) => b.kind === 'segment'), workout.name).toBe(true)

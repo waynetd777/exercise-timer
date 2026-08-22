@@ -10,7 +10,7 @@ import { NoticeDialog } from './NoticeDialog'
  * What a pasted routine is called unless it is renamed.
  *
  * Dated because they arrive weekly on one template and are otherwise
- * indistinguishable in the library — "Strength training" four times over tells
+ * indistinguishable in the library. "Strength training" four times over tells
  * you nothing about which is this week's.
  */
 export function defaultRoutineName(now: Date): string {
@@ -21,7 +21,7 @@ export function defaultRoutineName(now: Date): string {
  * Paste a routine in as text.
  *
  * The routines arrive as a weekly email, so this is the main way a real one gets
- * into the app — quicker than the editor by an order of magnitude, and the same
+ * into the app, quicker than the editor by an order of magnitude, and the same
  * grammar arrives by WhatsApp and Notes, which is why this is a paste box rather
  * than an `.eml` importer.
  *
@@ -53,12 +53,12 @@ export function PasteDialog({
    * Hands over an example of everything the parser understands.
    *
    * To the clipboard rather than into the box, so it can be edited where the
-   * routine actually lives — a phone's Notes, or the reply to the email it
-   * arrived in — and so it cannot overwrite something already typed here.
+   * routine actually lives, such as a phone's Notes or the reply to the email it
+   * arrived in, and so it cannot overwrite something already typed here.
    *
    * A clipboard write can be refused: an insecure context, or a browser wanting
    * a fresher gesture. The template is more use in the box than in an apology, so
-   * that is the fallback — but only when there is nothing there to lose.
+   * that is the fallback, but only when there is nothing there to lose.
    */
   const copyTemplate = async () => {
     try {
@@ -82,7 +82,7 @@ export function PasteDialog({
   return (
     <>
       <dialog ref={dialog} className="modal" onCancel={onCancel} onClose={onCancel}>
-        {/* The panel is its own element — see `.modal` in theme.css. */}
+        {/* The panel is its own element. See `.modal` in theme.css. */}
         <div className="paste">
       <h2 className="paste__title">Paste a routine</h2>
 
@@ -144,7 +144,7 @@ export function PasteDialog({
           <CloseIcon />
           Cancel
         </button>
-        {/* Importing with unread lines is allowed — they are listed above, and a
+        {/* Importing with unread lines is allowed. They are listed above, and a
             routine with one odd line should not be unimportable. */}
         <button
           type="button"

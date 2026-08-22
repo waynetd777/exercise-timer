@@ -14,7 +14,7 @@ const KIND_RANK = {
 /**
  * Every audio cue for a workout, as absolute offsets from its start.
  *
- * Precomputed so the audio layer can pre-schedule on the Web Audio clock —
+ * Precomputed so the audio layer can pre-schedule on the Web Audio clock.
  * beeps must not be fired from a JS tick, or a throttled tab cues late.
  *
  * A countdown beep is emitted only if it falls strictly after the step's start,
@@ -54,7 +54,7 @@ export function cues(timeline: Timeline): CuePoint[] {
 }
 
 /**
- * Cues in the half-open window `[fromMs, toMs)` — the rolling lookahead the
+ * Cues in the half-open window `[fromMs, toMs)`, the rolling lookahead the
  * audio scheduler arms on each pass. Half-open so consecutive windows neither
  * drop nor double-fire a cue.
  */
@@ -67,8 +67,8 @@ export function cuesBetween(all: CuePoint[], fromMs: number, toMs: number): CueP
  * The cues for ONE run, which is what the scheduler arms against.
  *
  * `cues()` describes a whole workout, and handing it a single run made it say
- * three wrong things: the finishing dings landed at the end of every run — after
- * the warm-up, after each 45-second rest — and a gate, whose steps all sit at
+ * three wrong things. The finishing dings landed at the end of every run, after
+ * the warm-up and after each 45-second rest. And a gate, whose steps all sit at
  * time zero, emitted one boundary cue per step stacked on the same millisecond.
  *
  * A gate gets ONE cue, at the moment it opens: a whistle to start the set, which

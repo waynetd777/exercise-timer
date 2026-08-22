@@ -3,7 +3,7 @@
  *
  * What is dropped and what is kept matters:
  *   - DROPPED: the Workbox precache (the HTML, JS and CSS of the app itself).
- *   - KEPT:    IndexedDB — every routine and its edits. This must never be
+ *   - KEPT:    IndexedDB, every routine and its edits. This must never be
  *              cleared; it is the only copy of anything authored in the editor.
  *   - KEPT:    the `exercise-images` runtime cache, so an update does not force
  *              every illustration to be downloaded again.
@@ -25,7 +25,7 @@ export async function updateApp(): Promise<void> {
       )
     }
   } catch {
-    // A failed update should still reload — the network may simply be down, and
+    // A failed update should still reload. The network may simply be down, and
     // reloading is what the user asked for.
   }
 

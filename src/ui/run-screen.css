@@ -36,7 +36,7 @@
   grid-template-columns: 4.5rem 1fr 4.5rem;
   align-items: center;
   /*
-   * The back button lives here. Under the status bar it was not just clipped —
+   * The back button lives here. Under the status bar it was not just clipped:
    * iOS takes those touches, so it could not be pressed while a routine ran.
    */
   padding: calc(var(--step-2) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
@@ -119,7 +119,7 @@
   display: grid;
   /*
    * Stacked: a FIXED split rather than "countdown takes what it needs". With an
-   * auto row the image resized whenever the numerals did — so a step whose
+   * auto row the image resized whenever the numerals did, so a step whose
    * digits differ in width visibly squashed the picture. Proportions instead,
    * so the image never moves.
    */
@@ -133,7 +133,7 @@
  * Short screens hand space to the image.
  *
  * The exercise illustrations are near-square (876x800), so a short wide frame
- * fits them to its HEIGHT and wastes the width — at 342x103 the picture renders
+ * fits them to its HEIGHT and wastes the width. At 342x103 the picture renders
  * at 0.13x. Giving the panel a bigger share is the only thing that helps.
  *
  * Viewport media queries rather than a container query, because a container
@@ -143,7 +143,7 @@
  */
 /*
  * Short windows. The row split changes, so the clock's share is re-stated in the
- * COLUMN's own height — the same basis as the base rule, since `.count` became
+ * COLUMN's own height, the same basis as the base rule, since `.count` became
  * the container. Read as a share of the body these would be 25% and 22%, which
  * is what they used to say when `cqh` meant the whole body.
  */
@@ -183,15 +183,31 @@
   }
 }
 
+/*
+ * Side by side, but only when the shell is actually wider than it is tall.
+ *
+ * Width alone was the wrong test. An iPad in portrait is 48 to 64rem wide, so it
+ * took the two-column layout and stood the countdown and the picture up as two
+ * tall half-width columns, while an iPhone of the same shape and smaller stacked
+ * them. What this layout depends on is the frame's SHAPE, not its size:
+ * a wide frame has width to spare and no height, a tall one the reverse. An
+ * iPhone in landscape is over 46rem AND landscape, so it keeps the columns.
+ *
+ * A viewport media query rather than an aspect-ratio container query, because
+ * `.run` is an inline-size container and cannot be asked about its height.
+ * The shell is pinned to the viewport, so the two agree on orientation.
+ */
 @container shell (min-width: 46rem) {
-  .run__body {
-    /* Proportional, and minmax(0, …) so both columns may shrink rather than
-       being pinned to a rem cap that wastes a large screen. */
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    grid-template-rows: minmax(0, 1fr);
-    align-items: stretch;
-    gap: var(--step-7);
-    padding: var(--step-5) var(--step-7);
+  @media (orientation: landscape) {
+    .run__body {
+      /* Proportional, and minmax(0, …) so both columns may shrink rather than
+         being pinned to a rem cap that wastes a large screen. */
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      grid-template-rows: minmax(0, 1fr);
+      align-items: stretch;
+      gap: var(--step-7);
+      padding: var(--step-5) var(--step-7);
+    }
   }
 }
 
@@ -205,8 +221,8 @@
    * Its own size container, so the countdown and the name are measured against
    * the column they actually live in.
    *
-   * They used to be sized in `cqh` of the whole BODY — which includes the media
-   * panel — as a hand-tuned fraction that had to stay "well under the row's
+   * They used to be sized in `cqh` of the whole BODY, which includes the media
+   * panel, as a hand-tuned fraction that had to stay "well under the row's
    * share". It was within a few points of the edge, and the iOS header inset
    * tipped it over: the lead outgrew its row and the step name landed on top of
    * the time remaining. A budget expressed in the box's own height cannot drift
@@ -243,14 +259,14 @@
  *   - width  --clock-coef cqi / --chars, where --chars is the string's width
  *            in ems (a digit counts 1, a colon 0.5). So "8" and "17" render at
  *            the same size, while "4:30" steps down instead of overflowing.
- *   - height 74cqh — raised after the effort strip and the eyebrow row were
+ *   - height 74cqh, raised after the effort strip and the eyebrow row were
  *            removed, which is where the extra vertical space came from.
  *
  * The width coefficient differs by layout because cqi measures the whole body,
  * not the column the clock actually occupies. Stacked, that is the full width;
  * beside the image panel it is only the 3fr column, where a larger value would
  * push a two-digit countdown wider than the column, most tightly on an iPad.
- * Whichever is smaller wins. No rem ceiling — that was what kept this tiny on
+ * Whichever is smaller wins. No rem ceiling: that was what kept this tiny on
  * a laptop.
  */
 .count__clock {
@@ -258,7 +274,7 @@
   /*
    * Now a share of the COLUMN, not of the body. The column's budget: the meta row
    * and the gap take about 20cqh, the label and the two gaps another 12, and the
-   * name up to 14 — which leaves this the rest with slack in hand for a wrapped
+   * name up to 14, which leaves this the rest with slack in hand for a wrapped
    * title or a taller meta line.
    */
   --clock-max: 52cqh;
@@ -305,7 +321,7 @@
    */
   /*
    * Bounded on both axes, like the media panel's fallback. `--fit` sizes the
-   * text so it fits three lines of THIS box — a pasted routine can carry a
+   * text so it fits three lines of THIS box, because a pasted routine can carry a
    * fifty-character step name, and a floor alone would just push it out of a
    * grid row whose height is fixed by proportion.
    */
@@ -322,7 +338,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  /* Column gap in em so it scales with the label size — a fixed 1.5rem read as
+  /* Column gap in em so it scales with the label size. A fixed 1.5rem read as
      cramped once the labels grew to ~43px. */
   gap: var(--step-3) 1.75em;
   margin: 0;
@@ -344,14 +360,14 @@
   /* Its own container, and `size` not `inline-size`: the fallback step name has
      to be measured against the frame's HEIGHT as well as its width, or it keeps
      a width-derived size as the frame gets shorter and overflows. Safe because
-     the frame's block size is definite — it fills a 1fr grid row. */
+     the frame's block size is definite, since it fills a 1fr grid row. */
   container-type: size;
   display: grid;
   place-items: center;
   min-height: 0;
   /*
    * No aspect-ratio in either layout: the frame takes whatever height is left
-   * over, which is what makes overflow impossible — object-fit: contain means a
+   * over, which is what makes overflow impossible. object-fit: contain means a
    * bigger or smaller frame never distorts the image.
    */
   height: 100%;
@@ -363,21 +379,25 @@
   position: relative;
 }
 
+/* Gated on orientation to match the two-column rule above: these numbers only
+   make sense in the column, so a portrait iPad must not pick them up. */
 @container shell (min-width: 46rem) {
-  /* Beside the panel the clock has far less width and far more height than it
-     does stacked, so both terms change. */
-  .count__clock {
-    --clock-coef: 88;
-    /* Sets --clock-height rather than --clock-max on purpose, so the short-screen
-       queries above cannot reach it — but it still owes the name its lines. */
-    --clock-height: calc(74cqh - (var(--name-lines, 1) - 1) * 11cqh);
+  @media (orientation: landscape) {
+    /* Beside the panel the clock has far less width and far more height than it
+       does stacked, so both terms change. */
+    .count__clock {
+      --clock-coef: 88;
+      /* Sets --clock-height rather than --clock-max on purpose, so the short-screen
+         queries above cannot reach it, but it still owes the name its lines. */
+      --clock-height: calc(74cqh - (var(--name-lines, 1) - 1) * 11cqh);
+    }
   }
 }
 
 /*
  * Absolutely positioned rather than `width/height: 100%`.
  *
- * As a normal grid item, the image's `height: 100%` was resolving to auto — so
+ * As a normal grid item, the image's `height: 100%` was resolving to auto, so
  * the box took its natural aspect at full width, grew taller than the frame,
  * and `overflow: hidden` cut the bottom off. `object-fit: contain` never got a
  * chance to letterbox it, because the box it was fitting into was already too
@@ -444,7 +464,7 @@
 
 /* ── Controls ──────────────────────────────────────────────────────────────
  * Bottom of the screen for thumb reach. Button styling itself lives in
- * theme.css — three screens use it.
+ * theme.css, because three screens use it.
  */
 .controls {
   display: flex;
@@ -509,7 +529,7 @@
  * the wrong instrument here: there is nothing to count down, and the useful
  * information is the four exercises after this one.
  *
- * Sized on the same principle as everything else — read from three metres, mid
+ * Sized on the same principle as everything else: read from three metres, mid
  * effort. Five or six rows is what the source routines actually contain, so the
  * rows can stay large; the list scrolls rather than shrinking if one is longer,
  * because a row too small to read is worse than one out of sight.
@@ -558,7 +578,7 @@
 /*
  * The list scrolls rather than shrinking its rows. A row too small to read from
  * three metres has failed at its only job, so when a group genuinely will not
- * fit, the right answer is that some of it is below the fold — not that all of
+ * fit, the right answer is that some of it is below the fold, not that all of
  * it is illegible.
  */
 .sheet__list {
@@ -574,18 +594,18 @@
   /*
    * Rows GROW to fill the sheet, rather than sitting at a floor in the middle of
    * it. Sized off the list's own height budget divided by the estimated line
-   * count, the same move `.panel__empty` makes — the width term that used to
+   * count, the same move `.panel__empty` makes. The width term that used to
    * govern here pinned a phone to the 1rem floor, which is unreadable from where
    * the phone is propped.
    *
    * The `cqi` term is the row's WIDTH budget, and it is not optional. A row is
-   * three columns and two of them are fixed in em — the count and its per-side
-   * qualifier — so the bigger the type, the less of the row is left for the name.
+   * three columns and two of them are fixed in em, the count and its per-side
+   * qualifier, so the bigger the type, the less of the row is left for the name.
    * With only three or four exercises the height term hit the 2.25rem ceiling,
    * the fixed columns ate two thirds of the width, and `overflow-wrap` shattered
    * the names a character at a time: "Spe / ed / Ska / ters". Only groups with a
-   * per-side row broke, since that column collapses to nothing otherwise — which
-   * is why some groups looked fine and others did not.
+   * per-side row broke, since that column collapses to nothing otherwise, which is
+   * why some groups looked fine and others did not.
    *
    * 6.5cqi leaves the name about 7em, or a dozen characters a line, once both
    * fixed columns and the padding have taken their share.
@@ -606,7 +626,7 @@
    * The count column's minimum is what lines the NAMES up: each row is its own
    * grid, so nothing else makes them share a left edge. Every em of it beyond the
    * count's own width is a gap between the number and the exercise, so it is cut
-   * to what the widest thing in it needs — 2em holds "12 ×" and the "1:30" a
+   * to what the widest thing in it needs. 2em holds "12 ×" and the "1:30" a
    * timed step counts down through.
    *
    * A minimum rather than plain `auto`, precisely because of that countdown: an
@@ -620,7 +640,7 @@
   /*
    * Spacing by padding, not by column-gap. A gap applies between declared tracks
    * whether or not anything is in them, so the qualifier column would cost a
-   * second gap on every row that has no qualifier — exactly the phantom the
+   * second gap on every row that has no qualifier, exactly the phantom the
    * paste dialog had. Padding travels with the element instead, so a column with
    * nothing in it takes no room at all.
    */
@@ -660,7 +680,7 @@
 /*
  * Flush left, not right.
  *
- * Right alignment gave the counts a shared right edge — tidy as a table, but it
+ * Right alignment gave the counts a shared right edge. Tidy as a table, but it
  * pushed a single digit a long way in from the row's own edge, and a set is
  * usually the same count all the way down anyway. Left, the digits share their
  * edge with each other AND with the rest of the row, and the names still line up
@@ -682,8 +702,8 @@
  * keeps the numbers the thing the eye lands on down the column.
  */
 /*
- * "each side". It may wrap — the pressure valve when a name still needs more room
- * than the size cap alone can give it. It used to be `nowrap`, which made this
+ * "each side". It may wrap, which is the pressure valve when a name still needs
+ * more room than the size cap alone can give it. It used to be `nowrap`, which made this
  * column incompressible and the name column whatever was left.
  */
 .sheet__side {

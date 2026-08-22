@@ -56,7 +56,7 @@ export async function run<T>(
 
 /**
  * Asks the browser not to evict this origin's storage. Without it a routine's
- * saved images can simply disappear under pressure. Best-effort and silent —
+ * saved images can simply disappear under pressure. Best-effort and silent:
  * some browsers grant it automatically, others only after the app is installed.
  */
 export async function requestPersistence(): Promise<boolean> {

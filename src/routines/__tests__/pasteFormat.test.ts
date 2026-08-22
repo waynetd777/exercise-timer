@@ -39,7 +39,7 @@ function asWorkout(blocks: Block[]): Workout {
   }
 }
 
-describe('parseRoutine — the real emails', () => {
+describe('parseRoutine: the real emails', () => {
   /*
    * The bar for this parser: it understands every line of all three routines.
    * A line it cannot place is reported rather than dropped, so an empty
@@ -117,7 +117,7 @@ describe('parseRoutine — the real emails', () => {
     ])
   })
 
-  it('keeps a stated count fixed while the main lift scales — one rule, both shapes', () => {
+  it('keeps a stated count fixed while the main lift scales: one rule, both shapes', () => {
     const ladder = find(parseRoutine(general).blocks, 'legs').children[0] as Ladder
 
     expect(ladder.counts).toEqual([15, 12, 9, 6, 3, 6, 9, 12, 15])
@@ -155,7 +155,7 @@ describe('parseRoutine — the real emails', () => {
   })
 
   it('takes the upper bound of a rounds or rest range', () => {
-    // "3–5 Rounds" and "Rest: 30–45 seconds" — the runner can always end early.
+    // "3-5 Rounds" and "Rest: 30-45 seconds". The runner can always end early.
     const core = find(parseRoutine(bands).blocks, 'core').children[0] as Repeat
     expect(core.times).toBe(5)
     expect(named(parseRoutine(trampoline).blocks, 'Rest').durationMs).toBe(45_000)
@@ -219,7 +219,7 @@ describe('parseItem', () => {
   })
 
   it('takes the per-side count as the real one, in either notation', () => {
-    // Ten lunges, five a side — not ten a side.
+    // Ten lunges, five a side, not ten a side.
     expect(parseItem('10 × Walking Lunges (5 each leg)')).toMatchObject({ count: 5, perSide: true })
     expect(parseItem('10 × RB Lateral Walks – 5 each direction')).toMatchObject({
       count: 5,

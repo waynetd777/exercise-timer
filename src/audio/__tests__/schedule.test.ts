@@ -38,7 +38,7 @@ describe('the rolling window covers a whole routine', () => {
     },
   )
 
-  it('misses nothing even if a re-arm is late — a throttled tab', () => {
+  it('misses nothing even if a re-arm is late: a throttled tab', () => {
     const timeline = compile(MIXED_CARDIO_2)
     const all = cues(timeline)
     // Arming at the very edge of the window is the worst legitimate case.
@@ -114,7 +114,7 @@ describe('cue timing across a real routine', () => {
   })
 })
 
-describe('runCues — one run at a time', () => {
+describe('runCues: one run at a time', () => {
   /** Warm-up (2 timed), a rep gate, a rest, then a closing rep gate. */
   const mixed = () =>
     compile(
@@ -204,7 +204,7 @@ describe('a recording that lands after its cue was queued', () => {
 
   it('spares a cue that is already sounding, which would otherwise play twice', () => {
     // Cancellation keeps anything within the grace, so the re-arm must not
-    // forget it — the pair have to draw the line in the same place.
+    // forget it. The pair have to draw the line in the same place.
     const all = cues(getReady())
     const scheduled = armed(all)
 
