@@ -208,6 +208,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
   const [leaving, setLeaving] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useCueScheduler({
     // One run at a time: cues are scheduled on one clock, and a gate ends it.
@@ -290,8 +291,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const onKeyRef = useRef<(event: KeyboardEvent) => void>(() => {})
   onKeyRef.current = (event: KeyboardEvent) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return
-    // The dialog owns the keyboard while it is open.
-    if (leaving) return
+    // A dialog owns the keyboard while it is open.
+    if (leaving || resetting) return
     // Leave the key alone only if what has focus actually uses it: a button
     // takes Space and Enter, a field takes everything. See `shortcutApplies`.
     if (!shortcutApplies((event.target as HTMLElement | null)?.tagName, event.key)) return
@@ -350,6 +351,25 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
   const stay = () => {
     setLeaving(false)
+    if (wasRunning.current) timer.resume()
+  }
+
+  /*
+   * Reset asks the same way Back does, and for the same reason: it sits one
+   * stray tap from throwing away a whole session's place. Same choreography
+   * too: pause the moment it is pressed, and a no puts a workout that was
+   * running back exactly as it was. A COMPLETE workout resets without asking,
+   * like Back leaves one, because there is no place left to lose.
+   */
+  const requestReset = () => {
+    if (status === 'complete') return timer.reset()
+    wasRunning.current = status === 'running'
+    timer.pause()
+    setResetting(true)
+  }
+
+  const keepGoing = () => {
+    setResetting(false)
     if (wasRunning.current) timer.resume()
   }
   const primaryLabel =
@@ -525,6 +545,19 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         />
       )}
 
+      {resetting && (
+        <ConfirmDialog
+          question="Start this workout over?"
+          detail="It is paused. Resetting loses your place in it."
+          confirmLabel="Reset"
+          onConfirm={withAudio(() => {
+            setResetting(false)
+            timer.reset()
+          })}
+          onCancel={keepGoing}
+        />
+      )}
+
       <div className="controls">
         <button
           className="btn"
@@ -559,7 +592,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
         <button
           className="btn btn--ghost"
-          onClick={withAudio(timer.reset)}
+          onClick={withAudio(requestReset)}
           disabled={status === 'idle'}
           aria-label="Reset"
           title="Reset"
