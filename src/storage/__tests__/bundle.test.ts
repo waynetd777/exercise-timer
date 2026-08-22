@@ -28,7 +28,7 @@ const workout = (name = 'Leg day'): Workout => ({
 
 describe('round trip', () => {
   it('survives export and re-import unchanged in substance', () => {
-    const back = fromBundle(toBundle([workout()], NOW), NOW)
+    const back = fromBundle(toBundle([workout()], NOW), NOW).workouts
     expect(back).toHaveLength(1)
     expect(back[0]!.name).toBe('Leg day')
     expect(back[0]!.blocks).toEqual(workout().blocks)
@@ -37,7 +37,7 @@ describe('round trip', () => {
   })
 
   it('round-trips every real routine', () => {
-    const back = fromBundle(toBundle(SEED_ROUTINES, NOW), NOW)
+    const back = fromBundle(toBundle(SEED_ROUTINES, NOW), NOW).workouts
     expect(back).toHaveLength(SEED_ROUTINES.length)
     for (const [i, original] of SEED_ROUTINES.entries()) {
       expect(compile(back[i]!).totalMs).toBe(compile(original).totalMs)
@@ -47,7 +47,7 @@ describe('round trip', () => {
 
   it('survives an actual JSON serialise, not just an object copy', () => {
     const text = JSON.stringify(toBundle([workout()], NOW))
-    const back = fromBundle(JSON.parse(text), NOW)
+    const back = fromBundle(JSON.parse(text), NOW).workouts
     expect(compile(back[0]!)).toEqual(compile(workout()))
   })
 
@@ -61,7 +61,7 @@ describe('round trip', () => {
       role: 'work',
       media: { source: 'remote', url: 'https://i.postimg.cc/x/y.png' },
     }
-    const back = fromBundle(JSON.parse(JSON.stringify(toBundle([withImage], NOW))), NOW)
+    const back = fromBundle(JSON.parse(JSON.stringify(toBundle([withImage], NOW))), NOW).workouts
     expect(back[0]!.blocks[0]).toMatchObject({
       media: { source: 'remote', url: 'https://i.postimg.cc/x/y.png' },
     })
@@ -97,7 +97,7 @@ describe('an uploaded photo travels in the file', () => {
     const text = JSON.stringify(toBundle([routine], NOW, media))
 
     const parsed = JSON.parse(text) as { media: unknown }
-    const back = fromBundle(parsed, NOW)
+    const back = fromBundle(parsed, NOW).workouts
     expect(back[0]!.blocks[0]).toMatchObject({ media: { source: 'local', hash } })
 
     const restored = await restoreMedia(parsed.media)
@@ -147,7 +147,7 @@ describe('toBundle', () => {
 
 describe('fromBundle', () => {
   it('refreshes updatedAt but keeps createdAt', () => {
-    const back = fromBundle(toBundle([workout()], NOW), 9_999)
+    const back = fromBundle(toBundle([workout()], NOW), 9_999).workouts
     expect(back[0]!.createdAt).toBe(1)
     expect(back[0]!.updatedAt).toBe(9_999)
   })
@@ -160,7 +160,7 @@ describe('fromBundle', () => {
         workouts: [{ id: 'x', name: 'Sparse', blocks: [] }],
       },
       NOW,
-    )
+    ).workouts
     expect(back[0]).toMatchObject({ createdAt: NOW, updatedAt: NOW, schemaVersion: SCHEMA_VERSION })
   })
 
@@ -185,17 +185,23 @@ describe('fromBundle', () => {
     ).toThrow(/no readable routines/)
   })
 
-  it('drops individual bad routines but keeps the good ones', () => {
-    // One corrupt entry should not lose the rest of the library.
-    const back = fromBundle(
+  it('drops individual bad routines but keeps the good ones, and says so', () => {
+    // One corrupt entry should not lose the rest of the library, and it must
+    // not vanish silently either: a restore that loses routines has to say so.
+    const { workouts, rejected } = fromBundle(
       {
         kind: 'davshack-timer-bundle',
         version: 1,
-        workouts: [{ nonsense: true }, workout('Keeper')],
+        workouts: [{ nonsense: true }, { id: 'b', name: 'Broken', blocks: 7 }, workout('Keeper')],
       },
       NOW,
     )
-    expect(back.map((w) => w.name)).toEqual(['Keeper'])
+    expect(workouts.map((w) => w.name)).toEqual(['Keeper'])
+    expect(rejected).toEqual(['Unnamed routine', 'Broken'])
+  })
+
+  it('reports nothing rejected for a fully readable file', () => {
+    expect(fromBundle(toBundle([workout()], NOW), NOW).rejected).toEqual([])
   })
 
   it('validates nested block trees, not just the top level', () => {
@@ -223,5 +229,108 @@ describe('bundleFilename', () => {
 
   it('never produces an empty name', () => {
     expect(bundleFilename('***', new Date('2026-08-21'))).toBe('routine-2026-08-21.timer.json')
+  })
+})
+
+describe('field validation', () => {
+  /*
+   * The trap these pin: `isBlock` used to accept `{kind: 'segment'}` with any
+   * field contents at all, so a hand-edited or corrupted bundle imported,
+   * persisted, and then threw in React every time the routine was opened.
+   */
+  const bundleWith = (blocks: unknown[]): unknown => ({
+    kind: 'davshack-timer-bundle',
+    version: 1,
+    workouts: [{ id: 'x', name: 'Suspect', blocks }],
+  })
+
+  const rejects = (blocks: unknown[]): void => {
+    expect(() => fromBundle(bundleWith(blocks), NOW)).toThrow(/no readable routines/)
+  }
+  const accepts = (blocks: unknown[]): void => {
+    expect(fromBundle(bundleWith(blocks), NOW).workouts).toHaveLength(1)
+  }
+
+  it('rejects a segment whose name is not a string', () => {
+    rejects([{ kind: 'segment', id: 's', name: { x: 1 }, role: 'work' }])
+    rejects([{ kind: 'segment', id: 's', role: 'work' }])
+  })
+
+  it('rejects a durationMs that is not a finite non-negative number', () => {
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', durationMs: '60' }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', durationMs: -5 }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', durationMs: Infinity }])
+    // Zero stays readable: compile() drops degenerate durations itself.
+    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', durationMs: 0 }])
+    // Absent means self-paced, which is a real shape, not damage.
+    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work' }])
+  })
+
+  it('rejects note, alternative and role that are not strings', () => {
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', note: 42 }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', alternative: {} }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: ['work'] }])
+  })
+
+  it('rejects a malformed reps shape and keeps the two real ones', () => {
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed', count: '10' } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed' } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'rung', perSide: 'yes' } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: 'ten' }])
+    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed', count: 10, perSide: true } }])
+    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'rung' } }])
+  })
+
+  it('rejects media whose fields do not match its source', () => {
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'local', hash: 'h' } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'bundled', path: 9 } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'remote', url: null } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'dropbox', url: 'x' } }])
+    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'bundled', path: 'p', w: '640' } }])
+    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'local', hash: 'h', mime: 'image/webp' } }])
+  })
+
+  it('rejects a repeat whose times is not a finite number', () => {
+    rejects([{ kind: 'repeat', id: 'r', times: '3', children: [] }])
+    rejects([{ kind: 'repeat', id: 'r', times: 3, label: 7, children: [] }])
+    accepts([{ kind: 'repeat', id: 'r', times: 3, label: 'Reps', children: [] }])
+  })
+
+  it('rejects a ladder whose counts are not all finite numbers', () => {
+    rejects([{ kind: 'ladder', id: 'l', counts: [2, '4'], children: [] }])
+    rejects([{ kind: 'ladder', id: 'l', counts: 'up', children: [] }])
+    accepts([{ kind: 'ladder', id: 'l', counts: [2, 4, 6], children: [] }])
+  })
+
+  it('rejects a section without a real display mode', () => {
+    rejects([{ kind: 'section', id: 'c', name: 'Warm-up', children: [] }])
+    rejects([{ kind: 'section', id: 'c', name: 'Warm-up', display: 'grid', children: [] }])
+    accepts([{ kind: 'section', id: 'c', name: 'Warm-up', display: 'list', children: [] }])
+  })
+
+  it('rejects an advance outside set and step, on any group', () => {
+    rejects([{ kind: 'repeat', id: 'r', times: 2, advance: 'both', children: [] }])
+    accepts([{ kind: 'repeat', id: 'r', times: 2, advance: 'step', children: [] }])
+  })
+
+  it('checks fields deep in the tree, not just at the top', () => {
+    rejects([
+      {
+        kind: 'section',
+        id: 'c',
+        name: 'Main',
+        display: 'list',
+        children: [{ kind: 'segment', id: 's', name: 'W', role: 'work', durationMs: '60' }],
+      },
+    ])
+  })
+
+  it('rejects workout metadata of the wrong type when present', () => {
+    const damaged = {
+      kind: 'davshack-timer-bundle',
+      version: 1,
+      workouts: [{ id: 'x', name: 'Suspect', createdAt: 'yesterday', blocks: [] }],
+    }
+    expect(() => fromBundle(damaged, NOW)).toThrow(/no readable routines/)
   })
 })

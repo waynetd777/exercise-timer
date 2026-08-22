@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { elapsed, IDLE_CLOCK, paused, resumed, seeked, started } from '../clock'
+import { credited, elapsed, IDLE_CLOCK, paused, resumed, seeked, started, suspendedMs } from '../clock'
 
 describe('clock', () => {
   it('reads zero before starting', () => {
@@ -78,5 +78,40 @@ describe('clock', () => {
     // simply tells the truth.
     const clock = started(0)
     expect(elapsed(clock, 600_000)).toBe(600_000)
+  })
+})
+
+describe('suspension reconcile', () => {
+  const anchor = { wallMs: 1_000_000, monoMs: 10_000 }
+
+  it('reports the stretch the wall clock saw but the monotonic clock missed', () => {
+    // Two minutes suspended: wall advanced 125s, monotonic only 5s.
+    expect(suspendedMs(anchor, 1_125_000, 15_000, 1_000)).toBe(120_000)
+  })
+
+  it('treats divergence within the tolerance as jitter, not suspension', () => {
+    expect(suspendedMs(anchor, 1_005_800, 15_000, 1_000)).toBe(0)
+  })
+
+  it('never reports a wall clock set backwards as negative suspension', () => {
+    expect(suspendedMs(anchor, 1_000_000 - 3_600_000, 15_000, 1_000)).toBe(0)
+  })
+
+  it('credits a running clock by exactly the missing time', () => {
+    // 5s in when the suspension hit, 120s frozen: coming back must read 125s.
+    const clock = credited(started(10_000), 120_000)
+    expect(elapsed(clock, 15_000)).toBe(125_000)
+  })
+
+  it('leaves a paused clock untouched', () => {
+    const clock = paused(started(10_000), 15_000)
+    expect(credited(clock, 120_000)).toBe(clock)
+    expect(elapsed(credited(clock, 120_000), 999_000)).toBe(5_000)
+  })
+
+  it('ignores a zero or negative credit', () => {
+    const clock = started(10_000)
+    expect(credited(clock, 0)).toBe(clock)
+    expect(credited(clock, -5_000)).toBe(clock)
   })
 })

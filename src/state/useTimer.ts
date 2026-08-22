@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { advance, compile, locate, retreat, START } from '../engine'
 import type { Cursor, Routine, RoutinePosition, Run, Workout } from '../engine'
-import type { Clock } from './clock'
-import { elapsed, IDLE_CLOCK, paused, resumed, seeked, started } from './clock'
+import type { Anchor, Clock } from './clock'
+import { credited, elapsed, IDLE_CLOCK, paused, resumed, seeked, started, suspendedMs } from './clock'
 import { tick } from './tick'
 import { useWakeLock } from './useWakeLock'
 
@@ -48,13 +48,27 @@ export type Timer = {
 /** Monotonic. Immune to the system clock being changed mid-workout. */
 const now = () => performance.now()
 
+/**
+ * Wall-versus-monotonic divergence below this is jitter or NTP slew, not a
+ * suspension. Anything above it is minutes of missing rest waiting to happen.
+ */
+const SUSPEND_TOLERANCE_MS = 1000
+
 /** A routine with no steps still needs something for the runner to hold. */
 const EMPTY_RUN: Run = { index: 0, entries: [], totalMs: 0, selfPaced: false }
 
 /**
  * Owns run state as a cursor plus a clock, and DERIVES elapsed from the clock.
- * Nothing accumulates ticks, so a throttled or backgrounded tab cannot drift.
+ * Nothing accumulates ticks, so a throttled or backgrounded tab cannot drift:
  * coming back after ten minutes simply shows the truth.
+ *
+ * One exception needs active repair: iOS freezes the WebContent process while
+ * the app is backgrounded, and performance.now() excludes the frozen stretch,
+ * so subtraction alone would under-count exactly the time spent away. On every
+ * return to visible, the wall clock is compared against a wall/monotonic pair
+ * captured while awake, and any missing stretch is credited to the running
+ * clocks (see `suspendedMs` in clock.ts; the credit is one-way, so a wall
+ * clock set backwards cannot rewind anything).
  *
  * The clock measures ONE RUN, not the whole routine, and is re-anchored every
  * time the cursor crosses into another. That is what lets a routine wait for a
@@ -122,6 +136,13 @@ export function useTimer(workout: Workout): Timer {
   useEffect(() => {
     if (status !== 'running') return
 
+    /*
+     * The wall/monotonic pair the suspension check measures against. Taken at
+     * effect start so a stretch spent paused (when this effect is down) can
+     * never be mistaken for a suspension and credited on the next resume.
+     */
+    let anchor: Anchor = { wallMs: Date.now(), monoMs: now() }
+
     const onTick = () => {
       const next = tick(routine, cursorRef.current.runIndex, readElapsed())
 
@@ -134,6 +155,17 @@ export function useTimer(workout: Workout): Timer {
       // A new run needs the clock re-anchored to it; the same run does not.
       if (next.kind === 'move') {
         moveTo(next.cursor, false)
+        /*
+         * The chain must be re-armed HERE, off the fresh cursor. The moved-to
+         * cursor only reaches cursorRef on the next render and nothing about a
+         * move re-runs this effect, so returning without scheduling would kill
+         * the loop at the first automatic crossing. Elapsed is zero by
+         * definition: moveTo just re-anchored the clock to the run's start.
+         */
+        const follow = tick(routine, next.cursor.runIndex, 0)
+        if (follow.kind === 'stay') {
+          timeoutId = window.setTimeout(onTick, follow.nextChangeInMs)
+        }
         return
       }
 
@@ -143,13 +175,23 @@ export function useTimer(workout: Workout): Timer {
 
     let timeoutId = window.setTimeout(onTick, 0)
 
-    // Returning to a hidden tab: resync immediately rather than waiting for a
-    // throttled timeout to fire.
+    // Returning to a hidden tab: credit any time iOS kept the process frozen,
+    // then resync immediately rather than waiting for a throttled timeout.
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        window.clearTimeout(timeoutId)
-        onTick()
+      if (document.visibilityState !== 'visible') return
+
+      const wallNow = Date.now()
+      const monoNow = now()
+      const missing = suspendedMs(anchor, wallNow, monoNow, SUSPEND_TOLERANCE_MS)
+      anchor = { wallMs: wallNow, monoMs: monoNow }
+      if (missing > 0) {
+        clock.current = credited(clock.current, missing)
+        session.current = credited(session.current, missing)
+        bump()
       }
+
+      window.clearTimeout(timeoutId)
+      onTick()
     }
     document.addEventListener('visibilitychange', onVisible)
 
@@ -157,7 +199,7 @@ export function useTimer(workout: Workout): Timer {
       window.clearTimeout(timeoutId)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [status, routine, readElapsed, moveTo, stopSession])
+  }, [status, routine, readElapsed, moveTo, stopSession, bump])
 
   useWakeLock(status === 'running')
 

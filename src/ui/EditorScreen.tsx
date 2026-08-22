@@ -35,7 +35,7 @@ import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/histo
 import { HelpTray } from './HelpTray'
 import { NoticeDialog } from './NoticeDialog'
 import { EDITOR_HELP } from './help'
-import { storeFile } from '../media/pin'
+import { pinDraft, storeFile, unpinDraft } from '../media/pin'
 import { duration } from './format'
 import { useMediaUrl } from './useMediaUrl'
 import { useDismiss } from './useDismiss'
@@ -187,7 +187,9 @@ function ImagePicker({
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    dialog.current?.showModal()
+    // Guarded like every other dialog here: StrictMode runs effects twice in
+    // dev, and showModal() on an already-open dialog throws.
+    if (!dialog.current?.open) dialog.current?.showModal()
   }, [])
 
   const shown = useMemo(() => {
@@ -319,6 +321,56 @@ function keyOf(patch: object): string {
 }
 
 /** The number the field shows, and what a change to it means. */
+/**
+ * A whole-number field that commits as it is typed, clamped into [1, max].
+ *
+ * The draft exists so the field can be CLEARED while retyping: committing the
+ * empty string used to snap the value to 1 under the cursor. It also holds raw
+ * text past the cap, because the `max` attribute only guards the spinners; the
+ * COMMITTED value is clamped, and blur tidies the field to it.
+ */
+function CountField({
+  value,
+  max,
+  label,
+  onCommit,
+}: {
+  value: number
+  max: number
+  label: string
+  onCommit: (value: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const lastCommit = useRef<number | null>(null)
+
+  // An outside change (undo, redo) rewrites the value under the field. A draft
+  // left standing would mask it, and the next blur would re-commit stale text.
+  useEffect(() => {
+    if (value !== lastCommit.current) setDraft(null)
+  }, [value])
+
+  return (
+    <input
+      className="efield efield--secs"
+      type="number"
+      min={1}
+      max={max}
+      value={draft ?? String(value)}
+      aria-label={label}
+      onChange={(event) => {
+        const text = event.target.value
+        setDraft(text)
+        const entered = Number(text)
+        if (text === '' || !Number.isFinite(entered)) return
+        const clamped = Math.min(max, Math.max(1, Math.round(entered)))
+        lastCommit.current = clamped
+        onCommit(clamped)
+      }}
+      onBlur={() => setDraft(null)}
+    />
+  )
+}
+
 function TimingField({
   segment,
   onChange,
@@ -347,24 +399,18 @@ function TimingField({
     <label className="esecs">
       {/* A rung has no number of its own. That is the point of it. */}
       {timing.kind !== 'rung' && (
-        <input
-          className="efield efield--secs"
-          type="number"
-          min={1}
-          max={timing.kind === 'timed' ? 5999 : 999}
+        <CountField
           value={value}
-          aria-label={timing.kind === 'timed' ? 'Seconds' : 'Reps'}
-          onChange={(event) => {
-            const entered = Number(event.target.value)
-            if (!Number.isFinite(entered)) return
-            const rounded = Math.max(1, Math.round(entered))
+          max={timing.kind === 'timed' ? 5999 : 999}
+          label={timing.kind === 'timed' ? 'Seconds' : 'Reps'}
+          onCommit={(entered) =>
             onChange(
               timing.kind === 'timed'
-                ? { kind: 'timed', durationMs: rounded * 1000 }
-                : { kind: 'reps', count: rounded, ...(timing.perSide ? { perSide: true } : {}) },
+                ? { kind: 'timed', durationMs: entered * 1000 }
+                : { kind: 'reps', count: entered, ...(timing.perSide ? { perSide: true } : {}) },
               true,
             )
-          }}
+          }
         />
       )}
       {/* `data-unit` is for the stylesheet: a native select is as wide as its
@@ -733,10 +779,18 @@ function SegmentRow({
       </div>
 
       {showExtras && (
+        /*
+         * Both fields are uncontrolled (committed on blur, so a note is one
+         * undo step) but KEYED on the committed value: undo rewrites that value
+         * under the field, and an uncontrolled input left standing would show
+         * the old text and re-commit it on the next blur, silently redoing what
+         * undo undid. A new key remounts the field with the truth.
+         */
         <div className="erow__extras">
           <label className="erow__extra">
             <span className="label label--sm">Note</span>
             <input
+              key={segment.note ?? ''}
               className="efield"
               defaultValue={segment.note ?? ''}
               placeholder="How to do it"
@@ -747,6 +801,7 @@ function SegmentRow({
           <label className="erow__extra">
             <span className="label label--sm">Or</span>
             <input
+              key={segment.alternative ?? ''}
               className="efield"
               defaultValue={segment.alternative ?? ''}
               placeholder="Lower-impact swap"
@@ -790,17 +845,11 @@ function RepeatRow({
 
         <label className="esecs">
           <span className="unit">&times;</span>
-          <input
-            className="efield efield--secs"
-            type="number"
-            min={1}
-            max={99}
+          <CountField
             value={repeat.times}
-            aria-label="Number of reps"
-            onChange={(event) => {
-              const times = Number(event.target.value)
-              if (Number.isFinite(times)) onPatch(path, { times: Math.max(1, Math.round(times)) })
-            }}
+            max={99}
+            label="Number of reps"
+            onCommit={(times) => onPatch(path, { times })}
           />
         </label>
 
@@ -861,6 +910,14 @@ function RepeatRow({
   )
 }
 
+/** A rung of zero reps is nothing to do; refuse it rather than compile it away. */
+const parseCounts = (text: string): number[] =>
+  text
+    .split(/[^0-9]+/)
+    .filter(Boolean)
+    .map(Number)
+    .filter((count) => count > 0)
+
 /**
  * A ladder's rungs, edited as the text they are written as.
  *
@@ -887,6 +944,19 @@ function LadderRow({
 }) {
   const [draft, setDraft] = useState(ladder.counts.join('-'))
 
+  /*
+   * Undo and redo rewrite the rungs UNDER the field. A draft that parses to
+   * something else is stale: left standing, the next keystroke would re-commit
+   * the undone rungs. A draft that parses to nothing is someone mid-clear, and
+   * resyncing under their cursor would fight the typing; blur tidies that case.
+   */
+  useEffect(() => {
+    const parsed = parseCounts(draft)
+    const same =
+      parsed.length === ladder.counts.length && parsed.every((n, i) => n === ladder.counts[i])
+    if (!same && parsed.length > 0) setDraft(ladder.counts.join('-'))
+  }, [ladder.counts, draft])
+
   return (
     <li className="erow erow--ladder" data-depth={depth}>
       <div className="erow__main">
@@ -906,12 +976,10 @@ function LadderRow({
             placeholder="5-10-15"
             onChange={(event) => {
               setDraft(event.target.value)
-              const counts = event.target.value
-                .split(/[^0-9]+/)
-                .filter(Boolean)
-                .map(Number)
+              const counts = parseCounts(event.target.value)
               if (counts.length > 0) onPatch(path, { counts })
             }}
+            onBlur={() => setDraft(ladder.counts.join('-'))}
           />
         </label>
 
@@ -1113,11 +1181,6 @@ export function EditorScreen({
   const rows = useMemo(() => flatten(blocks), [blocks])
 
   /*
-   * A pasted strength routine is built from sections and ladders, which have no
-   * row yet. Saying so beats rendering an empty list and letting someone think
-   * the routine was lost. It is all still there, and saving keeps it.
-   */
-  /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
    * set to undefined is not the same as an absent key. So the untinted case
    * DELETES the key rather than assigning undefined, which also keeps exported
@@ -1130,6 +1193,14 @@ export function EditorScreen({
   const dirty = useMemo(
     () => isDirty(workout, name, blocks, colour),
     [workout, name, blocks, colour],
+  )
+
+  const pinnedUploads = useRef<string[]>([])
+  useEffect(
+    () => () => {
+      for (const hash of pinnedUploads.current) unpinDraft(hash)
+    },
+    [],
   )
 
   // Also catch a reload or a closed tab, not just the back button.
@@ -1149,6 +1220,10 @@ export function EditorScreen({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return
+      // A modal on top owns the keyboard. Undoing the draft from behind the
+      // image picker edits state the user cannot see, and steals the native
+      // text undo from the picker's own search box.
+      if (document.querySelector('dialog[open]')) return
       event.preventDefault()
       setHistory(event.shiftKey ? redo : undo)
     }
@@ -1165,6 +1240,14 @@ export function EditorScreen({
   const upload = async (path: Path, file: File) => {
     try {
       const media = await storeFile(file)
+      if (media.source === 'local') {
+        // The blob is stored NOW but the routine only on Save, and the sweep
+        // counts references over persisted routines alone. Pinned until the
+        // editor leaves: by then the draft is saved (the routine owns the
+        // hash) or discarded (the sweep may fairly reclaim it).
+        pinDraft(media.hash)
+        pinnedUploads.current.push(media.hash)
+      }
       patchSegment(path, { media })
       setChoosingFor(null)
     } catch {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { compile } from '../compile'
 import { cues, cuesBetween } from '../cues'
-import { rep, seg, tabata, workout } from './fixtures'
+import { rep, seg, step, tabata, workout } from './fixtures'
 
 const BOUNDARY = ['work-start', 'work-end'] as const
 const isBoundary = (kind: string) => (BOUNDARY as readonly string[]).includes(kind)
@@ -57,6 +57,20 @@ describe('cues', () => {
     for (const cue of cues(timeline)) {
       expect(timeline.entries[cue.entryIndex]).toBeDefined()
     }
+  })
+
+  it('refuses a routine with gates, whose entry times share no clock', () => {
+    // A Routine satisfies Timeline structurally, so this call typechecks, but
+    // once it has gates the times it would mix are run-local garbage. The
+    // guard is at runtime rather than in the types because a FULLY TIMED
+    // routine is legitimately cued whole; the audio scheduler tests do.
+    const gated = compile(
+      workout('Gated', [seg('Jog', 40), step('Push-ups', 12), seg('Rest', 20, 'rest')]),
+    )
+    expect(() => cues(gated)).toThrow(/runCues/)
+
+    // One run, one clock: passing it whole stays fine.
+    expect(() => cues(compile(tabata()))).not.toThrow()
   })
 })
 

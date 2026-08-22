@@ -18,25 +18,32 @@ export async function downscale(file: Blob): Promise<Blob> {
   if (file.size <= SKIP_BELOW_BYTES) return file
 
   try {
-    const bitmap = await createImageBitmap(file)
-    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height))
+    // 'from-image' bakes the EXIF rotation into the pixels; the engine default
+    // is allowed to ignore it, which stores a phone photo sideways forever.
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    try {
+      const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height))
 
-    const width = Math.max(1, Math.round(bitmap.width * scale))
-    const height = Math.max(1, Math.round(bitmap.height * scale))
+      const width = Math.max(1, Math.round(bitmap.width * scale))
+      const height = Math.max(1, Math.round(bitmap.height * scale))
 
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext('2d')
-    if (!context) return file
-    context.drawImage(bitmap, 0, 0, width, height)
-    bitmap.close()
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const context = canvas.getContext('2d')
+      if (!context) return file
+      context.drawImage(bitmap, 0, 0, width, height)
 
-    const encoded = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/webp', QUALITY),
-    )
-    // Keep whichever is smaller: re-encoding an already-optimised PNG can grow it.
-    return encoded && encoded.size < file.size ? encoded : file
+      const encoded = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/webp', QUALITY),
+      )
+      // Keep whichever is smaller: re-encoding an already-optimised PNG can grow it.
+      return encoded && encoded.size < file.size ? encoded : file
+    } finally {
+      // The bitmap holds decoded pixels until close(); every exit above,
+      // early return and thrown error alike, must release them.
+      bitmap.close()
+    }
   } catch {
     // HEIC outside Safari, or any other format the browser will not decode.
     // Storing the original is better than losing the image.

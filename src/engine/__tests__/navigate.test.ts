@@ -155,6 +155,20 @@ describe('retreat', () => {
   it('cannot go back past the start', () => {
     expect(retreat(mixed(), at(0, 0))).toEqual(START)
   })
+
+  it('does not exit the run when its first step is shorter than the threshold', () => {
+    // [gate, 1s Blip, 10s Work]: 500ms into Work is just past the Blip, so the
+    // whole run's elapsed is still under the threshold. Retreat must land on
+    // the start of the run, not back on the gate.
+    const routine = compile(
+      workout('Short first', [step('Push-ups', 12), seg('Blip', 1), seg('Work', 10)]),
+    )
+    expect(retreat(routine, at(1, 1500))).toEqual(at(1, 0))
+
+    // From early in the Blip itself, the run IS exited, as the threshold rule
+    // says.
+    expect(retreat(routine, at(1, 500))).toEqual(at(0, 0))
+  })
 })
 
 describe('cursorForStep', () => {
@@ -169,6 +183,20 @@ describe('cursorForStep', () => {
     const routine = mixed()
     expect(cursorForStep(routine, 0)).toEqual(START)
     expect(locate(routine, cursorForStep(routine, 999)).isComplete).toBe(true)
+  })
+
+  it('seeks a MID-GATE step to the gate top, deliberately', () => {
+    // The gate is the unit of navigation: it clears with one tap and has no
+    // position inside it to seek to. Seeking to the rung's second exercise
+    // lands on the gate, which reports its FIRST step. Intended, not a bug.
+    const routine = compile(
+      workout('Rung', [ladder([5], [step('Squats', 'rung'), step('Walks', 10)])]),
+    )
+    const second = routine.entries[1]!
+    const cursor = cursorForStep(routine, second.step)
+
+    expect(cursor).toEqual(at(second.runIndex, 0))
+    expect(locate(routine, cursor).step).toBe(routine.entries[0]!.step)
   })
 })
 

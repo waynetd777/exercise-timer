@@ -18,6 +18,11 @@ export const STORE_MEDIA = 'media'
 
 let opening: Promise<IDBDatabase> | null = null
 
+/** Drops the cached connection, so the next call opens a fresh one. */
+function forget(): void {
+  opening = null
+}
+
 export function openDb(): Promise<IDBDatabase> {
   opening ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -32,10 +37,49 @@ export function openDb(): Promise<IDBDatabase> {
       }
     }
 
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
+    request.onsuccess = () => {
+      const db = request.result
+      /*
+       * The browser can close this connection behind our back: iOS does it to
+       * backgrounded pages, and a version change in another tab asks for it.
+       * A dead handle must not stay cached, or every write for the rest of the
+       * session silently fails.
+       */
+      db.onclose = forget
+      db.onversionchange = () => {
+        db.close()
+        forget()
+      }
+      resolve(db)
+    }
+    request.onerror = () => {
+      // A transient failure (locked database, pressure) must not poison every
+      // later call. Cleared here so the next call retries the open.
+      forget()
+      reject(request.error)
+    }
   })
   return opening
+}
+
+function attempt<T>(
+  db: IDBDatabase,
+  store: string,
+  mode: IDBTransactionMode,
+  action: (store: IDBObjectStore) => IDBRequest,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const transaction = db.transaction(store, mode)
+    const request = action(transaction.objectStore(store))
+    request.onsuccess = () => resolve(request.result as T)
+    request.onerror = () => reject(request.error)
+    transaction.onabort = () => reject(transaction.error)
+  })
+}
+
+/** What `transaction()` throws when the connection has already been closed. */
+function isClosedConnection(cause: unknown): boolean {
+  return cause instanceof Error && cause.name === 'InvalidStateError'
 }
 
 /** Runs one request in its own transaction and resolves with its result. */
@@ -44,14 +88,15 @@ export async function run<T>(
   mode: IDBTransactionMode,
   action: (store: IDBObjectStore) => IDBRequest,
 ): Promise<T> {
-  const db = await openDb()
-  return new Promise<T>((resolve, reject) => {
-    const transaction = db.transaction(store, mode)
-    const request = action(transaction.objectStore(store))
-    request.onsuccess = () => resolve(request.result as T)
-    request.onerror = () => reject(request.error)
-    transaction.onabort = () => reject(transaction.error)
-  })
+  try {
+    return await attempt<T>(await openDb(), store, mode, action)
+  } catch (cause) {
+    if (!isClosedConnection(cause)) throw cause
+    // iOS can kill the connection without firing onclose, and the corpse only
+    // shows itself when a transaction is asked for. Reopen and retry once.
+    forget()
+    return attempt<T>(await openDb(), store, mode, action)
+  }
 }
 
 /**

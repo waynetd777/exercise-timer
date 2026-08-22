@@ -149,3 +149,36 @@ describe('routineParam', () => {
     }
   })
 })
+
+describe('decodeRoutine: what a hand-edited link cannot smuggle in', () => {
+  /** Encodes anything, so the tests can craft links no honest app would make. */
+  const encodeRaw = (value: unknown) => encodeRoutine(value as Workout)
+
+  it('rejects a wrong-typed field instead of importing a NaN countdown', async () => {
+    const tampered = {
+      ...workout(),
+      blocks: [{ kind: 'segment', id: 's1', name: 'Cable fly', durationMs: '20000' }],
+    }
+    await expect(decodeRoutine(await encodeRaw(tampered), NOW, 'new-id')).rejects.toThrow(
+      'not a routine',
+    )
+  })
+
+  it('rejects an unknown block kind instead of misreading it', async () => {
+    const tampered = { ...workout(), blocks: [{ kind: 'mystery', id: 'x1', children: [] }] }
+    await expect(decodeRoutine(await encodeRaw(tampered), NOW, 'new-id')).rejects.toThrow(
+      'not a routine',
+    )
+  })
+
+  it('refuses a link made by a newer app version rather than guessing', async () => {
+    const future = { ...workout(), schemaVersion: SCHEMA_VERSION + 1 }
+    await expect(decodeRoutine(await encodeRaw(future), NOW, 'new-id')).rejects.toThrow(
+      'newer version',
+    )
+  })
+
+  it('rejects garbage that is not a routine at all', async () => {
+    await expect(decodeRoutine('!!not-base64!!', NOW, 'new-id')).rejects.toThrow()
+  })
+})

@@ -19,6 +19,7 @@ import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
 import { LIBRARY_HELP } from './help'
 import { NoticeDialog } from './NoticeDialog'
+import { unpinDraft } from '../media/pin'
 import {
   CheckIcon,
   CloseIcon,
@@ -239,18 +240,28 @@ export function LibraryScreen({
     setNoticeBusy(true)
     setNotice(workouts.length === 1 ? 'Preparing the routine…' : 'Preparing your routines…')
 
-    const media = await collectMedia(workouts, getBlob)
-    const photos = Object.keys(media).length
-    downloadJson(bundleFilename(name, new Date()), toBundle(workouts, Date.now(), media))
+    /*
+     * The busy notice swallows Escape, hides Close and ignores the backdrop,
+     * so a failure that skipped `setNoticeBusy(false)` wedged the whole screen
+     * behind an undismissable modal until a reload.
+     */
+    try {
+      const media = await collectMedia(workouts, getBlob)
+      const photos = Object.keys(media).length
+      downloadJson(bundleFilename(name, new Date()), toBundle(workouts, Date.now(), media))
 
-    const subject =
-      workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
-    setNotice(
-      photos === 0
-        ? `Exported ${subject}`
-        : `Exported ${subject} with ${photos} photo${photos === 1 ? '' : 's'}`,
-    )
-    setNoticeBusy(false)
+      const subject =
+        workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
+      setNotice(
+        photos === 0
+          ? `Exported ${subject}`
+          : `Exported ${subject} with ${photos} photo${photos === 1 ? '' : 's'}`,
+      )
+    } catch {
+      setNotice('The export failed before anything was written. Try again.')
+    } finally {
+      setNoticeBusy(false)
+    }
   }
 
   const ingest = async (files: readonly File[]) => {
@@ -260,8 +271,15 @@ export function LibraryScreen({
       return
     }
 
-    const { imported, failed, droppedImages } = await importRoutineFiles(candidates, Date.now())
-    for (const workout of imported) await library.add(workout)
+    const { imported, failed, droppedImages, rejectedRoutines, pinnedHashes, skippedLines } =
+      await importRoutineFiles(candidates, Date.now())
+    try {
+      for (const workout of imported) await library.add(workout)
+    } finally {
+      // Saved or abandoned, the routines own their images now; the import's
+      // shield against a mid-flight sweep comes off either way.
+      for (const hash of pinnedHashes) unpinDraft(hash)
+    }
 
     const added = imported.length > 0 ? `Imported ${imported.length}` : null
     const skipped =
@@ -274,7 +292,20 @@ export function LibraryScreen({
       droppedImages > 0
         ? `${droppedImages} image${droppedImages === 1 ? '' : 's'} could not be read`
         : null
-    setNotice([added, skipped, dropped].filter(Boolean).join('. ') || null)
+    // A bundle's unreadable routines and a text file's refused lines both mean
+    // the import is smaller than the file: never let that look fully successful.
+    const rejected =
+      rejectedRoutines.length > 0 ? `Could not read ${rejectedRoutines.join(', ')}` : null
+    const misread =
+      skippedLines.length > 0
+        ? skippedLines
+            .map(
+              ({ file, lines }) =>
+                `${lines.length} line${lines.length === 1 ? '' : 's'} in ${file} not understood`,
+            )
+            .join('; ')
+        : null
+    setNotice([added, skipped, dropped, rejected, misread].filter(Boolean).join('. ') || null)
   }
 
   return (

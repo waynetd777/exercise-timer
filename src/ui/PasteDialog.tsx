@@ -46,7 +46,9 @@ export function PasteDialog({
   const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
-    dialog.current?.showModal()
+    // Guarded: StrictMode runs effects twice in dev, and showModal() on an
+    // already-open dialog throws.
+    if (!dialog.current?.open) dialog.current?.showModal()
   }, [])
 
   /**

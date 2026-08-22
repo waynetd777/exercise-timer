@@ -4,6 +4,7 @@ import { fromBundle } from '../storage/bundle'
 import { restoreMedia } from '../storage/bundleMedia'
 import { migrateWorkout } from '../storage/migrate'
 import { hasBlob, putBlob } from '../media/store'
+import { pinDraft } from '../media/pin'
 import { parseRoutine } from './pasteFormat'
 import { importTabataFile, TabataImportError } from './tabataFormat'
 import { newId } from '../id'
@@ -17,6 +18,25 @@ export type ImportResult = {
    * import; those steps simply arrive without a picture.
    */
   droppedImages: number
+  /**
+   * Names of routines a bundle carried but that were too damaged to read. The
+   * file's readable routines still import; these must be reported, or a restore
+   * that loses some of them looks fully successful.
+   */
+  rejectedRoutines: string[]
+  /**
+   * Hashes draft-pinned here for the blobs written below, so a GC sweep in the
+   * window before the routines are saved cannot collect them. The caller owns
+   * releasing them: one `unpinDraft` per entry once the imported routines have
+   * been saved, or abandoned.
+   */
+  pinnedHashes: string[]
+  /**
+   * Lines the plain-text parser refused, per file. The routine still imports
+   * without them; the paste dialog shows these same lines, and a dropped file
+   * must not be the one way in that loses steps silently.
+   */
+  skippedLines: { file: string; lines: string[] }[]
 }
 
 /**
@@ -41,6 +61,9 @@ export async function importRoutineFiles(
   const imported: Workout[] = []
   const failed: ImportResult['failed'] = []
   let droppedImages = 0
+  const rejectedRoutines: string[] = []
+  const pinnedHashes: string[] = []
+  const skippedLines: ImportResult['skippedLines'] = []
 
   for (const file of files) {
     try {
@@ -50,7 +73,9 @@ export async function importRoutineFiles(
         json = JSON.parse(text)
       } catch {
         // Not JSON, so read it the way the paste dialog would.
-        imported.push(pasted(text, file.name, now))
+        const routine = pasted(text, file.name, now)
+        imported.push(routine.workout)
+        if (routine.skipped.length > 0) skippedLines.push({ file: file.name, lines: routine.skipped })
         continue
       }
 
@@ -60,7 +85,9 @@ export async function importRoutineFiles(
         (json as { kind?: unknown }).kind === 'davshack-timer-bundle'
       ) {
         // A bundle may hold a whole library, and each routine keeps its own id.
-        for (const workout of fromBundle(json, now)) imported.push(workout)
+        const contents = fromBundle(json, now)
+        for (const workout of contents.workouts) imported.push(workout)
+        rejectedRoutines.push(...contents.rejected)
 
         /*
          * The uploaded photos it carries, stored BEFORE the routines are saved so
@@ -74,6 +101,10 @@ export async function importRoutineFiles(
          */
         const media = await restoreMedia((json as { media?: unknown }).media)
         for (const { hash, blob } of media.entries) {
+          // Pinned before the write: the routines land only after this loop,
+          // and a sweep in that gap must not collect bytes they will reference.
+          pinDraft(hash)
+          pinnedHashes.push(hash)
           if (!(await hasBlob(hash))) await putBlob(hash, blob)
         }
         droppedImages += media.skipped.length
@@ -107,15 +138,19 @@ export async function importRoutineFiles(
     }
   }
 
-  return { imported, failed, droppedImages }
+  return { imported, failed, droppedImages, rejectedRoutines, pinnedHashes, skippedLines }
 }
 
 /** Turns a plain-text routine into a workout, named after its file. */
-function pasted(text: string, filename: string, now: number): Workout {
+function pasted(
+  text: string,
+  filename: string,
+  now: number,
+): { workout: Workout; skipped: string[] } {
   const name = filename.replace(/\.[^.]+$/, '').trim()
   const parsed = parseRoutine(text, name || 'Pasted routine')
   if (parsed.blocks.length === 0) throw new Error('No routine found in this file.')
-  return {
+  const workout: Workout = {
     id: newId(),
     name: parsed.name,
     blocks: parsed.blocks,
@@ -123,6 +158,7 @@ function pasted(text: string, filename: string, now: number): Workout {
     createdAt: now,
     updatedAt: now,
   }
+  return { workout, skipped: parsed.skipped.map((entry) => entry.text) }
 }
 
 /** Routine files are JSON, and browsers often report no MIME type for them. */

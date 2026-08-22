@@ -137,7 +137,8 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
     iteration,
     of,
     rung,
-    label: block.label ?? 'Set',
+    // `||`, not `??`: the editor stores an empty string for a deleted label.
+    label: block.label?.trim() || 'Set',
     ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
 }
@@ -156,15 +157,16 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
  * is not progress anyone is tracking mid-set.
  */
 function gateKey(entry: TimelineEntry): string | null {
-  for (let i = entry.path.length - 1; i >= 0; i--) {
-    const step = entry.path[i]!
-    // An explicit opt-out wins over an outer group's default: asking for one
-    // exercise at a time must not be overruled by the group enclosing it.
-    if (step.advance === 'step') return null
-    return `${step.id}@${step.iteration}`
-  }
+  const innermost = entry.path[entry.path.length - 1]
   // A step belonging to no group at all advances alone.
-  return null
+  if (!innermost) return null
+  // An explicit opt-out wins over an outer group's default: asking for one
+  // exercise at a time must not be overruled by the group enclosing it.
+  if (innermost.advance === 'step') return null
+  // The WHOLE path, not just the innermost level. Two rounds of a repeat around
+  // a one-rung ladder are the same rung of the same ladder, and a key that
+  // stopped there merged them into one gate: one tap cleared both rounds.
+  return entry.path.map((step) => `${step.id}@${step.iteration}`).join('/')
 }
 
 /**
@@ -181,6 +183,18 @@ function gateKey(entry: TimelineEntry): string | null {
  */
 export function compile(workout: Workout): Routine {
   const entries: TimelineEntry[] = []
+
+  /*
+   * The entry guard below only trips when something is PUSHED, so a repeat
+   * whose body emits nothing (empty, or all degenerate durations) would loop
+   * its full `times` unguarded: one corrupt number in an imported file froze
+   * the tab. Group iterations are bounded by the same ceiling; a legitimate
+   * routine cannot need more iterations than it is allowed steps.
+   */
+  let passes = 0
+  const countPass = (): void => {
+    if (++passes > MAX_TIMELINE_ENTRIES) throw new TimelineTooLargeError(MAX_TIMELINE_ENTRIES)
+  }
 
   const walk = (blocks: Block[], path: PathStep[], rung: number | null): void => {
     for (const block of blocks) {
@@ -222,6 +236,7 @@ export function compile(workout: Workout): Routine {
       if (block.kind === 'ladder') {
         const rungs = ladderRungs(block.counts)
         rungs.forEach((count, i) => {
+          countPass()
           walk(block.children, [...path, ladderStep(block, i + 1, rungs.length, count)], count)
         })
         continue
@@ -230,6 +245,7 @@ export function compile(workout: Workout): Routine {
       const times = repeatTimes(block.times)
       const drop = trailingRest(block.children) !== null
       for (let i = 0; i < times; i++) {
+        countPass()
         const children = drop && i === times - 1 ? block.children.slice(0, -1) : block.children
         walk(children, [...path, repeatStep(block, i + 1, times)], rung)
       }
@@ -373,9 +389,35 @@ export function stepCount(workout: Workout): number {
  * library needs this to know that "24:50" would be a lie.
  */
 export function hasGates(workout: Workout): boolean {
-  const any = (blocks: Block[]): boolean =>
-    blocks.some((block) =>
-      block.kind === 'segment' ? segmentDurationMs(block) === null : any(block.children),
-    )
+  // Mirrors what `compile()` actually runs: a repeat with no rounds never runs
+  // its children, a single round never runs its trailing rest, and a ladder
+  // with no usable rungs runs nothing. Disagreeing with compile here made the
+  // library flag a fully timed routine's length as an estimate.
+  const any = (blocks: Block[]): boolean => {
+    for (const block of blocks) {
+      if (block.kind === 'segment') {
+        if (segmentDurationMs(block) === null) return true
+        continue
+      }
+      if (block.kind === 'section') {
+        if (any(block.children)) return true
+        continue
+      }
+      if (block.kind === 'ladder') {
+        if (ladderRungs(block.counts).length > 0 && any(block.children)) return true
+        continue
+      }
+      const times = repeatTimes(block.times)
+      if (times < 1) continue
+      // With one round the trailing rest is dropped and never runs; with more,
+      // it runs between rounds and still counts.
+      const children =
+        times === 1 && trailingRest(block.children) !== null
+          ? block.children.slice(0, -1)
+          : block.children
+      if (any(children)) return true
+    }
+    return false
+  }
   return any(workout.blocks)
 }

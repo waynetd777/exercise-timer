@@ -1,6 +1,6 @@
 import type { MediaRef } from '../engine'
 import { resolvePlan } from './resolve'
-import { getBlob } from './store'
+import { getBlob, onBlobStored } from './store'
 
 /**
  * Turns a media ref into something an `<img src>` can use.
@@ -11,7 +11,12 @@ import { getBlob } from './store'
  * images in a routine, which is a handful.
  */
 const objectUrls = new Map<string, string>()
+/** Hashes already looked up, misses included, so a blob is read at most once. */
 const known = new Set<string>()
+
+// A cached miss is only true until the blob is stored. Forgetting it then lets
+// the next resolve read the new blob instead of waiting for a reload.
+onBlobStored((hash) => known.delete(hash))
 
 /** Synchronous best guess, for the first paint before any blob is read. */
 export function resolveMediaSync(ref: MediaRef | undefined, base: string): string | null {

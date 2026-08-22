@@ -3,11 +3,19 @@ import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import {
   clearMedia,
+  clearText,
   moveBy,
+  newLadder,
+  newRepsStep,
   newRoutineBlocks,
+  newRungStep,
+  newSection,
   newSegment,
   removeAt,
+  setTiming,
+  updateLadder,
   updateRepeat,
+  updateSection,
   updateSegment,
 } from '../blocks'
 import { isDirty } from '../dirty'
@@ -67,6 +75,7 @@ describe('isDirty', () => {
       'changed role': updateSegment(w.blocks, [0], { role: 'rest' }),
       'changed round count': updateRepeat(w.blocks, [1], { times: 8 }),
       'changed round label': updateRepeat(w.blocks, [1], { label: 'Set' }),
+      'changed round advance': updateRepeat(w.blocks, [1], { advance: 'step' }),
       'removed a step': removeAt(w.blocks, [0]),
       'reordered steps': moveBy(w.blocks, [0], 1),
       'added an image': updateSegment(w.blocks, [1, 0], {
@@ -111,5 +120,95 @@ describe('isDirty', () => {
     const replaced = [...w.blocks]
     replaced[0] = newSegment('prepare')
     expect(isDirty(w, w.name, replaced)).toBe(true)
+  })
+})
+
+describe('isDirty: rep counts and alternatives', () => {
+  // A self-paced routine: one step of 10 reps, with a swap noted.
+  const repsWorkout = (): Workout => ({
+    id: 'w2',
+    name: 'Push day',
+    blocks: [{ ...newRepsStep(10), alternative: 'From the knees' }],
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: 0,
+    updatedAt: 0,
+  })
+
+  it('is clean when nothing has been touched', () => {
+    const w = repsWorkout()
+    expect(isDirty(w, w.name, w.blocks)).toBe(false)
+  })
+
+  it('notices every way the timing choice can change', () => {
+    const w = repsWorkout()
+    const cases: Record<string, ReturnType<typeof setTiming>> = {
+      'changed rep count': setTiming(w.blocks, [0], { kind: 'reps', count: 12 }),
+      'toggled each side': setTiming(w.blocks, [0], { kind: 'reps', count: 10, perSide: true }),
+      'switched to a rung count': setTiming(w.blocks, [0], { kind: 'rung' }),
+      'switched to a timer': setTiming(w.blocks, [0], { kind: 'timed', durationMs: 30_000 }),
+    }
+    for (const [what, blocks] of Object.entries(cases)) {
+      expect(isDirty(w, w.name, blocks), what).toBe(true)
+    }
+  })
+
+  it('is clean when the timing is re-set to the same values', () => {
+    // setTiming rewrites the step object either way; only content may count.
+    const w = repsWorkout()
+    expect(isDirty(w, w.name, setTiming(w.blocks, [0], { kind: 'reps', count: 10 }))).toBe(false)
+  })
+
+  it('notices an alternative being edited or cleared', () => {
+    const w = repsWorkout()
+    const edited = updateSegment(w.blocks, [0], { alternative: 'On an incline' })
+    expect(isDirty(w, w.name, edited), 'edited').toBe(true)
+    expect(isDirty(w, w.name, clearText(w.blocks, [0], 'alternative')), 'cleared').toBe(true)
+  })
+})
+
+describe('isDirty: sections and ladders', () => {
+  const grouped = (): Workout => ({
+    id: 'w3',
+    name: 'Full body',
+    blocks: [
+      newSection('Warm-up', [newRepsStep(10)]),
+      newLadder([newRungStep()], [5, 10, 15]),
+    ],
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: 0,
+    updatedAt: 0,
+  })
+
+  it('is clean when nothing has been touched', () => {
+    const w = grouped()
+    expect(isDirty(w, w.name, w.blocks)).toBe(false)
+  })
+
+  it('is clean when a field is re-set to the same value', () => {
+    const w = grouped()
+    const repatched = updateSection(w.blocks, [0], { name: 'Warm-up' })
+    expect(isDirty(w, w.name, repatched)).toBe(false)
+  })
+
+  it('notices every section and ladder edit', () => {
+    const w = grouped()
+    const cases: Record<string, ReturnType<typeof updateSection>> = {
+      'renamed section': updateSection(w.blocks, [0], { name: 'Prep' }),
+      'changed section note': updateSection(w.blocks, [0], { note: 'No rest between' }),
+      'changed section display': updateSection(w.blocks, [0], { display: 'timer' }),
+      'changed section advance': updateSection(w.blocks, [0], { advance: 'step' }),
+      'edited a step inside the section': updateSegment(w.blocks, [0, 0], { name: 'Squats' }),
+      'changed ladder label': updateLadder(w.blocks, [1], { label: 'Rung' }),
+      'changed one rung': updateLadder(w.blocks, [1], { counts: [5, 12, 15] }),
+      'added a rung': updateLadder(w.blocks, [1], { counts: [5, 10, 15, 20] }),
+      'changed ladder advance': updateLadder(w.blocks, [1], { advance: 'step' }),
+      'edited a step inside the ladder': setTiming(w.blocks, [1, 0], {
+        kind: 'rung',
+        perSide: true,
+      }),
+    }
+    for (const [what, blocks] of Object.entries(cases)) {
+      expect(isDirty(w, w.name, blocks), what).toBe(true)
+    }
   })
 })

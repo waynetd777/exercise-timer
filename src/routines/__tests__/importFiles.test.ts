@@ -129,3 +129,29 @@ describe('importing a .tabata file', () => {
     }
   })
 })
+
+describe('what a lossy import must say out loud', () => {
+  it('reports the lines a text file lost, instead of a quietly smaller routine', async () => {
+    const body = [
+      'Warm-up:',
+      '* Arm Circles - 30 seconds',
+      'Breathe like a dragon between the moves',
+      '* Toe Touches - 30 seconds',
+    ].join('\n')
+
+    const { imported, skippedLines } = await importRoutineFiles([file('bands.txt', body)], NOW)
+
+    expect(imported).toHaveLength(1)
+    expect(skippedLines).toHaveLength(1)
+    expect(skippedLines[0]!.file).toBe('bands.txt')
+    expect(skippedLines[0]!.lines.length).toBeGreaterThan(0)
+  })
+
+  it('reports nothing when every line parsed', async () => {
+    const { skippedLines } = await importRoutineFiles(
+      [file('Strength training.txt', general)],
+      NOW,
+    )
+    expect(skippedLines).toEqual([])
+  })
+})
