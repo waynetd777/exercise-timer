@@ -22,6 +22,7 @@ Warm-up
 * Arm Circles
 * Bodyweight Squats (basic)
 or March in Place
+* Side Plank - 30 seconds each side
 
 #1 Full Body Ladder
 Counting: 10-8-6-4-2
@@ -50,6 +51,7 @@ Cool-down
 30 sec each
 * Hamstring Stretch
 * Chest Opener
+* Child's Pose - 1 minute
 * Deep Breathing
 ```
 
@@ -78,7 +80,12 @@ Start a step with `*`, `•`, `-`, or a number and a dot.
 | `20 Flutter Kicks` | the same, with the `×` left out |
 | `30-second Plank` | 30 seconds, counts itself down |
 | `Fast Feet for 15 seconds` | the same, the other way round |
+| `Plank - 1 minute` | minutes work anywhere seconds do: `2 min`, `1.5 minutes` |
+| `Side Plank - 30 seconds each side` | 30 seconds, once per side |
 | `40 sec each` | gives every step in the section that duration |
+
+`40 sec each` only counts on a line of its own. A bulleted step saying
+`30 seconds each side` keeps its own time and never retimes the list.
 
 A step named `Get ready`, `Get set` or `Prepare` becomes a get-ready step. One
 that says `rest` becomes a rest. Everything else is work.
@@ -106,7 +113,7 @@ finishes.
 | `Lateral Walks - 5 each direction` | the same |
 | `15 × Push-ups (or Knee Push-ups for low impact)` | an easier swap, shown beside the step |
 | `or March in Place` | on its own line, the same swap for the step above |
-| `20 × Front Punches + 20 × Uppercuts` | two steps. It splits only when both halves state a count |
+| `20 × Front Punches + 20 × Uppercuts` | two steps, with or without the `×`. It splits only when both halves state a count |
 | `Squat + Shoulder Press` | one step. One movement, left intact |
 | `Squats with a Reach (start standing, step out…)` | a parenthesis of 24 characters or more becomes the step's note, so the name stays readable across a room |
 | `(basic)` | short ones stay in the name, because they are part of what the exercise is |

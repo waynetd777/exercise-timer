@@ -62,11 +62,24 @@ Tracked in `seeded.ts` rather than "seed when the library is empty". That way a
 newly added seed reaches an existing install, and a seeded routine that gets
 deleted stays deleted.
 
+The write itself is **add-only** (`addWorkoutIfMissing`): the marker lives in
+localStorage while the routines live in IndexedDB, the two evict independently,
+and a lost marker used to lay the pristine seed over an edited copy of the same
+id. Losing the marker may re-offer a deleted seed, which is harmless; overwriting
+an edit is not.
+
 ## The export format
 
 One JSON file, versioned from the start: `{ kind, version, exportedAt, workouts,
 media }`. `kind` is a marker so the importer never has to guess, and a file from a
 *newer* version is refused rather than half-read.
+
+Every block field is type-checked on the way in (`isBlock` in `bundle.ts`), and
+share links pass through the same validation and version gate, because whatever is
+accepted is persisted and then rendered on every open: a hand-edited `name: {}` or
+`durationMs: "60"` used to import cleanly and crash the routine until deleted.
+Routines a bundle carries but that fail validation are reported by name, never
+silently filtered.
 
 **`media` carries the photos**, keyed by content hash, as data URLs
 (`bundleMedia.ts`). The split is the point:

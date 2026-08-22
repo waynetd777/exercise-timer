@@ -82,9 +82,15 @@ Decisions the grammar encodes, each because the emails are inconsistent:
 - **A per-side count is the smaller, truer one.** "10 × Walking Lunges (5 each
   leg)" is five a side, in either the bracketed or the dashed notation.
 - **A duration is looked for before a count**, because "30-second Plank" starts
-  with a number that is not a rep count.
+  with a number that is not a rep count. Minutes work anywhere seconds do:
+  "1 minute", "2 min", "1.5 minutes".
+- **"N sec each" retimes the list only on a line of its own.** A bulleted
+  "Side Plank - 30 seconds each side" is a step stating its own per-side time,
+  not a directive; reading it as one used to delete the step silently and retime
+  everything after it.
 - **A line is split only when both halves state a count.** "20 × Front Punches +
-  20 × Uppercuts" is two movements. "Squat + Shoulder Press" is one.
+  20 × Uppercuts" is two movements, with or without the ×. "Squat + Shoulder
+  Press" is one.
 - **A long trailing parenthetical is a description, not part of the name.** One step
   arrived as 159 characters, "Side-to-Side Squats with a Reach (start standing, step
   out to one side, …)", which no amount of sizing renders legibly across a gym. Over

@@ -45,7 +45,10 @@ than a beat, which is the same trade `speech.ts` makes.
 
 Beeps are queued on the `AudioContext` clock in a rolling 30-second window. The
 window is re-armed on a timer, on every clock mutation, on return to visibility,
-and when the whistle recording finishes decoding. They are never fired from a
+when the whistle recording finishes decoding, and whenever the context changes
+state, because iOS suspends it while the page hides and a phone call can leave it
+'interrupted'; each of those cancels the stale queue first, so nothing queued
+against a frozen clock plays late. They are never fired from a
 JavaScript tick, because the audio thread keeps time when the main thread is
 throttled, which is exactly the situation a gym timer is in.
 

@@ -11,10 +11,18 @@ This is the single most important decision in the project. A timer built on
 `setInterval(() => remaining--, 1000)` drifts, and is frozen outright by a
 backgrounded tab, so a phone in a pocket would come back minutes behind. Deriving
 elapsed from a monotonic timestamp means the timer is always simply correct, and
-returning to a hidden tab needs no correction at all.
+returning to a hidden tab needs almost no correction.
 
 `performance.now()` rather than `Date.now()` because it is monotonic: changing the
 system clock or crossing a timezone mid-workout cannot corrupt a run.
+
+The "almost": iOS freezes the whole WebContent process while the app is
+backgrounded, and `performance.now()` excludes the frozen stretch, so subtraction
+alone under-counts exactly the time spent away. On every return to visible, the
+wall clock is compared against a wall/monotonic pair captured while awake, and any
+missing stretch is credited to the running clocks (`suspendedMs` and `credited` in
+`clock.ts`). The credit is one-way: a wall clock set backwards can never rewind a
+run, so the monotonic property above still holds.
 
 The clock is pure data with pure transitions, tested with a fake clock. That is not
 fussiness: a real bug lived here. Seeking while paused used to leave the clock
@@ -71,9 +79,9 @@ counted. Timeout throttling in a hidden tab is therefore harmless.
 
 | | |
 |---|---|
-| `clock.ts` | Pure clock: `elapsed`, `started`, `paused`, `resumed`, `seeked` |
+| `clock.ts` | Pure clock: `elapsed`, `started`, `paused`, `resumed`, `seeked`, and the suspension credit (`suspendedMs`, `credited`) |
 | `tick.ts` | Pure: stay / move / complete, and when the display next changes |
 | `useTimer.ts` | Run state as a cursor, the session clock, the self-scheduling tick, and the seek controls |
 | `useWakeLock.ts` | Holds the screen awake while running. Re-acquires on return, since the browser releases it when the page hides |
-| `updateApp.ts` | Pull-to-update. Drops only the precached shell, **never IndexedDB**, which holds the only copy of anything authored in the editor |
+| `updateApp.ts` | Pull-to-update. Asks the service worker for the newer version and reloads onto it. Deletes **nothing**: the precache is only written during an install, so dropping it destroyed offline until the next deploy, and IndexedDB holds the only copy of anything authored |
 | `usePullToRefresh.ts` | The gesture. Listeners are attached natively with `{ passive: false }`, because React registers `touchmove` as passive and would ignore `preventDefault` |
