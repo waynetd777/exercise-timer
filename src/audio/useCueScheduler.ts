@@ -21,10 +21,10 @@ type Options = {
 /**
  * Keeps a rolling window of cues queued on the audio clock.
  *
- * Re-arms on a timer, on every clock mutation, on return to visibility, and when
- * a recording finishes decoding. Each arm cancels what was pending first, so a
- * pause or a skip cannot leave orphaned beeps from a position the workout has
- * left.
+ * Re-arms on a timer, on every clock mutation, on return to visibility, when the
+ * context changes state, and when a recording finishes decoding. Each of those
+ * cancels what was pending first, so a pause, a skip, or a spell in the
+ * background cannot leave orphaned beeps from a position the workout has left.
  */
 export function useCueScheduler({
   routine,
@@ -44,12 +44,6 @@ export function useCueScheduler({
    * arm that follows, and play twice.
    */
   const scheduled = useRef(new Set<string>())
-
-  // A clock jump abandons everything queued from the old position.
-  useEffect(() => {
-    audio.cancelPending()
-    scheduled.current.clear()
-  }, [generation])
 
   useEffect(() => {
     if (status !== 'running' || muted) {
@@ -74,44 +68,59 @@ export function useCueScheduler({
     }
 
     /*
-     * Queue again what the whistle recording has changed under us.
+     * Cancel what no longer belongs, then queue the window afresh.
      *
-     * A queued cue is already built, fallback tone and all (see
-     * `onSampleDecoded`), and on a cold start the whole first window was queued
-     * before the decode finished, including the whistle at the end of the
-     * get-ready. Cancelling and re-arming rebuilds them with the recording.
+     * For every path where the queue has gone stale under us: a clock jump, a
+     * recording decoding mid-window (a queued cue is already built, fallback
+     * tone and all, see `onSampleDecoded`), the context changing state, and
+     * the page coming back to visibility.
      *
      * Only what cancellation actually dropped is forgotten: a cue already
      * sounding is spared, and forgetting it would queue it a second time.
      */
-    const stopWaiting = audio.onSampleDecoded(() => {
+    const rearm = () => {
       const elapsed = readElapsed()
       audio.cancelPending()
       for (const key of requeueable(allCues, elapsed, scheduled.current)) {
         scheduled.current.delete(key)
       }
       arm()
-    })
+    }
 
-    arm()
+    // `generation` is in the deps below, so a clock jump lands here: the stale
+    // queue is dropped and the new position armed at once, not up to REARM_MS
+    // later, which used to silence a short step skipped into.
+    rearm()
     const interval = window.setInterval(arm, REARM_MS)
 
+    const stopWaiting = audio.onSampleDecoded(rearm)
+
+    // Arming against a suspended context is a no-op and `resume()` lands
+    // asynchronously, so the state actually reaching running must arm again.
+    // A full rearm, because after an iOS interruption (a call, Siri, an alarm)
+    // everything queued is aimed at moments measured on a clock that stood
+    // still, and must be dropped rather than played late.
+    const stopWatching = audio.onStateChange(rearm)
+
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        // iOS suspends the context while hidden. Resume before re-arming, or
-        // every cue is scheduled against a frozen clock.
-        audio.resume()
-        arm()
-      }
+      if (document.visibilityState !== 'visible') return
+      // iOS suspends the context while hidden: its clock froze while the run's
+      // kept counting, so everything queued before hiding is aimed at moments
+      // the run has left. Drop those BEFORE resuming, or the restarted clock
+      // plays them all, late and meaningless. The arm inside rearm() bails
+      // while still suspended; the statechange above arms once resume() lands.
+      rearm()
+      audio.resume()
     }
     document.addEventListener('visibilitychange', onVisible)
 
     return () => {
       stopWaiting()
+      stopWatching()
       window.clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [status, muted, allCues, readElapsed])
+  }, [generation, status, muted, allCues, readElapsed])
 
   /*
    * The finish, when the routine ends on a self-paced step.
@@ -127,8 +136,11 @@ export function useCueScheduler({
       finished.current = false
       return
     }
-    if (finished.current || muted || !finishesOnTap(routine)) return
+    if (finished.current) return
+    // Latched even when muted: the finish happened either way, and unmuting
+    // on the summary screen later must not replay it.
     finished.current = true
+    if (muted || !finishesOnTap(routine)) return
     const spec = toneFor('workout-complete')
     if (spec) audio.scheduleTone(audio.now, spec)
   }, [status, muted, routine])

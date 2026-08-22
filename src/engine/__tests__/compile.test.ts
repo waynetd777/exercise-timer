@@ -120,6 +120,23 @@ describe('compile', () => {
     expect(() => compile(bomb)).toThrow(TimelineTooLargeError)
     expect(() => compile(bomb)).toThrow(String(MAX_TIMELINE_ENTRIES))
   })
+
+  it('throws promptly on a huge repeat whose body emits nothing', () => {
+    // The entry guard never trips when nothing is pushed, so these looped for
+    // the full `times` before the pass guard existed.
+    const degenerate = workout('Hollow bomb', [rep(1e15, [seg('Zero', 0)])])
+    expect(() => compile(degenerate)).toThrow(TimelineTooLargeError)
+
+    const empty = workout('Empty bomb', [rep(1e9, [])])
+    expect(() => compile(empty)).toThrow(TimelineTooLargeError)
+  })
+
+  it('still compiles a modest repeat around a degenerate step to nothing', () => {
+    // Mid-edit tolerance: the pass guard must trip on bombs, not on a
+    // half-authored routine.
+    const timeline = compile(workout('Mid-edit', [rep(50, [seg('Zero', 0)])]))
+    expect(timeline.entries).toHaveLength(0)
+  })
 })
 
 describe('totalDurationMs / stepCount', () => {

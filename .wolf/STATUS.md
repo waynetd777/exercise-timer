@@ -983,3 +983,28 @@ VITE_BASE=/exercise-timer/ npm run build   # subpath build (GitHub Pages)
 - `.wolf/cerebrum.md` — User Preferences + Do-Not-Repeat + Decision Log
 - `.wolf/anatomy.md` — token-efficient file index
 - `.wolf/buglog.json` — known bugs + fixes
+
+---
+
+## ✅ Review findings ALL FIXED (2026-08-22, same session)
+
+Every finding from the review below (8 high, 13 medium, 15 low) is fixed, plus the systemic test gap: the hook/effect layer now has jsdom tests (useTimer wiring, useCueScheduler lifecycle, useSpokenCues, useWakeLock, usePullToRefresh, updateApp, EditorScreen dirty/undo/number-field integration). Suite grew 514 -> 617 tests; typecheck and production build green. New devDeps: jsdom, @testing-library/react, @testing-library/dom. Consolidated buglog entries: bug-058..bug-066. Review report artifact: https://claude.ai/code/artifact/d37f558a-5338-44a1-8900-8a5fbd433775
+
+Next quest: nothing queued. Candidates: on-device pass of the iOS audio/suspension fixes (bug-057 area), then consider surfacing rejected/skipped import detail in a richer dialog than the notice line.
+
+---
+
+## 🔍 Full quality/reliability review (2026-08-22)
+
+Five-subsystem audit; top claims re-verified by trace or execution. Full report: https://claude.ai/code/artifact/d37f558a-5338-44a1-8900-8a5fbd433775
+
+**High (fix first, all verified):**
+1. `useTimer.ts:135-141` tick chain dies on any automatic run crossing (gated routines freeze; masked by visibility/pause restarts). Reproduced in a harness.
+2. `updateApp.ts:21-26` pull-to-refresh deletes the Workbox precache with nothing to repopulate it: offline shell gone until a new SW version ships.
+3. `compile.ts:158-168` `gateKey` uses only the innermost path level, so gates from different outer rounds merge; one tap skips whole rounds.
+4. `dirty.ts:23-31` segment compare misses `reps`/`perSide`/`alternative`: Back silently discards those edits. Also no section/ladder branch (`:40`), so those routines are permanently "dirty".
+5. `blocks.ts moveStep` ejects a step out of a section/ladder instead of reordering (siblings resolved only for repeat parents).
+6. `pasteFormat.ts:487` unanchored `EACH_FOR` runs before the bullet handler: `* Side Plank – 30 seconds each side` is silently dropped and poisons later durations.
+7. `useCueScheduler.ts:99-105` visibility return never cancels stale pending cues (late beep burst on iOS); `:62` + `engine.ts:109-114` nothing re-arms when the context actually resumes (up to 10s of cues dropped; `interrupted` state never handled).
+
+**Systemic gap:** the hook/effect layer (useTimer wiring, useCueScheduler lifecycle, the big screens) has zero test coverage; every high finding except the parser lives there. Mediums and lows are in the report.

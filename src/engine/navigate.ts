@@ -182,7 +182,13 @@ export function retreat(routine: Routine, cursor: Cursor, restartThresholdMs = 1
   }
 
   const target = skipBack(run, clamped.elapsedInRunMs, restartThresholdMs)
-  const atTop = clamped.elapsedInRunMs <= restartThresholdMs && target === 0
+  // Leaving the run means being ON its first step and only just into it. Total
+  // elapsed alone misfires when the first step is shorter than the threshold:
+  // just into the SECOND step is still under it, and retreat exited the run,
+  // skipping the first step entirely.
+  const atTop =
+    position(run, clamped.elapsedInRunMs).index === 0 &&
+    clamped.elapsedInRunMs <= restartThresholdMs
   if (atTop && run.index > 0) return toEndOfPrevious(run.index)
   return { runIndex: run.index, elapsedInRunMs: target }
 }

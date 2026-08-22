@@ -73,6 +73,27 @@ describe('importTabataFile', () => {
     expect(() => importTabataFile({ workout: {} })).toThrow(/no intervals/)
   })
 
+  it('rejects a malformed interval with its own error, naming the culprit', () => {
+    // `[null]` used to throw a raw TypeError, and a numeric description crashed
+    // on .trim(); both are format errors and should read as such.
+    const wrap = (interval: unknown) => () =>
+      importTabataFile({ workout: { intervals: [{ type: 1, time: 20 }, interval] } })
+    expect(wrap(null)).toThrow(TabataImportError)
+    expect(wrap(null)).toThrow(/interval 2 is not an object/)
+    expect(wrap({ type: '1', time: 20 })).toThrow(/interval 2 has no numeric type/)
+    expect(wrap({ type: 1, time: '20' })).toThrow(/interval 2 has no numeric time/)
+    expect(wrap({ type: 1, time: 20, description: 123 })).toThrow(
+      /interval 2 description is not text/,
+    )
+  })
+
+  it('never lets a non-string url into a media ref', () => {
+    // It would be persisted, and every render of that step would trip on it.
+    expect(() =>
+      importTabataFile({ workout: { intervals: [{ type: 1, time: 20, url: 7 }] } }),
+    ).toThrow(/interval 1 url is not text/)
+  })
+
   it('skips intervals with no duration', () => {
     const imported = importTabataFile({
       workout: { title: 'Edge', intervals: [{ type: 1, time: 0 }, { type: 1, time: 20 }] },

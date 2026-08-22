@@ -55,11 +55,18 @@ export function localHashes(workouts: readonly Workout[]): string[] {
   return [...found].sort()
 }
 
-/** Stored hashes no routine references any more. */
+/**
+ * Stored hashes no routine references any more.
+ *
+ * `pinned` holds hashes owned by work in flight (an unsaved editor draft, an
+ * import between blob write and routine save): live, just not persisted yet,
+ * so the walk over stored workouts cannot see them. See `pin.ts`.
+ */
 export function orphanedHashes(
   stored: readonly string[],
   workouts: readonly Workout[],
+  pinned: ReadonlySet<string> = new Set(),
 ): string[] {
   const live = liveHashes(workouts)
-  return stored.filter((hash) => !live.has(hash))
+  return stored.filter((hash) => !live.has(hash) && !pinned.has(hash))
 }

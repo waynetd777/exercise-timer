@@ -75,8 +75,24 @@ const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
 const NAMED_SECTION =
   /^((?:trampoline\s+)?warm[-\s]?up|cool[-\s]?down|final\s+burnout|band\s+burner|burnout\s+ladder)\b(.*)$/i
 
-/** "40 sec each", "30 seconds each – continuous movement", "Mobility – 30 seconds each". */
-const EACH_FOR = new RegExp(`(\\d+)\\s*(?:sec|secs|second|seconds)\\s+each`, 'i')
+/**
+ * Durations arrive in seconds or minutes: "30 seconds", "2 min", "1.5 minutes".
+ * One shared fragment, so a unit accepted here is accepted by every duration
+ * pattern at once. Fractions exist for minutes ("1.5 minutes" is 90 seconds);
+ * fractional seconds fall out for free and cost nothing.
+ */
+const NUMBER = '(\\d+(?:\\.\\d+)?)'
+const UNIT = '(sec|secs|second|seconds|min|mins|minute|minutes)'
+
+const toMs = (value: string, unit: string): number =>
+  Math.round(Number(value) * (unit.toLowerCase().startsWith('m') ? 60_000 : 1_000))
+
+/**
+ * "40 sec each", "30 seconds each – continuous movement", "Mobility – 30 seconds each".
+ * NOT "30 seconds each side": that is one step's own time per side, and reading
+ * it as a directive would retime every exercise after it.
+ */
+const EACH_FOR = new RegExp(`${NUMBER}\\s*${UNIT}\\s+each\\b(?!\\s+(?:side|leg|arm|direction))`, 'i')
 
 /** "4 Rounds", "3-5 Rounds:". The upper bound wins, as agreed. */
 const ROUNDS = new RegExp(`^(\\d+)\\s*(?:${DASH}\\s*(\\d+))?\\s*rounds?\\b`, 'i')
@@ -122,21 +138,29 @@ const PER_SIDE_COUNT = new RegExp(
 /** "(or Reverse Lunges for low impact)", "– step-back option for low impact". */
 const ALTERNATIVE = new RegExp(`[(,]\\s*or\\s+([^)]+?)\\s*\\)|\\s+${DASH}\\s+(.*?\\boption\\b.*)$`, 'i')
 
-/** "30-second Plank", "20 second Hollow Hold", "Fast feet for 15 seconds". */
-const LEADING_SECONDS = new RegExp(
-  `^(\\d+)[\\s${DASH_CHARS}]*(?:sec|secs|second|seconds)\\s+(.+)$`,
+/** "30-second Plank", "1-minute Wall Sit", "20 second Hollow Hold". */
+const LEADING_DURATION = new RegExp(`^${NUMBER}[\\s${DASH_CHARS}]*${UNIT}\\s+(.+)$`, 'i')
+/** "Fast feet for 15 seconds", "Jog for 2 min". */
+const FOR_DURATION = new RegExp(`^(.+?)\\s+for\\s+${NUMBER}\\s*${UNIT}\\b`, 'i')
+/**
+ * "Side Plank - 30 seconds each side", "Plank - 1 minute": a duration stated at
+ * the end of the name, with no "for" to announce it. The per-side tail is
+ * consumed so it does not linger in the name; `PER_SIDE` has already read it.
+ */
+const TRAILING_DURATION = new RegExp(
+  `^(.+?)[\\s${DASH_CHARS}:]+${NUMBER}\\s*${UNIT}(?:\\s+each\\s+(?:side|leg|arm|direction))?\\s*$`,
   'i',
 )
-const TRAILING_SECONDS = new RegExp(`^(.+?)\\s+for\\s+(\\d+)\\s*(?:sec|secs|second|seconds)\\b`, 'i')
 /** "12 × Hammer Curls", and the bare "20 Flutter Kicks". */
 const LEADING_COUNT = /^(\d+)\s*(?:[×x]\s*|\s)(.+)$/
 
 /**
- * "20 × Front Punches + 20 × Uppercuts" is two exercises on one line. Split only
- * when the right-hand side states its own count. "Squat + Shoulder Press" and
+ * "20 × Front Punches + 20 × Uppercuts" is two exercises on one line, and so is
+ * "20 Front Punches + 20 Uppercuts" without the ×. Split only when the
+ * right-hand side states its own count. "Squat + Shoulder Press" and
  * "Thrusters – squat + press" are single movements and must survive intact.
  */
-const JOINED_ITEMS = /\s\+\s(?=\d+\s*[×x]\s*\S)/
+const JOINED_ITEMS = /\s\+\s(?=\d+\s*[×x]\s*\S|\d+\s\S)/
 
 type Item = {
   name: string
@@ -229,14 +253,19 @@ export function parseItem(text: string): Item {
     }
   }
 
-  const leadingSeconds = LEADING_SECONDS.exec(rest)
-  if (leadingSeconds) {
-    return done(tidy(leadingSeconds[2]!), { durationMs: Number(leadingSeconds[1]) * 1000 })
+  const leading = LEADING_DURATION.exec(rest)
+  if (leading) {
+    return done(tidy(leading[3]!), { durationMs: toMs(leading[1]!, leading[2]!) })
   }
 
-  const trailingSeconds = TRAILING_SECONDS.exec(rest)
-  if (trailingSeconds) {
-    return done(tidy(trailingSeconds[1]!), { durationMs: Number(trailingSeconds[2]) * 1000 })
+  const trailingFor = FOR_DURATION.exec(rest)
+  if (trailingFor) {
+    return done(tidy(trailingFor[1]!), { durationMs: toMs(trailingFor[2]!, trailingFor[3]!) })
+  }
+
+  const trailing = TRAILING_DURATION.exec(rest)
+  if (trailing) {
+    return done(tidy(trailing[1]!), { durationMs: toMs(trailing[2]!, trailing[3]!) })
   }
 
   const leadingCount = LEADING_COUNT.exec(rest)
@@ -336,7 +365,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
   let section: Section | null = null
   let target: Target = { kind: 'section' }
   /** Set by "40 sec each"; applies until the next directive or section. */
-  let eachSeconds: number | null = null
+  let eachMs: number | null = null
   let lastStep: Segment | null = null
   /** Set by "Main Exercise:": the next bare line is the ladder's main lift. */
   let expectMain = false
@@ -354,7 +383,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     closeSection()
     section = { kind: 'section', id: nextId('sec'), name: tidy(title), display: 'list', children: [] }
     target = { kind: 'section' }
-    eachSeconds = null
+    eachMs = null
     lastStep = null
   }
 
@@ -395,7 +424,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
     // A timed step keeps its own duration; "40 sec each" fills in the rest.
     const durationMs =
-      item.durationMs ?? (item.count === undefined && eachSeconds !== null ? eachSeconds * 1000 : undefined)
+      item.durationMs ?? (item.count === undefined && eachMs !== null ? eachMs : undefined)
 
     const step = segment(item, durationMs, reps)
     push(step)
@@ -423,7 +452,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       openSection(line.replace(/[:：]\s*$/, ''))
       // "WARM-UP – 40 seconds each" is a heading AND a duration directive.
       const each = EACH_FOR.exec(line)
-      if (each) eachSeconds = Number(each[1])
+      if (each) eachMs = toMs(each[1]!, each[2]!)
       return
     }
 
@@ -436,7 +465,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       const group: Ladder = { kind: 'ladder', id: nextId('lad'), counts, children: [] }
       ensureSection().children.push(group)
       target = { kind: 'ladder-main', group }
-      eachSeconds = null
+      eachMs = null
       return
     }
 
@@ -447,7 +476,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       const group: Repeat = { kind: 'repeat', id: nextId('rep'), times, children: [], label: 'Round' }
       ensureSection().children.push(group)
       target = { kind: 'rounds', group }
-      eachSeconds = null
+      eachMs = null
       return
     }
 
@@ -484,9 +513,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
-    const each = EACH_FOR.exec(line)
+    // Only a line of its own can retime the list: a bulleted "Side Plank -
+    // 30 seconds each side" is a step stating its own time, not a directive,
+    // and consuming it here silently deleted the step and retimed the rest.
+    const each = !BULLET.test(line) && !NUMBERED.test(line) ? EACH_FOR.exec(line) : null
     if (each) {
-      eachSeconds = Number(each[1])
+      eachMs = toMs(each[1]!, each[2]!)
       return
     }
 

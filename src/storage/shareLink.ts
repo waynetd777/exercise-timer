@@ -1,5 +1,6 @@
 import type { Block, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
+import { isBlock } from './bundle'
 import { migrateWorkout } from './migrate'
 
 /**
@@ -64,7 +65,18 @@ export async function decodeRoutine(param: string, now: number, id: string): Pro
   if (typeof parsed !== 'object' || parsed === null) throw new Error('not a routine')
 
   const workout = parsed as Partial<Workout>
-  if (typeof workout.name !== 'string' || !Array.isArray(workout.blocks)) {
+  // The same version gate the bundle path has: a link made by a newer app can
+  // carry a block kind this one would misread, so refuse it rather than guess.
+  if (typeof workout.schemaVersion === 'number' && workout.schemaVersion > SCHEMA_VERSION) {
+    throw new Error(`made by a newer version (${workout.schemaVersion})`)
+  }
+  // And the same field validation bundles get. A link is as hand-editable as a
+  // file: a string durationMs would import silently and count down from NaN.
+  if (
+    typeof workout.name !== 'string' ||
+    !Array.isArray(workout.blocks) ||
+    !workout.blocks.every(isBlock)
+  ) {
     throw new Error('not a routine')
   }
 

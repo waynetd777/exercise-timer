@@ -22,6 +22,14 @@ const KIND_RANK = {
  * boundary cue.
  */
 export function cues(timeline: Timeline): CuePoint[] {
+  // A Routine satisfies Timeline structurally, but once it has gates its entry
+  // times are run-local and share no clock, so cueing it whole yields garbage.
+  // A runtime guard rather than a type, because a FULLY TIMED routine is one
+  // run and legitimately cued whole.
+  if ('hasGates' in timeline && timeline.hasGates === true) {
+    throw new Error('cues() cannot cue a routine with gates: use runCues() per run')
+  }
+
   const out: CuePoint[] = []
 
   for (const entry of timeline.entries) {

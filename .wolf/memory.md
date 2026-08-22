@@ -90,3 +90,43 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 17:32 | Created src/ui/useDismiss.ts | — | ~448 |
+| 18:53 | Session end: 1 writes across 1 files (useDismiss.ts) | 5 reads | ~448 tok |
+
+## Session: 2026-08-22 18:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 19:17 | Edited vite.config.ts | 4→6 lines | ~53 |
+| 19:25 | Edited src/audio/engine.ts | 3→4 lines | ~56 |
+| 19:25 | Edited src/audio/engine.ts | modified if() | ~136 |
+| 19:25 | Edited src/audio/engine.ts | added 1 condition(s) | ~288 |
+| 19:25 | Edited src/audio/engine.ts | 6→11 lines | ~107 |
+| 19:25 | Edited src/audio/useCueScheduler.ts | 8→8 lines | ~111 |
+| 19:26 | Edited src/audio/useCueScheduler.ts | modified if() | ~820 |
+| 19:26 | Edited src/audio/useCueScheduler.ts | added 1 condition(s) | ~96 |
+| 19:26 | Edited src/audio/useSpokenCues.ts | expanded (+11 lines) | ~160 |
+| 19:26 | Edited src/audio/useSpokenCues.ts | modified if() | ~82 |
+| 19:26 | Edited src/audio/useSpokenCues.ts | added 2 condition(s) | ~180 |
+| 19:26 | Edited src/audio/useSpokenCues.ts | 2→2 lines | ~38 |
+| 19:26 | Created src/audio/__tests__/useCueScheduler.test.ts | — | ~1563 |
+| 19:27 | Created src/audio/__tests__/useSpokenCues.test.ts | — | ~1256 |
+| 19:28 | Edited src/audio/__tests__/useCueScheduler.test.ts | modified renderScheduler() | ~155 |
+| 19:30 | Full quality review (36 findings, artifact report) then wave-1 fixes: editor dirty/moveStep done, engine/audio/state/parsers/storage in flight | src/editor/*, src/audio/*, vite.config.ts, .wolf/STATUS.md | review published, fixes landing | ~120k |
+| 19:29 | Created src/state/__tests__/useTimer.test.tsx | — | ~1790 |
+| 19:30 | Edited src/state/clock.ts | expanded (+8 lines) | ~242 |
+| 19:30 | Edited src/state/clock.ts | added 1 condition(s) | ~356 |
+| 19:30 | Edited src/state/useTimer.ts | 2→2 lines | ~42 |
+| 19:30 | Edited src/state/useTimer.ts | expanded (+6 lines) | ~88 |
+| 19:30 | Edited src/state/useTimer.ts | expanded (+8 lines) | ~212 |
+| 19:30 | Edited src/state/useTimer.ts | added 2 condition(s) | ~720 |
+| 19:31 | Edited src/state/__tests__/clock.test.ts | 2→2 lines | ~43 |
+| 19:31 | Edited src/state/__tests__/clock.test.ts | expanded (+35 lines) | ~448 |
+| 19:31 | Created src/state/updateApp.ts | — | ~680 |
+| 19:32 | Created src/state/__tests__/updateApp.test.ts | — | ~1121 |
+| 21:31 | Created src/state/__tests__/useWakeLock.test.tsx | — | ~887 |
+| 21:31 | Created src/state/__tests__/usePullToRefresh.test.tsx | — | ~864 |
+| 21:32 | Created src/storage/__tests__/db.test.ts | — | ~1629 |
+| 21:33 | Created src/media/__tests__/resolveMedia.test.ts | — | ~657 |
+| 21:33 | Created src/media/__tests__/pin.test.ts | — | ~334 |
+| 21:41 | Created src/ui/__tests__/EditorScreen.test.tsx | — | ~1052 |
+| 21:50 | Fixed all 36 review findings + hook-layer test gap (engine gates/guards, iOS audio lifecycle, timer chain, SW precache, IDB self-heal, import validation, editor dirty/move/undo) | src/** (39 files), .wolf/* | 617 tests green, typecheck+build clean | ~350k |

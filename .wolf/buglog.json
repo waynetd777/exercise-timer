@@ -836,6 +836,307 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-22T18:35:00Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-08-22T17:25:28.546Z",
+      "error_message": "Missing guard clause",
+      "file": "src/audio/engine.ts",
+      "root_cause": "No early return/throw for edge case: !ctx || ctx.state === 'closed'",
+      "fix": "Added guard clause: if (!ctx || ctx.state === 'closed')",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:25:28.546Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-08-22T17:26:00.114Z",
+      "error_message": "Significant refactor of useCueScheduler.ts",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 67→76 lines (13 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:26:00.114Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-08-22T17:26:10.698Z",
+      "error_message": "Missing guard clause",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "No early return/throw for edge case: finished.current",
+      "fix": "Added guard clause: if (finished.current)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:26:10.698Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-08-22T17:26:19.625Z",
+      "error_message": "Type error",
+      "file": "src/audio/useSpokenCues.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:26:19.625Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-08-22T17:26:26.150Z",
+      "error_message": "Missing guard clause",
+      "file": "src/audio/useSpokenCues.ts",
+      "root_cause": "No early return/throw for edge case: status !== 'complete'",
+      "fix": "Added guard clause: if (status !== 'complete')",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:26:26.150Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-08-22T17:26:27.920Z",
+      "error_message": "Wrong reference: return should be secondsLeft",
+      "file": "src/audio/useSpokenCues.ts",
+      "root_cause": "Used \"return\" instead of \"secondsLeft\"",
+      "fix": "Changed return → secondsLeft",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:26:27.920Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-08-22T17:28:07.545Z",
+      "error_message": "Type error",
+      "file": "src/audio/__tests__/useCueScheduler.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:28:07.545Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-08-22T17:30:12.286Z",
+      "error_message": "Null/undefined access in clock.ts",
+      "file": "src/state/clock.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:30:12.286Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-08-22T17:30:56.374Z",
+      "error_message": "Significant refactor of useTimer.ts",
+      "file": "src/state/useTimer.ts",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 40→68 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:30:56.374Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-08-22T17:31:27.157Z",
+      "error_message": "Type error",
+      "file": "src/state/__tests__/clock.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T17:31:27.157Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Timer froze mid-workout in any gated routine: display stuck, never completed",
+      "file": "src/state/useTimer.ts",
+      "root_cause": "The tick effect only chained timeouts through the 'stay' branch; the 'move' branch returned without scheduling and no effect dependency changed, so the loop died on every automatic run crossing. Masked in daily use because visibilitychange and pause/resume restart the chain.",
+      "fix": "Re-arm the chain inside the move branch off the fresh cursor (tick at elapsed 0 on the new run). Regression test in src/state/__tests__/useTimer.test.tsx crosses a gate and asserts ticking continues.",
+      "tags": [
+        "timer",
+        "react-effect",
+        "gates",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Pull-to-refresh destroyed the offline shell until the next deployed SW version",
+      "file": "src/state/updateApp.ts",
+      "root_cause": "updateApp deleted every cache whose name includes 'precache', but Workbox only writes the precache during a service worker install and the name never changes, so nothing repopulated it.",
+      "fix": "Never delete caches; rely on registration.update() plus skipWaiting/clientsClaim, and wait briefly (3s cap) for an installing worker to activate before reload. Tests mock serviceWorker/caches and assert no cache is ever deleted.",
+      "tags": [
+        "pwa",
+        "service-worker",
+        "offline",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "One Next tap skipped whole rounds: gates from different rounds merged into one run",
+      "file": "src/engine/compile.ts",
+      "root_cause": "gateKey used only the innermost path level (id@iteration), so a repeat around a single-iteration group (one-rung ladder, section) produced identical keys across rounds and partition() merged their gates.",
+      "fix": "Key on the whole path (every level id@iteration joined), innermost advance opt-out still wins. Tests in gates.test.ts pin repeat-around-ladder and repeat-around-section.",
+      "tags": [
+        "engine",
+        "gates",
+        "compile",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Back silently discarded rep-count, per-side and alternative edits; section/ladder routines were permanently dirty",
+      "file": "src/editor/dirty.ts",
+      "root_cause": "sameBlock never compared segment reps/perSide/alternative (silently clean), had no section/ladder branches (identical ones fell through to false, always dirty), and the repeat branch missed advance.",
+      "fix": "Full structural comparison per block kind against engine/types.ts. dirty.test.ts covers every field both ways; EditorScreen.test.tsx proves the Back-button integration.",
+      "tags": [
+        "editor",
+        "dirty-tracking",
+        "data-loss",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Move up/down ejected a step out of its section or ladder instead of reordering",
+      "file": "src/editor/blocks.ts",
+      "root_cause": "moveStep resolved siblings only for repeat parents and top level; for section/ladder parents siblings was [] so the edge-of-group eject branch always ran.",
+      "fix": "Sibling resolution via isGroup for all group kinds; groups themselves always swap rather than nest. blocks.test.ts covers section/ladder reorder, edges, and move-into.",
+      "tags": [
+        "editor",
+        "blocks",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Pasted '* Side Plank - 30 seconds each side' silently deleted the step and retimed the next one to 30s",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "The unanchored EACH_FOR directive regex ran before the bullet handler without a bullet guard, consuming bulleted per-side steps as duration directives.",
+      "fix": "Directive lines must not be bullets, an 'each side/leg/arm/direction' lookahead excludes per-side phrasing, and a new TRAILING_DURATION pattern parses the line as a timed per-side step. Minutes and '+ N name' joins added alongside. Fixture tests added.",
+      "tags": [
+        "parser",
+        "paste-format",
+        "silent-data-loss",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "iOS audio: stale cues replayed after returning to the app; up to 10s of cues dropped after resume; audio dead after a phone call",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "The visibility handler never cancelled cues queued against the frozen AudioContext clock; arm() no-oped on a suspended context with nothing re-arming when it reached running; resume() ignored Safari's non-standard 'interrupted' state; within-run seeks cancelled without re-arming.",
+      "fix": "One rearm() (cancel, forget requeueable, arm) runs on generation bumps, visibility return, sample decode, and a new engine statechange listener; resume() nudges any non-running state. Hook tests with a mocked engine cover each path.",
+      "tags": [
+        "audio",
+        "ios",
+        "web-audio",
+        "lifecycle",
+        "high"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Medium roll-up: db connection poisoning, seed overwrite, unvalidated imports, GC draft window, iOS elapsed under-count, export modal wedge, undo desyncs",
+      "file": "src/storage/db.ts",
+      "root_cause": "See the review artifact (claude.ai/code/artifact/d37f558a-5338-44a1-8900-8a5fbd433775) for the 13 medium findings; all were variants of unvalidated input at the edges or unhandled lifecycle transitions.",
+      "fix": "db.ts retries failed opens and reopens dead connections; seeding is add-only; bundle/shareLink imports type-check every block field; draft pins shield unsaved media from the GC sweep; clock.ts credits wall-versus-monotonic suspension gaps; export wraps in try/finally; uncontrolled editor fields are keyed or resynced on external change.",
+      "tags": [
+        "storage",
+        "reliability",
+        "roll-up"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-08-22T21:45:00+02:00",
+      "error_message": "Low roll-up: 15 low findings from the 2026-08-22 review, all fixed",
+      "file": "src/",
+      "root_cause": "Full list in the review artifact and .wolf/STATUS.md.",
+      "fix": "Includes hasGates agreement with compile, the cues() gate guard, retreat first-step threshold, wake-lock double acquire, pull-to-refresh listener churn, announced-cue reset and window, tremolo node leak, tabata shape checks, resolveMedia negative-cache invalidation, downscale bitmap close and EXIF pin, showModal guards, modal-aware undo, number-field clearing and caps, and blank group labels.",
+      "tags": [
+        "roll-up",
+        "review"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-22T21:45:00+02:00"
     }
   ]
 }

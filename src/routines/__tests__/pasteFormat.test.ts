@@ -192,6 +192,42 @@ describe('parseRoutine: the real emails', () => {
     expect(named(parseRoutine(general).blocks, 'Squat + Shoulder Press')).toBeTruthy()
   })
 
+  it('keeps a bulleted "30 seconds each side" line as a step, not a directive', () => {
+    /*
+     * The each-for directive used to eat this bullet whole: the step vanished
+     * without even a `skipped` entry, and its 30 seconds retimed every
+     * uncounted exercise after it.
+     */
+    const parsed = parseRoutine(
+      '#4 Core\n* 15 × Russian Twists (each side)\n* Side Plank - 30 seconds each side\n* V-Ups',
+    )
+    expect(parsed.skipped).toEqual([])
+    expect(named(parsed.blocks, 'Side Plank')).toMatchObject({ durationMs: 30_000 })
+    expect(named(parsed.blocks, 'V-Ups').durationMs).toBeUndefined()
+  })
+
+  it('splits a joined pair even when the counts have no multiplier sign', () => {
+    // "20 Front Punches + 20 Uppercuts" was one step named after both.
+    const blocks = parseRoutine('#1 Boxing\n* 20 Front Punches + 20 Uppercuts').blocks
+    expect(named(blocks, 'Front Punches').reps).toEqual({ kind: 'fixed', count: 20 })
+    expect(named(blocks, 'Uppercuts').reps).toEqual({ kind: 'fixed', count: 20 })
+  })
+
+  it('reads an each-for directive stated in minutes', () => {
+    const parsed = parseRoutine('Warm-up - 1 minute each\n* March\n* High Knees')
+    expect(parsed.skipped).toEqual([])
+    expect(named(parsed.blocks, 'March').durationMs).toBe(60_000)
+    expect(named(parsed.blocks, 'High Knees').durationMs).toBe(60_000)
+  })
+
+  it('lets a step state minutes under a seconds directive', () => {
+    // "* Plank - 1 minute" was silently made a 40-second step.
+    const parsed = parseRoutine('Warm-up\n40 sec each\n* Jumping Jacks\n* Plank - 1 minute')
+    expect(parsed.skipped).toEqual([])
+    expect(named(parsed.blocks, 'Jumping Jacks').durationMs).toBe(40_000)
+    expect(named(parsed.blocks, 'Plank').durationMs).toBe(60_000)
+  })
+
   it('compiles what it produces into a runnable routine', () => {
     for (const text of Object.values(EMAILS)) {
       const routine = compile(asWorkout(parseRoutine(text).blocks))
@@ -216,6 +252,21 @@ describe('parseItem', () => {
       name: 'Fast feet',
       durationMs: 15_000,
     })
+  })
+
+  it('reads a duration stated at the end of the name', () => {
+    expect(parseItem('Side Plank - 30 seconds each side')).toMatchObject({
+      name: 'Side Plank',
+      durationMs: 30_000,
+      perSide: true,
+    })
+    expect(parseItem('Plank - 1 minute')).toMatchObject({ name: 'Plank', durationMs: 60_000 })
+  })
+
+  it('reads minutes wherever it reads seconds', () => {
+    expect(parseItem('1-minute Wall Sit')).toMatchObject({ name: 'Wall Sit', durationMs: 60_000 })
+    expect(parseItem('Jog for 2 min')).toMatchObject({ name: 'Jog', durationMs: 120_000 })
+    expect(parseItem('Plank - 1.5 minutes')).toMatchObject({ durationMs: 90_000 })
   })
 
   it('takes the per-side count as the real one, in either notation', () => {

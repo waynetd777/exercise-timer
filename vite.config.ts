@@ -63,7 +63,9 @@ export default defineConfig({
     }),
   ],
   test: {
+    // Node by default; hook tests opt into jsdom per file with
+    // `// @vitest-environment jsdom`.
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 })

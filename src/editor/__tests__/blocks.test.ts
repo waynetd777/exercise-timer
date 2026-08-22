@@ -439,6 +439,78 @@ describe('moveStep: moving through rounds, not just around them', () => {
   })
 })
 
+describe('moveStep: sections and ladders, not just rounds', () => {
+  const sec = (id: string, children: Block[]): Section => ({
+    kind: 'section',
+    id,
+    name: id,
+    display: 'list',
+    children,
+  })
+  const lad = (id: string, children: Block[], counts = [5, 10]): Ladder => ({
+    kind: 'ladder',
+    id,
+    counts,
+    children,
+    label: 'Set',
+  })
+
+  it('swaps adjacent steps inside a section, both directions', () => {
+    const t = (): Block[] => [sec('S', [seg('A'), seg('B'), seg('C'), seg('D')])]
+    expect(names(moveStep(t(), [0, 1], 1))).toEqual(['[S]', 'A', 'C', 'B', 'D'])
+    expect(names(moveStep(t(), [0, 1], -1))).toEqual(['[S]', 'B', 'A', 'C', 'D'])
+    // Still the section's child, not ejected beside it.
+    expect(blockAt(moveStep(t(), [0, 1], 1), [0, 2])).toMatchObject({ name: 'B' })
+  })
+
+  it('swaps adjacent steps inside a ladder', () => {
+    const t = (): Block[] => [lad('L', [seg('A'), seg('B'), seg('C')])]
+    expect(names(moveStep(t(), [0, 0], 1))).toEqual(['[L]', 'B', 'A', 'C'])
+    expect(blockAt(moveStep(t(), [0, 0], 1), [0, 1])).toMatchObject({ name: 'A' })
+    expect(names(moveStep(t(), [0, 2], -1))).toEqual(['[L]', 'A', 'C', 'B'])
+  })
+
+  it('still steps out at the edges of a section', () => {
+    const t = (): Block[] => [seg('X'), sec('S', [seg('A'), seg('B')]), seg('Y')]
+    expect(names(moveStep(t(), [1, 0], -1))).toEqual(['X', 'A', '[S]', 'B', 'Y'])
+    expect(names(moveStep(t(), [1, 1], 1))).toEqual(['X', '[S]', 'A', 'B', 'Y'])
+    expect(blockAt(moveStep(t(), [1, 1], 1), [2])).toMatchObject({ name: 'B' })
+  })
+
+  it('steps out of a ladder into the section around it', () => {
+    const t: Block[] = [sec('S', [lad('L', [seg('A'), seg('B')])])]
+    const moved = moveStep(t, [0, 0, 1], 1)
+    expect(names(moved)).toEqual(['[S]', '[L]', 'A', 'B'])
+    expect(blockAt(moved, [0, 1])).toMatchObject({ name: 'B' })
+  })
+
+  it('moves a step down INTO the section that follows it', () => {
+    const moved = moveStep([seg('A'), sec('S', [seg('B')])], [0], 1)
+    expect(names(moved)).toEqual(['[S]', 'A', 'B'])
+    expect(blockAt(moved, [0, 0])).toMatchObject({ name: 'A' })
+  })
+
+  it('moves a step up INTO the ladder above it, landing last', () => {
+    const moved = moveStep([lad('L', [seg('A')]), seg('B')], [1], -1)
+    expect(names(moved)).toEqual(['[L]', 'A', 'B'])
+    expect(blockAt(moved, [0, 1])).toMatchObject({ name: 'B' })
+  })
+
+  it('swaps a section past a round rather than nesting it', () => {
+    const two: Block[] = [sec('S', [seg('A')]), rep('R', [seg('B')])]
+    const moved = moveStep(two, [0], 1)
+    expect(moved.map((b) => b.id)).toEqual(['R', 'S'])
+    expect((moved[1] as Section).children).toHaveLength(1)
+  })
+
+  it('is reversible inside a section: down then up returns the shape', () => {
+    const original: Block[] = [sec('S', [seg('A'), seg('B'), seg('C')])]
+    const there = moveStep(original, [0, 0], 1)
+    const back = moveStep(there, [0, 1], -1)
+    expect(names(back)).toEqual(names(original))
+  })
+})
+
 describe('the tree operations reach every kind of group', () => {
   const routine = (): Block[] => [
     newSection('Warm-up', [seg('Jog', 40)]),

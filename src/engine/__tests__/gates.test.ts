@@ -194,6 +194,28 @@ describe('a round clears with ONE tap', () => {
     expect(routine.runs).toHaveLength(3)
   })
 
+  it('does not merge two rounds of a repeat around a single-rung ladder', () => {
+    // Both rounds run the ladder's iteration 1, so a key built from the
+    // innermost level alone read them as one gate and a tap skipped round 2.
+    const routine = compile(
+      workout('Rounds of one rung', [rep(2, [ladder([5], [step('Squats', 'rung')])], 'Round')]),
+    )
+    expect(routine.runs).toHaveLength(2)
+    expect(routine.runs.every((run) => run.selfPaced && run.entries.length === 1)).toBe(true)
+  })
+
+  it('does not merge the rounds of a repeat around a section', () => {
+    // A section is always iteration 1 of 1: only the outer repeat's level on
+    // the path can tell its rounds apart.
+    const routine = compile(
+      workout('Rounds of a block', [
+        rep(3, [section('Block', [step('Curls', 12), step('Press', 10)])], 'Round'),
+      ]),
+    )
+    expect(routine.runs).toHaveLength(3)
+    expect(routine.runs.map((run) => run.entries.length)).toEqual([2, 2, 2])
+  })
+
   it('collapses the loose steps of a section, which is what "without stopping" means', () => {
     const routine = compile(
       workout('Burnout', [
@@ -340,5 +362,30 @@ describe('the cheap measures agree with compile', () => {
     expect(totalDurationMs(routine)).toBe(compiled.totalMs)
     expect(stepCount(routine)).toBe(compiled.entries.length)
     expect(hasGates(routine)).toBe(compiled.hasGates)
+  })
+
+  it('agrees that a gate inside a never-running repeat is no gate', () => {
+    const wk = workout('Skipped', [rep(0, [step('Push-ups', 12)])])
+    expect(compile(wk).hasGates).toBe(false)
+    expect(hasGates(wk)).toBe(false)
+  })
+
+  it('agrees that a single round drops its self-paced trailing rest', () => {
+    const restUntilReady: Segment = { ...step('Rest until ready'), role: 'rest' }
+    const once = workout('One round', [rep(1, [seg('Work', 30), restUntilReady])])
+    expect(compile(once).hasGates).toBe(false)
+    expect(hasGates(once)).toBe(false)
+
+    // With two rounds the rest RUNS between them, so it is a gate again.
+    const restBetween: Segment = { ...step('Rest until ready'), role: 'rest' }
+    const twice = workout('Two rounds', [rep(2, [seg('Work', 30), restBetween])])
+    expect(compile(twice).hasGates).toBe(true)
+    expect(hasGates(twice)).toBe(true)
+  })
+
+  it('agrees that a gate inside a ladder with no usable rungs is no gate', () => {
+    const wk = workout('No rungs', [ladder([], [step('Squats', 'rung')])])
+    expect(compile(wk).hasGates).toBe(false)
+    expect(hasGates(wk)).toBe(false)
   })
 })

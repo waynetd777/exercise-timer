@@ -38,12 +38,27 @@ export function usePullToRefresh(
   const refresh = useRef(onRefresh)
   refresh.current = onRefresh
 
+  /*
+   * The handlers read these refs, not the state, so the effect attaches its
+   * listeners ONCE. With state in the dependency list all four listeners were
+   * torn down and re-attached on every pixel of movement, and a touchend that
+   * beat the re-render judged the threshold on the previous move's distance.
+   * The state still exists because the indicator renders from it.
+   */
+  const pulled = useRef(0)
+  const busyRef = useRef(false)
+
   useEffect(() => {
     const element = ref.current
     if (!element) return
 
+    const setPull = (px: number) => {
+      pulled.current = px
+      setDistance(px)
+    }
+
     const onStart = (event: TouchEvent) => {
-      if (busy || element.scrollTop > 0 || event.touches.length !== 1) return
+      if (busyRef.current || element.scrollTop > 0 || event.touches.length !== 1) return
       start.current = event.touches[0]!.clientY
     }
 
@@ -54,21 +69,22 @@ export function usePullToRefresh(
       if (delta <= 0) {
         // Reversed into an upward scroll: hand the gesture back.
         start.current = null
-        setDistance(0)
+        setPull(0)
         return
       }
 
       event.preventDefault()
-      setDistance(Math.min(delta * DAMPING, MAX))
+      setPull(Math.min(delta * DAMPING, MAX))
     }
 
     const onEnd = () => {
       if (start.current === null) return
-      const pulled = distance
+      const distanceAtRelease = pulled.current
       start.current = null
-      setDistance(0)
+      setPull(0)
 
-      if (pulled >= THRESHOLD) {
+      if (distanceAtRelease >= THRESHOLD) {
+        busyRef.current = true
         setBusy(true)
         void refresh.current()
       }
@@ -85,7 +101,7 @@ export function usePullToRefresh(
       element.removeEventListener('touchend', onEnd)
       element.removeEventListener('touchcancel', onEnd)
     }
-  }, [ref, distance, busy])
+  }, [ref])
 
   return { distance, armed: distance >= THRESHOLD, busy }
 }

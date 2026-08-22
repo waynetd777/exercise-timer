@@ -10,6 +10,17 @@ const MIN_STEP_MS = 20_000
 const ANNOUNCE_AT = 10
 
 /**
+ * Below this many seconds the moment has passed and the line is skipped.
+ *
+ * A window rather than the exact second, because a throttled tick can jump a
+ * render from eleven straight to nine and the announcement must survive that.
+ * But not an open-ended one: a return from background can land anywhere in the
+ * step, and "ten seconds left" with six on the clock is worse than silence.
+ * Two seconds of slack covers a missed tick and nothing staler.
+ */
+const ANNOUNCE_FLOOR = 8
+
+/**
  * Gap between the last ding being struck and the wrap-up line.
  *
  * Measured from the strike rather than from the end of its tail: the tail is long
@@ -57,6 +68,9 @@ export function useSpokenCues(
   useEffect(() => {
     if (status === 'idle' || status === 'complete') {
       greeted.current = false
+      // The announcement guard resets with it, or a rerun of the same routine
+      // would skip "ten seconds left" for any step it had spoken before.
+      announced.current = null
       return
     }
     if (status !== 'running' || greeted.current) return
@@ -71,8 +85,18 @@ export function useSpokenCues(
    * itself rather than a hardcoded delay, so retuning the dings keeps the voice
    * following them.
    */
+  const wrapped = useRef(false)
   useEffect(() => {
-    if (status !== 'complete' || muted || !canSpeak()) return
+    if (status !== 'complete') {
+      wrapped.current = false
+      return
+    }
+    if (wrapped.current) return
+    // Latched even when muted: the finish happened either way, and unmuting
+    // on the summary screen must not deliver the line minutes late, again on
+    // every unmute.
+    wrapped.current = true
+    if (muted || !canSpeak()) return
     const delay = lastStrikeMs(toneFor('workout-complete')!) + AFTER_LAST_DING_MS
     const timer = window.setTimeout(() => speak(SPOKEN.thatsAWrap), delay)
     return () => window.clearTimeout(timer)
@@ -91,7 +115,7 @@ export function useSpokenCues(
     if (entry.durationMs === undefined || entry.durationMs < MIN_STEP_MS) return
 
     const secondsLeft = Math.ceil(at.remainingMs / 1000)
-    if (secondsLeft !== ANNOUNCE_AT) return
+    if (secondsLeft > ANNOUNCE_AT || secondsLeft < ANNOUNCE_FLOOR) return
     // `step`, not `index`: index is RUN-LOCAL, so the first step of every run
     // shares index 0 and each would suppress the next one's announcement.
     if (announced.current === entry.step) return

@@ -15,9 +15,15 @@ export function useWakeLock(active: boolean): void {
     if (!active || !('wakeLock' in navigator)) return
 
     let cancelled = false
+    // Guards the await gap: rapid hidden/visible flaps can start a second
+    // request before the first resolves, and both would pass the sentinel
+    // check. The second lock would then orphan the first, which cleanup could
+    // no longer release.
+    let acquiring = false
 
     const acquire = async () => {
-      if (cancelled || sentinel.current) return
+      if (cancelled || acquiring || sentinel.current) return
+      acquiring = true
       try {
         const lock = await navigator.wakeLock.request('screen')
         if (cancelled) {
@@ -31,6 +37,8 @@ export function useWakeLock(active: boolean): void {
       } catch {
         // Denied or unavailable (often a non-visible page). Nothing to do:
         // the workout still runs, the screen just may dim.
+      } finally {
+        acquiring = false
       }
     }
 

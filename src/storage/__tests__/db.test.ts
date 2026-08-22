@@ -1,0 +1,180 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Workout } from '../../engine'
+import { SCHEMA_VERSION } from '../../engine'
+
+/**
+ * A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request
+ * transactions, and a connection that can be killed behind the caller's back.
+ * Enough to prove the self-healing paths, which real browsers only exercise
+ * under memory pressure or on iOS.
+ */
+type FakeRequest = {
+  result: unknown
+  error: Error | null
+  onsuccess: (() => void) | null
+  onerror: (() => void) | null
+  onupgradeneeded: (() => void) | null
+}
+
+function fakeRequest(result: unknown, error: Error | null = null): FakeRequest {
+  const request: FakeRequest = { result, error, onsuccess: null, onerror: null, onupgradeneeded: null }
+  queueMicrotask(() => {
+    if (error) request.onerror?.()
+    else request.onsuccess?.()
+  })
+  return request
+}
+
+function named(name: string): Error {
+  const error = new Error(name)
+  error.name = name
+  return error
+}
+
+type FakeDb = {
+  dead: boolean
+  rows: Map<string, unknown>
+  onclose: (() => void) | null
+  onversionchange: (() => void) | null
+  close: () => void
+  transaction: (store: string, mode: string) => { objectStore: (name: string) => unknown }
+  objectStoreNames: { contains: (name: string) => boolean }
+}
+
+function makeDb(): FakeDb {
+  const rows = new Map<string, unknown>()
+  const db: FakeDb = {
+    dead: false,
+    rows,
+    onclose: null,
+    onversionchange: null,
+    close: () => {},
+    objectStoreNames: { contains: () => true },
+    transaction: () => {
+      // iOS kills idle connections without firing onclose; the corpse only
+      // shows itself here, as an InvalidStateError.
+      if (db.dead) throw named('InvalidStateError')
+      return {
+        objectStore: () => ({
+          put: (value: unknown, key?: string) => {
+            const id = key ?? (value as { id: string }).id
+            rows.set(id, value)
+            return fakeRequest(id)
+          },
+          add: (value: unknown) => {
+            const id = (value as { id: string }).id
+            if (rows.has(id)) return fakeRequest(undefined, named('ConstraintError'))
+            rows.set(id, value)
+            return fakeRequest(id)
+          },
+          get: (key: string) => fakeRequest(rows.get(key)),
+          getAll: () => fakeRequest([...rows.values()]),
+        }),
+      }
+    },
+  }
+  return db
+}
+
+/** Scripted opens: each entry is a fresh connection, or an open failure. */
+let opens: Array<FakeDb | 'fail'>
+let opened: FakeDb[]
+
+function stubIndexedDb() {
+  opened = []
+  vi.stubGlobal('indexedDB', {
+    open: () => {
+      const plan = opens.shift()
+      if (plan === undefined) throw new Error('test opened the database more often than scripted')
+      if (plan === 'fail') return fakeRequest(undefined, named('UnknownError'))
+      opened.push(plan)
+      return fakeRequest(plan)
+    },
+  })
+}
+
+const routine = (id: string, name: string): Workout => ({
+  id,
+  name,
+  blocks: [],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+describe('db self-healing', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    stubIndexedDb()
+  })
+
+  it('retries after a failed open instead of caching the rejection forever', async () => {
+    opens = ['fail', makeDb()]
+    const { run, STORE_WORKOUTS } = await import('../db')
+
+    // The transient failure surfaces once. Before the fix it was memoized and
+    // every later call for the whole session failed with this same error.
+    await expect(
+      run(STORE_WORKOUTS, 'readonly', (store) => (store as { getAll: () => IDBRequest }).getAll()),
+    ).rejects.toThrow('UnknownError')
+
+    await expect(
+      run(STORE_WORKOUTS, 'readonly', (store) => (store as { getAll: () => IDBRequest }).getAll()),
+    ).resolves.toEqual([])
+  })
+
+  it('reopens and retries when the connection died without warning', async () => {
+    const first = makeDb()
+    const second = makeDb()
+    opens = [first, second]
+    const { run, STORE_WORKOUTS } = await import('../db')
+
+    await run(STORE_WORKOUTS, 'readwrite', (store) =>
+      (store as { put: (v: unknown) => IDBRequest }).put(routine('w1', 'Kept')),
+    )
+
+    first.dead = true
+
+    // The dead handle throws on transaction(); the write must land on a fresh
+    // connection rather than silently failing for the rest of the session.
+    await run(STORE_WORKOUTS, 'readwrite', (store) =>
+      (store as { put: (v: unknown) => IDBRequest }).put(routine('w2', 'Saved after the kill')),
+    )
+    expect(second.rows.has('w2')).toBe(true)
+  })
+
+  it('drops the cached connection when the browser closes it', async () => {
+    const first = makeDb()
+    const second = makeDb()
+    opens = [first, second]
+    const { openDb } = await import('../db')
+
+    await openDb()
+    expect(first.onclose).not.toBeNull()
+    first.onclose?.()
+
+    await openDb()
+    expect(opened).toHaveLength(2)
+  })
+})
+
+describe('addWorkoutIfMissing', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    stubIndexedDb()
+  })
+
+  it('adds a missing routine and refuses to overwrite an existing id', async () => {
+    const db = makeDb()
+    opens = [db]
+    const { addWorkoutIfMissing, saveWorkout } = await import('../workouts')
+
+    expect(await addWorkoutIfMissing(routine('seed-1', 'Pristine seed'), 10)).toBe(true)
+
+    // The user edits the seeded copy; a later lost localStorage marker makes
+    // the app try to seed again. The edit must survive.
+    await saveWorkout({ ...routine('seed-1', 'Edited by hand') }, 20)
+    expect(await addWorkoutIfMissing(routine('seed-1', 'Pristine seed'), 30)).toBe(false)
+    expect((db.rows.get('seed-1') as Workout).name).toBe('Edited by hand')
+  })
+})

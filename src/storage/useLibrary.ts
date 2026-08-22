@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
 import { orphanedHashes } from '../media/gc'
+import { draftPinnedHashes } from '../media/pin'
 import { forgetBlob } from '../media/resolveMedia'
 import { deleteBlob, storedHashes } from '../media/store'
 import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
-import { deleteWorkout, listWorkouts, putWorkout, saveWorkout } from './workouts'
+import { addWorkoutIfMissing, deleteWorkout, listWorkouts, putWorkout, saveWorkout } from './workouts'
 import { newId } from '../id'
 
 const now = () => Date.now()
@@ -45,7 +46,9 @@ export function useLibrary(seed: readonly Workout[]): Library {
         const offered = seededIds()
         const fresh = seed.filter((workout) => !offered.has(workout.id))
         if (fresh.length > 0) {
-          for (const workout of fresh) await saveWorkout(workout, now())
+          // Add-only: a lost marker must never put a pristine seed over an
+          // edited copy that is still in the store. See `addWorkoutIfMissing`.
+          for (const workout of fresh) await addWorkoutIfMissing(workout, now())
           markSeeded(fresh.map((workout) => workout.id))
         }
 
@@ -96,7 +99,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
      * routine may well have shared images with one that is staying.
      */
     try {
-      for (const hash of orphanedHashes(await storedHashes(), remaining)) {
+      for (const hash of orphanedHashes(await storedHashes(), remaining, draftPinnedHashes())) {
         await deleteBlob(hash)
         forgetBlob(hash)
       }

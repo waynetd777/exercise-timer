@@ -5,6 +5,14 @@
  * accumulates ticks, so a throttled, backgrounded or sleeping tab cannot cause
  * drift. Extracted from the React hook because this arithmetic is the most
  * bug-prone part of the app and deserves tests that need no DOM.
+ *
+ * One caveat the monotonic clock cannot see: iOS freezes the whole WebContent
+ * process while the app is backgrounded, and performance.now() excludes the
+ * frozen stretch. The wall clock does not, so `suspendedMs` compares the two
+ * against an anchor taken while the page was last known awake, and `credited`
+ * folds the missing time back in. The wall clock is only ever trusted for that
+ * one-way top-up: setting it backwards or forwards by hand can never rewind a
+ * running clock.
  */
 export type Clock = {
   /** Monotonic timestamp the run is anchored to. */
@@ -39,6 +47,42 @@ export function resumed(clock: Clock, now: number): Clock {
     pausedTotalMs: clock.pausedTotalMs + (now - clock.pausedAt),
     pausedAt: null,
   }
+}
+
+/** A wall-clock/monotonic pair captured at the same instant, while awake. */
+export type Anchor = {
+  wallMs: number
+  monoMs: number
+}
+
+/**
+ * How long the page was suspended since `anchor`: the stretch the wall clock
+ * saw but the monotonic clock did not.
+ *
+ * The tolerance absorbs the ordinary jitter between the two readings and small
+ * NTP slews, so only a real suspension is reported. Never negative: a wall
+ * clock set backwards means the wall reading is untrustworthy, not that time
+ * ran in reverse.
+ */
+export function suspendedMs(
+  anchor: Anchor,
+  wallNow: number,
+  monoNow: number,
+  toleranceMs: number,
+): number {
+  const missing = wallNow - anchor.wallMs - (monoNow - anchor.monoMs)
+  return missing > toleranceMs ? missing : 0
+}
+
+/**
+ * Credits time the monotonic clock never witnessed, by moving the anchor back.
+ *
+ * A paused clock is untouched: while paused, elapsed is frozen by design, so
+ * suspension is indistinguishable from any other waiting and owes nothing.
+ */
+export function credited(clock: Clock, ms: number): Clock {
+  if (ms <= 0 || clock.pausedAt !== null) return clock
+  return { ...clock, startedAt: clock.startedAt - ms }
 }
 
 /**

@@ -30,7 +30,7 @@ export function stopwatch(ms: number): string {
 export function pathLabel(path: { label?: string; iteration: number; of: number }[]): string {
   return path
     .filter((step) => step.of > 1)
-    .map((step) => `${step.label ?? 'Reps'} ${step.iteration} of ${step.of}`)
+    .map((step) => `${step.label?.trim() || 'Reps'} ${step.iteration} of ${step.of}`)
     .join(' · ')
 }
 
@@ -168,7 +168,9 @@ export function groupCaption(group: {
   rung?: number
 } | null): string {
   if (!group || group.of <= 1) return ''
-  const position = `${group.label ?? 'Reps'} ${group.iteration} of ${group.of}`
+  // `||`, not `??`: deleting the label in the editor stores an empty string,
+  // and a caption reading " 2 of 3" is worse than the default word.
+  const position = `${group.label?.trim() || 'Reps'} ${group.iteration} of ${group.of}`
   return group.rung === undefined ? position : `${position} · ${group.rung} reps`
 }
 

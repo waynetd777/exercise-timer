@@ -16,6 +16,10 @@
 
 ## Key Learnings
 
+- [2026-08-22] **The hook/effect seam is where this codebase's bugs live.** The 2026-08-22 full review found all eight high-severity bugs (except one parser bug) in the React-effect/lifecycle layer (useTimer's timeout chain, useCueScheduler's AudioContext lifecycle, updateApp's service worker, db.ts's connection cache) while the pure layers were near-flawless. When adding any effect that owns a timer, listener, or external handle, write a jsdom hook test alongside it; the infrastructure now exists (`// @vitest-environment jsdom` pragma, jsdom + @testing-library/react installed, examples in src/state/__tests__/useTimer.test.tsx and src/audio/__tests__/useCueScheduler.test.ts).
+- [2026-08-22] **New block kinds and fields must be added to three registries at once:** dirty.ts sameBlock, bundle.ts isBlock, and (for groups) blocks.ts isGroup-driven code. Sections/ladders and the reps/alternative fields missed the first two and caused silent data loss and permanent-dirty bugs.
+- [2026-08-22] **jsdom does not implement HTMLDialogElement.showModal/close**; component tests stub them onto the prototype (see src/ui/__tests__/EditorScreen.test.tsx).
+
 - [2026-08-22] **README screenshots live in `docs/screenshots/`, never in `public/`.** Anything under `public/` is copied into `dist` and precached by the PWA service worker, so four screenshots would have added megabytes to every offline install for no benefit. Verify after adding any asset: `npm run build` prints the precache count and size, and it must not move. Store them downscaled to 900px and converted with `cwebp -q 88 -resize 900 0`, which took these four from 3.2MB to 188KB. Git keeps every version forever, so size discipline matters more here than for a served asset.
 - [2026-08-22] **GitHub markdown needs an HTML `<table>` for side-by-side images.** There is no markdown syntax for it. Use `<td width="50%">` with `<img width="420">` (the README column is about 900px), and give every image real alt text.
 

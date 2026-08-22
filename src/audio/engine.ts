@@ -40,6 +40,7 @@ class AudioEngine {
   private samples = new Map<SampleName, AudioBuffer>()
   private decoding = new Set<SampleName>()
   private decodeListeners = new Set<() => void>()
+  private stateListeners = new Set<() => void>()
 
   /**
    * Must be called synchronously from a user gesture, since mobile browsers refuse
@@ -49,11 +50,16 @@ class AudioEngine {
   unlock(): void {
     if (!this.ctx) {
       this.ctx = new AudioContext()
+      // Announced, because resumption is asynchronous: the caller that asked
+      // for it has moved on by the time the state actually flips.
+      this.ctx.addEventListener('statechange', () => {
+        for (const listener of this.stateListeners) listener()
+      })
       this.master = this.ctx.createGain()
       this.master.gain.value = 1
       this.master.connect(this.ctx.destination)
     }
-    if (this.ctx.state === 'suspended') void this.ctx.resume()
+    this.resume()
     // Decoding needs a context, and unlock is the first moment one exists. The
     // bytes are already downloading (`samples.ts`), so this is short, but not
     // short enough to beat the scheduler's first arm, which is why it announces
@@ -105,9 +111,32 @@ class AudioEngine {
     return this.samples.has(name)
   }
 
-  /** iOS suspends the context when the page hides; call this on the way back. */
+  /**
+   * Subscribes to the context changing state, and returns the unsubscribe.
+   *
+   * Exists because the scheduler cannot queue against a context that is not
+   * running, and `resume()` lands asynchronously: an arm that bailed on a
+   * suspended context would otherwise wait out the full re-arm interval, and
+   * every cue due in that gap would be dropped.
+   */
+  onStateChange(listener: () => void): () => void {
+    this.stateListeners.add(listener)
+    return () => {
+      this.stateListeners.delete(listener)
+    }
+  }
+
+  /**
+   * iOS suspends the context when the page hides; call this on the way back.
+   *
+   * Nudges anything short of running, not just 'suspended': after a phone
+   * call, Siri, or an alarm, iOS reports the non-standard 'interrupted' state,
+   * and treating that as nothing-to-do left the rest of the workout silent.
+   */
   resume(): void {
-    if (this.ctx?.state === 'suspended') void this.ctx.resume()
+    const ctx = this.ctx
+    if (!ctx || ctx.state === 'closed') return
+    if (ctx.state !== 'running') void ctx.resume()
   }
 
   get ready(): boolean {
@@ -209,7 +238,12 @@ class AudioEngine {
       lfo.connect(depth).connect(trem.gain)
       lfo.start(at)
       lfo.stop(at + total + 0.02)
-      lfo.addEventListener('ended', () => depth.disconnect())
+      // The LFO outlives every source routed through the chop, so its end is
+      // also the moment the shared bus can come off the master.
+      lfo.addEventListener('ended', () => {
+        depth.disconnect()
+        trem.disconnect()
+      })
 
       trem.connect(master)
       bus = trem

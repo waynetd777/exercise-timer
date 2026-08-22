@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-22T15:32:41.959Z",
-    "fileCount": 26,
+    "lastScanned": "2026-08-22T19:41:26.789Z",
+    "fileCount": 44,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "1403795c0304d1e6c1cca7f946d33aa985ee5569b2522d410680822627c54b2d",
-    "storeUpdatedAt": "2026-08-22T15:32:41.965Z"
+    "renderedHash": "f8ef432897d9f463da644c76fbe5c4836bd827f02c78c2536c3c0e5ae831ab4b",
+    "storeUpdatedAt": "2026-08-22T19:41:26.795Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -373,6 +373,443 @@
       "mtimeMs": 1787412761898.082,
       "updatedAt": "2026-08-22T15:32:41.958Z",
       "source": "hook"
+    },
+    "vite.config.ts": {
+      "description": "/*.test.{ts,tsx}'],",
+      "tokens": 791,
+      "hash": "b0280b7a06245b16",
+      "size": 2766,
+      "mtimeMs": 1787419022794.8713,
+      "updatedAt": "2026-08-22T17:17:02.850Z",
+      "source": "hook"
+    },
+    "src/audio/engine.ts": {
+      "description": "Web Audio wrapper.",
+      "tokens": 4038,
+      "hash": "61813c373e0088d5",
+      "size": 14604,
+      "mtimeMs": 1787419531221.8936,
+      "updatedAt": "2026-08-22T17:25:31.281Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "AudioEngine",
+          "kind": "class",
+          "startLine": 34,
+          "endLine": 391,
+          "tokens": 3608
+        }
+      ]
+    },
+    "src/audio/useCueScheduler.ts": {
+      "description": "Which run the clock is measuring. Cues are armed one run at a time.",
+      "tokens": 1542,
+      "hash": "5d50c0bda475139b",
+      "size": 5395,
+      "mtimeMs": 1787419570631.504,
+      "updatedAt": "2026-08-22T17:26:10.689Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useCueScheduler",
+          "kind": "fn",
+          "startLine": 29,
+          "endLine": 148,
+          "tokens": 1226
+        }
+      ]
+    },
+    "src/audio/useSpokenCues.ts": {
+      "description": "Steps shorter than this never announce: the countdown beeps cover them.",
+      "tokens": 1416,
+      "hash": "57f60533c3bc66c7",
+      "size": 4954,
+      "mtimeMs": 1787419587859.3064,
+      "updatedAt": "2026-08-22T17:26:27.911Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "useSpokenCues",
+          "kind": "fn",
+          "startLine": 50,
+          "endLine": 127,
+          "tokens": 864
+        }
+      ]
+    },
+    "src/audio/__tests__/useCueScheduler.test.ts": {
+      "description": "The hook against a hand-driven engine: what these tests pin down is WHEN the",
+      "tokens": 1625,
+      "hash": "1c38e34ccfcf1cf5",
+      "size": 5685,
+      "mtimeMs": 1787419687486.2249,
+      "updatedAt": "2026-08-22T17:28:07.535Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "readElapsed",
+          "kind": "fn",
+          "startLine": 68,
+          "endLine": 69,
+          "tokens": 10
+        },
+        {
+          "name": "renderScheduler",
+          "kind": "fn",
+          "startLine": 70,
+          "endLine": 172,
+          "tokens": 1008
+        }
+      ]
+    },
+    "src/audio/__tests__/useSpokenCues.test.ts": {
+      "description": "One 25s work step: long enough (over 20s) to earn an announcement.",
+      "tokens": 1256,
+      "hash": "06708a5888734ec5",
+      "size": 4395,
+      "mtimeMs": 1787419648736.949,
+      "updatedAt": "2026-08-22T17:27:28.792Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "stubSpeech",
+          "kind": "fn",
+          "startLine": 14,
+          "endLine": 35,
+          "tokens": 157
+        },
+        {
+          "name": "positionAt",
+          "kind": "fn",
+          "startLine": 36,
+          "endLine": 39,
+          "tokens": 36
+        },
+        {
+          "name": "announcements",
+          "kind": "fn",
+          "startLine": 40,
+          "endLine": 45,
+          "tokens": 50
+        },
+        {
+          "name": "renderSpoken",
+          "kind": "fn",
+          "startLine": 46,
+          "endLine": 125,
+          "tokens": 872
+        }
+      ]
+    },
+    "src/state/__tests__/useTimer.test.tsx": {
+      "description": "renderTimer",
+      "tokens": 1790,
+      "hash": "5ca8f8b46ebd1466",
+      "size": 6264,
+      "mtimeMs": 1787419784736.0173,
+      "updatedAt": "2026-08-22T17:29:44.789Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "renderTimer",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 41,
+          "tokens": 182
+        },
+        {
+          "name": "advance",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 215,
+          "tokens": 1399
+        }
+      ]
+    },
+    "src/state/clock.ts": {
+      "description": "The run clock, as pure data plus transitions.",
+      "tokens": 1000,
+      "hash": "f8197baea94975e3",
+      "size": 3500,
+      "mtimeMs": 1787419812220.1904,
+      "updatedAt": "2026-08-22T17:30:12.277Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "elapsed",
+          "kind": "fn",
+          "startLine": 29,
+          "endLine": 33,
+          "tokens": 47
+        },
+        {
+          "name": "started",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 37,
+          "tokens": 32
+        },
+        {
+          "name": "paused",
+          "kind": "fn",
+          "startLine": 38,
+          "endLine": 42,
+          "tokens": 41
+        },
+        {
+          "name": "resumed",
+          "kind": "fn",
+          "startLine": 43,
+          "endLine": 66,
+          "tokens": 217
+        },
+        {
+          "name": "suspendedMs",
+          "kind": "fn",
+          "startLine": 67,
+          "endLine": 82,
+          "tokens": 138
+        },
+        {
+          "name": "credited",
+          "kind": "fn",
+          "startLine": 83,
+          "endLine": 93,
+          "tokens": 116
+        },
+        {
+          "name": "seeked",
+          "kind": "fn",
+          "startLine": 94,
+          "endLine": 101,
+          "tokens": 54
+        }
+      ]
+    },
+    "src/state/useTimer.ts": {
+      "description": "The run the clock is currently measuring. The cue scheduler arms against it.",
+      "tokens": 3238,
+      "hash": "b2395557b1cac40d",
+      "size": 11333,
+      "mtimeMs": 1787419856301.8232,
+      "updatedAt": "2026-08-22T17:30:56.364Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "now",
+          "kind": "fn",
+          "startLine": 49,
+          "endLine": 82,
+          "tokens": 496
+        },
+        {
+          "name": "useTimer",
+          "kind": "fn",
+          "startLine": 83,
+          "endLine": 305,
+          "tokens": 2152
+        }
+      ]
+    },
+    "src/state/__tests__/clock.test.ts": {
+      "description": "Declares clock",
+      "tokens": 1190,
+      "hash": "56361aaf7b883ac8",
+      "size": 4165,
+      "mtimeMs": 1787419887081.8645,
+      "updatedAt": "2026-08-22T17:31:27.147Z",
+      "source": "hook"
+    },
+    "src/state/updateApp.ts": {
+      "description": "Fetches the latest app from the host, then reloads onto it.",
+      "tokens": 680,
+      "hash": "fecaa70a0d7f4e55",
+      "size": 2379,
+      "mtimeMs": 1787419903319.1384,
+      "updatedAt": "2026-08-22T17:31:43.381Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "updateApp",
+          "kind": "fn",
+          "startLine": 18,
+          "endLine": 41,
+          "tokens": 258
+        },
+        {
+          "name": "settled",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 63,
+          "tokens": 174
+        }
+      ]
+    },
+    "src/state/__tests__/updateApp.test.ts": {
+      "description": "FakeWorker: fakeWorker, fakeRegistration, stubEnvironment",
+      "tokens": 1121,
+      "hash": "e011c3eaeba138fe",
+      "size": 3921,
+      "mtimeMs": 1787419938456.6309,
+      "updatedAt": "2026-08-22T17:32:18.510Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "fakeWorker",
+          "kind": "fn",
+          "startLine": 17,
+          "endLine": 31,
+          "tokens": 118
+        },
+        {
+          "name": "fakeRegistration",
+          "kind": "fn",
+          "startLine": 32,
+          "endLine": 43,
+          "tokens": 78
+        },
+        {
+          "name": "stubEnvironment",
+          "kind": "fn",
+          "startLine": 44,
+          "endLine": 137,
+          "tokens": 786
+        }
+      ]
+    },
+    "src/state/__tests__/useWakeLock.test.tsx": {
+      "description": "Holder",
+      "tokens": 887,
+      "hash": "cdcf8b392ceb813b",
+      "size": 3104,
+      "mtimeMs": 1787427069741.1785,
+      "updatedAt": "2026-08-22T19:31:09.803Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Holder",
+          "kind": "fn",
+          "startLine": 8,
+          "endLine": 111,
+          "tokens": 811
+        }
+      ]
+    },
+    "src/state/__tests__/usePullToRefresh.test.tsx": {
+      "description": "Puller",
+      "tokens": 864,
+      "hash": "65af53c062fb1314",
+      "size": 3022,
+      "mtimeMs": 1787427086490.4717,
+      "updatedAt": "2026-08-22T19:31:26.545Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Puller",
+          "kind": "fn",
+          "startLine": 8,
+          "endLine": 13,
+          "tokens": 57
+        },
+        {
+          "name": "touch",
+          "kind": "fn",
+          "startLine": 14,
+          "endLine": 15,
+          "tokens": 16
+        },
+        {
+          "name": "fire",
+          "kind": "fn",
+          "startLine": 16,
+          "endLine": 87,
+          "tokens": 710
+        }
+      ]
+    },
+    "src/storage/__tests__/db.test.ts": {
+      "description": "A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request",
+      "tokens": 1629,
+      "hash": "f6fb24ad40584828",
+      "size": 5701,
+      "mtimeMs": 1787427177884.7166,
+      "updatedAt": "2026-08-22T19:32:57.943Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "fakeRequest",
+          "kind": "fn",
+          "startLine": 19,
+          "endLine": 27,
+          "tokens": 86
+        },
+        {
+          "name": "named",
+          "kind": "fn",
+          "startLine": 28,
+          "endLine": 43,
+          "tokens": 118
+        },
+        {
+          "name": "makeDb",
+          "kind": "fn",
+          "startLine": 44,
+          "endLine": 82,
+          "tokens": 351
+        },
+        {
+          "name": "stubIndexedDb",
+          "kind": "fn",
+          "startLine": 83,
+          "endLine": 181,
+          "tokens": 904
+        }
+      ]
+    },
+    "src/media/__tests__/resolveMedia.test.ts": {
+      "description": "The store is mocked with a live listener registry, because the behavior",
+      "tokens": 657,
+      "hash": "04d03498f6632b61",
+      "size": 2297,
+      "mtimeMs": 1787427192625.6858,
+      "updatedAt": "2026-08-22T19:33:12.693Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "storeBlob",
+          "kind": "fn",
+          "startLine": 19,
+          "endLine": 68,
+          "tokens": 495
+        }
+      ]
+    },
+    "src/media/__tests__/pin.test.ts": {
+      "description": "",
+      "tokens": 334,
+      "hash": "003ed7ee84061ca8",
+      "size": 1168,
+      "mtimeMs": 1787427206385.0425,
+      "updatedAt": "2026-08-22T19:33:26.443Z",
+      "source": "hook"
+    },
+    "src/ui/__tests__/EditorScreen.test.tsx": {
+      "description": "sectioned",
+      "tokens": 1052,
+      "hash": "df19d927d5e7a30d",
+      "size": 3681,
+      "mtimeMs": 1787427686729.23,
+      "updatedAt": "2026-08-22T19:41:26.788Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "props",
+          "kind": "fn",
+          "startLine": 27,
+          "endLine": 108,
+          "tokens": 855
+        }
+      ]
     }
   },
   "preamble": [

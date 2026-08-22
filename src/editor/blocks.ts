@@ -239,9 +239,9 @@ export function moveBy(blocks: readonly Block[], path: Path, delta: number): Blo
  *   - at the edge, nested  -> move OUT, landing beside the group
  *   - at the edge, top     -> nothing to do
  *
- * Reps groups themselves only ever swap with their siblings: `wrapInRepeat`
- * refuses to nest a group in a group, so moving one into another would build a
- * tree the editor cannot show.
+ * Groups themselves only ever swap with their siblings, whatever their kind:
+ * `wrapInRepeat` refuses to nest a repeat or a section, so moving a group into
+ * a neighbouring group would build a tree the editor cannot show.
  *
  * A group left empty by a departing step is kept rather than pruned. A group
  * vanishing under you is more surprising than an empty one you can delete.
@@ -249,33 +249,33 @@ export function moveBy(blocks: readonly Block[], path: Path, delta: number): Blo
 export function moveStep(blocks: readonly Block[], path: Path, delta: 1 | -1): Block[] {
   const target = blockAt(blocks, path)
   if (!target) return [...blocks]
-  if (target.kind === 'repeat') return moveBy(blocks, path, delta)
+  if (isGroup(target)) return moveBy(blocks, path, delta)
 
   const index = path[path.length - 1]!
   const parentPath = path.slice(0, -1)
   const parent = parentPath.length > 0 ? blockAt(blocks, parentPath) : undefined
   const siblings =
-    parent && parent.kind === 'repeat' ? parent.children : parentPath.length === 0 ? blocks : []
+    parent && isGroup(parent) ? parent.children : parentPath.length === 0 ? blocks : []
 
   const neighbour = siblings[index + delta]
 
-  if (neighbour?.kind === 'repeat') {
+  if (neighbour && isGroup(neighbour)) {
     const without = removeAt(blocks, path)
-    // Going down, removing the step shifts the round back by one; going up it
+    // Going down, removing the step shifts the group back by one; going up it
     // sits before the step and is unaffected.
-    const roundPath = [...parentPath, delta === 1 ? index : index - 1]
+    const groupPath = [...parentPath, delta === 1 ? index : index - 1]
     return delta === 1
-      ? insertAt(without, [...roundPath, 0], target)
-      : appendTo(without, roundPath, target)
+      ? insertAt(without, [...groupPath, 0], target)
+      : appendTo(without, groupPath, target)
   }
 
   if (neighbour) return moveBy(blocks, path, delta)
 
-  // At the edge of a round: step outside it.
+  // At the edge of a group: step outside it.
   if (parentPath.length > 0) {
     const without = removeAt(blocks, path)
-    const roundIndex = parentPath[parentPath.length - 1]!
-    return insertAt(without, [...parentPath.slice(0, -1), roundIndex + (delta === 1 ? 1 : 0)], target)
+    const groupIndex = parentPath[parentPath.length - 1]!
+    return insertAt(without, [...parentPath.slice(0, -1), groupIndex + (delta === 1 ? 1 : 0)], target)
   }
 
   return [...blocks]
