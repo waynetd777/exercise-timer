@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-22T19:41:26.789Z",
-    "fileCount": 44,
+    "lastScanned": "2026-08-22T20:14:26.489Z",
+    "fileCount": 45,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "f8ef432897d9f463da644c76fbe5c4836bd827f02c78c2536c3c0e5ae831ab4b",
-    "storeUpdatedAt": "2026-08-22T19:41:26.795Z"
+    "renderedHash": "29468493d8a491df436cbd6bf766d906de06ff400d714e31b12b5272862e5484",
+    "storeUpdatedAt": "2026-08-22T20:14:26.495Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -810,6 +810,15 @@
           "tokens": 855
         }
       ]
+    },
+    "src/ui/__tests__/RunScreen.test.tsx": {
+      "description": "The audio layer is exercised by its own hook tests; here it would only try",
+      "tokens": 1010,
+      "hash": "7e4a8e1595f1e8a3",
+      "size": 3533,
+      "mtimeMs": 1787429666426.695,
+      "updatedAt": "2026-08-22T20:14:26.488Z",
+      "source": "hook"
     }
   },
   "preamble": [
