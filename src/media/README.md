@@ -37,10 +37,10 @@ outside Safari, and storing an oversized file beats storing nothing.
 - **`bundled`** is the illustration catalogue, served from the app's own origin out
   of `public/exercises/`. Precached by the service worker, so it needs no network
   and no pinning: it is there the moment the app installs.
-- **`local`** is a photo uploaded here. Downscaled on the way in and stored by
-  content hash in IndexedDB. It reaches another device only inside an export file,
-  which carries the bytes as a data URL. See `storage/bundleMedia.ts`. A share link
-  cannot take one, and says so.
+- **`local`** is a photo from this device: picked with the file button, or pasted off
+  the clipboard. Downscaled on the way in and stored by content hash in IndexedDB.
+  It reaches another device only inside an export file, which carries the bytes as a
+  data URL. See `storage/bundleMedia.ts`. A share link cannot take one, and says so.
 - **`remote`** is a link, and **nothing creates one any more.** The editor's link
   field and `pinRemote` are gone, and `.tabata` imports have their URLs rewritten
   to bundled paths on the way in (`storage/migrate.ts`). The branch stays in
@@ -77,3 +77,4 @@ screen. The cache is bounded by the number of distinct images in a routine.
 | `downscale.ts` | Canvas to WebP |
 | `pin.ts` | `storeFile`, the one way an image now enters storage, and the draft pins the sweep respects |
 | `dataUrl.ts` | Blob to data URL and back, so a photo can travel inside an export file |
+| `clipboard.ts` | Whether the clipboard holds an image, and the blob when it does |

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-22T20:14:26.489Z",
-    "fileCount": 45,
+    "lastScanned": "2026-08-23T15:47:35.054Z",
+    "fileCount": 50,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "29468493d8a491df436cbd6bf766d906de06ff400d714e31b12b5272862e5484",
-    "storeUpdatedAt": "2026-08-22T20:14:26.495Z"
+    "renderedHash": "42d03076c9dffdbf1396ac247d617343e8f3353fac5d43da43c58e1995a4bf02",
+    "storeUpdatedAt": "2026-08-23T15:47:35.063Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -137,11 +137,11 @@
     },
     "src/ui/help.ts": {
       "description": "The help text, kept out of the screens that show it.",
-      "tokens": 1154,
-      "hash": "4e08b9ee45695104",
-      "size": 4062,
-      "mtimeMs": 1787332036226.7686,
-      "updatedAt": "2026-08-21T17:07:16.302Z",
+      "tokens": 1562,
+      "hash": "55b2d85fb5ac0d35",
+      "size": 5496,
+      "mtimeMs": 1787500017754.131,
+      "updatedAt": "2026-08-23T15:46:57.822Z",
       "source": "hook"
     },
     "src/routines/pasteTemplate.ts": {
@@ -359,10 +359,10 @@
     "src/version.ts": {
       "description": "What the home screen shows beside the help button.",
       "tokens": 161,
-      "hash": "f5dd9e0e301d99f2",
-      "size": 565,
-      "mtimeMs": 1787347977568.2292,
-      "updatedAt": "2026-08-21T21:32:57.631Z",
+      "hash": "b7f95f139cb2743f",
+      "size": 562,
+      "mtimeMs": 1787500054978.2092,
+      "updatedAt": "2026-08-23T15:47:35.053Z",
       "source": "hook"
     },
     "src/ui/useDismiss.ts": {
@@ -794,20 +794,27 @@
       "source": "hook"
     },
     "src/ui/__tests__/EditorScreen.test.tsx": {
-      "description": "sectioned",
-      "tokens": 1052,
-      "hash": "df19d927d5e7a30d",
-      "size": 3681,
-      "mtimeMs": 1787427686729.23,
-      "updatedAt": "2026-08-22T19:41:26.788Z",
+      "description": "A step that runs as its own countdown, so it gets an image button.",
+      "tokens": 2424,
+      "hash": "771d45fe7afe299c",
+      "size": 8487,
+      "mtimeMs": 1787499981234.5605,
+      "updatedAt": "2026-08-23T15:46:21.314Z",
       "source": "hook",
       "symbols": [
         {
+          "name": "openChooser",
+          "kind": "fn",
+          "startLine": 43,
+          "endLine": 67,
+          "tokens": 242
+        },
+        {
           "name": "props",
           "kind": "fn",
-          "startLine": 27,
-          "endLine": 108,
-          "tokens": 855
+          "startLine": 68,
+          "endLine": 234,
+          "tokens": 1830
         }
       ]
     },
@@ -818,6 +825,176 @@
       "size": 3533,
       "mtimeMs": 1787429666426.695,
       "updatedAt": "2026-08-22T20:14:26.488Z",
+      "source": "hook"
+    },
+    "src/media/clipboard.ts": {
+      "description": "The clipboard as a source of images.",
+      "tokens": 1141,
+      "hash": "2d81fcca30c2dc16",
+      "size": 3999,
+      "mtimeMs": 1787499861056.9653,
+      "updatedAt": "2026-08-23T15:44:21.134Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "isImage",
+          "kind": "fn",
+          "startLine": 36,
+          "endLine": 38,
+          "tokens": 43
+        },
+        {
+          "name": "canReadClipboard",
+          "kind": "fn",
+          "startLine": 39,
+          "endLine": 48,
+          "tokens": 111
+        },
+        {
+          "name": "probeClipboardImage",
+          "kind": "fn",
+          "startLine": 49,
+          "endLine": 63,
+          "tokens": 159
+        },
+        {
+          "name": "readGranted",
+          "kind": "fn",
+          "startLine": 64,
+          "endLine": 85,
+          "tokens": 236
+        },
+        {
+          "name": "imageFromClipboard",
+          "kind": "fn",
+          "startLine": 86,
+          "endLine": 95,
+          "tokens": 78
+        }
+      ]
+    },
+    "src/ui/EditorScreen.tsx": {
+      "description": "One undo step: name, colour and steps together, so they cannot drift apart.",
+      "tokens": 16521,
+      "hash": "97af8205218a1334",
+      "size": 57847,
+      "mtimeMs": 1787499904168.59,
+      "updatedAt": "2026-08-23T15:45:04.258Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "ImageDialog",
+          "kind": "fn",
+          "startLine": 97,
+          "endLine": 176,
+          "tokens": 799
+        },
+        {
+          "name": "ImagePicker",
+          "kind": "fn",
+          "startLine": 177,
+          "endLine": 399,
+          "tokens": 2120
+        },
+        {
+          "name": "unitOf",
+          "kind": "fn",
+          "startLine": 400,
+          "endLine": 405,
+          "tokens": 66
+        },
+        {
+          "name": "keyOf",
+          "kind": "fn",
+          "startLine": 406,
+          "endLine": 418,
+          "tokens": 154
+        },
+        {
+          "name": "CountField",
+          "kind": "fn",
+          "startLine": 419,
+          "endLine": 460,
+          "tokens": 304
+        },
+        {
+          "name": "TimingField",
+          "kind": "fn",
+          "startLine": 461,
+          "endLine": 522,
+          "tokens": 606
+        },
+        {
+          "name": "SegmentRow",
+          "kind": "fn",
+          "startLine": 523,
+          "endLine": 904,
+          "tokens": 4178
+        },
+        {
+          "name": "RepeatRow",
+          "kind": "fn",
+          "startLine": 905,
+          "endLine": 1015,
+          "tokens": 933
+        },
+        {
+          "name": "LadderRow",
+          "kind": "fn",
+          "startLine": 1016,
+          "endLine": 1133,
+          "tokens": 1057
+        },
+        {
+          "name": "SectionRow",
+          "kind": "fn",
+          "startLine": 1134,
+          "endLine": 1216,
+          "tokens": 650
+        },
+        {
+          "name": "EditorScreen",
+          "kind": "fn",
+          "startLine": 1217,
+          "endLine": 1657,
+          "tokens": 4790
+        }
+      ]
+    },
+    "src/media/__tests__/clipboard.test.ts": {
+      "description": "One clipboard entry, shaped like the real ClipboardItem in the ways we use.",
+      "tokens": 1244,
+      "hash": "d6221b052259ef56",
+      "size": 4354,
+      "mtimeMs": 1787500006030.411,
+      "updatedAt": "2026-08-23T15:46:46.112Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "stub",
+          "kind": "fn",
+          "startLine": 17,
+          "endLine": 117,
+          "tokens": 1066
+        }
+      ]
+    },
+    "src/editor/README.md": {
+      "description": "Project documentation",
+      "tokens": 4492,
+      "hash": "3d6ad90ee0261a84",
+      "size": 17994,
+      "mtimeMs": 1787500037248.6997,
+      "updatedAt": "2026-08-23T15:47:17.327Z",
+      "source": "hook"
+    },
+    "src/media/README.md": {
+      "description": "Project documentation",
+      "tokens": 1065,
+      "hash": "9337993c1a368069",
+      "size": 4260,
+      "mtimeMs": 1787500049749.195,
+      "updatedAt": "2026-08-23T15:47:29.821Z",
       "source": "hook"
     }
   },

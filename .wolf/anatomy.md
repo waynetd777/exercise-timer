@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-22T20:14:26.489Z
-> Files: 45 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-23T15:47:35.054Z
+> Files: 50 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -60,13 +60,17 @@
 ## src/editor/
 
 - `images.ts` — An image a step can be given, whether it ships with the app or a routine (~1416 tok)
+- `README.md` — Project documentation (~4492 tok)
 
 ## src/media/
 
+- `clipboard.ts` — The clipboard as a source of images. (~1141 tok)
 - `dataUrl.ts` — Blobs as text, so an image can travel inside an export file. (~630 tok)
+- `README.md` — Project documentation (~1065 tok)
 
 ## src/media/__tests__/
 
+- `clipboard.test.ts` — One clipboard entry, shaped like the real ClipboardItem in the ways we use. (~1244 tok)
 - `pin.test.ts` (~334 tok)
 - `resolveMedia.test.ts` — The store is mocked with a live listener registry, because the behavior (~657 tok)
 
@@ -105,12 +109,13 @@
 
 ## src/ui/
 
-- `help.ts` — The help text, kept out of the screens that show it. (~1154 tok)
+- `EditorScreen.tsx` — One undo step: name, colour and steps together, so they cannot drift apart. (~16521 tok)
+- `help.ts` — The help text, kept out of the screens that show it. (~1562 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
 - `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)
 - `useDismiss.ts` — Closes a transient overlay — a menu, a popover — on Escape or a press outside (~448 tok)
 
 ## src/ui/__tests__/
 
-- `EditorScreen.test.tsx` — sectioned (~1052 tok)
+- `EditorScreen.test.tsx` — A step that runs as its own countdown, so it gets an image button. (~2424 tok)
 - `RunScreen.test.tsx` — The audio layer is exercised by its own hook tests; here it would only try (~1010 tok)

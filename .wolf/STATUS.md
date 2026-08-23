@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-22
+> Last updated: 2026-08-23
 
 ---
 
@@ -983,6 +983,42 @@ VITE_BASE=/exercise-timer/ npm run build   # subpath build (GitHub Pages)
 - `.wolf/cerebrum.md` — User Preferences + Do-Not-Repeat + Decision Log
 - `.wolf/anatomy.md` — token-efficient file index
 - `.wolf/buglog.json` — known bugs + fixes
+
+---
+
+## ✅ Paste from clipboard in the Add-an-image dialog (2026-08-23, v2.8)
+
+The chooser's footer now has **Paste from clipboard** beside Upload a photo. A pasted
+Blob goes straight into `storeFile`, so it takes the same downscale → hash → store
+path as a picked file; `upload()` widened from `File` to `Blob` (a clipboard image has
+no filename and nothing downstream wanted one).
+
+- New `src/media/clipboard.ts` — `canReadClipboard`, `probeClipboardImage`,
+  `imageFromClipboard`, and a four-valued `ClipboardImage` state.
+- **The button is disabled only on `none` and `unsupported`.** The probe reads the
+  clipboard ONLY where `clipboard-read` is already granted (Chromium), because Safari
+  and Firefox will not answer outside user activation and asking anyway would show
+  Safari's native paste confirmation unbidden. Elsewhere the state is `unknown`, the
+  button stays enabled, and the tap is the gesture that gets the answer — **the user
+  chose this over a button permanently grey on iOS.** A tap finding only text says so
+  and disables itself; a refused read reports differently and does not, since refusal
+  is not evidence about the contents.
+- Re-probed on window `focus` and `visibilitychange`, so copying an image in another
+  app and coming back lights the button up. Racing probes are token-guarded.
+- 16 new tests (9 on the module, 7 on the dialog's states). **637 green**, typecheck
+  and build clean. Docs: `editor/README.md`, `media/README.md`, editor help, cerebrum.
+
+**Untested on a device, and cannot be from the LAN dev server:** `navigator.clipboard`
+is secure-context only, exactly like `crypto.subtle`, so on plain HTTP the button
+reads `unsupported` and greys out. Needs the deployed HTTPS build on the iPhone: copy
+a screenshot, open a step's image button, and check Safari's paste confirmation
+appears and the picture lands.
+
+---
+
+## ✅ Reset confirmation (2026-08-22, v2.7, commit ce3a790)
+
+The run screen's Reset now pauses and asks ("Start this workout over?") exactly like Back does, resumes on cancel, and resets a complete workout without asking. First RunScreen component tests (5) cover the flow. 622 tests green. Pushed and deployed.
 
 ---
 
