@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { advance, compile, locate, retreat, START } from '../engine'
 import type { Cursor, Routine, RoutinePosition, Run, Workout } from '../engine'

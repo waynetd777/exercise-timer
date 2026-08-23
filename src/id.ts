@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * A unique id for a routine or a block.
  *
  * `crypto.randomUUID()` is **secure-context only**: on a plain-HTTP origin it is

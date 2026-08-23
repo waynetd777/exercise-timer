@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { describe, expect, it } from 'vitest'
 import { compile, hasGates, stepCount, totalDurationMs } from '../compile'
 import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'

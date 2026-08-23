@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * Blobs as text, so an image can travel inside an export file.
  *
  * A data URL rather than raw base64 with the type beside it: the string carries

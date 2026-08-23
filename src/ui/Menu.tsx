@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { CheckIcon, DownIcon } from './icons'

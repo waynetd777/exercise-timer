@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Exercise Timer
+# Copyright (c) 2026 Wayne Davies
+# MIT License. See LICENSE in the project root.
+
 """
 Regenerates public/exercises/ from the Horizon Torus exercise guide PDF.
 

@@ -986,6 +986,39 @@ VITE_BASE=/exercise-timer/ npm run build   # subpath build (GitHub Pages)
 
 ---
 
+## ✅ MIT licence + per-file headers (2026-08-23)
+
+The repo was PUBLIC with no licence, which grants nobody any rights. Now `LICENSE`
+holds MIT, `Copyright (c) 2026 Wayne Davies`. **Confirm the name is how Wayne wants
+it in a legal notice**; it was derived from the git email, not asked. One sed over
+`LICENSE`, 119 source files and `index.html` fixes it if not.
+
+- A four-line header on **every** source file: 112 `.ts`/`.tsx`, 5 `.css`,
+  `vite.config.ts`, `scripts/exercise_plates.py` (after the shebang), and
+  `index.html` (after the doctype, so no quirks mode). Idempotent script in the
+  session scratchpad; re-runnable and skips files that already carry it.
+- `package.json` gains `"license": "MIT"`. `private: true` stays: it blocks an
+  accidental npm publish and says nothing about the licence.
+- **The licence is scoped, and this matters.** `public/exercises/` is 43 crops of
+  the Horizon Torus 5 Exercise Guide (see `scripts/exercise_plates.py`), so a
+  repo-wide MIT would have been Wayne granting rights he does not hold. `LICENSE`
+  and the README both say the illustrations are excluded and a reuser brings their
+  own. The whistle is genuinely CC0 and needs no attribution.
+- README: a note under the live link saying there is nothing to clone, install or
+  build to USE the app, "Running it" renamed "Running it locally", and a Licence
+  section. Stale test count 617 corrected to 637 while in there.
+- **The notice now reaches the deployed bundle too.** `licenceNotice()` in
+  `vite.config.ts` prepends a `/*!` block to every built chunk and stylesheet. It
+  had to go in `generateBundle`, NOT in `output.banner` or `renderChunk`: both run
+  before Vite minifies, and Vite drives esbuild with `legalComments: 'none'`, which
+  deleted the banner silently on the first attempt (the build passed and the JS came
+  out bare). The filename content hash is computed before the hook, so it does not
+  cover the notice; harmless, as the notice is constant. `dist/sw.js` and the
+  workbox runtime are generated later and stay uncovered, correctly.
+- 637 tests green, typecheck and build clean after the sweep.
+
+---
+
 ## ✅ Paste from clipboard in the Add-an-image dialog (2026-08-23, v2.8)
 
 The chooser's footer now has **Paste from clipboard** beside Upload a photo. A pasted

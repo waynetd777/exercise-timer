@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * Exercise illustrations available to every routine.
  *
  * Served from the app's OWN origin: each entry is a path under `public/`, which

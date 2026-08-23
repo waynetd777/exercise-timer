@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import rawFullBody from '../beginner-full-body.tabata.json'
 import rawMixedCardio1 from '../beginner-mixed-cardio-1.tabata.json'
 import rawMixedCardio2 from '../beginner-mixed-cardio-2.tabata.json'

@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 /** Bare seconds under a minute: "17" reads faster than "0:17" at three metres. */
 export function clock(seconds: number): string {
   if (seconds < 60) return String(Math.max(0, seconds))

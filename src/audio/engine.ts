@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import type { Note, ToneSpec } from './tones'
 import { sampleBytes, type SampleName } from './samples'
 import { CANCEL_GRACE_MS } from './schedule'

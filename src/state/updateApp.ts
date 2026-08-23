@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * Fetches the latest app from the host, then reloads onto it.
  *
  * No cache is ever deleted here. Workbox only writes the precache during a

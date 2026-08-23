@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * Content hash for an image blob.
  *
  * Content-addressed rather than named, so the same illustration used by eight

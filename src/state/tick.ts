@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { locate, runIsOver } from '../engine'
 import type { Cursor, Routine } from '../engine'
 

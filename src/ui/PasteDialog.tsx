@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { useEffect, useRef, useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
 import type { ParsedRoutine } from '../routines/pasteFormat'

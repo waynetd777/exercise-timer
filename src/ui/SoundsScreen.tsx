@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import type { CueKind } from '../engine'
 import { audio } from '../audio/engine'
 import { canSpeak, speak, SPOKEN, VOICE } from '../audio/speech'

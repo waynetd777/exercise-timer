@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * Whether the run screen's shortcuts should act on a key, given what has focus.
  *
  * Clicking a control leaves that control focused, so every keydown afterwards is

@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 /*
  * Inline SVG rather than an icon font or emoji: it inherits `currentColor`,
  * stays crisp at any size, renders identically on every platform, and ships no

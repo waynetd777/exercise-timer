@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { describe, expect, it } from 'vitest'
 import type { Workout } from '../../engine'
 import { compile, SCHEMA_VERSION } from '../../engine'
