@@ -35,6 +35,8 @@ import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/histo
 import { HelpTray } from './HelpTray'
 import { NoticeDialog } from './NoticeDialog'
 import { EDITOR_HELP } from './help'
+import type { ClipboardImage } from '../media/clipboard'
+import { canReadClipboard, imageFromClipboard, probeClipboardImage } from '../media/clipboard'
 import { pinDraft, storeFile, unpinDraft } from '../media/pin'
 import { duration } from './format'
 import { useMediaUrl } from './useMediaUrl'
@@ -50,6 +52,7 @@ import {
   ImportIcon,
   MoreIcon,
   NoteIcon,
+  PasteIcon,
   PlusIcon,
   RedoIcon,
   RepsIcon,
@@ -175,22 +178,83 @@ function ImagePicker({
   images,
   onPick,
   onUpload,
+  onError,
   onClose,
 }: {
   images: readonly KnownImage[]
   onPick: (ref: MediaRef) => void
-  onUpload: (file: File) => void
+  onUpload: (file: Blob) => void
+  onError: (message: string) => void
   onClose: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const upload = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
+  const [clipboard, setClipboard] = useState<ClipboardImage>(() =>
+    canReadClipboard() ? 'unknown' : 'unsupported',
+  )
 
   useEffect(() => {
     // Guarded like every other dialog here: StrictMode runs effects twice in
     // dev, and showModal() on an already-open dialog throws.
     if (!dialog.current?.open) dialog.current?.showModal()
   }, [])
+
+  /*
+   * Whether the clipboard holds an image, re-asked whenever this window comes
+   * back to the front — you copy the screenshot in another app and return, with
+   * this dialog still open behind it.
+   *
+   * `probeClipboardImage` reads nothing where a read would prompt, so this
+   * cannot put a paste confirmation on the screen. See `media/clipboard.ts`.
+   */
+  useEffect(() => {
+    if (!canReadClipboard()) return
+
+    let live = true
+    let latest = 0
+    const probe = () => {
+      if (document.visibilityState !== 'visible') return
+      const token = ++latest
+      // A slow probe must not land on top of a later, fresher one: focus and
+      // visibilitychange can fire together, and the reads settle out of order.
+      void probeClipboardImage().then((state) => {
+        if (live && token === latest) setClipboard(state)
+      })
+    }
+
+    probe()
+    window.addEventListener('focus', probe)
+    document.addEventListener('visibilitychange', probe)
+    return () => {
+      live = false
+      window.removeEventListener('focus', probe)
+      document.removeEventListener('visibilitychange', probe)
+    }
+  }, [])
+
+  /*
+   * Must run from the click and not a moment later: this is the call that spends
+   * the user activation Safari and Firefox demand.
+   */
+  const paste = async () => {
+    try {
+      const blob = await imageFromClipboard()
+      if (!blob) {
+        // Only reachable from `unknown`, since `none` disables the button. Now
+        // it is known, so the button goes with it rather than inviting a retry
+        // that would fail the same way.
+        setClipboard('none')
+        onError('There is no image on the clipboard — copy one and try again')
+        return
+      }
+      onUpload(blob)
+    } catch {
+      onError(
+        'The clipboard could not be read — allow this site to see it, or use Upload a photo instead',
+      )
+    }
+  }
 
   const shown = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -251,10 +315,10 @@ function ImagePicker({
       )}
 
       {/*
-        Under the grid rather than beside the search box: it is the way in for the
-        exercise the catalogue does not have, and a distraction for everyone else.
-        The same placement, for the same reason, as Copy template in the paste
-        dialog.
+        Under the grid rather than beside the search box: these are the way in for
+        the exercise the catalogue does not have, and a distraction for everyone
+        else. The same placement, for the same reason, as Copy template in the
+        paste dialog.
       */}
       <div className="picker__actions">
         <button
@@ -265,6 +329,29 @@ function ImagePicker({
         >
           <ImportIcon />
           Upload a photo
+        </button>
+        {/*
+          Disabled only when we KNOW there is nothing to paste, or when this
+          browser cannot read a clipboard at all. Where the answer is unknowable
+          without a gesture it stays enabled and the tap finds out — a button
+          that is permanently grey on the device the app is used on would be a
+          worse lie than an occasional "nothing there".
+        */}
+        <button
+          type="button"
+          className="chip chip--action"
+          disabled={clipboard === 'none' || clipboard === 'unsupported'}
+          onClick={() => void paste()}
+          title={
+            clipboard === 'unsupported'
+              ? 'This browser cannot read the clipboard'
+              : clipboard === 'none'
+                ? 'There is no image on the clipboard'
+                : 'Use the image on the clipboard'
+          }
+        >
+          <PasteIcon />
+          Paste from clipboard
         </button>
         <input
           ref={upload}
@@ -1236,8 +1323,11 @@ export function EditorScreen({
    * the answer to the question the dialog was asking. A failure leaves it open
    * instead, so the next file can be tried without reopening anything. The notice
    * explaining why sits above it in the top layer.
+   *
+   * A Blob, not a File: a clipboard image has no filename and does not need one.
+   * Nothing below here reads anything but the bytes and the mime type.
    */
-  const upload = async (path: Path, file: File) => {
+  const upload = async (path: Path, file: Blob) => {
     try {
       const media = await storeFile(file)
       if (media.source === 'local') {
@@ -1487,6 +1577,7 @@ export function EditorScreen({
             setChoosingFor(null)
           }}
           onUpload={(file) => void upload(choosingFor, file)}
+          onError={setUploadError}
           onClose={() => setChoosingFor(null)}
         />
       )}

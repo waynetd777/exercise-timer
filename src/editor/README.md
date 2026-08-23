@@ -106,8 +106,8 @@ something most of them never got. It is one button now, beside the note button, 
 it has two states in one slot so the row does not reflow when a picture arrives:
 
 - **No image:** an image button, which opens the chooser. That is the catalogue's
-  illustrations in a searchable grid, with Upload a photo under it. One dialog,
-  because it answers one question.
+  illustrations in a searchable grid, with **Upload a photo** and **Paste from
+  clipboard** under it. One dialog, because it answers one question.
 - **An image:** the thumbnail itself, which opens the preview. The picture full
   size, the step's name, and **Remove image**. Both live there because they are the
   same errand: you open it to see what the step is carrying, and the only thing you
@@ -140,6 +140,26 @@ There is no link field. Pasting a URL only made sense while the illustrations li
 on someone else's server. An image now comes from the catalogue or from this
 device, and `editor/postimages.ts`, which parsed postimages share links and bare
 ids, went with it.
+
+### Paste is enabled on what we can actually know
+
+The paste button is disabled only when we KNOW there is nothing to paste. That is a
+narrower claim than it sounds, because reading a clipboard is a privacy operation
+and every browser gates it differently — `media/clipboard.ts` carries the detail.
+The short version: Chromium answers for free once `clipboard-read` is granted, and
+Safari and Firefox will not answer at all until you tap, since a tap is the user
+activation they demand.
+
+So the state is four-valued, not a boolean. `none` and `unsupported` disable the
+button; `unknown` leaves it enabled and the tap finds out. **Never probe where a
+probe could prompt** — asking on the off-chance would put Safari's native paste
+confirmation on screen for a question the user never asked, which is why the probe
+checks the permission first and returns `unknown` rather than reading. The
+consequence is deliberate: on an iPhone the button never greys out, and a tap that
+finds only text says so and disables itself afterwards.
+
+A refused read is reported differently from an empty clipboard, and does NOT
+disable the button: a refusal is not evidence about the contents.
 
 Both dialogs are the `.modal` sheet plus a panel of their own, and the preview's
 panel is `.notice`, the layout already known to survive iOS where a `<dialog>`
