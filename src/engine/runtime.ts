@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import type { Position, Timeline, TimelineEntry } from './types'
 
 const COMPLETE_INDEX_OFFSET = 0

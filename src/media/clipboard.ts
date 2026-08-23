@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * The clipboard as a source of images.
  *
  * A screenshot of an exercise, or a picture copied out of a message, is the

@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { useEffect, useMemo, useRef } from 'react'
 import { finishesOnTap, runCues } from '../engine'
 import type { Routine } from '../engine'

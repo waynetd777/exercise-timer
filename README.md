@@ -5,6 +5,11 @@ screen, and works offline.
 
 **Live: https://waynetd777.github.io/exercise-timer/**
 
+To use the app, open that link. There is nothing to clone, install or build. It
+runs entirely in the browser, and on a phone you can add it to the home screen
+from the browser's share menu and it will work offline after that. The
+instructions further down are for working on the code, not for using the app.
+
 Built for one job: telling someone mid-effort how much longer to keep going, from
 across a gym, with the phone propped against a rack.
 
@@ -63,12 +68,15 @@ across a gym, with the phone propped against a rack.
 - **Owns its images.** It stores local copies, so a routine survives gym wifi and
   the image host eventually losing a file.
 
-## Running it
+## Running it locally
+
+Only needed if you want to change the code. To just use the timer, use the live
+link above.
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 617 tests, no browser needed
+npm test           # 637 tests, no browser needed
 npm run typecheck
 npm run build
 ```
@@ -147,7 +155,7 @@ IndexedDB, and images live beside them once pinned. Export, share links and the
 
 ## Testing
 
-617 tests, all of which run in Node in a couple of seconds. There is no browser in
+637 tests, all of which run in Node in a couple of seconds. There is no browser in
 the test setup and none is needed. The parts with rules in them are pure and
 tested directly; the hooks that own timers, listeners and external handles (the
 tick chain, the cue scheduler, the wake lock, IndexedDB's connection) are tested
@@ -157,3 +165,13 @@ pure logic rather than being mocked wholesale.
 
 Several tests are named after the bug they exist to prevent. That is on purpose:
 `.wolf/buglog.json` records every one, and the interesting ones earned a test.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE). Use the code for anything, including commercially,
+as long as the copyright notice and licence text come along with it.
+
+Two things the licence does not cover. The exercise illustrations in
+`public/exercises/` are crops of the Horizon Torus 5 Exercise Guide, kept here
+for personal use, so bring your own images if you reuse this. The whistle is a
+CC0 public domain recording and needs no attribution. `LICENSE` has the detail.

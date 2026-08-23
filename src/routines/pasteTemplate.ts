@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * A routine written in every part of the grammar the paste parser understands,
  * offered from the paste dialog as a starting point.
  *

@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { describe, expect, it } from 'vitest'
 import { compile, MAX_TIMELINE_ENTRIES, stepCount, TimelineTooLargeError, totalDurationMs } from '../compile'
 import { CABLE_FLY, circuit, nested, rep, seg, tabata, workout } from './fixtures'

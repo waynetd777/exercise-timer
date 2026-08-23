@@ -1,3 +1,9 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaRef } from '../../engine'
 

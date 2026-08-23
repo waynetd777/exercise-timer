@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * IndexedDB, opened once and shared.
  *
  * Two stores from the start, so phase 4's media work is an addition rather than

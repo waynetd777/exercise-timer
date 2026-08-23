@@ -1,4 +1,10 @@
 /**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
  * What the home screen shows beside the help button.
  *
  * **Bump this on every build you intend to test.** It exists for one reason: an
