@@ -75,7 +75,7 @@ link above.
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:35173
 npm test           # 637 tests, no browser needed
 npm run typecheck
 npm run build

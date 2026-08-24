@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-23
+> Last updated: 2026-08-24
 
 ---
 
@@ -968,12 +968,13 @@ All seven phases are shipped. Work is now user-requested rather than plan-driven
 ## 🔧 Useful commands
 
 ```bash
-npm run dev          # Vite dev server
+npm run dev          # Vite dev server -> http://localhost:35173 (strictPort)
 npm test             # vitest, single run
 npm run test:watch   # vitest, watch mode
 npm run typecheck    # tsc -b --noEmit
 npm run build        # tsc -b && vite build
 VITE_BASE=/exercise-timer/ npm run build   # subpath build (GitHub Pages)
+npm run preview      # built app -> http://localhost:35174 (strictPort)
 ```
 
 ---

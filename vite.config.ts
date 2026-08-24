@@ -73,6 +73,20 @@ function licenceNotice(): Plugin {
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   /*
+   * Vite's default 5173 collides with another local project (sft-hire), and the
+   * loser silently drifts to 5174, so "is the timer on 5173?" stopped having a
+   * reliable answer. These are parked well clear of the usual dev-server range.
+   * `strictPort` makes a clash fail loudly instead of moving the goalposts again.
+   */
+  server: {
+    port: 35173,
+    strictPort: true,
+  },
+  preview: {
+    port: 35174,
+    strictPort: true,
+  },
+  /*
    * The build's own date, shown beside the version on the home screen. The
    * version is bumped by hand (see `src/version.ts`); this is the backstop for
    * the time it is forgotten, since an installed PWA is served by a service
