@@ -213,14 +213,9 @@ before moving to the next` become a note on the section rather than on any step.
 up and step back. It is skipped if your text already opens with a get-ready step,
 so a routine that says `30 sec to get set` does not wait twice.
 
-**The balance of an EMOM minute**, as rest. `Minute 6: 30-sec Wall Sit` is thirty
-seconds of work inside a minute that is fixed, so the other thirty are rest. Read
-out of the minute you wrote, not invented.
-
-It also **names** the step an AMRAP becomes, "As many rounds as possible", since
-the block is a clock rather than an exercise.
-
-Nothing else. Every step, count and duration comes from what you pasted.
+Nothing else. Every step, count and duration comes from what you pasted, and a
+rest the app puts in for you always comes from a line that asked for one: the rest
+between rounds, the rest between exercises, the balance of an EMOM minute.
 
 ## How a section is shown while running
 
