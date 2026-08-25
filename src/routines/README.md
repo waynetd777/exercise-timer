@@ -49,7 +49,9 @@ because the same grammar arrives by WhatsApp and Notes too.
 block IS `PASTE_TEMPLATE`, asserted by a test, so the doc cannot drift into
 describing a grammar the parser no longer reads.
 
-The one thing it ADDS to the text is **five seconds to get ready** at the start:
+Two things it ADDS to the text, and only two. The **balance of an EMOM minute**
+as rest, which is read out of a minute the text states (see the AMRAP and EMOM
+notes below). And **five seconds to get ready** at the start:
 long enough to prop the phone up and step back, short enough that nobody waits
 through it twice. The emails never mention it because a person reading one is
 already standing there. It goes at the top level rather than inside the first
@@ -65,9 +67,10 @@ Two rules govern everything else:
 2. **The result is a draft** for review in the editor, which is what makes rule 1
    affordable. An imperfect parse costs a correction, not a bad workout.
 
-The test that matters asserts `skipped` is empty for all three routines. It is the
-first thing to fail when the instructor writes something new, and that is the
-point.
+The test that matters asserts `skipped` is empty for every routine in
+`__tests__/emails/`. It is the first thing to fail when the instructor writes
+something new, and that is the point: the 25 Aug email arrived on a second
+template and failed it on 28 lines.
 
 **One rule covers every ladder in the source material:** inside a ladder, an item
 with no count of its own scales with the rung, and an item that states a count
@@ -105,6 +108,41 @@ Decisions the grammar encodes, each because the emails are inconsistent:
   says "rest".
 - **A section shows as a timer only when every step in it is timed,** which is
   derived rather than guessed. The warm-up qualifies, nothing else does.
+
+The 25 Aug email brought a second template, whose forms name no exercise on the
+line that times them. That needs one idea the rest of the grammar does not have:
+
+- **A directive can license the line below it.** "30 sec WORK", "Minute 4",
+  "LAST 20 SECONDS" and "Every time you finish a round:" all state a step without
+  naming one, so the next BARE line becomes that step. Bare lines are otherwise
+  still reported, because once the bullet is gone a heading, an instruction and an
+  exercise look alike. Read as steps in their own right, the five "30 sec WORK"
+  lines of a 30/30 block produced five steps called "WORK" and lost all five
+  exercises.
+- **An EMOM's minute is the unit, and it is an ordinary timed step.** "Minute 1:
+  12 × Bicep Curls" is sixty seconds labelled twelve reps, so an EMOM needs no
+  primitive of its own. A minute whose step states a SHORTER time of its own gets
+  the balance back as rest, since the minute is fixed. A joined pair inside a
+  minute is NOT split the way a bulleted line is: that would run the minute twice.
+- **"Repeat 2 rounds" may come after the steps it repeats.** One email states the
+  round count above the block and the next states it below. Read after a run of
+  loose steps it wraps them, but only where the section is still a plain list: a
+  section that has already stated a ladder or a round keeps it.
+- **An AMRAP is the clock, so it becomes one.** The ten minutes is stated, so it
+  is read: a single timed step of that length, named "As many rounds as possible",
+  with the round as its `note` so the panel beside the countdown shows it for the
+  whole ten minutes. What the text does not say is HOW MANY rounds, and nothing
+  invents one: that number is the person's to make, live. An AMRAP with no stated
+  length has no clock to build and stays a note.
+
+  The first attempt kept the exercises as steps and the cap as a note. That was
+  worse than a skipped line: with no clock and one pass through the list, the app
+  quietly turned a ten-minute block into a single round and said nothing. Refusing
+  to invent a round count was right; letting the stated ten minutes go with it was
+  not. **Read what the text states, and leave only what it does not.**
+- **A marker in front of a heading is read past and then kept.** "(Optional) 🔥
+  Final Burnout" is the Final Burnout section, named "(Optional) Final Burnout":
+  whether a block is optional is the reader's to know.
 
 A trap worth knowing: the dash characters are built into patterns two ways, as
 `DASH` (a complete class) and `DASH_CHARS` (the bare characters). Nesting the

@@ -56,10 +56,10 @@ across a gym, with the phone propped against a rack.
 - **Holds a library** of routines in the browser, searchable, with favourites and
   a colour per routine.
 - **Takes a routine as pasted text,** which is how they arrive. An email from a
-  gym instructor is parsed into sections, rounds and ladders, and any line it
-  could not place is reported before anything is saved. See
-  [the paste format](docs/paste-format.md) for what it reads, with an example
-  using every part of it.
+  gym instructor is parsed into sections, rounds, ladders, EMOM minutes, 30/30
+  intervals and AMRAPs, and any line it could not place is reported before
+  anything is saved. See [the paste format](docs/paste-format.md) for what it
+  reads, with an example using every part of it.
 - **Imports** the `.tabata` exports of the Tabata Timer app, its own bundles, and
   plain-text routines.
 - **Edits** routines: steps, durations, reps, ladders, sections and images, with

@@ -21,7 +21,8 @@ import {
   nameLines,
   pathLabel,
   stopwatch,
-  wordCount,
+  fitPanel,
+  FIT_HEIGHT_BUDGET,
 } from '../format'
 import { defaultRoutineName } from '../PasteDialog'
 
@@ -141,23 +142,66 @@ describe('fitCqi', () => {
   })
 })
 
-describe('wordCount', () => {
-  it('counts the words a fallback name will wrap onto', () => {
-    expect(wordCount('Rest')).toBe(1)
-    expect(wordCount('Get ready')).toBe(2)
-    expect(wordCount('Seated Abdominal Crunch')).toBe(3)
+describe('fitPanel', () => {
+  it('agrees with a line per word for a short name, which is what one needs', () => {
+    /*
+     * The case the old word-count model was right about, and the reason it
+     * survived so long. `fitCqi` sizes off the longest word, and at that size a
+     * two or three word name really does take a line each.
+     */
+    expect(fitPanel('Rest').lines).toBe(1)
+    expect(fitPanel('Get ready').lines).toBe(2)
+    expect(fitPanel('Seated Abdominal Crunch').lines).toBe(3)
   })
 
-  it('never returns zero, so it is safe as a divisor', () => {
-    // It divides the height budget in CSS, and a zero would blow the font size up.
-    expect(wordCount('')).toBe(1)
-    expect(wordCount('   ')).toBe(1)
+  it('leaves a short name at the width bound, unchanged by the height one', () => {
+    for (const name of ['Rest', 'Get ready', 'Seated Abdominal Crunch']) {
+      expect(fitPanel(name).fit).toBeCloseTo(fitCqi(name), 10)
+    }
   })
 
-  it('collapses runs of whitespace', () => {
-    expect(wordCount('  Get   ready  ')).toBe(2)
+  it('fills the panel with a paragraph instead of bottoming out on the floor', () => {
+    /*
+     * The AMRAP round, which is what this function exists for. A word per line
+     * asked for 30 lines, which drove the size under the CSS 1rem floor and then
+     * used three of them: the panel was four fifths empty.
+     */
+    const round =
+      '10 × Squat + Shoulder Press · 8 × Bulgarian split squat – 4 each leg · ' +
+      '10 × Plank Shoulder Taps – 5 each side · 6 × Burpees · ' +
+      '12 × Russian Twists – 6 each side · 10 Mountain Climbers'
+    const { fit, lines } = fitPanel(round)
+
+    // Words per line, not a line per word.
+    expect(lines).toBeLessThan(wordsIn(round) / 2)
+    // Comfortably off the 1rem floor: at 1cqi to a percent, this is several.
+    expect(fit).toBeGreaterThan(5)
+  })
+
+  it('uses the height budget without overrunning it, at every length', () => {
+    // The invariant the square root exists to hold: lines × size fits the box.
+    for (const text of ['Go', 'Rest', 'Seated Abdominal Crunch', 'a '.repeat(90), 'x'.repeat(200)]) {
+      const { fit, lines } = fitPanel(text)
+      expect(lines * fit).toBeLessThanOrEqual(FIT_HEIGHT_BUDGET + fit)
+    }
+  })
+
+  it('never returns a zero line count, which would blow the font size up', () => {
+    // `lines` divides the height budget in CSS.
+    for (const text of ['', '   ']) {
+      expect(fitPanel(text).lines).toBeGreaterThanOrEqual(1)
+      expect(Number.isFinite(fitPanel(text).fit)).toBe(true)
+    }
+  })
+
+  it('still refuses to set a long word wider than the frame', () => {
+    // The width bound is not traded away for height: an unbreakable word wins.
+    const word = 'Supercalifragilisticexpialidocious'
+    expect(fitPanel(word).fit).toBeLessThanOrEqual(fitCqi(word))
   })
 })
+
+const wordsIn = (text: string) => text.trim().split(/\s+/).filter(Boolean).length
 
 describe('fitCqi always fits its container', () => {
   // The invariant the portrait-iPad truncation broke: whatever the text, the

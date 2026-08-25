@@ -125,14 +125,42 @@ export function fitWidthUsed(text: string, max = 40): number {
 }
 
 /**
- * Number of lines the fallback step name will occupy, at most.
+ * Share of the container's HEIGHT the media panel's fallback text may claim.
  *
- * `fitCqi` sizes so the LONGEST word fits one line, which means each word may
- * end up on its own line. So the word count is an upper bound, and using it to
- * divide the height budget errs on the side of fitting.
+ * Mirrors the `72cqh` in `.panel__empty`, which divides it by the line count to
+ * get a font size. That model treats a line box as one em rather than the 1.05
+ * it sets, and the slack for that is already in the gap below `FIT_AVAILABLE`.
  */
-export function wordCount(text: string): number {
-  return Math.max(1, text.trim().split(/\s+/).filter(Boolean).length)
+export const FIT_HEIGHT_BUDGET = 72
+
+/**
+ * Size and line count for the media panel's fallback text, which has to fill a
+ * box on BOTH axes.
+ *
+ * Two bounds. The longest word still has to fit one line, which is `fitCqi`. The
+ * new one is the height: at size `s` a line holds `FIT_BUDGET / (s * FIT_ADVANCE)`
+ * characters, so `total` characters need `total * s * FIT_ADVANCE / FIT_BUDGET`
+ * lines and stand `s` high each. Setting that product against the height budget
+ * gives a SQUARE ROOT, because shrinking the text cuts the line count as well as
+ * the line height.
+ *
+ * That fixed point is the whole point. The previous version divided the height
+ * budget by the WORD COUNT, on the reasoning that `fitCqi` may put every word on
+ * its own line. True of a three-word exercise name in a narrow panel, and for
+ * those this returns the identical answer. For a thirty-word note it is wildly
+ * pessimistic: it asked for thirty lines, bottomed out on the CSS `1rem` floor,
+ * and then used three of them, leaving the panel four fifths empty.
+ *
+ * `lines` is the count at the size returned, rounded up, so `.panel__empty`'s own
+ * height term agrees rather than shrinking the text again. It stays as the
+ * backstop for a panel far from square, where mixing `cqi` and `cqh` the way this
+ * does breaks down; erring there costs space rather than clipping a word.
+ */
+export function fitPanel(text: string, max = 40): { fit: number; lines: number } {
+  const total = Math.max(1, text.trim().length)
+  const fill = Math.sqrt((FIT_HEIGHT_BUDGET * FIT_BUDGET) / (FIT_ADVANCE * total))
+  const fit = Math.min(fitCqi(text, max), fill)
+  return { fit, lines: Math.max(1, Math.ceil((total * fit * FIT_ADVANCE) / FIT_BUDGET)) }
 }
 
 type Effort = { durationMs?: number; reps?: { count: number; perSide?: boolean } }
@@ -187,7 +215,7 @@ export function groupCaption(group: {
  * With four or five short exercises there is a lot of height going spare, and a
  * row set at a phone's 1rem floor is unreadable from where the phone is propped.
  * Dividing the height budget by an estimated line count is the same move
- * `.panel__empty` makes with `wordCount`, and errs the same way, generously, so
+ * `.panel__empty` makes through `fitPanel`, and errs the same way, generously, so
  * a wrapped row costs space rather than overflowing.
  *
  * `CHARS_PER_LINE` is deliberately pessimistic: at the sizes this produces, a

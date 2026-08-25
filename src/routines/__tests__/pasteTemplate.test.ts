@@ -52,7 +52,7 @@ describe('the pasted-routine template', () => {
     expect(fenced![1]).toBe(PASTE_TEMPLATE)
   })
 
-  it('opens with the five seconds the parser adds, then five sections', () => {
+  it('opens with the five seconds the parser adds, then every section', () => {
     const blocks = parsed().blocks
     const first = blocks[0] as Segment
 
@@ -62,7 +62,11 @@ describe('the pasted-routine template', () => {
       'Warm-up',
       'Full Body Ladder',
       'Upper Body',
-      'Final Burnout',
+      'Arms EMOM',
+      'Legs 30/30',
+      'Core AMRAP',
+      // The marker stays in the name: whether a block is optional is yours to know.
+      '(Optional) Final Burnout',
       'Cool-down',
     ])
   })

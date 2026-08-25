@@ -21,13 +21,12 @@ import {
   effortLabel,
   effortSuffix,
   fitBlockCqi,
-  fitCqi,
+  fitPanel,
   groupCaption,
   listLines,
   nameLines,
   pathLabel,
   stopwatch,
-  wordCount,
 } from './format'
 import {
   BackIcon,
@@ -155,6 +154,9 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
    * is empty, because it has no illustration either.
    */
   const fallback = entry.note ?? entry.name
+  // Sized to FILL the frame on both axes. A round listed for an AMRAP is a
+  // paragraph, not a name, and the two need the same box used differently.
+  const { fit, lines } = fitPanel(fallback)
 
   // Decode the next step's image while this one is still running, or the
   // transition lands on a blank frame at exactly the wrong moment.
@@ -176,8 +178,8 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
           <span
             className="panel__empty"
             style={{
-              ['--fit' as string]: fitCqi(fallback),
-              ['--lines' as string]: wordCount(fallback),
+              ['--fit' as string]: fit,
+              ['--lines' as string]: lines,
             }}
             aria-hidden="true"
           >
