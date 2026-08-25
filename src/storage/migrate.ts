@@ -80,10 +80,36 @@ export const REHOSTED: Record<string, string> = {
   'https://i.postimg.cc/j56Gq1nB/horizon-5-0-r-recumbent-bike.jpg': 'exercises/horizon-5-0-r-recumbent-bike.jpg',
 }
 
+/**
+ * The AMRAP step's name, and the separator its round used to be joined with.
+ *
+ * FROZEN COPIES, deliberately not imported from `routines/pasteFormat`. A
+ * migration describes data that already exists, so it has to keep matching that
+ * data if the parser renames the step or changes the join tomorrow. Importing
+ * the live constants would silently stop it finding anything.
+ */
+const AMRAP_STEP = 'As many rounds as possible'
+const RUN_TOGETHER = ' · '
+
 function migrateSegment(segment: Segment): Segment {
-  if (segment.media?.source !== 'remote') return segment
-  const path = REHOSTED[segment.media.url]
-  return path ? { ...segment, media: { source: 'bundled', path } } : segment
+  let next = segment
+
+  /*
+   * An AMRAP's round was joined into one paragraph before the media panel could
+   * draw it as bullets, and a routine is STORED as it was parsed. Without this,
+   * fixing the parser fixes nothing already saved, and re-pasting means getting
+   * the email back onto the clipboard of the phone it is being read on.
+   */
+  if (next.name === AMRAP_STEP && next.note?.includes(RUN_TOGETHER)) {
+    next = { ...next, note: next.note.split(RUN_TOGETHER).join('\n') }
+  }
+
+  if (next.media?.source === 'remote') {
+    const path = REHOSTED[next.media.url]
+    if (path) next = { ...next, media: { source: 'bundled', path } }
+  }
+
+  return next
 }
 
 /**

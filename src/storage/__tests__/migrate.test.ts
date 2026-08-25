@@ -44,6 +44,48 @@ const steps = (workout: Workout): Segment[] => {
 
 const CABLE_FLY = 'https://i.postimg.cc/KvY7cdKk/Cable-Fly.png'
 
+const noted = (name: string, note: string): Segment => ({
+  kind: 'segment',
+  id: `id-${name}`,
+  name,
+  role: 'work',
+  durationMs: 600_000,
+  note,
+})
+
+describe("an AMRAP's round, run together into a paragraph", () => {
+  /*
+   * A routine is stored as it was PARSED, so fixing the parser fixes nothing
+   * already saved. The round used to be joined with an interpunct; the media
+   * panel now draws a note written one item per line as bullets under one
+   * another, and this is what gets the routines already on a phone there.
+   */
+  const ROUND = '10 × Squat + Shoulder Press · 6 × Burpees · 10 Mountain Climbers'
+
+  it('splits it back into one item per line', () => {
+    const migrated = migrateWorkout(
+      workout([section([noted('As many rounds as possible', ROUND)])]),
+    )
+
+    expect(steps(migrated)[0]!.note!.split('\n')).toEqual([
+      '10 × Squat + Shoulder Press',
+      '6 × Burpees',
+      '10 Mountain Climbers',
+    ])
+  })
+
+  it("leaves any other step's note exactly as written", () => {
+    // An interpunct in a hand-written note is a person's punctuation, not a list.
+    const before = workout([section([noted('Side Plank', 'left · then right')])])
+    expect(migrateWorkout(before)).toBe(before)
+  })
+
+  it('leaves an AMRAP already written one item per line alone', () => {
+    const before = workout([section([noted('As many rounds as possible', 'a\nb')])])
+    expect(migrateWorkout(before)).toBe(before)
+  })
+})
+
 describe('rehosted illustrations', () => {
   it('turns an old postimages link into the image that ships with the app', () => {
     const migrated = migrateWorkout(workout([step('Cable Fly', { source: 'remote', url: CABLE_FLY })]))

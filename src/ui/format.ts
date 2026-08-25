@@ -156,6 +156,68 @@ export const FIT_HEIGHT_BUDGET = 72
  * backstop for a panel far from square, where mixing `cqi` and `cqh` the way this
  * does breaks down; erring there costs space rather than clipping a word.
  */
+/**
+ * The bullet's hanging indent, in ems. Mirrors `padding-inline-start` on
+ * `.panel__round`, and is subtracted from the width budget below because an
+ * indent that scales with the type takes a share of the line that grows with it.
+ */
+export const LIST_INDENT = 1.2
+
+/**
+ * The gap between one bullet and the next, in ems. Mirrors `li + li` on
+ * `.panel__round`.
+ *
+ * Counted as height like any line is, or five gaps of it silently eat the slack
+ * the height budget keeps for line spacing.
+ */
+export const LIST_GAP = 0.35
+
+/**
+ * Size and line count for a LIST in the media panel: each item starts a line of
+ * its own, and a long one wraps underneath itself.
+ *
+ * `fitPanel` has a closed form because one blob of text wraps as one blob, so the
+ * line count is total length over line width and the fixed point is a square
+ * root. A list has no such form. Six items of different lengths each round UP to
+ * a whole line of their own, so the count STEPS rather than curves.
+ *
+ * Bisection instead, on the one thing that is monotonic: taller type needs more
+ * lines, so `lines(s) * s` only ever grows with `s`, and the largest size that
+ * still fits the height budget can be cornered. The longest word remains a hard
+ * ceiling, exactly as everywhere else here, since a word cannot break.
+ *
+ * The step is why the result can leave height unused: one notch bigger tips an
+ * item over to an extra line and overflows. Better a short column than a clipped
+ * one.
+ */
+export function fitList(items: readonly string[], max = 40): { fit: number; lines: number } {
+  const lengths = items.map((item) => Math.max(1, item.trim().length))
+  const ceiling = fitCqi(items.join(' '), max)
+
+  /* Characters a wrapped line holds at size `s`, the indent already taken out. */
+  const linesAt = (size: number): number => {
+    const perLine = (FIT_BUDGET - LIST_INDENT * size) / (size * FIT_ADVANCE)
+    if (perLine <= 0) return Number.POSITIVE_INFINITY
+    return lengths.reduce((total, length) => total + Math.ceil(length / perLine), 0)
+  }
+
+  /* Lines plus the gaps between the bullets, both paid for in height. */
+  const gaps = Math.max(0, lengths.length - 1) * LIST_GAP
+  const heightAt = (size: number): number => linesAt(size) + gaps
+
+  // Zero is always feasible, so `low` is only ever a size that fits.
+  let low = 0
+  let high = ceiling
+  for (let i = 0; i < 24; i += 1) {
+    const mid = (low + high) / 2
+    if (heightAt(mid) * mid <= FIT_HEIGHT_BUDGET) low = mid
+    else high = mid
+  }
+  // Rounded up so `.panel__round`'s own height term agrees rather than shrinking
+  // the type a second time.
+  return { fit: low, lines: Math.max(1, Math.ceil(heightAt(low))) }
+}
+
 export function fitPanel(text: string, max = 40): { fit: number; lines: number } {
   const total = Math.max(1, text.trim().length)
   const fill = Math.sqrt((FIT_HEIGHT_BUDGET * FIT_BUDGET) / (FIT_ADVANCE * total))
@@ -185,6 +247,33 @@ export function effortLabel(step: Effort): string {
 /** "each side", or nothing. Its own column beside `effortLabel`. */
 export function effortSuffix(step: Effort): string {
   return step.reps?.perSide ? 'each side' : ''
+}
+
+/** "each side", "5 each leg": the routine already said it, in the name. */
+const NAMES_PER_SIDE = /\b(?:each|per)\s+(?:side|leg|arm|direction)\b/i
+
+/**
+ * A step's name with the count it asks for: "12 × Bicep Curls".
+ *
+ * For the COUNTDOWN layout, which unlike the list has no column of its own for
+ * the effort. That was harmless while a counted step was always self-paced and
+ * therefore always drawn as a list. An EMOM minute is both timed and counted, so
+ * without this it showed a clock and the words "Bicep Curls" and never said
+ * twelve.
+ *
+ * Two things it will not say twice. The per-side qualifier is added only where
+ * the name does not already carry it, since the parser leaves a dashed "– 5 each
+ * leg" in place: it is the only record of which limb, and `perSide` is a boolean.
+ * And where the name already states the count per side, the count is not
+ * prefixed either, because "5 × Bulgarian split squat – 5 each side" says it
+ * twice and the name has already answered the question.
+ */
+export function nameWithEffort(step: { name: string } & Effort): string {
+  if (!step.reps) return step.name
+  const { count } = step.reps
+  const statesCount = new RegExp(`\\b${count}\\s+(?:each|per)\\s+\\w+`, 'i').test(step.name)
+  const suffix = step.reps.perSide && !NAMES_PER_SIDE.test(step.name) ? ' each side' : ''
+  return statesCount ? `${step.name}${suffix}` : `${count} × ${step.name}${suffix}`
 }
 
 /**

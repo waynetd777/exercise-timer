@@ -507,9 +507,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       name: AMRAP_NAME,
       role: 'work',
       durationMs,
-      // The panel beside the countdown shows a step's note, so this is where the
-      // round goes: on screen, in full, for all ten minutes.
-      ...(round.length > 0 ? { note: round.join(' · ') } : {}),
+      /*
+       * The panel beside the countdown shows a step's note, so this is where the
+       * round goes: on screen, in full, for all ten minutes. One item per LINE,
+       * because the panel draws a multi-line note as a bulleted list and a round
+       * run together into a paragraph cannot be scanned mid-burpee.
+       */
+      ...(round.length > 0 ? { note: round.join('\n') } : {}),
     })
   }
 

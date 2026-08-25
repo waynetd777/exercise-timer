@@ -21,6 +21,8 @@ import {
   effortLabel,
   effortSuffix,
   fitBlockCqi,
+  fitList,
+  nameWithEffort,
   fitPanel,
   groupCaption,
   listLines,
@@ -90,7 +92,6 @@ function SectionList({
   return (
     <div className="sheet">
       <div className="sheet__head">
-        {section && <h2 className="sheet__title">{section.label}</h2>}
         {caption && <p className="sheet__caption label">{caption}</p>}
         {section?.note && <p className="sheet__note label label--sm">{section.note}</p>}
       </div>
@@ -154,9 +155,16 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
    * is empty, because it has no illustration either.
    */
   const fallback = entry.note ?? entry.name
-  // Sized to FILL the frame on both axes. A round listed for an AMRAP is a
-  // paragraph, not a name, and the two need the same box used differently.
-  const { fit, lines } = fitPanel(fallback)
+  /*
+   * A note written one item per line is a LIST, and the only thing that writes
+   * one is an AMRAP's round. Drawn as bullets under each other rather than run
+   * together, because it is read at a glance between burpees.
+   *
+   * Sized to FILL the frame on both axes either way, but by different maths: see
+   * `fitList` for why a list cannot use the closed form a paragraph can.
+   */
+  const items = fallback.includes('\n') ? fallback.split('\n') : null
+  const { fit, lines } = items ? fitList(items) : fitPanel(fallback)
 
   // Decode the next step's image while this one is still running, or the
   // transition lands on a blank frame at exactly the wrong moment.
@@ -171,6 +179,14 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
       <div className="panel__frame">
         {src ? (
           <img src={src} alt={entry.name} />
+        ) : items ? (
+          /* NOT aria-hidden, unlike the name below: the round is the only place
+             these exercises are written, so it is the panel's own content. */
+          <ul className="panel__round" style={{ ['--fit' as string]: fit, ['--lines' as string]: lines }}>
+            {items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         ) : (
           // The step name rather than "No image": plenty of real exercises have
           // no illustration, so this is a normal state. aria-hidden because the
@@ -263,6 +279,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
   const reps = entry ? pathLabel(entry.path) : ''
+  // Only for the countdown: the list layout already heads itself with this.
+  const section = entry ? (sectionOf(entry)?.label ?? '') : ''
   /*
    * A timed step counts down. A self-paced one has nothing to count down to, so
    * it shows its rep target instead, the number the user is actually working to,
@@ -404,7 +422,20 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
         ) : (
           <span />
         )}
-        <h1 className="run__title">{workout.name}</h1>
+        {/*
+          The routine, and under it which section is running.
+
+          Here rather than above the countdown because the header row is `auto`
+          and gives way. The count column's own budget has about two points of
+          slack in it, so a section name that wrapped to two lines overflowed the
+          column and landed on top of both the header and the step count. It also
+          puts the section in ONE place for both layouts, which the list heading
+          used to duplicate.
+        */}
+        <div className="run__heading">
+          <h1 className="run__title">{workout.name}</h1>
+          {section && <p className="label label--sm label--section">{section}</p>}
+        </div>
 
         {/*
           The session stopwatch, in the slot the layout already kept empty for
@@ -492,7 +523,7 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
               against how many lines the name takes. */}
           <div
             className="count"
-            style={{ ['--name-lines' as string]: nameLines(entry.name) }}
+            style={{ ['--name-lines' as string]: nameLines(nameWithEffort(entry)) }}
           >
             {/* Grouped so the meta row below can be pinned to the bottom of the
                 column while this block stays vertically centred. */}
@@ -514,11 +545,14 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
               >
                 {clockText}
               </p>
+              {/* WITH the count it asks for: an EMOM minute is timed AND
+                  counted, and this column has no effort field the way a list
+                  row does. See `nameWithEffort`. */}
               <h1
                 className="count__name"
-                style={{ ['--fit' as string]: fitBlockCqi(entry.name, 3, 11) }}
+                style={{ ['--fit' as string]: fitBlockCqi(nameWithEffort(entry), 3, 11) }}
               >
-                {entry.name}
+                {nameWithEffort(entry)}
               </h1>
             </div>
 

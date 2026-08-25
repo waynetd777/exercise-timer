@@ -270,6 +270,23 @@ button {
   --label-size: var(--label-size-sm);
 }
 
+/*
+ * A section's name, wherever a screen shows one.
+ *
+ * Teal is `--group-section`, the colour a section already carries down the left
+ * edge of the editor, so the three screens agree on what teal means. It also
+ * sits apart from `--phase`, which is what a section name must not borrow: the
+ * heading would change hue every time work turned to rest, as though the part
+ * of the routine had changed with it.
+ *
+ * Defined ONCE and worn by both run layouts. The countdown and the list are two
+ * views of the same routine, and a heading that is small teal on one and large
+ * bone on the other reads as two different apps.
+ */
+.label--section {
+  color: var(--group-section);
+}
+
 /* Opts out of the surrounding uppercase so a unit suffix stays a unit: the
    label transform would otherwise render "20s" as "20S". */
 .unit {

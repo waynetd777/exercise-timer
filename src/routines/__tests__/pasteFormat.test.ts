@@ -366,12 +366,22 @@ describe('parseRoutine: the real emails', () => {
     // A section of one timed step counts down rather than listing.
     expect(body.display).toBe('timer')
 
-    // The whole round is on screen for the whole ten minutes, as written.
+    /*
+     * The whole round is on screen for the whole ten minutes, as written and ONE
+     * ITEM PER LINE. The line breaks are the contract: the panel draws a
+     * multi-line note as bullets under one another, and a round run together
+     * into a paragraph cannot be scanned mid-burpee.
+     */
     const note = (body.children[0] as Segment).note!
-    expect(note).toContain('10 × Squat + Shoulder Press')
-    expect(note).toContain('12 × Russian Twists – 6 each side')
-    // Including the step that closes each round.
-    expect(note).toContain('10 Mountain Climbers')
+    expect(note.split('\n')).toEqual([
+      '10 × Squat + Shoulder Press',
+      '8 × Bulgarian split squat – 4 each leg',
+      '10 × Plank Shoulder Taps – 5 each side',
+      '6 × Burpees',
+      '12 × Russian Twists – 6 each side',
+      // The step that closes each round.
+      '10 Mountain Climbers',
+    ])
 
     // The instruction itself still sits on the section.
     expect(body.note).toContain('10-MINUTE AMRAP')
