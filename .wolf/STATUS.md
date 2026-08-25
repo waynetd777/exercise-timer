@@ -307,6 +307,68 @@ storage or UI change: every new form is expressed with the existing `Repeat`,
 
 ---
 
+## ✅ Run screen: section heading, quantities, bulleted round (2026-08-25, v3.1)
+
+Three things Wayne asked for after training with the pasted routine. All in the
+countdown layout, which had never had to carry them because a counted step used
+to always be self-paced and therefore always drawn as a list.
+
+**The round is bullets, not a paragraph.** `flushAmrap` joins the round with `\n`
+instead of ` · `, and `MediaPanel` draws a multi-line note as a `<ul>`. Sizing
+needed a new function: `fitPanel`'s closed form works because one blob of text
+wraps as one blob, but six items each round UP to a whole line of their own, so
+the line count STEPS rather than curves. `fitList` bisects on the one monotonic
+thing (taller type needs more lines) with the bullet indent and the inter-item
+gaps both charged to the budget, since five gaps would otherwise eat the slack
+the height budget keeps for line spacing. Result ~36px, 6 bullets, 11 real lines,
+73.7cqh of the 92 available. Left-aligned against the centred `.panel__empty`
+beside it, because a list is scanned down a common left edge.
+
+**The section is named above the clock**, in `--group-section` teal: the colour a
+section already carries down the left edge of the editor, so the two screens agree
+on what teal means, and it does not change hue as work turns to rest. Countdown
+only; the list layout has always headed itself with it.
+
+**Every step shows the count it asks for.** `nameWithEffort` puts "12 ×" in front
+of the name, because the countdown has no effort column the way a list row does
+and an EMOM minute is timed AND counted. Two guards against saying things twice:
+the per-side qualifier is added only where the name has not already got it (the
+parser leaves a dashed "– 5 each leg" in place, as the only record of WHICH limb),
+and where the name already states the count per side the prefix stands down.
+
+**The saved routine needed a migration, not just a parser fix.** The bullets did
+not appear on Wayne's phone because a routine is STORED as it was parsed: the note
+in IndexedDB still had the ` · ` join, so `fallback.includes('\n')` was false.
+Added a `storage/migrate.ts` entry, which `workouts.ts:16` runs on every read
+(share links, bundles and file imports too). Its two constants are FROZEN local
+copies, deliberately not imported from `pasteFormat`: a migration describes data
+that already exists, so it must keep matching if the parser renames the step.
+Scoped by step name, so an interpunct in a hand-written note stays punctuation.
+
+**The section heading ended up in the HEADER, once, for both layouts.**
+`.label--section` in theme.css; `.sheet__title` and `.count__section` are both
+gone, as is the list layout's own `<h2>`.
+
+Two iterations to get there. First it went above the countdown in teal, matching
+nothing; then the list heading was made to match it. On Wayne's iPhone in Safari
+that clobbered the layout: the section name wrapped to two lines, overflowed
+`.count__lead`, and landed on the header AND on the step count. The `.count`
+comment had already recorded this exact failure ("the lead outgrew its row and the
+step name landed on top of the time remaining") and its budget leaves about 2cqh
+of slack, so a variable-height line was never affordable there.
+
+The header row is `auto` and gives way, so the section sits under the routine
+name: no budget to re-tune, and ONE location that serves both layouts instead of
+the list duplicating it. Clamped to two lines so a long name cannot grow the
+header and take the space from the countdown it captions. The tuned count column
+is byte-identical to before the whole episode. A test asserts the heading appears
+exactly once, inside the `header`, and never inside `.count__lead`.
+
+**676 tests green** (19 new: `fitList`, `nameWithEffort`, the AMRAP note migration,
+and five RunScreen component tests). Typecheck and production build clean.
+
+---
+
 ## 🚀 Next quest — none open
 
 The strength-routine work below is COMPLETE and pushed. The obvious candidates

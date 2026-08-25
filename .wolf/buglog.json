@@ -1171,6 +1171,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-25T09:55:00+02:00"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-08-25T11:20:00+02:00",
+      "error_message": "iPhone Safari: the section heading drew over the header and the step count drew over the step name",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "The section heading was added to `.count__lead`, whose column budget is documented in the `--clock-max` comment as meta 20 + label 12 + name 14 + clock 52 = 98cqh, leaving about 2cqh of slack. A long section name (\"FULL-LEG BURN – EVERY MINUTE ON THE MINUTE\") wrapped to two lines on the narrowest phone, the lead outgrew its `minmax(0, 1fr)` row, and because it is `align-content: center` the overflow spilled BOTH ways: up onto the header and down onto the meta row. The `.count` comment already recorded this exact failure from a previous occasion, which is what named the cause.",
+      "fix": "Moved the heading out of the count column into `.run__heading` in the header, under the routine name. That row is `auto`, so it takes the height it needs and the body's `1fr` gives way: no budget to re-tune, and the count column is byte-identical to before. It also removed a duplication, since the list layout had its own `<h2>` for the same thing, so the section is now named once for both layouts. Clamped to two lines with `-webkit-line-clamp` so a long name cannot grow the header and take the space from the countdown it captions. A test asserts the heading appears exactly once, inside the `header`, and never inside `.count__lead`.",
+      "tags": [
+        "ui",
+        "layout",
+        "run-screen",
+        "overflow",
+        "ios",
+        "regression"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-25T11:20:00+02:00"
     }
   ]
 }

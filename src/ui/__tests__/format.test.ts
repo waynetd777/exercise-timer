@@ -21,8 +21,11 @@ import {
   nameLines,
   pathLabel,
   stopwatch,
+  fitList,
   fitPanel,
   FIT_HEIGHT_BUDGET,
+  LIST_GAP,
+  nameWithEffort,
 } from '../format'
 import { defaultRoutineName } from '../PasteDialog'
 
@@ -202,6 +205,93 @@ describe('fitPanel', () => {
 })
 
 const wordsIn = (text: string) => text.trim().split(/\s+/).filter(Boolean).length
+
+describe('fitList', () => {
+  const ROUND = [
+    '10 × Squat + Shoulder Press',
+    '8 × Bulgarian split squat – 4 each leg',
+    '10 × Plank Shoulder Taps – 5 each side',
+    '6 × Burpees',
+    '12 × Russian Twists – 6 each side',
+    '10 Mountain Climbers',
+  ]
+
+  it('gives every item a line of its own, at least', () => {
+    // The whole reason it exists: a bullet starts a line, however short it is.
+    expect(fitList(ROUND).lines).toBeGreaterThanOrEqual(ROUND.length)
+    expect(fitList(['a', 'b', 'c']).lines).toBeGreaterThanOrEqual(3)
+  })
+
+  it('stays inside the height budget, gaps between the bullets included', () => {
+    for (const items of [ROUND, ['a'], ['x'.repeat(80), 'y'.repeat(80)], []]) {
+      const { fit, lines } = fitList(items)
+      expect(lines * fit).toBeLessThanOrEqual(FIT_HEIGHT_BUDGET + fit)
+    }
+  })
+
+  it('counts the gaps, or five of them eat the slack meant for line spacing', () => {
+    // Same items, one list: the gaps are the only difference, so a list of many
+    // short items must be set no larger than the height budget alone allows.
+    const many = Array.from({ length: 8 }, () => 'Burpees')
+    const { fit, lines } = fitList(many)
+    expect(lines).toBeGreaterThanOrEqual(many.length + Math.floor(7 * LIST_GAP))
+    expect(fit).toBeLessThanOrEqual(FIT_HEIGHT_BUDGET / many.length)
+  })
+
+  it('never sets a long word wider than the frame', () => {
+    const items = ['Supercalifragilisticexpialidocious', 'Go']
+    expect(fitList(items).fit).toBeLessThanOrEqual(fitCqi(items.join(' ')))
+  })
+
+  it('survives an empty list without dividing by zero', () => {
+    const { fit, lines } = fitList([])
+    expect(lines).toBeGreaterThanOrEqual(1)
+    expect(Number.isFinite(fit)).toBe(true)
+  })
+
+  it('fills more of the panel than running the round together would', () => {
+    // The bullets cost height, so they are set smaller than one blob of text
+    // would be, but both must be well clear of the 1rem floor.
+    expect(fitList(ROUND).fit).toBeGreaterThan(4)
+  })
+})
+
+describe('nameWithEffort', () => {
+  it('puts the count in front, which the countdown has no column for', () => {
+    expect(nameWithEffort({ name: 'Bicep Curls', reps: { count: 12 } })).toBe('12 × Bicep Curls')
+  })
+
+  it('leaves a step with no count alone', () => {
+    expect(nameWithEffort({ name: 'Wall Sit', durationMs: 30_000 })).toBe('Wall Sit')
+  })
+
+  it('adds the per-side qualifier where the name does not carry it', () => {
+    // The parser strips a BRACKETED "(each side)", so the name has lost it.
+    expect(nameWithEffort({ name: 'Dead Bugs', reps: { count: 10, perSide: true } })).toBe(
+      '10 × Dead Bugs each side',
+    )
+  })
+
+  it('does not say per-side twice', () => {
+    // A dashed "– each side" stays in the name: it is the only record of which
+    // limb, since `perSide` is a boolean and cannot tell a leg from an arm.
+    expect(
+      nameWithEffort({ name: 'Plank Shoulder Taps – each side', reps: { count: 10, perSide: true } }),
+    ).toBe('10 × Plank Shoulder Taps – each side')
+  })
+
+  it('does not say the count twice either', () => {
+    // "5 × Bulgarian split squat – 5 each side" states it at both ends. The name
+    // has already answered the question, so the prefix stands down.
+    expect(
+      nameWithEffort({ name: 'Bulgarian split squat – 5 each side', reps: { count: 5, perSide: true } }),
+    ).toBe('Bulgarian split squat – 5 each side')
+  })
+
+  it('still counts a step whose name merely contains the digits', () => {
+    expect(nameWithEffort({ name: 'Squat to 90', reps: { count: 90 } })).toBe('90 × Squat to 90')
+  })
+})
 
 describe('fitCqi always fits its container', () => {
   // The invariant the portrait-iPad truncation broke: whatever the text, the

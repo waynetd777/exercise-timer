@@ -63,6 +63,35 @@
   }
 }
 
+/*
+ * The routine name, and under it the section running.
+ *
+ * Stacked in the centre cell so the three-column balance is untouched. The
+ * header row is `auto`, so it takes the height it needs and the body's `1fr`
+ * gives way. That is the whole reason the section sits here: the count column's
+ * documented budget leaves about two points of slack, and a section name wrapped
+ * to two lines overflowed it onto the header and the step count.
+ */
+.run__heading {
+  display: grid;
+  gap: var(--step-1);
+  min-width: 0;
+}
+
+/*
+ * Two lines at most. A long one would otherwise grow the header and take the
+ * space from the very countdown it is there to caption, which is the failure
+ * this move exists to end rather than relocate.
+ */
+.run__heading .label--section {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-align: center;
+}
+
 .run__title {
   margin: 0;
   text-align: center;
@@ -426,6 +455,39 @@
  * the job the picture would have done. Several exercises in a real routine have
  * no illustration, so this is a normal state, not an error state.
  */
+/*
+ * An AMRAP's round: bullets under one another, not a paragraph.
+ *
+ * Left-aligned on purpose, against the centred `.panel__empty` beside it. A list
+ * is SCANNED, and a common left edge is what the eye runs down; centring six
+ * ragged lines gives it nothing to follow. The block itself is still centred in
+ * the frame by `place-items`.
+ *
+ * Same size expression as `.panel__empty`, fed by `fitList` rather than
+ * `fitPanel`. The indent is in `em` so it tracks the type, and `LIST_INDENT` in
+ * `ui/format.ts` mirrors it: the width budget has to know what the bullet costs
+ * or every item wraps a line earlier than the sizing believed.
+ */
+.panel__round {
+  padding: 4cqh 4cqi;
+  padding-inline-start: calc(4cqi + 1.2em);
+  margin: 0;
+  list-style: disc outside;
+  font-weight: 700;
+  font-size: clamp(1rem, min(calc(var(--fit, 12) * 1cqi), calc(72cqh / var(--lines, 1))), 7rem);
+  line-height: 1.05;
+  letter-spacing: var(--track-name);
+  text-transform: uppercase;
+  text-align: start;
+  overflow-wrap: anywhere;
+  color: color-mix(in oklab, var(--phase) 42%, var(--bone-faint));
+}
+
+/* The gap is a share of the type, so it holds at every size the fit produces. */
+.panel__round li + li {
+  margin-block-start: 0.35em;
+}
+
 .panel__empty {
   /* Padding proportional on BOTH axes. Fixed padding is a tenth of a narrow
      portrait-iPad panel and a thirtieth of a laptop one, so the text's width
@@ -559,15 +621,6 @@
 .sheet__head {
   display: grid;
   gap: var(--step-1);
-}
-
-.sheet__title {
-  margin: 0;
-  font-size: clamp(1.3rem, 5.5cqi, 2.2rem);
-  font-weight: 650;
-  letter-spacing: var(--track-name);
-  line-height: 1.1;
-  color: var(--bone);
 }
 
 .sheet__caption {

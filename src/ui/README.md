@@ -175,6 +175,19 @@ Re-check that ratio if any role colour changes.
 The four roles above are phases. The three group kinds are containers, so they take
 hues the roles do not use: **reps orange, ladder yellow, section teal**
 (`--group-*` in `theme.css`). Reps and ladder borrow the routine tints, keeping one
+`.label--section` names the section running, ONCE, in the run header under the
+routine name. It borrows `--group-section` rather than `--phase` on purpose, or
+the heading would change hue every time work turned to rest, as though the part
+of the routine had changed with it.
+
+It lives in the header because that row is `auto` and gives way. The list layout
+used to head itself with a large bone heading and the countdown showed nothing;
+putting a copy above the countdown overflowed a column whose own budget leaves
+about two points of slack, and it landed on the header and on the step count. The
+header costs the countdown nothing that the countdown was not already going to
+lose, and one location serves both layouts. A test asserts the heading appears
+exactly once, inside the `header`, and never inside `.count__lead`.
+
 palette rather than two. Teal is defined only as `--group-section`, because adding
 it to `--routine-*` would put an eighth swatch in the colour picker, and that set
 is deliberately six.

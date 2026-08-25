@@ -31,6 +31,153 @@ const timed = (): Workout => ({
   updatedAt: 1,
 })
 
+/** A section holding one EMOM minute: timed and counted at the same time. */
+const emom = (): Workout => ({
+  id: 'w2',
+  name: 'Weekly',
+  blocks: [
+    {
+      kind: 'section',
+      id: 'sec1',
+      name: 'ARMS & SHOULDERS',
+      display: 'timer',
+      children: [
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Bicep Curls',
+          durationMs: 60_000,
+          reps: { kind: 'fixed', count: 12 },
+          role: 'work',
+        },
+      ],
+    },
+  ],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+/** An AMRAP: one timed step whose note is the round, one item per line. */
+const amrap = (): Workout => ({
+  id: 'w3',
+  name: 'Weekly',
+  blocks: [
+    {
+      kind: 'section',
+      id: 'sec1',
+      name: 'GENERAL BODY',
+      display: 'timer',
+      children: [
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'As many rounds as possible',
+          durationMs: 600_000,
+          role: 'work',
+          note: '10 × Squat + Shoulder Press\n6 × Burpees\n10 Mountain Climbers',
+        },
+      ],
+    },
+  ],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+/** A rep-based section, which runs as the LIST rather than the countdown. */
+const listed = (): Workout => ({
+  id: 'w4',
+  name: 'Weekly',
+  blocks: [
+    {
+      kind: 'section',
+      id: 'sec1',
+      name: 'CORE',
+      display: 'list',
+      children: [
+        { kind: 'segment', id: 's1', name: 'Heel Taps', role: 'work', reps: { kind: 'fixed', count: 10 } },
+        { kind: 'segment', id: 's2', name: 'Toe Touches', role: 'work', reps: { kind: 'fixed', count: 12 } },
+      ],
+    },
+  ],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+describe('RunScreen: the countdown layout', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    cleanup()
+    vi.useRealTimers()
+  })
+
+  /** The body only exists once a run is under way. */
+  const run = (workout: Workout) => {
+    render(<RunScreen workout={workout} />)
+    fireEvent.click(screen.getByLabelText('Start'))
+  }
+
+  it('shows the count a step asks for, not just its clock', () => {
+    /*
+     * An EMOM minute is timed AND counted. The countdown has no effort column
+     * the way a list row does, so without this it read "Bicep Curls" and never
+     * said twelve.
+     */
+    run(emom())
+    expect(screen.getByRole('heading', { level: 1, name: '12 × Bicep Curls' })).toBeTruthy()
+  })
+
+  it('draws a note written one item per line as bullets under one another', () => {
+    run(amrap())
+    const items = screen.getAllByRole('listitem').map((li) => li.textContent)
+
+    expect(items).toEqual([
+      '10 × Squat + Shoulder Press',
+      '6 × Burpees',
+      '10 Mountain Climbers',
+    ])
+  })
+
+  it('names the section once, in the header, whichever layout is running', () => {
+    /*
+     * ONE place for both layouts. It was a large bone heading on the list and
+     * nothing at all on the countdown; putting it above the countdown then
+     * overflowed a column whose own budget leaves about two points of slack, and
+     * it landed on the header and on the step count. The header row is `auto`
+     * and gives way, so nothing has to be traded for it.
+     */
+    run(listed())
+    expect(screen.getAllByText('CORE')).toHaveLength(1)
+    expect(screen.getByText('CORE').closest('header')).not.toBeNull()
+    cleanup()
+
+    run(emom())
+    const heading = screen.getAllByText('ARMS & SHOULDERS')
+
+    expect(heading).toHaveLength(1)
+    expect(heading[0]!.className).toContain('label--section')
+    expect(heading[0]!.closest('header')).not.toBeNull()
+    // Emphatically NOT in the countdown column, which cannot afford it.
+    expect(heading[0]!.closest('.count__lead')).toBeNull()
+  })
+
+  it('leaves a one-line note as the single block it always was', () => {
+    // Only a list is drawn as a list; an ordinary how-to note is not.
+    const workout = amrap()
+    const step = (workout.blocks[0] as { children: { note?: string }[] }).children[0]!
+    step.note = 'start standing, step out to one side'
+    run(workout)
+
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0)
+    expect(screen.getByText('start standing, step out to one side')).toBeTruthy()
+  })
+})
+
 describe('RunScreen: the reset confirmation', () => {
   beforeAll(() => {
     // jsdom does not implement the dialog methods; the open attribute is all
