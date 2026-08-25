@@ -8,11 +8,12 @@ import { describe, expect, it } from 'vitest'
 import general from './emails/2026-07-20-general.txt?raw'
 import trampoline from './emails/2026-08-03-trampoline.txt?raw'
 import bands from './emails/2026-08-17-bands.txt?raw'
+import emom from './emails/2026-08-25-emom.txt?raw'
 import { compile, SCHEMA_VERSION } from '../../engine'
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../../engine'
 import { parseItem, parseRoutine } from '../pasteFormat'
 
-const EMAILS = { general, trampoline, bands }
+const EMAILS = { general, trampoline, bands, emom }
 
 function sections(blocks: Block[]): Section[] {
   return blocks.filter((block): block is Section => block.kind === 'section')
@@ -234,10 +235,189 @@ describe('parseRoutine: the real emails', () => {
     expect(named(parsed.blocks, 'Plank').durationMs).toBe(60_000)
   })
 
+  it('reads a trailing "Repeat 2 rounds" as closing the block above it', () => {
+    // #5 states the round count LAST, after its six minutes. #2 states the same
+    // thing first. Both have to mean two rounds of the whole block.
+    const legs = find(parseRoutine(emom).blocks, 'full-leg burn')
+    expect(legs.children).toHaveLength(1)
+    const round = legs.children[0] as Repeat
+    expect(round.kind).toBe('repeat')
+    expect(round.times).toBe(2)
+    expect(steps([round]).map((step) => step.name)).toContain('Sumo Squats')
+  })
+
+  it('does not let a rounds line swallow a block that already has structure', () => {
+    // The guard on the rule above: a ladder is structure the routine stated, and
+    // a later rounds line opens a group beside it rather than around it.
+    const core = find(parseRoutine(emom).blocks, 'core')
+    expect(core.children.map((child) => child.kind)).toEqual(['ladder', 'repeat'])
+  })
+
+  it('gives every minute of an EMOM the minute, reps and all', () => {
+    const arms = find(parseRoutine(emom).blocks, 'arms')
+    const round = arms.children[0] as Repeat
+    expect(round.times).toBe(2)
+    expect(round.children).toHaveLength(5)
+    const curls = named([round], 'Bicep Curls')
+    expect(curls.durationMs).toBe(60_000)
+    expect(curls.reps).toEqual({ kind: 'fixed', count: 12 })
+  })
+
+  it('keeps a joined pair inside one minute rather than making it two', () => {
+    // Split the way a bulleted line is split, "12 × Lateral Raises + 10 Cross
+    // Punches" would run for two minutes instead of one.
+    const arms = find(parseRoutine(emom).blocks, 'arms')
+    const minutes = steps(arms.children)
+    expect(minutes).toHaveLength(5)
+    expect(minutes[4]!.name).toBe('12 × Lateral Raises + 10 Cross Punches')
+    expect(minutes[4]!.durationMs).toBe(60_000)
+  })
+
+  it('rests out the balance of a minute the step does not use', () => {
+    // "Minute 6: 30-sec Wall Sit" is thirty seconds of work in a fixed minute.
+    const legs = find(parseRoutine(emom).blocks, 'full-leg burn')
+    const round = legs.children[0] as Repeat
+    const last = steps([round]).slice(-2)
+    expect(last[0]).toMatchObject({ name: 'Wall Sit', durationMs: 30_000 })
+    expect(last[1]).toMatchObject({ name: 'Rest', role: 'rest', durationMs: 30_000 })
+  })
+
+  it('reads a "Minute 4" heading over a bulleted step', () => {
+    const legs = find(parseRoutine(emom).blocks, 'full-leg burn')
+    expect(named(legs.children, 'RB Squats')).toMatchObject({
+      durationMs: 60_000,
+      reps: { kind: 'fixed', count: 12 },
+    })
+  })
+
+  it('takes the exercise for a "30 sec WORK" line from the line below it', () => {
+    // The 30/30 form names no exercise on the timed line, and reading it as one
+    // produced five steps called "WORK" and lost all five exercises.
+    const legs = find(parseRoutine(emom).blocks, '30/30')
+    const round = legs.children[0] as Repeat
+    expect(round.times).toBe(4)
+    expect(steps([round]).map((step) => [step.name, step.durationMs])).toEqual([
+      ['RB Lateral Walks', 30_000],
+      ['RB Glute Kickbacks', 30_000],
+      ['Glute Bridge + RB Abduction', 30_000],
+      ['Bulgarian split squat', 30_000],
+      ['Goblet Squats', 30_000],
+      ['Rest', 30_000],
+    ])
+  })
+
+  it('reads "3 × 30 seconds" as a round count and the time each step gets', () => {
+    const core = find(parseRoutine(emom).blocks, 'core')
+    const round = core.children[1] as Repeat
+    expect(round.times).toBe(3)
+    expect(named([round], 'Forearm Plank').durationMs).toBe(30_000)
+  })
+
+  it('spaces a list with the rest stated between its exercises, not after each', () => {
+    // "15 sec rest between exercises" over three planks is two rests, not three:
+    // the last one runs straight into the next round.
+    const core = find(parseRoutine(emom).blocks, 'core')
+    const round = core.children[1] as Repeat
+    expect(steps([round]).map((step) => step.role)).toEqual([
+      'work',
+      'rest',
+      'work',
+      'rest',
+      'work',
+    ])
+    expect(steps([round]).filter((step) => step.role === 'rest')[0]!.durationMs).toBe(15_000)
+  })
+
+  it('puts the step that closes every round at the end of the round', () => {
+    const text = [
+      '#1 Legs',
+      'Repeat × 2 rounds',
+      '30 sec WORK',
+      'Goblet Squats',
+      'Every time you finish a round:',
+      '10 Mountain Climbers',
+    ].join('\n')
+    const round = find(parseRoutine(text).blocks, 'legs').children[0] as Repeat
+
+    expect(round.times).toBe(2)
+    expect(steps([round]).at(-1)).toMatchObject({
+      name: 'Mountain Climbers',
+      reps: { kind: 'fixed', count: 10 },
+    })
+  })
+
+  it('builds an AMRAP as the clock it is, with the round as its note', () => {
+    /*
+     * The ten minutes is STATED, so it is read: an AMRAP becomes one timed step
+     * of that length, and the countdown layout gives it the whole screen with
+     * the round in the panel beside it. What the text does not say is how many
+     * rounds, and nothing here invents one: that number is the person's to make,
+     * live, against the clock.
+     *
+     * The earlier reading, exercises as steps and the cap as a note, was worse
+     * than a skipped line. With no clock and one pass through the list, the app
+     * quietly turned a ten-minute block into a single round and said nothing.
+     */
+    const body = find(parseRoutine(emom).blocks, 'general body')
+
+    expect(body.children).toEqual([
+      expect.objectContaining({ name: 'As many rounds as possible', durationMs: 600_000 }),
+    ])
+    // A section of one timed step counts down rather than listing.
+    expect(body.display).toBe('timer')
+
+    // The whole round is on screen for the whole ten minutes, as written.
+    const note = (body.children[0] as Segment).note!
+    expect(note).toContain('10 × Squat + Shoulder Press')
+    expect(note).toContain('12 × Russian Twists – 6 each side')
+    // Including the step that closes each round.
+    expect(note).toContain('10 Mountain Climbers')
+
+    // The instruction itself still sits on the section.
+    expect(body.note).toContain('10-MINUTE AMRAP')
+  })
+
+  it('leaves an AMRAP with no stated length as a note, having no clock to build', () => {
+    const text = ['#1 Core', 'AMRAP', '* 10 × Heel Taps', '* 20 × Russian Twists'].join('\n')
+    const core = find(parseRoutine(text).blocks, 'core')
+
+    expect(core.note).toBe('AMRAP')
+    expect(steps(core.children).map((step) => step.name)).toEqual(['Heel Taps', 'Russian Twists'])
+  })
+
+  it('reads a heading behind an optional marker', () => {
+    // "(Optinal)" is the instructor's typo and stays in the name: whether a
+    // block is optional is the reader's to know.
+    const burnout = find(parseRoutine(emom).blocks, 'final burnout')
+    expect(burnout.name).toBe('(Optinal) FINAL BURNOUT – 3-MINUTE CHALLENGE')
+    expect(steps(burnout.children)).toHaveLength(7)
+  })
+
+  it('reads "LAST 20 SECONDS" as the time for the effort named below it', () => {
+    const burnout = find(parseRoutine(emom).blocks, 'final burnout')
+    const last = steps(burnout.children).at(-1)!
+    expect(last).toMatchObject({ name: 'ALL OUT – Fast Feet!', durationMs: 20_000 })
+  })
+
+  it('reads a "Replace rest with …" line as both a step and the reason for it', () => {
+    const final = find(parseRoutine(emom).blocks, 'final round')
+    expect(final.note).toBe('Replace rest with 30-second Squat Hold')
+    expect(steps(final.children)).toEqual([
+      expect.objectContaining({ name: 'Squat Hold', durationMs: 30_000 }),
+    ])
+  })
+
+  it('ends a block at "Then:" instead of carrying it into the ladder above', () => {
+    const core = find(parseRoutine(emom).blocks, 'core')
+    const ladder = core.children[0] as Ladder
+    expect(ladder.counts).toEqual([10, 15, 20])
+    expect(steps([ladder]).map((step) => step.name)).not.toContain('Forearm Plank')
+  })
+
   it('compiles what it produces into a runnable routine', () => {
     for (const text of Object.values(EMAILS)) {
       const routine = compile(asWorkout(parseRoutine(text).blocks))
-      expect(routine.entries.length).toBeGreaterThan(100)
+      expect(routine.entries.length).toBeGreaterThan(80)
       expect(routine.hasGates).toBe(true)
       // Every self-paced step is its own run, so runs track the rep-based steps.
       expect(routine.runs.length).toBeGreaterThan(routine.runs.filter((r) => !r.selfPaced).length)

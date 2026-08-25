@@ -43,6 +43,12 @@ compulsory: a step name arrived at 159 characters.
 
 - **`fitCqi`** sizes off the longest word, assuming the worst case of one word per
   line. Right for a narrow box like the media panel, where that really happens.
+- **`fitPanel(text)`** is the media panel's, and returns a size AND a line count.
+  It solves the fixed point the other two dodge: shrinking text cuts the line
+  count as well as the line height, so filling a box on both axes is a square
+  root. It reproduces a line per word exactly for a short name, and rescues a
+  paragraph, which a line per word drove under the CSS `1rem` floor and then set
+  in three lines of an eleven-line box.
 - **`fitBlockCqi(text, maxLines, max)`** bounds by the longest word *and* by total
   length over a line budget. Right for a heading across a full-width column, where
   words pack and the one-per-line assumption would set a five-word name absurdly

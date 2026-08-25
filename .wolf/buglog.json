@@ -1137,6 +1137,40 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-22T21:45:00+02:00"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-08-25T09:30:00+02:00",
+      "error_message": "Pasted 25 Aug email: 28 lines reported as skipped, and five 30/30 exercises silently replaced by five steps named \"WORK\"",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "The grammar was built against one email template. The 25 Aug email arrived on a second one whose forms name no exercise on the line that times them (\"30 sec WORK\" then the exercise below), state the round count AFTER the block (\"Repeat 2 rounds\"), and use EMOM/AMRAP block headings. Read line by line in isolation, \"30 sec WORK\" parsed as a 30-second step named WORK and the real exercise on the next line fell through to skipped, and \"5-Minute EMOM\" became a five-minute step with its minutes stranded after it.",
+      "fix": "Added the idea a directive can license the line below it (expectItem/pendingMs), so \"30 sec WORK\", \"Minute 4\", \"LAST 20 SECONDS\" and \"Every time you finish a round:\" name the step on the next bare line. EMOM minutes compile to 60s steps carrying their rep target, with the balance returned as rest when the step states a shorter time. ROUNDS accepts \"Repeat\" and \"×\" and wraps the loose steps above it when read below them (guarded to plain lists so a ladder is never swallowed). Added SETS_OF, BETWEEN_REST, THEN, REPLACE_WITH, BLOCK_HEADING and a leading-marker strip on all four heading forms. AMRAP is deliberately kept as a note: no primitive means it, and a round count read out of it would be a silent guess. Fixture 2026-08-25-emom.txt now parses with zero skipped.",
+      "tags": [
+        "parser",
+        "paste",
+        "regex",
+        "grammar",
+        "silent-data-loss"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-25T09:30:00+02:00"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-08-25T09:55:00+02:00",
+      "error_message": "Media panel fallback text set at the 1rem floor, using three lines of an eleven-line box",
+      "file": "src/ui/format.ts",
+      "root_cause": "`.panel__empty` sizes with `min(--fit * 1cqi, 72cqh / --lines)`, and `--lines` came from `wordCount`, an upper bound justified by `fitCqi` sizing so the LONGEST word fits a line, so each word may take one. Sound for a two or three word exercise name, wildly pessimistic for a paragraph: a 43-word AMRAP round asked for 43 lines, so the height term was 1.67cqh, the size clamped to the 1rem floor, and at that size the text wrapped into three lines. The real error is that the line count is not independent of the size it divides: shrinking text cuts the line count as well as the line height.",
+      "fix": "Added `fitPanel(text)` returning `{fit, lines}` from one calculation. Solving `total*s^2*FIT_ADVANCE/FIT_BUDGET <= FIT_HEIGHT_BUDGET` gives `s = sqrt(FIT_HEIGHT_BUDGET*FIT_BUDGET/(FIT_ADVANCE*total))`, still floored by the longest-word bound from `fitCqi`, with `lines` the count at that size so the CSS height term agrees rather than shrinking again. `--fit` 12.96/`--lines` 43 became 6.79/11, roughly 16px to 42px on a 650px panel. Reproduces `wordCount` exactly for short names, which is asserted. `wordCount` removed: `RunScreen`'s MediaPanel was its only caller.",
+      "tags": [
+        "ui",
+        "typography",
+        "sizing",
+        "run-screen",
+        "fixed-point"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-25T09:55:00+02:00"
     }
   ]
 }

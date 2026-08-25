@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-24
+> Last updated: 2026-08-25
 
 ---
 
@@ -215,6 +215,89 @@
   - Folder READMEs: `engine` (the trailing-rest rule, the four `CueKind`s, `index.ts`), `audio` (the three figures, `schedule.ts`/`samples.ts`/the wav, the bench), `routines` (one seeded routine, 27 images and the corrected duplicate claim, `importFiles.ts`), `storage` (`migrate.ts` and read-time migration), `ui` (routine tints, the per-screen CSS split, `Menu`/`NoticeDialog`/`SoundsScreen`/`useMediaUrl`), `editor` and `media` (terminology and `useMediaUrl`'s real home).
   - Stale "round" wording fixed in `engine/types.ts` and `editor/blocks.ts` doc comments; `migrate.ts`'s legacy-label references are deliberate and left alone.
 - **301 tests green**, typecheck + build clean. Everything above is committed and pushed through `657af14`.
+
+---
+
+## ✅ Second email template: AMRAP, EMOM and 30/30 intervals (2026-08-25, v2.9)
+
+Wayne pasted the 25 Aug routine and the parser reported **28 skipped lines**, plus
+five silent junk steps named "WORK". It arrived on a SECOND template, not a
+variation of the first. Now parses with **zero skipped**.
+
+Saved verbatim as `src/routines/__tests__/emails/2026-08-25-emom.txt` and added to
+the shared `EMAILS` set, so every existing email assertion covers it too.
+
+**The one new idea in `pasteFormat.ts`: a directive can license the line below it**
+(`expectItem` / `pendingMs`). Every earlier form was self-contained on its line, so
+there was no way to carry intent forward. Bare lines are still reported by default.
+
+Forms added:
+
+| Form | Read as |
+|---|---|
+| `30 sec WORK` + exercise below | a 30s step named from the next line (was five steps called "WORK") |
+| `30 sec REST` | a 30s rest, needing no line below |
+| `Minute 1: 12 × Bicep Curls` | a 60s step labelled 12 reps. An EMOM needs no primitive |
+| `Minute 4` over a bullet | the same, heading form |
+| `Minute 6: 30-sec Wall Sit` | 30s work then 30s rest: the minute is fixed |
+| `Repeat 2 rounds` / `Repeat × 4 rounds` | a round count, readable ABOVE or BELOW its block |
+| `3 × 30 seconds` | three rounds, every step in them 30s |
+| `15 sec rest between exercises` | spaces the list already read (n-1 rests, not n) |
+| `Then:` | ends the block above it |
+| `Every time you finish a round:` | the next line closes every round |
+| `LAST 20 SECONDS` | 20s for the effort named below |
+| `Replace rest with 30-second Squat Hold` | the hold as a step, the line as a note |
+| `10-MINUTE AMRAP (…)` | a single 10-minute countdown, round in the note. See below |
+| `(Optinal) 🔥 Final Burnout` | the heading, marker kept in the name |
+
+**AMRAP is the clock** (Wayne's correction, mid-session, and he was right). The
+first pass kept the exercises as steps and the ten-minute cap as a note, on the
+reasoning that no primitive means "as many rounds as possible". That conflated two
+things: the ROUND COUNT is genuinely unreadable from the text, but the TEN MINUTES
+is stated plainly. Dropping it was not caution, it was data loss, and worse than a
+skipped line: with no clock and one pass through the list the app quietly ran a
+ten-minute block as a single round.
+
+It is now one timed step of the stated length, named "As many rounds as possible",
+with the round as its `note`. The section is all-timed so it runs as the countdown
+layout: the big clock, and `MediaPanel` showing the note beside it for the full ten
+minutes. An AMRAP with no stated length has no clock to build and stays a note.
+
+**Panel sizing bug found and fixed off the back of it.** Wayne's screenshot showed
+the round set at ~16px in a box that could hold eleven lines of 42px.
+`.panel__empty` divided its height budget by `wordCount`, which assumes `fitCqi`
+puts every word on its own line: 43 words asked for 43 lines, drove the size under
+the CSS `1rem` floor, and then used three of them.
+
+The error is that the line count is not independent of the size. Shrinking the
+text cuts the line count as well as the line height, so it is a fixed point:
+`total·s²·ADVANCE/BUDGET ≤ HEIGHT` gives `s = sqrt(HEIGHT·BUDGET/(ADVANCE·total))`.
+New `fitPanel(text)` in `ui/format.ts` returns `{fit, lines}` together, replacing
+`wordCount` (now removed, its only caller). `--fit` 12.96/`--lines` 43 becomes
+`--fit` 6.79/`--lines` 11: ~16px to ~42px on a 650px panel.
+
+It reproduces the word-count answer EXACTLY for short names ("Rest" 1, "Get ready"
+2, "Seated Abdominal Crunch" 3), which is the check that it generalises the old
+rule rather than adding a second one. Asserted in `ui/__tests__/format.test.ts`.
+
+A trailing `Repeat 2 rounds` wraps the loose steps above it, but ONLY where the
+section is still a plain list. A section that has already stated a ladder or a
+round keeps it: swallowing that would rewrite the workout rather than read it.
+
+Also touched: `pasteTemplate.ts` gained three sections and the closing sprint, so
+the shipped **Copy template** still demonstrates the whole grammar;
+`docs/paste-format.md` mirrors it (test-asserted) and documents the new forms;
+`src/routines/README.md` and the emails README record the second template.
+
+Version bumped to **2.9**. Docs updated: `docs/paste-format.md`, the root README,
+`src/routines/README.md`, `src/ui/README.md`, the emails README, and the in-app
+help tray (the Paste bullet now names the shapes it reads, plus a Copy template
+line). Two stale claims corrected while there: the parser adds TWO things now,
+not one, since an EMOM minute's balance comes back as rest.
+
+**657 tests green** (20 new), typecheck and production build clean. No engine,
+storage or UI change: every new form is expressed with the existing `Repeat`,
+`Ladder`, `Section` and `Segment` primitives.
 
 ---
 

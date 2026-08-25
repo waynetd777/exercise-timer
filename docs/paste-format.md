@@ -41,11 +41,47 @@ No rest between exercises
 * 30-second Plank
 Rest 45 seconds after each round
 
-🔥 Final Burnout
+#3 Arms EMOM
+5-Minute EMOM
+Repeat 2 rounds
+Start a new exercise every minute.
+Minute 1: 12 × Bicep Curls
+Minute 2: 10 × Arnold Press
+Minute 3: 30-second Wall Sit
+Minute 4
+* 15 × Band Pull-Aparts
+Minute 5: 12 × Lateral Raises + 10 Cross Punches
+
+#4 Legs 30/30
+Repeat × 4 rounds
+30 sec WORK
+Lateral Walks
+30 sec WORK
+Glute Kickbacks
+30 sec REST
+Every time you finish a round:
+10 Mountain Climbers
+
+#5 Core AMRAP
+6-minute AMRAP (as many rounds as possible)
+* 10 × Heel Taps
+* 20 × Russian Twists - 10 each side
+Every time you finish a round:
+10 Mountain Climbers
+
+Then:
+3 × 30 seconds
+* Forearm Plank
+* Side Plank - right
+15 sec rest between exercises
+
+(Optional) 🔥 Final Burnout
 Perform the following:
 1. Jumping Jacks for 30 seconds
 2. 20 × Flutter Kicks
 3. Side-to-Side Squats with a Reach (start standing, step out to one side, sink your hips and reach across your body)
+LAST 20 SECONDS
+All out - Fast Feet
 
 Cool-down
 30 sec each
@@ -69,6 +105,10 @@ A section is a named part of the routine. Four ways to start one:
 Only those names are recognised on their own. Any other heading needs a `#` or a
 flame, because a rule like "a short line in title case" would swallow half the
 exercises.
+
+A marker in front of a heading is read past and then kept: `(Optional) 🔥 Final
+Burnout` is the Final Burnout section, still named `(Optional) Final Burnout`,
+because whether a block is optional is yours to know.
 
 ## Steps
 
@@ -96,14 +136,60 @@ that says `rest` becomes a rest. Everything else is work.
 |---|---|
 | `4 Rounds` | everything below it, four times |
 | `3-5 Rounds` | five. A range takes its upper bound, since you can always stop early |
+| `Repeat 2 rounds` | the same as `2 Rounds`, and it may be written either above the steps or below them |
+| `Repeat × 4 rounds` | the same again |
+| `3 × 30 seconds` | three rounds, and every step in them gets 30 seconds |
 | `Counting: 10-8-6-4-2` | a ladder: five rounds, the count changing each time |
 | `15-12-9-6-3` | the same, without the word |
 | `Rest 45 seconds after each round` | a rest between rounds, not after the last one |
+| `15 sec rest between exercises` | written after the list, it spaces it out. Between, so the last step runs straight into the next round |
+| `Then:` | ends the block above it, so what follows is not read as part of it |
+| `Every time you finish a round:` | the step on the next line closes every round |
+
+`Repeat 2 rounds` below a run of steps wraps those steps. It only does that where
+the section is still a plain list: a section that has already stated a ladder or a
+round keeps it, and the line opens a new group beside it rather than around it.
 
 In a ladder, `Main exercise:` marks the lift that takes the rung count, and
 `After every set:` marks accessories that keep their own count. Accessories run
 after every set including the last. `Bonus: …` adds one step after the ladder
 finishes.
+
+## Intervals, EMOMs and AMRAPs
+
+An **EMOM** ("every minute on the minute") is a run of one-minute steps. Write the
+minutes and the app times them; a rep count on the same line is shown as the
+target for that minute.
+
+| Write | Means |
+|---|---|
+| `5-Minute EMOM` | a heading. It becomes a note, since the minutes below carry the timing |
+| `Minute 1: 12 × Bicep Curls` | one minute, labelled 12 reps |
+| `Minute 4` | a heading over the bulleted step that fills that minute |
+| `Minute 6: 30-sec Wall Sit` | 30 seconds of work and 30 of rest, because the minute is fixed |
+| `Minute 5: 12 × Lateral Raises + 10 Cross Punches` | one minute, not two. A joined pair inside a minute stays one step |
+
+A **30/30 interval** states the time on one line and the exercise on the next.
+
+| Write | Means |
+|---|---|
+| `30 sec WORK` | 30 seconds for whatever is named on the line below |
+| `30 sec REST` | a 30-second rest, needing no line below |
+| `LAST 20 SECONDS` | the same idea: 20 seconds for the effort named below it |
+| `Replace rest with 30-second Squat Hold` | a 30-second Squat Hold, and the line is kept as a note so you can see what it stands in for |
+
+An **AMRAP** is a clock, and that is what it becomes.
+
+| Write | Means |
+|---|---|
+| `10-MINUTE AMRAP (As Many Rounds As Possible)` | a single 10-minute countdown, named "As many rounds as possible" |
+| the bulleted list below it | the round, shown in full beside the clock for the whole ten minutes |
+| `Every time you finish a round:` | that step joins the round too |
+| `AMRAP` with no length | no clock to build, so it stays a note and the list below is read as ordinary steps |
+
+The ten minutes is stated, so it is read. How many rounds is not, so it is not
+invented: that number is yours to make against the clock, and the app just runs
+it and shows you the round.
 
 ## Details on a step
 
@@ -126,6 +212,13 @@ before moving to the next` become a note on the section rather than on any step.
 **Five seconds to get ready**, at the very start. Long enough to prop the phone
 up and step back. It is skipped if your text already opens with a get-ready step,
 so a routine that says `30 sec to get set` does not wait twice.
+
+**The balance of an EMOM minute**, as rest. `Minute 6: 30-sec Wall Sit` is thirty
+seconds of work inside a minute that is fixed, so the other thirty are rest. Read
+out of the minute you wrote, not invented.
+
+It also **names** the step an AMRAP becomes, "As many rounds as possible", since
+the block is a clock rather than an exercise.
 
 Nothing else. Every step, count and duration comes from what you pasted.
 
