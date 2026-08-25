@@ -14,10 +14,8 @@ import type { Block, Ladder, Repeat, Reps, Section, SectionDisplay, Segment } fr
  * one template, which is what makes parsing worth doing rather than typing each
  * routine in by hand.
  *
- * Two things it ADDS to the text, and only two. Five seconds to get ready at the
- * start, see `getReady`. And the balance of an EMOM minute as rest, see
- * `MINUTE_MS`, which is derived from a minute the text states rather than
- * invented. Everything else is read.
+ * The one thing it ADDS to the text is five seconds to get ready at the start.
+ * see `getReady`. Everything else is read, never invented.
  *
  * TWO RULES GOVERN EVERYTHING HERE.
  *

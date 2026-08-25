@@ -49,9 +49,7 @@ because the same grammar arrives by WhatsApp and Notes too.
 block IS `PASTE_TEMPLATE`, asserted by a test, so the doc cannot drift into
 describing a grammar the parser no longer reads.
 
-Two things it ADDS to the text, and only two. The **balance of an EMOM minute**
-as rest, which is read out of a minute the text states (see the AMRAP and EMOM
-notes below). And **five seconds to get ready** at the start:
+The one thing it ADDS to the text is **five seconds to get ready** at the start:
 long enough to prop the phone up and step back, short enough that nobody waits
 through it twice. The emails never mention it because a person reading one is
 already standing there. It goes at the top level rather than inside the first

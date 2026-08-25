@@ -292,8 +292,14 @@ the shipped **Copy template** still demonstrates the whole grammar;
 Version bumped to **2.9**. Docs updated: `docs/paste-format.md`, the root README,
 `src/routines/README.md`, `src/ui/README.md`, the emails README, and the in-app
 help tray (the Paste bullet now names the shapes it reads, plus a Copy template
-line). Two stale claims corrected while there: the parser adds TWO things now,
-not one, since an EMOM minute's balance comes back as rest.
+line).
+
+The docs briefly claimed the parser now adds TWO things rather than one, counting
+the rest that fills an EMOM minute. Reverted: that conflates SYNTHESISED with
+ADDED. The parser has always built steps that appear as no bullet (the rest after
+each round, the rest between exercises) because the text STATES them, and a
+minute's balance is arithmetic on stated values. The get-ready stays the only
+thing the app adds.
 
 **657 tests green** (20 new), typecheck and production build clean. No engine,
 storage or UI change: every new form is expressed with the existing `Repeat`,
