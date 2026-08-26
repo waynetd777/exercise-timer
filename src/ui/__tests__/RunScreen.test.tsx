@@ -132,6 +132,26 @@ describe('RunScreen: the countdown layout', () => {
     expect(screen.getByRole('heading', { level: 1, name: '12 × Bicep Curls' })).toBeTruthy()
   })
 
+  it('says the count in the panel too, so the two big texts agree', () => {
+    // The heading has read "12 × Bicep Curls" since an EMOM minute became both
+    // timed and counted; a panel reading only "Bicep Curls" beside it looked
+    // like a different step rather than the same one twice.
+    run(emom())
+
+    expect(screen.getAllByText('12 × Bicep Curls')).toHaveLength(2)
+  })
+
+  it('still gives the panel over to the how-to when a step has one', () => {
+    // The name is already the heading, so an instruction is worth more here.
+    const workout = emom()
+    const step = (workout.blocks[0] as { children: { note?: string }[] }).children[0]!
+    step.note = 'elbows in, and do not swing'
+    run(workout)
+
+    expect(screen.getByText('elbows in, and do not swing')).toBeTruthy()
+    expect(screen.getAllByText('12 × Bicep Curls')).toHaveLength(1)
+  })
+
   it('draws a note written one item per line as bullets under one another', () => {
     run(amrap())
     const items = screen.getAllByRole('listitem').map((li) => li.textContent)

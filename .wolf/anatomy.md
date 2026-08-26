@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-23T15:47:35.054Z
-> Files: 50 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T07:23:36.714Z
+> Files: 51 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -114,6 +114,7 @@
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
 - `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)
 - `useDismiss.ts` — Closes a transient overlay — a menu, a popover — on Escape or a press outside (~448 tok)
+- `useRowDrag.ts` — Exercise Timer (~2422 tok)
 
 ## src/ui/__tests__/
 

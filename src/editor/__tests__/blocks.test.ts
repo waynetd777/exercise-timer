@@ -24,6 +24,7 @@ import {
   newSection,
   newSegment,
   removeAt,
+  retypeSegment,
   setTiming,
   shownAsList,
   timingOf,
@@ -310,6 +311,54 @@ describe('defaults, stated once', () => {
     expect(reps.children).toHaveLength(2)
     // 3 works and 2 rests, not 3 of each: the last rep has no rest after it.
     expect(compile({ ...base, blocks: [reps] }).totalMs).toBe(3 * 20_000 + 2 * 10_000)
+  })
+})
+
+describe('retypeSegment: the name follows the type, until it is yours', () => {
+  it('renames a step still called what its old type called it', () => {
+    // Switching an untouched Work to Rest left a step called "Exercise"
+    // coloured and cued as a rest, to be renamed by hand every time.
+    expect(retypeSegment(newSegment('work'), 'rest')).toEqual({ role: 'rest', name: 'Rest' })
+    expect(retypeSegment(newSegment('rest'), 'prepare')).toEqual({
+      role: 'prepare',
+      name: 'Get ready',
+    })
+  })
+
+  it('never touches a name someone has typed', () => {
+    // The whole reason it compares rather than always renaming: "Plank" stays
+    // "Plank" whatever type it becomes.
+    const plank: Segment = { ...newSegment('work'), name: 'Plank' }
+    expect(retypeSegment(plank, 'rest')).toEqual({ role: 'rest' })
+  })
+
+  it('does not fill in a name that has been deliberately cleared', () => {
+    // An emptied field is not a default, and is not this function's to answer.
+    const blank: Segment = { ...newSegment('work'), name: '' }
+    expect(retypeSegment(blank, 'rest')).toEqual({ role: 'rest' })
+  })
+
+  it('reads past the whitespace around an otherwise untouched name', () => {
+    const padded: Segment = { ...newSegment('work'), name: '  Exercise ' }
+    expect(retypeSegment(padded, 'recover')).toEqual({ role: 'recover', name: 'Recover' })
+  })
+
+  it('agrees with the name a step of that type is born with', () => {
+    // Coupled on purpose: a default changed in one place and not the other would
+    // leave a retyped step named differently from a freshly added one.
+    for (const role of ['prepare', 'work', 'rest', 'recover'] as const) {
+      expect(retypeSegment(newSegment('custom'), role).name).toBe(newSegment(role).name)
+    }
+  })
+
+  it('carries no duration, which the row already shows in a field', () => {
+    expect(retypeSegment(newSegment('work'), 'rest')).not.toHaveProperty('durationMs')
+  })
+
+  it('is not coalesced into the keystrokes before it', () => {
+    // A retype is one deliberate act, so undo must take it back in one press
+    // even though it carries a name. `isTypedPatch` uses `every` for this.
+    expect(isTypedPatch(retypeSegment(newSegment('work'), 'rest'))).toBe(false)
   })
 })
 

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-23T15:47:35.054Z",
-    "fileCount": 50,
+    "lastScanned": "2026-08-26T07:23:36.714Z",
+    "fileCount": 51,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "42d03076c9dffdbf1396ac247d617343e8f3353fac5d43da43c58e1995a4bf02",
-    "storeUpdatedAt": "2026-08-23T15:47:35.063Z"
+    "renderedHash": "570d8b6fcefb8479829b30c9b1758ec2f03c26cb461b7fd8cf9c30a170a9a253",
+    "storeUpdatedAt": "2026-08-26T07:23:36.727Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -996,6 +996,31 @@
       "mtimeMs": 1787500049749.195,
       "updatedAt": "2026-08-23T15:47:29.821Z",
       "source": "hook"
+    },
+    "src/ui/useRowDrag.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2422,
+      "hash": "69b069fdf8f05484",
+      "size": 8477,
+      "mtimeMs": 1787729016650.4277,
+      "updatedAt": "2026-08-26T07:23:36.711Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "blockOf",
+          "kind": "fn",
+          "startLine": 60,
+          "endLine": 84,
+          "tokens": 246
+        },
+        {
+          "name": "useRowDrag",
+          "kind": "fn",
+          "startLine": 85,
+          "endLine": 232,
+          "tokens": 1506
+        }
+      ]
     }
   },
   "preamble": [

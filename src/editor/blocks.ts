@@ -54,6 +54,27 @@ const DEFAULT_NAME: Record<SegmentRole, string> = {
   custom: 'Step',
 }
 
+/**
+ * The patch for changing a step's TYPE, which carries its name along when the
+ * name is still the one the old type gave it.
+ *
+ * Switching an untouched Work to Rest used to leave a step called "Exercise"
+ * coloured and cued as a rest, and the user had to rename it by hand every time.
+ *
+ * Compared against the defaults rather than renaming unconditionally, because a
+ * name someone has typed is theirs: "Plank" stays "Plank" whatever its type
+ * becomes. Only the exact default, trimmed, counts as untouched. An emptied name
+ * is left alone too: it is not a default, and filling one in would overwrite a
+ * field the user has just deliberately cleared.
+ *
+ * The duration is NOT carried the same way. It is one number in a field already
+ * in front of you, whereas the name is a word that reads as simply wrong.
+ */
+export function retypeSegment(segment: Segment, role: SegmentRole): Partial<Segment> {
+  const untouched = segment.name.trim() === DEFAULT_NAME[segment.role]
+  return untouched ? { role, name: DEFAULT_NAME[role] } : { role }
+}
+
 export function newSegment(role: SegmentRole = 'work'): Segment {
   return {
     kind: 'segment',

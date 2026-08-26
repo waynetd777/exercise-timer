@@ -369,6 +369,49 @@ and five RunScreen component tests). Typecheck and production build clean.
 
 ---
 
+## ✅ Drag to reorder, and three editor/run-screen fixes (2026-08-26, v3.5)
+
+**Drag and drop in the editor.** Every row has a grip; drag it, or focus it and
+use the arrow keys. `ui/useRowDrag.ts` holds the gesture and nothing else: it
+decides the held row has passed its neighbour and calls `onStep(id, ±1)`, which
+the editor answers with **`moveStep`**, the same function the old buttons called
+and already tested for walking a step into and out of rounds, ladders and
+sections. One implementation of reordering, not two.
+
+- Pointer Events, because HTML5 drag-and-drop does not fire at all in iOS Safari.
+- The loop is on `requestAnimationFrame`, not `pointermove`: a move goes through
+  React so the DOM is a render behind, and auto-scroll must continue while a
+  finger is held still at the edge. One frame is skipped after each move or it
+  measures against a stale neighbour and moves again.
+- Groups take their children (found by `data-depth`), and neighbour-testing skips
+  the held block's own subtree.
+- `touch-action: none` on the grip ALONE, so the list still scrolls elsewhere.
+- The whole drag shares the `'drag'` coalescing key, so undo takes it back in one
+  press. Escape restores the tree.
+
+**Move up / Move down are gone from every row.** Wayne's call, in two passes
+(steps first, then all rows). The grip answers the arrow keys so nothing became
+pointer-only. Cleanup that fell out: `first` left `RowProps` entirely (those
+buttons were its only reader) and `last` moved into `SegmentRow`'s own props,
+since three components were being handed a prop they ignored.
+
+**`retypeSegment`** (`editor/blocks.ts`): changing a step's type carries its name
+when the name is still the old type's default. "Exercise" becomes "Rest"; "Plank"
+is left alone; an emptied field is left alone. Coupled by test to `newSegment`,
+so a default cannot change in one place only.
+
+**Panel quantity parity**: the media panel's fallback is `nameWithEffort(entry)`,
+so it reads "12 × Bicep Curls" like the heading beside it.
+
+**697 tests green** (24 new), typecheck and production build clean.
+
+Testing note worth keeping: jsdom lays nothing out, so the drag tests install a
+`getBoundingClientRect` that gives each row a fixed height in its CURRENT order
+and adds its parsed `translateY`. The frames run inside `act()`, or a state
+update dispatched from an animation frame never commits.
+
+---
+
 ## 🚀 Next quest — none open
 
 The strength-routine work below is COMPLETE and pushed. The obvious candidates

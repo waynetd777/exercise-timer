@@ -213,6 +213,74 @@
   border-left-color: var(--group-reps);
 }
 
+/*
+ * The drag grip.
+ *
+ * `touch-action: none` ONLY here, never on the row: the list has to keep
+ * scrolling under a finger everywhere else, and a row that swallowed the scroll
+ * would trade one gesture for another.
+ *
+ * Deliberately narrow. The row is the tightest layout in the app, and every
+ * pixel this takes comes off the name field, so it is the smallest thing that is
+ * still a target: 44px of touch height from the row itself, and just the dots
+ * across.
+ */
+.erow__grip {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  align-self: stretch;
+  min-height: 2.75rem;
+  margin: calc(-1 * var(--step-2)) 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bone-faint);
+  touch-action: none;
+  cursor: grab;
+}
+
+.erow__grip:active {
+  cursor: grabbing;
+}
+
+/* Focusable since the row's Move up and Move down buttons went: the arrow keys
+   are answered here now, so the ring has to say where they will land. */
+.erow__grip:focus-visible {
+  border-radius: var(--radius);
+  color: var(--bone);
+}
+
+/*
+ * The held row, and everything nested under it when a group is dragged.
+ *
+ * `position: relative` and a z-index so it rides OVER the rows it passes: the
+ * transform alone would still be painted under a later sibling. Above
+ * `[data-tools]`, which is the other thing on this screen that lifts a row.
+ */
+.erow[data-dragging] {
+  position: relative;
+  z-index: 6;
+  border-color: var(--bone-faint);
+  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.45);
+  cursor: grabbing;
+}
+
+.erow[data-dragging] .erow__grip {
+  color: var(--bone);
+  cursor: grabbing;
+}
+
+/*
+ * Nothing on the row responds while it is being dragged: a finger that lands on
+ * the grip and travels over the name field must not start editing it, and on a
+ * phone the whole row is under the finger for the length of the gesture.
+ */
+.erow[data-dragging] .erow__main > *:not(.erow__grip) {
+  pointer-events: none;
+}
+
 .erow__main {
   display: flex;
   flex-wrap: wrap;
