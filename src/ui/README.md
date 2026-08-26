@@ -82,6 +82,39 @@ Rows keep ONE size across the group, and the list scrolls when it must. A row
 shrunk to fit alone would be illegible, and rows of differing sizes read as
 ragged. Below the fold beats unreadable.
 
+## Dragging a row is `moveStep` called repeatedly
+
+`useRowDrag` never reorders the tree itself. It works out that the held row has
+passed its neighbour and calls `onStep(id, ±1)`, which the editor answers with
+`moveStep` — the same function the Move up and Move down buttons call, already
+tested for walking a step into and out of rounds, ladders and sections. So a
+drag cannot put a step anywhere the buttons could not, and there is no second
+implementation of reordering to keep in step with the first.
+
+Three things about it that are load-bearing:
+
+- **The loop runs on `requestAnimationFrame`, not on `pointermove`.** A move goes
+  through React, so the DOM is a render behind; a burst of pointer events would
+  apply the same step several times before any of it landed. Auto-scroll also has
+  to keep going while a finger is held still at the edge, when no pointer events
+  arrive at all.
+- **One frame is skipped after each move**, while the DOM catches up. Measuring
+  immediately compares the new position against a stale neighbour and moves again.
+- **The whole drag shares the `'drag'` coalescing key**, so undo takes it back in
+  one press rather than one press per row crossed. Same mechanism a run of
+  keystrokes uses.
+
+`touch-action: none` is on the grip alone. The list has to keep scrolling under a
+finger everywhere else, or the feature trades one gesture for another.
+
+The grip is the WHOLE reordering affordance for a step row, by pointer and by
+keyboard: it answers the arrow keys, because Move up and Move down were removed
+from that row once it could be dragged. Focus survives the move, since rows are
+keyed by block id and React moves the node rather than rebuilding it, so the key
+can be held down to walk a step up through the routine. That goes for group rows too: the
+Move up and Move down buttons are gone from every row in the editor, so the grip
+is the only way to reorder anything, by either input.
+
 ## Traps this codebase has already hit
 
 Each of these cost a real bug. They are recorded because they recur.
@@ -371,6 +404,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
 | `ConfirmDialog.tsx` | Asks before something irreversible. A modal, unlike the editor's inline confirm, because it is answered mid-workout |
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
+| `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
 | `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
 | `library.css`, `run-screen.css`, `editor.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |

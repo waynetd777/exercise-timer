@@ -5,8 +5,8 @@
  */
 
 // @vitest-environment jsdom
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { EditorScreen } from '../EditorScreen'
@@ -71,6 +71,16 @@ async function openChooser(options: {
   return label.closest('button') as HTMLButtonElement
 }
 
+/** A step still called what its type called it when it was added. */
+const untouched = (): Workout => ({
+  id: 'w3',
+  name: 'Tabata',
+  blocks: [{ kind: 'segment', id: 's1', name: 'Exercise', role: 'work', durationMs: 20_000 }],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
 const props = (workout: Workout) => ({
   workout,
   knownImages: [],
@@ -98,6 +108,25 @@ describe('EditorScreen', () => {
     delete navigator.clipboard
     // @ts-expect-error as above.
     delete navigator.permissions
+  })
+
+  it('renames a step whose name is still the one its old type gave it', () => {
+    // Switching an untouched Work to Rest left a step called "Exercise"
+    // coloured and cued as a rest, to be renamed by hand every time.
+    render(<EditorScreen {...props(untouched())} />)
+
+    fireEvent.change(screen.getByLabelText('Type of step'), { target: { value: 'rest' } })
+
+    expect((screen.getByLabelText('Step name') as HTMLInputElement).value).toBe('Rest')
+  })
+
+  it('leaves a name the user typed alone when the type changes', () => {
+    // "Squats" is theirs, whatever the step becomes.
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.change(screen.getByLabelText('Type of step'), { target: { value: 'rest' } })
+
+    expect((screen.getByLabelText('Step name') as HTMLInputElement).value).toBe('Squats')
   })
 
   it('leaves without a prompt when nothing changed, sections included', () => {
@@ -235,5 +264,268 @@ describe('EditorScreen', () => {
 
     fireEvent.click(screen.getByLabelText('Back to routines'))
     expect(screen.getByText('Discard your changes?')).toBeTruthy()
+  })
+})
+
+/**
+ * Dragging a row, with a layout for jsdom to be measured against.
+ *
+ * jsdom lays nothing out, so every rect is zero and the drag loop has nothing to
+ * compare. These give each row a hundred pixels in the order it is currently in,
+ * and add its `translateY` the way a real browser would, which is exactly what
+ * the loop reads. So the geometry under test is the real geometry.
+ */
+const ROW_H = 100
+
+const rectOf = (top: number, height: number) =>
+  ({
+    top,
+    bottom: top + height,
+    height,
+    left: 0,
+    right: 320,
+    width: 320,
+    x: 0,
+    y: top,
+    toJSON: () => ({}),
+  }) as DOMRect
+
+function layOut() {
+  Element.prototype.getBoundingClientRect = function (this: Element) {
+    if (this.classList?.contains('editor__list')) return rectOf(0, 10_000)
+    if (!this.hasAttribute?.('data-row-id')) return rectOf(0, 0)
+
+    const rows = [...document.querySelectorAll('[data-row-id]')]
+    const top = rows.indexOf(this) * ROW_H
+    const moved = /translateY\((-?[\d.]+)px\)/.exec((this as HTMLElement).style.transform)
+    return rectOf(top + (moved ? Number(moved[1]) : 0), ROW_H)
+  }
+}
+
+/** The rows as they read, top to bottom. */
+const order = () =>
+  [...document.querySelectorAll('[data-row-id]')].map(
+    (row) => (row.querySelector('[aria-label="Step name"]') as HTMLInputElement | null)?.value,
+  )
+
+/** The rows as they read, by block id, so a group's children can be seen to follow. */
+const rowIds = () =>
+  [...document.querySelectorAll('[data-row-id]')].map((row) => row.getAttribute('data-row-id'))
+
+const twoSections = (): Workout => ({
+  id: 'w6',
+  name: 'Strength day',
+  blocks: ['A', 'B'].map((tag) => ({
+    kind: 'section' as const,
+    id: `sec${tag}`,
+    name: `Part ${tag}`,
+    display: 'list' as const,
+    children: [
+      {
+        kind: 'segment' as const,
+        id: `${tag.toLowerCase()}1`,
+        name: `Step ${tag}`,
+        role: 'work' as const,
+        durationMs: 20_000,
+      },
+    ],
+  })),
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+const three = (): Workout => ({
+  id: 'w5',
+  name: 'Tabata',
+  blocks: ['A', 'B', 'C'].map((name, i) => ({
+    kind: 'segment' as const,
+    id: `s${i}`,
+    name,
+    role: 'work' as const,
+    durationMs: 20_000,
+  })),
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+describe('EditorScreen: dragging a row by its grip', () => {
+  let frames: FrameRequestCallback[] = []
+
+  beforeAll(() => {
+    // jsdom implements neither, and the grip calls both on the way in.
+    HTMLElement.prototype.setPointerCapture = function () {}
+    HTMLElement.prototype.releasePointerCapture = function () {}
+  })
+
+  beforeEach(() => {
+    frames = []
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb))
+    vi.stubGlobal('cancelAnimationFrame', () => {})
+    layOut()
+  })
+
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+  })
+
+  /**
+   * Runs the frames queued so far; each one queues the next.
+   *
+   * Inside `act`, because a move is dispatched from an animation frame rather
+   * than from a React event, so nothing is committed to the DOM until React is
+   * given the chance. Without it the next frame measures the old order.
+   */
+  const tick = () => {
+    const due = frames
+    frames = []
+    act(() => {
+      for (const frame of due) frame(0)
+    })
+  }
+
+  const grips = () => [...document.querySelectorAll<HTMLElement>('.erow__grip')]
+
+  const centreOf = (row: number) => row * ROW_H + ROW_H / 2
+  /** Frames enough for a move to apply and the one settling frame after it. */
+  const settle = (times = 3) => {
+    for (let i = 0; i < times; i += 1) tick()
+  }
+
+  /** A pixel PAST the target's middle: the comparison is strictly greater. */
+  const dragTo = (from: number, to: number) => {
+    fireEvent.pointerDown(grips()[from]!, { button: 0, clientY: centreOf(from) })
+    fireEvent.pointerMove(window, { clientY: centreOf(to) + 1 })
+    settle()
+  }
+
+  it('reorders the row it is dragged past', () => {
+    render(<EditorScreen {...props(three())} />)
+    expect(order()).toEqual(['A', 'B', 'C'])
+
+    dragTo(0, 1)
+
+    expect(order()).toEqual(['B', 'A', 'C'])
+  })
+
+  it('settles instead of running on, once it is where the finger is', () => {
+    // The loop re-queues every frame. Measuring against a neighbour it has
+    // already passed would walk the row to the end of the list on its own.
+    render(<EditorScreen {...props(three())} />)
+
+    dragTo(0, 1)
+    settle(6)
+
+    expect(order()).toEqual(['B', 'A', 'C'])
+  })
+
+  it('is one undo step however many rows it crossed', () => {
+    /*
+     * The whole drag shares the `'drag'` coalescing key, the same mechanism a run
+     * of keystrokes uses. Without it, undo would take a drag back one row at a
+     * time, which is not how anyone thinks of the gesture they just made.
+     */
+    render(<EditorScreen {...props(three())} />)
+
+    fireEvent.pointerDown(grips()[0]!, { button: 0, clientY: centreOf(0) })
+    fireEvent.pointerMove(window, { clientY: centreOf(1) + 1 })
+    settle()
+    fireEvent.pointerMove(window, { clientY: centreOf(2) + 1 })
+    settle()
+    fireEvent.pointerUp(window)
+    expect(order()).toEqual(['B', 'C', 'A'])
+
+    fireEvent.click(screen.getByLabelText('Undo'))
+
+    expect(order()).toEqual(['A', 'B', 'C'])
+  })
+
+  it('puts everything back when Escape is pressed mid-drag', () => {
+    render(<EditorScreen {...props(three())} />)
+
+    fireEvent.pointerDown(grips()[0]!, { button: 0, clientY: centreOf(0) })
+    fireEvent.pointerMove(window, { clientY: centreOf(1) + 1 })
+    settle()
+    expect(order()).toEqual(['B', 'A', 'C'])
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(order()).toEqual(['A', 'B', 'C'])
+  })
+
+  it('leaves the transform behind when the drag ends', () => {
+    // A row that kept its translate would sit visibly off its own row for good.
+    render(<EditorScreen {...props(three())} />)
+
+    dragTo(0, 1)
+    fireEvent.pointerUp(window)
+
+    for (const row of document.querySelectorAll<HTMLElement>('[data-row-id]')) {
+      expect(row.style.transform).toBe('')
+    }
+  })
+
+  it('gives every kind of row a grip, focusable and labelled', () => {
+    render(<EditorScreen {...props(sectioned())} />)
+    const found = grips()
+
+    expect(found.length).toBe(document.querySelectorAll('[data-row-id]').length)
+    for (const grip of found) {
+      expect(grip.tabIndex).toBe(0)
+      expect(grip.getAttribute('aria-label')).toMatch(/reorder/i)
+    }
+  })
+
+  it('reorders from the keyboard, which is now the grip’s job alone', () => {
+    /*
+     * The step row's Move up and Move down buttons are gone, so this IS the
+     * keyboard path. A grip that answered only a pointer would have made
+     * reordering impossible without one.
+     */
+    render(<EditorScreen {...props(three())} />)
+
+    fireEvent.keyDown(grips()[0]!, { key: 'ArrowDown' })
+    expect(order()).toEqual(['B', 'A', 'C'])
+
+    fireEvent.keyDown(grips()[1]!, { key: 'ArrowUp' })
+    expect(order()).toEqual(['A', 'B', 'C'])
+  })
+
+  it('no longer carries Move up and Move down on any row', () => {
+    // The grip replaced them everywhere, steps and groups alike, and it answers
+    // the arrow keys so nothing is left pointer-only.
+    for (const workout of [three(), sectioned()]) {
+      render(<EditorScreen {...props(workout)} />)
+
+      expect(screen.queryAllByLabelText('Move up')).toHaveLength(0)
+      expect(screen.queryAllByLabelText('Move down')).toHaveLength(0)
+      cleanup()
+    }
+  })
+
+  it('reorders a group from the keyboard, children and all', () => {
+    // A section is a row like any other now: its grip is the only way to move it,
+    // and moving it has to take what is inside it along.
+    render(<EditorScreen {...props(twoSections())} />)
+    expect(rowIds()).toEqual(['secA', 'a1', 'secB', 'b1'])
+
+    fireEvent.keyDown(grips()[0]!, { key: 'ArrowDown' })
+
+    expect(rowIds()).toEqual(['secB', 'b1', 'secA', 'a1'])
+  })
+
+  it('keeps the moved row focused, so the key can be held down', () => {
+    // Rows are keyed by block id, so React moves the node instead of rebuilding
+    // it. Without that, the first press would move the row and lose the focus.
+    render(<EditorScreen {...props(three())} />)
+    const grip = grips()[0]!
+    grip.focus()
+
+    fireEvent.keyDown(grip, { key: 'ArrowDown' })
+
+    expect(order()).toEqual(['B', 'A', 'C'])
+    expect(document.activeElement).toBe(grip)
   })
 })

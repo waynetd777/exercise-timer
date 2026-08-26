@@ -22,6 +22,7 @@ import {
   newSection,
   newSegment,
   removeAt,
+  retypeSegment,
   isTypedPatch,
   setTiming,
   shownAsList,
@@ -38,6 +39,7 @@ import type { Path } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
+import { ROW_ID, useRowDrag } from './useRowDrag'
 import { HelpTray } from './HelpTray'
 import { NoticeDialog } from './NoticeDialog'
 import { EDITOR_HELP } from './help'
@@ -52,11 +54,11 @@ import {
   CheckIcon,
   CloseIcon,
   CopyIcon,
-  DownIcon,
   HelpIcon,
   ImageIcon,
   ImportIcon,
   MoreIcon,
+  GripIcon,
   NoteIcon,
   PasteIcon,
   PlusIcon,
@@ -64,7 +66,6 @@ import {
   RepsIcon,
   TrashIcon,
   UndoIcon,
-  UpIcon,
 } from './icons'
 import './editor.css'
 
@@ -380,11 +381,46 @@ function ImagePicker({
 type RowProps = {
   path: Path
   depth: number
-  first: boolean
-  last: boolean
   onMove: (path: Path, delta: 1 | -1) => void
   onDuplicate: (path: Path) => void
   onRemove: (path: Path) => void
+  /** Pointer handlers for this row's drag grip. See `useRowDrag`. */
+  grip: ReturnType<typeof useRowDrag>['gripProps'] extends (id: string) => infer P ? P : never
+  /** This row is being dragged, or is nested under the row that is. */
+  dragging: boolean
+}
+
+/**
+ * The grip: the whole of the reordering affordance, by pointer AND by keyboard.
+ *
+ * It answers the arrow keys because the Move up and Move down buttons are gone
+ * from the step row now that a row can be dragged. A grip that took a pointer
+ * and nothing else would have made reordering impossible without one, which is
+ * not a trade removing those buttons was meant to make.
+ *
+ * Focus survives the move: rows are keyed by block id, so React moves the node
+ * rather than rebuilding it, and the arrow key can be held down to walk a step
+ * up through the routine.
+ */
+function Grip({ grip, onNudge }: { grip: RowProps['grip']; onNudge: (delta: 1 | -1) => void }) {
+  return (
+    <button
+      type="button"
+      className="erow__grip"
+      aria-label="Reorder: drag, or use the arrow keys"
+      title="Drag to reorder, or focus and use the arrow keys"
+      onKeyDown={(event) => {
+        const delta = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : null
+        if (delta === null) return
+        // Or the list scrolls away under the row being moved.
+        event.preventDefault()
+        onNudge(delta)
+      }}
+      {...grip}
+    >
+      <GripIcon />
+    </button>
+  )
 }
 
 /**
@@ -530,9 +566,10 @@ function SegmentRow({
   segment,
   path,
   depth,
-  first,
   last,
   listed,
+  grip,
+  dragging,
   onMove,
   onAdd,
   onDuplicate,
@@ -544,6 +581,8 @@ function SegmentRow({
   onPreview,
   onChoose,
 }: RowProps & {
+  /** Last child of its group, which is what makes a rest a between-reps rest. */
+  last: boolean
   onAdd: (path: Path, role: SegmentRole) => void
   segment: Segment
   /** Shown as a row in a list while running, so it has no media panel. */
@@ -662,7 +701,9 @@ function SegmentRow({
   return (
     <li
       className="erow"
+      {...{ [ROW_ID]: segment.id }}
       data-depth={depth}
+      data-dragging={dragging || undefined}
       data-role={segment.role}
       data-between-reps={betweenRepsOnly || undefined}
       /* Lifts this row over the ones below it, so an open panel is not painted
@@ -670,11 +711,16 @@ function SegmentRow({
       data-tools={tools || undefined}
     >
       <div className="erow__main">
+        <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
         <select
           className="efield efield--role"
           value={segment.role}
           aria-label="Type of step"
-          onChange={(event) => onPatch(path, { role: event.target.value as SegmentRole })}
+          /* The name comes too, where it is still the old type's default. See
+             `retypeSegment`. */
+          onChange={(event) =>
+            onPatch(path, retypeSegment(segment, event.target.value as SegmentRole))
+          }
         >
           {ROLES.map(({ role, label }) => (
             <option key={role} value={role}>
@@ -805,24 +851,6 @@ function SegmentRow({
             </button>
             <button
               className="btn btn--ghost"
-              onClick={() => onMove(path, -1)}
-              disabled={first && depth === 0}
-              aria-label="Move up"
-              title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
-            >
-              <UpIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => onMove(path, 1)}
-              disabled={last && depth === 0}
-              aria-label="Move down"
-              title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
-            >
-              <DownIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
               onClick={() => onWrap(path)}
               disabled={depth > 0}
               aria-label="Repeat this step"
@@ -912,8 +940,8 @@ function RepeatRow({
   repeat,
   path,
   depth,
-  first,
-  last,
+  grip,
+  dragging,
   onMove,
   onDuplicate,
   onRemove,
@@ -927,8 +955,14 @@ function RepeatRow({
   onUnwrap: (path: Path) => void
 }) {
   return (
-    <li className="erow erow--repeat" data-depth={depth}>
+    <li
+      className="erow erow--repeat"
+      {...{ [ROW_ID]: repeat.id }}
+      data-depth={depth}
+      data-dragging={dragging || undefined}
+    >
       <div className="erow__main">
+        <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
         <input
           className="efield efield--name"
           value={repeat.label ?? 'Reps'}
@@ -954,24 +988,6 @@ function RepeatRow({
             title="Add a step inside"
           >
             <PlusIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, -1)}
-            disabled={first && depth === 0}
-            aria-label="Move up"
-            title={first && depth > 0 ? 'Move out of the reps' : 'Move up'}
-          >
-            <UpIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, 1)}
-            disabled={last && depth === 0}
-            aria-label="Move down"
-            title={last && depth > 0 ? 'Move out of the reps' : 'Move down'}
-          >
-            <DownIcon />
           </button>
           <button
             className="btn btn--ghost"
@@ -1023,8 +1039,8 @@ function LadderRow({
   ladder,
   path,
   depth,
-  first,
-  last,
+  grip,
+  dragging,
   onMove,
   onDuplicate,
   onRemove,
@@ -1051,8 +1067,14 @@ function LadderRow({
   }, [ladder.counts, draft])
 
   return (
-    <li className="erow erow--ladder" data-depth={depth}>
+    <li
+      className="erow erow--ladder"
+      {...{ [ROW_ID]: ladder.id }}
+      data-depth={depth}
+      data-dragging={dragging || undefined}
+    >
       <div className="erow__main">
+        <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
         <input
           className="efield efield--name"
           value={ladder.label ?? 'Set'}
@@ -1091,24 +1113,6 @@ function LadderRow({
           </button>
           <button
             className="btn btn--ghost"
-            onClick={() => onMove(path, -1)}
-            disabled={first && depth === 0}
-            aria-label="Move up"
-            title="Move up"
-          >
-            <UpIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, 1)}
-            disabled={last && depth === 0}
-            aria-label="Move down"
-            title="Move down"
-          >
-            <DownIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
             onClick={() => onDuplicate(path)}
             aria-label="Duplicate this ladder"
             title="Duplicate ladder and steps"
@@ -1141,8 +1145,8 @@ function SectionRow({
   section,
   path,
   depth,
-  first,
-  last,
+  grip,
+  dragging,
   onMove,
   onDuplicate,
   onRemove,
@@ -1154,8 +1158,14 @@ function SectionRow({
   onAddChild: (path: Path) => void
 }) {
   return (
-    <li className="erow erow--section" data-depth={depth}>
+    <li
+      className="erow erow--section"
+      {...{ [ROW_ID]: section.id }}
+      data-depth={depth}
+      data-dragging={dragging || undefined}
+    >
       <div className="erow__main">
+        <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
         <input
           className="efield efield--name efield--section"
           value={section.name}
@@ -1171,24 +1181,6 @@ function SectionRow({
             title="Add a step inside"
           >
             <PlusIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, -1)}
-            disabled={first}
-            aria-label="Move up"
-            title="Move up"
-          >
-            <UpIcon />
-          </button>
-          <button
-            className="btn btn--ghost"
-            onClick={() => onMove(path, 1)}
-            disabled={last}
-            aria-label="Move down"
-            title="Move down"
-          >
-            <DownIcon />
           </button>
           <button
             className="btn btn--ghost"
@@ -1272,6 +1264,54 @@ export function EditorScreen({
   const typingIn = (path: Path, field: string) => `${path.join('.')}:${field}`
 
   const rows = useMemo(() => flatten(blocks), [blocks])
+
+  /**
+   * Dragging a row, which is `moveStep` called once per row crossed.
+   *
+   * `'drag'` is the coalescing key, the same mechanism a run of keystrokes uses:
+   * every step of one drag replaces the last rather than stacking, so undo takes
+   * the whole drag back in one press instead of one press per row passed.
+   */
+  /**
+   * The live draft, for the drag loop.
+   *
+   * The loop runs on animation frames and can apply several moves before React
+   * re-renders, so a `blocks` captured in the callback's closure would be stale
+   * by the second one and every step after the first would be computed from the
+   * position the row started in.
+   */
+  const historyRef = useRef(history)
+  historyRef.current = history
+
+  const list = useRef<HTMLUListElement>(null)
+  /** The tree as it was before the drag, for Escape to put back. */
+  const beforeDrag = useRef<Block[] | null>(null)
+  const drag = useRowDrag({
+    list,
+    onStep: (id, delta) => {
+      const row = flatten(historyRef.current.present.blocks).find(
+        ({ block }) => block.id === id,
+      )
+      if (!row) return
+      if (beforeDrag.current === null) beforeDrag.current = historyRef.current.present.blocks
+      editBlocks((current) => moveStep(current, row.path, delta), 'drag')
+    },
+    onEnd: () => {
+      beforeDrag.current = null
+    },
+    onCancel: () => {
+      const original = beforeDrag.current
+      beforeDrag.current = null
+      if (original) editBlocks(() => original, 'drag')
+    },
+  })
+
+  /** Which rows travel with the one being dragged: a group takes its children. */
+  const heldPath = drag.draggingId
+    ? (rows.find(({ block }) => block.id === drag.draggingId)?.path ?? null)
+    : null
+  const held = (path: Path): boolean =>
+    heldPath !== null && path.length >= heldPath.length && heldPath.every((at, i) => path[i] === at)
 
   /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
@@ -1498,8 +1538,8 @@ export function EditorScreen({
         {rows.length === 0 ? (
           <p className="editor__empty label label--sm">No steps yet. Add one below.</p>
         ) : (
-          <ul className="editor__list">
-            {rows.map(({ block, path, depth, first, last }) =>
+          <ul className="editor__list" ref={list}>
+            {rows.map(({ block, path, depth, last }) =>
               /*
                * Ladders and sections have no row yet. The editor gains them with
                * the strength-routine work. Nothing in the app can author one, so
@@ -1512,8 +1552,8 @@ export function EditorScreen({
                   section={block}
                   path={path}
                   depth={depth}
-                  first={first}
-                  last={last}
+                  grip={drag.gripProps(block.id)}
+                  dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
@@ -1526,8 +1566,8 @@ export function EditorScreen({
                   ladder={block}
                   path={path}
                   depth={depth}
-                  first={first}
-                  last={last}
+                  grip={drag.gripProps(block.id)}
+                  dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}
@@ -1537,11 +1577,12 @@ export function EditorScreen({
               ) : block.kind === 'segment' ? (
                 <SegmentRow
                   key={block.id}
+                  last={last}
                   segment={block}
                   path={path}
                   depth={depth}
-                  first={first}
-                  last={last}
+                  grip={drag.gripProps(block.id)}
+                  dragging={held(path)}
                   listed={shownAsList(blocks, path)}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
                   onAdd={(p, role) => editBlocks((c) => insertAfter(c, p, newSegment(role)))}
@@ -1560,8 +1601,8 @@ export function EditorScreen({
                   repeat={block}
                   path={path}
                   depth={depth}
-                  first={first}
-                  last={last}
+                  grip={drag.gripProps(block.id)}
+                  dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
                   onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
                   onRemove={(p) => editBlocks((c) => removeAt(c, p))}

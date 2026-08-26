@@ -99,6 +99,23 @@ export function BackIcon() {
   )
 }
 
+/**
+ * The drag grip. Two columns of dots, the convention everywhere, so it reads as
+ * "hold this" without a label being needed.
+ */
+export function GripIcon() {
+  return (
+    <Svg>
+      {[8, 12, 16].map((y) => (
+        <g key={y}>
+          <circle cx="9.5" cy={y} r="1.5" fill="currentColor" />
+          <circle cx="14.5" cy={y} r="1.5" fill="currentColor" />
+        </g>
+      ))}
+    </Svg>
+  )
+}
+
 export function StarIcon({ filled = false }: { filled?: boolean }) {
   const points = "12 3.6 14.7 9.2 20.8 10 16.4 14.3 17.5 20.4 12 17.4 6.5 20.4 7.6 14.3 3.2 10 9.3 9.2"
   return (

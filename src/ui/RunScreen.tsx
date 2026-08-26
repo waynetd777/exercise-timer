@@ -153,8 +153,13 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
    * trailing parenthetical, like "start standing, step out to one side, sink your
    * hips…", and an exercise you have not done before is exactly when the panel
    * is empty, because it has no illustration either.
+   *
+   * WITH the count, so the two big texts on the screen say the same thing. The
+   * heading has read "12 × Bicep Curls" since an EMOM minute became both timed
+   * and counted, and a panel reading only "Bicep Curls" beside it looked like a
+   * different step rather than the same one twice.
    */
-  const fallback = entry.note ?? entry.name
+  const fallback = entry.note ?? nameWithEffort(entry)
   /*
    * A note written one item per line is a LIST, and the only thing that writes
    * one is an AMRAP's round. Drawn as bullets under each other rather than run
