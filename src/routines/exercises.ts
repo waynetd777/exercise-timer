@@ -101,6 +101,17 @@ export const EXERCISES: readonly Exercise[] = [...MACHINE_EXERCISES, ...OTHER_EX
 
 export { MACHINE_EXERCISES, OTHER_EXERCISES }
 
-/** The ankle strap takes longer to fasten, so its get-ready is 20s, not 15s. */
-export const STRAP_PREPARE_MS = 20_000
+/**
+ * The longer get-ready, for anything you have to put ON.
+ *
+ * An ankle cuff has to be buckled and a band has to be stepped into and gripped;
+ * a machine you sit at and start. Twenty seconds against fifteen, which is
+ * Wayne's own margin from his routines rather than a guess.
+ */
+export const RIG_PREPARE_MS = 20_000
 export const PREPARE_MS = 15_000
+
+/** True where the exercise has to be put on before it can be started. */
+export function needsRigging(exercise: Exercise): boolean {
+  return exercise.attachment === 'ankle' || exercise.equipment === 'band'
+}

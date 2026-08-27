@@ -284,7 +284,8 @@ torso exercises, so a torso-focused session needs somewhere to go.
 
 `generate.ts` is pure, and the length is SOLVED rather than estimated: exercises
 are added one at a time and each one's real cost is known, so a per-side exercise
-costing two groups and an ankle-strap one costing five more seconds are exact.
+costing two groups and a band or ankle-strap one costing five more seconds are
+exact.
 `rng` is injected, so a seed pins a routine and "Try another" differs.
 
 Three rules worth knowing, all pinned by tests:

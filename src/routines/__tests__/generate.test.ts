@@ -296,6 +296,25 @@ describe('the shape it builds', () => {
     expect(new Set(announcements('none'))).toEqual(new Set([15_000]))
   })
 
+  it('gives a band exercise 20 seconds to get the bands on', () => {
+    // Same reason as the ankle cuff: it has to be put ON before it can be
+    // started, where a machine is something you sit at.
+    const { workout } = make({ equipment: 'none', totalMs: 50 * 60_000 })
+    const band = new Set(EXERCISES.filter((e) => e.equipment === 'band').map((e) => e.name))
+    const blocks = workout.blocks
+
+    let checked = 0
+    blocks.forEach((block, i) => {
+      if (block.kind !== 'repeat') return
+      const work = block.children.find((c): c is Segment => c.kind === 'segment')
+      const before = blocks[i - 1]
+      if (!work || before?.kind !== 'segment' || !band.has(work.name)) return
+      expect(before.durationMs).toBe(20_000)
+      checked += 1
+    })
+    expect(checked).toBeGreaterThan(0)
+  })
+
   it('gives an ankle-strap exercise a 20 second get-ready, and others 15', () => {
     const { workout } = make({ areas: ['lower'], equipment: 'machine', totalMs: 60 * 60_000 })
     const blocks = workout.blocks

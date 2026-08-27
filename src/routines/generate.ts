@@ -37,7 +37,7 @@ import type { Block, Repeat, Segment, Workout } from '../engine/types'
 import { SCHEMA_VERSION } from '../engine/types'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
-import { EXERCISES, PREPARE_MS, STRAP_PREPARE_MS } from './exercises'
+import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
 
 export type Recovery = 'passive' | 'active'
 
@@ -253,7 +253,7 @@ function exerciseBlocks(
   announce: boolean,
   recoverMs: number,
 ): Block[] {
-  const prepareMs = exercise.attachment === 'ankle' ? STRAP_PREPARE_MS : PREPARE_MS
+  const prepareMs = needsRigging(exercise) ? RIG_PREPARE_MS : PREPARE_MS
   const labelled = load ? `${exercise.name} ${load}` : exercise.name
   const work = segment({
     name: exercise.name,
