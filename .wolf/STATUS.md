@@ -602,7 +602,82 @@ one, so it survives the round trip and the migration lifts it out again.
 
 ---
 
-## 🚀 Next quest: generate a routine
+## 🚀 Next quest: generate the instructor's shape, not just a circuit
+
+The generator builds two circuit shapes. The routines Wayne is actually sent are
+a different thing, and the gap was MEASURED on 2026-08-27 rather than guessed.
+
+Wayne is gathering more routines, so **phase 1 waits for them**: every number
+below comes from a corpus of four, and the harvest should run against whatever
+is in `src/routines/__tests__/emails/` when it starts. See that folder's README
+for the conventions; the bodies are verbatim apart from the corporate banner and
+the iPhone signature, and must stay that way.
+
+### The gap
+
+| | Generator today | Instructor routines |
+|---|---|---|
+| Sections | 0 | 7 to 8 each |
+| Ladders | 0 | 1 to 3 each |
+| Self-paced steps | 0 | 23 to 27 in three of the four |
+| Rep counts | 0 | 9 to 20 fixed, 3 to 7 rungs |
+| Alternatives, notes | 0 | 1 to 4 each |
+
+Every block kind already exists and the engine runs them, which
+`strength-training.routine.json` proves. **This is composition work, not engine
+work.**
+
+### They are TWO templates
+
+- **Rep-based**, three of the four (general, trampoline, bands): mostly
+  self-paced, ladder-heavy, sections running Warm-up, General Body, Arms &
+  Shoulders, Legs, Core, Finisher, Final Burnout. The same skeleton all three
+  times, so the skeleton is data.
+- **Clock-based**, the 25 Aug EMOM one: 34 timed steps against 3 self-paced.
+  EMOM, a 30/30 interval, a counting challenge, a 3-minute challenge.
+
+### The thing that breaks, and it is not small
+
+**"About how long" stops meaning anything.** A self-paced routine has no length:
+it is gated on taps, so `totalDurationMs` cannot predict it. The budget solver,
+which is the best part of `generate.ts`, does not apply to a shape that is 24
+self-paced steps.
+
+DECIDE THIS BEFORE BUILDING. The question becomes advisory, or applies only to
+the timed parts, or is replaced by "how many sections". It changes the dialog
+either way.
+
+### What needs building
+
+1. **Three fields on the exercise table, all harvestable.** Verified against the
+   four: 33 exercises are counted only, 47 timed only, 12 appear both ways; rep
+   counts run 5, 6, 8, 10, 12, 15, 20, 30 and durations 10, 15, 20, 30, 40, 45,
+   60s; 19 appear as a ladder's main lift. A harvest script the same shape as
+   `scripts/exercise_metadata.py`.
+2. **Ladder counts, verbatim.** Eight distinct pyramids are already in the
+   corpus, all symmetric: `2-4-6-8-10-8-6-4-2`, `20-16-12-8-4-8-12-16-20` and so
+   on. Use them rather than generating sequences.
+3. **Section composition**, from the skeleton the three rep-based routines share.
+4. **New emitters in `generate.ts`**: section, ladder, self-paced rep step,
+   rest-between-rounds, and for the clock template EMOM, 30/30 and AMRAP.
+5. **A style question** in the dialog: Circuit (what exists), Rep-based,
+   Clock-based.
+
+### What to push back on
+
+- **The clock template is a sample of ONE.** Build the rep-based template first,
+  from three routines, and treat the clock one as a stretch until more arrive.
+- **A wrong ladder is worse than a wrong circuit.** A circuit that misjudges is
+  boring; a ladder that misjudges is twenty reps of something you cannot do
+  twenty of. The rung counts and the main-lift choice want Wayne's eye before
+  they ship.
+- The exercise table's non-machine half came from **four routines, one
+  instructor, five weeks**. More emails firm up the rep counts, the ladder shapes
+  and the clock template at once, which is why phase 1 waits.
+
+---
+
+## ✅ Done: generate a routine (2026-08-27, v4.0 to v4.7)
 
 A generator that asks a few questions and builds a routine from the patterns
 already in this repo. Planned 2026-08-27, decisions below are Wayne's and settled.
