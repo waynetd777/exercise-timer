@@ -340,3 +340,36 @@ describe('field validation', () => {
     expect(() => fromBundle(damaged, NOW)).toThrow(/no readable routines/)
   })
 })
+
+describe('the weights a backup carries', () => {
+  it('rides along, and comes back', () => {
+    /*
+     * Most routines state no weight of their own now: they read the settings
+     * page. A restore without these would put back every routine with the
+     * numbers missing from all of them.
+     */
+    const bundle = toBundle([workout('Legs')], 1000, {}, { 'leg pres': '65kg' })
+    expect(bundle.weights).toEqual({ 'leg pres': '65kg' })
+    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).weights).toEqual({
+      'leg pres': '65kg',
+    })
+  })
+
+  it('says nothing when there is nothing to say', () => {
+    // A file with no weights has to look exactly like one written before the
+    // field existed, or an older reader would see a field it cannot check.
+    expect(toBundle([workout('Legs')], 1000)).not.toHaveProperty('weights')
+  })
+
+  it('reads a file that predates the field', () => {
+    const old = { ...toBundle([workout('Legs')], 1000) }
+    expect(fromBundle(old, 2000).weights).toEqual({})
+  })
+
+  it('does not let a damaged weights map cost you the routines', () => {
+    const damaged = { ...toBundle([workout('Legs')], 1000), weights: { 'leg pres': 65 } }
+    const contents = fromBundle(damaged, 2000)
+    expect(contents.workouts).toHaveLength(1)
+    expect(contents.weights).toEqual({})
+  })
+})

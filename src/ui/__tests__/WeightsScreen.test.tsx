@@ -1,0 +1,95 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import type { Workout } from '../../engine'
+import { SCHEMA_VERSION } from '../../engine'
+import { loadWeights, saveWeights, weightFor } from '../../storage/weights'
+import { WeightsScreen } from '../WeightsScreen'
+
+const saved = (name: string, load: string): Workout => ({
+  id: 'w1',
+  name: 'Last week',
+  blocks: [{ kind: 'segment', id: 's', name, role: 'work', durationMs: 20_000, load }],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+const field = (name: string) => screen.getByLabelText(`Weight for ${name}`) as HTMLInputElement
+
+beforeEach(() => {
+  globalThis.localStorage?.clear()
+  saveWeights({})
+})
+afterEach(cleanup)
+
+describe('WeightsScreen', () => {
+  it('shows the weight in force, seeded or typed', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    expect(field('Leg Press').value).toBe('65kg')
+    // Not looked up, so it asks rather than guessing.
+    expect(field('Glute Kickback').value).toBe('')
+  })
+
+  it('writes a change straight through, so closing the page cannot lose it', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    fireEvent.change(field('Leg Press'), { target: { value: '70kg' } })
+
+    expect(weightFor('Leg Press')).toBe('70kg')
+    expect(loadWeights()).toEqual({ 'leg pres': '70kg' })
+  })
+
+  it('lets a seeded weight be emptied', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    fireEvent.change(field('Leg Press'), { target: { value: '' } })
+
+    expect(field('Leg Press').value).toBe('')
+    expect(weightFor('Leg Press')).toBe('')
+  })
+
+  it('offers what the saved routines already use, and fills it in', () => {
+    /*
+     * The Glute Kickback has no looked-up weight, but a routine has been using
+     * 15kg for it. That is better evidence than anything on a website.
+     */
+    render(<WeightsScreen workouts={[saved('Glute Kickback', '15kg')]} onExit={vi.fn()} />)
+
+    expect(field('Glute Kickback').placeholder).toBe('15kg')
+    fireEvent.click(screen.getByRole('button', { name: /Fill 1 from my routines/ }))
+
+    expect(field('Glute Kickback').value).toBe('15kg')
+    expect(screen.queryByRole('button', { name: /from my routines/ })).toBeNull()
+  })
+
+  it('does not offer to overwrite a weight that is already set', () => {
+    // The Leg Press is seeded, so a routine saying 40kg is not an offer to make.
+    render(<WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} />)
+
+    expect(screen.queryByRole('button', { name: /from my routines/ })).toBeNull()
+    expect(field('Leg Press').value).toBe('65kg')
+  })
+
+  it('filters by name', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    fireEvent.change(screen.getByLabelText('Search exercises'), { target: { value: 'pulldown' } })
+
+    expect(field('Lat Pulldown')).toBeTruthy()
+    expect(screen.queryByLabelText('Weight for Leg Press')).toBeNull()
+  })
+
+  it('leaves the bodyweight exercises out entirely', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    expect(screen.queryByLabelText('Weight for Sit Ups')).toBeNull()
+  })
+})

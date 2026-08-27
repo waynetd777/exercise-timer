@@ -9,6 +9,7 @@ import type { Block, Ladder, MediaRef, Repeat, RoutineColour, Section, Segment, 
 import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
+import { weightFor } from '../storage/weights'
 import {
   appendTo,
   clearMedia,
@@ -1009,6 +1010,11 @@ function SegmentRow({
             band has a colour and a press-up has your own weight. Weights used to
             be typed into the step NAME, which made the name carry two things and
             put the count and the load next to each other in one heading.
+
+            EMPTY IS NOT UNLOADED. An empty field means "whatever I lift for
+            this", and the weight comes from Settings when the routine runs, so
+            the placeholder shows what that would be rather than an example.
+            Typing here overrides it for this routine only.
           */}
           <label className="erow__extra erow__extra--load">
             <span className="label label--sm">Weight</span>
@@ -1016,7 +1022,7 @@ function SegmentRow({
               key={segment.load ?? ''}
               className="efield"
               defaultValue={segment.load ?? ''}
-              placeholder="65kg, red band"
+              placeholder={weightFor(segment.name) || '65kg, red band'}
               aria-label="Weight"
               onBlur={(event) => commitText('load', event.target.value)}
             />

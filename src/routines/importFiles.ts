@@ -9,6 +9,7 @@ import { SCHEMA_VERSION } from '../engine'
 import { fromBundle } from '../storage/bundle'
 import { restoreMedia } from '../storage/bundleMedia'
 import { migrateWorkout } from '../storage/migrate'
+import { loadWeights, saveWeights } from '../storage/weights'
 import { hasBlob, putBlob } from '../media/store'
 import { pinDraft } from '../media/pin'
 import { parseRoutine } from './pasteFormat'
@@ -114,6 +115,16 @@ export async function importRoutineFiles(
           if (!(await hasBlob(hash))) await putBlob(hash, blob)
         }
         droppedImages += media.skipped.length
+
+        /*
+         * The weights the file carried are MERGED over what is here, not
+         * swapped in: a restore onto a device that already has weights should
+         * not silently drop the ones the file has never heard of. The file
+         * wins where both say something, since it is the one being restored.
+         */
+        if (Object.keys(contents.weights).length > 0) {
+          saveWeights({ ...loadWeights(), ...contents.weights })
+        }
         continue
       }
 

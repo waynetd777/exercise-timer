@@ -22,6 +22,8 @@ import { updateApp } from '../state/updateApp'
 import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
 import { estimated } from './format'
+import { withWeights } from '../routines/loads'
+import { currentWeights, loadWeights } from '../storage/weights'
 import { Menu } from './Menu'
 import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
@@ -43,6 +45,7 @@ import {
   StarIcon,
   StopwatchIcon,
   TrashIcon,
+  WeightIcon,
 } from './icons'
 import './library.css'
 import { newId } from '../id'
@@ -226,6 +229,7 @@ export function LibraryScreen({
   onNew,
   onDraft,
   onSounds,
+  onWeights,
 }: {
   library: Library
   onRun: (workout: Workout) => void
@@ -237,6 +241,7 @@ export function LibraryScreen({
    */
   onDraft: (workout: Workout) => void
   onSounds: () => void
+  onWeights: () => void
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
@@ -287,8 +292,18 @@ export function LibraryScreen({
     return parts.length === 0 ? '' : `. Text cannot carry ${parts.join(' or ')}`
   }
 
+  /*
+   * Text goes out with the weights filled in.
+   *
+   * The grammar carries a load in the name — "Leg Press 65kg" — and there is
+   * nowhere in it to say "whatever I lift for this". Someone reading the text,
+   * here or on another device, needs the number, so it is resolved on the way
+   * out. The routine itself is untouched.
+   */
+  const asText = (workout: Workout) => writeRoutine(withWeights(workout, currentWeights()))
+
   const copyRoutineText = async (workout: Workout) => {
-    const { text, lost } = writeRoutine(workout)
+    const { text, lost } = asText(workout)
     setNotice(
       (await copyText(text))
         ? `“${workout.name}” copied as text${lostNote(lost)}`
@@ -297,7 +312,7 @@ export function LibraryScreen({
   }
 
   const downloadRoutineText = (workout: Workout) => {
-    const { text, lost } = writeRoutine(workout)
+    const { text, lost } = asText(workout)
     downloadText(textFilename(workout.name, new Date()), text)
     setNotice(`Downloaded “${workout.name}” as text${lostNote(lost)}`)
   }
@@ -333,7 +348,11 @@ export function LibraryScreen({
     try {
       const media = await collectMedia(workouts, getBlob)
       const photos = Object.keys(media).length
-      downloadJson(bundleFilename(name, new Date()), toBundle(workouts, Date.now(), media))
+      downloadJson(
+        bundleFilename(name, new Date()),
+        // The weights ride along: most routines state none of their own now.
+        toBundle(workouts, Date.now(), media, loadWeights()),
+      )
 
       const subject =
         workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
@@ -455,6 +474,12 @@ export function LibraryScreen({
                 icon: <PlusIcon />,
                 title: 'Build a routine by answering a few questions',
                 onSelect: () => setGenerating(true),
+              },
+              {
+                label: 'Weights',
+                icon: <WeightIcon />,
+                title: 'What you lift, per exercise, used by every routine that does not say',
+                onSelect: onWeights,
               },
               {
                 label: 'Backup all incl. images',

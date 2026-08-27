@@ -16,6 +16,9 @@ import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
+import { WeightsScreen } from './WeightsScreen'
+import { withWeights } from '../routines/loads'
+import { currentWeights } from '../storage/weights'
 import { newId } from '../id'
 
 /**
@@ -40,6 +43,7 @@ type View =
   | { screen: 'run'; workout: Workout }
   | { screen: 'edit'; workout: Workout }
   | { screen: 'sounds' }
+  | { screen: 'weights' }
 
 function blankRoutine(): Workout {
   const now = Date.now()
@@ -116,7 +120,24 @@ export function App() {
   )
 
   if (view.screen === 'run') {
-    return <RunScreen workout={view.workout} onExit={toLibrary} onStarted={onStarted} />
+    /*
+     * The weights are filled in HERE, on the way into the run, and never saved
+     * back. A step that states no load of its own is not unloaded: it means
+     * "whatever I lift for this", so it reads the settings page every time it
+     * is opened and follows a change made there. A step that does state one is
+     * left alone, because it is overriding on purpose.
+     */
+    return (
+      <RunScreen
+        workout={withWeights(view.workout, currentWeights())}
+        onExit={toLibrary}
+        onStarted={onStarted}
+      />
+    )
+  }
+
+  if (view.screen === 'weights') {
+    return <WeightsScreen workouts={library.workouts} onExit={toLibrary} />
   }
 
   if (view.screen === 'sounds' && SoundsScreen) {
@@ -147,6 +168,7 @@ export function App() {
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
       onDraft={(workout) => setView({ screen: 'edit', workout })}
       onSounds={() => setView({ screen: 'sounds' })}
+      onWeights={() => setView({ screen: 'weights' })}
     />
   )
 }

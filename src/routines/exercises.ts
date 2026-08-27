@@ -107,6 +107,33 @@ export const EXERCISES: readonly Exercise[] = [
 export { MACHINE_EXERCISES, OTHER_EXERCISES, HARVESTED_EXERCISES }
 
 /**
+ * The kit you choose a weight for.
+ *
+ * A press-up is loaded to your own bodyweight and a trampoline to nothing, so
+ * neither has a number to keep. Everything else does: a stack has a pin, a
+ * dumbbell has a number on the end and a band has a colour, which is why the
+ * field is free text rather than kilos.
+ */
+const LOADABLE: readonly Equipment[] = ['machine', 'dumbbell', 'kettlebell', 'band']
+
+/** True where it makes sense to write down what you lift for it. */
+export function loadable(exercise: Exercise): boolean {
+  return LOADABLE.includes(exercise.equipment)
+}
+
+/**
+ * Everything you can put a weight against, grouped the way the settings page
+ * shows it: the multi-gym first, since that is most of a session, then what is
+ * in the corner of the room.
+ */
+export const LOADABLE_GROUPS: readonly { kit: Equipment; label: string }[] = [
+  { kit: 'machine', label: 'Multi-gym' },
+  { kit: 'dumbbell', label: 'Dumbbells' },
+  { kit: 'kettlebell', label: 'Kettlebell' },
+  { kit: 'band', label: 'Bands' },
+]
+
+/**
  * The longer get-ready, for anything you have to put ON.
  *
  * An ankle cuff has to be buckled and a band has to be stepped into and gripped;

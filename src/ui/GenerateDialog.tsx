@@ -10,6 +10,7 @@ import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
+import { currentWeights } from '../storage/weights'
 import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
 import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
@@ -284,7 +285,7 @@ export function GenerateDialog({
           equipment,
           sets,
         },
-        { library, rng: seeded(seed), now: Date.now() },
+        { library, rng: seeded(seed), now: Date.now(), weights: currentWeights() },
       )
     } catch {
       return null
