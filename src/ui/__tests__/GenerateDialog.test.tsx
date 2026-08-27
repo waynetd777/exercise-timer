@@ -86,18 +86,36 @@ describe('GenerateDialog', () => {
     expect(screen.getByText(/Every exercise matching that choice was used/)).toBeTruthy()
   })
 
-  it('hides the cardio question when there is no cardio', () => {
+  it('hides all three cardio questions when there is no cardio', () => {
+    // Resting between sets means no warm-up and no cool down either: that shape
+    // comes from `beginner-full-body.routine.json`, which has neither.
     open()
-    expect(screen.getByLabelText('Active recovery')).toBeTruthy()
+    for (const q of ['Warm up with', 'Moving how', 'Cool down with']) {
+      expect(screen.getByLabelText(q)).toBeTruthy()
+    }
     fireEvent.click(screen.getByRole('button', { name: 'Rest' }))
-    expect(screen.queryByLabelText('Active recovery')).toBeNull()
+    for (const q of ['Warm up with', 'Moving how', 'Cool down with']) {
+      expect(screen.queryByLabelText(q)).toBeNull()
+    }
+  })
+
+  it('warms up and cools down with what it was told', () => {
+    const onGenerate = open()
+    fireEvent.change(screen.getByLabelText('Warm up with'), { target: { value: 'Trampoline' } })
+    fireEvent.change(screen.getByLabelText('Cool down with'), { target: { value: 'Burpees' } })
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+
+    const blocks = (onGenerate.mock.calls[0]![0] as Workout).blocks
+    const names = blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
+    expect(names[1]).toBe('Warm Up: Trampoline')
+    expect(names.at(-1)).toBe('Cool Down: Burpees')
   })
 
   it('offers a list to randomise from, all on, once Random is chosen', () => {
     open()
     expect(screen.queryByRole('button', { name: 'Burpees' })).toBeNull()
 
-    fireEvent.change(screen.getByLabelText('Active recovery'), { target: { value: '[random]' } })
+    fireEvent.change(screen.getByLabelText('Moving how'), { target: { value: '[random]' } })
     const burpees = screen.getByRole('button', { name: 'Burpees' })
     expect(burpees.getAttribute('aria-pressed')).toBe('true')
 
@@ -111,7 +129,7 @@ describe('GenerateDialog', () => {
 
   it('will not generate with nothing to move with', () => {
     open()
-    fireEvent.change(screen.getByLabelText('Active recovery'), { target: { value: '[random]' } })
+    fireEvent.change(screen.getByLabelText('Moving how'), { target: { value: '[random]' } })
     for (const chip of screen.getAllByRole('button')) {
       if (chip.getAttribute('aria-pressed') === 'true' && chip.textContent !== 'Upper body') {
         fireEvent.click(chip)

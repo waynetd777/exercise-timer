@@ -36,6 +36,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'New: build one step at a time.',
       'Paste: write or paste a routine as plain text. It reads sections, rounds, ladders, EMOM minutes, 30/30 intervals and AMRAPs, and lists any line it could not place. It then opens in the editor, so you can fix what it missed before keeping it.',
       'Generate: answer a few questions and it builds a routine. How long, what to work, whether to keep moving between sets and how, and what equipment. It shows what it will make as you answer, and opens in the editor.',
+      'Warm up with, Moving how and Cool down with are each chosen separately, so the ten minutes at the start need not be the same thing as the minutes between sets. All three go when you choose to rest between sets instead.',
       'Moving how can be one thing throughout, cycling or the trampoline, or Random, which puts a different exercise in every minute between sets. Random then offers the whole list to choose from, all on, so you can turn off anything you do not want coming up. The warm-up and the cool down stay as they are: ten minutes of one thing is what a warm-up is.',
       'Copy template, in the paste box, puts an example routine on the clipboard using every shape it understands. Easier than being told the rules.',
       'Import: a .tabata file, an exported .json, or a .txt or .md written as text. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',

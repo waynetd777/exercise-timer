@@ -52,6 +52,10 @@ export type RoutineSpec = {
   recovery: Recovery
   /** A cardio exercise's name, for `active`. Defaults to Cycling. */
   recoveryExercise?: string
+  /** What the ten minutes at the start are. Defaults to Cycling. */
+  warmUpExercise?: string
+  /** What the minute at the end is. Defaults to Cycling. */
+  coolDownExercise?: string
   /**
    * Cardio exercises to draw the between-set minutes from, a different one each
    * time. Takes precedence over `recoveryExercise`; absent means the same
@@ -312,6 +316,18 @@ export function generateRoutine(
     notes.push(`Nothing in the list to move with is a cardio exercise, so ${recovery?.name} was used.`)
   }
   const spin = chosen.length > 0 ? shuffled(chosen, rng) : []
+
+  /*
+   * The bookends, each chosen in its own right.
+   *
+   * NAMED for the exercise as well as the purpose: "Warm Up" alone was enough
+   * while it was always the bike and always carried its picture, and stopped
+   * being enough the moment it could be the trampoline, which has no
+   * illustration at all. "Warm Up: Trampoline" says what to do without one.
+   */
+  const named = (want: string | undefined) => cardio.find((e) => e.name === want) ?? recovery
+  const warmUp = named(spec.warmUpExercise)
+  const coolDown = named(spec.coolDownExercise)
   let spun = 0
   const nextSpin = (): Exercise => {
     const pick = spin[spun % spin.length] ?? recovery!
@@ -342,10 +358,10 @@ export function generateRoutine(
       ? [
           segment({ name: 'Get ready', role: 'prepare', durationMs: PREPARE_MS }),
           segment({
-            name: 'Warm Up',
+            name: warmUp ? `Warm Up: ${warmUp.name}` : 'Warm Up',
             role: 'work',
             durationMs: WARM_UP_MS,
-            ...(recovery?.media ? { media: { source: 'bundled', path: recovery.media } } : {}),
+            ...(warmUp?.media ? { media: { source: 'bundled', path: warmUp.media } } : {}),
           }),
         ]
       : []
@@ -354,10 +370,10 @@ export function generateRoutine(
       ? [
           segment({ name: 'Get ready', role: 'prepare', durationMs: PREPARE_MS }),
           segment({
-            name: 'Cool Down',
+            name: coolDown ? `Cool Down: ${coolDown.name}` : 'Cool Down',
             role: 'work',
             durationMs: COOL_DOWN_MS,
-            ...(recovery?.media ? { media: { source: 'bundled', path: recovery.media } } : {}),
+            ...(coolDown?.media ? { media: { source: 'bundled', path: coolDown.media } } : {}),
           }),
         ]
       : []
