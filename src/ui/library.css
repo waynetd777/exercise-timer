@@ -433,7 +433,9 @@
  * panel scrolls as a whole.
  */
 .generate {
-  width: min(100%, 34rem);
+  /* As wide as the paste panel. At 34rem the question chips wrapped a row each,
+     which made a short list of answers read as a long form. */
+  width: min(100%, 44rem);
   max-height: 100%;
   overflow-y: auto;
   padding: var(--step-5);
@@ -460,6 +462,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--step-2);
+}
+
+/*
+ * Tighter than a chip in the header, because these come in rows of three and the
+ * panel is capped by the screen on a phone whatever its max-width says. The 44px
+ * minimum height is untouched: it is what makes them tappable.
+ */
+.generate__options .chip {
+  padding: 0 var(--step-3);
 }
 
 /* The chosen one, on the same principle as the editor's colour swatches. */
