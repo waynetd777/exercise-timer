@@ -30,6 +30,7 @@
  */
 
 import { MACHINE_EXERCISES } from './exercises.machine'
+import { OTHER_EXERCISES } from './exercises.other'
 
 /** The guide's own three-way key, printed as the colour of each title band. */
 export type BodyArea = 'upper' | 'torso' | 'lower'
@@ -44,7 +45,26 @@ export type BodyArea = 'upper' | 'torso' | 'lower'
  */
 export type Pattern = 'push' | 'pull'
 
-export type Equipment = 'machine' | 'bodyweight' | 'dumbbell' | 'kettlebell' | 'band'
+export type Equipment =
+  | 'machine'
+  | 'bodyweight'
+  | 'dumbbell'
+  | 'kettlebell'
+  | 'band'
+  | 'trampoline'
+  | 'bike'
+
+/**
+ * What an exercise is FOR, which is not the same as what it works.
+ *
+ * The corpus makes the distinction unavoidable: a routine opens with ten minutes
+ * of `mobility` and `cardio`, works through `strength`, and in Wayne's own
+ * routines puts a minute of `cardio` between every set. One list with a `use`
+ * field gives the generator all three pools without three tables.
+ *
+ * Absent means `strength`, which is what every machine exercise is.
+ */
+export type Use = 'strength' | 'cardio' | 'mobility'
 
 /** The five the guide lists. `ankle` is the one that costs setup time. */
 export type Attachment = 'lat bar' | 'low row bar' | 'ab strap' | 'free-motion' | 'ankle'
@@ -55,6 +75,8 @@ export type Exercise = {
   /** Upper body only. */
   pattern?: Pattern
   equipment: Equipment
+  /** Absent means `strength`. */
+  use?: Use
   /** A path under `public/`, for the exercises the guide illustrates. */
   media?: string
   /** Horizon station 1 to 8. Consecutive exercises on one station save re-rigging. */
@@ -75,18 +97,9 @@ export type Exercise = {
   load?: string
 }
 
-/**
- * Everything the multi-gym cannot do.
- *
- * Filled in phase 2, seeded from `strength-training.routine.json` and the email
- * fixtures, so the vocabulary is the one Wayne's instructor actually uses rather
- * than a generic list. The kit is a 6kg kettlebell, dumbbells at 1, 1.5, 2, 3
- * and 5kg, a set of bands and a trampoline, so nothing here should call for a
- * weight that is not in the garage.
- */
-export const OTHER_EXERCISES: readonly Exercise[] = []
-
 export const EXERCISES: readonly Exercise[] = [...MACHINE_EXERCISES, ...OTHER_EXERCISES]
+
+export { MACHINE_EXERCISES, OTHER_EXERCISES }
 
 /** The ankle strap takes longer to fasten, so its get-ready is 20s, not 15s. */
 export const STRAP_PREPARE_MS = 20_000
