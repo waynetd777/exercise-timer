@@ -9,7 +9,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
-import { loadWeights, saveWeights, weightFor } from '../../storage/weights'
+import { loadWeights, saveWeights, weightFor, withWeight } from '../../storage/weights'
 import { WeightsScreen } from '../WeightsScreen'
 
 const saved = (name: string, load: string): Workout => ({
@@ -30,11 +30,12 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('WeightsScreen', () => {
-  it('shows the weight in force, seeded or typed', () => {
+  it('shows the weight in force, and asks where there is none', () => {
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(field('Leg Press').value).toBe('65kg')
-    // Not looked up, so it asks rather than guessing.
+    // Nothing is guessed, so it asks.
     expect(field('Toe Raise').value).toBe('')
   })
 
@@ -47,7 +48,8 @@ describe('WeightsScreen', () => {
     expect(loadWeights()).toEqual({ 'leg pres': '70kg' })
   })
 
-  it('lets a seeded weight be emptied', () => {
+  it('lets a weight be emptied', () => {
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     fireEvent.change(field('Leg Press'), { target: { value: '' } })
@@ -71,7 +73,8 @@ describe('WeightsScreen', () => {
   })
 
   it('does not offer to overwrite a weight that is already set', () => {
-    // The Leg Press is seeded, so a routine saying 40kg is not an offer to make.
+    // The Leg Press is set, so a routine saying 40kg is not an offer to make.
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     render(<WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(screen.queryByRole('button', { name: /from my routines/ })).toBeNull()
@@ -147,6 +150,7 @@ describe('letting routines follow the page', () => {
      * A routine written before this page carries its own weight on every step,
      * so it overrides the page and goes on saying 40kg after you have moved on.
      */
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     const onFollow = vi.fn()
     render(
       <WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
@@ -192,6 +196,7 @@ describe('letting routines follow the page', () => {
   })
 
   it('cancels without touching anything', () => {
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     const onFollow = vi.fn()
     render(
       <WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,

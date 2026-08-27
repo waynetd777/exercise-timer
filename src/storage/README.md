@@ -81,20 +81,18 @@ an edit is not.
 
 ## What you lift
 
-`weights.ts` holds one weight per exercise, keyed by folded name. `SEED_WEIGHTS`
-starts it off, and every number in it is Wayne's own: fifteen read out of routines
-2 and 3, four given directly. The looked-up numbers it began with were all wrong
-in the same direction (strengthlevel said 30kg for a shoulder press against a
-real 10), so a home stack is not the machine that site measures, and none of them
-survive.
+`weights.ts` holds one weight per exercise, keyed by folded name. It starts EMPTY.
+It used to ship one person's numbers as seeds, which put weights that were not the
+owner's on every other install; a looked-up number before that was wrong in every
+case (strengthlevel said 30kg for a shoulder press against a real 10, because a
+home stack is not the machine that site measures). An empty field asks the
+question, and "Fill from my routines" answers it from the device's own evidence.
 
-Three rules that are not obvious:
+Rules that are not obvious:
 
-- **A key present and empty is a deletion**, not a gap. If clearing a field simply
-  removed the key, the seed would come straight back and a seeded weight could
-  never be emptied.
-- **Setting a value back to the seed drops the key**, so the store holds only what
-  actually differs.
+- **An empty value removes the key**, so the store holds only what has a number.
+  Older stores recorded a cleared field as an empty string, to override a seed
+  that no longer exists; those read as absent.
 - **The parsed table is cached and dropped on save.** The library asks once per
   row.
 

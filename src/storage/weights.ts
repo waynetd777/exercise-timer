@@ -32,79 +32,20 @@ import { findLoad } from '../routines/loads'
 
 const KEY = 'davshack-timer-weights'
 
-/**
- * The starting numbers, nearly all of them Wayne's own.
+/*
+ * NO SEEDS. Every install starts with every field blank.
  *
- * READ OUT OF HIS ROUTINES on 2026-08-28, plus the four he gave directly. His
- * routines are the best evidence there is: they are what he has been loading
- * the machine to, week after week.
- *
- * The looked-up numbers they replaced were BADLY wrong, which is the thing to
- * remember here. strengthlevel.com said 30kg for the shoulder press against a
- * real 10, and 35kg for the hamstring curl against a real 10. A Horizon home
- * stack is not the commercial machine that site measures, and its numbering is
- * not the same numbering. Where the two disagree the machine is right.
- *
- * NOT ONE LOOKED-UP NUMBER IS LEFT. Every weight below is his, and the last of
- * the estimates went the same way as the rest: corrected downwards.
- *
- * The other forty-nine are blank on purpose: a guessed weight is worse than an
- * empty field, because an empty field asks and a wrong number gets loaded on.
+ * The table used to ship one person's numbers as a starting point, which made
+ * every other install open on weights that were not its owner's. A weight is a
+ * measurement of one gym and one body; a wrong one gets loaded onto a stack.
+ * An empty field asks the question, and "Fill from my routines" answers it
+ * from evidence the device actually holds.
  */
-export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
-  // Given directly, 2026-08-27.
-  'Standing Shoulder Press': '10kg',
-  'Seated Abdominal Crunch': '15kg',
-  'Seated Leg Extension': '15kg',
-
-  // Read out of routines 2 and 3.
-  'Leg Press': '65kg',
-  'Calf Press': '45kg',
-  'Lat Pulldown': '30kg',
-  'Seated Row': '30kg',
-  'Bentover Row': '30kg',
-  'Deadlift': '30kg',
-  'Side Cable Bends': '30kg',
-  'Incline Chest Press': '25kg',
-  'Low Pulley Squat': '25kg',
-  'Glute Kickback': '20kg',
-  'Hip Abductor Leg Raise': '15kg',
-  'Abdominal Oblique Crunch': '15kg',
-  'Rear Cable Fly': '10kg',
-  'Cable Converging Shoulder Press': '10kg',
-  'Free-Standing Hamstring Curl': '10kg',
-  'Shoulder Press': '10kg',
-
-  /*
-   * Inferred: routine 2 says "Chest Press 30kg", which is a name the table does
-   * not have. The standard one is what that almost certainly means, and 30
-   * matches the shape of every other correction: the looked-up 35 was high.
-   */
-  'Standard Chest Press': '30kg',
-
-  /*
-   * Wayne's, set on 2026-08-28 rather than lifted from a routine: no routine of
-   * his has ever loaded it. The looked-up number was 20kg, which he corrected
-   * down, exactly as he corrected every other one.
-   *
-   * The Cable Fly used to sit beside it at a looked-up 35kg and has been taken
-   * out rather than corrected: Wayne's own Rear Cable Fly, on the same cable
-   * stack, is 10kg. 35 was not a number worth keeping, and an empty field asks
-   * the question instead of answering it wrongly.
-   */
-  'Triceps Press': '15kg',
-}
 
 /** What is written down, keyed by folded exercise name. */
 export type Weights = Record<string, string>
 
 let cached: Map<string, string> | null = null
-
-function seeded(): Map<string, string> {
-  const out = new Map<string, string>()
-  for (const [name, load] of Object.entries(SEED_WEIGHTS)) out.set(foldName(name), load)
-  return out
-}
 
 /** Only what has been typed. Never throws: a broken store means no weights. */
 export function loadWeights(): Weights {
@@ -134,21 +75,20 @@ export function saveWeights(weights: Weights): void {
 }
 
 /**
- * The weights in force: what was typed, over the seeds.
+ * The weights in force: what was typed, and nothing else.
  *
- * A key PRESENT AND EMPTY is a deletion, not a gap. Clearing the Leg Press
- * field has to mean "I do not want a weight on this", or the seed would come
- * straight back and the field could never be emptied.
+ * An empty value is skipped. Older stores recorded a cleared field as an empty
+ * string, to override a seed that no longer exists; those entries are harmless
+ * and mean the same thing as absence.
  *
  * Cached, and dropped on save: every step of every routine asks, and re-parsing
  * storage for each of them is work for nothing.
  */
 export function currentWeights(): ReadonlyMap<string, string> {
   if (cached) return cached
-  const out = seeded()
+  const out = new Map<string, string>()
   for (const [name, load] of Object.entries(loadWeights())) {
     if (load.trim()) out.set(name, load.trim())
-    else out.delete(name)
   }
   cached = out
   return out
@@ -167,17 +107,13 @@ export function weightFor(name: string): string {
 }
 
 /**
- * Writes one exercise's weight and returns the new store.
- *
- * An empty value is RECORDED rather than removed, so it can override a seed.
- * Setting a value back to exactly the seed drops the key instead, which keeps
- * the store to what actually differs.
+ * Writes one exercise's weight and returns the new store. An empty value
+ * removes the key, so the store holds only what has a number.
  */
 export function withWeight(weights: Weights, name: string, load: string): Weights {
   const key = foldName(name)
   const next = { ...weights }
-  const seed = seeded().get(key)
-  if (load.trim() && load.trim() === seed) delete next[key]
-  else next[key] = load.trim()
+  if (load.trim()) next[key] = load.trim()
+  else delete next[key]
   return next
 }
