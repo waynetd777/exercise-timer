@@ -42,33 +42,11 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import type { Block } from '../src/engine/types'
-import { EXERCISES } from '../src/routines/exercises'
 import { parseRoutine } from '../src/routines/pasteFormat'
+import { fold } from './fold'
 
 const EMAILS = 'src/routines/__tests__/emails'
 const OUT = 'src/routines/exercises.prescription.ts'
-
-/**
- * A name reduced to what it is, for comparing across sixteen spellings.
- *
- * Drops anything bracketed, any count, any per-side qualifier, and any trailing
- * plural. "10x Bicycle Crunches (per leg)" and "Bicycle crunch" meet here.
- */
-function key(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/\b\d+\s*[×x]?\s*/g, ' ')
-    .replace(/\b(?:each|per)\s+(?:side|leg|arm|direction)\b/g, ' ')
-    .replace(/[^a-z\s]/g, ' ')
-    // "Fire hydrant left leg" and "Fire hydrant right leg" are one exercise done
-    // twice, not two. The side is a field, not part of the name.
-    .replace(/\b(?:left|right)\b/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => (word.length > 3 && word.endsWith('s') ? word.slice(0, -1) : word))
-    .join(' ')
-}
 
 const median = (values: number[]): number => {
   const sorted = [...values].sort((a, b) => a - b)
@@ -81,7 +59,7 @@ describe('harvest', () => {
   it('writes the prescription table', () => {
     const seen = new Map<string, Seen>()
     const bump = (name: string): Seen => {
-      const k = key(name)
+      const k = fold(name)
       const found = seen.get(k) ?? { reps: [], seconds: [], rung: 0 }
       seen.set(k, found)
       return found
@@ -93,7 +71,7 @@ describe('harvest', () => {
           walk(block.children)
           continue
         }
-        if (block.role !== 'work' || !key(block.name)) continue
+        if (block.role !== 'work' || !fold(block.name)) continue
         const entry = bump(block.name)
         if (block.reps?.kind === 'fixed') entry.reps.push(block.reps.count)
         if (block.reps?.kind === 'rung') entry.rung += 1
@@ -109,16 +87,23 @@ describe('harvest', () => {
       walk(parseRoutine(readFileSync(`${EMAILS}/${file}`, 'utf8'), file).blocks)
     }
 
-    // Onto the names the app actually uses. Anything that does not land is
-    // printed: a quiet miss looks the same as a match.
+    /*
+     * Every movement in the corpus, keyed by its FOLDED name, rather than only
+     * the ones the exercise table happens to hold today.
+     *
+     * It used to walk `EXERCISES`, which made this file depend on the exercise
+     * harvest having already written its own: same process, module already
+     * imported, stale table, 67 rows instead of the 200 the corpus can support.
+     * A generated file that changes depending on what ran first is not one to
+     * trust. The generator folds when it looks up, so nothing is lost.
+     */
     const rows: string[] = []
     const matched = new Set<string>()
-    for (const exercise of EXERCISES) {
-      const found = seen.get(key(exercise.name))
-      if (!found) continue
-      matched.add(key(exercise.name))
+    for (const [key, found] of [...seen.entries()].sort()) {
+      if (key.split(' ').length < 2) continue
+      matched.add(key)
       const counted = found.reps.length >= found.seconds.length && found.reps.length > 0
-      const fields = [`name: '${exercise.name.replace(/'/g, "\\'")}'`]
+      const fields = [`name: '${key.replace(/'/g, "\\'")}'`]
       fields.push(`prescribe: '${counted ? 'reps' : 'time'}'`)
       if (found.reps.length) fields.push(`reps: ${median(found.reps)}`)
       if (found.seconds.length) fields.push(`seconds: ${median(found.seconds)}`)
@@ -126,11 +111,9 @@ describe('harvest', () => {
       rows.push(`  { ${fields.join(', ')} },`)
     }
 
-    const missed = [...seen.keys()].filter((k) => !matched.has(k) && k.split(' ').length <= 6)
     console.log(`${files.length} routines, ${seen.size} distinct movements`)
-    console.log(`  matched to the table : ${rows.length}`)
-    console.log(`  in the emails only   : ${missed.length}`)
-    for (const name of missed.slice(0, 40)) console.log(`      ${name}`)
+    console.log(`  prescriptions written : ${rows.length}`)
+    console.log(`  one word, left out    : ${seen.size - rows.length}`)
 
     writeFileSync(
       OUT,
@@ -152,8 +135,33 @@ describe('harvest', () => {
  * ladder's main lift. Medians, because these are round numbers a person chose
  * and the mean of 10 and 20 is 15, which nobody wrote.
  *
- * An exercise absent from here has simply never appeared in a routine we hold.
+ * Names are FOLDED: lower case, singular, no side, no count. Look one up with
+ * \`foldName\` from \`./foldName\` rather than by \`Exercise.name\`. That is what lets this cover
+ * every movement the corpus holds rather than only the ones the exercise table
+ * happens to name today.
  */
+
+/**
+ * The same folding the harvest keyed these by. Kept beside the table rather than
+ * in `scripts/`, because the app has to fold a name to look one up.
+ */
+export function foldName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\\([^)]*\\)/g, ' ')
+    .replace(/\\b\\d+\\s*[×x]?\\s*/g, ' ')
+    .replace(/\\b(?:each|per)\\s+(?:side|leg|arm|direction)\\b/g, ' ')
+    .replace(/[^a-z\\s]/g, ' ')
+    .replace(/\\b(?:left|right)\\b/g, ' ')
+    .split(/\\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      if (/(?:ch|sh|ss|x|z)es$/.test(word)) return word.slice(0, -2)
+      return word.length > 3 && word.endsWith('s') ? word.slice(0, -1) : word
+    })
+    .filter((word, at, all) => !(at === all.length - 1 && /^(?:leg|arm|side)$/.test(word)))
+    .join(' ')
+}
 
 export type Prescription = {
   name: string
@@ -171,6 +179,6 @@ ${rows.join('\n')}
 `,
       'utf8',
     )
-    expect(rows.length).toBeGreaterThan(30)
+    expect(rows.length).toBeGreaterThan(100)
   })
 })

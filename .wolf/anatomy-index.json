@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T19:56:14.502Z",
-    "fileCount": 58,
+    "lastScanned": "2026-08-27T20:41:06.452Z",
+    "fileCount": 59,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "96da7a35d2d42da04dd53373027d0ae0618f6320cbe5399d789be37d9e8ffd87",
-    "storeUpdatedAt": "2026-08-27T19:56:14.515Z"
+    "renderedHash": "b82f8c5915ef0c7aac3b32fb74d19940af6bed188d1848cdb28cdaef133f9765",
+    "storeUpdatedAt": "2026-08-27T20:41:06.467Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1288,6 +1288,31 @@
           "startLine": 57,
           "endLine": 174,
           "tokens": 1206
+        }
+      ]
+    },
+    "scripts/harvest-exercises.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2319,
+      "hash": "7db42878190ac848",
+      "size": 8117,
+      "mtimeMs": 1787863266391.5298,
+      "updatedAt": "2026-08-27T20:41:06.452Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "classify",
+          "kind": "fn",
+          "startLine": 89,
+          "endLine": 107,
+          "tokens": 194
+        },
+        {
+          "name": "canonical",
+          "kind": "fn",
+          "startLine": 108,
+          "endLine": 204,
+          "tokens": 957
         }
       ]
     }

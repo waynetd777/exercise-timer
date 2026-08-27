@@ -10,6 +10,7 @@ import type { Block, Segment, Workout } from '../../engine/types'
 import { SCHEMA_VERSION } from '../../engine/types'
 import { EXERCISES } from '../exercises'
 import { PRESCRIPTIONS } from '../exercises.prescription'
+import { foldName } from '../foldName'
 import type { RoutineSpec } from '../generate'
 import { generateRoutine, seeded } from '../generate'
 
@@ -379,7 +380,7 @@ describe('what a set asks for', () => {
     expect(chosen.every((s) => s.durationMs !== undefined)).toBe(true)
 
     for (const step of chosen) {
-      const said = PRESCRIPTIONS.find((p) => p.name === step.name)
+      const said = PRESCRIPTIONS.find((p) => p.name === foldName(step.name))
       if (!said) continue
       if (said.seconds !== undefined) {
         // Capped at 45s: some harvested durations are the FORMAT'S rather than
@@ -392,7 +393,7 @@ describe('what a set asks for', () => {
     }
     // And at least one of them actually carried a prescription, or the loop
     // above proved nothing.
-    expect(chosen.some((s) => PRESCRIPTIONS.some((p) => p.name === s.name))).toBe(true)
+    expect(chosen.some((s) => PRESCRIPTIONS.some((p) => p.name === foldName(s.name)))).toBe(true)
   })
 
   it('still compiles as timed steps, not gates', () => {

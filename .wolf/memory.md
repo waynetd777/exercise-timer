@@ -223,3 +223,4 @@
 | 20:30 | Created src/ui/GenerateDialog.tsx | — | ~2855 |
 | 20:32 | Generate dialog with live preview; paste now opens in the editor too | src/ui/GenerateDialog.tsx, LibraryScreen, App | phase 4 done, 824 tests green, v4.0 | ~30000 |
 | 21:56 | Created scripts/harvest-prescription.test.ts | — | ~1861 |
+| 22:41 | Created scripts/harvest-exercises.test.ts | — | ~2319 |

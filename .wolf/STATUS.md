@@ -703,6 +703,27 @@ either way.
 
 ### What needs building
 
+PHASES 1 AND 2's FIRST HALF ARE DONE (v5.5, v5.6). `npm run harvest` runs two
+generators: `exercises.prescription.ts` (193 rows, how each movement is
+prescribed) and `exercises.harvested.ts` (16 rows, movements the authored tables
+never named). The generator reads the prescriptions, so a plank is a held 40
+seconds and hammer curls are twelve, rather than everything being a flat 20.
+
+Three traps paid for, all worth remembering:
+
+- **A harvest must not treat its own output as an input.** Comparing against
+  `EXERCISES`, which includes the generated file, made the second run see its own
+  16 rows as already known, write none, and silently drop them from the table.
+  It compares against the AUTHORED tables now.
+- **One folding, not two.** `src/routines/foldName.ts` is the single answer to
+  "are these two written names the same exercise". It was briefly two, and the
+  harvests then disagreed about how much of the same corpus they recognised.
+- **Some harvested durations are the FORMAT'S.** An EMOM minute is 60 seconds
+  because the EMOM says so, not because a bicep curl takes a minute. Circuit sets
+  are capped at 45s for that reason.
+
+Still to do in phase 2: the ladder pyramids, and section composition.
+
 1. **Three fields on the exercise table, all harvestable.** Verified against the
    four: 33 exercises are counted only, 47 timed only, 12 appear both ways; rep
    counts run 5, 6, 8, 10, 12, 15, 20, 30 and durations 10, 15, 20, 30, 40, 45,

@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { EXERCISES, OTHER_EXERCISES } from '../exercises'
-import { MACHINE_EXERCISES } from '../exercises.machine'
+import { EXERCISES, HARVESTED_EXERCISES, MACHINE_EXERCISES, OTHER_EXERCISES } from '../exercises'
+import { foldName } from '../foldName'
 import { IMAGE_CATALOGUE } from '../imageCatalogue'
 
 describe('the machine table, generated from the Horizon guide', () => {
@@ -159,5 +159,29 @@ describe('the authored half, harvested from the corpus', () => {
     // 5 each side" as if they were names. Those are fields, not names.
     const dirty = EXERCISES.filter((e) => /\d|each (side|leg|direction)|–|\+/i.test(e.name))
     expect(dirty.map((e) => e.name)).toEqual([])
+  })
+})
+
+describe('the harvested half', () => {
+  it('adds what the corpus knows and the authored tables do not', () => {
+    expect(HARVESTED_EXERCISES.length).toBeGreaterThan(10)
+    const authored = new Set([...MACHINE_EXERCISES, ...OTHER_EXERCISES].map((e) => foldName(e.name)))
+    // Nothing here duplicates a name the authored tables already chose. That was
+    // the whole failure mode of the first pass: "Curtsy Lunge" beside
+    // "Alternating Curtsy Lunges", "Rb Squats" beside "Band Squats".
+    expect(HARVESTED_EXERCISES.filter((e) => authored.has(foldName(e.name)))).toEqual([])
+  })
+
+  it('folds every spelling of a name onto one', () => {
+    // The property the whole harvest rests on, and it was briefly wrong twice.
+    expect(foldName('Bicycle Crunches')).toBe(foldName('10x Bicycle crunch (per leg)'))
+    expect(foldName('Reverse Crunches')).toBe('reverse crunch')
+    expect(foldName('Hand-release Push-ups')).toBe(foldName('Hand Release Push Ups'))
+    expect(foldName('Fire Hydrant Left Leg')).toBe(foldName('Fire Hydrants'))
+  })
+
+  it('names every exercise in the whole table once', () => {
+    const folded = EXERCISES.map((e) => foldName(e.name))
+    expect(new Set(folded).size).toBe(folded.length)
   })
 })
