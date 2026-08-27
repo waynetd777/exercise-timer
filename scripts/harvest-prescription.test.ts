@@ -53,14 +53,14 @@ const median = (values: number[]): number => {
   return sorted[Math.floor((sorted.length - 1) / 2)]!
 }
 
-type Seen = { reps: number[]; seconds: number[]; rung: number }
+type Seen = { reps: number[]; seconds: number[]; rung: number; paired: number[] }
 
 describe('harvest', () => {
   it('writes the prescription table', () => {
     const seen = new Map<string, Seen>()
     const bump = (name: string): Seen => {
       const k = fold(name)
-      const found = seen.get(k) ?? { reps: [], seconds: [], rung: 0 }
+      const found = seen.get(k) ?? { reps: [], seconds: [], rung: 0, paired: [] }
       seen.set(k, found)
       return found
     }
@@ -78,6 +78,18 @@ describe('harvest', () => {
         // A warm-up minute is a directive's doing, not the exercise's own.
         if (block.durationMs !== undefined && block.durationMs <= 120_000) {
           entry.seconds.push(Math.round(block.durationMs / 1000))
+        }
+        /*
+         * Kept apart for the RATE, which needs the two halves of a pair that are
+         * never written on one line: a "30-second Plank" one week and a
+         * "20 x Plank" another.
+         *
+         * Under a minute only. A 60-second entry is almost always an EMOM
+         * minute, where the reps are done and then you REST for the balance, so
+         * counting one would say a bicep curl takes five seconds.
+         */
+        if (block.durationMs !== undefined && block.durationMs < 60_000) {
+          entry.paired.push(block.durationMs / 1000)
         }
       }
     }
@@ -108,6 +120,13 @@ describe('harvest', () => {
       if (found.reps.length) fields.push(`reps: ${median(found.reps)}`)
       if (found.seconds.length) fields.push(`seconds: ${median(found.seconds)}`)
       if (found.rung > 0) fields.push('rung: true')
+      // Held things are not repeated things: a stretch's "3 reps" is three
+      // holds, and its rate says nothing about how fast anyone moves.
+      if (found.paired.length > 0 && found.reps.length > 0 && !/stretch|hold/.test(key)) {
+        const rate = median(found.paired) / median(found.reps)
+        // Anything outside this is the format talking, not the movement.
+        if (rate >= 0.5 && rate <= 6) fields.push(`secondsPerRep: ${Number(rate.toFixed(1))}`)
+      }
       rows.push(`  { ${fields.join(', ')} },`)
     }
 
@@ -141,34 +160,17 @@ describe('harvest', () => {
  * happens to name today.
  */
 
-/**
- * The same folding the harvest keyed these by. Kept beside the table rather than
- * in `scripts/`, because the app has to fold a name to look one up.
- */
-export function foldName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\\([^)]*\\)/g, ' ')
-    .replace(/\\b\\d+\\s*[×x]?\\s*/g, ' ')
-    .replace(/\\b(?:each|per)\\s+(?:side|leg|arm|direction)\\b/g, ' ')
-    .replace(/[^a-z\\s]/g, ' ')
-    .replace(/\\b(?:left|right)\\b/g, ' ')
-    .split(/\\s+/)
-    .filter(Boolean)
-    .map((word) => {
-      if (/(?:ch|sh|ss|x|z)es$/.test(word)) return word.slice(0, -2)
-      return word.length > 3 && word.endsWith('s') ? word.slice(0, -1) : word
-    })
-    .filter((word, at, all) => !(at === all.length - 1 && /^(?:leg|arm|side)$/.test(word)))
-    .join(' ')
-}
-
 export type Prescription = {
   name: string
   /** Whichever the instructor uses more often for it. */
   prescribe: 'reps' | 'time'
   reps?: number
   seconds?: number
+  /**
+   * How long one rep takes, where the instructor has written this exercise BOTH
+   * ways and so said so himself. Absent for most of them.
+   */
+  secondsPerRep?: number
   /** It has been a ladder's main lift, so it can scale with the rungs. */
   rung?: boolean
 }

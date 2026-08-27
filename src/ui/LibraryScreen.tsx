@@ -73,7 +73,7 @@ function Row({
   onDownloadText: (workout: Workout) => void
 }) {
   const [confirming, setConfirming] = useState(false)
-  const { totalMs, steps } = summary(workout)
+  const { totalMs, estimatedMs, rough, steps } = summary(workout)
 
   return (
     <li
@@ -109,8 +109,14 @@ function Row({
       <div className="row__body">
         <h2 className="row__name">{workout.name}</h2>
         <p className="row__meta label">
+          {/*
+            "about 35 min" where the routine is partly self-paced, and an exact
+            time where it is not. A rep-based routine used to show only its
+            rests, which was truthful and useless.
+          */}
           <span>
-            <span className="unit">{duration(totalMs)}</span>
+            {rough && 'about '}
+            <span className="unit">{duration(totalMs + estimatedMs)}</span>
           </span>
           <span>{steps} steps</span>
           {workout.lastRunAt !== undefined && (

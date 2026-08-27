@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
+import { estimate } from '../routines/estimate'
 import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
 import { SECTIONS_MAX, SECTIONS_MIN, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
@@ -308,6 +309,11 @@ export function GenerateDialog({
     coolDownSecs,
   ])
 
+  const guess = useMemo(
+    () => (result ? estimate(result.workout.blocks) : { knownMs: 0, estimatedMs: 0, rough: false }),
+    [result],
+  )
+
   const chosen = useMemo(() => {
     if (!result) return []
     const names: string[] = []
@@ -529,11 +535,18 @@ export function GenerateDialog({
                 saying "44:40" for a routine that ends when you stop tapping
                 would be the dialog inventing it.
               */}
+              {/*
+                A circuit promises a length; the sections shape can only estimate
+                one, and says "about". Saying "35:20" for a routine that ends
+                when you stop tapping would be the dialog inventing it.
+              */}
               <p className="label label--sm">
                 {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'}
                 {circuit
                   ? ` · ${duration(result.workout.estimatedTotalMs ?? 0)}`
-                  : ` · ${result.workout.blocks.length} sections`}
+                  : ` · ${result.workout.blocks.length} sections · about ${Math.round(
+                      (guess.knownMs + guess.estimatedMs) / 60_000,
+                    )} min`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>
               {result.notes.map((note) => (

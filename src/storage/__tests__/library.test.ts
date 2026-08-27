@@ -38,7 +38,31 @@ describe('stamp / summary', () => {
     const stamped = stamp(make('Legs'), 5000)
     expect(stamped.estimatedTotalMs).toBe(90_000)
     expect(stamped.updatedAt).toBe(5000)
-    expect(summary(stamped)).toEqual({ totalMs: 90_000, steps: 2 })
+    // A fully timed routine estimates nothing, so it is not "about" anything.
+    expect(summary(stamped)).toEqual({
+      totalMs: 90_000,
+      estimatedMs: 0,
+      rough: false,
+      steps: 2,
+    })
+  })
+
+  it('adds an estimate for the part of a routine that has no length', () => {
+    /*
+     * A rep-based routine used to show only its rests: truthful and useless.
+     * The self-paced half is worked out from a seconds-per-rep rate, and `rough`
+     * is what lets the row say "about".
+     */
+    const counted = {
+      ...make('Reps'),
+      blocks: [
+        { kind: 'segment' as const, id: 's', name: 'Mountain Climbers', role: 'work' as const, reps: { kind: 'fixed' as const, count: 30 } },
+      ],
+    }
+    const found = summary(counted)
+    expect(found.totalMs).toBe(0)
+    expect(found.estimatedMs).toBeGreaterThan(0)
+    expect(found.rough).toBe(true)
   })
 
   it('falls back to computing the total when it has not been stamped', () => {

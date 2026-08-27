@@ -6,6 +6,7 @@
 
 import type { Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
+import { estimate } from '../routines/estimate'
 
 /**
  * Pure library operations: sorting, filtering, naming, stamping.
@@ -26,9 +27,29 @@ export function stamp(workout: Workout, now: number): Workout {
   }
 }
 
-export function summary(workout: Workout): { totalMs: number; steps: number } {
+/**
+ * What a library row says about a routine.
+ *
+ * `totalMs` is the TIMED part, denormalised at save time. `estimatedMs` is the
+ * self-paced part, which has no length and is worked out from a rate: see
+ * `routines/estimate.ts`. A rep-based routine used to show only its rests,
+ * which was truthful and useless.
+ *
+ * The estimate is not denormalised. It walks the tree, which the stored total
+ * exists to avoid, but it is a walk of a few hundred nodes over a library of
+ * tens and the alternative is a schema field for a display nicety.
+ */
+export function summary(workout: Workout): {
+  totalMs: number
+  estimatedMs: number
+  rough: boolean
+  steps: number
+} {
+  const guess = estimate(workout.blocks)
   return {
-    totalMs: workout.estimatedTotalMs ?? totalDurationMs(workout),
+    totalMs: workout.estimatedTotalMs ?? guess.knownMs,
+    estimatedMs: guess.estimatedMs,
+    rough: guess.rough,
     steps: stepCount(workout),
   }
 }
