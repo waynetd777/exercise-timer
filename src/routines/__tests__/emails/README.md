@@ -36,16 +36,20 @@ character bar some blank lines. That check is what makes the rest trustworthy.
 Two of the four originals also exist here as re-forwards, which is why eighteen
 emails yielded sixteen routines.
 
+As first added, only 53% of their lines parsed. The grammar was widened for them
+the same day and it is **94% now**, with the four routines it was originally
+written for still at 100%.
+
 | Understood | Routines |
 |---|---|
-| 59 of 60 lines | `2026-07-27` |
-| 40 of 45 | `2026-07-13` |
-| 10 to 74% | everything from 16 April to 6 July |
+| 100% | `2026-05-04`, and the four originals |
+| 88 to 98% | `2026-04-16`, `2026-04-23`, `2026-05-18`, `2026-06-22`, `2026-06-29`, `2026-07-13`, `2026-07-27` |
+| 78 to 80% | `2026-05-11`, `2026-05-26`, `2026-06-01`, `2026-07-06` |
 
-## The third template
+## The third template, now mostly read
 
-The ten routines before 13 July are terser than anything the parser knows, and
-none of it is a small fix:
+The ten routines before 13 July are terser than anything the parser knew. These
+were the forms, and all but the last group are understood now:
 
 - Bare lines with no bullet at all, where the current grammar needs `*`, a
   number and a dot, or a bullet character
@@ -64,3 +68,24 @@ none of it is a small fix:
 The two July routines are on the template the parser does know, and fail on
 smaller things: a bracketed optional rung `Counting: 12-8-4-8-12-(16)`, and four
 directive lines such as "After every round:" and "Use heavy dumbbells".
+
+## What is still not read, and why
+
+Forty-two lines, and most of them are not step definitions at all:
+
+- **Accumulators written down the page.** `1`, `1 + 2`, `1 + 2 + 3`, and
+  `1-2-3-4-5-6-… (keep climbing)`. A person reads these as "do set one, then one
+  and two", which is a shape the block model has no word for.
+- **A countdown**: `10,9,8,7,6,5,4,3,2,1` with "Repeat the sequence counting
+  down" under it.
+- **A course drawn in characters**: `A🔺-------5m———🔺B`, with "Walking lunge
+  A-B" and "Walking lunge B-A" beneath it.
+- **Interval PAIRS**: `Squats (heels on weights) 20sec - 10sec squat hold`, one
+  step and then a different one, on a line that looks like a range.
+- **A ladder of durations**: `20-30-45-30-20 sec cardio`. Deliberately refused,
+  because reading it as reps would invent a main lift called "sec cardio".
+- Odds and ends: `10mins` alone, `Exercises:`, `(Repeat 2x)`, `Push-Up wave:`
+  and the `5 → 10 → 15 → 10 → 5` under it.
+
+None of these is a regex away. Each needs a decision about what it MEANS before
+it can be read, which is why they are reported rather than guessed at.

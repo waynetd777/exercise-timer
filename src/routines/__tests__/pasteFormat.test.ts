@@ -610,3 +610,56 @@ describe('the earlier template, which the routines before July are written in', 
     expect(JSON.stringify(blocks)).toContain('"durationMs":300000')
   })
 })
+
+describe('more of the earlier template', () => {
+  const clean = (text: string) => {
+    const parsed = parseRoutine(text)
+    expect(parsed.skipped).toEqual([])
+    return JSON.stringify(parsed.blocks)
+  }
+
+  it('reads a duration in a trailing parenthesis, and drops a marker after it', () => {
+    // A whole warm-up is written this way: "Jogging (30 sec)". "(Tabata)" names
+    // the timer the instructor had in mind, not the step.
+    expect(clean('#1 Warm up\nJogging (30 sec)')).toContain('"durationMs":30000')
+    const withMarker = clean('#1 Warm up\nKnee lifts (20 sec)(Tabata)')
+    expect(withMarker).toContain('"name":"Knee lifts"')
+    expect(withMarker).toContain('"durationMs":20000')
+  })
+
+  it('leaves a parenthesis that states no unit in the name', () => {
+    expect(clean('#1 Legs\n10 x Walking Lunges (5 each leg)')).toContain('"perSide":true')
+  })
+
+  it('reads a numbered list written with a dash', () => {
+    const blocks = clean('#1 Legs\n1 - 20 x Zulu war dance\n2 - 15 x Jump squats')
+    expect(blocks).toContain('"name":"Zulu war dance"')
+    expect(blocks).toContain('"name":"Jump squats"')
+  })
+
+  it('reads a heading in capitals, and one wrapped in asterisks', () => {
+    for (const heading of ['LEGS', 'ABS', '*Warm up* (on trampoline)']) {
+      const blocks = parseRoutine(`${heading}\n10 x Squats`).blocks
+      expect(blocks.some((b) => b.kind === 'section')).toBe(true)
+    }
+  })
+
+  it('does not read AMRAP as a shouted heading, since it is a clock', () => {
+    // All capitals and short, so the shape rule would take it. It is a step.
+    expect(JSON.stringify(parseRoutine('10-MINUTE AMRAP\n* 10 × Heel Taps').blocks)).toContain(
+      'As many rounds as possible',
+    )
+  })
+
+  it('reads a bullet with no space after it', () => {
+    expect(clean('#1 Core\n•side plank left')).toContain('"name":"side plank left"')
+  })
+
+  it('takes the upper bound of a range, as it already does for rounds', () => {
+    // "You can always stop early": a target you might beat beats one you have
+    // already passed.
+    expect(clean('#1 Arms\n10/12 x lateral raises')).toContain('"count":12')
+    expect(clean('#1 Legs\n10-15 x Fire hydrant')).toContain('"count":15')
+    expect(clean('#1 Warm up\n1-2mins Jumping jacks')).toContain('"durationMs":120000')
+  })
+})
