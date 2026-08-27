@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T20:52:53.721Z",
-    "fileCount": 60,
+    "lastScanned": "2026-08-27T21:15:26.944Z",
+    "fileCount": 61,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "03a6c0e57f843463ac8d55521e4065c16ed3d7b362f4262791f0e542a3566797",
-    "storeUpdatedAt": "2026-08-27T20:52:53.728Z"
+    "renderedHash": "edec83bb56e0b3c2c63a13e54408e380ed4dc26f54028ff1f3ca9298adf5c62e",
+    "storeUpdatedAt": "2026-08-27T21:15:26.951Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1324,6 +1324,38 @@
       "mtimeMs": 1787863973657.1426,
       "updatedAt": "2026-08-27T20:52:53.720Z",
       "source": "hook"
+    },
+    "src/routines/estimate.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1283,
+      "hash": "1bfdfc2982e5f53a",
+      "size": 4489,
+      "mtimeMs": 1787865326881.7668,
+      "updatedAt": "2026-08-27T21:15:26.944Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "secondsPerRep",
+          "kind": "fn",
+          "startLine": 54,
+          "endLine": 63,
+          "tokens": 102
+        },
+        {
+          "name": "stepMs",
+          "kind": "fn",
+          "startLine": 64,
+          "endLine": 67,
+          "tokens": 44
+        },
+        {
+          "name": "estimate",
+          "kind": "fn",
+          "startLine": 68,
+          "endLine": 122,
+          "tokens": 544
+        }
+      ]
     }
   },
   "preamble": [

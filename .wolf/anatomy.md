@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T20:52:53.721Z
-> Files: 60 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:15:26.944Z
+> Files: 61 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -80,6 +80,7 @@
 
 ## src/routines/
 
+- `estimate.ts` — Exercise Timer (~1283 tok)
 - `exercises.other.ts` — Exercise Timer (~2802 tok)
 - `exercises.ts` — Exercise Timer (~1064 tok)
 - `generate.ts` — Exercise Timer (~4235 tok)

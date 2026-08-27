@@ -17,7 +17,7 @@
  * and the mean of 10 and 20 is 15, which nobody wrote.
  *
  * Names are FOLDED: lower case, singular, no side, no count. Look one up with
- * `foldName` rather than by `Exercise.name`. That is what lets this cover
+ * `foldName` from `./foldName` rather than by `Exercise.name`. That is what lets this cover
  * every movement the corpus holds rather than only the ones the exercise table
  * happens to name today.
  */
@@ -28,6 +28,11 @@ export type Prescription = {
   prescribe: 'reps' | 'time'
   reps?: number
   seconds?: number
+  /**
+   * How long one rep takes, where the instructor has written this exercise BOTH
+   * ways and so said so himself. Absent for most of them.
+   */
+  secondsPerRep?: number
   /** It has been a ladder's main lift, so it can scale with the rungs. */
   rung?: boolean
 }
@@ -42,7 +47,7 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'alternating lateral lunge', prescribe: 'reps', reps: 20 },
   { name: 'alternating leg raise', prescribe: 'reps', reps: 10 },
   { name: 'alternating reverse lunge knee drive', prescribe: 'time', rung: true },
-  { name: 'alternating reverse lunge', prescribe: 'reps', reps: 12, seconds: 30, rung: true },
+  { name: 'alternating reverse lunge', prescribe: 'reps', reps: 12, seconds: 30, rung: true, secondsPerRep: 2.5 },
   { name: 'alternating step back lunge', prescribe: 'time' },
   { name: 'arm circle', prescribe: 'time', seconds: 30 },
   { name: 'arm swing acros chest overhead', prescribe: 'time', seconds: 30 },
@@ -57,11 +62,11 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'bent over row', prescribe: 'reps', reps: 10, seconds: 60 },
   { name: 'bicep curl to pres', prescribe: 'reps', reps: 10 },
   { name: 'bicep curl', prescribe: 'reps', reps: 12, seconds: 60, rung: true },
-  { name: 'bicycle abs', prescribe: 'time', reps: 20, seconds: 30 },
+  { name: 'bicycle abs', prescribe: 'time', reps: 20, seconds: 30, secondsPerRep: 1.5 },
   { name: 'bicycle crunch', prescribe: 'reps', reps: 12, rung: true },
   { name: 'bodyweight squat', prescribe: 'reps', reps: 10 },
   { name: 'bugarian split squat', prescribe: 'time', rung: true },
-  { name: 'bulgarian split squat', prescribe: 'time', reps: 5, seconds: 30, rung: true },
+  { name: 'bulgarian split squat', prescribe: 'time', reps: 5, seconds: 30, rung: true, secondsPerRep: 6 },
   { name: 'butt kick', prescribe: 'time', seconds: 20 },
   { name: 'butt stretch', prescribe: 'reps', reps: 3, seconds: 20 },
   { name: 'calf raise pulse', prescribe: 'reps', reps: 10 },
@@ -90,11 +95,11 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'front punch', prescribe: 'reps', reps: 20 },
   { name: 'glute bridge march', prescribe: 'reps', reps: 15 },
   { name: 'glute bridge pulse', prescribe: 'reps', reps: 20 },
-  { name: 'glute bridge rb abduction', prescribe: 'reps', reps: 20, seconds: 30 },
+  { name: 'glute bridge rb abduction', prescribe: 'reps', reps: 20, seconds: 30, secondsPerRep: 1.5 },
   { name: 'glute bridge', prescribe: 'reps', reps: 12 },
   { name: 'glute kickback with resistance band', prescribe: 'reps', reps: 10 },
   { name: 'glute stretch', prescribe: 'time' },
-  { name: 'goblet squat', prescribe: 'reps', reps: 10, seconds: 30, rung: true },
+  { name: 'goblet squat', prescribe: 'reps', reps: 10, seconds: 30, rung: true, secondsPerRep: 3 },
   { name: 'ham string stretch', prescribe: 'time' },
   { name: 'hammer curl', prescribe: 'reps', reps: 12 },
   { name: 'hampstring stretch', prescribe: 'reps', reps: 3 },
@@ -103,7 +108,7 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'hand release push ups', prescribe: 'reps', reps: 5 },
   { name: 'heel tap', prescribe: 'reps', reps: 12, rung: true },
   { name: 'high knee lift', prescribe: 'time', seconds: 20 },
-  { name: 'high knee', prescribe: 'reps', reps: 20, seconds: 30 },
+  { name: 'high knee', prescribe: 'reps', reps: 20, seconds: 30, secondsPerRep: 1.5 },
   { name: 'high plank jack', prescribe: 'time', seconds: 20 },
   { name: 'high plank', prescribe: 'time', seconds: 45 },
   { name: 'hollow hold', prescribe: 'time', seconds: 20 },
@@ -113,11 +118,11 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'jump jump squat', prescribe: 'time', seconds: 30 },
   { name: 'jump squat', prescribe: 'reps', reps: 15 },
   { name: 'jumping jack tabata timer', prescribe: 'time', seconds: 120 },
-  { name: 'jumping jack', prescribe: 'reps', reps: 10, seconds: 30 },
+  { name: 'jumping jack', prescribe: 'reps', reps: 10, seconds: 30, secondsPerRep: 3 },
   { name: 'kettleball swing', prescribe: 'reps', reps: 10 },
   { name: 'king squat', prescribe: 'time', rung: true },
   { name: 'knee drive opposite elbow', prescribe: 'time', seconds: 40 },
-  { name: 'knee lift', prescribe: 'time', reps: 10, seconds: 20 },
+  { name: 'knee lift', prescribe: 'time', reps: 10, seconds: 20, secondsPerRep: 2 },
   { name: 'lateral lunge overhead reach', prescribe: 'time', seconds: 40 },
   { name: 'lateral raise cros punch', prescribe: 'time', seconds: 60 },
   { name: 'lateral raise', prescribe: 'reps', reps: 10 },
@@ -129,7 +134,7 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'low plank sec plank jack', prescribe: 'time', seconds: 20 },
   { name: 'low plank to high plank x', prescribe: 'time' },
   { name: 'march jog on the spot', prescribe: 'time', seconds: 40 },
-  { name: 'mountain climber', prescribe: 'reps', reps: 30, seconds: 30, rung: true },
+  { name: 'mountain climber', prescribe: 'reps', reps: 30, seconds: 30, rung: true, secondsPerRep: 1 },
   { name: 'normal push up', prescribe: 'time' },
   { name: 'oblique crunch', prescribe: 'reps', reps: 10 },
   { name: 'on trampoline', prescribe: 'time' },
@@ -143,13 +148,13 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'plank up down', prescribe: 'reps', reps: 10 },
   { name: 'plie pulse', prescribe: 'time', seconds: 10 },
   { name: 'plie squat sec plie pulse', prescribe: 'reps', reps: 20 },
-  { name: 'plie squat', prescribe: 'reps', reps: 15, seconds: 20 },
+  { name: 'plie squat', prescribe: 'reps', reps: 15, seconds: 20, secondsPerRep: 1.3 },
   { name: 'punch squat', prescribe: 'time', seconds: 30 },
   { name: 'push ups', prescribe: 'reps', reps: 10, rung: true },
   { name: 'quad hamstring stretch', prescribe: 'reps', reps: 3 },
   { name: 'quad stretch', prescribe: 'reps', reps: 3, seconds: 20 },
-  { name: 'rb glute kickback', prescribe: 'reps', reps: 5, seconds: 30 },
-  { name: 'rb lateral walk', prescribe: 'reps', reps: 5, seconds: 30 },
+  { name: 'rb glute kickback', prescribe: 'reps', reps: 5, seconds: 30, secondsPerRep: 6 },
+  { name: 'rb lateral walk', prescribe: 'reps', reps: 5, seconds: 30, secondsPerRep: 6 },
   { name: 'rb side step', prescribe: 'reps', reps: 15 },
   { name: 'rb squat hold', prescribe: 'time', seconds: 20 },
   { name: 'rb squat', prescribe: 'reps', reps: 12, seconds: 60 },
@@ -188,7 +193,7 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'squat lunge combo', prescribe: 'reps', reps: 5 },
   { name: 'squat pres', prescribe: 'time', rung: true },
   { name: 'squat pulse after every round', prescribe: 'reps', reps: 10 },
-  { name: 'squat pulse', prescribe: 'reps', reps: 12, seconds: 30, rung: true },
+  { name: 'squat pulse', prescribe: 'reps', reps: 12, seconds: 30, rung: true, secondsPerRep: 2.5 },
   { name: 'squat sec squat pulse', prescribe: 'reps', reps: 20 },
   { name: 'squat shoulder pres', prescribe: 'time', rung: true },
   { name: 'squat to knee lift', prescribe: 'time', rung: true },
