@@ -42,7 +42,8 @@ Still open from the review (all medium/low), in rough priority:
 - UI: popstate/pushState routing for hardware Back (beforeunload is in); Ctrl+Y redo; focus after Delete/Add; group label/note store ''
   instead of deleting; Menu items keyed by label; drop overlay flicker on onDragLeave; done-row contrast on the phase wash.
 - Quality: split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared with GenerateDialog;
-  add a linter; tests for LibraryScreen/App/audio engine. Product: SEED_WEIGHTS still ships one user's 21 weights to every install.
+  add a linter; tests for LibraryScreen/App/audio engine.
+- v8.0 pushed 2026-08-28 for device testing: everything above, plus the weights page now starts blank on every install (no SEED_WEIGHTS).
 
 ---
 
