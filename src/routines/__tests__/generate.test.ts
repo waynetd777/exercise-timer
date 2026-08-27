@@ -486,16 +486,26 @@ describe('the instructor’s shape', () => {
       spec({ style: 'sections', equipment: 'none', recovery: 'passive', ...over }),
       { rng: seeded(seed), now: 0 },
     )
+  /** The sections alone: everything after the get-ready the routine opens on. */
+  const sectionsOf = (result: ReturnType<typeof sections>) => result.workout.blocks.slice(1)
+
+  it('opens on the same five seconds to get ready a pasted routine gets', () => {
+    // Loose and above the warm-up, and exactly the parser's step, so Send as
+    // text leaves it out and Paste puts it back.
+    const head = sections().workout.blocks[0]
+    expect(head).toMatchObject({ kind: 'segment', role: 'prepare', name: 'Get ready', durationMs: 5_000 })
+    expect(sectionsOf(sections()).every((b) => b.kind === 'section')).toBe(true)
+  })
 
   it('builds named sections in the order the routines use', () => {
-    const names = sections().workout.blocks.map((b) => (b.kind === 'section' ? b.name : ''))
+    const names = sectionsOf(sections()).map((b) => (b.kind === 'section' ? b.name : ''))
     expect(names[0]).toBe('Warm-up')
     expect(names.at(-1)).toBe('Finisher')
     expect(names).toContain('Core')
   })
 
   it('opens on a timed warm-up, which is the one part that is not self-paced', () => {
-    const warm = sections().workout.blocks[0]
+    const warm = sectionsOf(sections())[0]
     expect(warm?.kind === 'section' && warm.name).toBe('Warm-up')
     if (warm?.kind !== 'section') throw new Error('no warm-up')
     expect(warm.children.every((c) => c.kind === 'segment' && c.durationMs === 40_000)).toBe(true)
@@ -507,7 +517,7 @@ describe('the instructor’s shape', () => {
      * the warm-up section empty and it was silently dropped. You warm up on the
      * floor or the bike whatever the session is made of.
      */
-    const first = sections({ equipment: 'machine' }).workout.blocks[0]
+    const first = sectionsOf(sections({ equipment: 'machine' }))[0]
     expect(first?.kind === 'section' && first.name).toBe('Warm-up')
     if (first?.kind !== 'section') throw new Error('no warm-up')
     expect(first.children.length).toBeGreaterThan(3)
@@ -588,7 +598,7 @@ describe('the instructor’s shape', () => {
 
   it('still warms the whole of you up, whatever the session works', () => {
     // Exempt for the same reason it ignores the equipment.
-    const warm = sections({ areas: ['torso'] }).workout.blocks[0]
+    const warm = sectionsOf(sections({ areas: ['torso'] }))[0]
     expect(warm?.kind === 'section' && warm.name).toBe('Warm-up')
     if (warm?.kind !== 'section') throw new Error('no warm-up')
     expect(warm.children.length).toBeGreaterThan(3)
@@ -601,15 +611,15 @@ describe('the instructor’s shape', () => {
   })
 
   it('takes the number of sections it is given, within what the routines do', () => {
-    expect(sections({ sections: 5 }).workout.blocks).toHaveLength(5)
-    expect(sections({ sections: 3 }).workout.blocks).toHaveLength(3)
+    expect(sectionsOf(sections({ sections: 5 }))).toHaveLength(5)
+    expect(sectionsOf(sections({ sections: 3 }))).toHaveLength(3)
     /*
      * Clamped to three at the bottom, which is SHORTER than the instructor ever
      * writes: no routine of his has fewer than five. A shorter session is a
      * reasonable thing to want, and asking for one is not a claim about him.
      */
-    expect(sections({ sections: 1 }).workout.blocks.length).toBeGreaterThanOrEqual(3)
-    expect(sections({ sections: 99 }).workout.blocks.length).toBeLessThanOrEqual(8)
+    expect(sectionsOf(sections({ sections: 1 })).length).toBeGreaterThanOrEqual(3)
+    expect(sectionsOf(sections({ sections: 99 })).length).toBeLessThanOrEqual(8)
   })
 
   it('never repeats an exercise across the whole routine', () => {

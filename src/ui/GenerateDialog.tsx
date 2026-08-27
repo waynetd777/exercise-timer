@@ -546,7 +546,7 @@ export function GenerateDialog({
               */}
               <p className="label label--sm">
                 {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'}
-                {!circuit && ` · ${result.workout.blocks.length} sections`}
+                {!circuit && ` · ${result.workout.blocks.filter((b) => b.kind === 'section').length} sections`}
                 {` · ${estimated(guess.knownMs + guess.estimatedMs, guess.rough)}`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>

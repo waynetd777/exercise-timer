@@ -1381,7 +1381,8 @@ export function EditorScreen({
   workout: Workout
   /** Images already used across the library, offered by the picker. */
   knownImages: readonly KnownImage[]
-  onSave: (workout: Workout) => void
+  /** May be asynchronous: a rejected save keeps the draft here and says why. */
+  onSave: (workout: Workout) => void | Promise<void>
   onCancel: () => void
 }) {
   /**
@@ -1401,7 +1402,7 @@ export function EditorScreen({
   const [imagePreview, setImagePreview] = useState<ImageView | null>(null)
   /** The step whose image is being chosen, or null when the picker is closed. */
   const [choosingFor, setChoosingFor] = useState<Path | null>(null)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   /**
    * `typing` names the field a keystroke belongs to, so a run in ONE field
@@ -1559,7 +1560,7 @@ export function EditorScreen({
       patchSegment(path, { media })
       setChoosingFor(null)
     } catch {
-      setUploadError('That image could not be read. Try a JPEG, PNG or WebP.')
+      setNotice('That image could not be read. Try a JPEG, PNG or WebP.')
     }
   }
 
@@ -1632,7 +1633,14 @@ export function EditorScreen({
             a word beats a tick. */}
             <button
               className="btn btn--primary editor__save"
-              onClick={() => onSave({ ...preview, name: name.trim() || 'Untitled routine' })}
+              onClick={() => {
+                void Promise.resolve(
+                  onSave({ ...preview, name: name.trim() || 'Untitled routine' }),
+                ).catch((cause: unknown) => {
+                  const reason = cause instanceof Error ? cause.message : 'Could not save'
+                  setNotice(`${reason}. Your changes are still here.`)
+                })
+              }}
               aria-label="Save routine"
             >
               <CheckIcon />
@@ -1799,7 +1807,7 @@ export function EditorScreen({
             setChoosingFor(null)
           }}
           onUpload={(file) => void upload(choosingFor, file)}
-          onError={setUploadError}
+          onError={setNotice}
           onClose={() => setChoosingFor(null)}
         />
       )}
@@ -1810,8 +1818,8 @@ export function EditorScreen({
         onClose and shut it on dismissal. Rendered after it, so it sits above it
         in the top layer.
       */}
-      {uploadError !== null && (
-        <NoticeDialog text={uploadError} busy={false} onClose={() => setUploadError(null)} />
+      {notice !== null && (
+        <NoticeDialog text={notice} busy={false} onClose={() => setNotice(null)} />
       )}
 
       {imagePreview && (

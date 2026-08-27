@@ -17,7 +17,7 @@ import { getBlob } from '../media/store'
 import { copyText, downloadJson, downloadText } from '../storage/download'
 import { textFilename, writeRoutine } from '../routines/writeRoutine'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
-import { shareUrl } from '../storage/shareLink'
+import { shareable, shareUrl } from '../storage/shareLink'
 import { updateApp } from '../state/updateApp'
 import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
@@ -269,10 +269,17 @@ export function LibraryScreen({
 
   const share = async (workout: Workout) => {
     const url = await shareUrl(workout, `${location.origin}${location.pathname}`)
+    // Never silent: a link cannot carry an uploaded photo, and the person on
+    // the other end is otherwise the one who finds out.
+    const { droppedImages } = shareable(workout)
+    const photos =
+      droppedImages > 0
+        ? `. A link cannot carry ${droppedImages === 1 ? 'the uploaded photo' : `${droppedImages} uploaded photos`}`
+        : ''
     setNotice(
       (await copyText(url))
-        ? `Link to “${workout.name}” copied`
-        : 'Could not reach the clipboard. Open the link and copy it from the address bar.',
+        ? `Link to “${workout.name}” copied${photos}`
+        : `Could not reach the clipboard. Open the link and copy it from the address bar${photos}`,
     )
   }
 

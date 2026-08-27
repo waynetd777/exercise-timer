@@ -275,8 +275,9 @@ describe('the shape question', () => {
     pick('Sections')
     fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
 
-    const blocks = (onGenerate.mock.calls[0]![0] as Workout).blocks
-    expect(blocks.every((b) => b.kind === 'section')).toBe(true)
-    expect(blocks[0]!.kind === 'section' && blocks[0]!.name).toBe('Warm-up')
+    const [ready, ...sections] = (onGenerate.mock.calls[0]![0] as Workout).blocks
+    expect(ready?.kind === 'segment' && ready.role).toBe('prepare')
+    expect(sections.every((b) => b.kind === 'section')).toBe(true)
+    expect(sections[0]!.kind === 'section' && sections[0]!.name).toBe('Warm-up')
   })
 })

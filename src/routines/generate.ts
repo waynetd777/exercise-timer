@@ -49,6 +49,7 @@ import {
 } from './exercises.shapes'
 import { foldName } from './foldName'
 import { exerciseKey } from './loads'
+import { GET_READY_MS } from './pasteFormat'
 
 export type Recovery = 'passive' | 'active'
 
@@ -677,10 +678,20 @@ export function generateRoutine(
    * through, because a function that did both would be mostly `if (style)`.
    */
   if (spec.style === 'sections') {
-    const blocks = sectionsRoutine(spec, loads, rng, notes)
-    if (blocks.length === 0) {
+    const sections = sectionsRoutine(spec, loads, rng, notes)
+    if (sections.length === 0) {
       throw new Error('No exercises match that combination of areas and equipment.')
     }
+    /*
+     * The same five seconds a pasted routine gets, loose and above the first
+     * section: the app giving you a moment before the warm-up, not part of it.
+     * The length and name match `parseRoutine` exactly, so Send as text leaves
+     * it out and Paste puts it back, the way it does for a pasted routine.
+     */
+    const blocks: Block[] = [
+      segment({ name: 'Get ready', role: 'prepare', durationMs: GET_READY_MS }),
+      ...sections,
+    ]
     return {
       workout: {
         id: newId(),

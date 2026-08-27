@@ -30,8 +30,16 @@ function forget(): void {
 }
 
 export function openDb(): Promise<IDBDatabase> {
-  opening ??= new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
+  if (opening) return opening
+  const promise = new Promise<IDBDatabase>((resolve, reject) => {
+    let request: IDBOpenDBRequest
+    try {
+      request = indexedDB.open(DB_NAME, DB_VERSION)
+    } catch (cause) {
+      // `open` can throw synchronously: site data blocked, a sandboxed frame.
+      reject(cause)
+      return
+    }
 
     request.onupgradeneeded = () => {
       const db = request.result
@@ -58,14 +66,18 @@ export function openDb(): Promise<IDBDatabase> {
       }
       resolve(db)
     }
-    request.onerror = () => {
-      // A transient failure (locked database, pressure) must not poison every
-      // later call. Cleared here so the next call retries the open.
-      forget()
-      reject(request.error)
-    }
+    request.onerror = () => reject(request.error)
   })
-  return opening
+  /*
+   * A failed open must not poison every later call: a transient failure (locked
+   * database, pressure) or a throw from `open` is cleared so the next call
+   * retries. Done HERE, after the assignment, not inside the rejecting
+   * branches: the executor runs before `opening` is assigned, so a `forget()`
+   * inside it cleared nothing and the rejection stayed cached for the session.
+   */
+  opening = promise
+  promise.catch(forget)
+  return promise
 }
 
 function attempt<T>(

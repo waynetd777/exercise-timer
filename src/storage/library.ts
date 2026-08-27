@@ -65,14 +65,26 @@ export function filterWorkouts(workouts: Workout[], query: string): Workout[] {
 /**
  * Favourites first, then the chosen order. A routine that has never been run
  * sorts after ones that have, rather than jumping to the top on a 0 timestamp.
+ *
+ * Length is the timed part PLUS the estimate for the self-paced part, worked
+ * out once per routine before the sort. On the timed part alone a forty-minute
+ * strength session sorted under a four-minute Tabata, and the estimate walks
+ * the tree, which a comparator called n log n times should not.
  */
 export function sortWorkouts(workouts: Workout[], mode: SortMode): Workout[] {
+  const lengths = new Map<Workout, number>()
+  if (mode === 'duration') {
+    for (const workout of workouts) {
+      const { totalMs, estimatedMs } = summary(workout)
+      lengths.set(workout, totalMs + estimatedMs)
+    }
+  }
   const byMode = (a: Workout, b: Workout): number => {
     switch (mode) {
       case 'name':
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
       case 'duration':
-        return summary(b).totalMs - summary(a).totalMs
+        return (lengths.get(b) ?? 0) - (lengths.get(a) ?? 0)
       case 'recent': {
         const aRun = a.lastRunAt ?? 0
         const bRun = b.lastRunAt ?? 0
@@ -127,6 +139,7 @@ export function markRun(workout: Workout, now: number): Workout {
   return { ...workout, lastRunAt: now }
 }
 
-export function toggleFavourite(workout: Workout, now: number): Workout {
-  return stamp({ ...workout, favourite: !(workout.favourite ?? false) }, now)
+/** Not stamped: starring a routine is not editing it. See `markRun`. */
+export function toggleFavourite(workout: Workout): Workout {
+  return { ...workout, favourite: !(workout.favourite ?? false) }
 }
