@@ -9,6 +9,7 @@ import { compile, totalDurationMs } from '../../engine'
 import type { Block, Segment, Workout } from '../../engine/types'
 import { SCHEMA_VERSION } from '../../engine/types'
 import { EXERCISES } from '../exercises'
+import { PRESCRIPTIONS } from '../exercises.prescription'
 import type { RoutineSpec } from '../generate'
 import { generateRoutine, seeded } from '../generate'
 
@@ -365,9 +366,33 @@ describe('what a set asks for', () => {
     expect(exercises(workout)[0]?.reps).toEqual({ kind: 'fixed', count: 15 })
   })
 
-  it('leaves a non-machine exercise uncounted, for the prescription to decide', () => {
-    const { workout } = make({ equipment: 'none' })
-    expect(exercises(workout).every((s) => s.reps === undefined)).toBe(true)
+  it('asks a non-machine exercise for what the instructor asks it for', () => {
+    /*
+     * Out of `exercises.prescription.ts`, harvested from the sixteen routines,
+     * which is why a plank comes out as a held forty seconds and hammer curls
+     * as twelve reps. Timed either way: these are the circuit shapes, where the
+     * clock is what makes the length knowable and a count rides along as the
+     * target.
+     */
+    const { workout } = make({ equipment: 'none', totalMs: 50 * 60_000 })
+    const chosen = exercises(workout)
+    expect(chosen.every((s) => s.durationMs !== undefined)).toBe(true)
+
+    for (const step of chosen) {
+      const said = PRESCRIPTIONS.find((p) => p.name === step.name)
+      if (!said) continue
+      if (said.seconds !== undefined) {
+        // Capped at 45s: some harvested durations are the FORMAT'S rather than
+        // the exercise's, and an EMOM's minute of curls is not a circuit set.
+        expect(step.durationMs).toBe(Math.min(Math.max(said.seconds * 1000, 20_000), 45_000))
+      }
+      if (said.prescribe === 'reps' && said.reps !== undefined) {
+        expect(step.reps).toEqual({ kind: 'fixed', count: said.reps })
+      }
+    }
+    // And at least one of them actually carried a prescription, or the loop
+    // above proved nothing.
+    expect(chosen.some((s) => PRESCRIPTIONS.some((p) => p.name === s.name))).toBe(true)
   })
 
   it('still compiles as timed steps, not gates', () => {
