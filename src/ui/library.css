@@ -458,6 +458,48 @@
   min-width: 0;
 }
 
+/* A choice and its length, side by side: the length is small and the choice
+   should take whatever is left. */
+.generate__pair {
+  display: flex;
+  align-items: center;
+  gap: var(--step-2);
+  min-width: 0;
+}
+
+.generate__pair .paste__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.generate__secs {
+  display: flex;
+  align-items: center;
+  gap: var(--step-1);
+  flex: none;
+  color: var(--bone-dim);
+}
+
+/*
+ * No spinner buttons: fiddly at this size, and the field is edited by typing.
+ * `type="number"` stays, so the arrow keys still nudge and a phone still gets a
+ * numeric keypad. Same reasoning as `.efield--secs` in the editor.
+ */
+.generate__number {
+  width: 5.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.generate__number::-webkit-outer-spin-button,
+.generate__number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
 .generate__options {
   display: flex;
   flex-wrap: wrap;

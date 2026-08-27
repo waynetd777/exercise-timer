@@ -139,6 +139,27 @@ describe('GenerateDialog', () => {
     expect(screen.getByRole('button', { name: /Open in editor/ })).toHaveProperty('disabled', true)
   })
 
+  it('opens on the three lengths, and takes new ones', () => {
+    const onGenerate = open()
+    expect((screen.getByLabelText('Warm up with, seconds') as HTMLInputElement).value).toBe('600')
+    expect((screen.getByLabelText('Moving how, seconds') as HTMLInputElement).value).toBe('60')
+    expect((screen.getByLabelText('Cool down with, seconds') as HTMLInputElement).value).toBe('120')
+
+    fireEvent.change(screen.getByLabelText('Warm up with, seconds'), { target: { value: '300' } })
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+
+    const blocks = (onGenerate.mock.calls[0]![0] as Workout).blocks
+    const warm = blocks[1]
+    expect(warm?.kind === 'segment' && warm.durationMs).toBe(300_000)
+  })
+
+  it('still offers a length when resting, where there is no cardio to choose', () => {
+    open()
+    fireEvent.click(screen.getByRole('button', { name: 'Rest' }))
+    expect(screen.queryByLabelText('Warm up with, seconds')).toBeNull()
+    expect((screen.getByLabelText('Resting for, seconds') as HTMLInputElement).value).toBe('60')
+  })
+
   it('loads an exercise from what was last used for it', () => {
     const onGenerate = open([saved])
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))

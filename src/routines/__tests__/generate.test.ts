@@ -137,6 +137,45 @@ describe('the shape it builds', () => {
     expect(names.at(-1)).toBe('Cool Down: Cycling')
   })
 
+  it('opens on ten minutes and closes on two, unless told otherwise', () => {
+    const blocks = make().workout.blocks
+    const warm = blocks[1]
+    const cool = blocks.at(-1)
+    expect(warm?.kind === 'segment' && warm.durationMs).toBe(600_000)
+    expect(cool?.kind === 'segment' && cool.durationMs).toBe(120_000)
+  })
+
+  it('takes the three lengths it is given', () => {
+    const { workout } = make({ warmUpMs: 300_000, recoveryMs: 90_000, coolDownMs: 180_000 })
+    const blocks = workout.blocks
+    const warm = blocks[1]
+    const cool = blocks.at(-1)
+    expect(warm?.kind === 'segment' && warm.durationMs).toBe(300_000)
+    expect(cool?.kind === 'segment' && cool.durationMs).toBe(180_000)
+
+    const gaps = blocks.filter(
+      (b): b is Segment => b.kind === 'segment' && b.name === 'Cycling' && b.durationMs === 90_000,
+    )
+    expect(gaps.length).toBeGreaterThan(3)
+  })
+
+  it('applies the gap to a resting routine too, where there is no cardio', () => {
+    const { workout } = make({ recovery: 'passive', recoveryMs: 45_000 })
+    const rests = workout.blocks.filter(
+      (b): b is Segment => b.kind === 'segment' && b.name === 'Recover',
+    )
+    expect(rests.length).toBeGreaterThan(0)
+    expect(rests.every((r) => r.durationMs === 45_000)).toBe(true)
+  })
+
+  it('refuses a length of nothing, which is not a slot', () => {
+    const { workout } = make({ warmUpMs: 0, coolDownMs: -5 })
+    const warm = workout.blocks[1]
+    const cool = workout.blocks.at(-1)
+    expect(warm?.kind === 'segment' && warm.durationMs).toBe(600_000)
+    expect(cool?.kind === 'segment' && cool.durationMs).toBe(120_000)
+  })
+
   it('warms up and cools down with whatever it was told to', () => {
     const { workout } = make({
       warmUpExercise: 'Trampoline',

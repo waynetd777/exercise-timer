@@ -56,6 +56,15 @@ export type RoutineSpec = {
   warmUpExercise?: string
   /** What the minute at the end is. Defaults to Cycling. */
   coolDownExercise?: string
+  /** How long the opening stretch of cardio runs. Defaults to ten minutes. */
+  warmUpMs?: number
+  /**
+   * How long each gap between exercises runs, whether it is spent moving or
+   * resting. Defaults to a minute, which is what both shapes were read off.
+   */
+  recoveryMs?: number
+  /** How long the closing stretch runs. Defaults to two minutes. */
+  coolDownMs?: number
   /**
    * Cardio exercises to draw the between-set minutes from, a different one each
    * time. Takes precedence over `recoveryExercise`; absent means the same
@@ -91,7 +100,8 @@ const REST_MS = 10_000
 const ANNOUNCE_MS = 30_000
 const RECOVER_MS = 60_000
 const WARM_UP_MS = 600_000
-const COOL_DOWN_MS = 60_000
+/** Longer than a recovery minute: the end of a session is not another gap in it. */
+const COOL_DOWN_MS = 120_000
 const DEFAULT_SETS = 3
 /** A side gets two sets, not three, which is Wayne's own rule. */
 const PER_SIDE_SETS = 2
@@ -241,6 +251,7 @@ function exerciseBlocks(
   recoveryName: string,
   recoveryMedia: string | undefined,
   announce: boolean,
+  recoverMs: number,
 ): Block[] {
   const prepareMs = exercise.attachment === 'ankle' ? STRAP_PREPARE_MS : PREPARE_MS
   const labelled = load ? `${exercise.name} ${load}` : exercise.name
@@ -266,7 +277,7 @@ function exerciseBlocks(
         segment({
           name: recoveryName,
           role: 'work',
-          durationMs: RECOVER_MS,
+          durationMs: recoverMs,
           ...(recoveryMedia ? { media: { source: 'bundled', path: recoveryMedia } } : {}),
         }),
       )
@@ -285,7 +296,7 @@ function exerciseBlocks(
     blocks.push(sets({ ...work, id: newId() }, count))
   }
   if (spec.recovery === 'passive') {
-    blocks.push(segment({ name: 'Recover', role: 'recover', durationMs: RECOVER_MS }))
+    blocks.push(segment({ name: 'Recover', role: 'recover', durationMs: recoverMs }))
   }
   return blocks
 }
@@ -325,6 +336,13 @@ export function generateRoutine(
    * being enough the moment it could be the trampoline, which has no
    * illustration at all. "Warm Up: Trampoline" says what to do without one.
    */
+  /** A length from the spec, or the default. Never zero: that is not a slot. */
+  const span = (want: number | undefined, fallbackMs: number) =>
+    want !== undefined && Number.isFinite(want) && want > 0 ? Math.round(want) : fallbackMs
+  const warmUpMs = span(spec.warmUpMs, WARM_UP_MS)
+  const recoverMs = span(spec.recoveryMs, RECOVER_MS)
+  const coolDownMs = span(spec.coolDownMs, COOL_DOWN_MS)
+
   const named = (want: string | undefined) => cardio.find((e) => e.name === want) ?? recovery
   const warmUp = named(spec.warmUpExercise)
   const coolDown = named(spec.coolDownExercise)
@@ -360,7 +378,7 @@ export function generateRoutine(
           segment({
             name: warmUp ? `Warm Up: ${warmUp.name}` : 'Warm Up',
             role: 'work',
-            durationMs: WARM_UP_MS,
+            durationMs: warmUpMs,
             ...(warmUp?.media ? { media: { source: 'bundled', path: warmUp.media } } : {}),
           }),
         ]
@@ -372,14 +390,18 @@ export function generateRoutine(
           segment({
             name: coolDown ? `Cool Down: ${coolDown.name}` : 'Cool Down',
             role: 'work',
-            durationMs: COOL_DOWN_MS,
+            durationMs: coolDownMs,
             ...(coolDown?.media ? { media: { source: 'bundled', path: coolDown.media } } : {}),
           }),
         ]
       : []
 
   const budget = spec.totalMs - totalMs(opening) - totalMs(closing)
-  const rough = Math.max(1, Math.round(budget / (95_000 + 30_000 * (spec.sets ?? DEFAULT_SETS))))
+  const perExercise =
+    (spec.recovery === 'active' ? ANNOUNCE_MS + recoverMs + PREPARE_MS : PREPARE_MS + recoverMs) +
+    (spec.sets ?? DEFAULT_SETS) * (WORK_MS + REST_MS) -
+    REST_MS
+  const rough = Math.max(1, Math.round(budget / Math.max(1, perExercise)))
   const want = share([...pools.keys()], pools, rough)
 
   const body: Block[] = []
@@ -430,6 +452,7 @@ export function generateRoutine(
       spinner?.name ?? 'Cycling',
       spinner?.media,
       announce,
+      recoverMs,
     )
     const cost = totalMs(blocks)
 
