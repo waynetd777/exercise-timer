@@ -1189,6 +1189,25 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-25T11:20:00+02:00"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-08-27T19:08:00+02:00",
+      "error_message": "The Send menu on a library row opened far below its button (\"miles below\")",
+      "file": "src/ui/Menu.tsx",
+      "root_cause": "`.menu__list` is `position: fixed` and placed from the trigger's `getBoundingClientRect()`, which is correct ONLY while no ancestor establishes a containing block for fixed descendants. `.library__scroll` carries `transform: translateY(calc(var(--pull, 0) * 1px))` for pull-to-refresh, applied unconditionally, and even `translateY(0)` is enough to make that element the containing block. The list was therefore positioned against the scrolled list's border box rather than the viewport, so the further down the library was scrolled the further off it landed. The header menus (Routines, Sort) never showed it because they sit OUTSIDE the scroller, which is why the bug only appeared once a Menu was put inside a row.",
+      "fix": "Render the list through `createPortal` into `document.body`, so `position: fixed` resolves against the viewport wherever the trigger happens to live. Pinned by a test that mounts a Menu inside a transformed ancestor and asserts the list's parent is `document.body`. Placement was separately rewritten to measure the real box rather than assume 208px, to flip above the trigger when there is no room below, and to right-align when a left-aligned list would overrun the screen.",
+      "tags": [
+        "css",
+        "position-fixed",
+        "transform",
+        "containing-block",
+        "portal",
+        "menu",
+        "library"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T19:08:00+02:00"
     }
   ]
 }

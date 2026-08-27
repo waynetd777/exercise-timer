@@ -512,6 +512,50 @@ gained the three traps, and the library help covers the new menu.
 
 ---
 
+## ✅ The Send menu lands where it should, and Backup is called Backup (2026-08-27, v3.8)
+
+**bug-070, and it was not the arithmetic.** `.library__scroll` carries
+`transform: translateY(calc(var(--pull, 0) * 1px))` for pull-to-refresh at ALL
+times, and any transform, `translateY(0)` included, makes that element the
+containing block for `position: fixed` descendants. The `Menu` list is fixed and
+placed from the trigger's viewport rect, so a menu opened from a library ROW was
+positioned against the scrolled list and appeared far below its button, further
+off the further you had scrolled. The header menus were always fine because they
+sit outside the scroller, which is why this only existed once a Menu went into a
+row.
+
+Fixed with a **portal to `document.body`** rather than arithmetic against the
+offending ancestor, so the rule holds wherever a trigger lives instead of asking
+every future ancestor to watch what it does with transforms. `filter`,
+`perspective`, `will-change` and `contain` are the same trap. Pinned by a test
+that mounts a Menu inside a transformed ancestor.
+
+**Placement rewritten** while in there. It hardcoded `width = 208` to match
+`width: 13rem`, true only while the root font size is 16px, and never measured
+height at all. It now measures the rendered box in a `useLayoutEffect` (before
+paint, so nothing flashes), opens BELOW where there is room and ABOVE where there
+is not, takes the roomier side and caps `max-height` when it fits neither, and
+right-aligns when a left-aligned list would overrun the screen. Header chips are
+unaffected and a test says so. `place()` is exported and unit tested, because
+jsdom lays nothing out and the arithmetic is the whole behaviour.
+
+**Wording, all Wayne's.** The Send menu is ordered copy link, copy text, download
+text, backup: the three that send a routine to someone, then the one that keeps
+it. That is why the JSON export is now called a **BACKUP** rather than an export,
+in both menus: `Backup incl. images` on a row, `Backup all incl. images` in the
+Routines menu. The notice says "Backed up" to match, and "photos" is gone from
+every user-facing string in favour of "images".
+
+**738 tests green** (13 for `Menu`), typecheck and production build clean.
+
+Docs: the containing-block trap is in `src/ui/README.md` under "Traps this
+codebase has already hit", the `.menu__list` comment in `theme.css` now states
+the condition under which `position: fixed` is viewport-relative, and
+`.library__scroll` in `library.css` carries a CAUTION at the source of the
+transform. Logged as bug-070.
+
+---
+
 ## 🚀 Next quest — none open
 
 The strength-routine work below is COMPLETE and pushed. The obvious candidates

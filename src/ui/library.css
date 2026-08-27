@@ -39,7 +39,13 @@
 
 .library__scroll {
   /* Follows the finger. The indicator sits in the space this opens up.
-     --pull is unitless, so it can also drive an opacity ratio. */
+     --pull is unitless, so it can also drive an opacity ratio.
+
+     CAUTION: this transform is applied at ALL times, and a transform makes its
+     element the containing block for `position: fixed` descendants, even at
+     translateY(0). Anything fixed inside this scroller is therefore placed
+     against the SCROLLED list, not the viewport. That is why `Menu` portals its
+     list to the body. (bug-070) */
   transform: translateY(calc(var(--pull, 0) * 1px));
   display: grid;
   align-content: start;
