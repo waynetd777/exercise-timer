@@ -48,11 +48,11 @@ would leave a blank line under the step for ever.
 ## Rules worth knowing
 
 - **`moveStep` moves a row through the routine as it *reads*.** Next to a group
-  (reps, ladder or section alike) it moves *into* it, as the first child going down
+  (sets, ladder or section alike) it moves *into* it, as the first child going down
   or the last going up. Next to a step it swaps. At the edge of a group it steps
   *outside*. `moveBy` only reorders among siblings, which left a step trapped
   inside or outside a group. Sibling resolution covers every group kind: it once
-  covered only reps, and moving a step inside a section ejected it.
+  covered only sets, and moving a step inside a section ejected it.
 - **Groups themselves only ever swap.** `wrapInRepeat` refuses to nest a group inside a
   group, because the editor renders two levels and a deeper tree would be invisible
   and un-editable. The *data model* supports any depth, so lifting this is a UI
@@ -67,27 +67,32 @@ would leave a blank line under the step for ever.
   a key to `undefined`, and clearing an image means *deleting* the key so the
   property is absent rather than present-and-undefined.
 - **Defaults match the real routines:** 30s to get set, 20s of work, 10s rest, 60s
-  recovery, and a new group is three reps of work-then-rest. An added step usually
+  recovery, and a new group is three sets of work-then-rest. An added step usually
   needs no editing. Do not tidy these to round numbers.
-- **The label a new group stores is `'Reps'`, always plural,** short for
-  repetitions. It is *data*, so renaming it in code is never enough. See
-  `storage/migrate.ts`.
+- **The label a new group stores is `'Set'`, singular,** because it is read as a
+  position: "Set 2 of 3". The button that makes one is plural, because that names
+  the thing. The label is *data*, so renaming it in code is never enough: every
+  former default is remapped on read. See `storage/migrate.ts`.
 
 ## One grammar for every row
 
-Four kinds of row (step, reps, ladder, section) and one order for the buttons that
+Four kinds of row (step, sets, ladder, section) and one order for the buttons that
 act on them:
 
-    step     add · up · down · wrap    · duplicate · delete
-    reps     add · up · down · ungroup · duplicate · delete
-    ladder   add · up · down ·           duplicate · delete
-    section  add · up · down ·           duplicate · delete
+    step     add · wrap    · duplicate · delete
+    sets     add · ungroup · duplicate · delete
+    ladder   add ·           duplicate · delete
+    section  add ·           duplicate · delete
 
-Add first, delete last, duplicate before it, up and down adjacent and in reading
-order. The cluster is right-aligned, so despite rows carrying five or six buttons
-the sequence is stable **counting from the right**. Delete is always flush right,
-and that is where muscle memory lands. Wrap and ungroup share a slot and an icon on
-purpose: on a step it makes a reps group, on a group it undoes one.
+Add first, delete last, duplicate before it. The cluster is right-aligned, so
+despite rows carrying different numbers of buttons the sequence is stable
+**counting from the right**. Delete is always flush right, and that is where
+muscle memory lands. Wrap and ungroup share a slot and an icon on purpose: on a
+step it makes a group of sets, on a group it undoes one.
+
+Reordering is not in the cluster at all: every row is dragged by the grip at its
+leading edge, or focused there and moved with the arrow keys. The Move up and
+Move down buttons that used to sit between add and wrap are gone.
 
 The image and note buttons are deliberately **not** in that cluster. Everything in
 the cluster acts on the row's position or existence and acts at once, while these
@@ -121,7 +126,7 @@ is drawn for those steps.
 Two details it would be easy to get wrong:
 
 - **It is the enclosing SECTION that decides, not the group the step sits in.** A
-  ladder or a reps group on its own always runs as the countdown. Inside a
+  ladder or a group of sets on its own always runs as the countdown. Inside a
   list-display section, its steps are listed. So the check walks ancestors for the
   nearest section rather than looking at the immediate parent.
 - **A TIMED step in a list section still runs as the countdown,** because you watch

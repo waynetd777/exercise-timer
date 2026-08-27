@@ -109,8 +109,8 @@ describe('pathLabel', () => {
     expect(pathLabel([{ label: 'Circuit', iteration: 1, of: 1 }])).toBe('')
   })
 
-  it('falls back to "Reps" when a repeat has no label', () => {
-    expect(pathLabel([{ iteration: 3, of: 8 }])).toBe('Reps 3 of 8')
+  it('falls back to "Set" when a repeat has no label', () => {
+    expect(pathLabel([{ iteration: 3, of: 8 }])).toBe('Set 3 of 8')
   })
 
   it('returns empty for a step outside any repeat', () => {

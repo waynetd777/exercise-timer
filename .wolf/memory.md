@@ -195,3 +195,9 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 09:23 | Created src/ui/useRowDrag.ts | — | ~2422 |
+| 13:49 | Session end: 1 writes across 1 files (useRowDrag.ts) | 0 reads | ~2422 tok |
+
+## Session: 2026-08-26 13:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

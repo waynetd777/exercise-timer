@@ -206,8 +206,8 @@ Re-check that ratio if any role colour changes.
 ## Seven kinds, seven colours
 
 The four roles above are phases. The three group kinds are containers, so they take
-hues the roles do not use: **reps orange, ladder yellow, section teal**
-(`--group-*` in `theme.css`). Reps and ladder borrow the routine tints, keeping one
+hues the roles do not use: **sets orange, ladder yellow, section teal**
+(`--group-*` in `theme.css`). Sets and ladder borrow the routine tints, keeping one
 `.label--section` names the section running, ONCE, in the run header under the
 routine name. It borrows `--group-section` rather than `--phase` on purpose, or
 the heading would change hue every time work turned to rest, as though the part
@@ -395,7 +395,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `App.tsx` | Routing between library, run and edit. Consumes a shared routine from the URL |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
-| `EditorScreen.tsx` | Steps, reps, images, undo, and the image chooser and preview dialogs |
+| `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs |
 | `SoundsScreen.tsx` | The cue bench. **Dev only.** `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
 | `PasteDialog.tsx` | Paste a routine as text. Reports unparsed lines before saving, and hands over the template |
 | `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |

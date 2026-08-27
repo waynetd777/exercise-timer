@@ -739,9 +739,9 @@ function SegmentRow({
         {betweenRepsOnly && (
           <span
             className="erow__between label label--sm"
-            title="A rest belongs between reps, so this one does not run after the last rep. To rest at the end too, put a rest step after the group."
+            title="A rest belongs between sets, so this one does not run after the last set. To rest at the end too, put a rest step after the group."
           >
-            between reps
+            between sets
           </span>
         )}
 
@@ -854,7 +854,7 @@ function SegmentRow({
               onClick={() => onWrap(path)}
               disabled={depth > 0}
               aria-label="Repeat this step"
-              title={depth > 0 ? 'Already inside reps' : 'Repeat this step'}
+              title={depth > 0 ? 'Already inside sets' : 'Repeat this step'}
             >
               <RepsIcon />
             </button>
@@ -965,8 +965,8 @@ function RepeatRow({
         <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
         <input
           className="efield efield--name"
-          value={repeat.label ?? 'Reps'}
-          aria-label="Reps label"
+          value={repeat.label ?? 'Set'}
+          aria-label="Set label"
           onChange={(event) => onPatch(path, { label: event.target.value })}
         />
 
@@ -975,7 +975,7 @@ function RepeatRow({
           <CountField
             value={repeat.times}
             max={99}
-            label="Number of reps"
+            label="Number of sets"
             onCommit={(times) => onPatch(path, { times })}
           />
         </label>
@@ -984,7 +984,7 @@ function RepeatRow({
           <button
             className="btn btn--ghost"
             onClick={() => onAddChild(path)}
-            aria-label="Add a step to these reps"
+            aria-label="Add a step to these sets"
             title="Add a step inside"
           >
             <PlusIcon />
@@ -992,24 +992,24 @@ function RepeatRow({
           <button
             className="btn btn--ghost"
             onClick={() => onUnwrap(path)}
-            aria-label="Ungroup these reps"
-            title="Ungroup. Keeps the steps, drops the repeat."
+            aria-label="Ungroup these sets"
+            title="Ungroup. Keeps the steps, drops the group."
           >
             <RepsIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onDuplicate(path)}
-            aria-label="Duplicate these reps"
-            title="Duplicate reps and steps"
+            aria-label="Duplicate these sets"
+            title="Duplicate sets and steps"
           >
             <CopyIcon />
           </button>
           <button
             className="btn btn--ghost"
             onClick={() => onRemove(path)}
-            aria-label="Delete these reps and their steps"
-            title="Delete reps and steps"
+            aria-label="Delete these sets and their steps"
+            title="Delete sets and steps"
           >
             <TrashIcon />
           </button>
@@ -1677,7 +1677,7 @@ export function EditorScreen({
           onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
         >
           <PlusIcon />
-          Reps
+          Sets
         </button>
         <button
           className="chip chip--action"

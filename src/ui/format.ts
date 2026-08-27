@@ -32,11 +32,11 @@ export function stopwatch(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
-/** "Reps 3 of 8 · Set 2 of 2" from a timeline entry's repeat path. */
+/** "Set 3 of 8 · Round 2 of 2" from a timeline entry's repeat path. */
 export function pathLabel(path: { label?: string; iteration: number; of: number }[]): string {
   return path
     .filter((step) => step.of > 1)
-    .map((step) => `${step.label?.trim() || 'Reps'} ${step.iteration} of ${step.of}`)
+    .map((step) => `${step.label?.trim() || 'Set'} ${step.iteration} of ${step.of}`)
     .join(' · ')
 }
 
@@ -293,7 +293,7 @@ export function groupCaption(group: {
   if (!group || group.of <= 1) return ''
   // `||`, not `??`: deleting the label in the editor stores an empty string,
   // and a caption reading " 2 of 3" is worse than the default word.
-  const position = `${group.label?.trim() || 'Reps'} ${group.iteration} of ${group.of}`
+  const position = `${group.label?.trim() || 'Set'} ${group.iteration} of ${group.of}`
   return group.rung === undefined ? position : `${position} · ${group.rung} reps`
 }
 

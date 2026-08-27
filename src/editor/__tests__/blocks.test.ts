@@ -240,10 +240,10 @@ describe('constructors', () => {
     expect(compile({ ...base, blocks }).entries).toHaveLength(5)
   })
 
-  it('defaults a new group to 3 reps of a 20s exercise and a 10s rest', () => {
+  it('defaults a new group to 3 sets of a 20s exercise and a 10s rest', () => {
     const reps = newRepeat()
     expect(reps.times).toBe(3)
-    expect(reps.label).toBe('Reps')
+    expect(reps.label).toBe('Set')
     expect(reps.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null))).toEqual(
       [
         ['work', 20_000],
@@ -290,10 +290,10 @@ describe('newRoutineBlocks: what a new routine opens on', () => {
     expect(reps.map((entry) => entry.role)).toEqual(['work', 'rest', 'work', 'rest', 'work'])
   })
 
-  it('labels the reps, so the run screen shows "Reps 2 of 3"', () => {
+  it('labels the group, so the run screen shows "Set 2 of 3"', () => {
     const entry = compile({ ...base, blocks: template }).entries[3]!
     expect(entry.path).toEqual([
-      { kind: 'repeat', id: expect.any(String), label: 'Reps', iteration: 2, of: 3 },
+      { kind: 'repeat', id: expect.any(String), label: 'Set', iteration: 2, of: 3 },
     ])
   })
 })

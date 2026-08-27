@@ -19,7 +19,7 @@ Type 3 was confirmed rather than assumed. It is 60 seconds, has no description,
 appears after each exercise's sets, and matches the file's own
 `restBetweenTabatas: 60`.
 
-The import is **flat**, so no reps groups are inferred. The shape is recoverable
+The import is **flat**, so no groups of sets are inferred. The shape is recoverable
 later, but a wrong guess would silently alter someone's workout.
 
 `importFiles.ts` sits above all three readers. It takes the dropped or picked files
@@ -178,7 +178,7 @@ it needs the least equipment: the others want a trampoline and a set of resistan
 bands.
 
 `beginner-full-body` is committed as an authored `Workout` rather than as a
-`.tabata` file put through the importer, because its exercise runs are Reps groups
+`.tabata` file put through the importer, because its exercise runs are groups of sets
 and the importer deliberately never infers those. The `.tabata` files still in this
 folder are importer test fixtures now. They are not in the app's import graph, so
 they cost nothing in the bundle.

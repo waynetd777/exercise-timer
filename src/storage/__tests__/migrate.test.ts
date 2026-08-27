@@ -154,14 +154,23 @@ describe('rehosted illustrations', () => {
     expect(migrateWorkout(before)).toBe(before)
   })
 
-  it('still renames a legacy Round label, including inside a section', () => {
-    const migrated = migrateWorkout(
-      workout([
-        section([{ kind: 'repeat', id: 'r', label: 'Round', times: 3, children: [step('A')] }]),
-      ]),
-    )
-    const group = (migrated.blocks[0] as Section).children[0]
-    expect(group).toMatchObject({ kind: 'repeat', label: 'Reps' })
+  it.each(['Round', 'Rep', 'Reps'])(
+    'renames the legacy %s label, including inside a section',
+    (label) => {
+      const migrated = migrateWorkout(
+        workout([section([{ kind: 'repeat', id: 'r', label, times: 3, children: [step('A')] }])]),
+      )
+      const group = (migrated.blocks[0] as Section).children[0]
+      expect(group).toMatchObject({ kind: 'repeat', label: 'Set' })
+    },
+  )
+
+  it('leaves a group someone named themselves alone', () => {
+    // Only the exact former defaults move. "Rounds" and "Set" are theirs.
+    for (const label of ['Rounds', 'Round 1', 'Set', 'Superset']) {
+      const before = workout([{ kind: 'repeat', id: 'r', label, times: 3, children: [step('A')] }])
+      expect(migrateWorkout(before)).toBe(before)
+    }
   })
 
   it('maps only onto images the app actually offers', () => {

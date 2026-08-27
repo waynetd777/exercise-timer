@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-25
+> Last updated: 2026-08-27
 
 ---
 
@@ -409,6 +409,54 @@ Testing note worth keeping: jsdom lays nothing out, so the drag tests install a
 `getBoundingClientRect` that gives each row a fixed height in its CURRENT order
 and adds its parsed `translateY`. The frames run inside `act()`, or a state
 update dispatched from an animation frame never commits.
+
+---
+
+## ✅ A repeat group is called Sets, not Reps (2026-08-27)
+
+Wayne's two mixed-cardio routines use a repeat group to count SETS ("3 sets of
+12 reps"), but the editor called the group "reps" everywhere: the toolbar chip,
+"Number of reps", four group aria-labels, the "between reps" badge, the help
+text, and the `'Reps'` label default. Meanwhile the one control that really does
+mean reps, the step's `x` unit, used the same word. He had to type "Set" into
+each group's label by hand for the run screen to read "Set 1 of 3".
+
+Renamed every user-visible instance on the GROUP to "sets", and the `label`
+default in `editor/blocks.ts` from `'Reps'` to `'Set'`, with both `format.ts`
+fallbacks (`pathLabel`, `groupCaption`) to match. Left alone where the word is
+correct: the step timing field's `Reps` label, the unit tooltips, and a ladder's
+"Reps at each rung". `data-kind="reps"`, `data-between-reps`, `RepsIcon` and
+`newRepsStep` are CSS hooks and identifiers, not copy, so they did not move.
+
+**The label is DATA, so the rename needed a migration.** Every group already
+saved carries the literal `'Reps'` written by the old `newRepeat()`, and the
+caption fallback only fires when a label is ABSENT, so a code-only rename would
+have left every existing routine reading "Reps 2 of 3". `storage/migrate.ts` now
+maps `'Round'`, `'Rep'` and `'Reps'` onto `'Set'` on read, wired through
+`listWorkouts`, `fromBundle` and `decodeRoutine` as before. A group someone named
+themselves is still left alone. This is the second time this exact trap has been
+walked into on this file; see cerebrum.
+
+Docs and in-app help updated: root `README.md`, `src/editor/README.md`,
+`src/engine/README.md`, `src/routines/README.md`, `src/ui/README.md`,
+`theme.css`'s palette comment, and the Groups section of `ui/help.ts`.
+
+Two stale things fixed while in there, both left behind by the drag-to-reorder
+commit rather than by this one: the help said "Each row can move up or down" and
+the editor README's button-grammar table still listed `up · down` in every row.
+Both now describe the grip.
+
+**700 tests green** (3 new), typecheck and production build clean. Three tests
+needed changing rather than fixing, all for the same reason: `dirty.test.ts` used
+`{ label: 'Set' }` as its "changed round label" case, and the `bundle` and
+`shareLink` round-trip fixtures used `'Reps'`, which the migration now rewrites
+so the round trip stopped being identity. **Version bumped 3.5 to 3.6.**
+
+NOT done, and a real gap: **the editor cannot show a step that is both timed and
+counted**, though `pasteFormat.ts` builds them for EMOM minutes. `timingOf()`
+prefers `reps` and hides the seconds; `setTiming()` then deletes both fields
+before writing one, so the next keystroke on that row silently drops the
+duration. Supporting it means a second field on the row. See cerebrum.
 
 ---
 

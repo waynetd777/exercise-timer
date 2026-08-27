@@ -35,8 +35,8 @@ across a gym, with the phone propped against a rack.
       makes it findable at a glance.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name and a duration, a Reps group holding two of them, the per-row controls panel open showing an image thumbnail and a note button, and coloured add buttons along the bottom." />
-      <br /><b>The editor.</b> Steps, reps, ladders and sections, with undo. The
+      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name and a duration, a group holding two of them, the per-row controls panel open showing an image thumbnail and a note button, and coloured add buttons along the bottom." />
+      <br /><b>The editor.</b> Steps, sets, ladders and sections, with undo. The
       coloured edge on each row is the step type, and the add buttons match it.
     </td>
   </tr>
@@ -62,7 +62,7 @@ across a gym, with the phone propped against a rack.
   reads, with an example using every part of it.
 - **Imports** the `.tabata` exports of the Tabata Timer app, its own bundles, and
   plain-text routines.
-- **Edits** routines: steps, durations, reps, ladders, sections and images, with
+- **Edits** routines: steps, durations, sets, ladders, sections and images, with
   undo.
 - **Shares** a routine as a URL, or exports the whole library as one file.
 - **Owns its images.** It stores local copies, so a routine survives gym wifi and

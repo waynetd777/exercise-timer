@@ -82,10 +82,10 @@ step-through machine would have made each of those a special case.
   "after every set" includes the last set. This is deliberately the opposite of the
   trailing-rest rule below. Two similar-looking rules, opposite answers, both by
   decision.
-- **A group's trailing rest does not run after the final rep.** A rest belongs
-  *between* reps: three reps of work-then-rest is work rest work rest work, five
+- **A group's trailing rest does not run after the final set.** A rest belongs
+  *between* sets: three sets of work-then-rest is work rest work rest work, five
   steps, not six. Only the last child, and only the `rest` role, since `recover` is
-  a long interval someone put there on purpose. To rest after the last rep too, put
+  a long interval someone put there on purpose. To rest after the last set too, put
   the rest step *after* the group. That reads as what it is and survives a change to
   the rep count. `totalDurationMs()` and `stepCount()` subtract it as well.
 - **`compile()` drops degenerate input silently:** non-positive durations, groups

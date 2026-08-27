@@ -28,7 +28,7 @@ const workout = (): Workout => ({
       kind: 'repeat',
       id: 'r1',
       times: 3,
-      label: 'Reps',
+      label: 'Set',
       children: [{ kind: 'segment', id: 's2', name: 'Rest', durationMs: 10_000, role: 'rest' }],
     },
   ],
