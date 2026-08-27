@@ -473,6 +473,20 @@ button {
   width: min(100vw, 24rem);
   max-width: none;
   max-height: none;
+  /*
+   * EXPLICIT, because the UA stylesheet gives every `<dialog>`
+   * `height: fit-content`, and that beats the `top: 0; bottom: 0` above.
+   *
+   * With long content the tray therefore grew PAST the viewport instead of
+   * capping at it, `bottom: 0` was ignored as over-constrained, and the body had
+   * no definite height to scroll inside: the help simply ran off the bottom of
+   * the screen with nothing to drag. `.modal` sets the same property for the same
+   * reason, which is how this one was found.
+   *
+   * `dvh` rather than `svh`, matching `.modal`: a dialog wants to reflow for the
+   * keyboard, and unlike the app shell it is not the thing being scrolled.
+   */
+  height: 100dvh;
   margin: 0;
   padding: 0;
   /* Head fixed, body scrolling. */
