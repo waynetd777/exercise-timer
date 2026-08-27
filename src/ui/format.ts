@@ -20,6 +20,30 @@ export function duration(ms: number): string {
 }
 
 /**
+ * How long a routine takes, told to the precision it is actually known to.
+ *
+ * A timed routine gets `duration()`, because 44:40 is a promise the clock keeps.
+ * A routine with self-paced steps in it gets "about 35 min": the seconds are
+ * invented, and "about 35:20" claims a precision the estimate does not have
+ * while admitting in the same breath that it is a guess.
+ *
+ * Rounded UP to the minute, never down to nothing: a two-minute routine reading
+ * "about 0 min" would be worse than useless.
+ *
+ * This is the bare figure, for a stat whose LABEL carries the hedge. Use
+ * `estimated()` in running text.
+ */
+export function estimatedValue(ms: number, rough: boolean): string {
+  if (!rough) return duration(ms)
+  return `${Math.max(1, Math.round(ms / 60_000))} min`
+}
+
+/** The same figure, hedged. For running text, where nothing else says "about". */
+export function estimated(ms: number, rough: boolean): string {
+  return rough ? `about ${estimatedValue(ms, rough)}` : duration(ms)
+}
+
+/**
  * A stopwatch reading: always `m:ss`, and floored rather than rounded.
  *
  * Not `duration()`, which is for labels. "45s" is the right thing for a label

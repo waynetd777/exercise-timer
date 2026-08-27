@@ -278,3 +278,27 @@ describe('RunScreen: the reset confirmation', () => {
     expect(screen.getByLabelText('Resume')).toBeTruthy()
   })
 })
+
+describe('RunScreen: the Ready card', () => {
+  afterEach(cleanup)
+
+  it('gives an exact total for a routine that is timed throughout', () => {
+    render(<RunScreen workout={timed()} />)
+
+    expect(screen.getByText('30s')).toBeTruthy()
+    expect(screen.getByText('Total')).toBeTruthy()
+  })
+
+  it('estimates a rep-based routine rather than reading 0s', () => {
+    /*
+     * A self-paced step contributes nothing to `totalDurationMs`, so the card
+     * used to greet a whole session of counted work with "0s Total". The label
+     * carries the hedge here because the figure is set at title size, where
+     * "about" beside it reads as part of the number.
+     */
+    render(<RunScreen workout={listed()} />)
+
+    expect(screen.getByText('Est. total')).toBeTruthy()
+    expect(screen.getByText(/^\d+ min$/)).toBeTruthy()
+  })
+})

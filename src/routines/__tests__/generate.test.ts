@@ -602,8 +602,13 @@ describe('the instructor’s shape', () => {
 
   it('takes the number of sections it is given, within what the routines do', () => {
     expect(sections({ sections: 5 }).workout.blocks).toHaveLength(5)
-    // Clamped: no routine in the corpus has fewer than five or more than eight.
-    expect(sections({ sections: 1 }).workout.blocks.length).toBeGreaterThanOrEqual(5)
+    expect(sections({ sections: 3 }).workout.blocks).toHaveLength(3)
+    /*
+     * Clamped to three at the bottom, which is SHORTER than the instructor ever
+     * writes: no routine of his has fewer than five. A shorter session is a
+     * reasonable thing to want, and asking for one is not a claim about him.
+     */
+    expect(sections({ sections: 1 }).workout.blocks.length).toBeGreaterThanOrEqual(3)
     expect(sections({ sections: 99 }).workout.blocks.length).toBeLessThanOrEqual(8)
   })
 

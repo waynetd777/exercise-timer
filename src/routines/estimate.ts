@@ -51,8 +51,20 @@ export type Estimate = {
   rough: boolean
 }
 
-function secondsPerRep(name: string): number {
-  return PRESCRIPTIONS.find((p) => p.name === foldName(name))?.secondsPerRep ?? DEFAULT_SECONDS_PER_REP
+/**
+ * The rate for one exercise, best evidence first.
+ *
+ * A MEASURED rate wins: it is this person on this machine, against a rate
+ * implied by what one instructor wrote. Then the harvested one, then the median
+ * of the harvested ones.
+ */
+function secondsPerRep(name: string, measured: ReadonlyMap<string, number>): number {
+  const key = foldName(name)
+  return (
+    measured.get(key) ??
+    PRESCRIPTIONS.find((p) => p.name === key)?.secondsPerRep ??
+    DEFAULT_SECONDS_PER_REP
+  )
 }
 
 /**
@@ -61,11 +73,24 @@ function secondsPerRep(name: string): number {
  * A per-side count is doubled: "5 each side" is ten reps of work, and the field
  * deliberately holds the smaller, truer number.
  */
-function stepMs(name: string, count: number, perSide: boolean): number {
-  return Math.round(count * (perSide ? 2 : 1) * secondsPerRep(name) * 1000)
+function stepMs(
+  name: string,
+  count: number,
+  perSide: boolean,
+  measured: ReadonlyMap<string, number>,
+): number {
+  return Math.round(count * (perSide ? 2 : 1) * secondsPerRep(name, measured) * 1000)
 }
 
-export function estimate(blocks: readonly Block[]): Estimate {
+/**
+ * @param measured rates recorded from actual runs, which beat the harvested
+ * ones. Empty by default, so this stays pure and a test gets the same answer
+ * whatever is in the browser's storage.
+ */
+export function estimate(
+  blocks: readonly Block[],
+  measured: ReadonlyMap<string, number> = new Map(),
+): Estimate {
   let knownMs = 0
   let estimatedMs = 0
 
@@ -80,7 +105,7 @@ export function estimate(blocks: readonly Block[]): Estimate {
         const count =
           block.reps?.kind === 'fixed' ? block.reps.count : block.reps?.kind === 'rung' ? rung : null
         if (count !== null && count > 0) {
-          estimatedMs += stepMs(block.name, count, block.reps?.perSide === true)
+          estimatedMs += stepMs(block.name, count, block.reps?.perSide === true, measured)
         }
         continue
       }
