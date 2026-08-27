@@ -248,3 +248,4 @@
 | 00:27 | Created src/routines/__tests__/rename.test.ts | — | ~1224 |
 | 01:38 | Tidy exercise names across the library | rename.ts, LibraryScreen, help.ts | v7.3, 995 green | ~30k |
 | 01:52 | Bring every README up to date: weights, paces, estimate, rename, harvests | 6 READMEs, docs/paste-format.md, README.md | v7.4, 995 green | ~30k |
+| 02:05 | Hide the tidy menu item when there is nothing to tidy | LibraryScreen, help.ts | v7.5, 995 green | ~5k |
