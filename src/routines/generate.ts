@@ -565,6 +565,48 @@ function sectionsRoutine(
   return blocks
 }
 
+/**
+ * What to call a routine nobody has named.
+ *
+ * Built from the answers, because "Generated - 2026-08-27" tells you nothing in
+ * a library of them and a second one the same day tells you less. What a person
+ * scans a list for is what it works and how big it is, so that is what the name
+ * says: "Full Body Circuit, 45 min", "Bodyweight Legs & Core, 6 sections".
+ *
+ * The equipment is named only when it is worth naming. Every routine here is on
+ * the multi-gym unless it says otherwise, so saying so on most of them would
+ * push the useful half off the end of a narrow row.
+ *
+ * Exported so the dialog can show it as the placeholder: what you would get is
+ * better than a description of what you would get.
+ */
+export function describeRoutine(spec: RoutineSpec): string {
+  const AREA_NAMES: Record<BodyArea, string> = {
+    upper: 'Upper Body',
+    torso: 'Core',
+    lower: 'Lower Body',
+  }
+  const order: BodyArea[] = ['upper', 'torso', 'lower']
+  const areas = order.filter((area) => spec.areas.includes(area))
+
+  const worked =
+    areas.length === 0
+      ? 'Routine'
+      : areas.length === order.length
+        ? 'Full Body'
+        : areas.map((area) => AREA_NAMES[area]).join(' & ')
+
+  const kit =
+    spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
+
+  if (spec.style === 'sections') {
+    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_MIN, spec.sections ?? SECTIONS_TYPICAL))
+    return `${kit}${worked}, ${count} sections`
+  }
+  const minutes = Math.round(spec.totalMs / 60_000)
+  return `${kit}${worked} Circuit, ${minutes} min`
+}
+
 export function generateRoutine(
   spec: RoutineSpec,
   options: { library?: readonly Workout[]; rng?: Rng; now?: number } = {},
@@ -587,7 +629,7 @@ export function generateRoutine(
     return {
       workout: {
         id: newId(),
-        name: spec.name?.trim() || 'Generated routine',
+        name: spec.name?.trim() || describeRoutine(spec),
         blocks,
         schemaVersion: SCHEMA_VERSION,
         createdAt: now,
@@ -770,7 +812,7 @@ export function generateRoutine(
   const blocks = [...opening, ...body, ...closing]
   const workout: Workout = {
     id: newId(),
-    name: spec.name?.trim() || 'Generated routine',
+    name: spec.name?.trim() || describeRoutine(spec),
     blocks,
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
