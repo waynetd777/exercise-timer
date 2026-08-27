@@ -13,7 +13,8 @@ import type { Library } from '../storage/useLibrary'
 import { bundleFilename, toBundle } from '../storage/bundle'
 import { collectMedia } from '../storage/bundleMedia'
 import { getBlob } from '../media/store'
-import { copyText, downloadJson } from '../storage/download'
+import { copyText, downloadJson, downloadText } from '../storage/download'
+import { textFilename, writeRoutine } from '../routines/writeRoutine'
 import { filterWorkouts, sortWorkouts, summary } from '../storage/library'
 import { shareUrl } from '../storage/shareLink'
 import { updateApp } from '../state/updateApp'
@@ -58,6 +59,8 @@ function Row({
   onEdit,
   onShare,
   onExport,
+  onCopyText,
+  onDownloadText,
 }: {
   workout: Workout
   library: Library
@@ -65,6 +68,8 @@ function Row({
   onEdit: (workout: Workout) => void
   onShare: (workout: Workout) => Promise<void>
   onExport: (workout: Workout) => Promise<void>
+  onCopyText: (workout: Workout) => Promise<void>
+  onDownloadText: (workout: Workout) => void
 }) {
   const [confirming, setConfirming] = useState(false)
   const { totalMs, steps } = summary(workout)
@@ -147,25 +152,47 @@ function Row({
             >
               <CopyIcon />
             </button>
-            <button
+            {/*
+              Every way of sending a routine, in one control.
+
+              They belong together because they differ in exactly one thing:
+              what survives the trip. A file carries the photos, a link carries
+              the steps, text carries what a person can read. Four buttons would
+              not fit a phone row, and the editor already taught that lesson: when
+              the controls stop fitting, take them out of the row.
+            */}
+            <Menu
+              label=""
+              hint="Send this routine"
               className="btn btn--ghost"
-              onClick={() => void onShare(workout)}
-              aria-label="Copy a share link"
-              title="Copy a share link. Steps only, no photos."
-            >
-              <ShareIcon />
-            </button>
-            {/* Beside the link, because they are the two ways to send a routine
-                and they differ in exactly one thing: a file carries the photos
-                you took, a link cannot. */}
-            <button
-              className="btn btn--ghost"
-              onClick={() => void onExport(workout)}
-              aria-label="Export as a file"
-              title="Export as a file. Photos included."
-            >
-              <ExportIcon />
-            </button>
+              icon={<ShareIcon />}
+              items={[
+                {
+                  label: 'Copy a share link',
+                  icon: <ShareIcon />,
+                  title: 'A link to this routine. Steps only, no photos.',
+                  onSelect: () => void onShare(workout),
+                },
+                {
+                  label: 'Copy as text',
+                  icon: <PasteIcon />,
+                  title: 'The routine as plain text, for an email or a note. No photos.',
+                  onSelect: () => void onCopyText(workout),
+                },
+                {
+                  label: 'Export as a file',
+                  icon: <ExportIcon />,
+                  title: 'A .json file holding everything, photos included.',
+                  onSelect: () => void onExport(workout),
+                },
+                {
+                  label: 'Download as text',
+                  icon: <ExportIcon />,
+                  title: 'A .txt file in the format the app can paste back. No photos.',
+                  onSelect: () => void onDownloadText(workout),
+                },
+              ]}
+            />
             <button
               className="btn btn--ghost"
               onClick={() => setConfirming(true)}
@@ -221,6 +248,40 @@ export function LibraryScreen({
         ? `Link to “${workout.name}” copied`
         : 'Could not reach the clipboard. Open the link and copy it from the address bar.',
     )
+  }
+
+  /**
+   * What a text export could not carry, said plainly and once.
+   *
+   * Never silent. A share that quietly drops 23 illustrations looks like it
+   * worked, and the person on the other end is the one who finds out. Pictures
+   * are counted rather than listed, because naming all 23 is not a message
+   * anyone reads.
+   */
+  const lostNote = (lost: readonly string[]): string => {
+    const pictures = lost.filter((line) => line.startsWith('The picture on')).length
+    const rest = lost.filter(
+      (line) => !line.startsWith('The picture on') && !line.startsWith("The routine's name"),
+    ).length
+    const parts: string[] = []
+    if (pictures > 0) parts.push(`${pictures} picture${pictures === 1 ? '' : 's'}`)
+    if (rest > 0) parts.push(`${rest} other detail${rest === 1 ? '' : 's'}`)
+    return parts.length === 0 ? '' : `. Text cannot carry ${parts.join(' or ')}`
+  }
+
+  const copyRoutineText = async (workout: Workout) => {
+    const { text, lost } = writeRoutine(workout)
+    setNotice(
+      (await copyText(text))
+        ? `“${workout.name}” copied as text${lostNote(lost)}`
+        : 'Could not reach the clipboard.',
+    )
+  }
+
+  const downloadRoutineText = (workout: Workout) => {
+    const { text, lost } = writeRoutine(workout)
+    downloadText(textFilename(workout.name, new Date()), text)
+    setNotice(`Downloaded “${workout.name}” as text${lostNote(lost)}`)
   }
 
   /**
@@ -361,7 +422,8 @@ export function LibraryScreen({
               {
                 label: 'Import',
                 icon: <ImportIcon />,
-                title: 'Add routines from a .tabata, an exported .json, or a plain-text routine',
+                title:
+                  'Add routines from a .tabata, an exported .json, or a .txt or .md written as text',
                 onSelect: () => picker.current?.click(),
               },
               {
@@ -371,7 +433,7 @@ export function LibraryScreen({
                 onSelect: () => setPasting(true),
               },
               {
-                label: 'Export all',
+                label: 'Export all as JSON',
                 icon: <ExportIcon />,
                 title: 'Download every routine as one file, photos included',
                 disabled: library.workouts.length === 0,
@@ -463,6 +525,8 @@ export function LibraryScreen({
               onEdit={onEdit}
               onShare={share}
               onExport={(workout) => exportRoutines([workout], workout.name)}
+              onCopyText={copyRoutineText}
+              onDownloadText={downloadRoutineText}
             />
             ))}
           </ul>

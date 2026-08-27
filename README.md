@@ -64,7 +64,10 @@ across a gym, with the phone propped against a rack.
   plain-text routines.
 - **Edits** routines: steps, durations, sets, ladders, sections and images, with
   undo.
-- **Shares** a routine as a URL, or exports the whole library as one file.
+- **Shares** a routine four ways: a link, plain text, a `.json` file with the
+  photos inside it, or a `.txt` in the format it can paste back. Text says what
+  it had to leave behind rather than dropping it quietly.
+- **Exports** the whole library as one file.
 - **Owns its images.** It stores local copies, so a routine survives gym wifi and
   the image host eventually losing a file.
 

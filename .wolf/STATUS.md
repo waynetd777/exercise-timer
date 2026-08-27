@@ -460,6 +460,58 @@ duration. Supporting it means a second field on the row. See cerebrum.
 
 ---
 
+## ✅ Text export, and one Send menu per routine (2026-08-27, v3.7)
+
+Import already handled all three formats Wayne wanted, dispatching by CONTENT
+rather than extension: the bundle marker first, then `.tabata`, then anything
+that is not JSON goes to the paste parser with the filename as the routine name.
+Nothing to build there. The gap was the other direction.
+
+**`routines/writeRoutine.ts`** writes a routine in the paste format. The inverse
+of `pasteFormat.ts` and deliberately a narrow one: the parser reads a handout, so
+many forms land on the same blocks, and the writer picks exactly one per block.
+
+The property the test pins is NOT `write(read(x)) === x`, which is false. The
+parser prepends a five-second get-ready and gathers loose steps into a section
+called "Routine", and no writer can express those away. It is that **the second
+pass changes nothing**. The shipped template needs two passes, and the test says
+why: its AMRAP is inside a rounds group, where the AMRAP heading cannot be
+written at all.
+
+Three traps, all now tests:
+
+- **`Then:` closes a rounds group, not an AMRAP.** An AMRAP's round collects
+  bullets until a section HEADING, so the AMRAP form is only written where a
+  heading or the end of the text follows.
+- **A group's children are siblings too**, so the separator rules run inside
+  sections and rounds, not only at the top level.
+- **The parser's own get-ready is not written back.** It is prepended LOOSE above
+  any section; writing it as a bullet would sink the routine a level per trip.
+
+Everything the grammar cannot say is collected in `lost` and shown, because a
+share that quietly drops 23 illustrations looks like it worked. On Wayne's
+routine 2 that is 23 pictures, the two "Change Sides" steps whose role cannot be
+read back off their names, the colour, and the favourite mark.
+
+**UI.** The library row's two send buttons became ONE `Send` menu holding all
+four: Copy a share link, Copy as text, Export as a file, Download as text. The
+row LOSES a button rather than gaining one, which is the lesson the editor row
+already taught. `Menu` grew an optional `className` and `hint` so the same
+component is a header chip or a 42px row button, with the caret dropped when
+there is no label. `Export all` is now `Export all as JSON`.
+
+**Deliberately NOT built: text export of the whole library.** `parseRoutine`
+parses exactly one routine, so a multi-routine text file would be the only export
+the app could not read back. Text export is inherently per-routine and lives on
+the row.
+
+**725 tests green** (30 new: 25 for the writer, 5 for `Menu`), typecheck and
+production build clean. Docs: root `README.md`, `docs/paste-format.md` gained a
+"Writing a routine back out" section listing every loss, `src/routines/README.md`
+gained the three traps, and the library help covers the new menu.
+
+---
+
 ## 🚀 Next quest — none open
 
 The strength-routine work below is COMPLETE and pushed. The obvious candidates

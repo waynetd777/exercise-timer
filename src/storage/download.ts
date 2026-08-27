@@ -12,8 +12,7 @@
  * on the next tick. Revoking it immediately can cancel the download in some
  * browsers before it has started reading.
  */
-export function downloadJson(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+function download(filename: string, blob: Blob): void {
   const url = URL.createObjectURL(blob)
 
   const anchor = document.createElement('a')
@@ -25,6 +24,15 @@ export function downloadJson(filename: string, data: unknown): void {
   anchor.remove()
 
   setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+export function downloadJson(filename: string, data: unknown): void {
+  download(filename, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+}
+
+/** A routine written as text, for sending to someone who does not have the app. */
+export function downloadText(filename: string, text: string): void {
+  download(filename, new Blob([text], { type: 'text/plain;charset=utf-8' }))
 }
 
 /** Copies text, reporting whether it worked so the caller can offer a fallback. */

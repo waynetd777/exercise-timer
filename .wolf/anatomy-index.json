@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-26T07:23:36.714Z",
-    "fileCount": 51,
+    "lastScanned": "2026-08-27T16:49:01.351Z",
+    "fileCount": 52,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "570d8b6fcefb8479829b30c9b1758ec2f03c26cb461b7fd8cf9c30a170a9a253",
-    "storeUpdatedAt": "2026-08-26T07:23:36.727Z"
+    "renderedHash": "f3b15353b6094dfc4b7dfdd25978269ed40474912ea91a01cad0059637a39cf7",
+    "storeUpdatedAt": "2026-08-27T16:49:01.373Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1019,6 +1019,80 @@
           "startLine": 85,
           "endLine": 232,
           "tokens": 1506
+        }
+      ]
+    },
+    "src/routines/writeRoutine.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2698,
+      "hash": "3d4cd1655e20d9d0",
+      "size": 9445,
+      "mtimeMs": 1787849341272.6106,
+      "updatedAt": "2026-08-27T16:49:01.351Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "durationText",
+          "kind": "fn",
+          "startLine": 68,
+          "endLine": 77,
+          "tokens": 111
+        },
+        {
+          "name": "trailingRest",
+          "kind": "fn",
+          "startLine": 78,
+          "endLine": 89,
+          "tokens": 132
+        },
+        {
+          "name": "stepLines",
+          "kind": "fn",
+          "startLine": 90,
+          "endLine": 145,
+          "tokens": 613
+        },
+        {
+          "name": "ladderLines",
+          "kind": "fn",
+          "startLine": 146,
+          "endLine": 167,
+          "tokens": 209
+        },
+        {
+          "name": "repeatLines",
+          "kind": "fn",
+          "startLine": 168,
+          "endLine": 177,
+          "tokens": 112
+        },
+        {
+          "name": "sectionLines",
+          "kind": "fn",
+          "startLine": 178,
+          "endLine": 191,
+          "tokens": 178
+        },
+        {
+          "name": "blockLines",
+          "kind": "fn",
+          "startLine": 192,
+          "endLine": 205,
+          "tokens": 155
+        },
+        {
+          "name": "writeRoutine",
+          "kind": "fn",
+          "startLine": 206,
+          "endLine": 235,
+          "tokens": 311
+        },
+        {
+          "name": "textFilename",
+          "kind": "fn",
+          "startLine": 236,
+          "endLine": 245,
+          "tokens": 80
         }
       ]
     }

@@ -24,7 +24,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Tap a routine to open it, then Start.',
       'The star pins a favourite to the top of the list.',
-      'Each row also edits, duplicates, copies a share link, exports itself as a file, and deletes.',
+      'Each row also edits, duplicates, sends itself, and deletes. Send offers all four ways: a share link, plain text, a file, or a text file.',
       'Delete asks first, in the row itself. Nothing goes without a second tap.',
       'Search filters by name. Sort by Recent, Name or Longest.',
     ],
@@ -35,10 +35,11 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'New: build one step at a time.',
       'Paste: write or paste a routine as plain text. It reads sections, rounds, ladders, EMOM minutes, 30/30 intervals and AMRAPs, and lists any line it could not place before you save.',
       'Copy template, in the paste box, puts an example routine on the clipboard using every shape it understands. Easier than being told the rules.',
-      'Import: a .tabata file, an exported .json, or a plain-text routine. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',
-      'Export all: every routine in one file, with the photos you uploaded inside it.',
-      'A routine’s own file button exports just that one, photos included. That file is how a routine moves between devices intact: export, AirDrop, then Import on the other one.',
+      'Import: a .tabata file, an exported .json, or a .txt or .md written as text. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',
+      'Export all as JSON: every routine in one file, with the photos you uploaded inside it. JSON is the only format that carries everything, so it is the one to keep.',
+      'Send › Export as a file exports one routine, photos included. That file is how a routine moves between devices intact: export, AirDrop, then Import on the other one.',
       'A share link carries the steps and the app’s own illustrations. It cannot carry a photo you uploaded, because a picture will not fit in a link. Send the file for that.',
+      'Send › Copy as text writes the routine out in the same format Paste reads, so you can put it in an email. It carries no pictures at all, and it says what it had to leave behind. Text is for sending to a person; the file is for keeping.',
     ],
   },
   {

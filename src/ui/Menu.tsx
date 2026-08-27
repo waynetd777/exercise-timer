@@ -35,10 +35,17 @@ export function Menu({
   label,
   icon,
   items,
+  className = 'chip chip--action',
+  hint,
 }: {
+  /** Empty for an icon-only trigger, which then needs a `hint` to name it. */
   label: string
   icon?: ReactNode
   items: readonly MenuItem[]
+  /** So the same menu can be a header chip or one more button on a row. */
+  className?: string
+  /** The accessible name and tooltip, where the label is not one. */
+  hint?: string
 }) {
   const [open, setOpen] = useState(false)
   const [at, setAt] = useState({ top: 0, left: 0 })
@@ -95,8 +102,10 @@ export function Menu({
       <button
         ref={trigger}
         type="button"
-        className="chip chip--action"
+        className={className}
         aria-haspopup="menu"
+        aria-label={hint ?? undefined}
+        title={hint ?? undefined}
         aria-expanded={open}
         aria-controls={id}
         onClick={() => {
@@ -106,9 +115,13 @@ export function Menu({
       >
         {icon}
         {label}
-        <span className="menu__caret" aria-hidden="true">
-          <DownIcon />
-        </span>
+        {/* An icon-only trigger has no room for a caret and does not need one:
+            it sits in a row of buttons that all open something. */}
+        {label !== '' && (
+          <span className="menu__caret" aria-hidden="true">
+            <DownIcon />
+          </span>
+        )}
       </button>
 
       {open && (
