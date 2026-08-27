@@ -602,7 +602,7 @@ function sectionsRoutine(
  * Built from the answers, because "Generated - 2026-08-27" tells you nothing in
  * a library of them and a second one the same day tells you less. What a person
  * scans a list for is what it works and how big it is, so that is what the name
- * says: "Full Body Circuit, 45 min", "Bodyweight Legs & Core, 6 sections".
+ * says: "Full-Body Circuit, 45 min", "Bodyweight Legs & Core, 6 sections".
  *
  * The equipment is named only when it is worth naming. Every routine here is on
  * the multi-gym unless it says otherwise, so saying so on most of them would
@@ -624,7 +624,7 @@ export function describeRoutine(spec: RoutineSpec): string {
     areas.length === 0
       ? 'Routine'
       : areas.length === order.length
-        ? 'Full Body'
+        ? 'Full-Body'
         : areas.map((area) => AREA_NAMES[area]).join(' & ')
 
   const kit =

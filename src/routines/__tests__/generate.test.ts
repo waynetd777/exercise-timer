@@ -632,8 +632,8 @@ describe('what an unnamed routine is called', () => {
   it('says what it works and how big it is', () => {
     // What a person scans a library for. "Generated - 2026-08-27" says neither,
     // and a second one the same day says less.
-    expect(named({})).toBe('Full Body Circuit, 45 min')
-    expect(named({ totalMs: 35 * 60_000 })).toBe('Full Body Circuit, 35 min')
+    expect(named({})).toBe('Full-Body Circuit, 45 min')
+    expect(named({ totalMs: 35 * 60_000 })).toBe('Full-Body Circuit, 35 min')
   })
 
   it('names the areas when they are not all of them, in body order', () => {
@@ -642,15 +642,15 @@ describe('what an unnamed routine is called', () => {
   })
 
   it('counts sections rather than minutes for the shape that has no length', () => {
-    expect(named({ style: 'sections', sections: 6 })).toBe('Full Body, 6 sections')
+    expect(named({ style: 'sections', sections: 6 })).toBe('Full-Body, 6 sections')
   })
 
   it('names the equipment only when it is worth naming', () => {
     // Everything is on the multi-gym unless it says otherwise, so saying so on
     // most of them would push the useful half off the end of a narrow row.
-    expect(named({ equipment: 'machine' })).toBe('Full Body Circuit, 45 min')
-    expect(named({ equipment: 'none' })).toBe('Bodyweight Full Body Circuit, 45 min')
-    expect(named({ equipment: 'mixed' })).toBe('Mixed Full Body Circuit, 45 min')
+    expect(named({ equipment: 'machine' })).toBe('Full-Body Circuit, 45 min')
+    expect(named({ equipment: 'none' })).toBe('Bodyweight Full-Body Circuit, 45 min')
+    expect(named({ equipment: 'mixed' })).toBe('Mixed Full-Body Circuit, 45 min')
   })
 
   it('is what an unnamed routine actually gets called', () => {
