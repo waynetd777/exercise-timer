@@ -274,12 +274,16 @@ export function GenerateDialog({
           >
             Try another
           </button>
-          <button type="button" className="btn btn--ghost" onClick={onCancel} aria-label="Close">
+          {/* `chip--primary`, not `btn--primary`: the latter is the 68px SQUARE
+              icon button, which clipped this label to "Open in". A labelled
+              action is a chip here, the same as the paste dialog's. */}
+          <button type="button" className="chip" onClick={onCancel}>
             <CloseIcon />
+            Cancel
           </button>
           <button
             type="button"
-            className="btn btn--primary"
+            className="chip chip--primary"
             disabled={result === null}
             onClick={() => result && onGenerate(result.workout)}
           >
