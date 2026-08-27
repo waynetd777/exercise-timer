@@ -32,18 +32,16 @@ below are fixed and committed, one commit per group:
   beforeunload during a run; SECTIONS_FEWEST used everywhere; two-digit ladder rungs (dates are not ladders); landscape safe-area
   padding; wake-lock sentinel check; `tsconfig.scripts.json` typechecks scripts/ and the harvest config.
 
-Still open from the review (all medium/low), in rough priority:
-- Routines: rounds line after an AMRAP wraps the clock (pasteFormat.ts ~1007); `Then:` does not end an AMRAP (~1143); bulleted
-  duration ladders (~965); bare `Rest 30 seconds` becomes a note (~271); -ss plural folding (foldName.ts:38); generate.ts `totalMs`
-  vs `totalDurationMs` on ladders (~325); matcher duplicated in rename.ts/loads.ts; LADDER_COUNTS capped at 6 of 19 (generate.ts ~542);
-  torso mobility unreachable in warm-ups; `Minute N` joined pair split.
-- Storage/media: resolveMedia negative cache written before the read resolves (media/resolveMedia.ts:46, concurrent callers get null);
-  draft pins are per tab while the comment claims cross-tab (media/pin.ts); db.run resolves on request success not transaction complete.
-- UI: popstate/pushState routing for hardware Back (beforeunload is in); Ctrl+Y redo; focus after Delete/Add; group label/note store ''
-  instead of deleting; Menu items keyed by label; drop overlay flicker on onDragLeave; done-row contrast on the phase wash.
-- Quality: split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared with GenerateDialog;
-  add a linter; tests for LibraryScreen/App/audio engine.
-- v8.0 pushed 2026-08-28 for device testing: everything above, plus the weights page now starts blank on every install (no SEED_WEIGHTS).
+- v8.1 (2026-08-28): the routines mediums (AMRAP rounds/Then, bulleted duration ladders, bare Rest, Minute N pairs, -ss folding
+  with a re-harvest, shared blocksDurationMs, all 19 ladders weighted by `seen`, torso warm-ups), resolveMedia in-flight map,
+  db.run resolves on transaction completion, hardware Back routed through the screens' own exit handlers, and the countdown
+  re-measured at the minute marks (Wayne's pick).
+
+Still open from the review (all low, plus quality):
+- UI lows: Ctrl+Y redo; focus after Delete/Add; group label/note store '' instead of deleting; Menu items keyed by label;
+  drop overlay flicker on onDragLeave; done-row contrast on the phase wash; matcher still duplicated in rename.ts/loads.ts.
+- Quality: split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared with
+  GenerateDialog; add a linter; tests for LibraryScreen/App/audio engine.
 
 ---
 

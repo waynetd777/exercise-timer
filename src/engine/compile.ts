@@ -344,30 +344,32 @@ function partition(entries: TimelineEntry[]): Routine {
  * floor rather than a length. `Routine.hasGates` says when.
  */
 export function totalDurationMs(workout: Workout): number {
-  const sum = (blocks: Block[]): number => {
-    let total = 0
-    for (const block of blocks) {
-      if (block.kind === 'segment') {
-        total += segmentDurationMs(block) ?? 0
-        continue
-      }
-      if (block.kind === 'section') {
-        total += sum(block.children)
-        continue
-      }
-      if (block.kind === 'ladder') {
-        total += ladderRungs(block.counts).length * sum(block.children)
-        continue
-      }
-      const times = repeatTimes(block.times)
-      total += times * sum(block.children)
-      // The final rep's trailing rest never runs, so it is not in the total.
-      const rest = times > 0 ? trailingRest(block.children) : null
-      if (rest) total -= segmentDurationMs(rest) ?? 0
+  return blocksDurationMs(workout.blocks)
+}
+
+/** The same, for a block tree that is not yet a routine: the generator costs one as it builds. */
+export function blocksDurationMs(blocks: readonly Block[]): number {
+  let total = 0
+  for (const block of blocks) {
+    if (block.kind === 'segment') {
+      total += segmentDurationMs(block) ?? 0
+      continue
     }
-    return total
+    if (block.kind === 'section') {
+      total += blocksDurationMs(block.children)
+      continue
+    }
+    if (block.kind === 'ladder') {
+      total += ladderRungs(block.counts).length * blocksDurationMs(block.children)
+      continue
+    }
+    const times = repeatTimes(block.times)
+    total += times * blocksDurationMs(block.children)
+    // The final rep's trailing rest never runs, so it is not in the total.
+    const rest = times > 0 ? trailingRest(block.children) : null
+    if (rest) total -= segmentDurationMs(rest) ?? 0
   }
-  return sum(workout.blocks)
+  return total
 }
 
 /** Number of steps a routine will actually run, for "24 steps" in the library. */

@@ -71,3 +71,23 @@ describe('resolveMedia: the negative cache', () => {
     expect(await resolveMedia(local('h-gone'), '/')).toBeNull()
   })
 })
+
+describe('resolveMedia: two callers at once', () => {
+  beforeEach(() => {
+    blobs.clear()
+    let urls = 0
+    vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:fake-${++urls}`)
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+  })
+
+  it('gives both the URL, rather than the second a cached miss', async () => {
+    // The negative cache was written before the read resolved, so the second
+    // caller skipped the read and found no object URL, for good.
+    vi.resetModules()
+    const { resolveMedia } = await import('../resolveMedia')
+    blobs.set('shared', new Blob(['x']))
+    const [a, b] = await Promise.all([resolveMedia(local('shared'), '/'), resolveMedia(local('shared'), '/')])
+    expect(a).toMatch(/^blob:/)
+    expect(b).toBe(a)
+  })
+})

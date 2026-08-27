@@ -35,6 +35,7 @@
 
 import type { Block, Repeat, Segment, Workout } from '../engine/types'
 import { SCHEMA_VERSION } from '../engine/types'
+import { blocksDurationMs } from '../engine'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
@@ -219,6 +220,21 @@ export function seeded(seed: number): Rng {
   }
 }
 
+/**
+ * One of `items`, more often the ones seen more. Every ladder the instructor
+ * has written is a candidate, in proportion to how often he wrote it: a fixed
+ * cut of the first six left thirteen of the nineteen unreachable.
+ */
+function weightedPick<T>(items: readonly T[], weight: (item: T) => number, rng: Rng): T {
+  const total = items.reduce((sum, item) => sum + weight(item), 0)
+  let at = rng() * total
+  for (const item of items) {
+    at -= weight(item)
+    if (at < 0) return item
+  }
+  return items[items.length - 1]!
+}
+
 function shuffled<T>(items: readonly T[], rng: Rng): T[] {
   const out = [...items]
   for (let i = out.length - 1; i > 0; i--) {
@@ -322,22 +338,6 @@ const sets = (child: Segment, times: number): Repeat => ({
   children: [child, segment({ name: 'Rest', role: 'rest', durationMs: REST_MS })],
 })
 
-function totalMs(blocks: readonly Block[]): number {
-  let total = 0
-  for (const block of blocks) {
-    if (block.kind === 'segment') {
-      total += block.durationMs ?? 0
-    } else if (block.kind === 'repeat') {
-      total += block.times * totalMs(block.children)
-      const last = block.children.at(-1)
-      // A trailing rest does not run after the final set. See `compile()`.
-      if (last?.kind === 'segment' && last.role === 'rest') total -= last.durationMs ?? 0
-    } else {
-      total += totalMs(block.children)
-    }
-  }
-  return total
-}
 
 /** Everything one exercise contributes, ready to be costed before it is kept. */
 function exerciseBlocks(
@@ -510,7 +510,10 @@ function sectionsRoutine(
 
   for (const { theme, areas } of themes) {
     if (theme === 'Warm-up') {
-      const moves = [...draw(areas, 'mobility', 4), ...draw(areas, 'cardio', 4)]
+      // Every area, whatever the theme lists: a torso stretch warms you up too,
+      // and the two torso mobility moves could never be drawn otherwise.
+      const everywhere: BodyArea[] = ['upper', 'torso', 'lower']
+      const moves = [...draw(everywhere, 'mobility', 4), ...draw(everywhere, 'cardio', 4)]
       if (moves.length === 0) continue
       blocks.push({
         kind: 'section',
@@ -539,7 +542,7 @@ function sectionsRoutine(
      */
     const asLadder = blocks.length % 3 === 1
     if (asLadder) {
-      const shape = LADDER_COUNTS[Math.floor(rng() * Math.min(6, LADDER_COUNTS.length))]!
+      const shape = weightedPick(LADDER_COUNTS, (l) => l.seen, rng)
       const [main, ...rest] = chosen
       blocks.push({
         kind: 'section',
@@ -699,7 +702,7 @@ export function generateRoutine(
         schemaVersion: SCHEMA_VERSION,
         createdAt: now,
         updatedAt: now,
-        estimatedTotalMs: totalMs(blocks),
+        estimatedTotalMs: blocksDurationMs(blocks),
       },
       notes,
     }
@@ -791,7 +794,7 @@ export function generateRoutine(
         ]
       : []
 
-  const budget = spec.totalMs - totalMs(opening) - totalMs(closing)
+  const budget = spec.totalMs - blocksDurationMs(opening) - blocksDurationMs(closing)
   const perExercise =
     (spec.recovery === 'active' ? ANNOUNCE_MS + recoverMs + PREPARE_MS : PREPARE_MS + recoverMs) +
     (spec.sets ?? DEFAULT_SETS) * (WORK_MS + REST_MS) -
@@ -849,7 +852,7 @@ export function generateRoutine(
       announce,
       recoverMs,
     )
-    const cost = totalMs(blocks)
+    const cost = blocksDurationMs(blocks)
 
     // Half an exercise past the target is further from it than stopping here.
     if (spent > 0 && spent + cost > budget + cost / 2) break
@@ -882,10 +885,10 @@ export function generateRoutine(
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,
-    estimatedTotalMs: totalMs(blocks),
+    estimatedTotalMs: blocksDurationMs(blocks),
   }
 
-  const off = Math.round((totalMs(blocks) - spec.totalMs) / 60_000)
+  const off = Math.round((blocksDurationMs(blocks) - spec.totalMs) / 60_000)
   if (Math.abs(off) >= 2) {
     notes.push(
       `It came out ${Math.abs(off)} minutes ${off > 0 ? 'longer' : 'shorter'} than asked: exercises come in whole numbers.`,

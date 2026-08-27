@@ -1632,6 +1632,129 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-097",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "A '4 Rounds' line after a 10-minute AMRAP wrapped the AMRAP clock in the repeat (40 minutes); 'Then:' under an AMRAP added what followed to its round.",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "flushAmrap() ran before the trailing-repeat check, so the AMRAP segment counted as a loose step to swallow; the THEN branch never called flushAmrap().",
+      "fix": "The ROUNDS branch records whether an AMRAP was open before flushing and skips the trailing wrap if so; THEN flushes the AMRAP. Tests for both.",
+      "tags": [
+        "pasteFormat",
+        "amrap",
+        "rounds",
+        "then"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-098",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "A bulleted duration ladder ('- Plank 20sec-30sec-40sec') read as one 20s step; a bare 'Rest 30 seconds' in a section became a note; a joined pair under a 'Minute N' heading split into two steps.",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "DURATION_LADDER ran on the raw line only, never on the bullet's text; SECTION_NOTE's rest\\b matched before the loose-step fallback; the bullet path split JOINED_ITEMS without checking pendingFill.",
+      "fix": "readDurationLadder() is shared by the line and bullet paths; a 'rest N sec/min' line without between/after/each is a rest step; a bullet under pendingFill goes through addMinute. Tests for each.",
+      "tags": [
+        "pasteFormat",
+        "ladder",
+        "rest",
+        "emom"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-099",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "'Arnold Press' and 'Arnold Presses' folded to different keys ('arnold pres' / 'arnold press'), so the prescription table held both and ALIASES needed 'chest pres'.",
+      "file": "src/routines/foldName.ts",
+      "root_cause": "The trailing-s strip did not exempt words ending in a double s.",
+      "fix": "foldName keeps a trailing 'ss'; the harvest was re-run (prescription.ts re-keyed, duplicate rows merged); ALIASES key updated; test added.",
+      "tags": [
+        "foldName",
+        "harvest",
+        "plural"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-100",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "A generated sections routine's estimatedTotalMs was short by rungs x accessory time; only 6 of 19 ladder shapes were ever drawn; Torso Rotations and Inchworms could never be generated.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "A local totalMs counted a ladder's children once; LADDER_COUNTS was indexed with Math.min(6, length); the warm-up drew from ['lower','upper'] only.",
+      "fix": "compile.ts exports blocksDurationMs and generate.ts uses it; weightedPick over all ladders by `seen`; the warm-up draws from every area. Tests: >6 distinct shapes over 60 seeds; a torso mobility move appears.",
+      "tags": [
+        "generator",
+        "ladders",
+        "warm-up",
+        "estimate"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-101",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "Two steps sharing an uploaded photo: the second resolved to null for good when both were resolved in one render.",
+      "file": "src/media/resolveMedia.ts",
+      "root_cause": "The negative cache (a Set of hashes) was written before the read resolved, so a concurrent caller skipped the read and found no object URL.",
+      "fix": "The cache is a Map of in-flight reads; a second caller awaits the first. Test resolves the same ref twice concurrently.",
+      "tags": [
+        "media",
+        "cache",
+        "race"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-102",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "putBlob announced a stored blob before the write committed; a commit-time abort left resolveMedia believing in bytes never written.",
+      "file": "src/storage/db.ts",
+      "root_cause": "run() resolved on request.onsuccess for every mode.",
+      "fix": "A readwrite resolves on transaction.oncomplete; a readonly still resolves on success. The test fake completes the transaction a tick after the request.",
+      "tags": [
+        "storage",
+        "indexeddb",
+        "durability"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-103",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "Hardware/browser Back left a run or an unsaved edit with no confirmation.",
+      "file": "src/ui/App.tsx",
+      "root_cause": "The app had no history entries; Back left the page (beforeunload covered only the tab-close case).",
+      "fix": "App pushes one history entry while a screen other than the library is open and pops it on return; popstate on run/edit re-pushes and bumps a backRequest prop that RunScreen and EditorScreen answer with their own exit handlers; other screens go to the library.",
+      "tags": [
+        "navigation",
+        "popstate",
+        "back"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-104",
+      "timestamp": "2026-08-28T04:10:00Z",
+      "error_message": "USER REPORTED: countdown numerals small for a step of minutes ('1:30' sized for the whole step).",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "clockChars was measured once from the step's starting text so the size never changed mid-step.",
+      "fix": "Measured from timer.secondsLeft: the width class changes only where a character is lost (10:00 to 9:59, 1:00 to 59), the minute marks; clockWidth's floor of 2 keeps 10 to 9 steady.",
+      "tags": [
+        "run-screen",
+        "countdown",
+        "sizing"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T04:10:00Z"
     }
   ]
 }

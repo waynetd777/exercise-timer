@@ -5,7 +5,7 @@
  */
 
 export * from './types'
-export { compile, totalDurationMs, stepCount, MAX_TIMELINE_ENTRIES } from './compile'
+export { compile, totalDurationMs, blocksDurationMs, stepCount, MAX_TIMELINE_ENTRIES } from './compile'
 export { cues, cuesBetween, finishesOnTap, runCues } from './cues'
 export {
   advance,

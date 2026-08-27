@@ -910,3 +910,54 @@ describe('a date is not a ladder', () => {
     expect(parsed.skipped.map((entry) => entry.text)).toEqual(['2026-04-16'])
   })
 })
+
+describe('blocks that used to bleed into each other', () => {
+  const names = (blocks: readonly Block[]): string[] =>
+    blocks.flatMap((b) => (b.kind === 'segment' ? [b.name] : names(b.children)))
+
+  it('does not wrap an AMRAP clock in the rounds written after it', () => {
+    // Flushed, the AMRAP was one more loose segment, and "4 Rounds" swallowed
+    // it: forty minutes of AMRAP.
+    const parsed = parseRoutine('10-minute AMRAP\n* 10 squats\n* 5 burpees\n4 Rounds\n* 10 lunges')
+    const section = parsed.blocks.find((b) => b.kind === 'section')
+    if (section?.kind !== 'section') throw new Error('no section')
+    const rounds = section.children.find((b) => b.kind === 'repeat')
+    if (rounds?.kind !== 'repeat') throw new Error('no rounds')
+    expect(names(rounds.children)).toEqual(['lunges'])
+    expect(names(section.children)[0]).toBe('As many rounds as possible')
+  })
+
+  it('ends an AMRAP at "Then:"', () => {
+    const parsed = parseRoutine('10-minute AMRAP\n* 10 squats\nThen:\n* 20 lunges')
+    const section = parsed.blocks.find((b) => b.kind === 'section')
+    if (section?.kind !== 'section') throw new Error('no section')
+    const amrap = section.children[0]
+    if (amrap?.kind !== 'segment') throw new Error('no amrap')
+    expect(amrap.note).toBe('10 squats')
+    expect(names(section.children)).toContain('lunges')
+  })
+
+  it('reads a bulleted ladder of durations as its rungs', () => {
+    const parsed = parseRoutine('#1 Core\n- Plank 20sec-30sec-40sec')
+    expect(names(parsed.blocks).filter((n) => n === 'Plank')).toHaveLength(3)
+  })
+
+  it('reads a bare "Rest 30 seconds" inside a section as a rest step', () => {
+    const parsed = parseRoutine('#1 Legs\n10 x Squats\nRest 30 seconds\n10 x Lunges')
+    const section = parsed.blocks.find((b) => b.kind === 'section')
+    if (section?.kind !== 'section') throw new Error('no section')
+    const rest = section.children.find((b) => b.kind === 'segment' && b.role === 'rest')
+    expect(rest).toMatchObject({ durationMs: 30_000 })
+    expect(section.note).toBeUndefined()
+  })
+
+  it('keeps a joined pair under a "Minute N" heading as one minute, like the one-line form', () => {
+    const twoLine = parseRoutine('Minute 4\n* 12 × Lateral Raises + 10 Cross Punches')
+    const oneLine = parseRoutine('Minute 4: 12 × Lateral Raises + 10 Cross Punches')
+    expect(names(twoLine.blocks)).toEqual(names(oneLine.blocks))
+    const segments = (blocks: readonly Block[]): Block[] =>
+      blocks.flatMap((b) => (b.kind === 'segment' ? [b] : segments(b.children)))
+    const step = segments(twoLine.blocks).find((b) => b.kind === 'segment' && b.role === 'work')
+    expect(step?.kind === 'segment' && step.durationMs).toBe(60_000)
+  })
+})

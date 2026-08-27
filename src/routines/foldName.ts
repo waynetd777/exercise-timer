@@ -36,7 +36,8 @@ export function foldName(name: string): string {
       // "Crunches" is "crunch", not "crunche": an -es plural after a sibilant
       // drops both letters.
       if (/(?:ch|sh|ss|x|z)es$/.test(word)) return word.slice(0, -2)
-      return word.length > 3 && word.endsWith('s') ? word.slice(0, -1) : word
+      // "Press" is not a plural: a word ending in a double s keeps both.
+      return word.length > 3 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0, -1) : word
     })
     // A trailing limb is the side, which is a field: "Fire Hydrant Left Leg".
     .filter((word, at, all) => !(at === all.length - 1 && /^(?:leg|arm|side)$/.test(word)))

@@ -679,3 +679,39 @@ describe('what an unnamed routine is called', () => {
     expect(workout.name).toBe('Leg day')
   })
 })
+
+describe('what the sections shape can reach', () => {
+  const ladders = (blocks: readonly Block[]): string[] =>
+    blocks.flatMap((b) =>
+      b.kind === 'ladder' ? [b.counts.join('-')] : b.kind === 'segment' ? [] : ladders(b.children),
+    )
+  const steps = (blocks: readonly Block[]): string[] =>
+    blocks.flatMap((b) => (b.kind === 'segment' ? [b.name] : steps(b.children)))
+
+  it('draws from every ladder the instructor writes, not the first six', () => {
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 60; seed++) {
+      const { workout } = generateRoutine(
+        spec({ style: 'sections', equipment: 'none', recovery: 'passive', sections: 8 }),
+        { rng: seeded(seed), now: 0 },
+      )
+      for (const shape of ladders(workout.blocks)) seen.add(shape)
+    }
+    expect(seen.size).toBeGreaterThan(6)
+  })
+
+  it('can warm up with a torso stretch', () => {
+    // The warm-up theme listed lower and upper only, so the two torso mobility
+    // moves could never be drawn.
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 40; seed++) {
+      const { workout } = generateRoutine(
+        spec({ style: 'sections', equipment: 'none', recovery: 'passive' }),
+        { rng: seeded(seed), now: 0 },
+      )
+      const warm = workout.blocks.find((b) => b.kind === 'section')
+      if (warm?.kind === 'section') for (const name of steps(warm.children)) seen.add(name)
+    }
+    expect([...seen].some((name) => ['Torso Rotations', 'Inchworms'].includes(name))).toBe(true)
+  })
+})

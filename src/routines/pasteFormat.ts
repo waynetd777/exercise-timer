@@ -909,6 +909,29 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     else addItem(parseItem(text))
   }
 
+  /**
+   * A ladder of durations, as the run of timed steps it is. True if the text was
+   * one. Bulleted or not: "- Plank 20sec-30sec-40sec" under a section read as a
+   * single twenty-second step called "Plank 20sec-30sec-40sec" until the bullet
+   * path asked too.
+   */
+  const readDurationLadder = (text: string): boolean => {
+    const durationLadder = DURATION_LADDER.exec(text)
+    if (!durationLadder || !(durationLadder[3] || /\d\s*(?:sec|min)/i.test(durationLadder[2]!))) {
+      return false
+    }
+    const unit = durationLadder[3] ?? 'sec'
+    const name = tidy(durationLadder[1] ?? durationLadder[4] ?? '')
+    if (name === '') return false
+    flushAmrap()
+    for (const rung of durationLadder[2]!.split(new RegExp(DASH))) {
+      const own = /(\d+)\s*(sec|secs|min|mins)/i.exec(rung)
+      const value = own ? own[1]! : rung.trim()
+      addItem(parseItem(`${name} - ${value} ${own ? own[2]! : unit}`))
+    }
+    return true
+  }
+
   const lines = text.split('\n')
 
   lines.forEach((raw, i) => {
@@ -989,20 +1012,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      * exactly like one until the unit is noticed. Emitted as the run of timed
      * steps it is: "20-30-45-30-20 sec cardio" is five steps of cardio.
      */
-    const durationLadder = DURATION_LADDER.exec(line)
-    if (durationLadder && (durationLadder[3] || /\d\s*(?:sec|min)/i.test(durationLadder[2]!))) {
-      const unit = durationLadder[3] ?? 'sec'
-      const name = tidy(durationLadder[1] ?? durationLadder[4] ?? '')
-      if (name !== '') {
-        flushAmrap()
-        for (const rung of durationLadder[2]!.split(new RegExp(DASH))) {
-          const own = /(\d+)\s*(sec|secs|min|mins)/i.exec(rung)
-          const value = own ? own[1]! : rung.trim()
-          addItem(parseItem(`${name} - ${value} ${own ? own[2]! : unit}`))
-        }
-        return
-      }
-    }
+    if (readDurationLadder(line)) return
 
     const trailing = LADDER_TRAILING.exec(line)
     const ladderCounts = LADDER.exec(line) ?? (trailing ? [line, trailing[2]!, trailing[1]!] : null)
@@ -1031,6 +1041,10 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
     const rounds = ROUNDS.exec(unwrapped)
     if (rounds) {
+      // Whether an AMRAP was open is decided BEFORE it is flushed: flushed, it
+      // is one more loose segment, and "4 Rounds" under it wrapped the ten-minute
+      // clock into the repeat for forty minutes of AMRAP.
+      const afterAmrap = amrap !== null
       flushAmrap()
       // "3–5 Rounds" stores the upper bound; the runner can end a section early.
       const times = Number(rounds[2] ?? rounds[1])
@@ -1047,6 +1061,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
        */
       const trailing =
         target.kind === 'section' &&
+        !afterAmrap &&
         host.children.length > 0 &&
         host.children.every((child) => child.kind === 'segment')
       if (trailing) {
@@ -1168,6 +1183,9 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     // "Then:" ends the block above it. Without this the list that follows lands
     // inside the ladder it was written to come after.
     if (THEN.test(line)) {
+      // An AMRAP is a block too: "Then:" under one used to add what followed
+      // to its round.
+      flushAmrap()
       target = { kind: 'section' }
       eachMs = null
       return
@@ -1200,6 +1218,15 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     if (replace) {
       addNote(line)
       addItem(parseItem(replace[1]!))
+      return
+    }
+
+    // "Rest 30 seconds" on its own line is a rest STEP, not an instruction about
+    // the section: the routines before July have no bullets, and this read as a
+    // note and vanished from the clock. "Rest 30 seconds between rounds" stays
+    // an instruction.
+    if (/^rest\b/i.test(line) && /\d\s*(?:sec|min)/i.test(line) && !/\b(?:between|after|each)\b/i.test(line)) {
+      addItem(parseItem(line))
       return
     }
 
@@ -1259,6 +1286,11 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         amrap.round.push(tidy(bullet[1]!))
         return
       }
+      if (readDurationLadder(bullet[1]!)) return
+      // Under a "Minute N" heading a joined pair is ONE minute's work, exactly
+      // as it is on the one-line form; split, the second half became an untimed
+      // gate that doubled the minute.
+      if (pendingFill) return addMinute(bullet[1]!)
       for (const part of bullet[1]!.split(JOINED_ITEMS)) addItem(parseItem(part))
       if (dashIndex !== undefined && lastStep) {
         numberedItems.push({ index: Number(dashIndex), block: lastStep })

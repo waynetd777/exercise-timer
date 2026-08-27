@@ -1380,6 +1380,7 @@ export function EditorScreen({
   knownImages,
   onSave,
   onCancel,
+  backRequest = 0,
 }: {
   workout: Workout
   /** Images already used across the library, offered by the picker. */
@@ -1387,6 +1388,8 @@ export function EditorScreen({
   /** May be asynchronous: a rejected save keeps the draft here and says why. */
   onSave: (workout: Workout) => void | Promise<void>
   onCancel: () => void
+  /** Bumped when the browser's Back is pressed; answered as the in-app Back is. */
+  backRequest?: number
 }) {
   /**
    * Name and steps live in ONE history entry, so undo restores a consistent
@@ -1596,6 +1599,11 @@ export function EditorScreen({
     if (dirty) setConfirmingExit(true)
     else onCancel()
   }
+
+  useEffect(() => {
+    if (backRequest > 0) goBack()
+    // goBack reads the live draft; only the request count should re-run this.
+  }, [backRequest])
 
   /*
    * Only a keystroke-by-keystroke field coalesces. See `isTypedPatch`. Anything

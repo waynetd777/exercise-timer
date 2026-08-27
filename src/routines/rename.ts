@@ -38,7 +38,7 @@ import { foldName } from './foldName'
  * kept here rather than guessed at by the matcher.
  */
 const ALIASES: Readonly<Record<string, string>> = {
-  'chest pres': 'Standard Chest Press',
+  'chest press': 'Standard Chest Press',
 }
 
 /*

@@ -195,3 +195,12 @@ describe('the harvested half', () => {
     expect(new Set(folded).size).toBe(folded.length)
   })
 })
+
+describe('foldName and a double s', () => {
+  it('does not take an s off "press", so the singular and the plural meet', () => {
+    // "Arnold Press" folded to "arnold pres" and "Arnold Presses" to "arnold
+    // press": two keys for one exercise, and the prescription table held both.
+    expect(foldName('Arnold Press')).toBe(foldName('Arnold Presses'))
+    expect(foldName('Cross Punch')).toBe('cross punch')
+  })
+})

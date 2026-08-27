@@ -45,7 +45,7 @@ describe('WeightsScreen', () => {
     fireEvent.change(field('Leg Press'), { target: { value: '70kg' } })
 
     expect(weightFor('Leg Press')).toBe('70kg')
-    expect(loadWeights()).toEqual({ 'leg pres': '70kg' })
+    expect(loadWeights()).toEqual({ 'leg press': '70kg' })
   })
 
   it('lets a weight be emptied', () => {

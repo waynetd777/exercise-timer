@@ -122,6 +122,47 @@ function Screens() {
   )
   const toLibrary = useCallback(() => setView({ screen: 'library' }), [])
 
+  /*
+   * The browser's Back, on Android and in a tab. One history entry is pushed
+   * whenever a screen other than the library is open, and popped again when the
+   * library returns, so Back always means "back to the library" and never
+   * "leave the app". The run and edit screens are ASKED rather than closed,
+   * since both have something to lose and their own Back already asks; the
+   * entry is pushed back first, so the app stays where it is until they answer.
+   */
+  const [backRequest, setBackRequest] = useState(0)
+  const pushed = useRef(false)
+  const popping = useRef(false)
+  useEffect(() => {
+    if (view.screen !== 'library' && !pushed.current) {
+      history.pushState({ screen: view.screen }, '')
+      pushed.current = true
+    } else if (view.screen === 'library' && pushed.current) {
+      pushed.current = false
+      popping.current = true
+      history.back()
+    }
+  }, [view.screen])
+  useEffect(() => {
+    const onPop = () => {
+      if (popping.current) {
+        popping.current = false
+        return
+      }
+      if (!pushed.current) return
+      pushed.current = false
+      if (view.screen === 'run' || view.screen === 'edit') {
+        history.pushState({ screen: view.screen }, '')
+        pushed.current = true
+        setBackRequest((n) => n + 1)
+      } else if (view.screen !== 'library') {
+        setView({ screen: 'library' })
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [view.screen])
+
   const onStarted = useCallback(() => {
     if (view.screen === 'run') void library.markRun(view.workout)
   }, [view, library])
@@ -163,6 +204,7 @@ function Screens() {
         workout={running}
         onExit={toLibrary}
         onStarted={onStarted}
+        backRequest={backRequest}
       />
     )
   }
@@ -197,6 +239,7 @@ function Screens() {
         knownImages={knownImages}
         onSave={onSave}
         onCancel={toLibrary}
+        backRequest={backRequest}
       />
     )
   }
