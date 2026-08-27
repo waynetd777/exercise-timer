@@ -423,6 +423,68 @@
 }
 
 
+/*
+ * The generator's panel.
+ *
+ * Borrows `.paste`'s title, name field, report and actions rather than
+ * duplicating them: it is the same kind of dialog and should not drift into
+ * looking like a different one. What differs is the body, which is a stack of
+ * question rows instead of one big textarea, so the rows are all `auto` and the
+ * panel scrolls as a whole.
+ */
+.generate {
+  width: min(100%, 34rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--step-5);
+  display: grid;
+  grid-auto-rows: auto;
+  gap: var(--step-3);
+  color: var(--bone);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.generate__field {
+  display: grid;
+  gap: var(--step-2);
+  /* A fieldset brings a border and padding of its own that nothing here wants. */
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.generate__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2);
+}
+
+/* The chosen one, on the same principle as the editor's colour swatches. */
+.generate__options .chip[aria-pressed='true'] {
+  background: var(--phase);
+  border-color: var(--phase);
+  color: var(--ink-900);
+}
+
+/* The exercises it picked, which is the answer most worth reading. */
+.generate__list {
+  margin: 0;
+  color: var(--bone);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* What it had to do that was not asked for. Never hidden. */
+.generate__note {
+  margin: 0;
+  color: var(--role-prepare);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .paste__title {
   margin: 0;
   font-size: var(--size-name);

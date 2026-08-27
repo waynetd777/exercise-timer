@@ -62,6 +62,10 @@ across a gym, with the phone propped against a rack.
   reads, with an example using every part of it.
 - **Imports** the `.tabata` exports of the Tabata Timer app, its own backups, and
   plain-text routines.
+- **Generates** a routine from a few answers: how long, what to work, whether to
+  keep moving between sets, and what equipment. It builds in the shape of the
+  routines it has been given, from a table of 127 exercises whose multi-gym half
+  is read out of the manufacturer's guide.
 - **Edits** routines: steps, durations, reps, weights, sets, ladders, sections and
   images, with undo.
 - **Sends** a routine three ways: a link, plain text, or a `.txt` in the format it
