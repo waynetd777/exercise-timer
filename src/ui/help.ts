@@ -139,7 +139,7 @@ export const WEIGHTS_HELP: readonly HelpSection[] = [
     heading: 'What this is',
     points: [
       'What you lift, per exercise, in one place. A weight belongs to your gym rather than to a routine, and it used to be written into each one: moving up a plate meant editing every routine that named the lift.',
-      'Sixty-seven exercises: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
+      'Sixty-eight exercises: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”. Anything you would write on a step, you can write here.',
     ],
   },
@@ -155,8 +155,8 @@ export const WEIGHTS_HELP: readonly HelpSection[] = [
   {
     heading: 'Where the numbers came from',
     points: [
-      'Eighteen weights start filled in, and all but one of them are yours: three you gave, and fifteen read out of routines 2 and 3, which are what you have actually been loading the machine to.',
-      'The one exception is the triceps press, which is still a looked-up guess because no routine has ever loaded it. Treat it as high until you check: the looked-up shoulder press said 30kg against a real 10, and the hamstring curl 35kg against a real 10. A home stack is not the commercial machine that site measures.',
+      'Nineteen weights start filled in, and every one of them is yours: four you gave, and fifteen read out of routines 2 and 3, which are what you have actually been loading the machine to.',
+      'Nothing looked up survived. Every estimate was corrected downwards, most of them a long way: the shoulder press said 30kg against a real 10, and the hamstring curl 35kg against a real 10. A home stack is not the commercial machine that site measures.',
       'The other forty-nine are blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on.',
       'Fill from my routines takes the weight your saved routines already use for anything still blank. Better evidence than any website, and it shows you what it would take before you tap it.',
     ],

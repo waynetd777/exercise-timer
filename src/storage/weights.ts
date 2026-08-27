@@ -45,7 +45,8 @@ const KEY = 'davshack-timer-weights'
  * stack is not the commercial machine that site measures, and its numbering is
  * not the same numbering. Where the two disagree the machine is right.
  *
- * ONE GUESS LEFT, marked below. Everything else here he has lifted.
+ * NOT ONE LOOKED-UP NUMBER IS LEFT. Every weight below is his, and the last of
+ * the estimates went the same way as the rest: corrected downwards.
  *
  * The other forty-nine are blank on purpose: a guessed weight is worse than an
  * empty field, because an empty field asks and a wrong number gets loaded on.
@@ -65,6 +66,7 @@ export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
   'Deadlift': '30kg',
   'Side Cable Bends': '30kg',
   'Incline Chest Press': '25kg',
+  'Low Pulley Squat': '25kg',
   'Glute Kickback': '20kg',
   'Hip Abductor Leg Raise': '15kg',
   'Abdominal Oblique Crunch': '15kg',
@@ -81,17 +83,16 @@ export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
   'Standard Chest Press': '30kg',
 
   /*
-   * STILL A GUESS. strengthlevel, novice, ×0.70, rounded up to the nearest 5kg
-   * because that is where the pin goes. No routine of Wayne's has ever loaded
-   * it, so there is nothing better to say — and on this machine's record, it is
-   * more likely high than low.
+   * Wayne's, set on 2026-08-28 rather than lifted from a routine: no routine of
+   * his has ever loaded it. The looked-up number was 20kg, which he corrected
+   * down, exactly as he corrected every other one.
    *
    * The Cable Fly used to sit beside it at a looked-up 35kg and has been taken
    * out rather than corrected: Wayne's own Rear Cable Fly, on the same cable
    * stack, is 10kg. 35 was not a number worth keeping, and an empty field asks
    * the question instead of answering it wrongly.
    */
-  'Triceps Press': '20kg',
+  'Triceps Press': '15kg',
 }
 
 /** What is written down, keyed by folded exercise name. */

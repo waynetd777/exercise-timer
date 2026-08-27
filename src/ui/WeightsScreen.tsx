@@ -24,13 +24,14 @@ import './weights.css'
  * lift; now a routine that states no weight of its own reads this table every
  * time it is opened, and one number changes all of them.
  *
- * SIXTY-SEVEN ROWS, which is why there is a search box. Everything you can put
+ * SIXTY-EIGHT ROWS, which is why there is a search box. Everything you can put
  * a number against is listed rather than only what you have used, because the
  * page is also how you find out what the multi-gym can do.
  *
- * Blank is a real answer. Eleven have a starting number from strengthlevel.com;
- * the rest are empty because a guessed weight is worse than no weight, and an
- * empty field asks the question instead of answering it wrongly.
+ * Blank is a real answer. Nineteen start with a number, every one of them read
+ * out of Wayne's own routines or given by him; the rest are empty because a
+ * guessed weight is worse than no weight, and an empty field asks the question
+ * instead of answering it wrongly.
  */
 
 /** What the saved library says you last lifted, for a row with nothing in it. */
@@ -100,7 +101,7 @@ export function WeightsScreen({
   onFollow: (workouts: readonly Workout[]) => Promise<void> | void
 }) {
   /*
-   * The store is held here and written through on every keystroke. Sixty-seven
+   * The store is held here and written through on every keystroke. Sixty-eight
    * small strings in localStorage is not worth debouncing, and a settings page
    * that loses the last thing you typed because you closed it too quickly is
    * the one failure that would matter.

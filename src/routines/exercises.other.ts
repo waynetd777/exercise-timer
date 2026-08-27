@@ -5,8 +5,12 @@
  */
 
 /**
- * Everything the multi-gym cannot do: bodyweight, band, dumbbell, kettlebell,
- * trampoline and the bike.
+ * Everything the Horizon guide does not draw.
+ *
+ * Mostly that means what the multi-gym cannot do — bodyweight, band, dumbbell,
+ * kettlebell, trampoline and the bike — but it also holds the odd MACHINE
+ * movement the guide leaves out, which is why the file is defined by the
+ * missing picture rather than by the missing machine.
  *
  * HARVESTED, not invented. Every movement here appears in a routine this app has
  * already been given: `strength-training.routine.json` and the four emails in
@@ -36,6 +40,16 @@
 import type { Exercise } from './exercises'
 
 export const OTHER_EXERCISES: readonly Exercise[] = [
+  /*
+   * ── On the machine, but not in the guide ─────────────────────────────────
+   *
+   * Wayne does this one and routine 2 has always carried it; the guide simply
+   * does not illustrate it, so `exercise_metadata.py` could never find it and
+   * it cannot live in the generated table. Rigged like the Deadlift, which is
+   * the same low pulley and the same bar.
+   */
+  { name: 'Low Pulley Squat', area: 'lower', equipment: 'machine', station: 5, attachment: 'low row bar' },
+
   // ── Mobility, for the opening minutes ────────────────────────────────────
   { name: 'Arm Circles', area: 'upper', pattern: 'push', equipment: 'bodyweight', use: 'mobility' },
   { name: 'Arm Swings', area: 'upper', pattern: 'push', equipment: 'bodyweight', use: 'mobility' },

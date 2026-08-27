@@ -519,6 +519,13 @@ read out of his routines plus three he gave; only Triceps Press is still a
 guess, and the Cable Fly guess was removed rather than corrected. If a weight
 question comes up again, read his routines before reaching for a website.
 
-"Low Pulley Squat" is in routine 2 at 25kg and is NOT in the exercise table —
-the guide does not illustrate it. It cannot take a weight from the page until
-someone adds it.
+"Low Pulley Squat" was in routine 2 at 25kg and missing from the table because
+the guide does not illustrate it. Added to `exercises.other.ts` (v7.2), which is
+therefore no longer "what the multi-gym cannot do" but "what the guide does not
+DRAW" — a machine exercise can live there, and the kit invariant in
+`exercises.test.ts` was widened to say so. Rigged like the Deadlift: station 5,
+low row bar.
+
+Every looked-up weight is now gone. Wayne corrected the last one (triceps press
+20 → 15) without ever having loaded it in a routine, which is the final word on
+what strengthlevel was worth here: every single estimate was high.

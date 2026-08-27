@@ -100,9 +100,23 @@ describe('the authored half, harvested from the corpus', () => {
     OTHER_EXERCISES.filter((e) => (e.use ?? 'strength') === u)
 
   it('never calls for kit that is not in the garage', () => {
-    // A 6kg kettlebell, dumbbells to 5kg, bands, a trampoline, the bike and the
-    // machine. Suggesting anything else is proposing work Wayne cannot do.
-    const owned = new Set(['bodyweight', 'dumbbell', 'kettlebell', 'band', 'trampoline', 'bike'])
+    /*
+     * A 6kg kettlebell, dumbbells to 5kg, bands, a trampoline, the bike and the
+     * machine. Suggesting anything else is proposing work Wayne cannot do.
+     *
+     * `machine` belongs here now: this file is defined by the guide having no
+     * PICTURE of a movement, not by the multi-gym being unable to do it, and
+     * the Low Pulley Squat is one the guide leaves out.
+     */
+    const owned = new Set([
+      'bodyweight',
+      'dumbbell',
+      'kettlebell',
+      'band',
+      'trampoline',
+      'bike',
+      'machine',
+    ])
     expect(OTHER_EXERCISES.filter((e) => !owned.has(e.equipment))).toEqual([])
   })
 
