@@ -257,7 +257,7 @@ export function GenerateDialog({
 
   /*
    * Regenerated on every answer, and cheap enough to do so: the generator is
-   * pure arithmetic over a 127-row table. The seed is state, so changing an
+   * pure arithmetic over a 147-row table. The seed is state, so changing an
    * answer does not silently reroll the exercises as well.
    */
   const result = useMemo(() => {

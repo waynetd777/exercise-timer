@@ -64,7 +64,7 @@ across a gym, with the phone propped against a rack.
   plain-text routines.
 - **Generates** a routine from a few answers: how long, what to work, whether to
   keep moving between sets, and what equipment. It builds in the shape of the
-  routines it has been given, from a table of 127 exercises whose multi-gym half
+  routines it has been given, from a table of 147 exercises whose multi-gym half
   is read out of the manufacturer's guide. It leaves out any weight the settings
   page can supply, so the routine follows what you lift rather than freezing it.
 - **Edits** routines: steps, durations, reps, weights, sets, ladders, sections and
