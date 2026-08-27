@@ -691,7 +691,7 @@ describe('the tree operations reach every kind of group', () => {
   })
 })
 
-describe('setTiming: a step is timed OR counted, never both', () => {
+describe('setTiming: a cleared key is deleted, not blanked', () => {
   const stepAt = (blocks: Block[]) => blockAt(blocks, [0]) as Segment
 
   it('switching to reps DELETES the duration rather than blanking it', () => {

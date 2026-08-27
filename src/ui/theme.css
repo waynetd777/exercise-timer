@@ -155,19 +155,12 @@ html,
 body,
 #root {
   /*
-   * `dvh`, not a percentage.
+   * `svh`, the SMALL viewport. Not a percentage, not `dvh`, and no longer `lvh`.
    *
-   * On an iOS home-screen install with `viewport-fit=cover`, a percentage height
-   * resolves against the SAFE viewport, meaning the screen less the status-bar strip,
-   * while the page paints under the island regardless. The app was therefore 59pt
-   * shorter than the screen it was drawn on, which is the band of dead space that
-   * appeared below the controls the moment the header claimed its own inset: the
-   * inset pushed content down inside a box that stopped early.
-   *
-   * The percentage stays as a fallback line for anything without `dvh`.
-   */
-  /*
-   * `svh`, the SMALL viewport. Not `dvh`, and no longer `lvh`.
+   * Not a percentage, because on an iOS home-screen install with
+   * `viewport-fit=cover` it resolves against the SAFE viewport, the screen less
+   * the status-bar strip, while the page paints under the island regardless: the
+   * app came out 59pt shorter than the screen it was drawn on.
    *
    * Not `dvh`, because the dynamic viewport shrinks when the keyboard comes up: the
    * app relaid itself at keyboard height, and iOS did not always say when the
@@ -380,7 +373,7 @@ button {
   width: 100%;
   max-width: none;
   /*
-   * `dvh` here, where the shell uses `lvh`: this is the one thing that SHOULD
+   * `dvh` here, where the shell uses `svh`: this is the one thing that SHOULD
    * shrink when the keyboard appears, so the panel stays centred in what can
    * actually be seen rather than behind it.
    */

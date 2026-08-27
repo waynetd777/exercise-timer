@@ -21,14 +21,13 @@ before it was a rule: `flatten` rendered a ladder as one childless row, and
 than a piece of work and a round cannot contain one. It allows a ladder, because
 "3 rounds of this ladder" is a real thing to ask for.
 
-## A step is timed OR counted, never both
+## A cleared key is deleted, not blanked
 
-The data model lets a step carry a duration and a rep count at once. The editor
-does not, because a step that says "20 ×" and counts down 30 seconds cannot be
-obeyed. So `setTiming` **deletes** the other key rather than setting it undefined.
+`setTiming` **deletes** a key it clears rather than setting it undefined.
 `exactOptionalPropertyTypes` is on, and absent versus present-and-undefined is
-exactly what separates a self-paced step from a timed one. `clearMedia` exists for
-the same reason.
+exactly what separates a self-paced step from a timed one. `clearMedia` and
+`clearText` exist for the same reason. (A step may be counted AND timed; see
+"Timing is not either/or" below.)
 
 `timingOf` reads the choice back for the control that sets it, falling back to the
 role's default duration for a step with no duration to return to.
@@ -175,14 +174,14 @@ ids, went with it.
 
 The paste button is disabled only when we KNOW there is nothing to paste. That is a
 narrower claim than it sounds, because reading a clipboard is a privacy operation
-and every browser gates it differently — `media/clipboard.ts` carries the detail.
+and every browser gates it differently. `media/clipboard.ts` carries the detail.
 The short version: Chromium answers for free once `clipboard-read` is granted, and
 Safari and Firefox will not answer at all until you tap, since a tap is the user
 activation they demand.
 
 So the state is four-valued, not a boolean. `none` and `unsupported` disable the
 button; `unknown` leaves it enabled and the tap finds out. **Never probe where a
-probe could prompt** — asking on the off-chance would put Safari's native paste
+probe could prompt**, because asking on the off-chance would put Safari's native paste
 confirmation on screen for a question the user never asked, which is why the probe
 checks the permission first and returns `unknown` rather than reading. The
 consequence is deliberate: on an iPhone the button never greys out, and a tap that

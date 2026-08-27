@@ -1,7 +1,7 @@
 # ui
 
-The screens (library, run, edit, plus a dev-only sound bench), the design tokens
-and the type scale.
+The screens (library, run, edit, weights, plus a dev-only sound bench), the design
+tokens and the type scale.
 
 ## One type scale, in `theme.css`
 
@@ -86,7 +86,7 @@ ragged. Below the fold beats unreadable.
 
 `useRowDrag` never reorders the tree itself. It works out that the held row has
 passed its neighbour and calls `onStep(id, ±1)`, which the editor answers with
-`moveStep` — the same function the Move up and Move down buttons call, already
+`moveStep`, the same function the Move up and Move down buttons used to call, already
 tested for walking a step into and out of rounds, ladders and sections. So a
 drag cannot put a step anywhere the buttons could not, and there is no second
 implementation of reordering to keep in step with the first.
@@ -221,6 +221,10 @@ Re-check that ratio if any role colour changes.
 The four roles above are phases. The three group kinds are containers, so they take
 hues the roles do not use: **sets orange, ladder yellow, section teal**
 (`--group-*` in `theme.css`). Sets and ladder borrow the routine tints, keeping one
+palette rather than two. Teal is defined only as `--group-section`, because adding
+it to `--routine-*` would put an eighth swatch in the colour picker, and that set
+is deliberately six.
+
 `.label--section` names the section running, ONCE, in the run header under the
 routine name. It borrows `--group-section` rather than `--phase` on purpose, or
 the heading would change hue every time work turned to rest, as though the part
@@ -233,10 +237,6 @@ about two points of slack, and it landed on the header and on the step count. Th
 header costs the countdown nothing that the countdown was not already going to
 lose, and one location serves both layouts. A test asserts the heading appears
 exactly once, inside the `header`, and never inside `.count__lead`.
-
-palette rather than two. Teal is defined only as `--group-section`, because adding
-it to `--routine-*` would put an eighth swatch in the colour picker, and that set
-is deliberately six.
 
 Both halves show up the same way, as a 4px rule down the left edge of the row, so
 the shape of a routine is readable while scrolling without a word being read. Two
@@ -406,8 +406,8 @@ would cancel the whole paste when it was dismissed.
 
 ## Saying how long a routine takes
 
-Four places name a length — the library row, the editor header, the generator
-preview and the Ready card — and they all use the same figure, from
+Four places name a length: the library row, the editor header, the generator
+preview and the Ready card. They all use the same figure, from
 `routines/estimate.ts` plus the paces in `storage/paces.ts`. Adding a fifth means
 using it too, or that screen will report zero for a routine of counted exercises.
 
@@ -429,7 +429,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs |
-| `WeightsScreen.tsx` | What you lift, per exercise: 68 rows, searchable, each with its illustration. Holds the two bulk actions — filling from your routines, and letting your routines follow the page |
+| `WeightsScreen.tsx` | What you lift, per exercise: every loadable exercise, searchable, each with its illustration. Holds the two bulk actions, filling from your routines and letting your routines follow the page |
 | `SoundsScreen.tsx` | The cue bench. **Dev only.** `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
 | `PasteDialog.tsx` | Paste a routine as text. Reports unparsed lines before saving, and hands over the template |
 | `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |
@@ -440,7 +440,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
 | `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
 | `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
-| `library.css`, `run-screen.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
+| `library.css`, `run-screen.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs. `estimated()` is the one place a guessed length is worded |
 | `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

@@ -9,8 +9,9 @@ localStorage's 5MB quota plus base64's 33% inflation cannot hold images. Two sto
 were created at version 1, `workouts` keyed by id and `media` keyed by content
 hash, so the media work was an addition rather than a schema migration.
 
-Two things do live in localStorage, on purpose. `weights.ts` and `paces.ts` are
-small, per-device, and neither belongs inside a routine: what you lift is a
+A few small things live in localStorage, on purpose: the seeded-routine marker
+(`seeded.ts`), the mute switch, and `weights.ts` and `paces.ts`. The last two are
+per-device, and neither belongs inside a routine: what you lift is a
 property of your gym, and how fast you work is a property of you. A new IndexedDB
 store would mean a version bump and a migration on every install for a handful of
 strings. Both read synchronously, which is what lets every render ask.
@@ -22,8 +23,10 @@ routine's saved images can simply disappear under storage pressure.
 
 `library.ts` holds the ordering and naming rules and is fully tested. `workouts.ts`
 is deliberately dumb IndexedDB access, and `useLibrary.ts` only wires them to
-React. IndexedDB itself is not tested and does not need to be. Keep it that way
-rather than adding a fake.
+React. `db.test.ts` carries a hundred-line sliver of IndexedDB, scripted opens and
+one-request transactions, enough to prove the self-healing paths (a failed or
+throwing open is not cached, a dead connection is reopened) and add-only seeding.
+Keep it to that; the rules live in `library.ts` and need no fake at all.
 
 The rules that earned tests:
 
@@ -43,7 +46,8 @@ routines are, and no schema step has to run before anything can be read. It retu
 its input unchanged when there is nothing to fix, so React sees no needless new
 objects.
 
-Two fixes exist today.
+Four fixes exist today: repeat labels, rehosted images, the AMRAP note split, and
+the trailing load lifted out of a name.
 
 **Repeat labels.** Groups were called "rounds", and every one the editor created
 stored the literal label `'Round'`. The label is **data**, so a code-only rename
@@ -80,8 +84,8 @@ an edit is not.
 `weights.ts` holds one weight per exercise, keyed by folded name. `SEED_WEIGHTS`
 starts it off, and every number in it is Wayne's own: fifteen read out of routines
 2 and 3, four given directly. The looked-up numbers it began with were all wrong
-in the same direction — strengthlevel said 30kg for a shoulder press against a
-real 10 — so a home stack is not the machine that site measures, and none of them
+in the same direction (strengthlevel said 30kg for a shoulder press against a
+real 10), so a home stack is not the machine that site measures, and none of them
 survive.
 
 Three rules that are not obvious:
@@ -102,8 +106,8 @@ The resolution rule lives in `routines/loads.ts`, not here. See that README.
 can stop guessing. Every gate already times itself; the elapsed was being thrown
 away.
 
-What it refuses is the interesting half. A gate under four seconds is a DRY RUN —
-tapping Next through a routine to see what is in it — and would otherwise teach it
+What it refuses is the interesting half. A gate under four seconds is a DRY RUN,
+tapping Next through a routine to see what is in it, and would otherwise teach it
 that a twelve-rep set takes half a second. Rates outside 0.5 to 12 seconds a rep
 go too, as do gates over eight minutes. Timed steps inside a gate are subtracted
 from the elapsed rather than charged to the counted exercise beside them. Three

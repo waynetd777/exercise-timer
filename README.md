@@ -95,7 +95,7 @@ link above.
 ```bash
 npm install
 npm run dev        # http://localhost:35173
-npm test           # 637 tests, no browser needed
+npm test           # about a thousand tests, no browser needed
 npm run typecheck
 npm run build
 ```
@@ -174,7 +174,7 @@ IndexedDB, and images live beside them once pinned. Backups, share links and the
 
 ## Testing
 
-637 tests, all of which run in Node in a couple of seconds. There is no browser in
+About a thousand tests, all of which run in Node in a few seconds. There is no browser in
 the test setup and none is needed. The parts with rules in them are pure and
 tested directly; the hooks that own timers, listeners and external handles (the
 tick chain, the cue scheduler, the wake lock, IndexedDB's connection) are tested

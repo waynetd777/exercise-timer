@@ -33,7 +33,7 @@ import { foldName } from './foldName'
  * Bare names with one obvious owner on this machine.
  *
  * The table has five chest presses and no plain one, so nothing can match
- * "Chest Press" — and yet on a Horizon it can only mean the standard one, which
+ * "Chest Press", and yet on a Horizon it can only mean the standard one, which
  * is what Wayne confirmed it meant in routine 2. A short list of decisions,
  * kept here rather than guessed at by the matcher.
  */
@@ -44,7 +44,7 @@ const ALIASES: Readonly<Record<string, string>> = {
 /*
  * "Shoulder Press" is NOT here, though it has the same problem. The table has a
  * dumbbell exercise by exactly that name, so the plain name is already somebody's
- * — and in a multi-gym routine it means the standing one. Nothing in the name
+ * and in a multi-gym routine it means the standing one. Nothing in the name
  * can tell the two apart, so it is left as written. It resolves to the same
  * weight either way, which is why this costs nothing.
  */

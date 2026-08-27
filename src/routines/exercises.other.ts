@@ -7,8 +7,8 @@
 /**
  * Everything the Horizon guide does not draw.
  *
- * Mostly that means what the multi-gym cannot do — bodyweight, band, dumbbell,
- * kettlebell, trampoline and the bike — but it also holds the odd MACHINE
+ * Mostly that means what the multi-gym cannot do (bodyweight, band, dumbbell,
+ * kettlebell, trampoline and the bike), but it also holds the odd MACHINE
  * movement the guide leaves out, which is why the file is defined by the
  * missing picture rather than by the missing machine.
  *

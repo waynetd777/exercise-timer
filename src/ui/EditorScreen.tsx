@@ -212,7 +212,7 @@ function ImagePicker({
 
   /*
    * Whether the clipboard holds an image, re-asked whenever this window comes
-   * back to the front — you copy the screenshot in another app and return, with
+   * back to the front: you copy the screenshot in another app and return, with
    * this dialog still open behind it.
    *
    * `probeClipboardImage` reads nothing where a read would prompt, so this
@@ -255,13 +255,13 @@ function ImagePicker({
         // it is known, so the button goes with it rather than inviting a retry
         // that would fail the same way.
         setClipboard('none')
-        onError('There is no image on the clipboard — copy one and try again')
+        onError('There is no image on the clipboard. Copy one and try again')
         return
       }
       onUpload(blob)
     } catch {
       onError(
-        'The clipboard could not be read — allow this site to see it, or use Upload a photo instead',
+        'The clipboard could not be read. Allow this site to see it, or use Upload a photo instead',
       )
     }
   }
@@ -343,7 +343,7 @@ function ImagePicker({
         {/*
           Disabled only when we KNOW there is nothing to paste, or when this
           browser cannot read a clipboard at all. Where the answer is unknowable
-          without a gesture it stays enabled and the tap finds out — a button
+          without a gesture it stays enabled and the tap finds out: a button
           that is permanently grey on the device the app is used on would be a
           worse lie than an occasional "nothing there".
         */}
@@ -1757,10 +1757,8 @@ export function EditorScreen({
           <ul className="editor__list" ref={list}>
             {rows.map(({ block, path, depth, last }) =>
               /*
-               * Ladders and sections have no row yet. The editor gains them with
-               * the strength-routine work. Nothing in the app can author one, so
-               * this branch is unreachable today; it is explicit rather than a
-               * cast so adding a kind cannot silently render it as a repeat.
+               * One row component per block kind. Exhaustive rather than a
+               * cast, so adding a kind cannot silently render it as a repeat.
                */
               block.kind === 'section' ? (
                 <SectionRow

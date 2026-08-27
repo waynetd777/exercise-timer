@@ -34,7 +34,8 @@ export function defaultRoutineName(now: Date): string {
  * Lines the parser could not place are shown BEFORE saving, with their numbers.
  * Hiding them would make a partial parse look like a complete one, and the whole
  * point is that the reviewer can see what they were not told. The review happens
- * here rather than in the editor, which cannot show a section or a ladder yet.
+ * here rather than in the editor, so the list of misses sits beside the text
+ * that produced them.
  */
 export function PasteDialog({
   onCancel,

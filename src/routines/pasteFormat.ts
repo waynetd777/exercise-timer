@@ -427,7 +427,7 @@ type Item = {
  * leaving it in makes a 159-character step name that no amount of sizing can
  * render legibly across a gym.
  */
-const DESCRIPTION_CHARS = 24
+export const DESCRIPTION_CHARS = 24
 
 /** A trailing "(…)", which is where these routines put their instructions. */
 const TRAILING_PAREN = /^(.*?)\s*\(([^()]*)\)\s*$/
@@ -557,8 +557,8 @@ export function parseItem(text: string): Item {
 // ── Blocks ──────────────────────────────────────────────────────────────────
 
 /** A step that is the routine getting you ready rather than working you. */
-const PREPARE_NAME = /^(get (ready|set)|prepare|set ?up)\b/i
-const REST_NAME = /\brest\b/i
+export const PREPARE_NAME = /^(get (ready|set)|prepare|set ?up)\b/i
+export const REST_NAME = /\brest\b/i
 
 function segment(item: Item, durationMs: number | undefined, reps: Reps | undefined): Segment {
   const role = REST_NAME.test(item.name)

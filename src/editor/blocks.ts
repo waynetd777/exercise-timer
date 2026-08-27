@@ -100,11 +100,6 @@ export function newRepeat(
 }
 
 /**
- * The shape a new routine opens on: get set, a round, get set for whatever comes
- * next, then a recovery interval. Exported so the app and its tests cannot
- * disagree about it.
- */
-/**
  * A new ladder: three rungs of one exercise that scales with them.
  *
  * `5-10-15` rather than a symmetric pyramid, because a short ascending ladder is
@@ -148,6 +143,11 @@ export function newSection(name = 'Section', children: Block[] = [newRepsStep()]
   return { kind: 'section', id: newId(), name, display: 'list', children }
 }
 
+/**
+ * The shape a new routine opens on: get set, a round, get set for whatever comes
+ * next, then a recovery interval. Exported so the app and its tests cannot
+ * disagree about it.
+ */
 export function newRoutineBlocks(): Block[] {
   return [newSegment('prepare'), newRepeat(), newSegment('prepare'), newSegment('recover')]
 }
@@ -319,13 +319,6 @@ export function updateSegment(
 }
 
 /**
- * Removes a segment's image.
- *
- * Separate from `updateSegment` because `exactOptionalPropertyTypes` forbids
- * patching a key to `undefined`, and deleting the key is what is actually
- * meant, so the property is absent rather than present-and-undefined.
- */
-/**
  * Removes a step's note or alternative.
  *
  * A separate operation for the same reason as `clearMedia`: with
@@ -346,6 +339,13 @@ export function clearText(
   })
 }
 
+/**
+ * Removes a segment's image.
+ *
+ * Separate from `updateSegment` because `exactOptionalPropertyTypes` forbids
+ * patching a key to `undefined`, and deleting the key is what is actually
+ * meant, so the property is absent rather than present-and-undefined.
+ */
 export function clearMedia(blocks: readonly Block[], path: Path): Block[] {
   return mapAt(blocks, path, (block) => {
     if (block.kind !== 'segment') return block
@@ -381,16 +381,6 @@ export function updateSection(
   return mapAt(blocks, path, (block) => (block.kind === 'section' ? { ...block, ...patch } : block))
 }
 
-/**
- * What a step asks of you, as one exclusive choice.
- *
- * The data model lets a step carry both a duration and a rep count; the editor
- * does not, because a step that says "20 ×" and counts down 30 seconds cannot be
- * obeyed. Switching between them therefore has to DELETE the other key rather
- * than set it undefined. `exactOptionalPropertyTypes` is on, and a key present
- * and undefined is not the same as absent, which is exactly what separates a
- * self-paced step from a timed one.
- */
 /**
  * What a step asks of you, as the editor's timing control sees it.
  *

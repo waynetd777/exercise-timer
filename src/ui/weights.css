@@ -5,8 +5,8 @@
  */
 
 /*
- * The weights page. Header, lede and tools stay put; the sixty-seven rows
- * scroll under them, exactly as the library does.
+ * The weights page. Header, lede and tools stay put; the rows scroll under
+ * them, exactly as the library does.
  */
 .weights {
   container-type: inline-size;

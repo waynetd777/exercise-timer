@@ -303,20 +303,12 @@ export function LibraryScreen({
   }
 
   /*
-   * Text goes out with the weights filled in.
-   *
-   * The grammar carries a load in the name — "Leg Press 65kg" — and there is
-   * nowhere in it to say "whatever I lift for this". Someone reading the text,
-   * here or on another device, needs the number, so it is resolved on the way
-   * out. The routine itself is untouched.
-   */
-  /*
    * Putting every step's exercise back under the name the app knows it by.
    *
    * The reason it matters is not tidiness. A step called "Seated Ab Crunch" is
    * the same movement as the table's "Seated Abdominal Crunch", but only the
-   * table's spelling matches on the name exactly, so anything keyed by name —
-   * the weights page most of all — is working around the difference rather than
+   * table's spelling matches on the name exactly, so anything keyed by name,
+   * the weights page most of all, is working around the difference rather than
    * with it.
    *
    * Computed on every render of the menu, which is cheap: it is a walk over
@@ -335,6 +327,14 @@ export function LibraryScreen({
     )
   }
 
+  /*
+   * Text goes out with the weights filled in.
+   *
+   * The grammar carries a load in the name ("Leg Press 65kg") and there is
+   * nowhere in it to say "whatever I lift for this". Someone reading the text,
+   * here or on another device, needs the number, so it is resolved on the way
+   * out. The routine itself is untouched.
+   */
   const asText = (workout: Workout) => writeRoutine(withWeights(workout, currentWeights()))
 
   const copyRoutineText = async (workout: Workout) => {
@@ -352,13 +352,6 @@ export function LibraryScreen({
     setNotice(`Downloaded “${workout.name}” as text${lostNote(lost)}`)
   }
 
-  /**
-   * Stores a local copy of every linked image, so routines keep their pictures
-   * on gym wifi and survive the host eventually losing a file.
-   *
-   * Works because i.postimg.cc allows cross-origin reads. Failures are counted
-   * rather than thrown: one dead link should not abandon the rest.
-   */
   /**
    * Writes routines to a file, with their uploaded photos inside it.
    *
@@ -615,7 +608,7 @@ export function LibraryScreen({
           <p className="library__empty label">
             {query
             ? `Nothing matches “${query}”`
-            : 'Drop a .tabata or exported .json file here to add a routine'}
+            : 'Drop a .tabata, an exported .json or a .txt routine here to add it'}
           </p>
         ) : (
           <ul className="library__list">
