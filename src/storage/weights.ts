@@ -32,31 +32,38 @@ import { foldName } from '../routines/foldName'
 const KEY = 'davshack-timer-weights'
 
 /**
- * The starting numbers, for the eleven lifts there is real evidence for.
+ * The starting numbers, from two sources, and the better one wins.
  *
- * From strengthlevel.com's standards for a 55-year-old man at 88kg, taken at
- * NOVICE and multiplied by 0.70 for a working weight at twelve reps rather than
- * a one-rep max. Wayne looked these up on 2026-08-27.
+ * WHAT WAYNE ACTUALLY LIFTS, where he has said. Four of these are his own
+ * numbers off his own machine (2026-08-27), and they replace the looked-up ones
+ * outright: the shoulder press estimate was 30kg against a real 10, which is
+ * the size of error worth knowing about. A Horizon stack is not a commercial
+ * machine and a home cable run is not a gym one, so where the two disagree the
+ * machine is right and the table is wrong.
  *
- * ROUNDED UP to the nearest 5kg, because that is what a stack can do: the pin
- * goes in a hole, there is no 63kg, and a number you cannot select is worse
- * than one that is three kilos heavy. Up rather than down on Wayne's call.
+ * THE REST from strengthlevel.com's standards for a 55-year-old man at 88kg,
+ * taken at NOVICE and multiplied by 0.70 for a working weight at twelve reps
+ * rather than a one-rep max, rounded UP to the nearest 5kg because that is what
+ * a stack can do: the pin goes in a hole, and there is no 63kg.
  *
- * The other fifty-six are blank on purpose. A Horizon stack is not a commercial
- * machine, 25 of the 41 multi-gym exercises have no equivalent on that site at
- * all, and a guessed weight is worse than an empty field: an empty field asks,
- * and a wrong number gets loaded onto a bar.
+ * The other fifty-five are blank on purpose. 25 of the 41 multi-gym exercises
+ * have no equivalent on that site at all, and a guessed weight is worse than an
+ * empty field: an empty field asks, and a wrong number gets loaded on.
  */
 export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
+  // Wayne's own, off the machine.
+  'Standing Shoulder Press': '10kg',
+  'Seated Abdominal Crunch': '20kg',
+  'Seated Leg Extension': '15kg',
+  'Hip Abductor Leg Raise': '20kg',
+
+  // Looked up, and still to be checked against the machine.
   'Leg Press': '65kg',
   'Standard Chest Press': '35kg',
   'Lat Pulldown': '35kg',
   'Seated Row': '35kg',
   'Calf Press': '50kg',
-  'Standing Shoulder Press': '30kg',
-  'Seated Leg Extension': '40kg',
   'Free-Standing Hamstring Curl': '35kg',
-  'Hip Abductor Leg Raise': '40kg',
   'Cable Fly': '35kg',
   'Triceps Press': '20kg',
 }

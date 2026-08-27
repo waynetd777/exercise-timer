@@ -477,3 +477,12 @@
   bump, since an older reader ignores what it does not know.
 - Still open: routines saved before v6.5 carry their own loads and do not follow
   the page. See STATUS for the inverse button.
+
+## The looked-up weights are estimates, and some are badly wrong (2026-08-27)
+
+Wayne gave four real numbers off his machine: Standing Shoulder Press 10kg,
+Seated Abdominal Crunch 20kg, Seated Leg Extension 15kg, Hip Abductor Leg Raise
+20kg. The strengthlevel estimate for the shoulder press was 30kg — three times
+the truth. A Horizon home stack is not a commercial machine. Where Wayne states
+a weight it replaces the looked-up one outright, and the remaining eight seeds
+in `SEED_WEIGHTS` are still unchecked; do not defend them if he corrects one.

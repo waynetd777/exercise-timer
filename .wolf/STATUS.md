@@ -802,8 +802,12 @@ overriding on purpose. So changing one number changes every routine that does
 not disagree.
 
 - `src/storage/weights.ts` — the store. localStorage, cached, dropped on save.
-  `SEED_WEIGHTS` carries the eleven strengthlevel numbers, rounded UP to the
-  nearest 5kg because that is where the pin goes. An empty value is RECORDED
+  `SEED_WEIGHTS` carries twelve. FOUR are Wayne's own numbers off the machine
+  (Standing Shoulder Press 10, Seated Abdominal Crunch 20, Seated Leg Extension
+  15, Hip Abductor Leg Raise 20, given 2026-08-27) and they replace the
+  looked-up ones outright — the shoulder press estimate was 30kg against a real
+  10. The other eight are strengthlevel, rounded UP to the nearest 5kg because
+  that is where the pin goes, and are STILL UNCHECKED against the machine. An empty value is RECORDED
   rather than removed, or a cleared field would refill from the seed.
 - `src/routines/loads.ts` — `exerciseKey()` and `fillLoads()`, pure. The key
   sees through a count (`12 × Leg Press`) and the announcement wording

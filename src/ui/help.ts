@@ -58,7 +58,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Routines › Weights is where what you lift is written down, one weight per exercise. A routine that does not state a weight of its own uses these, so moving up a plate is one edit rather than seven.',
       'Sixty-seven exercises: everything on the multi-gym, plus dumbbells, the kettlebell and the bands. A press-up and the trampoline are not there, since neither has a number to keep.',
-      'Eleven multi-gym weights start filled in, from strengthlevel.com for a man of 55 at 88kg, taken at novice and rounded up to the nearest 5kg because that is where the pin goes. Change any of them. The rest are blank, because a guessed weight is worse than no weight.',
+      'Twelve multi-gym weights start filled in. Four are your own numbers off the machine; the rest come from strengthlevel.com for a man of 55 at 88kg, taken at novice and rounded up to the nearest 5kg because that is where the pin goes. Those eight are still worth checking against the machine. The rest are blank, because a guessed weight is worse than no weight.',
       'Fill from my routines takes the weights your saved routines already use for anything still blank. What a routine says about itself is left alone either way.',
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”.',
       'The multi-gym exercises show the illustration from the manufacturer’s guide. Tap one to see it full size, which is the quickest way to find out what an exercise you have not done before actually is.',
