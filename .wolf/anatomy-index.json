@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T18:25:32.364Z",
-    "fileCount": 56,
+    "lastScanned": "2026-08-27T18:30:23.961Z",
+    "fileCount": 57,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "d27ee77e425c171404a870a286a8ce4073c2d0783e0f806c205e7b0ed0b1f850",
-    "storeUpdatedAt": "2026-08-27T18:25:32.374Z"
+    "renderedHash": "8b7a3870eb3293cb2fc07e10c50cf65a71323c772a0a754d8ba2ee69603aa15c",
+    "storeUpdatedAt": "2026-08-27T18:30:23.971Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1245,6 +1245,31 @@
           "startLine": 266,
           "endLine": 417,
           "tokens": 1506
+        }
+      ]
+    },
+    "src/ui/GenerateDialog.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 2855,
+      "hash": "956cbf8839f9cc07",
+      "size": 9993,
+      "mtimeMs": 1787855423888.2708,
+      "updatedAt": "2026-08-27T18:30:23.960Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Choice",
+          "kind": "fn",
+          "startLine": 38,
+          "endLine": 82,
+          "tokens": 412
+        },
+        {
+          "name": "GenerateDialog",
+          "kind": "fn",
+          "startLine": 83,
+          "endLine": 294,
+          "tokens": 2031
         }
       ]
     }

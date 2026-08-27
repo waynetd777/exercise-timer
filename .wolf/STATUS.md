@@ -723,7 +723,26 @@ saving to the library, same ending as Paste.
    - The FIRST exercise gets no announcement, correctly: the announcement is what
      you read while the cardio minute runs, and the first comes off the warm-up.
      A test pins it, since it looks like a bug otherwise.
-4. NEXT. The dialog, wired to the editor.
+4. DONE. `ui/GenerateDialog.tsx`, on the `.modal` plus panel-child pattern, with
+   a LIVE preview: the generator is pure and fast, so the length, the exercises
+   and the notes update as the answers change. You find out a torso-only machine
+   routine cannot fill an hour while the answer can still be changed.
+
+   **PASTE now opens in the editor too**, Wayne's call. It used to go straight to
+   the library, and the comment explaining why said the editor could show neither
+   a section nor a ladder. That has been false since `SectionRow` and `LadderRow`
+   landed. Both now go through one `onDraft` prop, so nothing reaches the library
+   until it has been looked at.
+
+### Done, v4.0
+
+The whole quest is built. Remaining ideas, none started:
+
+- Ordering by station is only a TIEBREAK today, so a routine can walk between
+  stations more than it needs to. Worth watching in use before tuning.
+- The generator cannot make a section or a ladder, so it only builds the two
+  circuit shapes. Pattern C is unimplemented.
+- No routine has been generated and then actually trained with.
 
 ### Tests
 

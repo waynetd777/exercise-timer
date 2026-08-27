@@ -24,6 +24,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Tap a routine to open it, then Start.',
       'The star pins a favourite to the top of the list.',
+      'Paste and Generate both open in the editor rather than saving. Nothing is in your library until you save it there, so a routine you do not like costs you a Back.',
       'Each row also edits, duplicates, sends itself, and deletes. Send offers all four ways: a share link, plain text, a text file, or a backup including images.',
       'Delete asks first, in the row itself. Nothing goes without a second tap.',
       'Search filters by name. Sort by Recent, Name or Longest.',
@@ -33,7 +34,8 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     heading: 'Adding a routine',
     points: [
       'New: build one step at a time.',
-      'Paste: write or paste a routine as plain text. It reads sections, rounds, ladders, EMOM minutes, 30/30 intervals and AMRAPs, and lists any line it could not place before you save.',
+      'Paste: write or paste a routine as plain text. It reads sections, rounds, ladders, EMOM minutes, 30/30 intervals and AMRAPs, and lists any line it could not place. It then opens in the editor, so you can fix what it missed before keeping it.',
+      'Generate: answer a few questions and it builds a routine. How long, what to work, whether to keep moving between sets and how, and what equipment. It shows what it will make as you answer, and opens in the editor.',
       'Copy template, in the paste box, puts an example routine on the clipboard using every shape it understands. Easier than being told the rules.',
       'Import: a .tabata file, an exported .json, or a .txt or .md written as text. Dropping a file anywhere on this screen does the same. A .tabata routine picks up the app’s own illustrations as it comes in.',
       'Backup all incl. images: every routine in one file, with the images you uploaded inside it. A backup is the only one that carries everything, so it is the one to keep.',

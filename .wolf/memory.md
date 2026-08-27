@@ -220,3 +220,5 @@
 | 20:21 | Authored the non-machine exercise table from the corpus: exercises.other.ts, 86 rows, use field | src/routines/exercises.other.ts | phase 2 done, 127 exercises, 787 tests green | ~28000 |
 | 20:25 | Created src/routines/generate.ts | — | ~4235 |
 | 20:28 | The routine generator: pure, budget solve, area rotation, weights from history | src/routines/generate.ts | phase 3 done, 816 tests green | ~34000 |
+| 20:30 | Created src/ui/GenerateDialog.tsx | — | ~2855 |
+| 20:32 | Generate dialog with live preview; paste now opens in the editor too | src/ui/GenerateDialog.tsx, LibraryScreen, App | phase 4 done, 824 tests green, v4.0 | ~30000 |

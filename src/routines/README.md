@@ -267,3 +267,32 @@ parser normalises, and no writer can undo that. It is that **the second pass
 changes nothing**. Everything the format cannot say is collected in `lost` and
 shown to the user, because a share that quietly drops 23 illustrations looks
 like it worked.
+
+## Generating a routine
+
+`exercises.ts` is one table of 127 movements, in two halves that are trustworthy
+in different ways. `exercises.machine.ts` is GENERATED from the Horizon Torus
+guide by `scripts/exercise_metadata.py`: station, muscle group, attachment and
+per-side are all read out of the manual, the muscle group being the colour of
+each page's title band. `exercises.other.ts` is harvested from
+`strength-training.routine.json` and the email fixtures, so the vocabulary is
+the one these routines are actually written in.
+
+Equipment is a FIELD, not a partition. Asking for a multi-gym routine filters;
+it does not select a different table. That matters because the machine has five
+torso exercises, so a torso-focused session needs somewhere to go.
+
+`generate.ts` is pure, and the length is SOLVED rather than estimated: exercises
+are added one at a time and each one's real cost is known, so a per-side exercise
+costing two groups and an ankle-strap one costing five more seconds are exact.
+`rng` is injected, so a seed pins a routine and "Try another" differs.
+
+Three rules worth knowing, all pinned by tests:
+
+- **Areas alternate**, which is what makes the output read like the routines it
+  learned from. "Never the same area twice" applies only where there is another
+  area to alternate with, or asking for the torso alone stops after one exercise.
+- **The first exercise gets no announcement.** The announcement is what you read
+  while the cardio minute runs, and the first comes straight off the warm-up.
+- **A filter the user set is never widened quietly.** Multi-gym only reports a
+  shortfall rather than supplementing; only `mixed` supplements.

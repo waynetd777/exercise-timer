@@ -8,6 +8,7 @@ import { useMemo, useRef, useState } from 'react'
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { importRoutineFiles, looksImportable } from '../routines/importFiles'
+import { GenerateDialog } from './GenerateDialog'
 import { PasteDialog } from './PasteDialog'
 import type { Library } from '../storage/useLibrary'
 import { bundleFilename, toBundle } from '../storage/bundle'
@@ -220,12 +221,18 @@ export function LibraryScreen({
   onRun,
   onEdit,
   onNew,
+  onDraft,
   onSounds,
 }: {
   library: Library
   onRun: (workout: Workout) => void
   onEdit: (workout: Workout) => void
   onNew: () => void
+  /**
+   * Opens an unsaved routine in the editor. Paste and Generate both end here:
+   * neither result is yours until you have looked at it.
+   */
+  onDraft: (workout: Workout) => void
   onSounds: () => void
 }) {
   const [query, setQuery] = useState('')
@@ -233,6 +240,7 @@ export function LibraryScreen({
   const [helping, setHelping] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [pasting, setPasting] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   /** True while the reported work is still running, so there is nothing to dismiss yet. */
   const [noticeBusy, setNoticeBusy] = useState(false)
@@ -440,6 +448,12 @@ export function LibraryScreen({
                 onSelect: () => setPasting(true),
               },
               {
+                label: 'Generate',
+                icon: <PlusIcon />,
+                title: 'Build a routine by answering a few questions',
+                onSelect: () => setGenerating(true),
+              },
+              {
                 label: 'Backup all incl. images',
                 icon: <ExportIcon />,
                 title: 'Download every routine as one file, images included',
@@ -546,13 +560,16 @@ export function LibraryScreen({
           onImport={(parsed) => {
             setPasting(false)
             /*
-             * Into the library rather than the editor: the editor cannot show a
-             * section or a ladder yet, so it would open on a blank screen. The
-             * review the editor would have provided happens in the dialog, which
-             * lists every line the parser could not place.
+             * Into the EDITOR, as a draft. This used to go straight into the
+             * library because the editor could show neither a section nor a
+             * ladder, so a pasted routine opened on a blank screen. It has had
+             * `SectionRow` and `LadderRow` for a while now, and a routine read
+             * off someone else's email is exactly the one you want to look over
+             * before keeping. The dialog still lists what it could not place;
+             * this adds the chance to fix it.
              */
             const now = Date.now()
-            void library.add({
+            onDraft({
               id: newId(),
               name: parsed.name,
               blocks: parsed.blocks,
@@ -560,8 +577,17 @@ export function LibraryScreen({
               createdAt: now,
               updatedAt: now,
             })
-            // No notice: the dialog already listed anything it could not place,
-            // before saving, and the routine appearing in the list says the rest.
+          }}
+        />
+      )}
+
+      {generating && (
+        <GenerateDialog
+          library={library.workouts}
+          onCancel={() => setGenerating(false)}
+          onGenerate={(workout) => {
+            setGenerating(false)
+            onDraft(workout)
           }}
         />
       )}

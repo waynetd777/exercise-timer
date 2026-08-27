@@ -145,6 +145,7 @@ export function App() {
       onRun={(workout) => setView({ screen: 'run', workout })}
       onEdit={(workout) => setView({ screen: 'edit', workout })}
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
+      onDraft={(workout) => setView({ screen: 'edit', workout })}
       onSounds={() => setView({ screen: 'sounds' })}
     />
   )

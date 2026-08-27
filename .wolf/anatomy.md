@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T18:25:32.364Z
-> Files: 56 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T18:30:23.961Z
+> Files: 57 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -115,6 +115,7 @@
 ## src/ui/
 
 - `EditorScreen.tsx` — One undo step: name, colour and steps together, so they cannot drift apart. (~16521 tok)
+- `GenerateDialog.tsx` — Exercise Timer (~2855 tok)
 - `help.ts` — The help text, kept out of the screens that show it. (~1562 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
 - `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)
