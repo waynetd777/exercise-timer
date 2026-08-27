@@ -284,6 +284,10 @@ const NUMBERED = /^\d+\.\s+(.+)$/
  * "2-4-6-8-10", which has none.
  */
 const NUMBERED_DASH = new RegExp(`^\\d+\\s*${DASH}\\s+(.+)$`)
+/** The same line, for the number itself: which entry of the vocabulary it is. */
+const NUMBERED_DASH_INDEX = new RegExp(`^(\\d+)\\s*${DASH}\\s+`)
+/** "1", "1 + 2", "1 + 2 + 3": one round of a pyramid circuit. */
+const PYRAMID_ROW = /^\d+(?:\s*\+\s*\d+)*$/
 /** A lone "or …" line: the previous step's low-impact swap. */
 const ALTERNATIVE_LINE = /^or\s+(.+)$/i
 
@@ -650,9 +654,92 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     })
   }
 
+  /**
+   * A PYRAMID CIRCUIT, which two routines write and no other form covers.
+   *
+   *     1 - 20 x Straight legs up overhead crunch     <- the vocabulary
+   *     2 - 15 x Plie squats
+   *     3 - 10 x Around the world
+   *     4 - 5 x Rev lunge/forward lunge
+   *
+   *     1                                             <- the work
+   *     1 + 2
+   *     1 + 2 + 3
+   *     1 + 2 + 3 + 4
+   *     1 + 2 + 3
+   *     1 + 2
+   *     1
+   *
+   * Seven rounds, growing and then shrinking. The numbered lines are not steps
+   * to do in their own right: they say what 1, 2, 3 and 4 MEAN, and the rows
+   * below spend them.
+   *
+   * Expanded at section close rather than as it reads, because the other routine
+   * that does this puts the vocabulary AFTER the rows, and one pass cannot spend
+   * a word it has not been told yet.
+   *
+   * The definitions are the ascending run 1..N. A lone "1 - plank jacks x 10"
+   * that is not part of such a run is an ordinary step: Wayne's confirmation,
+   * and in his routine it bookends the pyramid on both sides.
+   */
+  const pyramidRows: { rungs: number[]; line: number; text: string }[] = []
+  /**
+   * The numbered lines seen in this section, by identity rather than by a field
+   * on `Segment`: this is parser bookkeeping and has no business in the schema,
+   * where it would need adding to the bundle validator and the dirty check too.
+   */
+  const numberedItems: { index: number; block: Segment }[] = []
+
+  const expandPyramid = (current: Section): void => {
+    if (pyramidRows.length === 0) return
+
+    const numbered = numberedItems.flatMap((entry) => {
+      const at = current.children.indexOf(entry.block)
+      return at === -1 ? [] : [{ at, index: entry.index, block: entry.block }]
+    })
+    // The vocabulary: 1, 2, 3 … in order, and at least two of them.
+    const vocabulary = new Map<number, Segment>()
+    for (const entry of numbered) {
+      if (entry.index === vocabulary.size + 1) vocabulary.set(entry.index, entry.block)
+    }
+    /*
+     * No vocabulary means the rows referred to nothing, so they are REPORTED
+     * rather than dropped. A pyramid quietly deleted would look like a parse.
+     */
+    if (vocabulary.size < 2) {
+      for (const row of pyramidRows) skipped.push({ line: row.line, text: row.text })
+      pyramidRows.length = 0
+      numberedItems.length = 0
+      return
+    }
+
+    const spent = new Set(numbered.filter((e) => vocabulary.get(e.index) === e.block).map((e) => e.at))
+    const rounds: Block[] = pyramidRows.map((row) => ({
+      kind: 'repeat',
+      id: nextId('rep'),
+      times: 1,
+      label: 'Round',
+      children: row.rungs
+        .map((rung) => vocabulary.get(rung))
+        .filter((step): step is Segment => step !== undefined)
+        .map((step) => ({ ...step, id: nextId('seg') })),
+    }))
+
+    // The vocabulary out, the rounds in where the first of it stood.
+    const first = Math.min(...spent)
+    current.children = [
+      ...current.children.slice(0, first).filter((_, at) => !spent.has(at)),
+      ...rounds,
+      ...current.children.slice(first + 1).filter((_, at) => !spent.has(at + first + 1)),
+    ]
+    pyramidRows.length = 0
+    numberedItems.length = 0
+  }
+
   const closeSection = () => {
     flushAmrap()
     if (!section) return
+    expandPyramid(section)
     if (section.children.length > 0) {
       section.display = displayFor(section.children)
       blocks.push(section)
@@ -670,6 +757,8 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     pendingMs = null
     pendingFill = false
     amrap = null
+    pyramidRows.length = 0
+    numberedItems.length = 0
   }
 
   /** Steps outside any section still need somewhere to go. */
@@ -1039,6 +1128,20 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
+    /*
+     * A row of a pyramid circuit: "1", "1 + 2", "1 + 2 + 3". Held rather than
+     * built, because the numbered lines it spends may not have been read yet.
+     */
+    if (PYRAMID_ROW.test(line)) {
+      pyramidRows.push({
+        rungs: line.split('+').map((part) => Number(part.trim())),
+        line: number,
+        text: line,
+      })
+      return
+    }
+
+    const dashIndex = NUMBERED_DASH_INDEX.exec(line)?.[1]
     const bullet = BULLET.exec(line) ?? NUMBERED.exec(line) ?? NUMBERED_DASH.exec(line)
     if (bullet) {
       // Inside an AMRAP the list is the round, and the round is one step's note.
@@ -1047,6 +1150,9 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         return
       }
       for (const part of bullet[1]!.split(JOINED_ITEMS)) addItem(parseItem(part))
+      if (dashIndex !== undefined && lastStep) {
+        numberedItems.push({ index: Number(dashIndex), block: lastStep })
+      }
       return
     }
 
