@@ -84,6 +84,8 @@ export type RoutineSpec = {
   equipment: EquipmentScope
   /** Sets per exercise. A per-side exercise gets two a side regardless. */
   sets?: number
+  /** Reps in each multi-gym set. Defaults to twelve. */
+  machineReps?: number
 }
 
 export type GeneratedRoutine = {
@@ -105,6 +107,18 @@ const COOL_DOWN_MS = 120_000
 const DEFAULT_SETS = 3
 /** A side gets two sets, not three, which is Wayne's own rule. */
 const PER_SIDE_SETS = 2
+/**
+ * What a multi-gym set asks for: twelve reps inside twenty seconds.
+ *
+ * Both, not one or the other. The clock paces you and the count is the target,
+ * which is exactly what the editor's `× in` unit exists to say. Wayne's own
+ * routines read "12 × Leg Press 65kg" for twenty seconds, and until the editor
+ * could hold both that twelve had to live in the step's NAME.
+ *
+ * Only for the machine. Everything else is prescribed the way the instructor
+ * prescribes it, which is what `exercises.prescription.ts` is for.
+ */
+const MACHINE_REPS = 12
 
 /**
  * A small deterministic generator, so a seed pins a routine.
@@ -259,6 +273,9 @@ function exerciseBlocks(
     name: exercise.name,
     role: 'work',
     durationMs: WORK_MS,
+    ...(exercise.equipment === 'machine'
+      ? { reps: { kind: 'fixed' as const, count: spec.machineReps ?? MACHINE_REPS } }
+      : {}),
     ...(load ? { load } : {}),
     ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
   })

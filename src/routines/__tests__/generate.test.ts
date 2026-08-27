@@ -346,6 +346,38 @@ describe('the shape it builds', () => {
   })
 })
 
+describe('what a set asks for', () => {
+  it('gives a multi-gym set twelve reps INSIDE twenty seconds', () => {
+    /*
+     * Both, which is what the editor's `× in` unit exists to say: the clock
+     * paces you and the count is the target. Until the editor could hold both,
+     * that twelve had to live in the step's name.
+     */
+    const { workout } = make({ equipment: 'machine' })
+    for (const step of exercises(workout)) {
+      expect(step.durationMs).toBe(20_000)
+      expect(step.reps).toEqual({ kind: 'fixed', count: 12 })
+    }
+  })
+
+  it('takes another count if it is given one', () => {
+    const { workout } = make({ equipment: 'machine', machineReps: 15 })
+    expect(exercises(workout)[0]?.reps).toEqual({ kind: 'fixed', count: 15 })
+  })
+
+  it('leaves a non-machine exercise uncounted, for the prescription to decide', () => {
+    const { workout } = make({ equipment: 'none' })
+    expect(exercises(workout).every((s) => s.reps === undefined)).toBe(true)
+  })
+
+  it('still compiles as timed steps, not gates', () => {
+    // A counted step that also has a clock must not become self-paced.
+    const routine = compile(make({ equipment: 'machine' }).workout)
+    expect(routine.runs).toHaveLength(1)
+    expect(routine.runs[0]!.entries.every((e) => !e.selfPaced)).toBe(true)
+  })
+})
+
 describe('the weight', () => {
   const saved = (name: string, load: string): Workout => ({
     id: 'w',
