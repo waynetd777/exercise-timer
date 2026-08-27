@@ -13,8 +13,14 @@ import type { EquipmentScope, Recovery } from '../routines/generate'
 import { duration, isoDate } from './format'
 import { CloseIcon, PlusIcon } from './icons'
 
-/** Enough to fill a session, and the lengths Wayne's own routines come to. */
-const LENGTHS = [30, 45, 60]
+/**
+ * The lengths a session actually runs to.
+ *
+ * Tight around the 42 to 45 minutes Wayne's own routines come to, rather than
+ * spread from half an hour to a full one: the useful choice is a few minutes
+ * either side of a normal session, not a different kind of session.
+ */
+const LENGTHS = [35, 40, 45, 50]
 
 const AREAS: { area: BodyArea; label: string }[] = [
   { area: 'upper', label: 'Upper body' },

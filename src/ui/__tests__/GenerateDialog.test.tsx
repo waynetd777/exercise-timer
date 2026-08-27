@@ -57,7 +57,7 @@ describe('GenerateDialog', () => {
   it('reacts to an answer, without rerolling the exercises', () => {
     open()
     const before = screen.getByText(/exercises ·/).textContent
-    fireEvent.click(screen.getByRole('button', { name: '60 min' }))
+    fireEvent.click(screen.getByRole('button', { name: '50 min' }))
     expect(screen.getByText(/exercises ·/).textContent).not.toBe(before)
   })
 
@@ -82,7 +82,7 @@ describe('GenerateDialog', () => {
     // The machine has five torso exercises, nowhere near an hour.
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))
     fireEvent.click(screen.getByRole('button', { name: 'Lower body' }))
-    fireEvent.click(screen.getByRole('button', { name: '60 min' }))
+    fireEvent.click(screen.getByRole('button', { name: '50 min' }))
     expect(screen.getByText(/Every exercise matching that choice was used/)).toBeTruthy()
   })
 
@@ -97,7 +97,7 @@ describe('GenerateDialog', () => {
     const onGenerate = open([saved])
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))
     fireEvent.click(screen.getByRole('button', { name: 'Torso' }))
-    fireEvent.click(screen.getByRole('button', { name: '60 min' }))
+    fireEvent.click(screen.getByRole('button', { name: '50 min' }))
     fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
 
     const workout = onGenerate.mock.calls[0]![0] as Workout
