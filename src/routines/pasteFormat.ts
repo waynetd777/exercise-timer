@@ -85,7 +85,20 @@ const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
  * heuristic like "Title Case on its own line" would swallow half the exercises.
  */
 const NAMED_SECTION =
-  /^((?:trampoline\s+)?warm[-\s]?up|cool[-\s]?down|final\s+burnout|band\s+burner|burnout\s+ladder)\b(.*)$/i
+  /^((?:trampoline\s+)?warm[-\s]?up|cool[-\s]?down|final\s+burnout|band\s+burner|burnout\s+ladder|(?:[\p{L}&\s]{0,24}\s)?finisher)\b(.*)$/iu
+
+/**
+ * A heading in capitals: "LEGS", "ARMS", "ABS".
+ *
+ * Still closed rather than heuristic, just closed on SHAPE instead of on a word
+ * list. No lowercase letter anywhere, no digit, at most three words, and short.
+ * "TABATA TIMER" only ever appears at the end of a longer line, and an exercise
+ * shouted in capitals would have to be under 24 characters to be caught.
+ */
+const SHOUTED_SECTION = /^(?=.*\p{Lu})[^\p{Ll}\d]{2,24}$/u
+
+/** A heading wrapped in asterisks, the way these emails emphasise one. */
+const STARRED_SECTION = /^\*+\s*([^*]+?)\s*\*+\s*(.*)$/
 
 /**
  * Durations arrive in seconds or minutes: "30 seconds", "2 min", "1.5 minutes".
@@ -243,8 +256,19 @@ const BONUS = /^bonus:\s*(.+)$/i
 const SECTION_NOTE =
   /^(complete\b.*\b(?:exercise|count)\b|no rest between exercises|rest\b|reps? and sets?\b|as many\b|start a new\b|work\s*(?:→|->)\s*rest\b)/i
 
-const BULLET = new RegExp(`^(?:[*•]|${DASH})\\s+(.+)$`)
+/**
+ * `•side plank left` has no space after the bullet, and only `•` is allowed to
+ * do that: a bare `*` with no space is an asterisk-wrapped heading, and a bare
+ * dash with none is a range.
+ */
+const BULLET = new RegExp(`^(?:[*]\\s+|${DASH}\\s+|•\\s*)(.+)$`)
 const NUMBERED = /^\d+\.\s+(.+)$/
+/**
+ * "1 - 20 x Straight legs up overhead crunch": a numbered list written with a
+ * dash instead of a dot. The space after the dash is what keeps it clear of
+ * "2-4-6-8-10", which has none.
+ */
+const NUMBERED_DASH = new RegExp(`^\\d+\\s*${DASH}\\s+(.+)$`)
 /** A lone "or …" line: the previous step's low-impact swap. */
 const ALTERNATIVE_LINE = /^or\s+(.+)$/i
 
@@ -272,12 +296,46 @@ const FOR_DURATION = new RegExp(`^(.+?)\\s+for\\s+${NUMBER}\\s*${UNIT}\\b`, 'i')
  * the end of the name, with no "for" to announce it. The per-side tail is
  * consumed so it does not linger in the name; `PER_SIDE` has already read it.
  */
+/**
+ * "Jogging (30 sec)", "Knee lifts (20 sec)(Tabata)".
+ *
+ * A whole warm-up is written this way in the routines before July. A second
+ * parenthesis after it is a marker rather than a time, and is dropped with the
+ * first: "(Tabata)" names the timer the instructor had in mind, not the step.
+ *
+ * A unit is required, so "10 × Walking Lunges (5 each leg)" is untouched.
+ */
+const PAREN_DURATION = new RegExp(
+  `^(.+?)\\s*\\(\\s*${NUMBER}\\s*${UNIT}\\s*\\)\\s*(?:\\([^)]*\\)\\s*)?$`,
+  'i',
+)
+
 const TRAILING_DURATION = new RegExp(
   `^(.+?)[\\s${DASH_CHARS}:]+${NUMBER}\\s*${UNIT}(?:\\s+each\\s+(?:side|leg|arm|direction))?\\s*$`,
   'i',
 )
 /** "12 × Hammer Curls", and the bare "20 Flutter Kicks". */
 const LEADING_COUNT = /^(\d+)\s*(?:[×x]\s*|\s)(.+)$/
+/**
+ * A RANGE where one number is expected: "10/12 x lateral raises",
+ * "10-15 x Fire hydrant left leg", "1-2mins Jumping jacks".
+ *
+ * The upper bound wins, on the same reasoning the parser already applies to
+ * "3-5 Rounds": you can always stop early, and a target you might beat is more
+ * use than one you have already passed.
+ *
+ * A range of three or more is a LADDER, not a range, and is matched long before
+ * this.
+ */
+// The dashes lead: `[/-–—]` reads `/` to `–` as a range and so excludes the
+// plain hyphen, which is the one these routines actually use.
+const RANGE = `(?:\\s*[${DASH_CHARS}/]\\s*(\\d+))?`
+const LEADING_RANGE_COUNT = new RegExp(`^(\\d+)${RANGE}\\s*[×x]\\s*(.+)$`)
+const LEADING_RANGE_DURATION = new RegExp(
+  `^${NUMBER}${RANGE}\\s*${UNIT}\\s+(.+)$`,
+  'i',
+)
+
 /** "wide squats 15x", "…crunch x12". The `x` is what makes it a count. */
 const TRAILING_COUNT = /^(\p{L}.*?)[\s:]+(?:[×x]\s*(\d+)|(\d+)\s*[×x])$/u
 
@@ -393,6 +451,24 @@ export function parseItem(text: string): Item {
   const trailing = TRAILING_DURATION.exec(rest)
   if (trailing) {
     return done(tidy(trailing[1]!), { durationMs: toMs(trailing[2]!, trailing[3]!) })
+  }
+
+  const paren = PAREN_DURATION.exec(rest)
+  if (paren) {
+    return done(tidy(paren[1]!), { durationMs: toMs(paren[2]!, paren[3]!) })
+  }
+
+  const rangeDuration = LEADING_RANGE_DURATION.exec(rest)
+  if (rangeDuration && rangeDuration[2]) {
+    return done(tidy(rangeDuration[4]!), {
+      durationMs: toMs(rangeDuration[2]!, rangeDuration[3]!),
+    })
+  }
+
+  const rangeCount = LEADING_RANGE_COUNT.exec(rest)
+  if (rangeCount && rangeCount[2]) {
+    const count = perSideCount ? Number(perSideCount[1]) : Number(rangeCount[2])
+    return done(tidy(rangeCount[3]!), { count })
   }
 
   const leadingCount = LEADING_COUNT.exec(rest)
@@ -693,6 +769,18 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
     if (AFTER_ROUND_SECTION.test(heading)) return openSection(marker + heading.replace(/:$/, ''))
 
+    const starred = STARRED_SECTION.exec(heading)
+    if (starred) return openSection((marker + starred[1]! + ' ' + (starred[2] ?? '')).trim())
+
+    if (
+      SHOUTED_SECTION.test(heading.trim()) &&
+      /\p{L}/u.test(heading) &&
+      !AMRAP_HEADING.test(heading) &&
+      !EMOM_HEADING.test(heading)
+    ) {
+      return openSection((marker + heading).trim())
+    }
+
     const named = NAMED_SECTION.exec(heading)
     if (named && !BULLET.test(line) && !NUMBERED.test(line)) {
       openSection(line.replace(/[:：]\s*$/, ''))
@@ -913,7 +1001,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
-    const bullet = BULLET.exec(line) ?? NUMBERED.exec(line)
+    const bullet = BULLET.exec(line) ?? NUMBERED.exec(line) ?? NUMBERED_DASH.exec(line)
     if (bullet) {
       // Inside an AMRAP the list is the round, and the round is one step's note.
       if (amrap) {
