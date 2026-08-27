@@ -5,15 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import {
-  canRedo,
-  canUndo,
-  HISTORY_LIMIT,
-  initHistory,
-  push,
-  redo,
-  undo,
-} from '../history'
+import { HISTORY_LIMIT, canRedo, canUndo, discardRun, endRun, initHistory, push, redo, undo } from '../history'
 
 const chain = (...values: string[]) => values.reduce((h, v) => push(h, v), initHistory('a'))
 
@@ -113,6 +105,29 @@ describe('history', () => {
     // The oldest states fell off the back; the most recent are intact.
     expect(h.present).toBe(HISTORY_LIMIT + 25)
     expect(undo(h).present).toBe(HISTORY_LIMIT + 24)
+  })
+
+  it('ends a run on request, so the next push in the same field is its own step', () => {
+    // A drag coalesces while it lasts. Nothing ended it, so the next drag's
+    // first move joined the previous one and a single undo took both back.
+    let h = push(push(initHistory('a'), 'ab', 'drag'), 'abc', 'drag')
+    h = endRun(h)
+    h = push(h, 'abcd', 'drag')
+    expect(h.past).toEqual(['a', 'abc'])
+    expect(undo(h).present).toBe('abc')
+  })
+
+  it('discards a run, restoring the state before it with nothing to redo', () => {
+    // Escape mid-drag. Pushing the original back under the same key coalesced
+    // into the run, which left an undo step that visibly did nothing.
+    const before = push(initHistory('a'), 'b')
+    const dragging = push(push(before, 'c', 'drag'), 'd', 'drag')
+    const dropped = discardRun(dragging)
+    expect(dropped.present).toBe('b')
+    expect(dropped.past).toEqual(['a'])
+    expect(canRedo(dropped)).toBe(false)
+    // Nothing being typed: nothing to discard.
+    expect(discardRun(before)).toBe(before)
   })
 
   it('never mutates the history it is given', () => {

@@ -36,12 +36,12 @@ import {
   updateSection,
   updateSegment,
   wrapInRepeat,
+  DEFAULT_SECONDS,
 } from '../editor/blocks'
-import type { Timing } from '../editor/blocks'
-import type { Path } from '../editor/blocks'
+import type { Path, Timing } from '../editor/blocks'
 import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
-import { canRedo, canUndo, initHistory, push, redo, undo } from '../editor/history'
+import { canRedo, canUndo, discardRun, endRun, initHistory, push, redo, undo } from '../editor/history'
 import { ROW_ID, useRowDrag } from './useRowDrag'
 import { HelpTray } from './HelpTray'
 import { NoticeDialog } from './NoticeDialog'
@@ -544,7 +544,7 @@ function TimingField({
        * not see and which is not written down anywhere.
        */
       const durationMs = next.endsWith('-timed')
-        ? (segment.durationMs ?? 20_000)
+        ? (segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000)
         : undefined
       return onChange({
         kind: 'reps',
@@ -797,7 +797,10 @@ function SegmentRow({
             onPatch(path, retypeSegment(segment, event.target.value as SegmentRole))
           }
         >
-          {ROLES.map(({ role, label }) => (
+          {/* A .tabata import can arrive with the 'custom' role, which has no
+              add button. Offered here only when the step already has it, so
+              the select does not show "Get ready" for a step that is not. */}
+          {[...ROLES, ...(segment.role === 'custom' ? [{ role: 'custom' as const, label: 'Custom' }] : [])].map(({ role, label }) => (
             <option key={role} value={role}>
               {label}
             </option>
@@ -1459,11 +1462,16 @@ export function EditorScreen({
     },
     onEnd: () => {
       beforeDrag.current = null
+      // The drag's run ends with the finger. Left open, the next drag's first
+      // move coalesced into this one and a single Undo took both back.
+      setHistory(endRun)
     },
     onCancel: () => {
       const original = beforeDrag.current
       beforeDrag.current = null
-      if (original) editBlocks(() => original, 'drag')
+      // Drop the drag's step rather than pushing the original back under the
+      // same key: that coalesced, and left an undo step that did nothing.
+      if (original) setHistory(discardRun)
     },
   })
 
@@ -1530,6 +1538,18 @@ export function EditorScreen({
       // image picker edits state the user cannot see, and steals the native
       // text undo from the picker's own search box.
       if (document.querySelector('dialog[open]')) return
+      // A note, alternative or weight is committed on blur, so text still being
+      // typed there is not in the history yet. Undoing the draft under it took
+      // back the previous edit, deleting the very step being typed in. Leave
+      // the browser's own undo to that field until it commits.
+      const field = document.activeElement
+      if (
+        field instanceof HTMLInputElement &&
+        field.value !== field.defaultValue &&
+        field.getAttribute('aria-label') !== 'Routine name'
+      ) {
+        return
+      }
       event.preventDefault()
       setHistory(event.shiftKey ? redo : undo)
     }

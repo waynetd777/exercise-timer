@@ -189,6 +189,32 @@ describe('EditorScreen', () => {
     expect(name.value).toBe('Strength day')
   })
 
+  it('leaves Cmd+Z to the field while a note is still being typed', () => {
+    /*
+     * A note is committed on blur, so mid-typing it is not in the history. The
+     * global handler used to undo the draft anyway, taking back the previous
+     * edit under the very field being typed in.
+     */
+    const p = props(sectioned())
+    render(<EditorScreen {...p} />)
+    const name = screen.getByLabelText('Routine name') as HTMLInputElement
+    fireEvent.change(name, { target: { value: 'Renamed' } })
+
+    fireEvent.click(screen.getAllByLabelText('Add a note or an alternative')[0]!)
+    const note = screen.getAllByLabelText('Note')[0] as HTMLInputElement
+    note.focus()
+    fireEvent.change(note, { target: { value: 'slow tempo' } })
+    fireEvent.keyDown(window, { key: 'z', metaKey: true })
+    expect(name.value).toBe('Renamed')
+
+    // Committed, the note is a step of its own, and undo is the draft's again.
+    fireEvent.blur(note)
+    fireEvent.keyDown(window, { key: 'z', metaKey: true })
+    expect(name.value).toBe('Renamed')
+    fireEvent.keyDown(window, { key: 'z', metaKey: true })
+    expect(name.value).toBe('Strength day')
+  })
+
   it('shows a step that is counted AND timed as both, and keeps both', () => {
     /*
      * The row used to hold ONE number, and `timingOf` preferred the count, so an
@@ -553,7 +579,7 @@ describe('EditorScreen: dragging a row by its grip', () => {
     expect(order()).toEqual(['A', 'B', 'C'])
   })
 
-  it('puts everything back when Escape is pressed mid-drag', () => {
+  it('puts everything back when Escape is pressed mid-drag, leaving nothing to undo', () => {
     render(<EditorScreen {...props(three())} />)
 
     fireEvent.pointerDown(grips()[0]!, { button: 0, clientY: centreOf(0) })
@@ -563,6 +589,30 @@ describe('EditorScreen: dragging a row by its grip', () => {
 
     fireEvent.keyDown(window, { key: 'Escape' })
 
+    expect(order()).toEqual(['A', 'B', 'C'])
+    // The cancelled drag used to leave a step behind whose undo did nothing.
+    expect((screen.getByLabelText('Undo') as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('makes two drags two undo steps', () => {
+    // The first drag's run was never ended, so the second coalesced into it
+    // and one Undo took both back.
+    render(<EditorScreen {...props(three())} />)
+
+    dragTo(0, 1)
+    fireEvent.pointerUp(window)
+    expect(order()).toEqual(['B', 'A', 'C'])
+
+    // Upwards this time, so the row has to pass ABOVE the neighbour's centre.
+    fireEvent.pointerDown(grips()[2]!, { button: 0, clientY: centreOf(2) })
+    fireEvent.pointerMove(window, { clientY: centreOf(1) - 1 })
+    settle()
+    fireEvent.pointerUp(window)
+    expect(order()).toEqual(['B', 'C', 'A'])
+
+    fireEvent.click(screen.getByLabelText('Undo'))
+    expect(order()).toEqual(['B', 'A', 'C'])
+    fireEvent.click(screen.getByLabelText('Undo'))
     expect(order()).toEqual(['A', 'B', 'C'])
   })
 
