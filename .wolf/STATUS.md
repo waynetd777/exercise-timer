@@ -602,10 +602,121 @@ one, so it survives the round trip and the migration lifts it out again.
 
 ---
 
-## 🚀 Next quest — none open
+## 🚀 Next quest: generate a routine
 
-The strength-routine work below is COMPLETE and pushed. The obvious candidates
-now, none started:
+A generator that asks a few questions and builds a routine from the patterns
+already in this repo. Planned 2026-08-27, decisions below are Wayne's and settled.
+
+### The questionnaire
+
+| Question | Drives |
+|---|---|
+| Approximate total duration | how many exercises fit |
+| Body areas to target | which exercises are eligible, and the rotation |
+| Recovery: passive or active | pattern A or B |
+| Active recovery type (cycling, trampoline, ...) | the recovery step's name and image |
+| Equipment: multi-gym / none / mixed | which exercises are eligible |
+| Sets per exercise (default 3) | the per-exercise cost |
+
+### The three patterns it generates from
+
+- **A. Passive recovery**, from `beginner-full-body.routine.json`:
+  `Get ready 15s -> 3x [work 20s / rest 10s] -> Recover 60s`, per exercise.
+- **B. Active recovery**, from Wayne's routines 2 and 3:
+  `Get ready: <name> 30s -> cardio 60s -> Get ready 15s -> N x [work 20s / rest 10s]`,
+  inside a 10 min cardio warm-up and a cool down.
+- **C. Bodyweight**, from `strength-training.routine.json`: sections, ladders,
+  self-paced rep steps.
+
+### ONE exercise table, not two pools
+
+Wayne's answer to the torso shortfall (only 5 torso exercises on the machine) is
+to supplement from non-machine exercises. So equipment is a FIELD, not a
+partition: the choice filters, and a shortfall widens the filter rather than
+shortening the routine.
+
+Each row: `file?`, `name`, `group`, `station?`, `attachment?`, `perSide`,
+`equipment`, `push|pull` for upper.
+
+### Where the data comes from
+
+**The machine half is fully derivable from the Horizon guide, and none of it is
+invented.** Verified 2026-08-27 against
+`~/Library/CloudStorage/OneDrive-Personal/Documents/Fitness/Home Gym/Horizon Torus 5 Exercise Guide.pdf`:
+
+| Field | Source in the guide | Result |
+|---|---|---|
+| Station 1 to 8 | text after `STATION` | all 41 parsed |
+| Muscle group | TITLE BAND COLOUR, which the manual's own key defines | yellow `upper` 25, green `torso` 5, blue `lower` 11 |
+| Attachment | instruction text ("attach ankle strap") | lat bar, low row bar, ab strap, free-motion, ankle |
+| Per side | "one leg", "outside leg", "repeat on opposite side" | 6 exercises |
+
+Cross-checks: Glute Kickback comes out station 7 / ankle / per side, matching what
+was read off the plate. Standing Leg Curl is per side but uses a ROLLER PAD, so it
+correctly gets no ankle strap and no 20s get-ready.
+
+Two rules that were memory become data: the 5 ankle-strap exercises get 20s
+get-readys, and the 6 per-side ones get 2 sets a side plus Change Sides.
+
+Station 7 holds 17 of the 41, so ordering by station mostly means grouping the
+free-motion work.
+
+**The non-machine half is authored**, covering bodyweight, dumbbell, kettlebell
+and resistance band. Seed from `strength-training.routine.json` (36 distinct
+exercises) and the four email fixtures, then extend. No illustrations, which
+Wayne accepted: a picture can be uploaded per step later. Same for active
+recovery types beyond cycling.
+
+**Push/pull** is the one classification not in the guide, needed for routine 2's
+legs/core/push/legs/push/legs/pull/core/pull/legs alternation. Derive it
+mechanically from names and show Wayne the ~25 upper-body rows to correct.
+
+**Weights come from history.** Now `Segment.load` is a real field, look through
+the saved library for the last load used on that exercise and seed it. Nothing
+found leaves the field blank rather than inventing a number.
+
+### The generator
+
+`src/routines/generate.ts`, PURE, no React, testable like the engine:
+
+    generateRoutine(spec, library, rng) -> { workout, notes }
+
+Duration is a solve, not a guess. The skeleton is fixed, so per-exercise cost is
+closed form: pattern B with 3 sets is `30 + 60 + 15 + (sets x 30) - 10 = 185s`,
+warm-up 615s, cool-down 75s. A 45 minute target leaves 2010s, which is 10
+exercises. That IS routine 2, which is the check that the arithmetic matches
+reality rather than itself.
+
+`rng` is injected so tests are deterministic and "generate another" differs.
+
+### UI
+
+A `Generate` item in the Routines menu, on the `.modal` plus panel-child pattern
+`PasteDialog` uses. It OPENS THE RESULT IN THE EDITOR as a draft rather than
+saving to the library, same ending as Paste.
+
+### Phases
+
+1. `scripts/exercise_metadata.py`, a sibling of `exercise_plates.py`, generating
+   the machine half of `src/routines/exercises.ts` from the PDF. Reproducible
+   rather than remembered, which is the principle the plate script already states.
+2. The authored non-machine exercises, and the push/pull review.
+3. The generator and its tests. No UI, driven from tests.
+4. The dialog, wired to the editor.
+
+### Tests
+
+Total duration lands within tolerance; no area repeats back to back; no exercise
+twice; only selected areas appear; per-side exercises get Change Sides;
+ankle-strap exercises get 20s; the same seed gives the same routine; the result
+compiles.
+
+---
+
+## 📝 Standing items, none blocking
+
+Not a quest. These have been open a while and can only be closed with a phone in
+hand:
 
 - **Train with it.** Still the only real unknown: whether the wake lock holds on
   Wayne's iPhone through a full session, and whether the whistle decodes on iOS

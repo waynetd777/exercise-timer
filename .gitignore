@@ -19,3 +19,4 @@ coverage/
 
 # Local tooling scratch, not part of the project.
 .gastown-ignore
+__pycache__/

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T16:49:01.351Z",
-    "fileCount": 52,
+    "lastScanned": "2026-08-27T18:15:08.402Z",
+    "fileCount": 54,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "f3b15353b6094dfc4b7dfdd25978269ed40474912ea91a01cad0059637a39cf7",
-    "storeUpdatedAt": "2026-08-27T16:49:01.373Z"
+    "renderedHash": "10b9da13b486409ff1748bc7fa6272aa03faf5e85dd77a7aa76f6c5d1a74bde6",
+    "storeUpdatedAt": "2026-08-27T18:15:08.411Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1095,6 +1095,75 @@
           "tokens": 80
         }
       ]
+    },
+    "scripts/exercise_metadata.py": {
+      "description": "Exercise Timer",
+      "tokens": 2649,
+      "hash": "43c2b165c90c5375",
+      "size": 9270,
+      "mtimeMs": 1787854415027.0886,
+      "updatedAt": "2026-08-27T18:13:35.115Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "area_of",
+          "kind": "fn",
+          "startLine": 92,
+          "endLine": 114,
+          "tokens": 311
+        },
+        {
+          "name": "station_of",
+          "kind": "fn",
+          "startLine": 115,
+          "endLine": 132,
+          "tokens": 196
+        },
+        {
+          "name": "pattern_of",
+          "kind": "fn",
+          "startLine": 133,
+          "endLine": 145,
+          "tokens": 141
+        },
+        {
+          "name": "rows",
+          "kind": "fn",
+          "startLine": 146,
+          "endLine": 166,
+          "tokens": 240
+        },
+        {
+          "name": "literal",
+          "kind": "fn",
+          "startLine": 167,
+          "endLine": 174,
+          "tokens": 64
+        },
+        {
+          "name": "typescript",
+          "kind": "fn",
+          "startLine": 175,
+          "endLine": 217,
+          "tokens": 528
+        },
+        {
+          "name": "main",
+          "kind": "fn",
+          "startLine": 218,
+          "endLine": 240,
+          "tokens": 240
+        }
+      ]
+    },
+    "src/routines/exercises.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1064,
+      "hash": "21d2044bea81ea2f",
+      "size": 3724,
+      "mtimeMs": 1787854508321.5283,
+      "updatedAt": "2026-08-27T18:15:08.402Z",
+      "source": "hook"
     }
   },
   "preamble": [

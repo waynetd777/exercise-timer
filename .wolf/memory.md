@@ -202,3 +202,17 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 18:49 | Created src/routines/writeRoutine.ts | — | ~2698 |
+| 19:53 | Session end: 1 writes across 1 files (writeRoutine.ts) | 3 reads | ~2698 tok |
+
+## Session: 2026-08-27 19:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-27 19:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:13 | Created scripts/exercise_metadata.py | — | ~2649 |
+| 20:15 | Created src/routines/exercises.ts | — | ~1064 |
+| 20:18 | Guide-derived exercise metadata: scripts/exercise_metadata.py + exercises.machine.ts, 41 rows, 10 tests | scripts/exercise_metadata.py, src/routines/exercises*.ts | phase 1 of the generator complete, 778 tests green | ~46000 |
