@@ -778,20 +778,40 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     numberedItems.length = 0
   }
 
-  const closeSection = () => {
+  /** The line that opened the current section, so an empty one can be reported. */
+  let sectionSource: { line: number; text: string } | null = null
+  /** Lines read under the current section, refused or not. */
+  let sectionLines = 0
+  /** The line being read, for `openSection` to record. */
+  let currentLine: { line: number; text: string } | null = null
+
+  const closeSection = (atEnd = false) => {
     flushAmrap()
     if (!section) return
     expandPyramid(section)
     if (section.children.length > 0) {
       section.display = displayFor(section.children)
       blocks.push(section)
+    } else if (atEnd && sectionLines === 0 && sectionSource) {
+      /*
+       * A heading with nothing under it at the END of the text used to vanish,
+       * against the rule that every line lands somewhere or is reported: "Cool
+       * down walk for 2 minutes" as the last line matched the heading vocabulary
+       * and was gone. Only then: mid-text, an empty heading is a title split
+       * over two lines ("3#" then "Finisher"), and one whose lines were all
+       * refused has those lines reported already.
+       */
+      skipped.push(sectionSource)
     }
     section = null
+    sectionSource = null
   }
 
   const openSection = (title: string) => {
     closeSection()
     section = { kind: 'section', id: nextId('sec'), name: tidy(title), display: 'list', children: [] }
+    sectionSource = currentLine
+    sectionLines = 0
     target = { kind: 'section' }
     eachMs = null
     lastStep = null
@@ -890,6 +910,8 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     const line = raw.trim()
     if (line === '') return
     const number = i + 1
+    currentLine = { line: number, text: line }
+    if (section) sectionLines += 1
 
     /*
      * Headings first: they reset everything below them.
@@ -1303,7 +1325,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     skipped.push({ line: number, text: line })
   })
 
-  closeSection()
+  closeSection(true)
 
   const prepare = blocks.length > 0 ? getReady(blocks) : null
   return { name, blocks: prepare ? [prepare, ...blocks] : blocks, skipped }

@@ -118,6 +118,24 @@ describe('a step survives being written and read', () => {
     expect(back).toMatchObject({ note, durationMs: 30_000 })
   })
 
+  it('leaves out a note the parser would read as a time, and says so', () => {
+    /*
+     * "Plank (hold for 2 seconds at the top of each rep) - 40 seconds" read back
+     * as a two-second step called "Plank (hold", and nothing said so.
+     */
+    const plank = step({ name: 'Plank', durationMs: 40_000, note: 'hold for 2 seconds at the top of each rep' })
+    expect(find(pass([plank]), 'Plank')).toMatchObject({ durationMs: 40_000 })
+    expect(writeRoutine(workout([plank])).lost.join(' ')).toMatch(/Note on "Plank" would change/)
+  })
+
+  it('leaves out a note with a parenthesis of its own, and says so', () => {
+    const dog = step({ name: 'Bird Dog', durationMs: 30_000, note: 'Keep your back straight (do not arch) and breathe' })
+    const back = find(pass([dog]), 'Bird Dog')
+    expect(back).toMatchObject({ name: 'Bird Dog', durationMs: 30_000 })
+    expect(back.note).toBeUndefined()
+    expect(writeRoutine(workout([dog])).lost.join(' ')).toMatch(/Note on "Bird Dog" would change/)
+  })
+
   it('keeps an alternative', () => {
     const back = find(
       pass([

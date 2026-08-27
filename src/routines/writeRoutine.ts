@@ -39,6 +39,7 @@
 
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../engine/types'
 import { isGroup } from '../engine/types'
+import { parseItem } from './pasteFormat'
 
 /**
  * The shortest parenthesis the parser treats as a note rather than as part of
@@ -151,20 +152,50 @@ function stepLines(segment: Segment, lost: string[]): string[] {
     lost.push(`"${segment.name}" will split into two steps, because of the + between two counts`)
   }
 
+  const bare = line
+  let note: string | null = null
   if (segment.note !== undefined && segment.note.trim() !== '') {
     if (segment.note.includes('\n')) {
       // A parenthesis cannot hold a line break. The AMRAP whose round is its
       // note is written as an AMRAP instead; see `amrapLines`.
       lost.push(`The note on "${segment.name}", which runs to several lines`)
     } else if (segment.note.length >= NOTE_MIN) {
+      note = segment.note
       line += ` (${segment.note})`
     } else {
       lost.push(`Note on "${segment.name}" is too short to survive: "${segment.note}"`)
     }
   }
 
-  if (segment.durationMs !== undefined) {
-    line += ` - ${durationText(segment.durationMs)}`
+  const time = segment.durationMs !== undefined ? ` - ${durationText(segment.durationMs)}` : ''
+  line += time
+
+  /*
+   * Read back before it is written out. The grammar has no escaping, so a note
+   * that says "hold for 2 seconds" or contains a parenthesis of its own is read
+   * as a duration or as the end of the name: "Plank (hold for 2 seconds at the
+   * top) - 40 seconds" came back as a two-second step called "Plank (hold", and
+   * nothing said so. A line the parser reads differently from what it means
+   * loses its note and says why; one that is wrong even bare is reported.
+   */
+  const expectedName = load ? `${segment.name} ${load}` : segment.name
+  const readsBack = (text: string): boolean => {
+    // Without its bullet, which the reader strips before `parseItem` sees a line.
+    const back = parseItem(text.slice(2))
+    return (
+      back.name === expectedName &&
+      back.durationMs === segment.durationMs &&
+      back.count === (countable && reps.kind === 'fixed' ? reps.count : undefined)
+    )
+  }
+  if (!readsBack(line)) {
+    if (note !== null) {
+      lost.push(`Note on "${segment.name}" would change how the step reads, so it was left out: "${note}"`)
+      line = bare + time
+    }
+    if (!readsBack(line)) {
+      lost.push(`"${segment.name}" will not read back as written`)
+    }
   }
 
   if (!ROLE_FROM_NAME.has(segment.role)) {

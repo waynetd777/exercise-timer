@@ -42,6 +42,27 @@ describe('canonicalName', () => {
     expect(canonicalName('Mountain climbers (per leg)')).toBe('Mountain Climbers (per leg)')
   })
 
+  it('keeps the side, the limb and a trailing count', () => {
+    /*
+     * `foldName` throws all of these away to match, so the canonical name came
+     * back without them: "side plank left" became "Side Plank", and the count
+     * on "Quad stretch × 3" vanished.
+     */
+    expect(canonicalName('Mountain climbers left')).toBe('Mountain Climbers left')
+    expect(canonicalName('Mountain climbers right leg')).toBe('Mountain Climbers right leg')
+    expect(canonicalName('Mountain climbers per leg')).toBe('Mountain Climbers per leg')
+    expect(canonicalName('Mountain climbers × 3 (left & right)')).toBe(
+      'Mountain Climbers × 3 (left & right)',
+    )
+    expect(canonicalName('Mountain climbers– 5 each side')).toBe('Mountain Climbers– 5 each side')
+  })
+
+  it('leaves alone a name whose qualifier it does not recognise', () => {
+    // Better unrenamed than shortened: the qualifier would be folded away.
+    expect(canonicalName('Mountain climbers left-ish')).toBeNull()
+    expect(canonicalName('Mountain climbers 3 times')).toBeNull()
+  })
+
   it('reads a bare Chest Press as the standard one', () => {
     // The table has five and no plain one, so nothing can match it. On this
     // machine it can only mean the standard press, which Wayne confirmed.

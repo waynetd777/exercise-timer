@@ -1491,6 +1491,55 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T02:10:00Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-08-28T02:40:00Z",
+      "error_message": "Tidy exercise names dropped side qualifiers and trailing counts: 'side plank left' -> 'Side Plank', 'Quad stretch \u00d7 3 (left & right)' lost the \u00d7 3.",
+      "file": "src/routines/rename.ts",
+      "root_cause": "split() peeled only a trailing load, parenthesis or spaced dash into `trail`; foldName() throws left/right/per leg/counts away to match, and the canonical name replaced the whole core without them. TRAILING_DASH also required a space before the dash, so 'squat\u2013 5 each side' was not peeled.",
+      "fix": "split() also peels TRAILING_SIDE and TRAILING_COUNT, TRAILING_DASH allows no space before the dash, and canonicalName refuses a core that still holds a side word or a digit. Tests cover each form and the refusal.",
+      "tags": [
+        "routines",
+        "tidy",
+        "rename",
+        "foldName"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T02:40:00Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-08-28T02:40:00Z",
+      "error_message": "Text export corrupted a step whose note contained 'for N seconds' or a parenthesis: 'Plank (hold for 2 seconds\u2026) - 40 seconds' read back as a 2-second step called 'Plank (hold', with `lost` empty.",
+      "file": "src/routines/writeRoutine.ts",
+      "root_cause": "The grammar has no escaping; FOR_DURATION is tried before TRAILING_DURATION in parseItem and TRAILING_PAREN is [^()]*, so the note's text was read as the step's timing or name. The writer never checked what it emitted.",
+      "fix": "stepLines re-parses each line it writes (bullet stripped) and compares name, duration and count; a mismatch drops the note and reports it, and a line still wrong is reported. Two round-trip tests.",
+      "tags": [
+        "routines",
+        "writeRoutine",
+        "pasteFormat",
+        "round-trip",
+        "notes"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T02:40:00Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-08-28T02:40:00Z",
+      "error_message": "A heading with nothing under it at the end of the text vanished with no `skipped` entry ('Cool down walk for 2 minutes' as the last line).",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "closeSection() discarded a childless section silently. NAMED_SECTION matches 'cool down\u2026' so the line opened a section that closed empty at end of input.",
+      "fix": "The parser records the line that opened a section and the count of lines read under it; a section closed at the END of the text with no children and no lines under it is pushed to `skipped`. Mid-text empty headings (a title split over two lines, or lines already refused) stay silent. The corpus test now records the one line this surfaces in 2026-07-13-trampoline, a closing 'Challenge' heading that was being dropped.",
+      "tags": [
+        "routines",
+        "pasteFormat",
+        "skipped",
+        "headings"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T02:40:00Z"
     }
   ]
 }
