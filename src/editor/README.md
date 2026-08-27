@@ -74,6 +74,14 @@ would leave a blank line under the step for ever.
   Weights used to be typed into the NAME, so `storage/migrate.ts` lifts a
   trailing one out of names already saved, and `writeRoutine` puts it back into
   the name on the way out, since text has no syntax for it.
+- **An empty weight field is not an unloaded step.** It means "whatever I lift
+  for this", and the weight comes from the weights page when the routine runs, so
+  the field's placeholder shows what that would be rather than an example. The ×
+  beside it is how a step goes back to following the page; clearing three
+  characters by hand was a poor way to say something deliberate. It is the one
+  CONTROLLED field among the three extras, because the × has to change what is
+  shown and commit in the same gesture, and it is keyed on the committed value
+  like its neighbours so undo still remounts it.
 - **A move past either end is a no-op** rather than an error, so holding a button
   cannot corrupt the tree.
 - **A group left empty by a departing step is kept, not pruned.** A group vanishing

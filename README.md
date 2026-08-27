@@ -71,14 +71,19 @@ across a gym, with the phone propped against a rack.
   images, with undo.
 - **Keeps what you lift in one place.** One weight per exercise, and any routine
   that does not state a weight of its own uses it, so moving up a plate is one
-  edit rather than seven. Eleven multi-gym weights start filled in.
+  edit rather than seven. Nineteen start filled in, each with the illustration
+  from the manufacturer's guide beside it.
+- **Tidies the names**, putting each step's exercise back under the name the app
+  knows it by, so weights and pictures find it. Counts, weights and anything in
+  brackets are kept exactly as they are.
 - **Says how long a routine takes**, including the self-paced parts a clock
   cannot know, and learns your pace from the runs you actually do.
 - **Sends** a routine three ways: a link, plain text, or a `.txt` in the format it
   can paste back. None of them carries a picture, so each says what it had to
   leave behind rather than dropping it quietly.
-- **Backs up** one routine or the whole library to a `.json`, images included.
-  It is the only format that carries everything, so it is the one to keep.
+- **Backs up** one routine or the whole library to a `.json`, images and weights
+  included. It is the only format that carries everything, so it is the one to
+  keep.
 - **Owns its images.** It stores local copies, so a routine survives gym wifi and
   the image host eventually losing a file.
 

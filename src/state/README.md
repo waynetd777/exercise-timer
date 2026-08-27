@@ -81,7 +81,7 @@ counted. Timeout throttling in a hidden tab is therefore harmless.
 |---|---|
 | `clock.ts` | Pure clock: `elapsed`, `started`, `paused`, `resumed`, `seeked`, and the suspension credit (`suspendedMs`, `credited`) |
 | `tick.ts` | Pure: stay / move / complete, and when the display next changes |
-| `useTimer.ts` | Run state as a cursor, the session clock, the self-scheduling tick, and the seek controls |
+| `useTimer.ts` | Run state as a cursor, the session clock, the self-scheduling tick, the seek controls, and the `onGate` callback that hands a cleared gate's real length to `storage/paces.ts` |
 | `useWakeLock.ts` | Holds the screen awake while running. Re-acquires on return, since the browser releases it when the page hides |
 | `updateApp.ts` | Pull-to-update. Asks the service worker for the newer version and reloads onto it. Deletes **nothing**: the precache is only written during an install, so dropping it destroyed offline until the next deploy, and IndexedDB holds the only copy of anything authored |
 | `usePullToRefresh.ts` | The gesture. Listeners are attached natively with `{ passive: false }`, because React registers `touchmove` as passive and would ignore `preventDefault` |

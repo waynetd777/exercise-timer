@@ -78,6 +78,10 @@ step-through machine would have made each of those a special case.
 - **An absent duration is self-paced. A present non-positive one is dropped.**
   Those are not the same thing, and the difference is deliberate: a mistyped `0`
   must not quietly become a step that waits forever for a tap.
+- **`load` is carried, never interpreted.** `compile()` copies it onto the entry
+  and that is all the engine knows about weights. An absent one means "whatever I
+  lift for this" and is resolved by `routines/loads.ts` before a routine gets
+  here, so the engine has no idea the weights page exists.
 - **A ladder runs everything on its final rung**, accessories included, because
   "after every set" includes the last set. This is deliberately the opposite of the
   trailing-rest rule below. Two similar-looking rules, opposite answers, both by
