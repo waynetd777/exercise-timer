@@ -30,6 +30,7 @@
  */
 
 import { MACHINE_EXERCISES } from './exercises.machine'
+import { HARVESTED_EXERCISES } from './exercises.harvested'
 import { OTHER_EXERCISES } from './exercises.other'
 
 /** The guide's own three-way key, printed as the colour of each title band. */
@@ -97,9 +98,13 @@ export type Exercise = {
   load?: string
 }
 
-export const EXERCISES: readonly Exercise[] = [...MACHINE_EXERCISES, ...OTHER_EXERCISES]
+export const EXERCISES: readonly Exercise[] = [
+  ...MACHINE_EXERCISES,
+  ...OTHER_EXERCISES,
+  ...HARVESTED_EXERCISES,
+]
 
-export { MACHINE_EXERCISES, OTHER_EXERCISES }
+export { MACHINE_EXERCISES, OTHER_EXERCISES, HARVESTED_EXERCISES }
 
 /**
  * The longer get-ready, for anything you have to put ON.

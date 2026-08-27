@@ -39,6 +39,7 @@ import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
 import { PRESCRIPTIONS } from './exercises.prescription'
+import { foldName } from './foldName'
 
 export type Recovery = 'passive' | 'active'
 
@@ -138,7 +139,9 @@ const MAX_SET_MS = 45_000
 function asks(exercise: Exercise, machineReps: number): { durationMs: number; count?: number } {
   if (exercise.equipment === 'machine') return { durationMs: WORK_MS, count: machineReps }
 
-  const said = PRESCRIPTIONS.find((p) => p.name === exercise.name)
+  // Folded, because that is how the harvest keys them: one name for every
+  // spelling the instructor uses.
+  const said = PRESCRIPTIONS.find((p) => p.name === foldName(exercise.name))
   if (!said) return { durationMs: WORK_MS }
   /*
    * Capped at `MAX_SET_MS`, because some of the harvested durations are the
