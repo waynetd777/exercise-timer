@@ -1259,6 +1259,57 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T00:55:00Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-08-28T00:50:00Z",
+      "error_message": "A generated sections routine started straight on the warm-up; a pasted routine opens on five seconds to get ready.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "sectionsRoutine() returned the sections only and generateRoutine() used them as the block list. The parser's getReady() prepends a loose 5s prepare step; the generator never did.",
+      "fix": "generateRoutine's sections branch prepends segment({name:'Get ready', role:'prepare', durationMs: GET_READY_MS}) imported from pasteFormat.ts, so it matches the parser exactly and writeRoutine strips it on Send as text. GenerateDialog counts blocks of kind 'section' instead of all blocks. Tests use sectionsOf() to skip the get-ready; README paragraph added.",
+      "tags": [
+        "generator",
+        "sections",
+        "get-ready",
+        "pasteFormat",
+        "GenerateDialog"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T00:50:00Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-08-28T01:10:00Z",
+      "error_message": "No whistle at Start, and no cue when a gate opened: the @0 opening cue of every run was never scheduled.",
+      "file": "src/audio/schedule.ts",
+      "root_cause": "dueCues opened its window AT the elapsed time (cuesBetween keeps atMs >= fromMs). readElapsed is performance.now() based and the effect runs after React commits, so the first arm always saw a small positive elapsed and the cue at 0 fell outside the window. The existing hook test passed only because its readElapsed returned exactly 0.",
+      "fix": "dueCues looks back by CANCEL_GRACE_MS; engine.scheduleTone drops a cue only when it is later than the same grace (was a literal 50ms). Test mounts the hook with elapsed=3 and expects the whistle.",
+      "tags": [
+        "audio",
+        "scheduler",
+        "cues",
+        "opening-whistle",
+        "gate"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:10:00Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-08-28T01:10:00Z",
+      "error_message": "The opening cue of the second and later runs was silent even when run 0's played.",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "The dedup Set of queued cue keys (kind@atMs, run-relative) was only cleared when not running or muted, and requeueable never forgets a cue at @0, so run 0's 'work-start@0' key suppressed the identical key in every later run.",
+      "fix": "The hook remembers which allCues the set describes and clears it when the run's cues change identity. Test rerenders runIndex 0 -> 1 -> 2 on a work/gate/rest routine and expects a cue at zero each time.",
+      "tags": [
+        "audio",
+        "scheduler",
+        "dedup",
+        "runs",
+        "gate"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:10:00Z"
     }
   ]
 }
