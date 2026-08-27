@@ -1226,6 +1226,22 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-27T23:05:00+02:00"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-08-27T23:10:00+02:00",
+      "error_message": "The generator's sections shape ignored \"what to work\": asking for Core alone still built Arms & Shoulders and Legs sections",
+      "file": "src/routines/generate.ts",
+      "root_cause": "`SECTION_THEMES` carries its own `areas` per theme, harvested from the corpus, and `sectionsRoutine` took them as written. The user's `spec.areas` was never intersected with them, so every theme built regardless of what had been asked for. The circuit shape had always intersected, which is why the bug was invisible on the shape most used: the two shapes were written weeks apart and only one of them read the answer.",
+      "fix": "Narrow each theme's areas to `spec.areas` and drop a theme left with nothing, noting how many were dropped. The WARM-UP is exempt, for the same reason it ignores the equipment filter: you warm the whole of yourself up whatever the session then works. Found by Wayne asking whether both shapes honoured the selection rather than by a test.",
+      "tags": [
+        "generator",
+        "sections",
+        "filter",
+        "user-input-ignored"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T23:10:00+02:00"
     }
   ]
 }

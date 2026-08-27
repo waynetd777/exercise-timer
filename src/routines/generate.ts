@@ -474,7 +474,33 @@ function sectionsRoutine(
   }
 
   const blocks: Block[] = []
-  const themes = SECTION_THEMES.slice(0, wanted)
+
+  /*
+   * Every theme narrowed to what was asked for, and a theme left with nothing
+   * dropped entirely.
+   *
+   * The themes carry their own areas, and taking them as written ignored the
+   * question: asking for Core alone still built an Arms & Shoulders section and
+   * a Legs one. The circuit shape had always intersected; this one had not.
+   *
+   * The WARM-UP is exempt for the same reason it ignores the equipment: you warm
+   * the whole of yourself up whatever the session then works.
+   */
+  const themes = SECTION_THEMES.map((entry) => ({
+    ...entry,
+    areas:
+      entry.theme === 'Warm-up'
+        ? entry.areas
+        : entry.areas.filter((area) => spec.areas.includes(area as BodyArea)),
+  }))
+    .filter((entry) => entry.areas.length > 0)
+    .slice(0, wanted)
+
+  if (themes.length < wanted) {
+    notes.push(
+      `Only ${themes.length} sections suit what you asked to work; the rest would have had nothing in them.`,
+    )
+  }
 
   for (const { theme, areas } of themes) {
     if (theme === 'Warm-up') {

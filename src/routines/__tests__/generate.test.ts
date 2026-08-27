@@ -558,6 +558,48 @@ describe('the instructor’s shape', () => {
     expect(first[1]!.reps!.count).toBe(second[1]!.reps!.count)
   })
 
+  it('works only what it was asked to work', () => {
+    /*
+     * The themes carry their own areas, and taking them as written ignored the
+     * question: asking for Core alone still built an Arms & Shoulders section
+     * and a Legs one. The circuit shape had always intersected; this one had
+     * not.
+     */
+    const { workout } = sections({ areas: ['torso'] })
+    const names = workout.blocks.map((b) => (b.kind === 'section' ? b.name : ''))
+    expect(names).not.toContain('Arms & Shoulders')
+    expect(names).not.toContain('Legs')
+    expect(names).toContain('Core')
+
+    // And nothing outside the torso is worked, bar the warm-up.
+    const worked: string[] = []
+    const walk = (blocks: readonly Block[], inWarmUp: boolean) => {
+      for (const block of blocks) {
+        if (block.kind === 'section') walk(block.children, block.name === 'Warm-up')
+        else if (block.kind !== 'segment') walk(block.children, inWarmUp)
+        else if (block.role === 'work' && !inWarmUp) worked.push(block.name)
+      }
+    }
+    walk(workout.blocks, false)
+    for (const name of worked) {
+      expect(EXERCISES.find((e) => e.name === name)?.area).toBe('torso')
+    }
+  })
+
+  it('still warms the whole of you up, whatever the session works', () => {
+    // Exempt for the same reason it ignores the equipment.
+    const warm = sections({ areas: ['torso'] }).workout.blocks[0]
+    expect(warm?.kind === 'section' && warm.name).toBe('Warm-up')
+    if (warm?.kind !== 'section') throw new Error('no warm-up')
+    expect(warm.children.length).toBeGreaterThan(3)
+  })
+
+  it('says when fewer sections suit the areas than were asked for', () => {
+    expect(sections({ areas: ['torso'], sections: 8 }).notes.join(' ')).toMatch(
+      /Only \d sections suit/,
+    )
+  })
+
   it('takes the number of sections it is given, within what the routines do', () => {
     expect(sections({ sections: 5 }).workout.blocks).toHaveLength(5)
     // Clamped: no routine in the corpus has fewer than five or more than eight.
