@@ -545,3 +545,68 @@ describe('parseItem', () => {
     expect(parseItem('Squat + Shoulder Press').name).toBe('Squat + Shoulder Press')
   })
 })
+
+describe('the earlier template, which the routines before July are written in', () => {
+  /*
+   * Ten routines from 16 April to 6 July are terser than anything the grammar
+   * was built for. These are the forms it learned on 2026-08-27, each taken
+   * verbatim from one of them.
+   */
+  const only = (text: string) => {
+    const parsed = parseRoutine(text)
+    expect(parsed.skipped).toEqual([])
+    return parsed
+  }
+
+  it('reads a counted line with no bullet at all', () => {
+    // "10 x Tricep dips" on its own line, which is how these are written.
+    const step = only('#1 Arms\n10 x Tricep dips').blocks
+    expect(JSON.stringify(step)).toContain('"name":"Tricep dips"')
+    expect(JSON.stringify(step)).toContain('"count":10')
+  })
+
+  it('refuses a bare line whose count is followed by arithmetic', () => {
+    /*
+     * "1 + 2" is an accumulator written down the page. Read as a step it becomes
+     * one called "+ 2", and a junk step that looks like a parse is worse than a
+     * line reported as unread.
+     */
+    expect(parseRoutine('#1 Arms\n1 + 2').skipped).toHaveLength(1)
+  })
+
+  it('reads a ladder that names its lift on the same line', () => {
+    const blocks = only('#1 Legs\n2-4-6-8-10-8-6-4-2 king squats').blocks
+    expect(JSON.stringify(blocks)).toContain('"counts":[2,4,6,8,10,8,6,4,2]')
+    expect(JSON.stringify(blocks)).toContain('"name":"king squats"')
+  })
+
+  it('reads a ladder whose counts come after the lift', () => {
+    const blocks = only('#1 Abs\nsit ups 5-10-15-10-5').blocks
+    expect(JSON.stringify(blocks)).toContain('"counts":[5,10,15,10,5]')
+    expect(JSON.stringify(blocks)).toContain('"name":"sit ups"')
+  })
+
+  it('does not read a ladder of DURATIONS as one of reps', () => {
+    // "20-30-45-30-20 sec cardio" would otherwise be a rep ladder whose main
+    // lift is called "sec cardio".
+    expect(parseRoutine('#1 Warm up\n20-30-45-30-20 sec cardio').skipped).toHaveLength(1)
+  })
+
+  it('reads a section marked only by its number, either way round', () => {
+    for (const heading of ['#1', '2#', '#Warmup']) {
+      const blocks = parseRoutine(`${heading}\n10 x Squats`).blocks
+      expect(blocks.some((b) => b.kind === 'section')).toBe(true)
+    }
+  })
+
+  it('reads a count written after the name', () => {
+    const blocks = only('#1 Legs\nwide squats 15x').blocks
+    expect(JSON.stringify(blocks)).toContain('"name":"wide squats"')
+    expect(JSON.stringify(blocks)).toContain('"count":15')
+  })
+
+  it('reads m as minutes', () => {
+    const blocks = only('#1 Warm up\n5m ham string stretch').blocks
+    expect(JSON.stringify(blocks)).toContain('"durationMs":300000')
+  })
+})

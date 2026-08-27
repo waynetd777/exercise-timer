@@ -66,7 +66,13 @@ const DASH_CHARS = '-–—'
 const DASH = `[${DASH_CHARS}]`
 
 /** "#1 General Body", "#5 Legs Finisher – Burnout Ladder". */
-const NUMBERED_SECTION = /^#\s*\d+\s*(.+)$/
+/**
+ * "#1 Full Body Ladder", and the barer forms the earlier routines use: "#1" and
+ * "2#" with no name at all, and "#Warmup" with no number.
+ */
+const NUMBERED_SECTION = /^#\s*\d+\s*(.*)$/
+const TRAILING_HASH_SECTION = /^(\d+)\s*#\s*(.*)$/
+const WORD_HASH_SECTION = /^#\s*(\p{L}.*)$/u
 
 /** "🔥 Final Burnout", "🔥 After Round 5:". */
 const FLAME_SECTION = /^🔥\s*(.+?):?$/
@@ -88,7 +94,7 @@ const NAMED_SECTION =
  * fractional seconds fall out for free and cost nothing.
  */
 const NUMBER = '(\\d+(?:\\.\\d+)?)'
-const UNIT = '(sec|secs|second|seconds|min|mins|minute|minutes)'
+const UNIT = '(sec|secs|second|seconds|m|min|mins|minute|minutes)'
 
 const toMs = (value: string, unit: string): number =>
   Math.round(Number(value) * (unit.toLowerCase().startsWith('m') ? 60_000 : 1_000))
@@ -116,7 +122,27 @@ const ROUNDS = new RegExp(
 const SETS_OF = new RegExp(`^(\\d+)\\s*[×x]\\s*${NUMBER}\\s*${UNIT}\\s*$`, 'i')
 
 /** "Counting: 2-4-6-8-10-8-6-4-2", or the bare "15-12-9-6-3-6-9-12-15". */
-const LADDER = new RegExp(`^(?:counting:\\s*)?(\\d+(?:\\s*${DASH}\\s*\\d+){2,})\\s*$`, 'i')
+/**
+ * "Counting: 10-8-6-4-2", and the bare "15-12-9-6-3".
+ *
+ * The counts may be FOLLOWED by the lift they belong to, which is how the
+ * routines before July write a ladder: "2-4-6-8-10-8-6-4-2 king squats" on one
+ * line rather than a `Counting:` line and a name under it.
+ *
+ * The name has to start with a letter, and must not be a unit: without that
+ * guard "20-30-45-30-20 sec cardio" reads as a rep ladder whose main lift is
+ * called "sec cardio", and "1-2-3-4-5-6-… (keep climbing)" as one called "…".
+ */
+const UNIT_WORD = /^(?:secs?|seconds?|mins?|minutes?|reps?)\b/i
+const LADDER = new RegExp(
+  `^(?:counting:\\s*)?(\\d+(?:\\s*${DASH}\\s*\\d+){2,})\\s*(.*)$`,
+  'i',
+)
+/** The same, written the other way round: "sit ups 5-10-15-10-5". */
+const LADDER_TRAILING = new RegExp(
+  `^(\\p{L}[^${DASH_CHARS}]*?)\\s+(\\d+(?:\\s*${DASH}\\s*\\d+){2,})\\s*$`,
+  'iu',
+)
 
 /** "Rest 45 seconds after each round", "Rest: 30–45 seconds after each round". */
 const ROUND_REST = new RegExp(
@@ -252,6 +278,8 @@ const TRAILING_DURATION = new RegExp(
 )
 /** "12 × Hammer Curls", and the bare "20 Flutter Kicks". */
 const LEADING_COUNT = /^(\d+)\s*(?:[×x]\s*|\s)(.+)$/
+/** "wide squats 15x", "…crunch x12". The `x` is what makes it a count. */
+const TRAILING_COUNT = /^(\p{L}.*?)[\s:]+(?:[×x]\s*(\d+)|(\d+)\s*[×x])$/u
 
 /**
  * "20 × Front Punches + 20 × Uppercuts" is two exercises on one line, and so is
@@ -372,6 +400,19 @@ export function parseItem(text: string): Item {
     // "10 × Walking Lunges (5 each leg)" is five a side, not ten.
     const count = perSideCount ? Number(perSideCount[1]) : Number(leadingCount[1])
     return done(tidy(leadingCount[2]!), { count })
+  }
+
+  /*
+   * The count written AFTER the name, which the routines before July do as often
+   * as before it: "wide squats 15x", "straight leg up over head crunch x12",
+   * "Curtsy lunges: 10x per leg". The `x` is required here, unlike the leading
+   * form, or every name ending in a number would grow a rep count.
+   */
+  const trailingCount = TRAILING_COUNT.exec(rest)
+  if (trailingCount) {
+    const stated = Number(trailingCount[2] ?? trailingCount[3])
+    const count = perSideCount ? Number(perSideCount[1]) : stated
+    return done(tidy(trailingCount[1]!), { count })
   }
 
   return done(tidy(rest))
@@ -637,7 +678,15 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     const heading = line.slice(marker.length)
 
     const numbered = NUMBERED_SECTION.exec(heading)
-    if (numbered) return openSection(marker + numbered[1]!)
+    if (numbered) return openSection((marker + (numbered[1] || heading)).trim())
+
+    const trailingHash = TRAILING_HASH_SECTION.exec(heading)
+    if (trailingHash) {
+      return openSection((marker + (trailingHash[2] || `#${trailingHash[1]}`)).trim())
+    }
+
+    const wordHash = WORD_HASH_SECTION.exec(heading)
+    if (wordHash) return openSection((marker + wordHash[1]!).trim())
 
     const flame = FLAME_SECTION.exec(heading)
     if (flame) return openSection(marker + flame[1]!)
@@ -667,8 +716,10 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
-    const ladderCounts = LADDER.exec(line)
-    if (ladderCounts) {
+    const trailing = LADDER_TRAILING.exec(line)
+    const ladderCounts = LADDER.exec(line) ?? (trailing ? [line, trailing[2]!, trailing[1]!] : null)
+    const mainLift = ladderCounts?.[2]?.trim() ?? ''
+    if (ladderCounts && (mainLift === '' || (/^\p{L}/u.test(mainLift) && !UNIT_WORD.test(mainLift)))) {
       flushAmrap()
       const counts = ladderCounts[1]!
         .split(new RegExp(DASH))
@@ -678,6 +729,8 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       ensureSection().children.push(group)
       target = { kind: 'ladder-main', group }
       eachMs = null
+      // Named on the same line, so it is the lift the rungs count.
+      if (mainLift !== '') addItem(parseItem(mainLift))
       return
     }
 
@@ -897,10 +950,20 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return addItem(parseItem(line))
     }
 
-    // A bare line that states its own duration is a step: the trampoline
-    // warm-up ends with "Sprint Finish – Fast feet for 15 seconds".
+    /*
+     * A bare line that states its own AMOUNT is a step, whether that amount is a
+     * time or a count. The trampoline warm-up ends with "Sprint Finish – Fast
+     * feet for 15 seconds"; the routines before July are written almost entirely
+     * as "10 x Tricep dips" with no bullet at all.
+     *
+     * A count needs its name to begin with a LETTER, which a duration does not.
+     * "1 + 2" and "1 + 2 + 3" are an accumulator written down the page, and
+     * without that guard they become a step called "+ 2": a junk step that looks
+     * like a parse, which is worse than a line reported as unread.
+     */
     const loose = parseItem(line)
     if (loose.durationMs !== undefined) return addItem(loose)
+    if (loose.count !== undefined && /^\p{L}/u.test(loose.name)) return addItem(loose)
 
     skipped.push({ line: number, text: line })
   })
