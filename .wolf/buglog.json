@@ -1208,6 +1208,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-27T19:08:00+02:00"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-08-27T23:05:00+02:00",
+      "error_message": "The help tray's contents would not scroll; long help ran off the bottom of the screen",
+      "file": "src/ui/theme.css",
+      "root_cause": "The UA stylesheet gives every `<dialog>` `height: fit-content`, and `.tray` never overrode it. That beats the `inset: 0 0 0 auto` above it: with `top` and `bottom` both 0 the height would otherwise resolve to the viewport, but an explicit `height` wins and the box is over-constrained, so `bottom: 0` is dropped. The tray therefore grew to its CONTENT height rather than capping at the screen, which left `.tray__body`'s `minmax(0, 1fr)` grid row with no definite height to scroll inside. Everything else was already right: the grid rows, `min-height: 0`, `overflow-y: auto`. It only showed once enough help bullets were added for the content to exceed one screen, which happened on 2026-08-27 when the generator's help was written.",
+      "fix": "`height: 100dvh` on `.tray`, which is exactly what `.modal` already does and how the cause was found: the two dialogs differed in one property and only one of them scrolled. `dvh` rather than `svh` matches `.modal`, since a dialog wants to reflow for the keyboard and is not the thing being scrolled.",
+      "tags": [
+        "css",
+        "dialog",
+        "ua-stylesheet",
+        "fit-content",
+        "overflow",
+        "help-tray"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T23:05:00+02:00"
     }
   ]
 }
