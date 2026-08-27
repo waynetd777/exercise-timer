@@ -6,8 +6,6 @@
 
 import type { Position, Timeline, TimelineEntry } from './types'
 
-const COMPLETE_INDEX_OFFSET = 0
-
 /**
  * Index of the last entry starting at or before `t`.
  * Assumes `entries` is ordered by `startMs`, which `compile()` guarantees.
@@ -33,7 +31,7 @@ function completed(timeline: Timeline): Position {
   return {
     entry: null,
     nextEntry: null,
-    index: timeline.entries.length + COMPLETE_INDEX_OFFSET,
+    index: timeline.entries.length,
     elapsedInEntryMs: 0,
     remainingMs: 0,
     totalElapsedMs: timeline.totalMs,

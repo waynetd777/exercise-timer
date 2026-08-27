@@ -20,8 +20,8 @@ import { importTabataFile } from '../tabataFormat'
  * Imported here rather than in `samples.ts` so the app's bundle cannot include
  * them: nothing in the import graph of `App.tsx` reaches this file.
  */
-export const FULL_BODY_IMPORTED = importTabataFile(rawFullBody, 0, 'fixture-full-body')
-export const MIXED_CARDIO_1 = importTabataFile(rawMixedCardio1, 0, 'fixture-mixed-cardio-1')
+const FULL_BODY_IMPORTED = importTabataFile(rawFullBody, 0, 'fixture-full-body')
+const MIXED_CARDIO_1 = importTabataFile(rawMixedCardio1, 0, 'fixture-mixed-cardio-1')
 export const MIXED_CARDIO_2 = importTabataFile(rawMixedCardio2, 0, 'fixture-mixed-cardio-2')
 
 /** The three as they used to be seeded, for tests that want breadth. */

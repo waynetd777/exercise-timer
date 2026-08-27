@@ -36,7 +36,7 @@ import rawStrength from './strength-training.routine.json'
  */
 const authored = rawFullBody as { name: string; colour: string; blocks: Block[] }
 
-export const BEGINNER_FULL_BODY: Workout = {
+const BEGINNER_FULL_BODY: Workout = {
   id: 'seed-beginner-full-body',
   name: authored.name,
   colour: authored.colour as RoutineColour,
@@ -64,7 +64,7 @@ export const BEGINNER_FULL_BODY: Workout = {
  */
 const strength = rawStrength as { name: string; colour: string; blocks: Block[] }
 
-export const STRENGTH_TRAINING: Workout = {
+const STRENGTH_TRAINING: Workout = {
   id: 'seed-strength-training',
   name: strength.name,
   colour: strength.colour as RoutineColour,

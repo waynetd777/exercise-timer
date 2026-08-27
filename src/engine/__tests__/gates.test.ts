@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { compile, hasGates, stepCount, totalDurationMs } from '../compile'
+import { compile, stepCount, totalDurationMs } from '../compile'
 import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'
 import type { Repeat, Segment } from '../types'
 
@@ -48,7 +48,6 @@ describe('self-paced steps', () => {
     expect(routine.hasGates).toBe(true)
     expect(totalDurationMs(mixed)).toBe(routine.totalMs)
     expect(stepCount(mixed)).toBe(3)
-    expect(hasGates(mixed)).toBe(true)
   })
 })
 
@@ -388,31 +387,26 @@ describe('the cheap measures agree with compile', () => {
     const compiled = compile(routine)
     expect(totalDurationMs(routine)).toBe(compiled.totalMs)
     expect(stepCount(routine)).toBe(compiled.entries.length)
-    expect(hasGates(routine)).toBe(compiled.hasGates)
   })
 
   it('agrees that a gate inside a never-running repeat is no gate', () => {
     const wk = workout('Skipped', [rep(0, [step('Push-ups', 12)])])
     expect(compile(wk).hasGates).toBe(false)
-    expect(hasGates(wk)).toBe(false)
   })
 
   it('agrees that a single round drops its self-paced trailing rest', () => {
     const restUntilReady: Segment = { ...step('Rest until ready'), role: 'rest' }
     const once = workout('One round', [rep(1, [seg('Work', 30), restUntilReady])])
     expect(compile(once).hasGates).toBe(false)
-    expect(hasGates(once)).toBe(false)
 
     // With two rounds the rest RUNS between them, so it is a gate again.
     const restBetween: Segment = { ...step('Rest until ready'), role: 'rest' }
     const twice = workout('Two rounds', [rep(2, [seg('Work', 30), restBetween])])
     expect(compile(twice).hasGates).toBe(true)
-    expect(hasGates(twice)).toBe(true)
   })
 
   it('agrees that a gate inside a ladder with no usable rungs is no gate', () => {
     const wk = workout('No rungs', [ladder([], [step('Squats', 'rung')])])
     expect(compile(wk).hasGates).toBe(false)
-    expect(hasGates(wk)).toBe(false)
   })
 })

@@ -23,7 +23,7 @@ import { newId } from '../id'
  */
 export type Path = readonly number[]
 
-export type FlatBlock = {
+type FlatBlock = {
   block: Block
   path: Path
   /** 0 for a top-level block, 1 inside one repeat, and so on. */
@@ -205,7 +205,7 @@ export function insertAfter(blocks: readonly Block[], path: Path, block: Block):
 }
 
 /** Inserts AT a position among siblings, pushing whatever is there along. */
-export function insertAt(blocks: readonly Block[], path: Path, block: Block): Block[] {
+function insertAt(blocks: readonly Block[], path: Path, block: Block): Block[] {
   return withSiblings(blocks, path, (siblings, index) => {
     siblings.splice(index, 0, block)
     return siblings

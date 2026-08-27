@@ -45,16 +45,21 @@ function fakeRegistration(overrides: Record<string, unknown> = {}) {
 }
 
 const reload = vi.fn()
-const cacheDelete = vi.fn().mockResolvedValue(true)
+
+/** `updateApp` deliberately deletes no cache; any touch at all is a failure. */
+const untouchable = new Proxy(
+  {},
+  {
+    get() {
+      throw new Error('updateApp must not touch caches')
+    },
+  },
+)
 
 function stubEnvironment(registration: unknown) {
   vi.stubGlobal('location', { reload })
-  const caches = {
-    keys: vi.fn().mockResolvedValue(['workbox-precache-v2-https://example/', 'exercise-images']),
-    delete: cacheDelete,
-  }
-  vi.stubGlobal('caches', caches)
-  vi.stubGlobal('window', { caches })
+  vi.stubGlobal('caches', untouchable)
+  vi.stubGlobal('window', { caches: untouchable })
   vi.stubGlobal('navigator', {
     serviceWorker: { getRegistration: vi.fn().mockResolvedValue(registration) },
   })
@@ -63,7 +68,6 @@ function stubEnvironment(registration: unknown) {
 describe('updateApp', () => {
   beforeEach(() => {
     reload.mockClear()
-    cacheDelete.mockClear()
   })
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -77,7 +81,6 @@ describe('updateApp', () => {
     await updateApp()
 
     expect(registration.update).toHaveBeenCalledOnce()
-    expect(cacheDelete).not.toHaveBeenCalled()
     expect(reload).toHaveBeenCalledOnce()
   })
 
@@ -91,7 +94,6 @@ describe('updateApp', () => {
     await done
 
     expect(reload).toHaveBeenCalledOnce()
-    expect(cacheDelete).not.toHaveBeenCalled()
   })
 
   it('waits for an installing worker to activate before reloading', async () => {
@@ -128,7 +130,6 @@ describe('updateApp', () => {
     await updateApp()
 
     expect(reload).toHaveBeenCalledOnce()
-    expect(cacheDelete).not.toHaveBeenCalled()
   })
 
   it('still reloads with no registration at all', async () => {
@@ -137,6 +138,5 @@ describe('updateApp', () => {
     await updateApp()
 
     expect(reload).toHaveBeenCalledOnce()
-    expect(cacheDelete).not.toHaveBeenCalled()
   })
 })

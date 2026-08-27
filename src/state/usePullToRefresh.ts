@@ -16,7 +16,7 @@ const MAX = 120
 /** Movement is damped, or the indicator outruns the finger and feels loose. */
 const DAMPING = 0.55
 
-export type PullState = {
+type PullState = {
   /** Current pull distance in px, 0 when idle. */
   distance: number
   /** True once far enough that releasing will refresh. */

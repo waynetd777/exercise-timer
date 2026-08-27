@@ -65,10 +65,10 @@ export type Equipment =
  *
  * Absent means `strength`, which is what every machine exercise is.
  */
-export type Use = 'strength' | 'cardio' | 'mobility'
+type Use = 'strength' | 'cardio' | 'mobility'
 
 /** The five the guide lists. `ankle` is the one that costs setup time. */
-export type Attachment = 'lat bar' | 'low row bar' | 'ab strap' | 'free-motion' | 'ankle'
+type Attachment = 'lat bar' | 'low row bar' | 'ab strap' | 'free-motion' | 'ankle'
 
 export type Exercise = {
   name: string
@@ -89,13 +89,6 @@ export type Exercise = {
    * repetitions and repeat on opposite side".
    */
   perSide?: boolean
-  /**
-   * What to load it with, where the kit decides. Free text, like `Segment.load`,
-   * and only a starting point: the generator prefers the weight last used for
-   * this exercise in the saved library, and leaves the field empty rather than
-   * inventing one.
-   */
-  load?: string
 }
 
 export const EXERCISES: readonly Exercise[] = [

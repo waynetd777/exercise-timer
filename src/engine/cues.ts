@@ -7,15 +7,7 @@
 import type { CuePoint, Routine, Timeline } from './types'
 
 /** Seconds before the end of a step at which a countdown beep fires. */
-export const COUNTDOWN_SECONDS = [3, 2, 1] as const
-
-/** Ordering for cues that land on the same millisecond. */
-const KIND_RANK = {
-  'workout-complete': 0,
-  'work-start': 1,
-  'work-end': 1,
-  countdown: 2,
-} as const
+const COUNTDOWN_SECONDS = [3, 2, 1] as const
 
 /**
  * Every audio cue for a workout, as absolute offsets from its start.
@@ -63,7 +55,9 @@ export function cues(timeline: Timeline): CuePoint[] {
     })
   }
 
-  out.sort((a, b) => a.atMs - b.atMs || KIND_RANK[a.kind] - KIND_RANK[b.kind])
+  // No tie-break: boundaries sit at step starts, countdowns strictly inside a
+  // step, completion at the end, so no two cues share a millisecond.
+  out.sort((a, b) => a.atMs - b.atMs)
   return out
 }
 

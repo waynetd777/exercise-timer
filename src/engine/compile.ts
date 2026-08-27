@@ -341,7 +341,7 @@ function partition(entries: TimelineEntry[]): Routine {
  * construction; asserted in the tests.
  *
  * Self-paced steps contribute nothing, so for a routine with gates this is a
- * floor rather than a length. Pair it with `hasGates()`.
+ * floor rather than a length. `Routine.hasGates` says when.
  */
 export function totalDurationMs(workout: Workout): number {
   const sum = (blocks: Block[]): number => {
@@ -396,42 +396,4 @@ export function stepCount(workout: Workout): number {
     return total
   }
   return count(workout.blocks)
-}
-
-/**
- * Whether a routine contains a self-paced step, without compiling it. The
- * library needs this to know that "24:50" would be a lie.
- */
-export function hasGates(workout: Workout): boolean {
-  // Mirrors what `compile()` actually runs: a repeat with no rounds never runs
-  // its children, a single round never runs its trailing rest, and a ladder
-  // with no usable rungs runs nothing. Disagreeing with compile here made the
-  // library flag a fully timed routine's length as an estimate.
-  const any = (blocks: Block[]): boolean => {
-    for (const block of blocks) {
-      if (block.kind === 'segment') {
-        if (segmentDurationMs(block) === null) return true
-        continue
-      }
-      if (block.kind === 'section') {
-        if (any(block.children)) return true
-        continue
-      }
-      if (block.kind === 'ladder') {
-        if (ladderRungs(block.counts).length > 0 && any(block.children)) return true
-        continue
-      }
-      const times = repeatTimes(block.times)
-      if (times < 1) continue
-      // With one round the trailing rest is dropped and never runs; with more,
-      // it runs between rounds and still counts.
-      const children =
-        times === 1 && trailingRest(block.children) !== null
-          ? block.children.slice(0, -1)
-          : block.children
-      if (any(children)) return true
-    }
-    return false
-  }
-  return any(workout.blocks)
 }

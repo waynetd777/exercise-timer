@@ -17,7 +17,6 @@ import {
   FIT_AVAILABLE,
   fitBlockCqi,
   fitCqi,
-  fitWidthUsed,
   isoDate,
   listLines,
   nameLines,
@@ -369,12 +368,6 @@ describe('fitCqi always fits its container', () => {
     const longest = Math.max(...text.split(' ').map((word) => word.length))
     const worstCase = longest * PESSIMISTIC * fitCqi(text)
     expect(worstCase).toBeLessThanOrEqual(FIT_AVAILABLE)
-  })
-
-  it('claims less than the space available, so the slack is real', () => {
-    for (const text of WORDS) {
-      expect(fitWidthUsed(text)).toBeLessThan(FIT_AVAILABLE)
-    }
   })
 
   it('is bounded by the cap for very short words, still with headroom', () => {

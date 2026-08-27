@@ -24,9 +24,9 @@ import { sha256 } from '../media/hash'
  */
 
 /** Reads a blob out of storage. Injected so this can be tested without IndexedDB. */
-export type ReadBlob = (hash: string) => Promise<Blob | undefined>
+type ReadBlob = (hash: string) => Promise<Blob | undefined>
 
-export type MediaReport = {
+type MediaReport = {
   /** Images ready to store, already verified against their key. */
   entries: { hash: string; blob: Blob }[]
   /** Hashes that could not be used, and why. Reported, never thrown. */

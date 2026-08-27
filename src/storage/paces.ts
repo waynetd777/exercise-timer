@@ -58,7 +58,7 @@ const MIN_GATE_MS = 4_000
 /** Above this you put the phone down and made tea. Not a rep rate. */
 const MAX_GATE_MS = 8 * 60_000
 
-export type Paces = Record<string, number[]>
+type Paces = Record<string, number[]>
 
 /**
  * The rate a gate implies, and who it belongs to.

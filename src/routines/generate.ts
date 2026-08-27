@@ -129,7 +129,7 @@ export type GeneratedRoutine = {
   notes: string[]
 }
 
-export type Rng = () => number
+type Rng = () => number
 
 /** Timings taken from the routines these shapes were read off, not chosen. */
 const WORK_MS = 20_000
