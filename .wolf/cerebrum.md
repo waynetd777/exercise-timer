@@ -529,3 +529,23 @@ low row bar.
 Every looked-up weight is now gone. Wayne corrected the last one (triceps press
 20 → 15) without ever having loaded it in a routine, which is the final word on
 what strengthlevel was worth here: every single estimate was high.
+
+## Renaming steps to the table's names (v7.3, 2026-08-28)
+
+`routines/rename.ts` — `canonicalName()` / `tidyLibrary()`, behind Routines ›
+Tidy n exercise names.
+
+- A step name is NOT just an exercise: "Get ready: 12 × Seated Ab Crunch 15kg
+  (bodyweight)" is five things. `split()` peels the lead (announcement, count)
+  and the trail (weight, bracketed note, dashed qualifier) and puts them back
+  untouched. Never widen the rename to swallow those — the bracketed note is
+  often the only record of the easier option.
+- It uses the SAME two passes as `findLoad` (exact fold, then word-prefix) on
+  purpose: a step the weights page can answer for is exactly a step this can
+  rename. Keep them in step.
+- `ALIASES` holds bare names with one obvious owner — only 'chest pres' →
+  'Standard Chest Press' (Wayne confirmed). "Shoulder Press" is deliberately
+  NOT aliased: a dumbbell exercise already owns that exact name.
+- Audited against his library first: 10 steps across 4 routines, nothing
+  meaningful lost. Always preview a bulk edit against the real backups in
+  ~/Downloads before shipping it.

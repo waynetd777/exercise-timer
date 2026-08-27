@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T21:44:22.522Z",
-    "fileCount": 69,
+    "lastScanned": "2026-08-27T22:27:10.368Z",
+    "fileCount": 71,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "c3820f1a87976e7a6d6a0c13c03aeacfb1be2f519932f525369a1d23857cbdf6",
-    "storeUpdatedAt": "2026-08-27T21:44:22.529Z"
+    "renderedHash": "92519ae96a75bf9b84f3f3e6b0dd156185f76edbb272674961750c2efe560716",
+    "storeUpdatedAt": "2026-08-27T22:27:10.375Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1580,6 +1580,75 @@
           "tokens": 755
         }
       ]
+    },
+    "src/routines/rename.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1930,
+      "hash": "beee0ec62f4559e0",
+      "size": 6764,
+      "mtimeMs": 1787869542754.471,
+      "updatedAt": "2026-08-27T22:25:42.807Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "split",
+          "kind": "fn",
+          "startLine": 59,
+          "endLine": 74,
+          "tokens": 187
+        },
+        {
+          "name": "table",
+          "kind": "fn",
+          "startLine": 75,
+          "endLine": 90,
+          "tokens": 155
+        },
+        {
+          "name": "match",
+          "kind": "fn",
+          "startLine": 91,
+          "endLine": 118,
+          "tokens": 265
+        },
+        {
+          "name": "canonicalName",
+          "kind": "fn",
+          "startLine": 119,
+          "endLine": 133,
+          "tokens": 144
+        },
+        {
+          "name": "tidyNames",
+          "kind": "fn",
+          "startLine": 134,
+          "endLine": 156,
+          "tokens": 228
+        },
+        {
+          "name": "tidyWorkout",
+          "kind": "fn",
+          "startLine": 157,
+          "endLine": 167,
+          "tokens": 110
+        },
+        {
+          "name": "tidyLibrary",
+          "kind": "fn",
+          "startLine": 168,
+          "endLine": 183,
+          "tokens": 122
+        }
+      ]
+    },
+    "src/routines/__tests__/rename.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1224,
+      "hash": "669bce01b2a2ae0d",
+      "size": 4295,
+      "mtimeMs": 1787869630307.0364,
+      "updatedAt": "2026-08-27T22:27:10.368Z",
+      "source": "hook"
     }
   },
   "preamble": [

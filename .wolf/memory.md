@@ -244,3 +244,6 @@
 | 00:55 | Fix weights not matching a routine's shorthand names | loads.ts, weights.ts, tests | v7.0, 984 green | ~25k |
 | 01:10 | Audit routines 2 and 3; seed weights from what Wayne actually lifts | weights.ts, help.ts, tests | v7.1, 984 green | ~35k |
 | 01:22 | Add Low Pulley Squat; last looked-up weight corrected away | exercises.other.ts, weights.ts, help.ts | v7.2, 984 green | ~15k |
+| 00:25 | Created src/routines/rename.ts | — | ~1930 |
+| 00:27 | Created src/routines/__tests__/rename.test.ts | — | ~1224 |
+| 01:38 | Tidy exercise names across the library | rename.ts, LibraryScreen, help.ts | v7.3, 995 green | ~30k |

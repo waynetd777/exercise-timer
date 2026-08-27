@@ -29,6 +29,8 @@ import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
 import { LIBRARY_HELP } from './help'
 import { NoticeDialog } from './NoticeDialog'
+import { ConfirmDialog } from './ConfirmDialog'
+import { tidyLibrary } from '../routines/rename'
 import { unpinDraft } from '../media/pin'
 import {
   CheckIcon,
@@ -249,6 +251,7 @@ export function LibraryScreen({
   const [dragging, setDragging] = useState(false)
   const [pasting, setPasting] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [tidying, setTidying] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   /** True while the reported work is still running, so there is nothing to dismiss yet. */
   const [noticeBusy, setNoticeBusy] = useState(false)
@@ -300,6 +303,31 @@ export function LibraryScreen({
    * here or on another device, needs the number, so it is resolved on the way
    * out. The routine itself is untouched.
    */
+  /*
+   * Putting every step's exercise back under the name the app knows it by.
+   *
+   * The reason it matters is not tidiness. A step called "Seated Ab Crunch" is
+   * the same movement as the table's "Seated Abdominal Crunch", but only the
+   * table's spelling matches on the name exactly, so anything keyed by name —
+   * the weights page most of all — is working around the difference rather than
+   * with it.
+   *
+   * Computed on every render of the menu, which is cheap: it is a walk over
+   * blocks already in memory, and it has to be current or the count in the menu
+   * would be a promise about a library that has since changed.
+   */
+  const tidy = tidyLibrary(library.workouts)
+
+  const applyTidy = async () => {
+    setTidying(false)
+    for (const workout of tidy.workouts) await library.add(workout)
+    setNotice(
+      `Renamed ${tidy.renamed.length} ${tidy.renamed.length === 1 ? 'step' : 'steps'} in ${
+        tidy.workouts.length
+      } ${tidy.workouts.length === 1 ? 'routine' : 'routines'}`,
+    )
+  }
+
   const asText = (workout: Workout) => writeRoutine(withWeights(workout, currentWeights()))
 
   const copyRoutineText = async (workout: Workout) => {
@@ -476,6 +504,16 @@ export function LibraryScreen({
                 onSelect: () => setGenerating(true),
               },
               {
+                label: `Tidy ${tidy.renamed.length} exercise ${
+                  tidy.renamed.length === 1 ? 'name' : 'names'
+                }`,
+                icon: <PencilIcon />,
+                title:
+                  'Rename steps to the exercise names the app knows, so weights and pictures match',
+                disabled: tidy.renamed.length === 0,
+                onSelect: () => setTidying(true),
+              },
+              {
                 label: 'Weights',
                 icon: <WeightIcon />,
                 title: 'What you lift, per exercise, used by every routine that does not say',
@@ -633,6 +671,24 @@ export function LibraryScreen({
 
       {helping && (
         <HelpTray title="Help" sections={LIBRARY_HELP} onClose={() => setHelping(false)} />
+      )}
+
+      {tidying && (
+        <ConfirmDialog
+          question="Tidy the exercise names?"
+          /* Three examples and a count. The whole list would be a dialog nobody
+             reads, and no examples at all would be a bulk edit taken on trust. */
+          detail={`${tidy.renamed.length} ${
+            tidy.renamed.length === 1 ? 'step' : 'steps'
+          } in ${tidy.workouts.length} ${
+            tidy.workouts.length === 1 ? 'routine' : 'routines'
+          }, for example ${[...new Set(tidy.renamed.map((r) => `“${r.from}” → “${r.to}”`))]
+            .slice(0, 3)
+            .join(', ')}. Counts, weights and anything in brackets are kept exactly as they are.`}
+          confirmLabel={`Rename ${tidy.renamed.length}`}
+          onConfirm={() => void applyTidy()}
+          onCancel={() => setTidying(false)}
+        />
       )}
 
       <div className="library__drop" aria-hidden="true">

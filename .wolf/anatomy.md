@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:44:22.522Z
-> Files: 69 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T22:27:10.368Z
+> Files: 71 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -87,11 +87,13 @@
 - `imageCatalogue.ts` — Exercise illustrations available to every routine. (~1025 tok)
 - `loads.ts` — Exercise Timer (~820 tok)
 - `pasteTemplate.ts` — A routine written in every part of the grammar the paste parser understands, (~569 tok)
+- `rename.ts` — Exercise Timer (~1930 tok)
 - `writeRoutine.ts` — Exercise Timer (~2698 tok)
 
 ## src/routines/__tests__/
 
 - `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
+- `rename.test.ts` — Exercise Timer (~1224 tok)
 
 ## src/state/
 
