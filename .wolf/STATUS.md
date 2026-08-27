@@ -607,11 +607,24 @@ one, so it survives the round trip and the migration lifts it out again.
 The generator builds two circuit shapes. The routines Wayne is actually sent are
 a different thing, and the gap was MEASURED on 2026-08-27 rather than guessed.
 
-Wayne is gathering more routines, so **phase 1 waits for them**: every number
-below comes from a corpus of four, and the harvest should run against whatever
-is in `src/routines/__tests__/emails/` when it starts. See that folder's README
-for the conventions; the bodies are verbatim apart from the corporate banner and
-the iPhone signature, and must stay that way.
+**The corpus is now SIXTEEN routines, not four** (added 2026-08-27 from
+`~/Downloads/routines`, 18 `.eml` files yielding 16 after two re-forwards).
+Weekly from 16 April to 25 August 2026.
+
+Extracted by a script validated against the existing fixtures first: it
+reproduces three of the four byte for byte. That check is what makes the other
+twelve trustworthy.
+
+**But ten of the twelve are on a THIRD, EARLIER template the grammar has never
+seen**, and only 53% of their lines parse. See the emails README for the full
+list of forms; the short version is bare unbulleted lines, a lowercase `x`,
+ladder counts inline with the exercise name, bare `LEGS`/`ARMS`/`ABS` headings,
+ladders of DURATIONS, and ranges like `10/12 x` and `1-2mins`.
+
+So there is now a **phase 0**: widen the grammar, or harvest vocabulary from
+those ten with a looser pass that does not need the block structure. Ten
+routines' worth of exercises, rep counts and ladder shapes are behind that
+decision. The two July ones are nearly clean already (1 and 5 skipped lines).
 
 ### The gap
 
