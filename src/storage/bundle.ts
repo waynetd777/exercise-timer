@@ -29,6 +29,16 @@ export type Bundle = {
    * uploaded photo has to carry its bytes or it does not travel at all.
    */
   media: Record<string, string>
+  /**
+   * The weights kept in Settings, keyed by folded exercise name.
+   *
+   * OPTIONAL, and older files do not have it: a reader that finds none simply
+   * keeps the weights it already has. It rides in the backup because most
+   * routines now state no weight of their own and read this table instead, so a
+   * restore without it would put back sixty-seven routines with the numbers
+   * missing from all of them.
+   */
+  weights?: Record<string, string>
 }
 
 export class BundleError extends Error {
@@ -42,6 +52,7 @@ export function toBundle(
   workouts: readonly Workout[],
   now: number,
   media: Record<string, string> = {},
+  weights: Record<string, string> = {},
 ): Bundle {
   return {
     kind: 'davshack-timer-bundle',
@@ -49,6 +60,9 @@ export function toBundle(
     exportedAt: now,
     workouts: workouts.map((workout) => ({ ...workout })),
     media,
+    // Omitted entirely when there is nothing to say, so a file that carries no
+    // weights looks exactly like one written before the field existed.
+    ...(Object.keys(weights).length > 0 ? { weights } : {}),
   }
 }
 
@@ -186,6 +200,8 @@ export type BundleContents = {
    * successful, because the file is the user's only copy.
    */
   rejected: string[]
+  /** The weights the file carried, if any. See `Bundle.weights`. */
+  weights: Record<string, string>
 }
 
 /**
@@ -228,7 +244,18 @@ export function fromBundle(json: unknown, now: number): BundleContents {
       }),
     ),
     rejected,
+    weights: readWeights(bundle.weights),
   }
+}
+
+/** Strings only, and never throws: a damaged weights map must not lose the routines. */
+function readWeights(value: unknown): Record<string, string> {
+  if (typeof value !== 'object' || value === null) return {}
+  const out: Record<string, string> = {}
+  for (const [name, load] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof load === 'string') out[name] = load
+  }
+  return out
 }
 
 /** A filesystem-safe filename for an export. */

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:25:39.542Z
-> Files: 63 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:44:22.522Z
+> Files: 69 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -85,6 +85,7 @@
 - `exercises.ts` — Exercise Timer (~1064 tok)
 - `generate.ts` — Exercise Timer (~4235 tok)
 - `imageCatalogue.ts` — Exercise illustrations available to every routine. (~1025 tok)
+- `loads.ts` — Exercise Timer (~820 tok)
 - `pasteTemplate.ts` — A routine written in every part of the grammar the paste parser understands, (~569 tok)
 - `writeRoutine.ts` — Exercise Timer (~2698 tok)
 
@@ -110,6 +111,7 @@
 
 - `bundleMedia.ts` — The photos in an export file. (~890 tok)
 - `paces.ts` — Exercise Timer (~1674 tok)
+- `weights.ts` — Exercise Timer (~1404 tok)
 
 ## src/storage/__tests__/
 
@@ -117,6 +119,7 @@
 - `db.test.ts` — A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request (~1629 tok)
 - `migrate.test.ts` — Declares workout (~1336 tok)
 - `paces.test.ts` — Exercise Timer (~1540 tok)
+- `weights.test.ts` — Exercise Timer (~1395 tok)
 
 ## src/ui/
 
@@ -127,8 +130,11 @@
 - `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)
 - `useDismiss.ts` — Closes a transient overlay — a menu, a popover — on Escape or a press outside (~448 tok)
 - `useRowDrag.ts` — Exercise Timer (~2422 tok)
+- `weights.css` — Exercise Timer (~914 tok)
+- `WeightsScreen.tsx` — Exercise Timer (~2026 tok)
 
 ## src/ui/__tests__/
 
 - `EditorScreen.test.tsx` — A step that runs as its own countdown, so it gets an image button. (~2424 tok)
 - `RunScreen.test.tsx` — The audio layer is exercised by its own hook tests; here it would only try (~1010 tok)
+- `WeightsScreen.test.tsx` — Exercise Timer (~970 tok)

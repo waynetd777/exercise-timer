@@ -789,7 +789,46 @@ made of.
 
 ---
 
-## 🚀 Next quest: the weights settings page
+## ✅ Done: the weights settings page (2026-08-27, v6.5)
+
+Routines › Weights. Sixty-seven rows — the 41 multi-gym exercises, 14 dumbbell,
+1 kettlebell, 11 band — searchable, one free-text weight each.
+
+**THE RULE, and it is the whole feature.** An empty `load` on a step does not
+mean unloaded: it means "whatever I lift for this". It is resolved from the
+settings table on the way INTO a run, a text export or the editor's placeholder,
+and never written back. A step that DOES state a load keeps it, because it is
+overriding on purpose. So changing one number changes every routine that does
+not disagree.
+
+- `src/storage/weights.ts` — the store. localStorage, cached, dropped on save.
+  `SEED_WEIGHTS` carries the eleven strengthlevel numbers, rounded UP to the
+  nearest 5kg because that is where the pin goes. An empty value is RECORDED
+  rather than removed, or a cleared field would refill from the seed.
+- `src/routines/loads.ts` — `exerciseKey()` and `fillLoads()`, pure. The key
+  sees through a count (`12 × Leg Press`) and the announcement wording
+  (`Get ready: Leg Press`), so all three spellings of a lift take one weight.
+- The generator now writes down NO weight that Settings can supply, and does not
+  bake one into an announcement name either. Only an exercise Settings has never
+  heard of is stamped from what your last routine said.
+- Backups carry the weights (optional field, no version bump) and merge them
+  back on restore, file winning. A text export resolves them, since the grammar
+  has no way to say "whatever I lift".
+- "Fill n from my routines" takes what your saved routines already use for any
+  row still blank. The placeholder shows it before you do.
+
+### The gap this leaves, and it is worth closing
+
+**Routines saved BEFORE this still carry their own loads**, so they do not follow
+the settings page. Capturing them is one tap (Fill from my routines); making them
+follow is not built. The obvious next step is the inverse button — "let my
+routines follow these weights", stripping `load` from steps whose exercise has a
+weight in Settings. It is a bulk edit of the library, so it wants a confirm and
+Wayne's say-so before it ships.
+
+---
+
+## ✅ Done: the weights settings page — the original plan
 
 Every routine carries its weights in the step's `load` field, so changing what
 you lift means editing every routine that names it. The settings page holds one

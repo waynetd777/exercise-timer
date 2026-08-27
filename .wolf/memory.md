@@ -230,3 +230,10 @@
 | 23:25 | Created src/storage/__tests__/paces.test.ts | — | ~1540 |
 | 23:35 | Estimate a rep-based routine everywhere, and measure your own pace | estimate.ts, paces.ts, format.ts, EditorScreen, RunScreen, LibraryScreen, GenerateDialog, help.ts | v6.3, 939 tests green | ~95k |
 | 23:42 | Hyphenate Full-Body in generated routine names | generate.ts, help.ts, 2 tests | v6.4, 939 green | ~6k |
+| 23:35 | Created src/storage/weights.ts | — | ~1404 |
+| 23:36 | Created src/routines/loads.ts | — | ~820 |
+| 23:38 | Created src/ui/WeightsScreen.tsx | — | ~2026 |
+| 23:39 | Created src/ui/weights.css | — | ~914 |
+| 23:43 | Created src/storage/__tests__/weights.test.ts | — | ~1395 |
+| 23:44 | Created src/ui/__tests__/WeightsScreen.test.tsx | — | ~970 |
+| 23:58 | The weights settings page: one weight per exercise, resolved live | weights.ts, loads.ts, WeightsScreen, App, LibraryScreen, generate.ts, bundle.ts | v6.5, 965 green | ~120k |

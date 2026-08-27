@@ -457,3 +457,23 @@
   All four now use the same figure; adding a fifth surface means using it too.
 - `currentRates()` caches; `savePaces()` drops the cache. The library calls
   `summary()` once per row.
+
+## The weights settings page (v6.5, 2026-08-27)
+
+- THE RULE: an empty `Segment.load` means "whatever I lift for this", NOT
+  unloaded. It is resolved from `storage/weights.ts` at the boundary — run
+  start (App.tsx), text export (LibraryScreen), editor placeholder — and never
+  written back. A stated load always wins; it is a deliberate override.
+- Anything new that DISPLAYS a routine's weights has to call
+  `withWeights(workout, currentWeights())` or it will show blanks.
+- `routines/loads.ts` owns the key: `exerciseKey()` strips a "Get ready:" prefix
+  and folds. The generator must not bake a weight into an announcement NAME, or
+  no settings change can ever reach it.
+- The seeds are rounded UP to the nearest 5kg: a stack has holes, not a dial.
+  Wayne's call, 2026-08-27.
+- An empty typed value is STORED, not deleted. Deleting it would let the seed
+  refill the field, and a seeded weight could never be cleared.
+- Weights ride in the backup as an optional `weights` field — no BUNDLE_VERSION
+  bump, since an older reader ignores what it does not know.
+- Still open: routines saved before v6.5 carry their own loads and do not follow
+  the page. See STATUS for the inverse button.

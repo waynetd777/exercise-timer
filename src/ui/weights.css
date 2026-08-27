@@ -1,0 +1,163 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/*
+ * The weights page. Header, lede and tools stay put; the sixty-seven rows
+ * scroll under them, exactly as the library does.
+ */
+.weights {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--step-3);
+  height: 100%;
+  padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
+    calc(var(--step-5) + var(--safe-bottom)) calc(var(--step-5) + var(--safe-left));
+  overflow: hidden;
+  background: var(--ink-900);
+  background: radial-gradient(
+    140% 90% at 50% -10%,
+    color-mix(in oklab, var(--role-prepare) 14%, var(--ink-900)),
+    var(--ink-900) 78%
+  );
+}
+
+.weights__head {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 3.5rem;
+  align-items: center;
+}
+
+.weights__head .btn {
+  width: 44px;
+  height: 44px;
+}
+
+.weights__title {
+  margin: 0;
+  text-align: center;
+  font-size: var(--size-title);
+  font-weight: 700;
+  letter-spacing: var(--track-display);
+  color: var(--role-prepare);
+}
+
+.weights__lede {
+  margin: 0;
+  color: var(--bone-faint);
+  /*
+   * NO max-width. A measure of 46ch is right for a paragraph and wrong for a
+   * one-line caption: it wrapped this onto two lines on a wide screen with
+   * half the row empty beside it. It runs the full width and wraps only where
+   * a screen genuinely cannot hold it.
+   */
+  text-wrap: pretty;
+}
+
+.weights__count {
+  color: var(--bone-faint);
+  white-space: nowrap;
+}
+
+.weights__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-3);
+  align-items: center;
+}
+
+.weights__search {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: var(--step-3) var(--step-4);
+  font: inherit;
+  font-size: var(--label-size-sm);
+  color: var(--bone);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.weights__search::placeholder {
+  color: var(--bone-faint);
+}
+
+.weights__scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--step-4);
+}
+
+.weights__group + .weights__group {
+  margin-top: var(--step-5);
+}
+
+/* Sticky, so you can still see which kit you are scrolling through. */
+.weights__kit {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 var(--step-2);
+  padding: var(--step-2) 0;
+  color: var(--role-prepare);
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  background: var(--ink-900);
+}
+
+.weights__list {
+  display: grid;
+  gap: var(--step-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weights__empty {
+  margin: 0;
+  color: var(--bone-faint);
+}
+
+/*
+ * Name and field on one line. The field is fixed rather than fluid so the
+ * column of numbers reads down the page as a column, which is how you spot the
+ * one you have not filled in.
+ */
+.weight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7.5rem;
+  align-items: center;
+  gap: var(--step-3);
+  padding: var(--step-2) var(--step-3);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.weight__name {
+  min-width: 0;
+  color: var(--bone);
+  font-size: var(--label-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.weight__field {
+  width: 100%;
+  padding: var(--step-2) var(--step-3);
+  font: inherit;
+  font-size: var(--label-size-sm);
+  text-align: right;
+  color: var(--bone);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.weight__field::placeholder {
+  color: var(--bone-faint);
+  font-style: italic;
+}

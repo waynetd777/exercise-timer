@@ -65,9 +65,15 @@ across a gym, with the phone propped against a rack.
 - **Generates** a routine from a few answers: how long, what to work, whether to
   keep moving between sets, and what equipment. It builds in the shape of the
   routines it has been given, from a table of 127 exercises whose multi-gym half
-  is read out of the manufacturer's guide.
+  is read out of the manufacturer's guide. It leaves out any weight the settings
+  page can supply, so the routine follows what you lift rather than freezing it.
 - **Edits** routines: steps, durations, reps, weights, sets, ladders, sections and
   images, with undo.
+- **Keeps what you lift in one place.** One weight per exercise, and any routine
+  that does not state a weight of its own uses it, so moving up a plate is one
+  edit rather than seven. Eleven multi-gym weights start filled in.
+- **Says how long a routine takes**, including the self-paced parts a clock
+  cannot know, and learns your pace from the runs you actually do.
 - **Sends** a routine three ways: a link, plain text, or a `.txt` in the format it
   can paste back. None of them carries a picture, so each says what it had to
   leave behind rather than dropping it quietly.

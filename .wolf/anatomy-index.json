@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T21:25:39.542Z",
-    "fileCount": 63,
+    "lastScanned": "2026-08-27T21:44:22.522Z",
+    "fileCount": 69,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "f789ccb6934bb1ca8a05b26ac625faef2161054f33f0d4fc22913b723c8bbb90",
-    "storeUpdatedAt": "2026-08-27T21:25:39.549Z"
+    "renderedHash": "c3820f1a87976e7a6d6a0c13c03aeacfb1be2f519932f525369a1d23857cbdf6",
+    "storeUpdatedAt": "2026-08-27T21:44:22.529Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1432,6 +1432,152 @@
           "startLine": 21,
           "endLine": 159,
           "tokens": 1381
+        }
+      ]
+    },
+    "src/storage/weights.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1404,
+      "hash": "c092b799c95cd934",
+      "size": 4914,
+      "mtimeMs": 1787866551398.169,
+      "updatedAt": "2026-08-27T21:35:51.455Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "seeded",
+          "kind": "fn",
+          "startLine": 65,
+          "endLine": 71,
+          "tokens": 76
+        },
+        {
+          "name": "loadWeights",
+          "kind": "fn",
+          "startLine": 72,
+          "endLine": 87,
+          "tokens": 130
+        },
+        {
+          "name": "saveWeights",
+          "kind": "fn",
+          "startLine": 88,
+          "endLine": 107,
+          "tokens": 208
+        },
+        {
+          "name": "currentWeights",
+          "kind": "fn",
+          "startLine": 108,
+          "endLine": 119,
+          "tokens": 106
+        },
+        {
+          "name": "weightFor",
+          "kind": "fn",
+          "startLine": 120,
+          "endLine": 130,
+          "tokens": 106
+        },
+        {
+          "name": "withWeight",
+          "kind": "fn",
+          "startLine": 131,
+          "endLine": 139,
+          "tokens": 81
+        }
+      ]
+    },
+    "src/routines/loads.ts": {
+      "description": "Exercise Timer",
+      "tokens": 820,
+      "hash": "cd3fb685f66e167e",
+      "size": 2868,
+      "mtimeMs": 1787866575735.844,
+      "updatedAt": "2026-08-27T21:36:15.795Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "exerciseKey",
+          "kind": "fn",
+          "startLine": 38,
+          "endLine": 47,
+          "tokens": 98
+        },
+        {
+          "name": "fillLoads",
+          "kind": "fn",
+          "startLine": 48,
+          "endLine": 73,
+          "tokens": 235
+        },
+        {
+          "name": "withWeights",
+          "kind": "fn",
+          "startLine": 74,
+          "endLine": 78,
+          "tokens": 67
+        }
+      ]
+    },
+    "src/ui/WeightsScreen.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 2026,
+      "hash": "64a41370111ae9ec",
+      "size": 7092,
+      "mtimeMs": 1787866716820.8699,
+      "updatedAt": "2026-08-27T21:38:36.868Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "observed",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 48,
+          "tokens": 156
+        },
+        {
+          "name": "WeightsScreen",
+          "kind": "fn",
+          "startLine": 49,
+          "endLine": 194,
+          "tokens": 1462
+        }
+      ]
+    },
+    "src/ui/weights.css": {
+      "description": "Exercise Timer",
+      "tokens": 914,
+      "hash": "c9edcf498016f5d8",
+      "size": 3199,
+      "mtimeMs": 1787866756782.09,
+      "updatedAt": "2026-08-27T21:39:16.843Z",
+      "source": "hook"
+    },
+    "src/storage/__tests__/weights.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1395,
+      "hash": "a22f873aad5a9138",
+      "size": 4884,
+      "mtimeMs": 1787866988832.2969,
+      "updatedAt": "2026-08-27T21:43:08.892Z",
+      "source": "hook"
+    },
+    "src/ui/__tests__/WeightsScreen.test.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 970,
+      "hash": "ca7cb2f8eb444483",
+      "size": 3394,
+      "mtimeMs": 1787867062465.0063,
+      "updatedAt": "2026-08-27T21:44:22.522Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "field",
+          "kind": "fn",
+          "startLine": 24,
+          "endLine": 96,
+          "tokens": 755
         }
       ]
     }

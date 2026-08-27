@@ -175,7 +175,15 @@ describe('GenerateDialog', () => {
     expect((screen.getByLabelText('Resting for, seconds') as HTMLInputElement).value).toBe('60')
   })
 
-  it('loads an exercise from what was last used for it', () => {
+  it('writes down no weight that Settings can supply', () => {
+    /*
+     * The Leg Press has a weight on the settings page, so the generated routine
+     * leaves the field EMPTY on purpose: an empty load reads Settings every time
+     * the routine is opened, and stamping 65kg here would freeze it at what last
+     * week's routine happened to say. Stamping from the library is still what
+     * happens for an exercise Settings has never heard of; `generate.test.ts`
+     * covers that, since it is the generator's rule rather than the dialog's.
+     */
     const onGenerate = open([saved])
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))
     fireEvent.click(screen.getByRole('button', { name: 'Torso' }))
@@ -187,7 +195,15 @@ describe('GenerateDialog', () => {
     const walk = (blocks: readonly any[]) =>
       blocks.forEach((b) => (b.kind === 'segment' ? b.load && loads.push(b.load) : walk(b.children)))
     walk(workout.blocks)
-    expect(loads).toContain('65kg')
+    expect(loads).not.toContain('65kg')
+
+    // And the name does not carry it either, or the weight would be frozen in
+    // a string no settings change could reach.
+    const names: string[] = []
+    const walkNames = (blocks: readonly any[]) =>
+      blocks.forEach((b) => (b.kind === 'segment' ? names.push(b.name) : walkNames(b.children)))
+    walkNames(workout.blocks)
+    expect(names.some((n) => n.includes('65kg'))).toBe(false)
   })
 })
 

@@ -221,6 +221,19 @@ export function StopwatchIcon() {
   )
 }
 
+/** A dumbbell: two plates and a bar, for the weights page. */
+export function WeightIcon() {
+  return (
+    <Svg>
+      <path d="M4 9.5v5" {...STROKE} />
+      <path d="M20 9.5v5" {...STROKE} />
+      <rect x="6.5" y="7.5" width="3" height="9" rx="1" {...STROKE} />
+      <rect x="14.5" y="7.5" width="3" height="9" rx="1" {...STROKE} />
+      <path d="M9.5 12h5" {...STROKE} />
+    </Svg>
+  )
+}
+
 export function UpIcon() {
   return (
     <Svg>

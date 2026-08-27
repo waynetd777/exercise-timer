@@ -48,6 +48,7 @@ import {
   SECTIONS_TYPICAL,
 } from './exercises.shapes'
 import { foldName } from './foldName'
+import { exerciseKey } from './loads'
 
 export type Recovery = 'passive' | 'active'
 
@@ -423,7 +424,7 @@ function exerciseBlocks(
  */
 function sectionsRoutine(
   spec: RoutineSpec,
-  loads: Map<string, string>,
+  loads: (name: string) => string | undefined,
   rng: Rng,
   notes: string[],
 ): Block[] {
@@ -465,7 +466,7 @@ function sectionsRoutine(
   /** A counted step, which is what most of an instructor routine is made of. */
   const counted = (exercise: Exercise): Segment => {
     const said = PRESCRIPTIONS.find((p) => p.name === foldName(exercise.name))
-    const load = loads.get(exercise.name.toLowerCase())
+    const load = loads(exercise.name)
     const timed = said?.prescribe === 'time' && said.seconds !== undefined
     return segment({
       name: exercise.name,
@@ -557,9 +558,7 @@ function sectionsRoutine(
                 role: 'work',
                 reps: { kind: 'rung', ...(main!.perSide ? { perSide: true } : {}) },
                 ...(main!.media ? { media: { source: 'bundled', path: main!.media } } : {}),
-                ...(loads.get(main!.name.toLowerCase())
-                  ? { load: loads.get(main!.name.toLowerCase())! }
-                  : {}),
+                ...(loads(main!.name) ? { load: loads(main!.name)! } : {}),
               }),
               ...rest.map(counted),
             ],
@@ -640,12 +639,37 @@ export function describeRoutine(spec: RoutineSpec): string {
 
 export function generateRoutine(
   spec: RoutineSpec,
-  options: { library?: readonly Workout[]; rng?: Rng; now?: number } = {},
+  options: {
+    library?: readonly Workout[]
+    rng?: Rng
+    now?: number
+    /**
+     * The weights kept in Settings, which the routine does NOT write down.
+     *
+     * A weight this table can supply is left off the step on purpose: an empty
+     * load reads from Settings every time the routine is opened, so changing
+     * the number there changes every routine at once. Stamping it in would
+     * freeze it at what you lifted the day it was generated, which is the thing
+     * the settings page exists to stop.
+     *
+     * Empty by default, so a test sees the old behaviour and `generateRoutine`
+     * still reads nothing from storage.
+     */
+    weights?: ReadonlyMap<string, string>
+  } = {},
 ): GeneratedRoutine {
   const rng = options.rng ?? Math.random
   const now = options.now ?? 0
   const notes: string[] = []
-  const loads = loadFrom(options.library ?? [])
+  const weights = options.weights ?? new Map<string, string>()
+  const observed = loadFrom(options.library ?? [])
+  /*
+   * Settings first, and where it answers, nothing is written down at all. Only
+   * a weight Settings has never heard of is stamped from what your last routine
+   * said, which is where it used to come from.
+   */
+  const loads = (name: string): string | undefined =>
+    weights.has(exerciseKey(name)) ? undefined : observed.get(name.toLowerCase())
 
   /*
    * Two shapes, and they share almost nothing: the circuit solves for a length
@@ -809,7 +833,7 @@ export function generateRoutine(
     const blocks = exerciseBlocks(
       pick,
       spec,
-      loads.get(pick.name.toLowerCase()),
+      loads(pick.name),
       spinner?.name ?? 'Cycling',
       spinner?.media,
       announce,
