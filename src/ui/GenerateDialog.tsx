@@ -334,13 +334,10 @@ export function GenerateDialog({
         </fieldset>
 
         <Choice
-          legend="Between sets"
-          options={[
-            { value: 'active' as Recovery, label: 'Keep moving', title: 'A minute of cardio between exercises' },
-            { value: 'passive' as Recovery, label: 'Rest', title: 'A minute to recover between exercises' },
-          ]}
-          value={recovery}
-          onChange={setRecovery}
+          legend="Equipment"
+          options={EQUIPMENT}
+          value={equipment}
+          onChange={setEquipment}
         />
 
         {recovery === 'active' && (
@@ -353,6 +350,23 @@ export function GenerateDialog({
             onSeconds={setWarmUpSecs}
           />
         )}
+
+        <Choice
+          legend="Sets"
+          options={[2, 3, 4].map((n) => ({ value: n, label: String(n) }))}
+          value={sets}
+          onChange={setSets}
+        />
+
+        <Choice
+          legend="Between sets"
+          options={[
+            { value: 'active' as Recovery, label: 'Keep moving', title: 'A minute of cardio between exercises' },
+            { value: 'passive' as Recovery, label: 'Rest', title: 'A minute to recover between exercises' },
+          ]}
+          value={recovery}
+          onChange={setRecovery}
+        />
 
         {recovery === 'active' && (
           <Cardio
@@ -399,6 +413,13 @@ export function GenerateDialog({
           </fieldset>
         )}
 
+        {recovery === 'passive' && (
+          <label className="generate__field">
+            <span className="label label--sm">Resting for</span>
+            <Seconds value={recoverSecs} label="Resting for, seconds" onChange={setRecoverSecs} />
+          </label>
+        )}
+
         {recovery === 'active' && (
           <Cardio
             legend="Cool down with"
@@ -409,27 +430,6 @@ export function GenerateDialog({
             onSeconds={setCoolDownSecs}
           />
         )}
-
-        {recovery === 'passive' && (
-          <label className="generate__field">
-            <span className="label label--sm">Resting for</span>
-            <Seconds value={recoverSecs} label="Resting for, seconds" onChange={setRecoverSecs} />
-          </label>
-        )}
-
-        <Choice
-          legend="Equipment"
-          options={EQUIPMENT}
-          value={equipment}
-          onChange={setEquipment}
-        />
-
-        <Choice
-          legend="Sets"
-          options={[2, 3, 4].map((n) => ({ value: n, label: String(n) }))}
-          value={sets}
-          onChange={setSets}
-        />
 
         {/*
           Live, and before generating rather than after. A torso-only machine
