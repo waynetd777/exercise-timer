@@ -43,6 +43,41 @@ const EQUIPMENT: { value: EquipmentScope; label: string; title: string }[] = [
   { value: 'mixed', label: 'Mixed', title: 'Whatever fits best, machine or not' },
 ]
 
+/** A cardio exercise picked from a list, for a slot that is always one thing. */
+function Cardio({
+  legend,
+  options,
+  value,
+  onChange,
+  extra,
+}: {
+  legend: string
+  options: { name: string }[]
+  value: string
+  onChange: (value: string) => void
+  /** An option the table does not hold, such as Random. */
+  extra?: { value: string; label: string }
+}) {
+  return (
+    <label className="generate__field">
+      <span className="label label--sm">{legend}</span>
+      <select
+        className="paste__name"
+        value={value}
+        aria-label={legend}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {extra && <option value={extra.value}>{extra.label}</option>}
+        {options.map((option) => (
+          <option key={option.name} value={option.name}>
+            {option.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 /**
  * A row of choices, one of which is on.
  *
@@ -111,6 +146,8 @@ export function GenerateDialog({
   const [recovery, setRecovery] = useState<Recovery>('active')
   const [equipment, setEquipment] = useState<EquipmentScope>('machine')
   const [cardio, setCardio] = useState('Cycling')
+  const [warmUp, setWarmUp] = useState('Cycling')
+  const [coolDown, setCoolDown] = useState('Cycling')
   /** What Random may draw from. Everything, until it is narrowed. */
   const [pool, setPool] = useState<string[]>(() =>
     EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name),
@@ -145,6 +182,7 @@ export function GenerateDialog({
           recovery,
           ...(recovery === 'active' && cardio !== VARY ? { recoveryExercise: cardio } : {}),
           ...(recovery === 'active' && cardio === VARY ? { recoveryPool: pool } : {}),
+          ...(recovery === 'active' ? { warmUpExercise: warmUp, coolDownExercise: coolDown } : {}),
           equipment,
           sets,
         },
@@ -153,7 +191,21 @@ export function GenerateDialog({
     } catch {
       return null
     }
-  }, [areas, cardio, equipment, fallback, library, minutes, name, pool, recovery, seed, sets])
+  }, [
+    areas,
+    cardio,
+    coolDown,
+    equipment,
+    fallback,
+    library,
+    minutes,
+    name,
+    pool,
+    recovery,
+    seed,
+    sets,
+    warmUp,
+  ])
 
   const chosen = useMemo(() => {
     if (!result) return []
@@ -229,22 +281,22 @@ export function GenerateDialog({
         />
 
         {recovery === 'active' && (
-          <label className="generate__field">
-            <span className="label label--sm">Moving how</span>
-            <select
-              className="paste__name"
-              value={cardio}
-              aria-label="Active recovery"
-              onChange={(event) => setCardio(event.target.value)}
-            >
-              <option value={VARY}>Random, a different one each time</option>
-              {cardioOptions.map((option) => (
-                <option key={option.name} value={option.name}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Cardio
+            legend="Warm up with"
+            options={cardioOptions}
+            value={warmUp}
+            onChange={setWarmUp}
+          />
+        )}
+
+        {recovery === 'active' && (
+          <Cardio
+            legend="Moving how"
+            options={cardioOptions}
+            value={cardio}
+            onChange={setCardio}
+            extra={{ value: VARY, label: 'Random, a different one each time' }}
+          />
         )}
 
         {/*
@@ -278,6 +330,15 @@ export function GenerateDialog({
               ))}
             </div>
           </fieldset>
+        )}
+
+        {recovery === 'active' && (
+          <Cardio
+            legend="Cool down with"
+            options={cardioOptions}
+            value={coolDown}
+            onChange={setCoolDown}
+          />
         )}
 
         <Choice

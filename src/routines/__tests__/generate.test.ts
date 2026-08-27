@@ -34,7 +34,10 @@ function exercises(workout: Workout): Segment[] {
   }
   walk(workout.blocks)
   const cardio = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
-  return out.filter((s) => !cardio.has(s.name) && s.name !== 'Warm Up' && s.name !== 'Cool Down')
+  // The bookends carry the exercise in their names now, so match the prefix.
+  return out.filter(
+    (s) => !cardio.has(s.name) && !s.name.startsWith('Warm Up') && !s.name.startsWith('Cool Down'),
+  )
 }
 
 /** One entry per distinct exercise, in the order they first appear. */
@@ -130,8 +133,36 @@ describe('what it chooses', () => {
 describe('the shape it builds', () => {
   it('opens on a warm-up and closes on a cool down, for active recovery', () => {
     const names = make().workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
-    expect(names[1]).toBe('Warm Up')
-    expect(names.at(-1)).toBe('Cool Down')
+    expect(names[1]).toBe('Warm Up: Cycling')
+    expect(names.at(-1)).toBe('Cool Down: Cycling')
+  })
+
+  it('warms up and cools down with whatever it was told to', () => {
+    const { workout } = make({
+      warmUpExercise: 'Trampoline',
+      coolDownExercise: 'Jog on the Spot',
+    })
+    const names = workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
+    expect(names[1]).toBe('Warm Up: Trampoline')
+    expect(names.at(-1)).toBe('Cool Down: Jog on the Spot')
+  })
+
+  it('falls back rather than failing on a bookend it does not know', () => {
+    const { workout } = make({ warmUpExercise: 'Rowing' })
+    const names = workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
+    expect(names[1]).toBe('Warm Up: Cycling')
+  })
+
+  it('names the bookends for the exercise, since most carry no picture', () => {
+    /*
+     * "Warm Up" alone was enough while it was always the bike and always carried
+     * its illustration. The trampoline has none, so the name is the only thing
+     * left to say what to do.
+     */
+    const { workout } = make({ warmUpExercise: 'Trampoline' })
+    const warm = workout.blocks[1]
+    expect(warm?.kind === 'segment' && warm.media).toBeUndefined()
+    expect(warm?.kind === 'segment' && warm.name).toBe('Warm Up: Trampoline')
   })
 
   it('puts a minute of the chosen cardio before every exercise but the first', () => {
@@ -181,9 +212,10 @@ describe('the shape it builds', () => {
     // not something to hand anybody.
     const { workout } = make({ recoveryPool: ALL_CARDIO })
     const warmUp = workout.blocks.find(
-      (b): b is Segment => b.kind === 'segment' && b.name === 'Warm Up',
+      (b): b is Segment => b.kind === 'segment' && b.name.startsWith('Warm Up'),
     )
     expect(warmUp?.durationMs).toBe(600_000)
+    expect(warmUp?.name).toBe('Warm Up: Cycling')
   })
 
   it('leaves the cool down alone as well', () => {
@@ -191,14 +223,14 @@ describe('the shape it builds', () => {
     // change a picture and nothing else.
     const { workout } = make({ recoveryPool: ALL_CARDIO })
     const cool = workout.blocks.at(-1)
-    expect(cool?.kind === 'segment' && cool.name).toBe('Cool Down')
+    expect(cool?.kind === 'segment' && cool.name).toBe('Cool Down: Cycling')
   })
 
   it('recovers rather than cycling, when asked for passive', () => {
     const { workout } = make({ recovery: 'passive' })
     const names = workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
     expect(names).toContain('Recover')
-    expect(names).not.toContain('Warm Up')
+    expect(names.some((n) => n.startsWith('Warm Up'))).toBe(false)
   })
 
   it('announces the exercise and its weight before it', () => {
