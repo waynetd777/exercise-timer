@@ -6,7 +6,7 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Ladder, MediaRef, Repeat, RoutineColour, Section, Segment, SegmentRole, Workout } from '../engine'
-import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
+import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
 import { weightFor } from '../storage/weights'
@@ -1492,6 +1492,14 @@ export function EditorScreen({
     const { colour: _previous, ...rest } = workout
     return colour ? { ...rest, name, blocks, colour } : { ...rest, name, blocks }
   }, [workout, name, blocks, colour])
+  const steps = stepCount(preview)
+  /*
+   * `compile()` refuses a routine of more than this many steps, and it does so
+   * in the run screen's render. Refused here first, with the count in view, so
+   * a nested repeat that overshoots is fixed in the editor rather than found
+   * on Start.
+   */
+  const tooLarge = steps > MAX_TIMELINE_ENTRIES
   const dirty = useMemo(
     () => isDirty(workout, name, blocks, colour),
     [workout, name, blocks, colour],
@@ -1653,6 +1661,8 @@ export function EditorScreen({
             a word beats a tick. */}
             <button
               className="btn btn--primary editor__save"
+              disabled={tooLarge}
+              title={tooLarge ? `Over ${MAX_TIMELINE_ENTRIES.toLocaleString()} steps` : undefined}
               onClick={() => {
                 void Promise.resolve(
                   onSave({ ...preview, name: name.trim() || 'Untitled routine' }),
@@ -1733,7 +1743,10 @@ export function EditorScreen({
             </span>{' '}
             total
           </span>
-          <span>{stepCount(preview)} steps</span>
+          <span>
+            {steps.toLocaleString()} steps
+            {tooLarge && ` (the most a routine can run is ${MAX_TIMELINE_ENTRIES.toLocaleString()})`}
+          </span>
         </p>
       </div>
 

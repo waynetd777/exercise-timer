@@ -5,7 +5,7 @@
  */
 
 import type { Block, SegmentRole, Workout } from '../engine'
-import { ROUTINE_COLOURS, SCHEMA_VERSION } from '../engine'
+import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, SCHEMA_VERSION, stepCount } from '../engine'
 import { migrateWorkout } from './migrate'
 
 /**
@@ -193,7 +193,7 @@ export function isBlock(value: unknown): value is Block {
 export function isWorkout(value: unknown): value is Workout {
   if (typeof value !== 'object' || value === null) return false
   const w = value as Record<string, unknown>
-  return (
+  const shaped =
     typeof w['id'] === 'string' &&
     typeof w['name'] === 'string' &&
     isColour(w['colour']) &&
@@ -203,7 +203,11 @@ export function isWorkout(value: unknown): value is Workout {
     isOptionalFinite(w['estimatedTotalMs']) &&
     (w['favourite'] === undefined || typeof w['favourite'] === 'boolean') &&
     isBlockArray(w['blocks'])
-  )
+  if (!shaped) return false
+  // Size as well as shape: `compile()` refuses more steps than this, and it
+  // does so in the run screen's render. A file or link is the one place a
+  // routine that large can come from without the editor's guard seeing it.
+  return stepCount(value as Workout) <= MAX_TIMELINE_ENTRIES
 }
 
 export type BundleContents = {

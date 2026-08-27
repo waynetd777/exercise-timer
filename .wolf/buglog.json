@@ -1457,6 +1457,40 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T01:50:00Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-08-28T02:10:00Z",
+      "error_message": "A reps group outside a list section showed only its first step; one tap skipped the rest unseen.",
+      "file": "src/engine/compile.ts",
+      "root_cause": "gateKey() collapsed every self-paced step of any group into one gate, but listMode() only draws the list inside a display:'list' section; everywhere else the countdown view renders the gate's first entry only.",
+      "fix": "gateKey() returns null unless the nearest section on the path is display 'list', so a group anywhere else advances a step at a time. Test compiles a top-level reps group and a timer-section group to one run per step; three shape tests gained list sections; engine README and types.ts comments reworded.",
+      "tags": [
+        "engine",
+        "gates",
+        "listMode",
+        "run-screen",
+        "compile"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T02:10:00Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-08-28T02:10:00Z",
+      "error_message": "A routine over 10,000 steps white-screened the app on Start.",
+      "file": "src/state/useTimer.ts",
+      "root_cause": "compile() throws TimelineTooLargeError inside useMemo during render; nothing caught it and there was no error boundary. The editor capped times at 99 per level but not nesting, and bundle/share-link validation checked shape, not size.",
+      "fix": "isWorkout() rejects a routine whose stepCount exceeds MAX_TIMELINE_ENTRIES (bundles and share links); the editor disables Save over the limit and says so beside the count; App wraps the screens in a new ErrorBoundary whose Back remounts them on the library.",
+      "tags": [
+        "engine",
+        "error-boundary",
+        "import",
+        "editor",
+        "limits"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T02:10:00Z"
     }
   ]
 }

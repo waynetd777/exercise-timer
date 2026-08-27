@@ -14,6 +14,7 @@ import { SEED_ROUTINES } from '../routines/samples'
 import { decodeRoutine, routineParam } from '../storage/shareLink'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
+import { ErrorBoundary } from './ErrorBoundary'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
 import { WeightsScreen } from './WeightsScreen'
@@ -63,7 +64,21 @@ function blankRoutine(): Workout {
   }
 }
 
+/**
+ * The screens, inside the one error boundary. Going back from the crash card
+ * remounts them, which lands on the library with fresh state: the routine that
+ * threw is no longer open, and the library is read again from storage.
+ */
 export function App() {
+  const [generation, setGeneration] = useState(0)
+  return (
+    <ErrorBoundary onReset={() => setGeneration((n) => n + 1)}>
+      <Screens key={generation} />
+    </ErrorBoundary>
+  )
+}
+
+function Screens() {
   const library = useLibrary(SEED_ROUTINES)
 
   /**

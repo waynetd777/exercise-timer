@@ -896,3 +896,31 @@ button {
     scrollbar-gutter: auto;
   }
 }
+
+/* The error boundary's card: the last thing between a throw and a blank page. */
+.crash {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: var(--step-6);
+  color: var(--bone);
+  background: var(--ink-900);
+}
+
+.crash__card {
+  display: grid;
+  gap: var(--step-4);
+  max-width: 28rem;
+}
+
+.crash__title {
+  margin: 0;
+  font-size: 1.5rem;
+  text-wrap: balance;
+}
+
+.crash__text {
+  margin: 0;
+  color: var(--bone-dim);
+  line-height: 1.4;
+}
