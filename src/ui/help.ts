@@ -69,7 +69,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'Every kind has its own colour. The bar on an add button matches the edge of the row it makes.',
       'The unit beside the number: s counts seconds, × waits for Next, × each side counts per side.',
       'On a narrow screen a step shows its fields and one ⋯ button, which opens the rest of its controls. On a wide screen they are all on the row already.',
-      'Each row can move up or down, duplicate itself, add a step below, or delete.',
+      'Each row can be dragged by its grip to reorder, or focused and moved with the arrow keys. It can also duplicate itself, add a step below, or delete.',
       'The note button adds a note or an alternative exercise. In a list, the alternative reads “or …” beside the step, and the note shows on the step you are on.',
       'The image button gives a step its picture: one of the illustrations that come with the app, a photo on this device, or an image you have copied.',
       'Paste from clipboard is greyed out when there is nothing to paste. On iPhone and iPad it stays available, because Safari will not say what is on the clipboard until you tap — so tap it, and it will tell you if it finds nothing.',
@@ -80,13 +80,13 @@ export const EDITOR_HELP: readonly HelpSection[] = [
   {
     heading: 'Groups',
     points: [
-      'Reps repeats everything inside it. While running it reads “Reps 3 of 8”, or the name you give the group.',
-      'A row’s buttons always read the same way: add, move up, move down, group or ungroup, duplicate, delete.',
-      'The reps button on a step wraps that one step in a group of its own.',
+      'Sets repeats everything inside it. While running it reads “Set 3 of 8”, or the name you give the group.',
+      'A row’s buttons always read the same way: add, group or ungroup, duplicate, delete.',
+      'The sets button on a step wraps that one step in a group of its own.',
       'Ladder changes the count each time round: 5-10-15. A step set to rung takes its number from the ladder.',
       'Section is a named part of the routine, shown as a list while running.',
-      'Ungroup, on a reps group, keeps the steps and drops the repeat.',
-      'A rest inside a group does not run after the last round. To rest at the end too, put a rest step after the group.',
+      'Ungroup, on a sets group, keeps the steps and drops the group.',
+      'A rest inside a group does not run after the last set. To rest at the end too, put a rest step after the group.',
     ],
   },
   {

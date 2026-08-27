@@ -38,7 +38,7 @@
    * hues the four roles do not use, and the routine reads down its left edge
    * without a word being read.
    *
-   * Reps and ladder borrow the routine tints, keeping one palette rather than
+   * Sets and ladder borrow the routine tints, keeping one palette rather than
    * two. Teal is only defined here: adding it to `--routine-*` would add a
    * swatch to the colour picker, and that set is deliberately six.
    *

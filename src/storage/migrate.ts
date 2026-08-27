@@ -16,19 +16,24 @@ import type { Block, Segment, Workout } from '../engine'
  */
 
 /**
- * Repeat groups were called "rounds" and every one created by the editor stored
- * the literal label `'Round'`. They are reps now, and the label is DATA, so a
- * code-only rename would leave existing routines saying "Round 2 of 3" forever.
+ * Repeat groups have been called "rounds" and then "reps", and every one created
+ * by the editor stored that word as its literal label. They are SETS now, since
+ * a group counts sets and the count of reps belongs on the step inside it, and
+ * the label is DATA, so a code-only rename would leave existing routines saying
+ * "Reps 2 of 3" forever.
  *
  * Only exact former defaults are renamed. A group someone deliberately named
  * "Round 1" or "Rounds" keeps its name. Theirs to choose, not ours to correct.
  *
- * `'Rep'` is in the list because it was briefly the default during the rename:
- * short for repetitions, so it should always have been plural. It never shipped,
- * but a routine saved from a dev build could be carrying it.
+ * `'Rep'` is in the list because it was briefly the default during the first
+ * rename: short for repetitions, so it should always have been plural. It never
+ * shipped, but a routine saved from a dev build could be carrying it.
+ *
+ * The default is SINGULAR because it is read as a position: "Set 2 of 3". The
+ * button that makes one is plural, because that names the thing.
  */
-const LEGACY_REPEAT_LABELS = ['Round', 'Rep']
-const REPEAT_LABEL = 'Reps'
+const LEGACY_REPEAT_LABELS = ['Round', 'Rep', 'Reps']
+const REPEAT_LABEL = 'Set'
 
 /**
  * Illustrations that used to be postimages links and now ship with the app.

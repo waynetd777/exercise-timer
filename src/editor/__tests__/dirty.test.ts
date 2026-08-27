@@ -80,7 +80,9 @@ describe('isDirty', () => {
       'changed name': updateSegment(w.blocks, [0], { name: 'Set up' }),
       'changed role': updateSegment(w.blocks, [0], { role: 'rest' }),
       'changed round count': updateRepeat(w.blocks, [1], { times: 8 }),
-      'changed round label': updateRepeat(w.blocks, [1], { label: 'Set' }),
+      // Not 'Set': that is the default a new group already carries, so it
+      // would be no edit at all.
+      'changed round label': updateRepeat(w.blocks, [1], { label: 'Round' }),
       'changed round advance': updateRepeat(w.blocks, [1], { advance: 'step' }),
       'removed a step': removeAt(w.blocks, [0]),
       'reordered steps': moveBy(w.blocks, [0], 1),

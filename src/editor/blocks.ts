@@ -96,7 +96,7 @@ export function newRepeat(
   children: Block[] = [newSegment('work'), newSegment('rest')],
   times = 3,
 ): Repeat {
-  return { kind: 'repeat', id: newId(), times, children, label: 'Reps' }
+  return { kind: 'repeat', id: newId(), times, children, label: 'Set' }
 }
 
 /**
