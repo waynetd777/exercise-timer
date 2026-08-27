@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T18:30:23.961Z",
-    "fileCount": 57,
+    "lastScanned": "2026-08-27T19:56:14.502Z",
+    "fileCount": 58,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "8b7a3870eb3293cb2fc07e10c50cf65a71323c772a0a754d8ba2ee69603aa15c",
-    "storeUpdatedAt": "2026-08-27T18:30:23.971Z"
+    "renderedHash": "96da7a35d2d42da04dd53373027d0ae0618f6320cbe5399d789be37d9e8ffd87",
+    "storeUpdatedAt": "2026-08-27T19:56:14.515Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1270,6 +1270,24 @@
           "startLine": 83,
           "endLine": 294,
           "tokens": 2031
+        }
+      ]
+    },
+    "scripts/harvest-prescription.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1861,
+      "hash": "f6f22ae27a01e897",
+      "size": 6512,
+      "mtimeMs": 1787860574421.0442,
+      "updatedAt": "2026-08-27T19:56:14.501Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "key",
+          "kind": "fn",
+          "startLine": 57,
+          "endLine": 174,
+          "tokens": 1206
         }
       ]
     }

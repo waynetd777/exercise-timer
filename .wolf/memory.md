@@ -222,3 +222,4 @@
 | 20:28 | The routine generator: pure, budget solve, area rotation, weights from history | src/routines/generate.ts | phase 3 done, 816 tests green | ~34000 |
 | 20:30 | Created src/ui/GenerateDialog.tsx | — | ~2855 |
 | 20:32 | Generate dialog with live preview; paste now opens in the editor too | src/ui/GenerateDialog.tsx, LibraryScreen, App | phase 4 done, 824 tests green, v4.0 | ~30000 |
+| 21:56 | Created scripts/harvest-prescription.test.ts | — | ~1861 |

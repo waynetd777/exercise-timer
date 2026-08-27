@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T18:30:23.961Z
-> Files: 57 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T19:56:14.502Z
+> Files: 58 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -42,6 +42,7 @@
 
 - `exercise_metadata.py` — Exercise Timer (~2649 tok)
 - `exercise_plates.py` — page_text, exercise_names, slug, plate (~1651 tok)
+- `harvest-prescription.test.ts` — Exercise Timer (~1861 tok)
 
 ## src/
 
