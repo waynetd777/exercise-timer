@@ -11,7 +11,10 @@
 .weights {
   container-type: inline-size;
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  /* Header, tools, then the rows. The standing explanation lives in the help
+     tray now: a caption you have read once is a line of screen you read past
+     every time after that. */
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: var(--step-3);
   height: 100%;
   padding: calc(var(--step-5) + var(--safe-top)) calc(var(--step-5) + var(--safe-right))
@@ -48,18 +51,6 @@
   font-weight: 700;
   letter-spacing: var(--track-display);
   color: var(--role-prepare);
-}
-
-.weights__lede {
-  margin: 0;
-  color: var(--bone-faint);
-  /*
-   * NO max-width. A measure of 46ch is right for a paragraph and wrong for a
-   * one-line caption: it wrapped this onto two lines on a wide screen with
-   * half the row empty beside it. It runs the full width and wraps only where
-   * a screen genuinely cannot hold it.
-   */
-  text-wrap: pretty;
 }
 
 .weights__count {
