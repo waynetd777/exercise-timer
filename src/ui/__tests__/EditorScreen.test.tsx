@@ -44,7 +44,7 @@ const timed = (): Workout => ({
  * Installs a clipboard, then opens the image chooser and waits for its probe.
  *
  * `permission` of null means the browser does not know the `clipboard-read`
- * descriptor and throws when asked — Safari and Firefox.
+ * descriptor and throws when asked: Safari and Firefox.
  */
 async function openChooser(options: {
   read?: () => Promise<unknown[]>
@@ -365,7 +365,7 @@ describe('EditorScreen', () => {
     fireEvent.click(button)
 
     expect(
-      await screen.findByText('There is no image on the clipboard — copy one and try again'),
+      await screen.findByText('There is no image on the clipboard. Copy one and try again'),
     ).toBeTruthy()
     // The chooser stays open behind the notice, and the button now knows better.
     expect(screen.getByText('Add an image')).toBeTruthy()

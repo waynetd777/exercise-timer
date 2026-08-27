@@ -18,7 +18,7 @@ const item = (types: string[], blob = new Blob(['x'], { type: types[0] ?? '' }))
  * Installs a clipboard and a permission answer.
  *
  * `permission` of null means the descriptor is unknown, which browsers signal by
- * THROWING from query() rather than reporting denied — Safari and Firefox both.
+ * THROWING from query() rather than reporting denied: Safari and Firefox both.
  */
 function stub(options: {
   read?: () => Promise<unknown[]>

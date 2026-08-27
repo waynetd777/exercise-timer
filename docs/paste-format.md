@@ -225,7 +225,7 @@ reading it back lifts the weight out of the name again.
 A step that states NO weight is written out with the one the weights page would
 give it. In the app an empty weight means "whatever I lift for this" and is
 resolved fresh every time the routine runs, but there is no way to write that
-down for someone else to read — so text carries the weight in force at the moment
+down for someone else to read, so text carries the weight in force at the moment
 it was written.
 - **The routine's name**, which the download carries as its filename and the
   paste dialog asks for on the way back.

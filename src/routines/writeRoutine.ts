@@ -39,27 +39,17 @@
 
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../engine/types'
 import { isGroup } from '../engine/types'
-import { parseItem } from './pasteFormat'
+import { DESCRIPTION_CHARS, GET_READY_MS, parseItem, PREPARE_NAME, REST_NAME } from './pasteFormat'
 
 /**
  * The shortest parenthesis the parser treats as a note rather than as part of
- * the name. Must match `NOTE_MIN` in `pasteFormat.ts`; the round-trip test is
- * what holds the two together.
+ * the name. The parser's own constant, imported rather than copied: these used
+ * to be declared twice, with a comment asking that they be kept in step.
  */
-const NOTE_MIN = 24
-
-/**
- * The get-ready `parseRoutine` adds when a routine does not open on one. Must
- * match `GET_READY_MS` there, and the fixed-point test is what holds them
- * together.
- */
-const GET_READY_MS = 5_000
+const NOTE_MIN = DESCRIPTION_CHARS
 
 /** Roles the parser can rebuild from a step's name. */
 const ROLE_FROM_NAME = new Set(['work', 'rest', 'prepare'])
-
-const PREPARE_NAME = /^(get (ready|set)|prepare|set ?up)\b/i
-const REST_NAME = /\brest\b/i
 
 export type WrittenRoutine = {
   text: string

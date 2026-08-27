@@ -49,7 +49,7 @@ export function exerciseKey(name: string): string {
  *
  * So the fallback matches word by word, with a shorter word allowed to be the
  * start of a longer one: `ab` finds `abdominal`, `tricep` finds `triceps`. The
- * shape has to line up exactly — the same number of words, in the same order —
+ * shape has to line up exactly, the same number of words in the same order,
  * which is what keeps `Incline Chest Press` away from `Incline Cable Converging
  * Chest Press`, and `Hip Abductor` away from `Hip Adductor`, since neither of
  * those is the start of the other.

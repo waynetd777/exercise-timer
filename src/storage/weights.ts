@@ -78,7 +78,7 @@ export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
   /*
    * Inferred: routine 2 says "Chest Press 30kg", which is a name the table does
    * not have. The standard one is what that almost certainly means, and 30
-   * matches the shape of every other correction — the looked-up 35 was high.
+   * matches the shape of every other correction: the looked-up 35 was high.
    */
   'Standard Chest Press': '30kg',
 

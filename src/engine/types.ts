@@ -383,7 +383,7 @@ export type Routine = {
  */
 export type CueKind = 'countdown' | 'work-start' | 'work-end' | 'workout-complete'
 
-/** An audio cue at an absolute offset from workout start. */
+/** An audio cue, at an offset from the start of its RUN. See `TimelineEntry`. */
 export type CuePoint = {
   atMs: number
   kind: CueKind

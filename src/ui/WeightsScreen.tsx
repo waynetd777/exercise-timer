@@ -24,12 +24,12 @@ import './weights.css'
  * lift; now a routine that states no weight of its own reads this table every
  * time it is opened, and one number changes all of them.
  *
- * SIXTY-EIGHT ROWS, which is why there is a search box. Everything you can put
+ * DOZENS OF ROWS, which is why there is a search box. Everything you can put
  * a number against is listed rather than only what you have used, because the
  * page is also how you find out what the multi-gym can do.
  *
- * Blank is a real answer. Nineteen start with a number, every one of them read
- * out of Wayne's own routines or given by him; the rest are empty because a
+ * Blank is a real answer. A few start with a number, from `SEED_WEIGHTS`; the
+ * rest are empty because a
  * guessed weight is worse than no weight, and an empty field asks the question
  * instead of answering it wrongly.
  */
@@ -54,7 +54,7 @@ function observed(workouts: readonly Workout[]): Map<string, string> {
  * One illustration, full size.
  *
  * Its own dialog rather than the editor's: that one carries Remove, which has
- * no meaning here — the picture belongs to the exercise table, not to a step,
+ * no meaning here: the picture belongs to the exercise table, not to a step,
  * and nothing on this page can take it away. Everything else is the same
  * `.modal` sheet and `.notice` panel every dialog in the app uses.
  */

@@ -21,7 +21,8 @@ rebased from that moment.
 
 A fully timed routine compiles to exactly **one** run and behaves identically to
 before any of this existed. That is the point of the shape: the tested core is
-untouched, and `runtime.ts` and `cues.ts` never learned that gates exist.
+untouched: `runtime.ts` works on one run, and `cues.ts` has a per-run entry point
+(`runCues`) beside its whole-timeline one.
 
 A gate usually holds one step. The exception is a **group inside a list
 section**, meaning a round, a ladder rung, or the loose steps of the section.
@@ -99,7 +100,8 @@ step-through machine would have made each of those a special case.
 - **`compile()` drops degenerate input silently:** non-positive durations, groups
   that run fewer than once, fractional values rounded or floored. Validation
   belongs in the editor, and the engine must never crash on a half-typed routine.
-  The one thing it *does* throw for is a tree that expands past 10,000 steps, which
+  The one thing it *does* throw for is a tree that expands past 10,000 steps, or
+walks past 10,000 group iterations to get there, which
   would lock up the tab.
 - **All non-finite `elapsedMs` clamps to 0.** `+Infinity` is not treated as "past
   the end". One rule for invalid input beats two special cases, and a real
@@ -125,10 +127,11 @@ step-through machine would have made each of those a special case.
 | `types.ts` | Both models, plus `MediaRef`, `Position`, `CuePoint`, `ROUTINE_COLOURS` and `SCHEMA_VERSION` |
 | `compile.ts` | Tree to timeline, and the cheap whole-routine measures |
 | `runtime.ts` | `position()`, and the seek helpers behind skip forward/back |
-| `cues.ts` | Absolute-time cue points, and the half-open window the audio scheduler arms |
+| `cues.ts` | Cue points, at offsets within a run, and the half-open window the audio scheduler arms |
 | `navigate.ts` | The layer above runs: `locate`, `advance`, `retreat`, and `groupEntries`, which is what list mode draws |
 | `index.ts` | The package surface. Import from `'../engine'`, not from a file inside it |
 
-`runtime.ts` and `cues.ts` work on one run and know nothing about gates. Keep it
+`runtime.ts` and `cues.ts` work on one run; `runCues` and `finishesOnTap` are the
+only places `cues.ts` looks across them. Keep it
 that way: anything that has to reason about crossing a run belongs in
 `navigate.ts`.

@@ -20,7 +20,7 @@
  * - Chromium exposes `clipboard-read` to the Permissions API. Once granted, a
  *   read is silent, so the answer is free and we can take it.
  * - Safari and Firefox do not expose that descriptor at all, and will not answer
- *   without a user gesture — Safari puts up its own native Paste confirmation.
+ *   without a user gesture: Safari puts up its own native Paste confirmation.
  *   Asking on the off-chance would show that prompt for a question the user
  *   never asked, so we do not ask: the state stays `unknown` and the button
  *   stays enabled, because the tap is the gesture that gets the answer.
@@ -38,7 +38,7 @@
  */
 export type ClipboardImage = 'image' | 'none' | 'unknown' | 'unsupported'
 
-/** Anything a browser will decode. Type first, extension never — a clipboard has no filenames. */
+/** Anything a browser will decode. Type first, extension never: a clipboard has no filenames. */
 const isImage = (type: string) => type.startsWith('image/')
 
 /** Whether an async clipboard read exists here at all. False on an insecure origin. */
@@ -60,7 +60,7 @@ export async function probeClipboardImage(): Promise<ClipboardImage> {
     const items = await navigator.clipboard.read()
     return items.some((item) => item.types.some(isImage)) ? 'image' : 'none'
   } catch {
-    // Granted a moment ago is not granted now — the permission can be revoked,
+    // Granted a moment ago is not granted now: the permission can be revoked,
     // and Chromium also refuses while the document is not focused.
     return 'unknown'
   }
@@ -70,7 +70,7 @@ export async function probeClipboardImage(): Promise<ClipboardImage> {
 async function readGranted(): Promise<boolean> {
   try {
     // `clipboard-read` is not in the typed PermissionName union, and querying a
-    // name a browser does not know THROWS rather than reporting 'denied' — which
+    // name a browser does not know THROWS rather than reporting 'denied', which
     // is how Safari and Firefox end up answering false here.
     const status = await navigator.permissions.query({
       name: 'clipboard-read',

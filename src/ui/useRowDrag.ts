@@ -16,9 +16,9 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
  *
  * IT MOVES ONE ROW AT A TIME, through `onStep`. The tree work is already written
  * and tested: `moveStep` walks a step into and out of rounds, ladders and
- * sections exactly as the Move up and Move down buttons do. So a drag is not a
- * second implementation of reordering, it is the same one called repeatedly, and
- * a drag can never put a step somewhere the buttons could not.
+ * sections, and the arrow keys on a focused row call the same function. So a
+ * drag is not a second implementation of reordering, it is the same one called
+ * repeatedly, and a drag can never put a step somewhere the keys could not.
  *
  * The loop runs on `requestAnimationFrame` rather than on `pointermove`. Two
  * reasons, both load-bearing. A move applies through React, so the DOM is a
