@@ -503,16 +503,25 @@ export function LibraryScreen({
                 title: 'Build a routine by answering a few questions',
                 onSelect: () => setGenerating(true),
               },
-              {
-                label: `Tidy ${tidy.renamed.length} exercise ${
-                  tidy.renamed.length === 1 ? 'name' : 'names'
-                }`,
-                icon: <PencilIcon />,
-                title:
-                  'Rename steps to the exercise names the app knows, so weights and pictures match',
-                disabled: tidy.renamed.length === 0,
-                onSelect: () => setTidying(true),
-              },
+              /*
+                Absent rather than greyed out when there is nothing to fix.
+                A disabled "Tidy 0 exercise names" is an odd thing to read: it
+                names a job that does not exist, and the count it carries is the
+                whole reason the item is there.
+              */
+              ...(tidy.renamed.length > 0
+                ? [
+                    {
+                      label: `Tidy ${tidy.renamed.length} exercise ${
+                        tidy.renamed.length === 1 ? 'name' : 'names'
+                      }`,
+                      icon: <PencilIcon />,
+                      title:
+                        'Rename steps to the exercise names the app knows, so weights and pictures match',
+                      onSelect: () => setTidying(true),
+                    },
+                  ]
+                : []),
               {
                 label: 'Weights',
                 icon: <WeightIcon />,
