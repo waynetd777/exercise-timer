@@ -23,17 +23,21 @@ A fully timed routine compiles to exactly **one** run and behaves identically to
 before any of this existed. That is the point of the shape: the tested core is
 untouched, and `runtime.ts` and `cues.ts` never learned that gates exist.
 
-A gate usually holds one step. The exception is a **group**, meaning a round, a
-ladder rung, or the loose steps of a section. There, one Next clears every
-rep-based step in it, because the group is the unit of work. "12 curls, 10 press,
-12 flyes" is one round you do and tick off, not three prompts to tap through with
-your hands full, and a burnout block says "complete without stopping" in as many
-words. All of them collapse by default. `advance: 'step'` opts one out, and an
-inner opt-out beats an outer group's default.
+A gate usually holds one step. The exception is a **group inside a list
+section**, meaning a round, a ladder rung, or the loose steps of the section.
+There, one Next clears every rep-based step in it, because the group is the unit
+of work. "12 curls, 10 press, 12 flyes" is one round you do and tick off, not
+three prompts to tap through with your hands full, and a burnout block says
+"complete without stopping" in as many words. `advance: 'step'` opts one out, and
+an inner opt-out beats an outer group's default.
 
-Nothing is hidden by this. The list draws every step of the gate, all marked as
-being worked, so the only thing given up is per-exercise progress, and that is not
-progress anyone tracks mid-set.
+Nothing is hidden by this, and that is why it is confined to list sections. The
+list draws every step of the gate, all marked as being worked, so the only thing
+given up is per-exercise progress, and that is not progress anyone tracks
+mid-set. The countdown view shows one step, so a group anywhere else advances a
+step at a time: collapsed there, it showed its first step and a tap skipped the
+rest unseen. `listMode()` in `navigate.ts` decides the view; `gateKey()` in
+`compile.ts` asks the same question of the nearest section.
 
 A TIMED step is never swallowed by the tap. It keeps its own run, so the
 45-second rest after a round, the wall sit after a rung and the one in the middle

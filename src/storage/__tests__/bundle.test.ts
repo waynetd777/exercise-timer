@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import type { Workout } from '../../engine'
+import type { Block, Workout } from '../../engine'
 import { compile, SCHEMA_VERSION } from '../../engine'
 import { SEED_ROUTINES } from '../../routines/samples'
 import { sha256 } from '../../media/hash'
@@ -168,6 +168,25 @@ describe('fromBundle', () => {
       NOW,
     ).workouts
     expect(back[0]).toMatchObject({ createdAt: NOW, updatedAt: NOW, schemaVersion: SCHEMA_VERSION })
+  })
+
+  it('rejects a routine that would expand past the step limit', () => {
+    // `compile()` throws on more than MAX_TIMELINE_ENTRIES steps, in the run
+    // screen's render. A file is the one way such a routine arrives without
+    // the editor's guard seeing it.
+    const nested = (times: number, child: Block): Block => ({ kind: 'repeat', id: `r${times}`, times, children: [child] })
+    const huge = {
+      kind: 'davshack-timer-bundle',
+      version: 1,
+      workouts: [
+        {
+          id: 'big',
+          name: 'Too big',
+          blocks: [nested(99, nested(99, nested(99, { kind: 'segment', id: 's', name: 'Squat', role: 'work', reps: { kind: 'fixed', count: 5 } })))],
+        },
+      ],
+    }
+    expect(() => fromBundle(huge, NOW)).toThrow(BundleError)
   })
 
   it('rejects anything that is not one of our exports', () => {

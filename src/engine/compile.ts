@@ -152,15 +152,19 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
 /**
  * The group a self-paced step advances WITH, or `null` if it advances alone.
  *
- * Steps sharing a key are cleared by one Next. The innermost group wins, and all
- * of them collapse by default, because the group is the unit of work: a round, a
- * ladder rung, or the loose steps of a burnout block whose instruction reads
- * "complete without stopping". Tapping through those separately is five taps for
- * one thing you just did.
+ * Steps sharing a key are cleared by one Next. The innermost group wins, and a
+ * group inside a LIST section collapses by default, because the group is the
+ * unit of work: a round, a ladder rung, or the loose steps of a burnout block
+ * whose instruction reads "complete without stopping". Tapping through those
+ * separately is five taps for one thing you just did.
  *
- * Nothing is hidden. The list draws every step of the gate, all marked as being
- * worked, so the only cost of collapsing is losing per-exercise progress, which
- * is not progress anyone is tracking mid-set.
+ * Only inside a list section, because only the list draws every step of the
+ * gate, all marked as being worked, so that nothing is hidden and the only cost
+ * of collapsing is per-exercise progress, which nobody tracks mid-set. Anywhere
+ * else the run screen shows the countdown view, which shows ONE step: a group
+ * collapsed there showed its first step, and one tap skipped past the rest
+ * unseen. Which view a step gets is `listMode()` in `navigate.ts`; the editor
+ * mirrors the same rule in `shownAsList()`.
  */
 function gateKey(entry: TimelineEntry): string | null {
   const innermost = entry.path[entry.path.length - 1]
@@ -169,6 +173,9 @@ function gateKey(entry: TimelineEntry): string | null {
   // An explicit opt-out wins over an outer group's default: asking for one
   // exercise at a time must not be overruled by the group enclosing it.
   if (innermost.advance === 'step') return null
+  // The NEAREST section owns the display, so it is the one that decides.
+  const section = [...entry.path].reverse().find((step) => step.kind === 'section')
+  if (section?.display !== 'list') return null
   // The WHOLE path, not just the innermost level. Two rounds of a repeat around
   // a one-rung ladder are the same rung of the same ladder, and a key that
   // stopped there merged them into one gate: one tap cleared both rounds.

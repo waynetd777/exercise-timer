@@ -196,7 +196,7 @@ describe('cursorForStep', () => {
     // position inside it to seek to. Seeking to the rung's second exercise
     // lands on the gate, which reports its FIRST step. Intended, not a bug.
     const routine = compile(
-      workout('Rung', [ladder([5], [step('Squats', 'rung'), step('Walks', 10)])]),
+      workout('Rung', [section('Legs', [ladder([5], [step('Squats', 'rung'), step('Walks', 10)])])]),
     )
     const second = routine.entries[1]!
     const cursor = cursorForStep(routine, second.step)

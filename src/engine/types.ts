@@ -31,8 +31,9 @@
  * one, everything works exactly as it always has: `position()` is a binary search,
  * cues pre-schedule on the audio clock, and a phone that has been in a pocket for
  * ten minutes lands on the right step rather than the next one. Between runs sit
- * GATES: single self-paced steps where the clock parks until Next is tapped, and
- * the following run is rebased from that moment.
+ * GATES: a self-paced step, or the rep-based steps of one group iteration in a
+ * list section, where the clock parks until Next is tapped, and the following
+ * run is rebased from that moment.
  *
  * A fully timed routine therefore compiles to exactly ONE run and behaves
  * identically to before this existed.
@@ -296,8 +297,9 @@ export type PathStep = {
  * gates has no single time axis to be absolute against. For a fully timed
  * routine there is one run, so the two are the same thing.
  *
- * A SELF-PACED step has no `durationMs`, and `startMs === endMs === 0`: it is
- * alone in its run and ends when the user taps Next.
+ * A SELF-PACED step has no `durationMs`, and `startMs === endMs === 0`: its run
+ * has no clock and ends when the user taps Next. See `Run` for when it shares
+ * that run with the rest of its group.
  */
 export type TimelineEntry = {
   /** Position within the entry's own run. This is what `position()` returns. */
@@ -337,8 +339,9 @@ export type Run = {
   index: number
   /**
    * A timed run holds consecutive timed steps. A self-paced run holds ONE step,
-   * unless they belong to a group that advances as a whole, such as a ladder rung, in
-   * which case it holds all of them and one Next clears the lot.
+   * unless they belong to a group inside a list section, such as a ladder rung,
+   * in which case it holds all of them and one Next clears the lot. See
+   * `gateKey` in `compile.ts`.
    */
   entries: TimelineEntry[]
   /** Length of the run. 0 when `selfPaced`. */

@@ -193,9 +193,28 @@ describe('a round clears with ONE tap', () => {
     ])
   })
 
+  it('does not collapse a group outside a list section, which the countdown cannot draw', () => {
+    /*
+     * The countdown view shows one step. A reps group at the top level, or in
+     * a section shown as a timer, used to compile to one gate: the screen
+     * showed its first step and a tap skipped the rest unseen.
+     */
+    const loose = compile(workout('Loose', [rep(2, [step('Curls', 12), step('Press', 10)])]))
+    expect(loose.runs.map((run) => run.entries.map((e) => e.name))).toEqual([
+      ['Curls'],
+      ['Press'],
+      ['Curls'],
+      ['Press'],
+    ])
+    const timer = compile(
+      workout('Timer', [section('Arms', [rep(2, [step('Curls', 12), step('Press', 10)])], 'timer')]),
+    )
+    expect(timer.runs).toHaveLength(4)
+  })
+
   it('does not merge one round into the next', () => {
     const routine = compile(
-      workout('Rounds', [rep(3, [step('Curls', 12), step('Press', 10)], 'Round')]),
+      workout('Rounds', [section('Arms', [rep(3, [step('Curls', 12), step('Press', 10)], 'Round')])]),
     )
     expect(routine.runs).toHaveLength(3)
   })
@@ -267,7 +286,9 @@ describe('a round clears with ONE tap', () => {
 describe('a ladder rung clears with ONE tap', () => {
   it('puts the whole rung in one gate', () => {
     const routine = compile(
-      workout('Ladder', [ladder([20, 16], [step('Goblet Squats', 'rung'), step('Walks', 10), step('Kickbacks', 10)])]),
+      workout('Ladder', [
+        section('Legs', [ladder([20, 16], [step('Goblet Squats', 'rung'), step('Walks', 10), step('Kickbacks', 10)])]),
+      ]),
     )
 
     // Two rungs of three exercises: six steps, but two gates.
