@@ -64,6 +64,12 @@ JPEG_QUALITY = 85
 OUT = pathlib.Path(__file__).resolve().parent.parent / 'public' / 'exercises'
 
 
+def page_count(pdf: pathlib.Path) -> int:
+    """Pulled out of main() so `exercise_metadata.py` reads the guide the same way."""
+    info = subprocess.run(['pdfinfo', str(pdf)], capture_output=True, text=True, check=True).stdout
+    return int(re.search(r'Pages:\s+(\d+)', info).group(1))
+
+
 def page_text(pdf: pathlib.Path, page: int) -> str:
     return subprocess.run(
         ['pdftotext', '-f', str(page), '-l', str(page), '-layout', str(pdf), '-'],
@@ -125,10 +131,7 @@ def main() -> None:
     if not pdf.exists():
         raise SystemExit(f'no such file: {pdf}')
 
-    pages = int(re.search(r'Pages:\s+(\d+)',
-                          subprocess.run(['pdfinfo', str(pdf)], capture_output=True,
-                                         text=True, check=True).stdout).group(1))
-    names = exercise_names(pdf, pages)
+    names = exercise_names(pdf, page_count(pdf))
     OUT.mkdir(parents=True, exist_ok=True)
 
     total = 0

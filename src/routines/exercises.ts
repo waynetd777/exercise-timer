@@ -1,0 +1,93 @@
+/**
+ * Exercise Timer
+ * Copyright (c) 2026 Wayne Davies
+ * MIT License. See LICENSE in the project root.
+ */
+
+/**
+ * What the routine generator is allowed to choose from.
+ *
+ * ONE table, not one per equipment type. The equipment is a FIELD, so asking for
+ * a multi-gym routine filters rather than partitions, and a shortfall can widen
+ * the filter instead of shortening the routine. The machine has only five torso
+ * exercises, which is exactly the case that needs the fallback.
+ *
+ * Two halves, kept in separate files because they are trustworthy in different
+ * ways:
+ *
+ *  - `exercises.machine.ts` is GENERATED from the Horizon Torus guide by
+ *    `scripts/exercise_metadata.py`. Every field but `pattern` is read out of the
+ *    manual, so it is fact rather than recollection, and a revised guide
+ *    regenerates it.
+ *  - the authored list below is everything the machine cannot do: bodyweight,
+ *    dumbbell, kettlebell and band work. It has no illustrations, because the
+ *    guide is the only source of those and it only draws the machine. A picture
+ *    can be added to a step by hand afterwards.
+ *
+ * NOTHING here is advice. It is a vocabulary of movements, drawn from the
+ * routines this app has been given, so a generated routine reads like the ones
+ * Wayne is already sent rather than like something invented.
+ */
+
+import { MACHINE_EXERCISES } from './exercises.machine'
+
+/** The guide's own three-way key, printed as the colour of each title band. */
+export type BodyArea = 'upper' | 'torso' | 'lower'
+
+/**
+ * Push or pull, for upper-body work only.
+ *
+ * Not in the guide, and the one field derived rather than read. It exists
+ * because "upper body" is too coarse for the alternation the generator copies
+ * from Wayne's own routines, which runs legs, core, push, legs, push, legs,
+ * pull, core, pull, legs.
+ */
+export type Pattern = 'push' | 'pull'
+
+export type Equipment = 'machine' | 'bodyweight' | 'dumbbell' | 'kettlebell' | 'band'
+
+/** The five the guide lists. `ankle` is the one that costs setup time. */
+export type Attachment = 'lat bar' | 'low row bar' | 'ab strap' | 'free-motion' | 'ankle'
+
+export type Exercise = {
+  name: string
+  area: BodyArea
+  /** Upper body only. */
+  pattern?: Pattern
+  equipment: Equipment
+  /** A path under `public/`, for the exercises the guide illustrates. */
+  media?: string
+  /** Horizon station 1 to 8. Consecutive exercises on one station save re-rigging. */
+  station?: number
+  attachment?: Attachment
+  /**
+   * Worked one side at a time, so the generator gives it two sets a side and a
+   * Change Sides step between them. Read from the guide, which says "complete
+   * repetitions and repeat on opposite side".
+   */
+  perSide?: boolean
+  /**
+   * What to load it with, where the kit decides. Free text, like `Segment.load`,
+   * and only a starting point: the generator prefers the weight last used for
+   * this exercise in the saved library, and leaves the field empty rather than
+   * inventing one.
+   */
+  load?: string
+}
+
+/**
+ * Everything the multi-gym cannot do.
+ *
+ * Filled in phase 2, seeded from `strength-training.routine.json` and the email
+ * fixtures, so the vocabulary is the one Wayne's instructor actually uses rather
+ * than a generic list. The kit is a 6kg kettlebell, dumbbells at 1, 1.5, 2, 3
+ * and 5kg, a set of bands and a trampoline, so nothing here should call for a
+ * weight that is not in the garage.
+ */
+export const OTHER_EXERCISES: readonly Exercise[] = []
+
+export const EXERCISES: readonly Exercise[] = [...MACHINE_EXERCISES, ...OTHER_EXERCISES]
+
+/** The ankle strap takes longer to fasten, so its get-ready is 20s, not 15s. */
+export const STRAP_PREPARE_MS = 20_000
+export const PREPARE_MS = 15_000
