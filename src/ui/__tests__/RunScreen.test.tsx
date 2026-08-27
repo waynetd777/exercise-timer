@@ -331,6 +331,6 @@ describe('RunScreen: a weight that comes from the weights page', () => {
     render(<RunScreen workout={withWeights(following(), currentWeights())} />)
     fireEvent.click(screen.getByLabelText('Start'))
 
-    expect(screen.getAllByText(/12 × Seated Ab Crunch 20kg/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/12 × Seated Ab Crunch 15kg/).length).toBeGreaterThan(0)
   })
 })

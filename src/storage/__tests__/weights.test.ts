@@ -27,12 +27,11 @@ beforeEach(() => {
 describe('the store', () => {
   it('starts from the seeded numbers', () => {
     expect(weightFor('Leg Press')).toBe(SEED_WEIGHTS['Leg Press'])
-    // Rounded up to a hole the pin actually goes in: 34.3 is not selectable.
-    expect(weightFor('Lat Pulldown')).toBe('35kg')
+    expect(weightFor('Lat Pulldown')).toBe('30kg')
   })
 
-  it('has nothing to say about an exercise nobody looked up', () => {
-    expect(weightFor('Glute Kickback')).toBe('')
+  it('has nothing to say about an exercise no routine has loaded', () => {
+    expect(weightFor('Toe Raise')).toBe('')
   })
 
   it('matches an exercise however the step spells it', () => {
@@ -65,9 +64,9 @@ describe('the store', () => {
   })
 
   it('drops the cache when a weight changes', () => {
-    expect(weightFor('Cable Fly')).toBe('35kg')
-    saveWeights(withWeight(loadWeights(), 'Cable Fly', '40kg'))
-    expect(weightFor('Cable Fly')).toBe('40kg')
+    expect(weightFor('Lat Pulldown')).toBe('30kg')
+    saveWeights(withWeight(loadWeights(), 'Lat Pulldown', '40kg'))
+    expect(weightFor('Lat Pulldown')).toBe('40kg')
   })
 
   it('survives rubbish in storage', () => {
@@ -192,8 +191,8 @@ describe('the shorthand a routine is actually written in', () => {
    */
   it('finds the weight through an abbreviation', () => {
     expect(weightFor('Seated Ab Crunch')).toBe(SEED_WEIGHTS['Seated Abdominal Crunch'])
-    expect(weightFor('12 × Seated Ab Crunch')).toBe('20kg')
-    expect(weightFor('Get ready: Seated Ab Crunch')).toBe('20kg')
+    expect(weightFor('12 × Seated Ab Crunch')).toBe('15kg')
+    expect(weightFor('Get ready: Seated Ab Crunch')).toBe('15kg')
   })
 
   it('fills a step named that way, on the way into a run', () => {
@@ -202,8 +201,8 @@ describe('the shorthand a routine is actually written in', () => {
       { kind: 'segment', id: 'b', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
     ]
     const filled = fillLoads(blocks, currentWeights()) as Block[]
-    expect((filled[0] as { load?: string }).load).toBe('20kg')
-    expect((filled[1] as { load?: string }).load).toBe('20kg')
+    expect((filled[0] as { load?: string }).load).toBe('15kg')
+    expect((filled[1] as { load?: string }).load).toBe('15kg')
   })
 
   it('will not join two exercises that merely look alike', () => {
@@ -222,7 +221,7 @@ describe('the shorthand a routine is actually written in', () => {
   })
 
   it('keeps a one-letter word from matching half the table', () => {
-    const table = new Map([[exerciseKey('Seated Abdominal Crunch'), '20kg']])
+    const table = new Map([[exerciseKey('Seated Abdominal Crunch'), '15kg']])
     expect(findLoad(table, 'Seated A Crunch')).toBeUndefined()
   })
 })

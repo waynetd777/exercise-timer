@@ -35,7 +35,7 @@ describe('WeightsScreen', () => {
 
     expect(field('Leg Press').value).toBe('65kg')
     // Not looked up, so it asks rather than guessing.
-    expect(field('Glute Kickback').value).toBe('')
+    expect(field('Toe Raise').value).toBe('')
   })
 
   it('writes a change straight through, so closing the page cannot lose it', () => {
@@ -58,15 +58,15 @@ describe('WeightsScreen', () => {
 
   it('offers what the saved routines already use, and fills it in', () => {
     /*
-     * The Glute Kickback has no looked-up weight, but a routine has been using
+     * The Toe Raise has no looked-up weight, but a routine has been using
      * 15kg for it. That is better evidence than anything on a website.
      */
-    render(<WeightsScreen workouts={[saved('Glute Kickback', '15kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<WeightsScreen workouts={[saved('Toe Raise', '15kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
-    expect(field('Glute Kickback').placeholder).toBe('15kg')
+    expect(field('Toe Raise').placeholder).toBe('15kg')
     fireEvent.click(screen.getByRole('button', { name: /Fill 1 from my routines/ }))
 
-    expect(field('Glute Kickback').value).toBe('15kg')
+    expect(field('Toe Raise').value).toBe('15kg')
     expect(screen.queryByRole('button', { name: /from my routines/ })).toBeNull()
   })
 
