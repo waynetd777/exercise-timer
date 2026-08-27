@@ -38,10 +38,10 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'A generated routine announces the next exercise and its weight before the gap, so you can set the machine up. That announcement is 30 seconds for a multi-gym exercise and 15 for anything else, because a press-up has nothing to rig.',
       'The get-ready just before a set is 20 seconds where something has to be put on, a band or the ankle cuff, and 15 where it does not.',
       'A multi-gym set asks for 12 reps inside 20 seconds, so the clock paces you and the count is the target. It reads as “12 × Leg Press 65kg” while you work out.',
-      'A routine of counted reps has no fixed length, so it says “about 35 min” where a timed routine gives an exact time. The library row, the editor and the Ready card all say it. The estimate starts from how long your own routines say an exercise takes: some of them are written both ways, a 30-second Plank one week and 20 × Plank another.',
+      'A routine of counted reps has no fixed length, so it says “about 35 min” where a timed routine gives an exact time. The library row, the editor and the Ready card all say it. The estimate starts from a built-in pace for each exercise, read off routines that write it both ways: a 30-second Plank in one, 20 × Plank in another.',
       'It then learns your pace. Every self-paced step already times itself while you work out, so after three sets of something the estimate uses your own time for it rather than the average. Tapping quickly through a routine to see what is in it is ignored, so a dry run does not teach it that a set takes two seconds.',
       'Leave the name empty and it is called after what you asked for: “Full-Body Circuit, 45 min”, “Bodyweight Legs & Core, 6 sections”. The box shows what it would be while you are still choosing.',
-      'Shape decides the rest of the questions. Circuit is one exercise at a time with everything on a clock, so it can be asked how long. Sections is the shape your routines arrive in: named sections, ladders, counted reps. Those end when you tap through them, so it asks how many sections instead of how many minutes.',
+      'Shape decides the rest of the questions. Circuit is one exercise at a time with everything on a clock, so it can be asked how long. Sections is the shape a written-out routine usually takes: named sections, ladders, counted reps. Those end when you tap through them, so it asks how many sections instead of how many minutes.',
       'Generate: answer a few questions and it builds a routine. How long, what to work, whether to keep moving between sets and how, and what equipment. It shows what it will make as you answer, and opens in the editor.',
       'Warm up with, Moving how and Cool down with are each chosen separately, so the ten minutes at the start need not be the same thing as the minutes between sets. Each has its own length in seconds beside it, starting at 600, 60 and 120. All three go when you choose to rest between sets instead, leaving just how long to rest for.',
       'Moving how can be one thing throughout, cycling or the trampoline, or Random, which puts a different exercise in every minute between sets. Random then offers the whole list to choose from, all on, so you can turn off anything you do not want coming up. The warm-up and the cool down stay as they are: ten minutes of one thing is what a warm-up is.',
@@ -93,7 +93,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'Weight is free text: 65kg, 30kg each side, red band, bodyweight. It reads after the exercise while you work out, so “Leg Press” loaded to “65kg” shows as “Leg Press 65kg”. Weights that used to be typed into the step name are moved into the field for you.',
       'Leaving it empty does not mean unloaded. It means “whatever I lift for this”, and the weight comes from Routines › Weights when the routine runs. The placeholder shows what that would be. Typing here overrides it, for this routine only.',
       'The image button gives a step its picture: one of the illustrations that come with the app, a photo on this device, or an image you have copied.',
-      'Paste from clipboard is greyed out when there is nothing to paste. On iPhone and iPad it stays available, because Safari will not say what is on the clipboard until you tap — so tap it, and it will tell you if it finds nothing.',
+      'Paste from clipboard is greyed out when there is nothing to paste. On iPhone and iPad it stays available, because Safari will not say what is on the clipboard until you tap. Tap it, and it will tell you if it finds nothing.',
       'Once a step has a picture, that button becomes the picture. Tap it to see it full size, or to remove it.',
       'Steps listed inside a section get no image. A list has no room for a picture, so only steps that run as a countdown have one.',
     ],
@@ -139,7 +139,7 @@ export const WEIGHTS_HELP: readonly HelpSection[] = [
   {
     heading: 'What this is',
     points: [
-      'What you lift, per exercise, in one place. A weight belongs to your gym rather than to a routine, and it used to be written into each one: moving up a plate meant editing every routine that named the lift.',
+      'What you lift, per exercise, in one place. A weight belongs to your gym rather than to a routine: written into each routine instead, moving up a plate means editing every routine that names the lift.',
       'Sixty-eight exercises: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”. Anything you would write on a step, you can write here.',
     ],
@@ -147,18 +147,16 @@ export const WEIGHTS_HELP: readonly HelpSection[] = [
   {
     heading: 'How a routine uses it',
     points: [
-      'A step that states no weight of its own is not unloaded. It means “whatever I lift for this”, and it reads this page every time the routine is opened — so changing a number here changes every routine that does not disagree.',
+      'A step that states no weight of its own is not unloaded. It means “whatever I lift for this”, and it reads this page every time the routine is opened, so changing a number here changes every routine that does not disagree.',
       'A step that DOES state a weight keeps it. That is an override, and a deliberate one: it is the routine saying that today, on purpose, it is not your usual weight.',
       'So in the editor, the Weight field is empty by default and its hint shows what this page would supply. Type to override for that routine only; press the × to clear it and go back to following this page.',
       'Routines written before this page state a weight on every step, so they override it. “Let n routines follow these” clears the ones this page can answer for, in one go. A step for an exercise with nothing set here keeps what it has, since the routine is then the only record of it.',
     ],
   },
   {
-    heading: 'Where the numbers came from',
+    heading: 'Filling them in',
     points: [
-      'Nineteen weights start filled in, and every one of them is yours: four you gave, and fifteen read out of routines 2 and 3, which are what you have actually been loading the machine to.',
-      'Nothing looked up survived. Every estimate was corrected downwards, most of them a long way: the shoulder press said 30kg against a real 10, and the hamstring curl 35kg against a real 10. A home stack is not the commercial machine that site measures.',
-      'The other forty-nine are blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on.',
+      'Most fields start blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on. A weight that starts filled in is a starting point, not a measurement: check it against what you lift.',
       'Fill from my routines takes the weight your saved routines already use for anything still blank. Better evidence than any website, and it shows you what it would take before you tap it.',
     ],
   },
