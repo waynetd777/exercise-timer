@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { locate, runIsOver } from '../engine'
+import { locate, nextRun, runIsOver } from '../engine'
 import type { Cursor, Routine } from '../engine'
 
 /**
@@ -16,7 +16,7 @@ import type { Cursor, Routine } from '../engine'
  * (routine, cursor) and deserve tests that need no DOM, the same reason
  * `clock.ts` is not inside the hook either.
  */
-export type Tick =
+type Tick =
   /** Same run, same clock. Come back in `nextChangeInMs`. */
   | { kind: 'stay'; cursor: Cursor; nextChangeInMs: number }
   /** Crossed into another run. The caller must re-anchor the clock to it. */
@@ -39,7 +39,7 @@ export function tick(routine: Routine, runIndex: number, elapsedInRunMs: number)
    */
   if (runIsOver(routine, cursor)) {
     while (runIsOver(routine, cursor)) {
-      cursor = { runIndex: cursor.runIndex + 1, elapsedInRunMs: 0 }
+      cursor = nextRun(routine, cursor)
     }
     return locate(routine, cursor).isComplete ? { kind: 'complete', cursor } : { kind: 'move', cursor }
   }

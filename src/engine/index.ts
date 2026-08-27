@@ -5,19 +5,10 @@
  */
 
 export * from './types'
-export {
-  compile,
-  totalDurationMs,
-  stepCount,
-  hasGates,
-  MAX_TIMELINE_ENTRIES,
-  TimelineTooLargeError,
-} from './compile'
-export { position, elapsedAtStepStart, skipForward, skipBack } from './runtime'
-export { cues, cuesBetween, finishesOnTap, runCues, COUNTDOWN_SECONDS } from './cues'
+export { compile, totalDurationMs, stepCount, MAX_TIMELINE_ENTRIES } from './compile'
+export { cues, cuesBetween, finishesOnTap, runCues } from './cues'
 export {
   advance,
-  cursorForStep,
   groupEntries,
   groupOf,
   listMode,

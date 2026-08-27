@@ -152,7 +152,7 @@ function isBlockArray(value: unknown): value is Block[] {
   return Array.isArray(value) && value.every(isBlock)
 }
 
-export function isBlock(value: unknown): value is Block {
+function isBlock(value: unknown): value is Block {
   if (typeof value !== 'object' || value === null) return false
   const block = value as Record<string, unknown>
   // Required, not optional: the run keys a gate on `${id}@${iteration}`, so two
@@ -210,7 +210,7 @@ export function isWorkout(value: unknown): value is Workout {
   return stepCount(value as Workout) <= MAX_TIMELINE_ENTRIES
 }
 
-export type BundleContents = {
+type BundleContents = {
   workouts: Workout[]
   /**
    * Names of routines the file carried but that were too damaged to read. Never

@@ -10,7 +10,7 @@ import type { ReactNode } from 'react'
 import { CheckIcon, DownIcon } from './icons'
 import { useDismiss } from './useDismiss'
 
-export type MenuItem = {
+type MenuItem = {
   label: string
   icon?: ReactNode
   disabled?: boolean

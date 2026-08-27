@@ -28,7 +28,6 @@ function describe(note: Note): string {
     return [
       `recording “${note.sample}”`,
       `gain ${note.gain}`,
-      `rate ${note.playbackRate ?? 1}`,
       audio.sampleReady(note.sample)
         ? 'decoded, so this is what plays'
         : 'not decoded yet, so the synthesised contour plays until it is',
@@ -43,19 +42,6 @@ function describe(note: Note): string {
     `strike ${note.strikeMs}ms`,
   ]
   if (note.partial) parts.push(`partial ×${note.partial.ratio} @${note.partial.gain}`)
-  if (note.warble) parts.push(`warble ${note.warble.hz}Hz ±${note.warble.depthHz}Hz`)
-  if (note.tremolo) {
-    parts.push(
-      `chop ${note.tremolo.hz}Hz depth ${note.tremolo.depth} ${note.tremolo.shape ?? 'sine'}`,
-    )
-  }
-  for (const resonance of note.resonances ?? []) {
-    parts.push(
-      `noise ${resonance.gain} @${resonance.centreHz}Hz Q${resonance.q}` +
-        (resonance.sweepFromHz ? ` sweep ${resonance.sweepFromHz}Hz` : '') +
-        (resonance.wobbleHz ? ` wobble ${resonance.wobbleHz}Hz ±${resonance.wobbleDepthHz}Hz` : ''),
-    )
-  }
   return parts.join(' · ')
 }
 
@@ -81,12 +67,12 @@ function Card({
 
       <div className="sound__buttons">
         {sequence && (
-          <button className="chip chip--action" onClick={() => void audio.preview(sequence)}>
+          <button className="chip chip--action" onClick={() => audio.preview(sequence)}>
             <PlayIcon />
             Beep beep beep {title.toLowerCase()}
           </button>
         )}
-        <button className="chip" onClick={() => void audio.preview(spec)}>
+        <button className="chip" onClick={() => audio.preview(spec)}>
           <PlayIcon />
           {sequence ? 'Just the sound' : 'Play'}
         </button>
@@ -182,7 +168,7 @@ export function SoundsScreen({ onExit }: { onExit: () => void }) {
   /** The whole finish, dings and voice, which is the only way to judge the gap. */
   const playFinish = () => {
     const complete = toneFor('workout-complete')!
-    void audio.preview(sequenceFor('workout-complete'))
+    audio.preview(sequenceFor('workout-complete'))
     if (canSpeak()) {
       window.setTimeout(() => speak(SPOKEN.thatsAWrap), 3000 + lastStrikeMs(complete) + 450)
     }

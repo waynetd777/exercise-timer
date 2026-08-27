@@ -14,7 +14,7 @@ import type { MediaRef } from '../engine'
  * pinning, so the routine keeps working when the gym wifi does not, and when
  * postimages eventually loses the file.
  */
-export type Plan =
+type Plan =
   | { kind: 'url'; url: string }
   | { kind: 'blob'; hash: string }
   | { kind: 'none' }

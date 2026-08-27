@@ -5,6 +5,12 @@
  */
 
 import { elapsedAtStepStart, position, skipBack, skipForward } from './runtime'
+
+/**
+ * How far into a step Back restarts it rather than leaving it, the music-player
+ * convention. The same figure `skipBack` defaults to within a run.
+ */
+const RESTART_THRESHOLD_MS = 1500
 import type { PathStep, Routine, Run, TimelineEntry } from './types'
 
 /**
@@ -163,7 +169,7 @@ export function advance(routine: Routine, cursor: Cursor): Cursor {
  * At the top of a run that means landing on the LAST step of the previous run,
  * which is the step the user actually just left, not the top of it.
  */
-export function retreat(routine: Routine, cursor: Cursor, restartThresholdMs = 1500): Cursor {
+export function retreat(routine: Routine, cursor: Cursor): Cursor {
   const clamped = clampCursor(cursor)
 
   const toEndOfPrevious = (runIndex: number): Cursor => {
@@ -183,18 +189,18 @@ export function retreat(routine: Routine, cursor: Cursor, restartThresholdMs = 1
   const run = routine.runs[clamped.runIndex]!
 
   if (run.selfPaced) {
-    if (clamped.elapsedInRunMs > restartThresholdMs) return topOf(run.index)
+    if (clamped.elapsedInRunMs > RESTART_THRESHOLD_MS) return topOf(run.index)
     return toEndOfPrevious(run.index)
   }
 
-  const target = skipBack(run, clamped.elapsedInRunMs, restartThresholdMs)
+  const target = skipBack(run, clamped.elapsedInRunMs, RESTART_THRESHOLD_MS)
   // Leaving the run means being ON its first step and only just into it. Total
   // elapsed alone misfires when the first step is shorter than the threshold:
   // just into the SECOND step is still under it, and retreat exited the run,
   // skipping the first step entirely.
   const atTop =
     position(run, clamped.elapsedInRunMs).index === 0 &&
-    clamped.elapsedInRunMs <= restartThresholdMs
+    clamped.elapsedInRunMs <= RESTART_THRESHOLD_MS
   if (atTop && run.index > 0) return toEndOfPrevious(run.index)
   return { runIndex: run.index, elapsedInRunMs: target }
 }

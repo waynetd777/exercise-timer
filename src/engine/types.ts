@@ -81,7 +81,7 @@ export type MediaRef =
  *
  * `'step'` opts a group out, one exercise at a time.
  */
-export type Advance = 'set' | 'step'
+type Advance = 'set' | 'step'
 
 /**
  * How many reps a step calls for.

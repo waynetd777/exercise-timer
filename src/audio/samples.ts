@@ -47,7 +47,7 @@ import whistleUrl from './referee-whistle-cc0.wav?url'
  */
 export type SampleName = 'whistle'
 
-export const SAMPLES: Record<SampleName, string> = { whistle: whistleUrl }
+const SAMPLES: Record<SampleName, string> = { whistle: whistleUrl }
 
 /**
  * The download, started at module load rather than at the first tap.

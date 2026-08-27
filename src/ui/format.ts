@@ -142,12 +142,6 @@ export function fitBlockCqi(text: string, maxLines: number, max: number): number
   )
 }
 
-/** The width `fitCqi`'s result will occupy, as a share of the container. */
-export function fitWidthUsed(text: string, max = 40): number {
-  const longest = Math.max(1, ...text.split(/\s+/).map((word) => word.length))
-  return longest * FIT_ADVANCE * fitCqi(text, max)
-}
-
 /**
  * Share of the container's HEIGHT the media panel's fallback text may claim.
  *
@@ -185,7 +179,7 @@ export const FIT_HEIGHT_BUDGET = 72
  * `.panel__round`, and is subtracted from the width budget below because an
  * indent that scales with the type takes a share of the line that grows with it.
  */
-export const LIST_INDENT = 1.2
+const LIST_INDENT = 1.2
 
 /**
  * The gap between one bullet and the next, in ems. Mirrors `li + li` on

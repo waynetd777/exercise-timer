@@ -113,7 +113,7 @@ step-through machine would have made each of those a special case.
   `work-end`.
 - **Countdown cues that would collide with a step's own start are suppressed,** so
   a 3-second step beeps "2, 1" rather than firing "3" on top of its boundary cue.
-  Cues landing on the same millisecond are ordered by kind, completion first.
+  So no two cues ever share a millisecond, and the sort needs no tie-break.
 - **`totalDurationMs()` and `stepCount()` duplicate `compile()`'s arithmetic** so
   the library can draw a row without compiling every routine. A parametrised test
   asserts they agree. Keep it if either changes.

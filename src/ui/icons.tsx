@@ -234,14 +234,6 @@ export function WeightIcon() {
   )
 }
 
-export function UpIcon() {
-  return (
-    <Svg>
-      <polyline points="6 14.5 12 8.5 18 14.5" {...STROKE} />
-    </Svg>
-  )
-}
-
 export function DownIcon() {
   return (
     <Svg>
@@ -319,10 +311,6 @@ export function ShareIcon() {
   )
 }
 
-
-/** The menu entry for the sound bench. */
-export const SpeakerIcon = SoundOnIcon
-
 /** Paste: a clipboard. Stroked, like the other utilities. */
 export function PasteIcon() {
   return (
@@ -337,7 +325,6 @@ export function PasteIcon() {
   )
 }
 
-/** A note: lines on a page. */
 /* Filled dots rather than stroked circles: at 19px a stroked ring reads as mush. */
 export function MoreIcon() {
   return (
@@ -349,6 +336,7 @@ export function MoreIcon() {
   )
 }
 
+/** A note: lines on a page. */
 export function NoteIcon() {
   return (
     <Svg>

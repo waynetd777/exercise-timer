@@ -25,24 +25,15 @@ import { CANCEL_GRACE_MS } from './schedule'
  * in between therefore changes nothing on its own. Hence `onSampleDecoded`, so
  * whoever queued those cues can queue them again.
  *
- * A note is built as a small graph:
- *
- *   oscillators ─┐
- *                ├─ each with its own envelope ─→ tremolo ─→ master
- *   resonances  ─┘
- *
- * Envelopes are per source, because a bell's high partial has to die before its
- * body stops ringing. The tremolo is shared, because it is one physical thing, the
- * pea in a whistle chopping the airflow, and it must modulate the noise as
- * well as the tone. Modulating only the tone was why the first whistle sounded
- * like a synthesiser.
+ * A synthesised note is one oscillator, and optionally a second for an
+ * inharmonic partial, each with its own envelope into the master. Envelopes are
+ * per source, because a bell's high partial has to die before its body stops
+ * ringing. A sampled note is its buffer, played flat.
  */
 class AudioEngine {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
   private pending = new Map<AudioScheduledSourceNode, number>()
-  /** A second of white noise, made once and reused by every resonance. */
-  private noiseBuffer: AudioBuffer | null = null
   private samples = new Map<SampleName, AudioBuffer>()
   private decoding = new Set<SampleName>()
   private decodeListeners = new Set<() => void>()
@@ -211,17 +202,6 @@ class AudioEngine {
     }
   }
 
-  private noise(ctx: AudioContext): AudioBuffer {
-    if (!this.noiseBuffer) {
-      const length = Math.floor(ctx.sampleRate)
-      const buffer = ctx.createBuffer(1, length, ctx.sampleRate)
-      const data = buffer.getChannelData(0)
-      for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1
-      this.noiseBuffer = buffer
-    }
-    return this.noiseBuffer
-  }
-
   private playNote(
     ctx: AudioContext,
     master: GainNode,
@@ -230,32 +210,6 @@ class AudioEngine {
     note: Note,
   ): void {
     const total = note.durationMs / 1000
-
-    // ── Shared chop, if any ────────────────────────────────────────────────
-    let bus: AudioNode = master
-    if (note.tremolo) {
-      const trem = ctx.createGain()
-      const half = note.tremolo.depth / 2
-      trem.gain.value = 1 - half
-
-      const lfo = ctx.createOscillator()
-      const depth = ctx.createGain()
-      lfo.type = note.tremolo.shape ?? 'sine'
-      lfo.frequency.value = note.tremolo.hz
-      depth.gain.value = half
-      lfo.connect(depth).connect(trem.gain)
-      lfo.start(at)
-      lfo.stop(at + total + 0.02)
-      // The LFO outlives every source routed through the chop, so its end is
-      // also the moment the shared bus can come off the master.
-      lfo.addEventListener('ended', () => {
-        depth.disconnect()
-        trem.disconnect()
-      })
-
-      trem.connect(master)
-      bus = trem
-    }
 
     // ── Envelope shared in SHAPE, applied per source ───────────────────────
     const envelope = (level: number, seconds: number): GainNode => {
@@ -273,7 +227,7 @@ class AudioEngine {
         at + attack + strike,
       )
       env.gain.exponentialRampToValueAtTime(0.0001, at + seconds)
-      env.connect(bus)
+      env.connect(master)
       return env
     }
 
@@ -291,24 +245,20 @@ class AudioEngine {
      * ── A recording ────────────────────────────────────────────────────────
      * Played flat: the recording already has the envelope and the pitch, and
      * imposing ours on top is what made the synthesised attempts sound wrong.
-     * `playbackRate` is the one liberty, since it shifts pitch and length
-     * together exactly as blowing harder does.
      */
     const buffer = note.sample ? this.samples.get(note.sample) : undefined
     if (buffer) {
       const source = ctx.createBufferSource()
       const level = ctx.createGain()
-      const rate = note.playbackRate ?? 1
 
       source.buffer = buffer
-      source.playbackRate.value = rate
       level.gain.value = note.gain
       source.connect(level)
-      level.connect(bus)
+      level.connect(master)
 
       // Its own duration, not the note's: the note's is the fallback's length.
       source.start(at)
-      source.stop(at + buffer.duration / rate + 0.02)
+      source.stop(at + buffer.duration + 0.02)
       this.pending.set(source, cueAt)
       source.addEventListener('ended', () => {
         this.pending.delete(source)
@@ -322,17 +272,6 @@ class AudioEngine {
       const osc = ctx.createOscillator()
       osc.type = note.type ?? 'sine'
       osc.frequency.setValueAtTime(freq, at)
-
-      if (note.warble) {
-        const lfo = ctx.createOscillator()
-        const depth = ctx.createGain()
-        lfo.frequency.value = note.warble.hz
-        depth.gain.value = note.warble.depthHz
-        lfo.connect(depth).connect(osc.frequency)
-        lfo.start(at)
-        lfo.stop(at + total + 0.02)
-        lfo.addEventListener('ended', () => depth.disconnect())
-      }
 
       const env = envelope(level, seconds)
       osc.connect(env)
@@ -348,50 +287,6 @@ class AudioEngine {
       )
     }
 
-    // ── Resonances: noise through a high-Q filter ──────────────────────────
-    /*
-     * This is what makes a whistle a whistle. A pea whistle is an air-jet edge
-     * tone, mostly turbulence, given its pitch by a sharp resonance rather than
-     * by an oscillator. A tone with a little noise on top sounds synthetic; noise
-     * through a Q of twenty sounds blown.
-     */
-    for (const resonance of note.resonances ?? []) {
-      const source = ctx.createBufferSource()
-      const band = ctx.createBiquadFilter()
-
-      source.buffer = this.noise(ctx)
-      source.loop = true
-      band.type = 'bandpass'
-      band.Q.value = resonance.q
-
-      // A short upward sweep is the sound of air pressure building.
-      if (resonance.sweepFromHz !== undefined) {
-        band.frequency.setValueAtTime(resonance.sweepFromHz, at)
-        band.frequency.exponentialRampToValueAtTime(resonance.centreHz, at + 0.03)
-      } else {
-        band.frequency.setValueAtTime(resonance.centreHz, at)
-      }
-
-      // The pea shifting the cavity resonance: the trill, as opposed to the
-      // level chop. Added to whatever the sweep left the frequency at.
-      if (resonance.wobbleHz !== undefined && resonance.wobbleDepthHz !== undefined) {
-        const lfo = ctx.createOscillator()
-        const depth = ctx.createGain()
-        lfo.frequency.value = resonance.wobbleHz
-        depth.gain.value = resonance.wobbleDepthHz
-        lfo.connect(depth).connect(band.frequency)
-        lfo.start(at)
-        lfo.stop(at + total + 0.02)
-        lfo.addEventListener('ended', () => depth.disconnect())
-      }
-
-      const env = envelope(resonance.gain, total)
-      source.connect(band).connect(env)
-      track(source, () => {
-        env.disconnect()
-        band.disconnect()
-      })
-    }
   }
 }
 

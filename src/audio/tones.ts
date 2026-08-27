@@ -47,33 +47,12 @@ export type Note = {
    * and if it never is.
    */
   sample?: SampleName
-  /** Sample only. Shifts pitch and length together, as blowing harder does. */
-  playbackRate?: number
   /**
    * An inharmonic partial, as a multiple of `freq`. This is what makes a tone read as
    * metallic. `decayScale` shortens it, since a real bell's high partials die
    * before its body stops ringing.
    */
   partial?: { ratio: number; gain: number; decayScale?: number }
-  /** Frequency wobble, applied to the tone only. */
-  warble?: { hz: number; depthHz: number }
-  /**
-   * Amplitude chop, applied to everything in the note. A square shape chops
-   * rather than swells.
-   */
-  tremolo?: { hz: number; depth: number; shape?: OscillatorType }
-  /**
-   * Noise through a band-pass filter. A high `q` turns noise into a pitched but
-   * airy sound.
-   */
-  resonances?: {
-    gain: number
-    centreHz: number
-    q: number
-    sweepFromHz?: number
-    wobbleHz?: number
-    wobbleDepthHz?: number
-  }[]
 }
 
 export type ToneSpec = { notes: Note[] }

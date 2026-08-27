@@ -43,7 +43,7 @@ import {
   PencilIcon,
   PlusIcon,
   ShareIcon,
-  SpeakerIcon,
+  SoundOnIcon,
   StarIcon,
   StopwatchIcon,
   TrashIcon,
@@ -545,7 +545,7 @@ export function LibraryScreen({
               // Development only, and the screen itself is not in a production
               // build. See the note in App.tsx.
               ...(import.meta.env.DEV
-                ? [{ label: 'Sounds', icon: <SpeakerIcon />, onSelect: onSounds }]
+                ? [{ label: 'Sounds', icon: <SoundOnIcon />, onSelect: onSounds }]
                 : []),
             ]}
           />
@@ -555,7 +555,7 @@ export function LibraryScreen({
               already carrying two labelled chips. */}
           <button
             type="button"
-            className="chip chip--action library__help"
+            className="chip chip--action"
             onClick={() => setHelping(true)}
             aria-label="Help"
             title="What this screen can do"

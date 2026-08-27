@@ -89,7 +89,7 @@ function sameBlock(a: Block, b: Block): boolean {
   return false
 }
 
-export function sameBlocks(a: readonly Block[], b: readonly Block[]): boolean {
+function sameBlocks(a: readonly Block[], b: readonly Block[]): boolean {
   if (a.length !== b.length) return false
   return a.every((block, index) => sameBlock(block, b[index]!))
 }

@@ -64,13 +64,6 @@
   /* Resolved per element by [data-colour]; untinted elements stay neutral. */
   --tint: transparent;
 
-  /* Relative height of a step in the effort strip. */
-  --effort-prepare: 0.3;
-  --effort-work: 1;
-  --effort-rest: 0.42;
-  --effort-recover: 0.62;
-  --effort-custom: 0.7;
-
   --step-1: 0.25rem;
   --step-2: 0.5rem;
   --step-3: 0.75rem;

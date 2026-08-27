@@ -47,7 +47,7 @@ type Options = {
   onCancel?: (id: string) => void
 }
 
-export type RowDrag = {
+type RowDrag = {
   /** The row being dragged, for the styling that lifts it. */
   draggingId: string | null
   /** Spread onto a row's grip. */

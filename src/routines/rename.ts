@@ -184,7 +184,7 @@ export function tidyNames(
 }
 
 /** The same, for a whole routine. */
-export function tidyWorkout(
+function tidyWorkout(
   workout: Workout,
   byKey = table(),
 ): { workout: Workout; renamed: Rename[] } {

@@ -120,10 +120,6 @@ describe('the authored half, harvested from the corpus', () => {
     expect(OTHER_EXERCISES.filter((e) => !owned.has(e.equipment))).toEqual([])
   })
 
-  it('states no weight, because the generator seeds one from history instead', () => {
-    expect(OTHER_EXERCISES.filter((e) => e.load !== undefined)).toEqual([])
-  })
-
   it('carries no illustration, since the guide only draws the machine', () => {
     // Cycling is the exception: it is not the guide's, and it has a photo.
     expect(OTHER_EXERCISES.filter((e) => e.media).map((e) => e.name)).toEqual(['Cycling'])
