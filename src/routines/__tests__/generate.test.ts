@@ -280,6 +280,22 @@ describe('the shape it builds', () => {
     expect(announced.length).toBeGreaterThan(0)
   })
 
+  it('announces a machine exercise for 30s and anything else for 15', () => {
+    /*
+     * The long announcement is not reading time: it is the time spent changing
+     * the pin and moving the seat while the cardio minute runs. A press-up needs
+     * none of that. The name and the weight stay either way.
+     */
+    const announcements = (equipment: RoutineSpec['equipment']) => {
+      const { workout } = make({ equipment, totalMs: 50 * 60_000 })
+      return workout.blocks
+        .filter((b): b is Segment => b.kind === 'segment' && b.name.startsWith('Get ready: '))
+        .map((b) => b.durationMs)
+    }
+    expect(new Set(announcements('machine'))).toEqual(new Set([30_000]))
+    expect(new Set(announcements('none'))).toEqual(new Set([15_000]))
+  })
+
   it('gives an ankle-strap exercise a 20 second get-ready, and others 15', () => {
     const { workout } = make({ areas: ['lower'], equipment: 'machine', totalMs: 60 * 60_000 })
     const blocks = workout.blocks
