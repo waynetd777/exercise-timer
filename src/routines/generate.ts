@@ -272,8 +272,18 @@ function exerciseBlocks(
      * when you change the pin.
      */
     if (announce) {
+      /*
+       * Thirty seconds to announce it, but only for a MACHINE exercise.
+       *
+       * The long announcement is not there to be read: it is the time you spend
+       * changing the pin and moving the seat while the cardio minute runs. A
+       * press-up needs none of that, so it gets the ordinary fifteen. The name
+       * and the weight stay either way, since knowing what is coming is the
+       * other half of what the step is for.
+       */
+      const announceMs = exercise.equipment === 'machine' ? ANNOUNCE_MS : PREPARE_MS
       blocks.push(
-        segment({ name: `Get ready: ${labelled}`, role: 'prepare', durationMs: ANNOUNCE_MS }),
+        segment({ name: `Get ready: ${labelled}`, role: 'prepare', durationMs: announceMs }),
         segment({
           name: recoveryName,
           role: 'work',
