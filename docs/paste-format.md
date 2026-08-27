@@ -207,6 +207,32 @@ it and shows you the round.
 Lines like `No rest between exercises` or `Complete the full count of one exercise
 before moving to the next` become a note on the section rather than on any step.
 
+## Writing a routine back out
+
+Send › Copy as text, or Download as text, writes a routine in this format. It is
+the only export that is lossy, so it is for sending to a person rather than for
+keeping. It always says what it could not carry.
+
+What has no syntax here, and so cannot survive the trip:
+
+- **Pictures.** Nothing in this format can name one.
+- **The routine's name**, which the download carries as its filename and the
+  paste dialog asks for on the way back.
+- **The routine's colour**, and whether it was a favourite.
+- **A step whose role does not match its name.** A role is read off the name on
+  the way in, so a get-ready called "Change Sides" comes back as work.
+- **A note under 24 characters.** At that length a parenthesis is part of what an
+  exercise is called, so writing one would rename the step.
+- **A count on a step that is also timed.** `12 × Bicep Curls - 60 seconds` reads
+  as a step CALLED "12 × Bicep Curls"; only an EMOM minute says both.
+- **An AMRAP's round, unless a heading follows the AMRAP.** Nothing else ends the
+  round, so anywhere else it is written as the plain countdown it is.
+
+Two things change shape rather than being lost. A routine that does not open on a
+get-ready gains the usual five seconds, and loose steps are gathered into a
+section called "Routine". Both are this parser's doing, and both settle: writing
+a routine that has already been through once changes nothing further.
+
 ## What the app adds
 
 **Five seconds to get ready**, at the very start. Long enough to prop the phone

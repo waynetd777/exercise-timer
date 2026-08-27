@@ -241,3 +241,29 @@ parallel list of names to keep in sync. The filenames are the exercise names.
 | `strength-training.routine.json` | The generated strength seed. Regenerate with the parser, never edit by hand |
 | `imageCatalogue.ts` | The 43 bundled illustration paths, in the note's original order and grouping |
 | `*.tabata.json` | Importer fixtures, not imported by the app |
+
+## Writing text back out
+
+`writeRoutine.ts` is the inverse of `pasteFormat.ts`, and deliberately a NARROW
+one. The parser reads a handout, so many surface forms land on the same blocks;
+the writer picks exactly one form per block and the round-trip test proves the
+choice reads back.
+
+Three rules earned the hard way, all pinned by tests:
+
+- **`Then:` closes a rounds group, not an AMRAP.** An AMRAP's round collects
+  bullets until a section HEADING arrives, so the AMRAP form is only written
+  where a heading or the end of the text follows it. Anywhere else it is written
+  as the plain countdown it is, and the round is reported as lost.
+- **A group's children are siblings too.** The separator rules have to run inside
+  a section and inside a rounds group, not only at the top level, or a step after
+  a nested group is read into it.
+- **The parser's own five-second get-ready is not written back.** It is prepended
+  LOOSE, above any section, and writing it as a bullet would put it inside the
+  first section instead, so the routine would sink one level on every trip.
+
+The property the tests hold is not `write(read(x)) === x`, which is false: the
+parser normalises, and no writer can undo that. It is that **the second pass
+changes nothing**. Everything the format cannot say is collected in `lost` and
+shown to the user, because a share that quietly drops 23 illustrations looks
+like it worked.
