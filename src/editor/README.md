@@ -57,6 +57,23 @@ would leave a blank line under the step for ever.
   group, because the editor renders two levels and a deeper tree would be invisible
   and un-editable. The *data model* supports any depth, so lifting this is a UI
   decision, not a schema one.
+- **Timing is not either/or.** A step may be counted AND timed: an EMOM's minute
+  is sixty seconds and twelve curls. `Timing`'s `reps` variant carries an
+  optional `durationMs` for exactly that, the unit select offers `× in s`, and a
+  second number appears beside it. Every commit writes back BOTH values, because
+  `setTiming` clears the segment's `durationMs` and `reps` before writing, so a
+  patch that mentions only one of them deletes the other. That is what used to
+  happen: the row showed the count, hid the clock, and ate it on the first
+  keystroke. Going self-paced does drop the duration, which is correct, since a
+  self-paced step has none.
+- **A weight is free text, and it lives on the step, not in its name.**
+  `Segment.load` holds "65kg", "30kg each side", "red band" or "bodyweight",
+  because half of what a routine loads is not a number. It sits in
+  `.erow__extras` beside Note and Or rather than on the row: it is content, the
+  area reveals itself for a step that has one, and the row has no width to spare.
+  Weights used to be typed into the NAME, so `storage/migrate.ts` lifts a
+  trailing one out of names already saved, and `writeRoutine` puts it back into
+  the name on the way out, since text has no syntax for it.
 - **A move past either end is a no-op** rather than an error, so holding a button
   cannot corrupt the tree.
 - **A group left empty by a departing step is kept, not pruned.** A group vanishing

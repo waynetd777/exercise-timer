@@ -261,6 +261,75 @@ const base = {
   updatedAt: 0,
 }
 
+describe('a step that is counted AND timed', () => {
+  /*
+   * An EMOM's minute: sixty seconds and twelve curls. `Segment` has always
+   * allowed both and the parser has always built them, but the editor modelled
+   * timing as either/or, so `timingOf` hid the clock behind the count and
+   * `setTiming` deleted whichever it was not writing. One keystroke on such a
+   * row destroyed the duration.
+   */
+  const emom = (): Block[] => [
+    {
+      kind: 'segment',
+      id: 's',
+      name: 'Bicep Curls',
+      role: 'work',
+      durationMs: 60_000,
+      reps: { kind: 'fixed', count: 12 },
+    },
+  ]
+
+  it('is read as a count that carries its clock', () => {
+    expect(timingOf(emom()[0] as Segment)).toEqual({
+      kind: 'reps',
+      count: 12,
+      durationMs: 60_000,
+    })
+  })
+
+  it('keeps both when the count is retyped', () => {
+    const [step] = setTiming(emom(), [0], { kind: 'reps', count: 15, durationMs: 60_000 })
+    expect(step).toMatchObject({ durationMs: 60_000, reps: { kind: 'fixed', count: 15 } })
+  })
+
+  it('keeps both when the clock is retyped', () => {
+    const [step] = setTiming(emom(), [0], { kind: 'reps', count: 12, durationMs: 45_000 })
+    expect(step).toMatchObject({ durationMs: 45_000, reps: { kind: 'fixed', count: 12 } })
+  })
+
+  it('drops the clock when the step is made self-paced, and not before', () => {
+    const [step] = setTiming(emom(), [0], { kind: 'reps', count: 12 })
+    expect(step).toMatchObject({ reps: { kind: 'fixed', count: 12 } })
+    expect((step as Segment).durationMs).toBeUndefined()
+  })
+
+  it('drops the count when the step is made purely timed', () => {
+    const [step] = setTiming(emom(), [0], { kind: 'timed', durationMs: 60_000 })
+    expect(step).toMatchObject({ durationMs: 60_000 })
+    expect((step as Segment).reps).toBeUndefined()
+  })
+
+  it('carries a per-side count alongside a clock', () => {
+    const [step] = setTiming(emom(), [0], {
+      kind: 'reps',
+      count: 5,
+      perSide: true,
+      durationMs: 60_000,
+    })
+    expect(step).toMatchObject({
+      durationMs: 60_000,
+      reps: { kind: 'fixed', count: 5, perSide: true },
+    })
+  })
+
+  it('still compiles as a timed step, not a gate', () => {
+    const routine = compile({ ...base, blocks: emom() })
+    expect(routine.entries[0]).toMatchObject({ selfPaced: false, reps: { count: 12 } })
+    expect(routine.totalMs).toBe(60_000)
+  })
+})
+
 describe('newRoutineBlocks: what a new routine opens on', () => {
   const template = newRoutineBlocks()
 

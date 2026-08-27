@@ -141,6 +141,19 @@ describe('a step survives being written and read', () => {
     expect(back).toMatchObject({ durationMs: 20_000, role: 'work' })
   })
 
+  it('keeps a weight, by writing it back into the name', () => {
+    // Text has no syntax for a load, so it goes where it used to live. The
+    // migration lifts it out again on the way in, which is the round trip.
+    const written = writeRoutine(
+      workout([step({ name: 'Leg Press', load: '65kg', durationMs: 20_000 })]),
+    )
+    expect(written.text).toContain('Leg Press 65kg')
+    expect(written.lost).not.toContain('The picture on "Leg Press"')
+
+    const back = find(pass([step({ name: 'Leg Press', load: '65kg', durationMs: 20_000 })]), 'Leg Press 65kg')
+    expect(back.durationMs).toBe(20_000)
+  })
+
   it('keeps a rest and a get-ready, by their names', () => {
     const back = pass([
       step({ name: 'Get ready', role: 'prepare', durationMs: 15_000 }),

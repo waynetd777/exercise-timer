@@ -26,6 +26,7 @@ import {
   FIT_HEIGHT_BUDGET,
   LIST_GAP,
   nameWithEffort,
+  nameWithLoad,
 } from '../format'
 import { defaultRoutineName } from '../PasteDialog'
 
@@ -256,6 +257,20 @@ describe('fitList', () => {
   })
 })
 
+describe('nameWithLoad', () => {
+  it('puts the load after the name, as the name used to carry it', () => {
+    expect(nameWithLoad({ name: 'Leg Press', load: '65kg' })).toBe('Leg Press 65kg')
+  })
+
+  it('leaves a step with no load alone', () => {
+    expect(nameWithLoad({ name: 'Cycling' })).toBe('Cycling')
+  })
+
+  it('ignores a load that is only whitespace, which is what an emptied field holds', () => {
+    expect(nameWithLoad({ name: 'Cycling', load: '   ' })).toBe('Cycling')
+  })
+})
+
 describe('nameWithEffort', () => {
   it('puts the count in front, which the countdown has no column for', () => {
     expect(nameWithEffort({ name: 'Bicep Curls', reps: { count: 12 } })).toBe('12 × Bicep Curls')
@@ -286,6 +301,19 @@ describe('nameWithEffort', () => {
     expect(
       nameWithEffort({ name: 'Bulgarian split squat – 5 each side', reps: { count: 5, perSide: true } }),
     ).toBe('Bulgarian split squat – 5 each side')
+  })
+
+  it('carries the load through, after the count and the per-side words', () => {
+    expect(
+      nameWithEffort({ name: 'Leg Press', load: '65kg', reps: { count: 12 } }),
+    ).toBe('12 × Leg Press 65kg')
+    expect(
+      nameWithEffort({ name: 'Kickback', load: '20kg', reps: { count: 10, perSide: true } }),
+    ).toBe('10 × Kickback each side 20kg')
+  })
+
+  it('shows a load on a timed step, which has no count at all', () => {
+    expect(nameWithEffort({ name: 'Plank', load: '10kg', durationMs: 30_000 })).toBe('Plank 10kg')
   })
 
   it('still counts a step whose name merely contains the digits', () => {

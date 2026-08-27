@@ -116,6 +116,7 @@ function isSegment(block: Record<string, unknown>): boolean {
       (isFiniteNumber(block['durationMs']) && block['durationMs'] >= 0)) &&
     (block['reps'] === undefined || isReps(block['reps'])) &&
     isOptionalString(block['alternative']) &&
+    isOptionalString(block['load']) &&
     isOptionalString(block['role']) &&
     (block['media'] === undefined || isMedia(block['media'])) &&
     isOptionalString(block['note'])

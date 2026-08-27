@@ -96,8 +96,39 @@ export const REHOSTED: Record<string, string> = {
 const AMRAP_STEP = 'As many rounds as possible'
 const RUN_TOGETHER = ' · '
 
+/**
+ * A weight typed on the end of a step's name, which is where weights used to
+ * live because there was no field for them.
+ *
+ * "12 × Leg Press 65kg" becomes "12 × Leg Press" loaded to "65kg". Deliberately
+ * NARROW: a number and a unit at the very END of the name, nothing else. It is
+ * rewriting text the user typed, so it takes only the shape that cannot mean
+ * anything else.
+ *
+ * What it must not touch, and does not:
+ *
+ *  - "Squat to 90", "Minute 5", "Row 500m": no weight unit.
+ *  - "20kg Goblet Squat": not at the end, so it is part of the name as written.
+ *  - a step that already HAS a load: nothing to lift, and the two might disagree.
+ *
+ * `each side` is allowed to follow the unit, since "Glute Kickback 20kg each
+ * side" is one weight qualified, not a weight plus a name.
+ */
+const TRAILING_LOAD = /\s+(\d+(?:\.\d+)?\s?(?:kg|lb|lbs)(?:\s+(?:each|per)\s+side)?)$/i
+
+function liftLoad(segment: Segment): Segment {
+  if (segment.load !== undefined) return segment
+  const match = TRAILING_LOAD.exec(segment.name)
+  if (!match) return segment
+  const name = segment.name.slice(0, match.index).trim()
+  // A name that was ONLY a weight keeps it: "65kg" alone is what the step is
+  // called, and stripping it would leave a step with no name at all.
+  if (name === '') return segment
+  return { ...segment, name, load: match[1]!.trim() }
+}
+
 function migrateSegment(segment: Segment): Segment {
-  let next = segment
+  let next = liftLoad(segment)
 
   /*
    * An AMRAP's round was joined into one paragraph before the media panel could

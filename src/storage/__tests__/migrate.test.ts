@@ -173,6 +173,49 @@ describe('rehosted illustrations', () => {
     }
   })
 
+  describe('lifting a weight out of a step name', () => {
+    const named = (name: string, load?: string) =>
+      migrateWorkout(
+        workout([{ kind: 'segment', id: 's', name, role: 'work', ...(load ? { load } : {}) }]),
+      ).blocks[0] as Segment
+
+    it.each([
+      ['12 × Leg Press 65kg', '12 × Leg Press', '65kg'],
+      ['Chest Press 30kg', 'Chest Press', '30kg'],
+      ['Glute Kickback 20kg each side', 'Glute Kickback', '20kg each side'],
+      ['Bicep Curls 8 kg', 'Bicep Curls', '8 kg'],
+      ['Deadlift 62.5kg', 'Deadlift', '62.5kg'],
+      ['Bench 135lb', 'Bench', '135lb'],
+    ])('turns %s into %s loaded to %s', (name, expected, load) => {
+      expect(named(name)).toMatchObject({ name: expected, load })
+    })
+
+    it.each([
+      'Squat to 90',
+      'Minute 5',
+      'Row 500m',
+      '20kg Goblet Squat',
+      'Cycling',
+      '65kg',
+    ])('leaves %s alone', (name) => {
+      const step = named(name)
+      expect(step.name).toBe(name)
+      expect(step.load).toBeUndefined()
+    })
+
+    it('does not overwrite a load the step already has', () => {
+      expect(named('Leg Press 65kg', '70kg')).toMatchObject({
+        name: 'Leg Press 65kg',
+        load: '70kg',
+      })
+    })
+
+    it('returns the same object when there is no weight to lift', () => {
+      const before = workout([{ kind: 'segment', id: 's', name: 'Cycling', role: 'work' }])
+      expect(migrateWorkout(before)).toBe(before)
+    })
+  })
+
   it('maps only onto images the app actually offers', () => {
     // A typo in a path would be a silently broken image on someone's phone.
     const offered = new Set(IMAGE_CATALOGUE)

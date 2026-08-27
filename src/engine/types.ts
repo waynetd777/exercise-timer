@@ -116,6 +116,20 @@ export type Segment = {
   reps?: Reps
   /** A lower-impact or equipment-free swap: "knees or toes", "step-back option". */
   alternative?: string
+  /**
+   * What you are lifting: "65kg", "30kg each side", "red band", "bodyweight".
+   *
+   * FREE TEXT, not a number and a unit, because half of what a routine loads is
+   * not a number: a band has a colour, a machine has a stack position, and a
+   * press-up has your own weight. A number would force those back into the name,
+   * which is the thing this field exists to stop.
+   *
+   * Display only, like `reps`. The app does not add it up and does not track it
+   * between sessions; PROGRESSION is a different feature needing per-session
+   * storage. Weights used to live in the step NAME, so `storage/migrate.ts`
+   * lifts a trailing one out of names already saved.
+   */
+  load?: string
   role: SegmentRole
   media?: MediaRef
   note?: string
@@ -305,6 +319,8 @@ export type TimelineEntry = {
   /** Resolved against the enclosing ladder's rung, if any. */
   reps?: { count: number; perSide?: boolean }
   alternative?: string
+  /** What to lift. See `Segment.load`. */
+  load?: string
   media?: MediaRef
   note?: string
   path: PathStep[]

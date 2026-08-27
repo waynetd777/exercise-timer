@@ -268,12 +268,32 @@ const NAMES_PER_SIDE = /\b(?:each|per)\s+(?:side|leg|arm|direction)\b/i
  * prefixed either, because "5 × Bulgarian split squat – 5 each side" says it
  * twice and the name has already answered the question.
  */
-export function nameWithEffort(step: { name: string } & Effort): string {
-  if (!step.reps) return step.name
+export function nameWithEffort(step: { name: string; load?: string } & Effort): string {
+  if (!step.reps) return nameWithLoad(step)
   const { count } = step.reps
   const statesCount = new RegExp(`\\b${count}\\s+(?:each|per)\\s+\\w+`, 'i').test(step.name)
   const suffix = step.reps.perSide && !NAMES_PER_SIDE.test(step.name) ? ' each side' : ''
-  return statesCount ? `${step.name}${suffix}` : `${count} × ${step.name}${suffix}`
+  const named = `${step.name}${suffix}`
+  const withLoad = nameWithLoad({ name: named, ...(step.load !== undefined ? { load: step.load } : {}) })
+  return statesCount ? withLoad : `${count} × ${withLoad}`
+}
+
+/**
+ * A step's name with what it is loaded to: "Leg Press 65kg".
+ *
+ * The load rides WITH the name rather than getting a line of its own, and that
+ * is deliberate. `.count__lead` has about two points of slack in its budget and
+ * has already overflowed twice from exactly this kind of addition, so a new
+ * element in the countdown column would be the third. Riding with the name also
+ * renders precisely as these routines used to read when the weight was typed
+ * into the name by hand, which is the point: the DATA moved out of the name, the
+ * reading did not change.
+ *
+ * Trimmed and skipped when empty, since the editor stores what was typed.
+ */
+export function nameWithLoad(step: { name: string; load?: string }): string {
+  const load = step.load?.trim()
+  return load ? `${step.name} ${load}` : step.name
 }
 
 /**
@@ -316,7 +336,7 @@ const CHARS_PER_LINE = 24
 const SUB_LINE = 0.8
 
 export function listLines(
-  rows: readonly { name: string; alternative?: string; note?: string }[],
+  rows: readonly { name: string; load?: string; alternative?: string; note?: string }[],
   /** The rows showing their note: the whole current gate, which may be a rung. */
   showNotesFor: readonly { note?: string }[] = [],
 ): number {
@@ -326,7 +346,7 @@ export function listLines(
     rows.reduce((total, row) => {
       const note = showNotesFor.includes(row) && row.note ? SUB_LINE * lines(row.note) : 0
       const alternative = row.alternative ? SUB_LINE * lines(row.alternative) : 0
-      return total + lines(row.name) + note + alternative
+      return total + lines(nameWithLoad(row)) + note + alternative
     }, 0),
   )
 }

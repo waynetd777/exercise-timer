@@ -435,13 +435,25 @@ const UNITS: { value: string; label: string; title: string }[] = [
   { value: 'timed', label: 's', title: 'Seconds. The step times itself.' },
   { value: 'reps', label: '×', title: 'Reps. The step waits for Next.' },
   { value: 'reps-side', label: '× each side', title: 'Reps per side. The step waits for Next.' },
+  /*
+   * Counted AND timed, which is an EMOM's minute: sixty seconds and twelve
+   * curls, the clock running and the count as the target. The parser has always
+   * built these; until now the editor could neither show one nor keep one.
+   */
+  { value: 'reps-timed', label: '× in', title: 'Reps in a fixed time. The step times itself.' },
+  {
+    value: 'reps-side-timed',
+    label: '× each side in',
+    title: 'Reps per side in a fixed time. The step times itself.',
+  },
   { value: 'rung', label: 'rung', title: "Takes its count from the ladder's current rung" },
   { value: 'rung-side', label: 'rung each side', title: "The ladder's rung, per side" },
 ]
 
 function unitOf(timing: Timing): string {
   if (timing.kind === 'timed') return 'timed'
-  return timing.perSide ? `${timing.kind}-side` : timing.kind
+  if (timing.kind === 'rung') return timing.perSide ? 'rung-side' : 'rung'
+  return `reps${timing.perSide ? '-side' : ''}${timing.durationMs === undefined ? '' : '-timed'}`
 }
 
 /** The single field a group patch carries, for keying a run of keystrokes. */
@@ -513,16 +525,51 @@ function TimingField({
   const counted = timing.kind === 'reps'
 
   const retarget = (next: string) => {
-    const perSide = next.endsWith('-side')
+    // "-side" is no longer the tail of every per-side unit: "× each side in s"
+    // ends in the clock. Test for the word rather than the ending.
+    const perSide = next.includes('-side')
     if (next.startsWith('rung')) return onChange({ kind: 'rung', ...(perSide ? { perSide } : {}) })
     if (next.startsWith('reps')) {
       const count = counted ? timing.count : 10
-      return onChange({ kind: 'reps', count, ...(perSide ? { perSide } : {}) })
+      /*
+       * A step arriving at a timed unit keeps the clock it still has, so a timed
+       * step given a count keeps its seconds rather than being reset.
+       *
+       * Going self-paced really does drop the duration, because a self-paced
+       * step HAS no duration: coming back gets the default, not the old value.
+       * The alternative is remembering it in component state, which undo could
+       * not see and which is not written down anywhere.
+       */
+      const durationMs = next.endsWith('-timed')
+        ? (segment.durationMs ?? 20_000)
+        : undefined
+      return onChange({
+        kind: 'reps',
+        count,
+        ...(perSide ? { perSide } : {}),
+        ...(durationMs !== undefined ? { durationMs } : {}),
+      })
     }
     onChange({ kind: 'timed', durationMs: segment.durationMs ?? 20_000 })
   }
 
   const value = timing.kind === 'timed' ? Math.round(timing.durationMs / 1000) : counted ? timing.count : 0
+
+  /** The clock that sits beside the count, for a step that is both. */
+  const clockMs = timing.kind === 'reps' ? timing.durationMs : undefined
+
+  /*
+   * Whatever else the row is showing, a commit must carry the OTHER value with
+   * it. Typing in the count used to write `{ kind: 'reps', count }` and nothing
+   * else, which is how a step that was both lost its clock on the first
+   * keystroke. Everything the step has goes back every time.
+   */
+  const counts = (count: number): Timing => ({
+    kind: 'reps',
+    count,
+    ...(timing.kind === 'reps' && timing.perSide ? { perSide: true } : {}),
+    ...(clockMs !== undefined ? { durationMs: clockMs } : {}),
+  })
 
   return (
     <label className="esecs">
@@ -536,12 +583,13 @@ function TimingField({
             onChange(
               timing.kind === 'timed'
                 ? { kind: 'timed', durationMs: entered * 1000 }
-                : { kind: 'reps', count: entered, ...(timing.perSide ? { perSide: true } : {}) },
+                : counts(entered),
               true,
             )
           }
         />
       )}
+
       {/* `data-unit` is for the stylesheet: a native select is as wide as its
           LONGEST option, which is how showing "s" cost the width of "rung each
           side". See `.efield--unit` in editor.css. */}
@@ -558,6 +606,29 @@ function TimingField({
           </option>
         ))}
       </select>
+
+      {/*
+        After the unit, so the row reads "12 × in 20 s" left to right: how many,
+        of what kind, for how long. The unit says "in" rather than "in s"
+        because the field it introduces already carries its own "s".
+        `.erow__main` wraps, so on a phone this pair drops to a second line
+        rather than crushing the name field.
+      */}
+      {clockMs !== undefined && timing.kind === 'reps' && (
+        <>
+          <CountField
+            value={Math.round(clockMs / 1000)}
+            max={5999}
+            label="Seconds"
+            onCommit={(entered) =>
+              onChange({ kind: 'reps', count: timing.count, ...(timing.perSide ? { perSide: true } : {}), durationMs: entered * 1000 }, true)
+            }
+          />
+          <span className="esecs__unit" aria-hidden="true">
+            s
+          </span>
+        </>
+      )}
     </label>
   )
 }
@@ -589,7 +660,7 @@ function SegmentRow({
   listed: boolean
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onTiming: (path: Path, timing: Timing, typed?: boolean) => void
-  onClearText: (path: Path, field: 'note' | 'alternative') => void
+  onClearText: (path: Path, field: 'note' | 'alternative' | 'load') => void
   onWrap: (path: Path) => void
   onPreview: (view: ImageView) => void
   onChoose: (path: Path) => void
@@ -619,7 +690,8 @@ function SegmentRow({
    * again instead of leaving a blank one behind.
    */
   const [extras, setExtras] = useState(false)
-  const hasExtras = segment.note !== undefined || segment.alternative !== undefined
+  const hasExtras =
+    segment.note !== undefined || segment.alternative !== undefined || segment.load !== undefined
   const showExtras = hasExtras || extras
 
   /*
@@ -691,7 +763,7 @@ function SegmentRow({
    * all if it comes back unchanged. Without that guard, tabbing through a step
    * left an undo step that undid nothing visible.
    */
-  const commitText = (field: 'note' | 'alternative', value: string) => {
+  const commitText = (field: 'note' | 'alternative' | 'load', value: string) => {
     const next = value.trim()
     if (next === (segment[field] ?? '')) return
     if (next === '') onClearText(path, field)
@@ -928,6 +1000,23 @@ function SegmentRow({
               placeholder="Lower-impact swap"
               aria-label="Alternative"
               onBlur={(event) => commitText('alternative', event.target.value)}
+            />
+          </label>
+          {/*
+            Free text, because half of what a routine loads is not a number: a
+            band has a colour and a press-up has your own weight. Weights used to
+            be typed into the step NAME, which made the name carry two things and
+            put the count and the load next to each other in one heading.
+          */}
+          <label className="erow__extra erow__extra--load">
+            <span className="label label--sm">Weight</span>
+            <input
+              key={segment.load ?? ''}
+              className="efield"
+              defaultValue={segment.load ?? ''}
+              placeholder="65kg, red band"
+              aria-label="Weight"
+              onBlur={(event) => commitText('load', event.target.value)}
             />
           </label>
         </div>
