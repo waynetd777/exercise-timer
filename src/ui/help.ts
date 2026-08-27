@@ -56,13 +56,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
   {
     heading: 'Weights',
     points: [
-      'Routines › Weights is where what you lift is written down, one weight per exercise. A routine that does not state a weight of its own uses these, so moving up a plate is one edit rather than seven.',
-      'Sixty-seven exercises: everything on the multi-gym, plus dumbbells, the kettlebell and the bands. A press-up and the trampoline are not there, since neither has a number to keep.',
-      'Twelve multi-gym weights start filled in. Four are your own numbers off the machine; the rest come from strengthlevel.com for a man of 55 at 88kg, taken at novice and rounded up to the nearest 5kg because that is where the pin goes. Those eight are still worth checking against the machine. The rest are blank, because a guessed weight is worse than no weight.',
-      'Fill from my routines takes the weights your saved routines already use for anything still blank. What a routine says about itself is left alone either way.',
-      'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”.',
-      'The multi-gym exercises show the illustration from the manufacturer’s guide. Tap one to see it full size, which is the quickest way to find out what an exercise you have not done before actually is.',
-      'They ride along in a backup and are merged back in on restore. They are not in a shared link or a text file: text carries the weight in force at the time it was written.',
+      'Routines › Weights is where what you lift is written down, one weight per exercise. A routine that does not state a weight of its own uses these, so moving up a plate is one edit rather than seven. That page has its own help.',
     ],
   },
   {
@@ -129,6 +123,57 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'Back asks before discarding them, and only when there is something to lose.',
       'Undo and redo, or Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z. Typing counts as one step, not one per letter.',
       'The bar shows the routine’s total time and step count as you edit.',
+    ],
+  },
+]
+
+/**
+ * The weights page.
+ *
+ * Its own tray rather than a section of the library's, because the page is the
+ * one place in the app where an EMPTY field means something, and that is not a
+ * detail to bury eight sections down someone else's list.
+ */
+export const WEIGHTS_HELP: readonly HelpSection[] = [
+  {
+    heading: 'What this is',
+    points: [
+      'What you lift, per exercise, in one place. A weight belongs to your gym rather than to a routine, and it used to be written into each one: moving up a plate meant editing every routine that named the lift.',
+      'Sixty-seven exercises: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
+      'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”. Anything you would write on a step, you can write here.',
+    ],
+  },
+  {
+    heading: 'How a routine uses it',
+    points: [
+      'A step that states no weight of its own is not unloaded. It means “whatever I lift for this”, and it reads this page every time the routine is opened — so changing a number here changes every routine that does not disagree.',
+      'A step that DOES state a weight keeps it. That is an override, and a deliberate one: it is the routine saying that today, on purpose, it is not your usual weight.',
+      'So in the editor, the Weight field is empty by default and its hint shows what this page would supply. Type to override for that routine only; press the × to clear it and go back to following this page.',
+      'Routines written before this page state a weight on every step, so they override it. “Let n routines follow these” clears the ones this page can answer for, in one go. A step for an exercise with nothing set here keeps what it has, since the routine is then the only record of it.',
+    ],
+  },
+  {
+    heading: 'Where the numbers came from',
+    points: [
+      'Twelve multi-gym weights start filled in. Four are your own numbers off the machine. The other eight come from strengthlevel.com for a man of 55 at 88kg, taken at novice and rounded up to the nearest 5kg because that is where the pin goes.',
+      'Those eight are still worth checking. The shoulder press estimate was 30kg against a real 10, which is what a looked-up number is worth: a home stack is not the commercial machine that site measures.',
+      'The other fifty-five are blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on.',
+      'Fill from my routines takes the weight your saved routines already use for anything still blank. Better evidence than any website, and it shows you what it would take before you tap it.',
+    ],
+  },
+  {
+    heading: 'Pictures',
+    points: [
+      'The multi-gym exercises show the illustration from the manufacturer’s guide. Tap one to see it full size, which is the quickest way to find out what an exercise you have not done before actually is.',
+      'The dumbbell, kettlebell and band exercises get an empty frame instead, so the names still line up. The guide only illustrates the machine.',
+    ],
+  },
+  {
+    heading: 'Keeping them',
+    points: [
+      'They live on this device, like the sound and pace settings, not inside a routine.',
+      'They ride along in a backup and are merged back in on restore, with the file winning where both say something.',
+      'They are not in a shared link or a text file. Text carries the weight in force at the moment it was written, since there is no way to write “whatever I lift” into a routine someone else is going to read.',
     ],
   },
 ]

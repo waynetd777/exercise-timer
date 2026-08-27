@@ -1016,20 +1016,83 @@ function SegmentRow({
             the placeholder shows what that would be rather than an example.
             Typing here overrides it for this routine only.
           */}
-          <label className="erow__extra erow__extra--load">
+          <div className="erow__extra erow__extra--load">
             <span className="label label--sm">Weight</span>
-            <input
+            <LoadField
+              /* Keyed on the committed value, like the two fields above and for
+                 the same reason: undo rewrites it underneath. */
               key={segment.load ?? ''}
-              className="efield"
-              defaultValue={segment.load ?? ''}
-              placeholder={weightFor(segment.name) || '65kg, red band'}
-              aria-label="Weight"
-              onBlur={(event) => commitText('load', event.target.value)}
+              value={segment.load ?? ''}
+              hint={weightFor(segment.name)}
+              name={segment.name}
+              onCommit={(next) => commitText('load', next)}
             />
-          </label>
+          </div>
         </div>
       )}
     </li>
+  )
+}
+
+/**
+ * The weight field, with a way to empty it.
+ *
+ * Emptying it is a REAL ACTION here, not a lack of one: an empty load means
+ * "whatever I lift for this", so clearing the field is how a step stops
+ * overriding the weights page and starts following it. Selecting three
+ * characters and pressing delete is a poor way to express that, hence the ×.
+ *
+ * Controlled, unlike the note and alternative beside it, because the × has to
+ * change what the field shows and commit in the same gesture. Typing still
+ * commits on blur, so a weight is one undo step rather than one per keystroke.
+ */
+function LoadField({
+  value,
+  hint,
+  name,
+  onCommit,
+}: {
+  value: string
+  /** What the weights page would supply. Shown once the field is empty. */
+  hint: string
+  name: string
+  onCommit: (value: string) => void
+}) {
+  const [text, setText] = useState(value)
+
+  return (
+    <span className="efield-clearable">
+      <input
+        className="efield"
+        value={text}
+        /*
+         * The hint is the weight this step would use if left alone, so an empty
+         * field answers the question it raises. Only where there is nothing to
+         * fall back on does it show an example instead.
+         */
+        placeholder={hint || '65kg, red band'}
+        aria-label="Weight"
+        onChange={(event) => setText(event.target.value)}
+        onBlur={(event) => onCommit(event.target.value)}
+      />
+      {text !== '' && (
+        <button
+          type="button"
+          className="efield-clear"
+          aria-label={`Clear the weight for ${name}`}
+          title={hint ? `Clear, and use ${hint} from the weights page` : 'Clear'}
+          /* Blur would otherwise fire first and commit the old text, and on a
+             touch device the field would keep it. */
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            setText('')
+            onCommit('')
+          }}
+        >
+          <CloseIcon />
+        </button>
+      )}
+    </span>
   )
 }
 
