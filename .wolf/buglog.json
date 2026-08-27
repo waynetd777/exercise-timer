@@ -1540,6 +1540,98 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T02:40:00Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "The timeline was recompiled and the tick and cue effects re-armed a few milliseconds into every run.",
+      "file": "src/ui/App.tsx",
+      "root_cause": "withWeights(view.workout, currentWeights()) was called inline in JSX, returning a new object per render whenever any load fills; markRun resolving after Start re-rendered App.",
+      "fix": "useMemo keyed on view; RunScreen receives the memoised routine.",
+      "tags": [
+        "app",
+        "performance",
+        "useTimer",
+        "identity"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-092",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "A paused cue within the cancel grace played during the pause and again after resume.",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "The not-running branch cleared the dedup set wholesale while cancelPending spared cues within CANCEL_GRACE_MS.",
+      "fix": "Paused (or muted while running) prunes with requeueable; idle/complete still clears so a restart gets its whistle. Test pauses at 24.9s and expects no second bell at 25s.",
+      "tags": [
+        "audio",
+        "scheduler",
+        "pause"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-093",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "Holding an arrow key on the run screen skipped a step every ~30ms; hardware Back or closing the tab left a run with no confirmation.",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "No event.repeat guard; no beforeunload while a run was in progress (only the editor had one).",
+      "fix": "event.repeat returns early; a beforeunload handler is registered while inProgress.",
+      "tags": [
+        "run-screen",
+        "keyboard",
+        "beforeunload"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-094",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "describeRoutine named a three-section routine '5 sections'; the dialog hard-coded 3.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "sectionsRoutine clamped at SECTIONS_FEWEST (3) while describeRoutine used SECTIONS_MIN (5) and GenerateDialog used a literal 3.",
+      "fix": "SECTIONS_FEWEST is exported and used by all three. Test names sections:3 as '3 sections'.",
+      "tags": [
+        "generator",
+        "sections",
+        "clamp"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-095",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "A date line such as 2026-04-16 parsed as a rep ladder and claimed the next step as its main lift.",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "LADDER matched any three dash-separated numbers of any length.",
+      "fix": "Rungs are at most two digits (corpus max is 20). Test: the date is reported in skipped and no ladder is built.",
+      "tags": [
+        "pasteFormat",
+        "ladder",
+        "dates"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
+    },
+    {
+      "id": "bug-096",
+      "timestamp": "2026-08-28T03:20:00Z",
+      "error_message": "Landscape iPhone: the Next slab and the wide-layout run body ignored the safe-area insets; a wake-lock release event could orphan a newer lock; scripts/*.ts were typechecked by nothing.",
+      "file": "src/ui/run-screen.css",
+      "root_cause": ".run__sheet and the landscape .run__body padded without --safe-left/right; useWakeLock nulled the shared sentinel on any release; tsconfig.node included only vite.config.ts.",
+      "fix": "Both paddings add the insets; the release listener checks sentinel.current === lock; tsconfig.scripts.json (extends app config, includes scripts, vitest.harvest.config.ts and src) is referenced from tsconfig.json.",
+      "tags": [
+        "css",
+        "safe-area",
+        "wake-lock",
+        "tsconfig"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T03:20:00Z"
     }
   ]
 }

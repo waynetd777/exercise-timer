@@ -44,7 +44,6 @@ import {
   SECTION_SIZE,
   SECTION_THEMES,
   SECTIONS_MAX,
-  SECTIONS_MIN,
   SECTIONS_TYPICAL,
 } from './exercises.shapes'
 import { foldName } from './foldName'
@@ -166,10 +165,10 @@ const DEFAULT_REPS = 12
  * The fewest sections that can be asked for.
  *
  * BELOW what the corpus does: no routine in the corpus has fewer than five, and
- * `SECTIONS_MIN` says so. This is a shorter session than the instructor writes,
+ * `SECTIONS_MIN` in `exercises.shapes.ts` says so. This is a shorter session than the instructor writes,
  * which is a reasonable thing to want and not a claim about what he sends.
  */
-const SECTIONS_FEWEST = 3
+export const SECTIONS_FEWEST = 3
 
 /**
  * What one set of this exercise asks for.
@@ -631,7 +630,7 @@ export function describeRoutine(spec: RoutineSpec): string {
     spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
 
   if (spec.style === 'sections') {
-    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_MIN, spec.sections ?? SECTIONS_TYPICAL))
+    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, spec.sections ?? SECTIONS_TYPICAL))
     return `${kit}${worked}, ${count} sections`
   }
   const minutes = Math.round(spec.totalMs / 60_000)

@@ -241,7 +241,8 @@
       grid-template-rows: minmax(0, 1fr);
       align-items: stretch;
       gap: var(--step-7);
-      padding: var(--step-5) var(--step-7);
+      padding: var(--step-5) calc(var(--step-7) + var(--safe-right)) var(--step-5)
+        calc(var(--step-7) + var(--safe-left));
     }
   }
 }
@@ -607,7 +608,9 @@
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: var(--step-4);
-  padding: var(--step-5) var(--step-5) var(--step-4);
+  /* The insets too: landscape puts the Next slab's edge under the sensor housing. */
+  padding: var(--step-5) calc(var(--step-5) + var(--safe-right)) var(--step-4)
+    calc(var(--step-5) + var(--safe-left));
   min-height: 0;
 }
 

@@ -139,7 +139,18 @@ function Screens() {
     [library, toLibrary],
   )
 
-  if (view.screen === 'run') {
+  /*
+   * Filled once per visit, not per render: `withWeights` returns a new object
+   * whenever any load fills, and a fresh identity recompiled the timeline and
+   * re-armed the tick and the cues a few milliseconds into every run, when
+   * `markRun` landed and this component re-rendered.
+   */
+  const running = useMemo(
+    () => (view.screen === 'run' ? withWeights(view.workout, currentWeights()) : null),
+    [view],
+  )
+
+  if (view.screen === 'run' && running) {
     /*
      * The weights are filled in HERE, on the way into the run, and never saved
      * back. A step that states no load of its own is not unloaded: it means
@@ -149,7 +160,7 @@ function Screens() {
      */
     return (
       <RunScreen
-        workout={withWeights(view.workout, currentWeights())}
+        workout={running}
         onExit={toLibrary}
         onStarted={onStarted}
       />

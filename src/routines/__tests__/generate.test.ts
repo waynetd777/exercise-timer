@@ -651,6 +651,12 @@ describe('what an unnamed routine is called', () => {
     expect(named({ areas: ['lower', 'upper'] })).toBe('Upper Body & Lower Body Circuit, 45 min')
   })
 
+  it('names the section count it actually builds, at the bottom of the range', () => {
+    // describeRoutine clamped at five while the builder clamped at three, so a
+    // three-section routine was called "5 sections".
+    expect(named({ style: 'sections', sections: 3 })).toBe('Full-Body, 3 sections')
+  })
+
   it('counts sections rather than minutes for the shape that has no length', () => {
     expect(named({ style: 'sections', sections: 6 })).toBe('Full-Body, 6 sections')
   })

@@ -339,6 +339,8 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
   const onKeyRef = useRef<(event: KeyboardEvent) => void>(() => {})
   onKeyRef.current = (event: KeyboardEvent) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return
+    // A held key is one press. Auto-repeat skipped a step every 30ms.
+    if (event.repeat) return
     // A dialog owns the keyboard while it is open.
     if (leaving || resetting) return
     // Leave the key alone only if what has focus actually uses it: a button
@@ -389,6 +391,20 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
    */
   const wasRunning = useRef(false)
   const inProgress = status === 'running' || status === 'paused'
+
+  /*
+   * Leaving the PAGE mid-run asks the browser's question, as the editor does
+   * for unsaved edits. The in-app Back already asks; the hardware Back on
+   * Android, and closing the tab, went straight out and lost the place.
+   */
+  useEffect(() => {
+    if (!inProgress) return
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [inProgress])
 
   const requestExit = () => {
     if (!inProgress) return onExit?.()

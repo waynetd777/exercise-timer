@@ -1,0 +1,10 @@
+{
+  // The harvest scripts and their vitest config. They import from src, and a
+  // composite project must list every file it reaches, so src is here too.
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.scripts.tsbuildinfo"
+  },
+  "include": ["scripts", "vitest.harvest.config.ts", "src"]
+}
