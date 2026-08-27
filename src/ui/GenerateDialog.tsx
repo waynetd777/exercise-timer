@@ -43,13 +43,57 @@ const EQUIPMENT: { value: EquipmentScope; label: string; title: string }[] = [
   { value: 'mixed', label: 'Mixed', title: 'Whatever fits best, machine or not' },
 ]
 
-/** A cardio exercise picked from a list, for a slot that is always one thing. */
+/**
+ * A length in whole seconds.
+ *
+ * Seconds rather than minutes because two of the three are under two minutes,
+ * and a field that reads 1.5 is worse than one that reads 90. Committed as typed
+ * and clamped, the same as the editor's own duration field; an emptied box holds
+ * its draft rather than snapping to the minimum under the cursor.
+ */
+function Seconds({
+  value,
+  label,
+  onChange,
+}: {
+  value: number
+  label: string
+  onChange: (seconds: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  return (
+    <span className="generate__secs">
+      <input
+        className="paste__name generate__number"
+        type="number"
+        min={5}
+        max={3600}
+        value={draft ?? String(value)}
+        aria-label={label}
+        onChange={(event) => {
+          setDraft(event.target.value)
+          const entered = Number(event.target.value)
+          if (event.target.value === '' || !Number.isFinite(entered)) return
+          onChange(Math.min(3600, Math.max(5, Math.round(entered))))
+        }}
+        onBlur={() => setDraft(null)}
+      />
+      <span className="label label--sm" aria-hidden="true">
+        s
+      </span>
+    </span>
+  )
+}
+
+/** A cardio exercise picked from a list, and how long that slot runs. */
 function Cardio({
   legend,
   options,
   value,
   onChange,
   extra,
+  seconds,
+  onSeconds,
 }: {
   legend: string
   options: { name: string }[]
@@ -57,23 +101,28 @@ function Cardio({
   onChange: (value: string) => void
   /** An option the table does not hold, such as Random. */
   extra?: { value: string; label: string }
+  seconds: number
+  onSeconds: (seconds: number) => void
 }) {
   return (
     <label className="generate__field">
       <span className="label label--sm">{legend}</span>
-      <select
-        className="paste__name"
-        value={value}
-        aria-label={legend}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {extra && <option value={extra.value}>{extra.label}</option>}
-        {options.map((option) => (
-          <option key={option.name} value={option.name}>
-            {option.name}
-          </option>
-        ))}
-      </select>
+      <span className="generate__pair">
+        <select
+          className="paste__name"
+          value={value}
+          aria-label={legend}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {extra && <option value={extra.value}>{extra.label}</option>}
+          {options.map((option) => (
+            <option key={option.name} value={option.name}>
+              {option.name}
+            </option>
+          ))}
+        </select>
+        <Seconds value={seconds} label={`${legend}, seconds`} onChange={onSeconds} />
+      </span>
     </label>
   )
 }
@@ -148,6 +197,9 @@ export function GenerateDialog({
   const [cardio, setCardio] = useState('Cycling')
   const [warmUp, setWarmUp] = useState('Cycling')
   const [coolDown, setCoolDown] = useState('Cycling')
+  const [warmUpSecs, setWarmUpSecs] = useState(600)
+  const [recoverSecs, setRecoverSecs] = useState(60)
+  const [coolDownSecs, setCoolDownSecs] = useState(120)
   /** What Random may draw from. Everything, until it is narrowed. */
   const [pool, setPool] = useState<string[]>(() =>
     EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name),
@@ -182,7 +234,15 @@ export function GenerateDialog({
           recovery,
           ...(recovery === 'active' && cardio !== VARY ? { recoveryExercise: cardio } : {}),
           ...(recovery === 'active' && cardio === VARY ? { recoveryPool: pool } : {}),
-          ...(recovery === 'active' ? { warmUpExercise: warmUp, coolDownExercise: coolDown } : {}),
+          ...(recovery === 'active'
+            ? {
+                warmUpExercise: warmUp,
+                coolDownExercise: coolDown,
+                warmUpMs: warmUpSecs * 1000,
+                coolDownMs: coolDownSecs * 1000,
+              }
+            : {}),
+          recoveryMs: recoverSecs * 1000,
           equipment,
           sets,
         },
@@ -205,6 +265,9 @@ export function GenerateDialog({
     seed,
     sets,
     warmUp,
+    warmUpSecs,
+    recoverSecs,
+    coolDownSecs,
   ])
 
   const chosen = useMemo(() => {
@@ -286,6 +349,8 @@ export function GenerateDialog({
             options={cardioOptions}
             value={warmUp}
             onChange={setWarmUp}
+            seconds={warmUpSecs}
+            onSeconds={setWarmUpSecs}
           />
         )}
 
@@ -296,6 +361,8 @@ export function GenerateDialog({
             value={cardio}
             onChange={setCardio}
             extra={{ value: VARY, label: 'Random, a different one each time' }}
+            seconds={recoverSecs}
+            onSeconds={setRecoverSecs}
           />
         )}
 
@@ -338,7 +405,16 @@ export function GenerateDialog({
             options={cardioOptions}
             value={coolDown}
             onChange={setCoolDown}
+            seconds={coolDownSecs}
+            onSeconds={setCoolDownSecs}
           />
+        )}
+
+        {recovery === 'passive' && (
+          <label className="generate__field">
+            <span className="label label--sm">Resting for</span>
+            <Seconds value={recoverSecs} label="Resting for, seconds" onChange={setRecoverSecs} />
+          </label>
         )}
 
         <Choice
