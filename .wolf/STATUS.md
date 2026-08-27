@@ -697,11 +697,20 @@ saving to the library, same ending as Paste.
 
 ### Phases
 
-1. `scripts/exercise_metadata.py`, a sibling of `exercise_plates.py`, generating
-   the machine half of `src/routines/exercises.ts` from the PDF. Reproducible
-   rather than remembered, which is the principle the plate script already states.
-2. The authored non-machine exercises, and the push/pull review.
-3. The generator and its tests. No UI, driven from tests.
+1. DONE (commit 7870b1b). `scripts/exercise_metadata.py` generates
+   `exercises.machine.ts` from the PDF: 41 rows, every field but `pattern` read
+   out of the manual.
+2. DONE. `exercises.other.ts`, 86 rows harvested from
+   `strength-training.routine.json` and the four emails and canonicalised. The
+   corpus held 105 names but spells Mountain Climbers three ways and Bulgarian
+   Split Squat four, and carries per-side qualifiers as if they were names.
+   Seven rows are marked ADDED where the corpus had one of an obvious pair.
+   The `use` field (`strength` / `cardio` / `mobility`) fell out of the data and
+   gives the generator its warm-up and active-recovery pools from the same table.
+   Push/pull reviewed and accepted by Wayne 2026-08-27.
+   **127 exercises total. Torso is machine 5, other 21, so the shortfall that
+   prompted the whole one-table design is comfortably covered.**
+3. NEXT. The generator and its tests. No UI, driven from tests.
 4. The dialog, wired to the editor.
 
 ### Tests

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T18:15:08.402Z",
-    "fileCount": 54,
+    "lastScanned": "2026-08-27T18:20:16.505Z",
+    "fileCount": 55,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "10b9da13b486409ff1748bc7fa6272aa03faf5e85dd77a7aa76f6c5d1a74bde6",
-    "storeUpdatedAt": "2026-08-27T18:15:08.411Z"
+    "renderedHash": "54667a1ee94fdc26f67ee15f769ac9a51a09ad188af1b36e8fc06084c160bb81",
+    "storeUpdatedAt": "2026-08-27T18:20:16.516Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1163,6 +1163,15 @@
       "size": 3724,
       "mtimeMs": 1787854508321.5283,
       "updatedAt": "2026-08-27T18:15:08.402Z",
+      "source": "hook"
+    },
+    "src/routines/exercises.other.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2802,
+      "hash": "f7ed583dd5916069",
+      "size": 10303,
+      "mtimeMs": 1787854816427.3608,
+      "updatedAt": "2026-08-27T18:20:16.505Z",
       "source": "hook"
     }
   },
