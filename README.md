@@ -60,14 +60,15 @@ across a gym, with the phone propped against a rack.
   intervals and AMRAPs, and any line it could not place is reported before
   anything is saved. See [the paste format](docs/paste-format.md) for what it
   reads, with an example using every part of it.
-- **Imports** the `.tabata` exports of the Tabata Timer app, its own bundles, and
+- **Imports** the `.tabata` exports of the Tabata Timer app, its own backups, and
   plain-text routines.
 - **Edits** routines: steps, durations, sets, ladders, sections and images, with
   undo.
-- **Shares** a routine four ways: a link, plain text, a `.json` file with the
-  photos inside it, or a `.txt` in the format it can paste back. Text says what
-  it had to leave behind rather than dropping it quietly.
-- **Exports** the whole library as one file.
+- **Sends** a routine three ways: a link, plain text, or a `.txt` in the format it
+  can paste back. None of them carries a picture, so each says what it had to
+  leave behind rather than dropping it quietly.
+- **Backs up** one routine or the whole library to a `.json`, images included.
+  It is the only format that carries everything, so it is the one to keep.
 - **Owns its images.** It stores local copies, so a routine survives gym wifi and
   the image host eventually losing a file.
 
@@ -113,7 +114,7 @@ src/
   audio/      Cues, pre-scheduled on the Web Audio clock.
   editor/     Pure operations on a routine's block tree, plus undo.
   media/      Images: content-addressed storage, downscaling, offline pinning.
-  storage/    IndexedDB, the library, the export format, share links, read-time migration.
+  storage/    IndexedDB, the library, the backup format, share links, read-time migration.
   routines/   The .tabata importer, the paste parser, the seed, the image catalogue.
   ui/         Screens, the type scale, the design tokens.
 ```
@@ -153,7 +154,7 @@ axes and is sized from the longest value a step will show, so it never changes
 size mid-step.
 
 **Everything is local.** No accounts, no server, no telemetry. Routines live in
-IndexedDB, and images live beside them once pinned. Export, share links and the
+IndexedDB, and images live beside them once pinned. Backups, share links and the
 `.tabata` importer are how data moves.
 
 ## Testing
