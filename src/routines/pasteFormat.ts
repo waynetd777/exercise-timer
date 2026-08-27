@@ -127,7 +127,7 @@ const EACH_FOR = new RegExp(`${NUMBER}\\s*${UNIT}\\s+each\\b(?!\\s+(?:side|leg|a
  * where the line is read rather than here. See the round handler.
  */
 const ROUNDS = new RegExp(
-  `^(?:repeat\\s*[×x]?\\s*)?(\\d+)\\s*(?:${DASH}\\s*(\\d+))?\\s*rounds?\\b`,
+  `^(?:repeat\\s*[×x]?\\s*)?(\\d+)\\s*(?:${DASH}\\s*(\\d+))?\\s*(?:rounds?\\b|[×x]\\s*$)`,
   'i',
 )
 
@@ -148,9 +148,24 @@ const SETS_OF = new RegExp(`^(\\d+)\\s*[×x]\\s*${NUMBER}\\s*${UNIT}\\s*$`, 'i')
  */
 const UNIT_WORD = /^(?:secs?|seconds?|mins?|minutes?|reps?)\b/i
 const LADDER = new RegExp(
-  `^(?:counting:\\s*)?(\\d+(?:\\s*${DASH}\\s*\\d+){2,})\\s*(.*)$`,
+  `^(?:counting:\\s*)?(\\(?\\d+\\)?(?:\\s*[${DASH_CHARS},]\\s*\\(?\\d+\\)?){2,})\\s*(.*)$`,
   'i',
 )
+/**
+ * A ladder of DURATIONS rather than of reps.
+ *
+ * "20-30-45-30-20 sec cardio" states the unit once at the end;
+ * "Plank 20sec-30sec-40sec-30sec-20sec" repeats it on every rung and puts the
+ * exercise first. Both are a run of timed steps of the same movement, which is
+ * what a person reading them does, and NOT a `Ladder`, whose rungs are counts.
+ */
+const DURATION_LADDER = new RegExp(
+  '^(?:(\\p{L}[^0-9]*?)\\s+)?' +
+    `(\\d+\\s*(?:sec|secs|min|mins)?(?:\\s*${DASH}\\s*\\d+\\s*(?:sec|secs|min|mins)?){2,})` +
+    '\\s*(sec|secs|second|seconds|min|mins|minute|minutes)?\\s*(.*)$',
+  'iu',
+)
+
 /** The same, written the other way round: "sit ups 5-10-15-10-5". */
 const LADDER_TRAILING = new RegExp(
   `^(\\p{L}[^${DASH_CHARS}]*?)\\s+(\\d+(?:\\s*${DASH}\\s*\\d+){2,})\\s*$`,
@@ -337,7 +352,8 @@ const LEADING_RANGE_DURATION = new RegExp(
 )
 
 /** "wide squats 15x", "…crunch x12". The `x` is what makes it a count. */
-const TRAILING_COUNT = /^(\p{L}.*?)[\s:]+(?:[×x]\s*(\d+)|(\d+)\s*[×x])$/u
+const TRAILING_COUNT =
+  /^(\p{L}.*?)[\s:]+(?:[×x]\s*(\d+)|(\d+)\s*[×x])(?:\s+(?:each|per)\s+(?:side|leg|arm|direction))?$/u
 
 /**
  * "20 × Front Punches + 20 × Uppercuts" is two exercises on one line, and so is
@@ -804,14 +820,36 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
+    /*
+     * A ladder of durations is read BEFORE a ladder of reps, because it looks
+     * exactly like one until the unit is noticed. Emitted as the run of timed
+     * steps it is: "20-30-45-30-20 sec cardio" is five steps of cardio.
+     */
+    const durationLadder = DURATION_LADDER.exec(line)
+    if (durationLadder && (durationLadder[3] || /\d\s*(?:sec|min)/i.test(durationLadder[2]!))) {
+      const unit = durationLadder[3] ?? 'sec'
+      const name = tidy(durationLadder[1] ?? durationLadder[4] ?? '')
+      if (name !== '') {
+        flushAmrap()
+        for (const rung of durationLadder[2]!.split(new RegExp(DASH))) {
+          const own = /(\d+)\s*(sec|secs|min|mins)/i.exec(rung)
+          const value = own ? own[1]! : rung.trim()
+          addItem(parseItem(`${name} - ${value} ${own ? own[2]! : unit}`))
+        }
+        return
+      }
+    }
+
     const trailing = LADDER_TRAILING.exec(line)
     const ladderCounts = LADDER.exec(line) ?? (trailing ? [line, trailing[2]!, trailing[1]!] : null)
     const mainLift = ladderCounts?.[2]?.trim() ?? ''
     if (ladderCounts && (mainLift === '' || (/^\p{L}/u.test(mainLift) && !UNIT_WORD.test(mainLift)))) {
       flushAmrap()
       const counts = ladderCounts[1]!
-        .split(new RegExp(DASH))
-        .map((part) => Number(part.trim()))
+        .split(new RegExp(`[${DASH_CHARS},]`))
+        // A rung offered rather than required is written "(16)". It is still a
+        // rung; the brackets are the instructor saying "if you have it in you".
+        .map((part) => Number(part.replace(/[()]/g, '').trim()))
         .filter((count) => Number.isFinite(count))
       const group: Ladder = { kind: 'ladder', id: nextId('lad'), counts, children: [] }
       ensureSection().children.push(group)
