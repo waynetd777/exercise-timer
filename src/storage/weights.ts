@@ -33,39 +33,64 @@ import { findLoad } from '../routines/loads'
 const KEY = 'davshack-timer-weights'
 
 /**
- * The starting numbers, from two sources, and the better one wins.
+ * The starting numbers, nearly all of them Wayne's own.
  *
- * WHAT WAYNE ACTUALLY LIFTS, where he has said. Four of these are his own
- * numbers off his own machine (2026-08-27), and they replace the looked-up ones
- * outright: the shoulder press estimate was 30kg against a real 10, which is
- * the size of error worth knowing about. A Horizon stack is not a commercial
- * machine and a home cable run is not a gym one, so where the two disagree the
- * machine is right and the table is wrong.
+ * READ OUT OF HIS ROUTINES on 2026-08-28, plus the four he gave directly. His
+ * routines are the best evidence there is: they are what he has been loading
+ * the machine to, week after week.
  *
- * THE REST from strengthlevel.com's standards for a 55-year-old man at 88kg,
- * taken at NOVICE and multiplied by 0.70 for a working weight at twelve reps
- * rather than a one-rep max, rounded UP to the nearest 5kg because that is what
- * a stack can do: the pin goes in a hole, and there is no 63kg.
+ * The looked-up numbers they replaced were BADLY wrong, which is the thing to
+ * remember here. strengthlevel.com said 30kg for the shoulder press against a
+ * real 10, and 35kg for the hamstring curl against a real 10. A Horizon home
+ * stack is not the commercial machine that site measures, and its numbering is
+ * not the same numbering. Where the two disagree the machine is right.
  *
- * The other fifty-five are blank on purpose. 25 of the 41 multi-gym exercises
- * have no equivalent on that site at all, and a guessed weight is worse than an
- * empty field: an empty field asks, and a wrong number gets loaded on.
+ * ONE GUESS LEFT, marked below. Everything else here he has lifted.
+ *
+ * The other forty-nine are blank on purpose: a guessed weight is worse than an
+ * empty field, because an empty field asks and a wrong number gets loaded on.
  */
 export const SEED_WEIGHTS: Readonly<Record<string, string>> = {
-  // Wayne's own, off the machine.
+  // Given directly, 2026-08-27.
   'Standing Shoulder Press': '10kg',
-  'Seated Abdominal Crunch': '20kg',
+  'Seated Abdominal Crunch': '15kg',
   'Seated Leg Extension': '15kg',
-  'Hip Abductor Leg Raise': '20kg',
 
-  // Looked up, and still to be checked against the machine.
+  // Read out of routines 2 and 3.
   'Leg Press': '65kg',
-  'Standard Chest Press': '35kg',
-  'Lat Pulldown': '35kg',
-  'Seated Row': '35kg',
-  'Calf Press': '50kg',
-  'Free-Standing Hamstring Curl': '35kg',
-  'Cable Fly': '35kg',
+  'Calf Press': '45kg',
+  'Lat Pulldown': '30kg',
+  'Seated Row': '30kg',
+  'Bentover Row': '30kg',
+  'Deadlift': '30kg',
+  'Side Cable Bends': '30kg',
+  'Incline Chest Press': '25kg',
+  'Glute Kickback': '20kg',
+  'Hip Abductor Leg Raise': '15kg',
+  'Abdominal Oblique Crunch': '15kg',
+  'Rear Cable Fly': '10kg',
+  'Cable Converging Shoulder Press': '10kg',
+  'Free-Standing Hamstring Curl': '10kg',
+  'Shoulder Press': '10kg',
+
+  /*
+   * Inferred: routine 2 says "Chest Press 30kg", which is a name the table does
+   * not have. The standard one is what that almost certainly means, and 30
+   * matches the shape of every other correction — the looked-up 35 was high.
+   */
+  'Standard Chest Press': '30kg',
+
+  /*
+   * STILL A GUESS. strengthlevel, novice, ×0.70, rounded up to the nearest 5kg
+   * because that is where the pin goes. No routine of Wayne's has ever loaded
+   * it, so there is nothing better to say — and on this machine's record, it is
+   * more likely high than low.
+   *
+   * The Cable Fly used to sit beside it at a looked-up 35kg and has been taken
+   * out rather than corrected: Wayne's own Rear Cable Fly, on the same cable
+   * stack, is 10kg. 35 was not a number worth keeping, and an empty field asks
+   * the question instead of answering it wrongly.
+   */
   'Triceps Press': '20kg',
 }
 

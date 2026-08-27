@@ -509,3 +509,16 @@ in `SEED_WEIGHTS` are still unchecked; do not defend them if he corrects one.
 exercise up from a step name must go through `findLoad()` in `routines/loads.ts`,
 which allows a shorter word to start a longer one. Do not call
 `weights.get(exerciseKey(name))` directly — that was the bug.
+
+## Wayne's routines are the weight authority (2026-08-28)
+
+Audited routines 2 and 3 against the seeded weights: FIVE disagreed and the
+routine was right every time. The looked-up numbers were high, sometimes by
+3.5× (hamstring curl 35 vs a real 10). `SEED_WEIGHTS` is now fifteen numbers
+read out of his routines plus three he gave; only Triceps Press is still a
+guess, and the Cable Fly guess was removed rather than corrected. If a weight
+question comes up again, read his routines before reaching for a website.
+
+"Low Pulley Squat" is in routine 2 at 25kg and is NOT in the exercise table —
+the guide does not illustrate it. It cannot take a weight from the page until
+someone adds it.

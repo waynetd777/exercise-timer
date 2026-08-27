@@ -242,3 +242,4 @@
 | 00:40 | Clear-× on the weight field, bulk follow button, weights help tray | EditorScreen, WeightsScreen, loads.ts, help.ts | v6.8, 978 green | ~40k |
 | 00:48 | Drop the weights page lede; the help tray carries it | WeightsScreen, weights.css | v6.9, 978 green | ~5k |
 | 00:55 | Fix weights not matching a routine's shorthand names | loads.ts, weights.ts, tests | v7.0, 984 green | ~25k |
+| 01:10 | Audit routines 2 and 3; seed weights from what Wayne actually lifts | weights.ts, help.ts, tests | v7.1, 984 green | ~35k |
