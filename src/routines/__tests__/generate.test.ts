@@ -42,6 +42,9 @@ const distinct = (workout: Workout) => [...new Set(exercises(workout).map((s) =>
 
 const areaOf = (name: string) => EXERCISES.find((e) => e.name === name)?.area
 
+/** Everything on offer to move with, which is what the dialog checks by default. */
+const ALL_CARDIO = EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name)
+
 describe('the length it asks for', () => {
   it.each([30, 45, 60])('lands within two minutes of %i', (minutes) => {
     const { workout } = make({ totalMs: minutes * 60_000 })
@@ -140,7 +143,7 @@ describe('the shape it builds', () => {
   })
 
   it('puts a different exercise in every slot, when asked to vary', () => {
-    const { workout } = make({ varyRecovery: true, totalMs: 50 * 60_000 })
+    const { workout } = make({ recoveryPool: ALL_CARDIO, totalMs: 50 * 60_000 })
     const cardioNames = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
     const slots = workout.blocks.filter(
       (b): b is Segment => b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
@@ -154,10 +157,29 @@ describe('the shape it builds', () => {
     expect(new Set(slots.map((s) => s.name)).size).toBeGreaterThan(1)
   })
 
+  it('draws only from the list it is given', () => {
+    // The point of the list rather than a flag: "surprise me" stays bounded.
+    const only = ['Cycling', 'Trampoline']
+    const { workout } = make({ recoveryPool: only, totalMs: 50 * 60_000 })
+    const cardioNames = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
+    const slots = workout.blocks.filter(
+      (b): b is Segment => b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
+    )
+    expect(slots.length).toBeGreaterThan(4)
+    expect([...new Set(slots.map((s) => s.name))].sort()).toEqual(['Cycling', 'Trampoline'])
+  })
+
+  it('falls back rather than failing when the list holds nothing usable', () => {
+    const { workout, notes } = make({ recoveryPool: ['Not an exercise'] })
+    expect(notes.join(' ')).toMatch(/Nothing in the list to move with/)
+    const names = workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
+    expect(names).toContain('Cycling')
+  })
+
   it('leaves the ten-minute warm-up alone when varying', () => {
     // Ten minutes of one thing is what a warm-up is. Ten minutes of burpees is
     // not something to hand anybody.
-    const { workout } = make({ varyRecovery: true })
+    const { workout } = make({ recoveryPool: ALL_CARDIO })
     const warmUp = workout.blocks.find(
       (b): b is Segment => b.kind === 'segment' && b.name === 'Warm Up',
     )
@@ -167,7 +189,7 @@ describe('the shape it builds', () => {
   it('leaves the cool down alone as well', () => {
     // It is named for what it is, not for the exercise, so varying it would
     // change a picture and nothing else.
-    const { workout } = make({ varyRecovery: true })
+    const { workout } = make({ recoveryPool: ALL_CARDIO })
     const cool = workout.blocks.at(-1)
     expect(cool?.kind === 'segment' && cool.name).toBe('Cool Down')
   })

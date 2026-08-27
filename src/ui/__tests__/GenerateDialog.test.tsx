@@ -93,6 +93,34 @@ describe('GenerateDialog', () => {
     expect(screen.queryByLabelText('Active recovery')).toBeNull()
   })
 
+  it('offers a list to randomise from, all on, once Random is chosen', () => {
+    open()
+    expect(screen.queryByRole('button', { name: 'Burpees' })).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('Active recovery'), { target: { value: '[random]' } })
+    const burpees = screen.getByRole('button', { name: 'Burpees' })
+    expect(burpees.getAttribute('aria-pressed')).toBe('true')
+
+    // Bounding it is the point: nobody wants a routine willing to put burpees
+    // in every gap.
+    fireEvent.click(burpees)
+    expect(screen.getByRole('button', { name: 'Burpees' }).getAttribute('aria-pressed')).toBe(
+      'false',
+    )
+  })
+
+  it('will not generate with nothing to move with', () => {
+    open()
+    fireEvent.change(screen.getByLabelText('Active recovery'), { target: { value: '[random]' } })
+    for (const chip of screen.getAllByRole('button')) {
+      if (chip.getAttribute('aria-pressed') === 'true' && chip.textContent !== 'Upper body') {
+        fireEvent.click(chip)
+      }
+    }
+    expect(screen.getByText('Pick at least one thing to move with.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Open in editor/ })).toHaveProperty('disabled', true)
+  })
+
   it('loads an exercise from what was last used for it', () => {
     const onGenerate = open([saved])
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))

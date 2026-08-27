@@ -53,8 +53,13 @@ export type RoutineSpec = {
   /** A cardio exercise's name, for `active`. Defaults to Cycling. */
   recoveryExercise?: string
   /**
-   * A DIFFERENT cardio exercise in every minute-long slot, rather than the same
-   * one throughout. Takes precedence over `recoveryExercise`.
+   * Cardio exercises to draw the between-set minutes from, a different one each
+   * time. Takes precedence over `recoveryExercise`; absent means the same
+   * exercise all the way down.
+   *
+   * A LIST rather than a flag, so "surprise me" can still be bounded: nobody
+   * wants a routine that is happy to put burpees in every gap, and the choice of
+   * what may come up is the user's.
    *
    * The WARM-UP and the COOL DOWN are not included. They bookend the routine and
    * are named for what they are rather than for the exercise, so varying them
@@ -62,7 +67,7 @@ export type RoutineSpec = {
    * what a warm-up IS, and ten minutes of burpees is not something to hand
    * anybody.
    */
-  varyRecovery?: boolean
+  recoveryPool?: readonly string[]
   equipment: EquipmentScope
   /** Sets per exercise. A per-side exercise gets two a side regardless. */
   sets?: number
@@ -301,7 +306,12 @@ export function generateRoutine(
    * an independent draw per slot repeats itself, and a minute of burpees twice
    * running is the one thing nobody wants from "surprise me".
    */
-  const spin = spec.varyRecovery ? shuffled(cardio, rng) : []
+  const asked = spec.recoveryPool ?? []
+  const chosen = cardio.filter((e) => asked.includes(e.name))
+  if (asked.length > 0 && chosen.length === 0) {
+    notes.push(`Nothing in the list to move with is a cardio exercise, so ${recovery?.name} was used.`)
+  }
+  const spin = chosen.length > 0 ? shuffled(chosen, rng) : []
   let spun = 0
   const nextSpin = (): Exercise => {
     const pick = spin[spun % spin.length] ?? recovery!
@@ -396,7 +406,7 @@ export function generateRoutine(
     const announce = body.length > 0 || spec.recovery !== 'active'
     // Drawn only where a slot is actually going to be built, or the sequence
     // advances on exercises that never make it past the budget check.
-    const spinner = spec.varyRecovery && announce && spec.recovery === 'active' ? nextSpin() : recovery
+    const spinner = spin.length > 0 && announce && spec.recovery === 'active' ? nextSpin() : recovery
     const blocks = exerciseBlocks(
       pick,
       spec,
