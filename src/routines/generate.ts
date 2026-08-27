@@ -38,6 +38,7 @@ import { SCHEMA_VERSION } from '../engine/types'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
+import { PRESCRIPTIONS } from './exercises.prescription'
 
 export type Recovery = 'passive' | 'active'
 
@@ -119,6 +120,38 @@ const PER_SIDE_SETS = 2
  * prescribes it, which is what `exercises.prescription.ts` is for.
  */
 const MACHINE_REPS = 12
+/** The longest a circuit set runs. See `asks`. */
+const MAX_SET_MS = 45_000
+
+/**
+ * What one set of this exercise asks for.
+ *
+ * The multi-gym is Wayne's rule: twelve reps inside twenty seconds, whatever the
+ * movement. Everything else is prescribed the way the instructor prescribes IT,
+ * out of `exercises.prescription.ts`, which is why a plank comes out as forty
+ * seconds and hammer curls as twelve.
+ *
+ * Timed either way. These are the circuit shapes, where the clock is what makes
+ * the length knowable; a count rides along as the target. An exercise nobody has
+ * ever prescribed gets the plain twenty seconds.
+ */
+function asks(exercise: Exercise, machineReps: number): { durationMs: number; count?: number } {
+  if (exercise.equipment === 'machine') return { durationMs: WORK_MS, count: machineReps }
+
+  const said = PRESCRIPTIONS.find((p) => p.name === exercise.name)
+  if (!said) return { durationMs: WORK_MS }
+  /*
+   * Capped at `MAX_SET_MS`, because some of the harvested durations are the
+   * FORMAT'S rather than the exercise's: an EMOM minute is sixty seconds because
+   * the EMOM says so, not because a bicep curl takes a minute. In a circuit that
+   * would be three minutes of curls with ten-second rests.
+   */
+  const wanted = (said.seconds ?? WORK_MS / 1000) * 1000
+  return {
+    durationMs: Math.min(Math.max(wanted, WORK_MS), MAX_SET_MS),
+    ...(said.prescribe === 'reps' && said.reps !== undefined ? { count: said.reps } : {}),
+  }
+}
 
 /**
  * A small deterministic generator, so a seed pins a routine.
@@ -269,13 +302,12 @@ function exerciseBlocks(
 ): Block[] {
   const prepareMs = needsRigging(exercise) ? RIG_PREPARE_MS : PREPARE_MS
   const labelled = load ? `${exercise.name} ${load}` : exercise.name
+  const set = asks(exercise, spec.machineReps ?? MACHINE_REPS)
   const work = segment({
     name: exercise.name,
     role: 'work',
-    durationMs: WORK_MS,
-    ...(exercise.equipment === 'machine'
-      ? { reps: { kind: 'fixed' as const, count: spec.machineReps ?? MACHINE_REPS } }
-      : {}),
+    durationMs: set.durationMs,
+    ...(set.count !== undefined ? { reps: { kind: 'fixed' as const, count: set.count } } : {}),
     ...(load ? { load } : {}),
     ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
   })
