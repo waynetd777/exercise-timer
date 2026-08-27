@@ -486,3 +486,18 @@ Seated Abdominal Crunch 20kg, Seated Leg Extension 15kg, Hip Abductor Leg Raise
 the truth. A Horizon home stack is not a commercial machine. Where Wayne states
 a weight it replaces the looked-up one outright, and the remaining eight seeds
 in `SEED_WEIGHTS` are still unchecked; do not defend them if he corrects one.
+
+## The weights page, completed (v6.8, 2026-08-27)
+
+- `stripLoads()` in `routines/loads.ts` is the DESTRUCTIVE direction: it takes a
+  stated weight off a step whose exercise the page can answer for. Behind a
+  confirm, and it deletes the key rather than emptying it — an empty string
+  would read as a stated weight.
+- A step whose exercise has NO weight on the page keeps its own: the routine is
+  the only record of it. Do not "simplify" that away.
+- The editor's Weight field is the one CONTROLLED field among the three extras,
+  because the × must change the display and commit in the same gesture. It is
+  keyed on the committed value like its neighbours, so undo still remounts it.
+  `onMouseDown={preventDefault}` on the × or blur commits the old text first.
+- Each screen with a rule of its own gets its own HelpTray (`WEIGHTS_HELP`),
+  not a section in `LIBRARY_HELP`.

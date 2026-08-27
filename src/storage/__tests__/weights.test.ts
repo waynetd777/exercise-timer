@@ -9,7 +9,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Block } from '../../engine/types'
-import { exerciseKey, fillLoads } from '../../routines/loads'
+import { exerciseKey, fillLoads, stripLoads } from '../../routines/loads'
 import {
   currentWeights,
   loadWeights,
@@ -134,5 +134,50 @@ describe('fillLoads', () => {
     const none: Block[] = [blocks[2]!]
     expect(fillLoads(none, weights)).toBe(none)
     expect(fillLoads(blocks, new Map())).toBe(blocks)
+  })
+})
+
+describe('stripLoads', () => {
+  const weights = new Map([[exerciseKey('Leg Press'), '65kg']])
+
+  it('takes off a weight the page can answer for', () => {
+    const blocks: Block[] = [
+      { kind: 'segment', id: 'a', name: 'Leg Press', role: 'work', durationMs: 20_000, load: '40kg' },
+    ]
+    const { blocks: next, cleared } = stripLoads(blocks, weights)
+    expect(cleared).toBe(1)
+    expect((next[0] as { load?: string }).load).toBeUndefined()
+    // Removed, not emptied: an empty string would read as a stated weight.
+    expect('load' in (next[0] as object)).toBe(false)
+  })
+
+  it('leaves a weight nothing else records', () => {
+    // The page says nothing about a band, so the routine is the only copy.
+    const blocks: Block[] = [
+      { kind: 'segment', id: 'a', name: 'Band Squats', role: 'work', durationMs: 20_000, load: 'red' },
+    ]
+    expect(stripLoads(blocks, weights).cleared).toBe(0)
+  })
+
+  it('counts every step, inside groups too', () => {
+    const blocks: Block[] = [
+      {
+        kind: 'repeat',
+        id: 'r',
+        times: 3,
+        children: [
+          { kind: 'segment', id: 'a', name: '12 × Leg Press', role: 'work', durationMs: 20_000, load: '40kg' },
+          { kind: 'segment', id: 'b', name: 'Get ready: Leg Press', role: 'prepare', durationMs: 15_000, load: '40kg' },
+        ],
+      },
+    ]
+    expect(stripLoads(blocks, weights).cleared).toBe(2)
+  })
+
+  it('returns what it was given when there is nothing to clear', () => {
+    const blocks: Block[] = [
+      { kind: 'segment', id: 'a', name: 'Leg Press', role: 'work', durationMs: 20_000 },
+    ]
+    expect(stripLoads(blocks, weights).blocks).toBe(blocks)
   })
 })

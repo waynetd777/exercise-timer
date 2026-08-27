@@ -75,3 +75,49 @@ export function withWeights(workout: Workout, weights: ReadonlyMap<string, strin
   const blocks = fillLoads(workout.blocks, weights)
   return blocks === workout.blocks ? workout : { ...workout, blocks: [...blocks] }
 }
+
+/**
+ * The same routine with its stated weights TAKEN OUT, where the table has one.
+ *
+ * The other direction, and the destructive one. Routines written before the
+ * weights page carry their own load on every step, so they override it and go
+ * on saying 65kg after you have moved to 70. This is how they let go: a step
+ * whose exercise has a weight in the table loses its own and starts following.
+ *
+ * A step the table says nothing about keeps what it has. Losing that would be
+ * losing the only record of it.
+ *
+ * Returns the count as well, because this cannot be undone and the number is
+ * what makes the question answerable: "clear 14 weights in 3 routines" is a
+ * decision, "clear your weights" is a leap.
+ */
+export function stripLoads(
+  blocks: readonly Block[],
+  weights: ReadonlyMap<string, string>,
+): { blocks: readonly Block[]; cleared: number } {
+  let cleared = 0
+  const walk = (list: readonly Block[]): Block[] =>
+    list.map((block) => {
+      if (block.kind === 'segment') {
+        if (block.load === undefined || !weights.has(exerciseKey(block.name))) return block
+        cleared += 1
+        const { load: _gone, ...rest } = block
+        return rest
+      }
+      const children = walk(block.children)
+      if (children.every((child, at) => child === block.children[at])) return block
+      return { ...block, children } as Block
+    })
+
+  const next = walk(blocks)
+  return cleared === 0 ? { blocks, cleared } : { blocks: next, cleared }
+}
+
+/** The same, for a whole routine. */
+export function withoutStatedLoads(
+  workout: Workout,
+  weights: ReadonlyMap<string, string>,
+): { workout: Workout; cleared: number } {
+  const { blocks, cleared } = stripLoads(workout.blocks, weights)
+  return cleared === 0 ? { workout, cleared } : { workout: { ...workout, blocks: [...blocks] }, cleared }
+}

@@ -36,6 +36,11 @@
   height: 44px;
 }
 
+/* Back on the left, help on the right, title centred between them. */
+.weights__head .btn:last-child {
+  justify-self: end;
+}
+
 .weights__title {
   margin: 0;
   text-align: center;

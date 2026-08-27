@@ -824,14 +824,13 @@ not disagree.
   size. Bundled paths, so no blob to read; a row without one gets an empty frame
   so the names still line up.
 
-### The gap this leaves, and it is worth closing
-
-**Routines saved BEFORE this still carry their own loads**, so they do not follow
-the settings page. Capturing them is one tap (Fill from my routines); making them
-follow is not built. The obvious next step is the inverse button — "let my
-routines follow these weights", stripping `load` from steps whose exercise has a
-weight in Settings. It is a bulk edit of the library, so it wants a confirm and
-Wayne's say-so before it ships.
+**v6.8 closed the gap.** "Let n routines follow these" runs `stripLoads`, which
+takes the stated weight off every step whose exercise the page can answer for,
+behind a ConfirmDialog naming the count. A step for an exercise with nothing set
+keeps its weight: the routine is then the only record of it. The editor's Weight
+field gained an × that clears in one gesture, and the page gained a help tray of
+its own (`WEIGHTS_HELP`), because "an empty field means something" is the one
+rule that must not be buried in the library's list.
 
 ---
 

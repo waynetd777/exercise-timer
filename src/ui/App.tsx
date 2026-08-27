@@ -137,7 +137,17 @@ export function App() {
   }
 
   if (view.screen === 'weights') {
-    return <WeightsScreen workouts={library.workouts} onExit={toLibrary} />
+    return (
+      <WeightsScreen
+        workouts={library.workouts}
+        onExit={toLibrary}
+        /* One save each, in order: `add` replaces a routine by id and returns
+           the stamped copy, and doing them together would race the state. */
+        onFollow={async (rewritten) => {
+          for (const workout of rewritten) await library.add(workout)
+        }}
+      />
+    )
   }
 
   if (view.screen === 'sounds' && SoundsScreen) {

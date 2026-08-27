@@ -938,3 +938,48 @@
   flex: 1 1 auto;
   min-width: 0;
 }
+
+/*
+ * A field with an × in its right-hand end. The button overlays the input rather
+ * than sitting beside it, so the field keeps the full width of the row and the
+ * three extras still line up.
+ */
+.efield-clearable {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  min-width: 0;
+}
+
+.efield-clearable .efield {
+  /* Room for the button, so a long weight does not run under it. */
+  padding-right: 2rem;
+}
+
+.efield-clear {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  color: var(--bone-faint);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.efield-clear:hover,
+.efield-clear:focus-visible {
+  color: var(--bone);
+  background: var(--ink-700);
+}
+
+.efield-clear .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}

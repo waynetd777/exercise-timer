@@ -8,9 +8,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Workout } from '../engine'
 import type { Equipment } from '../routines/exercises'
 import { EXERCISES, LOADABLE_GROUPS, loadable } from '../routines/exercises'
-import { exerciseKey } from '../routines/loads'
-import { loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
-import { BackIcon, CloseIcon } from './icons'
+import { exerciseKey, withoutStatedLoads } from '../routines/loads'
+import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
+import { BackIcon, CloseIcon, HelpIcon } from './icons'
+import { ConfirmDialog } from './ConfirmDialog'
+import { HelpTray } from './HelpTray'
+import { WEIGHTS_HELP } from './help'
 import './weights.css'
 
 /**
@@ -89,9 +92,12 @@ function ImageView({ src, name, onClose }: { src: string; name: string; onClose:
 export function WeightsScreen({
   workouts,
   onExit,
+  onFollow,
 }: {
   workouts: readonly Workout[]
   onExit: () => void
+  /** Saves the routines this page rewrote. See `follow` below. */
+  onFollow: (workouts: readonly Workout[]) => Promise<void> | void
 }) {
   /*
    * The store is held here and written through on every keystroke. Sixty-seven
@@ -102,6 +108,8 @@ export function WeightsScreen({
   const [weights, setWeights] = useState(loadWeights)
   const [query, setQuery] = useState('')
   const [viewing, setViewing] = useState<{ src: string; name: string } | null>(null)
+  const [asking, setAsking] = useState(false)
+  const [helping, setHelping] = useState(false)
 
   /*
    * Every illustration here is a BUNDLED one: a short path under `public/`,
@@ -156,6 +164,36 @@ export function WeightsScreen({
     saveWeights(next)
   }
 
+  /*
+   * What is still overriding this page.
+   *
+   * Every routine written before the page carries its own weight on every step,
+   * so it goes on saying 65kg after you have moved to 70. Counted here, and
+   * cleared only on the button below: it cannot be undone, and the number is
+   * what makes the question answerable.
+   *
+   * Recomputed on every keystroke in a weight field, which is right: typing a
+   * weight for an exercise brings that exercise's steps into scope.
+   */
+  const overriding = useMemo(() => {
+    const table = currentWeights()
+    const rewritten: Workout[] = []
+    let steps = 0
+    for (const workout of workouts) {
+      const { workout: next, cleared } = withoutStatedLoads(workout, table)
+      if (cleared > 0) {
+        rewritten.push(next)
+        steps += cleared
+      }
+    }
+    return { rewritten, steps }
+  }, [workouts, weights])
+
+  const follow = () => {
+    setAsking(false)
+    void onFollow(overriding.rewritten)
+  }
+
   const total = EXERCISES.filter((e) => loadable(e)).length
   const filled = EXERCISES.filter((e) => loadable(e) && shown(e.name)).length
 
@@ -171,7 +209,17 @@ export function WeightsScreen({
           <BackIcon />
         </button>
         <h1 className="weights__title">Weights</h1>
-        <span />
+        {/* In the slot the back button's mirror image leaves, which is why that
+            slot was reserved rather than collapsed. */}
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={() => setHelping(true)}
+          aria-label="Help"
+          title="What this screen can do"
+        >
+          <HelpIcon />
+        </button>
       </header>
 
       <p className="weights__lede label label--sm">
@@ -194,6 +242,16 @@ export function WeightsScreen({
         {missing.length > 0 && (
           <button className="chip chip--action" onClick={fillFromRoutines}>
             Fill {missing.length} from my routines
+          </button>
+        )}
+        {overriding.steps > 0 && (
+          <button
+            className="chip"
+            onClick={() => setAsking(true)}
+            title="Clear the weights your routines state, so they use this page instead"
+          >
+            Let {overriding.rewritten.length}{' '}
+            {overriding.rewritten.length === 1 ? 'routine' : 'routines'} follow these
           </button>
         )}
       </div>
@@ -261,6 +319,24 @@ export function WeightsScreen({
           ))
         )}
       </div>
+
+      {helping && (
+        <HelpTray title="Weights" sections={WEIGHTS_HELP} onClose={() => setHelping(false)} />
+      )}
+
+      {asking && (
+        <ConfirmDialog
+          question="Let your routines follow these weights?"
+          detail={`${overriding.steps} ${overriding.steps === 1 ? 'step' : 'steps'} in ${
+            overriding.rewritten.length
+          } ${
+            overriding.rewritten.length === 1 ? 'routine' : 'routines'
+          } state a weight of their own. Clearing those makes them read this page instead, every time they run. A step for an exercise with no weight here keeps what it has.`}
+          confirmLabel={`Clear ${overriding.steps}`}
+          onConfirm={follow}
+          onCancel={() => setAsking(false)}
+        />
+      )}
 
       {viewing && (
         <ImageView src={viewing.src} name={viewing.name} onClose={() => setViewing(null)} />
