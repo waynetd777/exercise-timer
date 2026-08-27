@@ -10,6 +10,7 @@ import type { Block, Segment, Workout } from '../../engine/types'
 import { SCHEMA_VERSION } from '../../engine/types'
 import { EXERCISES } from '../exercises'
 import { PRESCRIPTIONS } from '../exercises.prescription'
+import { LADDER_COUNTS } from '../exercises.shapes'
 import { foldName } from '../foldName'
 import type { RoutineSpec } from '../generate'
 import { generateRoutine, seeded } from '../generate'
@@ -476,5 +477,92 @@ describe('the seed', () => {
     const a = distinct(make({}, 1).workout)
     const b = distinct(make({}, 2).workout)
     expect(a).not.toEqual(b)
+  })
+})
+
+describe('the instructor’s shape', () => {
+  const sections = (over: Partial<RoutineSpec> = {}, seed = 5) =>
+    generateRoutine(
+      spec({ style: 'sections', equipment: 'none', recovery: 'passive', ...over }),
+      { rng: seeded(seed), now: 0 },
+    )
+
+  it('builds named sections in the order the routines use', () => {
+    const names = sections().workout.blocks.map((b) => (b.kind === 'section' ? b.name : ''))
+    expect(names[0]).toBe('Warm-up')
+    expect(names.at(-1)).toBe('Finisher')
+    expect(names).toContain('Core')
+  })
+
+  it('opens on a timed warm-up, which is the one part that is not self-paced', () => {
+    const warm = sections().workout.blocks[0]
+    expect(warm?.kind === 'section' && warm.name).toBe('Warm-up')
+    if (warm?.kind !== 'section') throw new Error('no warm-up')
+    expect(warm.children.every((c) => c.kind === 'segment' && c.durationMs === 40_000)).toBe(true)
+  })
+
+  it('is mostly self-paced, which is the whole difference from a circuit', () => {
+    const routine = compile(sections().workout)
+    const steps = routine.runs.flatMap((r) => r.entries)
+    expect(steps.filter((e) => e.selfPaced).length).toBeGreaterThan(steps.length / 2)
+  })
+
+  it('says it cannot know how long it will take', () => {
+    // A self-paced step ends when you tap Next. Claiming a duration would be
+    // the app pretending to a number.
+    expect(sections().notes.join(' ')).toMatch(/no length/)
+  })
+
+  it('uses a ladder the instructor actually writes, never a generated one', () => {
+    /*
+     * "4-9-14-9-4" would be arithmetically fine and unlike anything he has been
+     * given. Every ladder must be one of the nineteen in the corpus.
+     */
+    const known = new Set(LADDER_COUNTS.map((l) => l.counts.join('-')))
+    let seen = 0
+    const walk = (blocks: readonly Block[]) => {
+      for (const block of blocks) {
+        if (block.kind === 'ladder') {
+          expect(known).toContain(block.counts.join('-'))
+          seen += 1
+        }
+        if (block.kind !== 'segment') walk(block.children)
+      }
+    }
+    walk(sections().workout.blocks)
+    expect(seen).toBeGreaterThan(0)
+  })
+
+  it('scales the ladder’s main lift and leaves the accessories alone', () => {
+    // "Main exercise:" then "After every set:", which is the shape his ladders
+    // take: rung 2 is two of the lift and still twelve of the rest.
+    const routine = compile(sections().workout)
+    const rungs = routine.runs
+      .flatMap((r) => r.entries)
+      .filter((e) => e.path.some((p) => p.kind === 'ladder'))
+    const first = rungs.filter((e) => e.path.at(-1)?.iteration === 1)
+    const second = rungs.filter((e) => e.path.at(-1)?.iteration === 2)
+    expect(first[0]!.reps!.count).not.toBe(second[0]!.reps!.count)
+    expect(first[1]!.reps!.count).toBe(second[1]!.reps!.count)
+  })
+
+  it('takes the number of sections it is given, within what the routines do', () => {
+    expect(sections({ sections: 5 }).workout.blocks).toHaveLength(5)
+    // Clamped: no routine in the corpus has fewer than five or more than eight.
+    expect(sections({ sections: 1 }).workout.blocks.length).toBeGreaterThanOrEqual(5)
+    expect(sections({ sections: 99 }).workout.blocks.length).toBeLessThanOrEqual(8)
+  })
+
+  it('never repeats an exercise across the whole routine', () => {
+    const names: string[] = []
+    const walk = (blocks: readonly Block[]) => {
+      for (const block of blocks) {
+        if (block.kind === 'segment') {
+          if (block.role === 'work') names.push(block.name)
+        } else walk(block.children)
+      }
+    }
+    walk(sections().workout.blocks)
+    expect(new Set(names).size).toBe(names.length)
   })
 })

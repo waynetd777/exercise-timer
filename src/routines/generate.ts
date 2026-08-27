@@ -39,9 +39,31 @@ import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
 import { PRESCRIPTIONS } from './exercises.prescription'
+import {
+  LADDER_COUNTS,
+  SECTION_SIZE,
+  SECTION_THEMES,
+  SECTIONS_MAX,
+  SECTIONS_MIN,
+  SECTIONS_TYPICAL,
+} from './exercises.shapes'
 import { foldName } from './foldName'
 
 export type Recovery = 'passive' | 'active'
+
+/**
+ * Which kind of routine to build.
+ *
+ * `circuit` is the shape Wayne's own mixed-cardio routines take: one exercise at
+ * a time, everything on a clock, so the length is knowable and solvable.
+ *
+ * `sections` is the shape his instructor sends: six named sections, two or three
+ * of them ladders, and most steps COUNTED rather than timed. Its length is not
+ * knowable, because a self-paced step ends when you tap Next, so the question
+ * that shape asks is how many sections rather than how many minutes. Wayne's
+ * decision.
+ */
+export type Style = 'circuit' | 'sections'
 
 /** Multi-gym, nothing but the multi-gym, or both. */
 export type EquipmentScope = 'machine' | 'none' | 'mixed'
@@ -88,6 +110,15 @@ export type RoutineSpec = {
   sets?: number
   /** Reps in each multi-gym set. Defaults to twelve. */
   machineReps?: number
+  /** Defaults to `circuit`. */
+  style?: Style
+  /**
+   * Sections, for `sections`. Defaults to what the routines typically hold.
+   *
+   * This is what replaces `totalMs` for that style: a routine of self-paced
+   * steps has no length to aim at, so the size of it is counted in sections.
+   */
+  sections?: number
 }
 
 export type GeneratedRoutine = {
@@ -123,6 +154,12 @@ const PER_SIDE_SETS = 2
 const MACHINE_REPS = 12
 /** The longest a circuit set runs. See `asks`. */
 const MAX_SET_MS = 45_000
+/** Each movement in a warm-up, which the routines write as "40 sec each". */
+const WARM_UP_EACH_MS = 40_000
+/** Between rounds of a section, which the routines write as "Rest 45 seconds". */
+const ROUND_REST_MS = 45_000
+/** Where nothing has ever been prescribed for a counted step. */
+const DEFAULT_REPS = 12
 
 /**
  * What one set of this exercise asks for.
@@ -363,6 +400,161 @@ function exerciseBlocks(
   return blocks
 }
 
+/**
+ * A routine in the instructor's shape: named sections, ladders, counted steps.
+ *
+ * SELF-PACED, which is the whole difference. A rep-based step has no duration
+ * and ends when you tap Next, so this routine has no length: `notes` says so
+ * rather than the app pretending to a number. That is why the spec asks for
+ * sections instead of minutes here.
+ *
+ * The skeleton and the ladders are not invented. `exercises.shapes.ts` is read
+ * out of the sixteen routines: warm-up first, finisher last, the body between,
+ * and nineteen pyramids used verbatim because `4-9-14-9-4` would be
+ * arithmetically fine and unlike anything he has ever been given.
+ */
+function sectionsRoutine(
+  spec: RoutineSpec,
+  loads: Map<string, string>,
+  rng: Rng,
+  notes: string[],
+): Block[] {
+  const wanted = Math.min(
+    SECTIONS_MAX,
+    Math.max(SECTIONS_MIN, Math.round(spec.sections ?? SECTIONS_TYPICAL)),
+  )
+
+  /** Everything eligible, by area, shuffled once so a section can draw freely. */
+  const pool = (area: BodyArea, use: 'strength' | 'cardio' | 'mobility'): Exercise[] =>
+    shuffled(
+      EXERCISES.filter(
+        (e) => e.area === area && (e.use ?? 'strength') === use && eligible(spec.equipment, e),
+      ),
+      rng,
+    )
+
+  const taken = new Set<string>()
+  const draw = (areas: readonly string[], use: 'strength' | 'cardio' | 'mobility', want: number) => {
+    const out: Exercise[] = []
+    for (const area of areas) {
+      for (const exercise of pool(area as BodyArea, use)) {
+        if (out.length >= want) break
+        if (taken.has(exercise.name)) continue
+        taken.add(exercise.name)
+        out.push(exercise)
+      }
+    }
+    return out
+  }
+
+  /** A counted step, which is what most of an instructor routine is made of. */
+  const counted = (exercise: Exercise): Segment => {
+    const said = PRESCRIPTIONS.find((p) => p.name === foldName(exercise.name))
+    const load = loads.get(exercise.name.toLowerCase())
+    const timed = said?.prescribe === 'time' && said.seconds !== undefined
+    return segment({
+      name: exercise.name,
+      role: 'work',
+      ...(timed
+        ? { durationMs: said!.seconds! * 1000 }
+        : { reps: { kind: 'fixed', count: said?.reps ?? DEFAULT_REPS, ...(exercise.perSide ? { perSide: true } : {}) } }),
+      ...(load ? { load } : {}),
+      ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
+    })
+  }
+
+  const blocks: Block[] = []
+  const themes = SECTION_THEMES.slice(0, wanted)
+
+  for (const { theme, areas } of themes) {
+    if (theme === 'Warm-up') {
+      const moves = [...draw(areas, 'mobility', 4), ...draw(areas, 'cardio', 4)]
+      if (moves.length === 0) continue
+      blocks.push({
+        kind: 'section',
+        id: newId(),
+        name: theme,
+        display: 'timer',
+        note: `${WARM_UP_EACH_MS / 1000} seconds each, continuous movement`,
+        children: moves.map((exercise) =>
+          segment({ name: exercise.name, role: 'work', durationMs: WARM_UP_EACH_MS }),
+        ),
+      })
+      continue
+    }
+
+    const chosen = draw(areas, 'strength', SECTION_SIZE)
+    if (chosen.length < 2) {
+      notes.push(`Not enough left for a ${theme} section with the equipment chosen.`)
+      continue
+    }
+
+    /*
+     * A ladder needs a lift that can carry the rungs and accessories that keep
+     * their own count, which is the shape the instructor's ladders take: "Main
+     * exercise:" then "After every set:". Every third section, so a routine has
+     * two or three of them rather than six.
+     */
+    const asLadder = blocks.length % 3 === 1
+    if (asLadder) {
+      const shape = LADDER_COUNTS[Math.floor(rng() * Math.min(6, LADDER_COUNTS.length))]!
+      const [main, ...rest] = chosen
+      blocks.push({
+        kind: 'section',
+        id: newId(),
+        name: theme,
+        display: 'list',
+        children: [
+          {
+            kind: 'ladder',
+            id: newId(),
+            counts: [...shape.counts],
+            label: 'Set',
+            children: [
+              segment({
+                name: main!.name,
+                role: 'work',
+                reps: { kind: 'rung', ...(main!.perSide ? { perSide: true } : {}) },
+                ...(main!.media ? { media: { source: 'bundled', path: main!.media } } : {}),
+                ...(loads.get(main!.name.toLowerCase())
+                  ? { load: loads.get(main!.name.toLowerCase())! }
+                  : {}),
+              }),
+              ...rest.map(counted),
+            ],
+          },
+        ],
+      })
+      continue
+    }
+
+    const rounds = 3 + Math.floor(rng() * 2)
+    blocks.push({
+      kind: 'section',
+      id: newId(),
+      name: theme,
+      display: 'list',
+      children: [
+        {
+          kind: 'repeat',
+          id: newId(),
+          times: rounds,
+          label: 'Round',
+          children: [
+            ...chosen.map(counted),
+            segment({ name: 'Rest', role: 'rest', durationMs: ROUND_REST_MS }),
+          ],
+        },
+      ],
+    })
+  }
+
+  notes.push(
+    'A rep-based routine has no length: its steps end when you tap Next, so the app cannot say how long it will take.',
+  )
+  return blocks
+}
+
 export function generateRoutine(
   spec: RoutineSpec,
   options: { library?: readonly Workout[]; rng?: Rng; now?: number } = {},
@@ -371,6 +563,30 @@ export function generateRoutine(
   const now = options.now ?? 0
   const notes: string[] = []
   const loads = loadFrom(options.library ?? [])
+
+  /*
+   * Two shapes, and they share almost nothing: the circuit solves for a length
+   * and the sections count sections. Dispatched here rather than threaded
+   * through, because a function that did both would be mostly `if (style)`.
+   */
+  if (spec.style === 'sections') {
+    const blocks = sectionsRoutine(spec, loads, rng, notes)
+    if (blocks.length === 0) {
+      throw new Error('No exercises match that combination of areas and equipment.')
+    }
+    return {
+      workout: {
+        id: newId(),
+        name: spec.name?.trim() || 'Generated routine',
+        blocks,
+        schemaVersion: SCHEMA_VERSION,
+        createdAt: now,
+        updatedAt: now,
+        estimatedTotalMs: totalMs(blocks),
+      },
+      notes,
+    }
+  }
 
   const cardio = EXERCISES.filter((e) => e.use === 'cardio')
   const recovery =
