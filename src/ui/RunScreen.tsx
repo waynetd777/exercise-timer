@@ -23,6 +23,7 @@ import {
   fitBlockCqi,
   fitList,
   nameWithEffort,
+  nameWithLoad,
   fitPanel,
   groupCaption,
   listLines,
@@ -126,7 +127,7 @@ function SectionList({
                   than with the end of "each side". */}
               <span className="sheet__side">{effortSuffix(row)}</span>
               <span className="sheet__name">
-                {row.name}
+                {nameWithLoad(row)}
                 {row.alternative && <em className="sheet__alt">or {row.alternative}</em>}
                 {/* The how-to only on the row being worked: it is guidance for
                     what you are doing NOW, and printing every step's would push

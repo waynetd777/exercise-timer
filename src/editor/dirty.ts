@@ -46,6 +46,7 @@ function sameBlock(a: Block, b: Block): boolean {
       a.role === b.role &&
       a.note === b.note &&
       a.alternative === b.alternative &&
+      a.load === b.load &&
       sameReps(a.reps, b.reps) &&
       sameMedia(a.media, b.media)
     )

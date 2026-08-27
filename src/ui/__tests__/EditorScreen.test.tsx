@@ -172,6 +172,100 @@ describe('EditorScreen', () => {
     expect(name.value).toBe('Strength day')
   })
 
+  it('shows a step that is counted AND timed as both, and keeps both', () => {
+    /*
+     * The row used to hold ONE number, and `timingOf` preferred the count, so an
+     * EMOM minute showed "12 ×" and its sixty seconds appeared nowhere. Worse,
+     * `setTiming` cleared both fields before writing one, so the first keystroke
+     * on that row destroyed the clock.
+     */
+    const emom = (): Workout => ({
+      id: 'w1',
+      name: 'Arms EMOM',
+      blocks: [
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Bicep Curls',
+          role: 'work',
+          durationMs: 60_000,
+          reps: { kind: 'fixed', count: 12 },
+        },
+      ],
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: 0,
+      updatedAt: 0,
+    })
+
+    const p = props(emom())
+    render(<EditorScreen {...p} />)
+
+    expect((screen.getByLabelText('Timed or counted') as HTMLSelectElement).value).toBe(
+      'reps-timed',
+    )
+    expect((screen.getByLabelText('Reps') as HTMLInputElement).value).toBe('12')
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('60')
+
+    // Retyping either one leaves the other standing.
+    fireEvent.change(screen.getByLabelText('Reps'), { target: { value: '15' } })
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('60')
+
+    fireEvent.change(screen.getByLabelText('Seconds'), { target: { value: '45' } })
+    expect((screen.getByLabelText('Reps') as HTMLInputElement).value).toBe('15')
+  })
+
+  it('drops the clock only when the unit says self-paced', () => {
+    const p = props({
+      id: 'w1',
+      name: 'Arms EMOM',
+      blocks: [
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Bicep Curls',
+          role: 'work',
+          durationMs: 60_000,
+          reps: { kind: 'fixed', count: 12 },
+        },
+      ],
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: 0,
+      updatedAt: 0,
+    })
+    render(<EditorScreen {...p} />)
+
+    fireEvent.change(screen.getByLabelText('Timed or counted'), { target: { value: 'reps' } })
+    expect(screen.queryByLabelText('Seconds')).toBeNull()
+
+    /*
+     * Coming back gets the DEFAULT, not the sixty seconds. A self-paced step has
+     * no duration, so there is nothing to restore: remembering it would mean
+     * component state that undo cannot see and that no document records. Undo is
+     * how you get the old value back.
+     */
+    fireEvent.change(screen.getByLabelText('Timed or counted'), { target: { value: 'reps-timed' } })
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('20')
+  })
+
+  it('gives a timed step a count without resetting its clock', () => {
+    // The other direction, where the duration IS still there and must survive.
+    const p = props({
+      id: 'w1',
+      name: 'Plank day',
+      blocks: [{ kind: 'segment', id: 's1', name: 'Plank', role: 'work', durationMs: 45_000 }],
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: 0,
+      updatedAt: 0,
+    })
+    render(<EditorScreen {...p} />)
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('45')
+
+    fireEvent.change(screen.getByLabelText('Timed or counted'), { target: { value: 'reps-timed' } })
+
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('45')
+    expect((screen.getByLabelText('Reps') as HTMLInputElement).value).toBe('10')
+  })
+
   it('clamps a typed rep count to the field cap on commit', () => {
     const p = props(sectioned())
     render(<EditorScreen {...p} />)

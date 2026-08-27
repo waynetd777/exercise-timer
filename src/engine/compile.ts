@@ -228,6 +228,7 @@ export function compile(workout: Workout): Routine {
           ...(durationMs !== null ? { durationMs } : {}),
           ...(reps ? { reps } : {}),
           ...(block.alternative !== undefined ? { alternative: block.alternative } : {}),
+          ...(block.load !== undefined ? { load: block.load } : {}),
           ...(block.media ? { media: block.media } : {}),
           ...(block.note !== undefined ? { note: block.note } : {}),
         })

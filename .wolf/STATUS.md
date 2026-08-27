@@ -556,6 +556,52 @@ transform. Logged as bug-070.
 
 ---
 
+## ✅ A step can be counted AND timed, and a weight is a field (2026-08-27, v3.9)
+
+Two of the same shape: a value that had nowhere to live but the step's name.
+
+**Counted and timed** (Wayne picked option C of four). The unit select gained
+`× in` and `× each side in`, and a second number renders after it, so the row
+reads `12 × in 20 s`. `Timing`'s `reps` variant carries an optional `durationMs`.
+The row survives a phone because `.erow__main` is `flex-wrap: wrap`: the pair
+drops to a second line rather than crushing the name field.
+
+The display was the smaller half. **`setTiming` clears both `durationMs` and
+`reps` before writing**, so a patch mentioning one deleted the other, and typing
+in the count destroyed the clock on the first keystroke. Every commit now writes
+both. Going self-paced still drops the duration, which is correct, and undo is
+how the old value comes back; remembering it in component state would be state
+undo cannot see.
+
+**Weights.** `Segment.load`, FREE TEXT, because half of what a routine loads is
+not a number: a band has a colour and a press-up has your own weight. It lives in
+`.erow__extras` beside Note and Or, which reveals itself for a step that has one.
+This reverses the 2026-08-26 decision to keep weights in the name, at Wayne's
+request, now that the row had shown it could carry another value.
+
+Wired into all three registries at once, as cerebrum says a new field must be:
+`bundle.ts isBlock`, `dirty.ts sameBlock`, and `compile()` onto `TimelineEntry`.
+
+**`storage/migrate.ts` lifts a trailing weight out of names already saved**, since
+a routine is stored as it was authored. Verified against Wayne's routine 2: all 23
+weights lifted, `Cycling`, `Rest`, `Change Sides`, `Squat to 90` and
+`20kg Goblet Squat` correctly untouched. The pattern takes only a number and a
+unit at the very END of a name.
+
+**The run screen is unchanged to look at.** `nameWithLoad` puts the weight back
+after the name, so it reads exactly as the hand-typed names did. Deliberate:
+`.count__lead` has about 2cqh of slack and has already overflowed twice from this
+kind of addition, so the DATA moved out of the name and the READING did not. A
+weight on its own line is a change to that tuned budget and wants a phone in hand.
+
+`writeRoutine` writes the load back into the name, since text has no syntax for
+one, so it survives the round trip and the migration lifts it out again.
+
+**768 tests green** (30 new), typecheck and production build clean. Docs: root
+`README.md`, `docs/paste-format.md`, `src/editor/README.md`, and two help lines.
+
+---
+
 ## 🚀 Next quest — none open
 
 The strength-routine work below is COMPLETE and pushed. The obvious candidates

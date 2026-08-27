@@ -123,7 +123,20 @@ function stepLines(segment: Segment, lost: string[]): string[] {
     line += reps.perSide ? `${reps.count * 2} × ` : `${reps.count} × `
   }
 
-  line += segment.name
+  /*
+   * The load goes back into the NAME, which is where the grammar can carry it:
+   * there is no syntax for a weight, and "Leg Press 65kg" is exactly how these
+   * routines were written before the field existed. So it survives the round
+   * trip, and `storage/migrate.ts` lifts it out of the name again on the way in.
+   *
+   * Written out here rather than borrowed from `ui/format.ts`'s `nameWithLoad`,
+   * which reads the same today: everything else in this file depends only on the
+   * engine, and a serializer reaching into the UI layer for a string would be the
+   * one import pointing the wrong way. The round-trip test is what holds the two
+   * spellings together.
+   */
+  const load = segment.load?.trim()
+  line += load ? `${segment.name} ${load}` : segment.name
 
   if (countable && reps.kind === 'fixed' && reps.perSide) {
     line += ` (${reps.count} each side)`

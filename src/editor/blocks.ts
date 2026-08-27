@@ -336,7 +336,7 @@ export function updateSegment(
 export function clearText(
   blocks: readonly Block[],
   path: Path,
-  field: 'note' | 'alternative',
+  field: 'note' | 'alternative' | 'load',
 ): Block[] {
   return mapAt(blocks, path, (block) => {
     if (block.kind !== 'segment') return block
@@ -391,9 +391,18 @@ export function updateSection(
  * and undefined is not the same as absent, which is exactly what separates a
  * self-paced step from a timed one.
  */
+/**
+ * What a step asks of you, as the editor's timing control sees it.
+ *
+ * `reps` carries an OPTIONAL `durationMs`, which is the one case where a step is
+ * both counted and timed: an EMOM's minute is sixty seconds AND twelve curls.
+ * `Segment` has always allowed it and the parser has always built them, but the
+ * editor used to model timing as either/or, so it showed the count, hid the
+ * clock, and deleted whichever it was not writing.
+ */
 export type Timing =
   | { kind: 'timed'; durationMs: number }
-  | { kind: 'reps'; count: number; perSide?: boolean }
+  | { kind: 'reps'; count: number; perSide?: boolean; durationMs?: number }
   | { kind: 'rung'; perSide?: boolean }
 
 export function setTiming(blocks: readonly Block[], path: Path, timing: Timing): Block[] {
@@ -410,6 +419,9 @@ export function setTiming(blocks: readonly Block[], path: Path, timing: Timing):
     return {
       ...next,
       reps: { kind: 'fixed', count: timing.count, ...(timing.perSide ? { perSide: true } : {}) },
+      // Both, where the step is counted AND timed. This is the line that used to
+      // be missing, and why editing such a step lost its clock.
+      ...(timing.durationMs !== undefined ? { durationMs: timing.durationMs } : {}),
     }
   })
 }
@@ -424,6 +436,9 @@ export function timingOf(segment: Segment): Timing {
       kind: 'reps',
       count: segment.reps.count,
       ...(segment.reps.perSide ? { perSide: true } : {}),
+      // Carried through, so the control can show the clock beside the count
+      // rather than hiding it behind the count as it used to.
+      ...(segment.durationMs !== undefined ? { durationMs: segment.durationMs } : {}),
     }
   }
   return { kind: 'timed', durationMs: segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000 }

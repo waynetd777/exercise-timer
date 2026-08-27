@@ -697,6 +697,17 @@
   color: var(--bone-dim);
 }
 
+/*
+ * The static "s" after the clock on a step that is counted AND timed.
+ *
+ * Static rather than a second select: the unit is already stated once, by the
+ * control that chose the mode, and a row does not need to say it twice. It is
+ * `aria-hidden`, since the field it follows is labelled "Seconds" already.
+ */
+.esecs__unit {
+  font-size: var(--step--1);
+}
+
 /* ── Routine colour ────────────────────────────────────────────────────────
  *
  * The editor surface carries the same wash as the library row, so the choice is
@@ -877,6 +888,15 @@
 
 .efield--unit[data-unit='rung-side'] {
   width: 10.5em;
+}
+
+/* Counted and timed. "× each side in" is the longest label the select has. */
+.efield--unit[data-unit='reps-timed'] {
+  width: 6em;
+}
+
+.efield--unit[data-unit='reps-side-timed'] {
+  width: 11em;
 }
 
 /* Three levels exist now: section → group → step. */

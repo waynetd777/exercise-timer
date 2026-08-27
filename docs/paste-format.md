@@ -216,6 +216,11 @@ keeping. It always says what it could not carry.
 What has no syntax here, and so cannot survive the trip:
 
 - **Pictures.** Nothing in this format can name one.
+
+A **weight** is the exception that survives: there is no syntax for one either,
+so it is written into the name the way these routines were written before the
+field existed. "Leg Press" loaded to "65kg" goes out as `Leg Press 65kg`, and
+reading it back lifts the weight out of the name again.
 - **The routine's name**, which the download carries as its filename and the
   paste dialog asks for on the way back.
 - **The routine's colour**, and whether it was a favourite.

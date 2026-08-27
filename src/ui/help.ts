@@ -68,10 +68,11 @@ export const EDITOR_HELP: readonly HelpSection[] = [
     points: [
       'Add a step with Get ready, Work, Rest or Recover. The type sets its colour and which cue it sounds.',
       'Every kind has its own colour. The bar on an add button matches the edge of the row it makes.',
-      'The unit beside the number: s counts seconds, × waits for Next, × each side counts per side.',
+      'The unit beside the number: s counts seconds, × waits for Next, × each side counts per side, and × in does both, for a minute that also has a target.',
       'On a narrow screen a step shows its fields and one ⋯ button, which opens the rest of its controls. On a wide screen they are all on the row already.',
       'Each row can be dragged by its grip to reorder, or focused and moved with the arrow keys. It can also duplicate itself, add a step below, or delete.',
-      'The note button adds a note or an alternative exercise. In a list, the alternative reads “or …” beside the step, and the note shows on the step you are on.',
+      'The note button adds a note, an alternative exercise, or a weight. In a list, the alternative reads “or …” beside the step, and the note shows on the step you are on.',
+      'Weight is free text: 65kg, 30kg each side, red band, bodyweight. It reads after the exercise while you run, so “Leg Press” loaded to “65kg” shows as “Leg Press 65kg”. Weights that used to be typed into the step name are moved into the field for you.',
       'The image button gives a step its picture: one of the illustrations that come with the app, a photo on this device, or an image you have copied.',
       'Paste from clipboard is greyed out when there is nothing to paste. On iPhone and iPad it stays available, because Safari will not say what is on the clipboard until you tap — so tap it, and it will tell you if it finds nothing.',
       'Once a step has a picture, that button becomes the picture. Tap it to see it full size, or to remove it.',

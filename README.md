@@ -62,8 +62,8 @@ across a gym, with the phone propped against a rack.
   reads, with an example using every part of it.
 - **Imports** the `.tabata` exports of the Tabata Timer app, its own backups, and
   plain-text routines.
-- **Edits** routines: steps, durations, sets, ladders, sections and images, with
-  undo.
+- **Edits** routines: steps, durations, reps, weights, sets, ladders, sections and
+  images, with undo.
 - **Sends** a routine three ways: a link, plain text, or a `.txt` in the format it
   can paste back. None of them carries a picture, so each says what it had to
   leave behind rather than dropping it quietly.
