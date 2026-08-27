@@ -222,11 +222,6 @@ export function WeightsScreen({
         </button>
       </header>
 
-      <p className="weights__lede label label--sm">
-        What you lift, in one place. A routine that does not state a weight of its own uses these,
-        so changing one here changes every routine at once.
-      </p>
-
       <div className="weights__tools">
         <input
           className="weights__search"

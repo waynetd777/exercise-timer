@@ -240,3 +240,4 @@
 | 00:12 | Thumbnails and a full-size viewer on the weights page | WeightsScreen, weights.css, help.ts | v6.6, 968 green | ~18k |
 | 00:20 | Wayne's own weights replace four looked-up seeds | weights.ts, help.ts | v6.7, 968 green | ~9k |
 | 00:40 | Clear-× on the weight field, bulk follow button, weights help tray | EditorScreen, WeightsScreen, loads.ts, help.ts | v6.8, 978 green | ~40k |
+| 00:48 | Drop the weights page lede; the help tray carries it | WeightsScreen, weights.css | v6.9, 978 green | ~5k |
