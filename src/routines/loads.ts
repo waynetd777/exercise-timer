@@ -40,6 +40,53 @@ export function exerciseKey(name: string): string {
 }
 
 /**
+ * The weight for a written name, allowing for the SHORTHAND people write.
+ *
+ * The exact key first. That misses more than it looks: the exercise table takes
+ * its names from the manufacturer's guide, and a routine is written by a person
+ * in a hurry. "Seated Ab Crunch" and "Seated Abdominal Crunch" are the same
+ * machine, and the first is what actually gets typed.
+ *
+ * So the fallback matches word by word, with a shorter word allowed to be the
+ * start of a longer one: `ab` finds `abdominal`, `tricep` finds `triceps`. The
+ * shape has to line up exactly — the same number of words, in the same order —
+ * which is what keeps `Incline Chest Press` away from `Incline Cable Converging
+ * Chest Press`, and `Hip Abductor` away from `Hip Adductor`, since neither of
+ * those is the start of the other.
+ *
+ * AMBIGUITY REFUSES TO GUESS. Two matches mean no answer: putting the wrong
+ * number on a bar is worse than putting none on it.
+ */
+export function findLoad(
+  weights: ReadonlyMap<string, string>,
+  name: string,
+): string | undefined {
+  const key = exerciseKey(name)
+  const exact = weights.get(key)
+  if (exact !== undefined) return exact
+
+  const wanted = key.split(' ').filter(Boolean)
+  if (wanted.length === 0) return undefined
+
+  let found: string | undefined
+  for (const [candidate, load] of weights) {
+    const words = candidate.split(' ')
+    if (words.length !== wanted.length) continue
+    const alike = words.every((word, at) => {
+      const other = wanted[at]!
+      const [short, long] = word.length <= other.length ? [word, other] : [other, word]
+      // Two letters is the shortest abbreviation worth honouring; one would
+      // match half the table.
+      return short.length >= 2 && long.startsWith(short)
+    })
+    if (!alike) continue
+    if (found !== undefined) return undefined
+    found = load
+  }
+  return found
+}
+
+/**
  * Every step's weight, filled in where the step does not state one.
  *
  * Returns the SAME blocks where nothing changed, so an unloaded routine costs
@@ -56,7 +103,7 @@ export function fillLoads(
     list.map((block) => {
       if (block.kind === 'segment') {
         if (block.load !== undefined) return block
-        const load = weights.get(exerciseKey(block.name))
+        const load = findLoad(weights, block.name)
         if (!load) return block
         changed = true
         return { ...block, load }
@@ -99,7 +146,7 @@ export function stripLoads(
   const walk = (list: readonly Block[]): Block[] =>
     list.map((block) => {
       if (block.kind === 'segment') {
-        if (block.load === undefined || !weights.has(exerciseKey(block.name))) return block
+        if (block.load === undefined || findLoad(weights, block.name) === undefined) return block
         cleared += 1
         const { load: _gone, ...rest } = block
         return rest

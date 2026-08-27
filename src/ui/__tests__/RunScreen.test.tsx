@@ -18,6 +18,8 @@ vi.mock('../../audio/engine', () => ({ audio: { unlock: () => {} } }))
 vi.mock('../../audio/speech', () => ({ unlockSpeech: () => {} }))
 
 import { RunScreen } from '../RunScreen'
+import { withWeights } from '../../routines/loads'
+import { currentWeights } from '../../storage/weights'
 
 const timed = (): Workout => ({
   id: 'w1',
@@ -300,5 +302,35 @@ describe('RunScreen: the Ready card', () => {
 
     expect(screen.getByText('Est. total')).toBeTruthy()
     expect(screen.getByText(/^\d+ min$/)).toBeTruthy()
+  })
+})
+
+/**
+ * A step whose weight comes from the weights page rather than from itself.
+ *
+ * Clearing a step's weight is how it starts following that page, so the run
+ * screen has to show the page's number. It showed nothing: `App` fills the
+ * weights in on the way here, and the name in the routine ("Seated Ab Crunch")
+ * did not match the table's ("Seated Abdominal Crunch").
+ */
+const following = (): Workout => ({
+  id: 'w5',
+  name: 'Routine 2',
+  blocks: [
+    { kind: 'segment', id: 's1', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
+  ],
+  schemaVersion: SCHEMA_VERSION,
+  createdAt: 1,
+  updatedAt: 1,
+})
+
+describe('RunScreen: a weight that comes from the weights page', () => {
+  afterEach(cleanup)
+
+  it('reads it after the exercise, exactly as a stated one does', () => {
+    render(<RunScreen workout={withWeights(following(), currentWeights())} />)
+    fireEvent.click(screen.getByLabelText('Start'))
+
+    expect(screen.getAllByText(/12 × Seated Ab Crunch 20kg/).length).toBeGreaterThan(0)
   })
 })

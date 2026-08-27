@@ -9,7 +9,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Block } from '../../engine/types'
-import { exerciseKey, fillLoads, stripLoads } from '../../routines/loads'
+import { exerciseKey, fillLoads, findLoad, stripLoads } from '../../routines/loads'
 import {
   currentWeights,
   loadWeights,
@@ -179,5 +179,50 @@ describe('stripLoads', () => {
       { kind: 'segment', id: 'a', name: 'Leg Press', role: 'work', durationMs: 20_000 },
     ]
     expect(stripLoads(blocks, weights).blocks).toBe(blocks)
+  })
+})
+
+describe('the shorthand a routine is actually written in', () => {
+  /*
+   * The bug this exists for. Routine 2 calls the step "12 × Seated Ab Crunch";
+   * the exercise table takes its names from the manufacturer's guide and calls
+   * it "Seated Abdominal Crunch". Clearing that step's weight left it with no
+   * hint in the editor and no weight on the run screen, because the two names
+   * never met.
+   */
+  it('finds the weight through an abbreviation', () => {
+    expect(weightFor('Seated Ab Crunch')).toBe(SEED_WEIGHTS['Seated Abdominal Crunch'])
+    expect(weightFor('12 × Seated Ab Crunch')).toBe('20kg')
+    expect(weightFor('Get ready: Seated Ab Crunch')).toBe('20kg')
+  })
+
+  it('fills a step named that way, on the way into a run', () => {
+    const blocks: Block[] = [
+      { kind: 'segment', id: 'a', name: 'Get ready: Seated Ab Crunch', role: 'prepare', durationMs: 15_000 },
+      { kind: 'segment', id: 'b', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
+    ]
+    const filled = fillLoads(blocks, currentWeights()) as Block[]
+    expect((filled[0] as { load?: string }).load).toBe('20kg')
+    expect((filled[1] as { load?: string }).load).toBe('20kg')
+  })
+
+  it('will not join two exercises that merely look alike', () => {
+    // Neither "abductor" nor "adductor" starts the other, and they are
+    // different machines. A wrong number here gets loaded onto a stack.
+    const table = new Map([[exerciseKey('Hip Adductor Leg Raise'), '25kg']])
+    expect(findLoad(table, 'Hip Abductor Leg Raise')).toBeUndefined()
+  })
+
+  it('refuses to choose between two matches', () => {
+    const table = new Map([
+      [exerciseKey('Standing Leg Curl'), '10kg'],
+      [exerciseKey('Standing Leg Curtsy'), '20kg'],
+    ])
+    expect(findLoad(table, 'Standing Leg Cur')).toBeUndefined()
+  })
+
+  it('keeps a one-letter word from matching half the table', () => {
+    const table = new Map([[exerciseKey('Seated Abdominal Crunch'), '20kg']])
+    expect(findLoad(table, 'Seated A Crunch')).toBeUndefined()
   })
 })
