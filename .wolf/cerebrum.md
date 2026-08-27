@@ -501,3 +501,11 @@ in `SEED_WEIGHTS` are still unchecked; do not defend them if he corrects one.
   `onMouseDown={preventDefault}` on the × or blur commits the old text first.
 - Each screen with a rule of its own gets its own HelpTray (`WEIGHTS_HELP`),
   not a section in `LIBRARY_HELP`.
+
+## A routine's names are shorthand; the table's are the guide's (2026-08-28)
+
+`foldName` alone is NOT enough to match a step to an exercise. Routine 2 says
+"Seated Ab Crunch"; the table says "Seated Abdominal Crunch". Anything looking an
+exercise up from a step name must go through `findLoad()` in `routines/loads.ts`,
+which allows a shorter word to start a longer one. Do not call
+`weights.get(exerciseKey(name))` directly — that was the bug.

@@ -28,6 +28,7 @@
  */
 
 import { foldName } from '../routines/foldName'
+import { findLoad } from '../routines/loads'
 
 const KEY = 'davshack-timer-weights'
 
@@ -127,9 +128,16 @@ export function currentWeights(): ReadonlyMap<string, string> {
   return out
 }
 
-/** One exercise's weight, by its written name. Empty string where there is none. */
+/**
+ * One exercise's weight, by its written name. Empty string where there is none.
+ *
+ * Through `findLoad`, which is the same lookup a running routine uses: it sees
+ * through an announcement's wording and through the shorthand a routine is
+ * written in. Anything else and the editor's hint would promise a weight the
+ * run does not use, or stay blank while the run finds one.
+ */
 export function weightFor(name: string): string {
-  return currentWeights().get(foldName(name)) ?? ''
+  return findLoad(currentWeights(), name) ?? ''
 }
 
 /**
