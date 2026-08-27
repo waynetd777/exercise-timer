@@ -364,9 +364,15 @@ focus guard has to name the keys, not the tag.
 
 ## Help is a tray, and it is data
 
-Two screens carry a help button: the library, beside the Routines menu, and the
-editor, to the right of Save. Both open the same `HelpTray`, a modal `<dialog>`
-pinned to the right edge, with native `<details>` sections of bullet points.
+Three screens carry a help button: the library, beside the Routines menu; the
+editor, to the right of Save; and the weights page, in the slot the back button's
+mirror image leaves. All three open the same `HelpTray`, a modal `<dialog>` pinned
+to the right edge, with native `<details>` sections of bullet points.
+
+A screen with a rule of its own gets its own sections rather than a heading in
+somebody else's list. `WEIGHTS_HELP` exists because "an empty field means
+something" is the one thing that page cannot afford to have buried eight sections
+down the library's tray.
 
 Three decisions worth keeping:
 
@@ -398,6 +404,20 @@ The acknowledgement is a `NoticeDialog` rendered as a SIBLING of the paste dialo
 never a child. `close` reaches React's handlers on the way up, so a nested notice
 would cancel the whole paste when it was dismissed.
 
+## Saying how long a routine takes
+
+Four places name a length — the library row, the editor header, the generator
+preview and the Ready card — and they all use the same figure, from
+`routines/estimate.ts` plus the paces in `storage/paces.ts`. Adding a fifth means
+using it too, or that screen will report zero for a routine of counted exercises.
+
+One formatter, `estimated()` / `estimatedValue()`. A known length keeps its
+seconds, because 44:40 is a promise the clock keeps. A guessed one rounds to whole
+minutes and says "about": `about 35:20` claims a precision it has not got while
+admitting in the same breath that it is a guess. The Ready card uses the bare
+value with "Est. total" as its label, since the figure is set at title size where
+"about" reads as part of the number.
+
 ## Files
 
 Each screen owns its stylesheet and imports it itself. `theme.css` is imported
@@ -405,10 +425,11 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 
 | | |
 |---|---|
-| `App.tsx` | Routing between library, run and edit. Consumes a shared routine from the URL |
+| `App.tsx` | Routing between library, run, edit and weights. Consumes a shared routine from the URL, and fills a routine's empty weights in on the way into a run |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs |
+| `WeightsScreen.tsx` | What you lift, per exercise: 68 rows, searchable, each with its illustration. Holds the two bulk actions — filling from your routines, and letting your routines follow the page |
 | `SoundsScreen.tsx` | The cue bench. **Dev only.** `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
 | `PasteDialog.tsx` | Paste a routine as text. Reports unparsed lines before saving, and hands over the template |
 | `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |
@@ -419,7 +440,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
 | `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
 | `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
-| `library.css`, `run-screen.css`, `editor.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
+| `library.css`, `run-screen.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |
-| `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs |
+| `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs. `estimated()` is the one place a guessed length is worded |
 | `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

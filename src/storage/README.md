@@ -1,12 +1,19 @@
 # storage
 
-IndexedDB, the routine library, the export format and share links.
+IndexedDB, the routine library, the export format, share links, and the two small
+things kept per device: your weights and your pace.
 
 ## Why IndexedDB, not localStorage
 
 localStorage's 5MB quota plus base64's 33% inflation cannot hold images. Two stores
 were created at version 1, `workouts` keyed by id and `media` keyed by content
 hash, so the media work was an addition rather than a schema migration.
+
+Two things do live in localStorage, on purpose. `weights.ts` and `paces.ts` are
+small, per-device, and neither belongs inside a routine: what you lift is a
+property of your gym, and how fast you work is a property of you. A new IndexedDB
+store would mean a version bump and a migration on every install for a handful of
+strings. Both read synchronously, which is what lets every render ask.
 
 `requestPersistence()` asks the browser not to evict the origin. Without it, a
 routine's saved images can simply disappear under storage pressure.
@@ -68,10 +75,44 @@ and a lost marker used to lay the pristine seed over an edited copy of the same
 id. Losing the marker may re-offer a deleted seed, which is harmless; overwriting
 an edit is not.
 
+## What you lift
+
+`weights.ts` holds one weight per exercise, keyed by folded name. `SEED_WEIGHTS`
+starts it off, and every number in it is Wayne's own: fifteen read out of routines
+2 and 3, four given directly. The looked-up numbers it began with were all wrong
+in the same direction — strengthlevel said 30kg for a shoulder press against a
+real 10 — so a home stack is not the machine that site measures, and none of them
+survive.
+
+Three rules that are not obvious:
+
+- **A key present and empty is a deletion**, not a gap. If clearing a field simply
+  removed the key, the seed would come straight back and a seeded weight could
+  never be emptied.
+- **Setting a value back to the seed drops the key**, so the store holds only what
+  actually differs.
+- **The parsed table is cached and dropped on save.** The library asks once per
+  row.
+
+The resolution rule lives in `routines/loads.ts`, not here. See that README.
+
+## How fast you work
+
+`paces.ts` records the real length of a self-paced step so `routines/estimate.ts`
+can stop guessing. Every gate already times itself; the elapsed was being thrown
+away.
+
+What it refuses is the interesting half. A gate under four seconds is a DRY RUN —
+tapping Next through a routine to see what is in it — and would otherwise teach it
+that a twelve-rep set takes half a second. Rates outside 0.5 to 12 seconds a rep
+go too, as do gates over eight minutes. Timed steps inside a gate are subtracted
+from the elapsed rather than charged to the counted exercise beside them. Three
+samples minimum, then the median of the last eight.
+
 ## The export format
 
 One JSON file, versioned from the start: `{ kind, version, exportedAt, workouts,
-media }`. `kind` is a marker so the importer never has to guess, and a file from a
+media, weights }`. `kind` is a marker so the importer never has to guess, and a file from a
 *newer* version is refused rather than half-read.
 
 Every block field is type-checked on the way in (`isBlock` in `bundle.ts`), and
@@ -100,6 +141,15 @@ sharing that hash, and re-hashing a file just read off disk costs a millisecond.
 bad entry is skipped and counted, never thrown. The routines still import, and the
 notice says how many pictures were dropped.
 
+**`weights` carries the settings page**, optional and added without a version
+bump: an older reader ignores a field it does not know, and a file with no weights
+looks exactly like one written before the field existed. It rides along because
+most routines now state no weight of their own and read the page instead, so a
+restore without it would put back every routine with the numbers missing from all
+of them. On the way in they are MERGED over what is already here, the file winning
+where both say something, so a restore does not silently drop weights the file has
+never heard of.
+
 Both exports go through one function in `LibraryScreen`, so **Export all** and a
 routine's own file button cannot drift into carrying different things.
 
@@ -127,3 +177,5 @@ and none of the sender's favourites or run history: it is their copy now.
 | `bundleMedia.ts` | The photos in an export: collected on the way out, re-hashed on the way in |
 | `shareLink.ts` | Routine to URL and back |
 | `download.ts` | Handing the user a file, and the clipboard |
+| `weights.ts` | One weight per exercise, and the seeds. localStorage |
+| `paces.ts` | How long a rep of each exercise actually takes you. localStorage |

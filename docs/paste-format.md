@@ -221,6 +221,12 @@ A **weight** is the exception that survives: there is no syntax for one either,
 so it is written into the name the way these routines were written before the
 field existed. "Leg Press" loaded to "65kg" goes out as `Leg Press 65kg`, and
 reading it back lifts the weight out of the name again.
+
+A step that states NO weight is written out with the one the weights page would
+give it. In the app an empty weight means "whatever I lift for this" and is
+resolved fresh every time the routine runs, but there is no way to write that
+down for someone else to read — so text carries the weight in force at the moment
+it was written.
 - **The routine's name**, which the download carries as its filename and the
   paste dialog asks for on the way back.
 - **The routine's colour**, and whether it was a favourite.
