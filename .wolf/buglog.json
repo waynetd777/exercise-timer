@@ -1310,6 +1310,88 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T01:10:00Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-08-28T01:30:00Z",
+      "error_message": "A failed save, delete, copy or favourite went unreported; the editor returned to the library as if it had saved.",
+      "file": "src/storage/useLibrary.ts",
+      "root_cause": "Every mutation was fired with `void library.x()` and useLibrary only set `error` during the initial load, so a rejected IndexedDB write was an unhandled rejection.",
+      "fix": "useLibrary wraps every mutation in guarded(): failure sets `error` (shown by the library screen) and rethrows with the same words; success clears it. App.onSave awaits add() before leaving the editor; EditorScreen catches a rejected onSave and shows a notice keeping the draft.",
+      "tags": [
+        "storage",
+        "useLibrary",
+        "save",
+        "error-handling",
+        "editor"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:30:00Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-08-28T01:30:00Z",
+      "error_message": "One unreadable IndexedDB record errored the whole library and could not be deleted.",
+      "file": "src/storage/workouts.ts",
+      "root_cause": "listWorkouts mapped migrateWorkout over every record; a record with no `blocks` or a group with no `children` threw, the list failed with workouts=[], and remove() needs the list.",
+      "fix": "readWorkouts() checks and migrates one record at a time, skips and counts the unreadable ones, leaves them in the store; useLibrary shows the count in `error`. listWorkouts() returns the readable ones. Test with two corrupt rows.",
+      "tags": [
+        "storage",
+        "migrate",
+        "corruption",
+        "library"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:30:00Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-08-28T01:30:00Z",
+      "error_message": "Starring a routine re-stamped updatedAt and jumped it to the top of the recent sort.",
+      "file": "src/storage/library.ts",
+      "root_cause": "toggleFavourite went through stamp(), which sets updatedAt, although putWorkout's contract says metadata-only writes must not.",
+      "fix": "toggleFavourite spreads the flag without stamp() and lost its `now` parameter. Test asserts updatedAt unchanged.",
+      "tags": [
+        "storage",
+        "favourite",
+        "updatedAt",
+        "sort"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:30:00Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-08-28T01:30:00Z",
+      "error_message": "A synchronous throw from indexedDB.open was cached as a permanently rejected promise.",
+      "file": "src/storage/db.ts",
+      "root_cause": "`opening ??= new Promise(executor)`: the executor runs before the assignment, so a forget() inside it (or in onerror) could only work for asynchronous failures; a sync throw rejected a promise that was then assigned and never cleared.",
+      "fix": "openDb assigns the promise then attaches promise.catch(forget), so any rejection un-caches itself after assignment. Test scripts a 'throw' open followed by a good one.",
+      "tags": [
+        "storage",
+        "indexeddb",
+        "db.ts",
+        "caching"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:30:00Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-08-28T01:30:00Z",
+      "error_message": "Share links imported unchecked workout metadata, block ids were optional, and dropped photos were not reported.",
+      "file": "src/storage/shareLink.ts",
+      "root_cause": "decodeRoutine validated blocks only and spread `...workout` into the store; isBlock accepted a missing id although gates key on it; encodeRoutine discarded shareable()'s droppedImages count.",
+      "fix": "decodeRoutine runs isWorkout (now exported from bundle.ts) and builds from named fields; isBlock requires a string id; isSegment/isWorkout check role and colour against their unions; LibraryScreen.share() reports uploaded photos a link cannot carry. sortWorkouts by duration now uses timed + estimated length precomputed once; duplicate() reads names from the store.",
+      "tags": [
+        "storage",
+        "share-link",
+        "validation",
+        "bundle",
+        "sort"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:30:00Z"
     }
   ]
 }

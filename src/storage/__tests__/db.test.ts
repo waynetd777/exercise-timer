@@ -82,8 +82,8 @@ function makeDb(): FakeDb {
   return db
 }
 
-/** Scripted opens: each entry is a fresh connection, or an open failure. */
-let opens: Array<FakeDb | 'fail'>
+/** Scripted opens: each entry is a fresh connection, an open failure, or a synchronous throw. */
+let opens: Array<FakeDb | 'fail' | 'throw'>
 let opened: FakeDb[]
 
 function stubIndexedDb() {
@@ -93,6 +93,8 @@ function stubIndexedDb() {
       const plan = opens.shift()
       if (plan === undefined) throw new Error('test opened the database more often than scripted')
       if (plan === 'fail') return fakeRequest(undefined, named('UnknownError'))
+      // What a browser does with site data blocked, or in a sandboxed frame.
+      if (plan === 'throw') throw named('SecurityError')
       opened.push(plan)
       return fakeRequest(plan)
     },
@@ -129,6 +131,18 @@ describe('db self-healing', () => {
     ).resolves.toEqual([])
   })
 
+  it('retries after open threw synchronously, the same as after it failed', async () => {
+    opens = ['throw', makeDb()]
+    const { run, STORE_WORKOUTS } = await import('../db')
+    const read = () =>
+      run(STORE_WORKOUTS, 'readonly', (store) => (store as { getAll: () => IDBRequest }).getAll())
+
+    // The throw rejects the promise inside the executor, where `onerror` never
+    // runs. Before the fix that rejection stayed cached for the session.
+    await expect(read()).rejects.toThrow('SecurityError')
+    await expect(read()).resolves.toEqual([])
+  })
+
   it('reopens and retries when the connection died without warning', async () => {
     const first = makeDb()
     const second = makeDb()
@@ -161,6 +175,33 @@ describe('db self-healing', () => {
 
     await openDb()
     expect(opened).toHaveLength(2)
+  })
+})
+
+describe('readWorkouts', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    stubIndexedDb()
+  })
+
+  it('skips a record it cannot read, counts it, and leaves it in the store', async () => {
+    const db = makeDb()
+    opens = [db]
+    const { readWorkouts, saveWorkout } = await import('../workouts')
+    await saveWorkout(routine('ok', 'Readable'), 1)
+    // A development build's write, or a corrupted row: no block list at all,
+    // and a group with no children. Either used to throw out of the list and
+    // take every routine down with it.
+    db.rows.set('bad-1', { id: 'bad-1', name: 'No blocks', schemaVersion: SCHEMA_VERSION })
+    db.rows.set('bad-2', {
+      ...routine('bad-2', 'Childless group'),
+      blocks: [{ kind: 'repeat', id: 'r', times: 2 }],
+    })
+
+    const { workouts, unreadable } = await readWorkouts()
+    expect(workouts.map((w) => w.name)).toEqual(['Readable'])
+    expect(unreadable).toBe(2)
+    expect(db.rows.size).toBe(3)
   })
 })
 

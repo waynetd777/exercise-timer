@@ -111,9 +111,14 @@ export function App() {
     if (view.screen === 'run') void library.markRun(view.workout)
   }, [view, library])
 
+  /*
+   * Waited for, and the library is shown only once the write has landed. It
+   * used to fire and forget: a save that failed went back to the library
+   * looking saved. Now a failure keeps the editor, and its draft, on screen.
+   */
   const onSave = useCallback(
-    (workout: Workout) => {
-      void library.add(workout)
+    async (workout: Workout) => {
+      await library.add(workout)
       toLibrary()
     },
     [library, toLibrary],

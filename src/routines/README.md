@@ -308,7 +308,11 @@ each one's real cost is known, so a per-side exercise costing two groups and a
 band or ankle-strap one costing five more seconds are exact. **Sections** is the
 shape the instructor's routines arrive in — named sections, ladders, counted reps
 — and it has no length at all, because a self-paced step ends when you tap Next.
-That shape is asked how many SECTIONS instead of how many minutes.
+That shape is asked how many SECTIONS instead of how many minutes. Both shapes
+open on a get-ready. The circuit's is the fifteen seconds before its first set.
+The sections one gets the parser's five seconds, loose and above the warm-up,
+so a generated routine and a pasted one start the same way and Send as text
+treats them alike.
 
 `rng` is injected, so a seed pins a routine and "Try another" differs.
 

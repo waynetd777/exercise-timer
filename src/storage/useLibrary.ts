@@ -13,7 +13,7 @@ import { deleteBlob, storedHashes } from '../media/store'
 import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
-import { addWorkoutIfMissing, deleteWorkout, listWorkouts, putWorkout, saveWorkout } from './workouts'
+import { addWorkoutIfMissing, deleteWorkout, listWorkouts, putWorkout, readWorkouts, saveWorkout } from './workouts'
 import { newId } from '../id'
 
 const now = () => Date.now()
@@ -58,8 +58,16 @@ export function useLibrary(seed: readonly Workout[]): Library {
           markSeeded(fresh.map((workout) => workout.id))
         }
 
-        const stored = await listWorkouts()
-        if (!cancelled) setWorkouts(stored)
+        const { workouts: stored, unreadable } = await readWorkouts()
+        if (cancelled) return
+        setWorkouts(stored)
+        if (unreadable > 0) {
+          setError(
+            unreadable === 1
+              ? 'One routine in storage could not be read. It was left in place, and the rest are shown.'
+              : `${unreadable} routines in storage could not be read. They were left in place, and the rest are shown.`,
+          )
+        }
       } catch (cause) {
         if (!cancelled) {
           setError(cause instanceof Error ? cause.message : 'Could not open the routine library.')
@@ -85,16 +93,44 @@ export function useLibrary(seed: readonly Workout[]): Library {
     })
   }, [])
 
+  /**
+   * Every write goes through here, so a failure is SEEN.
+   *
+   * The callers fire and forget (`void library.add(...)`), and a rejected save
+   * used to be an unhandled promise: the editor went back to the library, the
+   * row did not change, and nothing said why. Now the failure lands in `error`,
+   * which the library screen shows, and is rethrown with the same words so a
+   * caller that does wait (the editor's Save) can keep the draft and say so.
+   * A write that succeeds clears it, since the store is evidently working again.
+   */
+  const guarded = useCallback(<T,>(what: string, work: () => Promise<T>): Promise<T> => {
+    return work().then(
+      (result) => {
+        setError(null)
+        return result
+      },
+      (cause: unknown) => {
+        const reason = cause instanceof Error ? cause.message : String(cause)
+        const message = `Could not ${what}: ${reason}`
+        setError(message)
+        throw new Error(message, { cause })
+      },
+    )
+  }, [])
+
   const add = useCallback(
-    async (workout: Workout) => {
-      const saved = await saveWorkout(workout, now())
-      replace(saved)
-      return saved
-    },
-    [replace],
+    (workout: Workout) =>
+      guarded(`save “${workout.name}”`, async () => {
+        const saved = await saveWorkout(workout, now())
+        replace(saved)
+        return saved
+      }),
+    [guarded, replace],
   )
 
-  const remove = useCallback(async (id: string) => {
+  const remove = useCallback(
+    (id: string) =>
+      guarded('delete the routine', async () => {
     await deleteWorkout(id)
     const remaining = await listWorkouts()
     setWorkouts(remaining)
@@ -113,29 +149,36 @@ export function useLibrary(seed: readonly Workout[]): Library {
       // A failed sweep leaves dead bytes behind, which is harmless, the same
       // sweep runs on the next delete.
     }
-  }, [])
+      }),
+    [guarded],
+  )
 
   const duplicate = useCallback(
-    async (workout: Workout) => {
-      const names = workouts.map((w) => w.name)
-      const copy = lib.duplicate(workout, names, newId(), now())
-      replace(await saveWorkout(copy, now()))
-    },
-    [workouts, replace],
+    (workout: Workout) =>
+      guarded(`copy “${workout.name}”`, async () => {
+        // Names from the store, not from state: two quick taps both saw the
+        // list before the first copy landed and both became "(copy)".
+        const names = (await listWorkouts()).map((w) => w.name)
+        const copy = lib.duplicate(workout, names, newId(), now())
+        replace(await saveWorkout(copy, now()))
+      }),
+    [guarded, replace],
   )
 
   const toggleFavourite = useCallback(
-    async (workout: Workout) => {
-      replace(await putWorkout(lib.toggleFavourite(workout, now())))
-    },
-    [replace],
+    (workout: Workout) =>
+      guarded(`mark “${workout.name}”`, async () => {
+        replace(await putWorkout(lib.toggleFavourite(workout)))
+      }),
+    [guarded, replace],
   )
 
   const markRun = useCallback(
-    async (workout: Workout) => {
-      replace(await putWorkout(lib.markRun(workout, now())))
-    },
-    [replace],
+    (workout: Workout) =>
+      guarded('record the run', async () => {
+        replace(await putWorkout(lib.markRun(workout, now())))
+      }),
+    [guarded, replace],
   )
 
   return { workouts, loading, error, add, remove, duplicate, toggleFavourite, markRun }

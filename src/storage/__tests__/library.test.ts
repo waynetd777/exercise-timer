@@ -193,8 +193,15 @@ describe('markRun / toggleFavourite', () => {
 
   it('flips the favourite flag both ways', () => {
     const off = make('Legs')
-    const on = toggleFavourite(off, 1)
+    const on = toggleFavourite(off)
     expect(on.favourite).toBe(true)
-    expect(toggleFavourite(on, 2).favourite).toBe(false)
+    expect(toggleFavourite(on).favourite).toBe(false)
+  })
+
+  it('stars a routine without touching updatedAt', () => {
+    // Starring is not editing either: it used to re-stamp, and a never-run
+    // routine jumped to the top of "recent" the moment it was starred.
+    const original = make('Legs', { updatedAt: 100 })
+    expect(toggleFavourite(original).updatedAt).toBe(100)
   })
 })

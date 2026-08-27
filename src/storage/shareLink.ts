@@ -6,7 +6,7 @@
 
 import type { Block, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
-import { isBlock } from './bundle'
+import { isWorkout } from './bundle'
 import { migrateWorkout } from './migrate'
 
 /**
@@ -78,21 +78,20 @@ export async function decodeRoutine(param: string, now: number, id: string): Pro
   }
   // And the same field validation bundles get. A link is as hand-editable as a
   // file: a string durationMs would import silently and count down from NaN.
-  if (
-    typeof workout.name !== 'string' ||
-    !Array.isArray(workout.blocks) ||
-    !workout.blocks.every(isBlock)
-  ) {
-    throw new Error('not a routine')
-  }
+  // The whole routine, not just the blocks: this used to spread `...workout`
+  // into the store unchecked, so a crafted link arrived pre-starred, with a
+  // made-up last run, and carrying any key it liked.
+  const candidate = { ...workout, id }
+  if (!isWorkout(candidate)) throw new Error('not a routine')
 
+  // Built from named fields, so only what a routine is made of comes through.
   // Migrated like the other two entry points. A link shared before a rename
   // should not arrive speaking the old vocabulary.
   return migrateWorkout({
-    ...workout,
     id,
-    name: workout.name,
-    blocks: workout.blocks,
+    name: candidate.name,
+    blocks: candidate.blocks,
+    ...(candidate.colour !== undefined ? { colour: candidate.colour } : {}),
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,

@@ -4,8 +4,8 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import type { Block, Workout } from '../engine'
-import { SCHEMA_VERSION } from '../engine'
+import type { Block, SegmentRole, Workout } from '../engine'
+import { ROUTINE_COLOURS, SCHEMA_VERSION } from '../engine'
 import { migrateWorkout } from './migrate'
 
 /**
@@ -97,6 +97,17 @@ function isAdvance(value: unknown): boolean {
   return value === undefined || value === 'set' || value === 'step'
 }
 
+const ROLES: readonly SegmentRole[] = ['prepare', 'work', 'rest', 'recover', 'custom']
+
+/** A role outside the union would draw with `var(--role-banana)`: no colour at all. */
+function isRole(value: unknown): boolean {
+  return value === undefined || (ROLES as readonly unknown[]).includes(value)
+}
+
+function isColour(value: unknown): boolean {
+  return value === undefined || (ROUTINE_COLOURS as readonly unknown[]).includes(value)
+}
+
 function isReps(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false
   const reps = value as { kind?: unknown; count?: unknown; perSide?: unknown }
@@ -131,7 +142,7 @@ function isSegment(block: Record<string, unknown>): boolean {
     (block['reps'] === undefined || isReps(block['reps'])) &&
     isOptionalString(block['alternative']) &&
     isOptionalString(block['load']) &&
-    isOptionalString(block['role']) &&
+    isRole(block['role']) &&
     (block['media'] === undefined || isMedia(block['media'])) &&
     isOptionalString(block['note'])
   )
@@ -144,7 +155,9 @@ function isBlockArray(value: unknown): value is Block[] {
 export function isBlock(value: unknown): value is Block {
   if (typeof value !== 'object' || value === null) return false
   const block = value as Record<string, unknown>
-  if (!isOptionalString(block['id'])) return false
+  // Required, not optional: the run keys a gate on `${id}@${iteration}`, so two
+  // groups without one would be cleared by a single tap.
+  if (typeof block['id'] !== 'string') return false
   switch (block['kind']) {
     case 'segment':
       return isSegment(block)
@@ -176,13 +189,14 @@ export function isBlock(value: unknown): value is Block {
   }
 }
 
-function isWorkout(value: unknown): value is Workout {
+/** Exported for the share link, which is as hand-editable as a file and gets the same checks. */
+export function isWorkout(value: unknown): value is Workout {
   if (typeof value !== 'object' || value === null) return false
   const w = value as Record<string, unknown>
   return (
     typeof w['id'] === 'string' &&
     typeof w['name'] === 'string' &&
-    isOptionalString(w['colour']) &&
+    isColour(w['colour']) &&
     isOptionalFinite(w['createdAt']) &&
     isOptionalFinite(w['updatedAt']) &&
     isOptionalFinite(w['lastRunAt']) &&
