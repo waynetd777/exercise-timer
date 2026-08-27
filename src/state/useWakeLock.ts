@@ -38,7 +38,9 @@ export function useWakeLock(active: boolean): void {
         }
         sentinel.current = lock
         lock.addEventListener('release', () => {
-          sentinel.current = null
+          // Only if it is still ours: a release from an earlier lock landing
+          // after a newer one was stored would orphan the newer one.
+          if (sentinel.current === lock) sentinel.current = null
         })
       } catch {
         // Denied or unavailable (often a non-visible page). Nothing to do:

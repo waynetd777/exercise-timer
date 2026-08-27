@@ -66,7 +66,18 @@ export function useCueScheduler({
     }
     if (status !== 'running' || muted) {
       audio.cancelPending()
-      scheduled.current.clear()
+      if (status === 'paused' || status === 'running') {
+        // Forget only what cancellation dropped. A cue within the grace is
+        // spared and plays, and clearing the set had it queued again on
+        // resume: a beep a tenth of a second into the pause, then the same
+        // beep a tenth of a second after resuming.
+        for (const key of requeueable(allCues, readElapsed(), scheduled.current)) {
+          scheduled.current.delete(key)
+        }
+      } else {
+        // Idle or complete: the next start is from the top, whistle and all.
+        scheduled.current.clear()
+      }
       return
     }
 

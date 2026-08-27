@@ -140,6 +140,23 @@ describe('useCueScheduler lifecycle', () => {
     expect(mock.state.tones).toContain(100)
   })
 
+  it('does not queue again, on resume, a cue that pausing spared', () => {
+    /*
+     * cancelPending spares a cue within CANCEL_GRACE_MS of sounding, so it plays
+     * during the pause. The set of queued keys was cleared wholesale on pause,
+     * so the re-arm on resume queued it a second time.
+     */
+    const { rerender } = renderScheduler()
+    elapsed = 24_900
+    rerender({ status: 'paused', muted: false, generation: 2 })
+    mock.state.tones.length = 0
+    rerender({ status: 'running', muted: false, generation: 3 })
+    // The bell at 25s is 100ms away: spared, so not queued again.
+    expect(mock.state.tones).not.toContain(100.1)
+    // The next window is queued as usual.
+    expect(mock.state.tones.length).toBeGreaterThan(0)
+  })
+
   it('a clock jump cancels the stale queue and arms the new position at once', () => {
     const { rerender } = renderScheduler()
     mock.state.tones.length = 0

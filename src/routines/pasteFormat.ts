@@ -147,8 +147,13 @@ const SETS_OF = new RegExp(`^(\\d+)\\s*[×x]\\s*${NUMBER}\\s*${UNIT}\\s*$`, 'i')
  * called "sec cardio", and "1-2-3-4-5-6-… (keep climbing)" as one called "…".
  */
 const UNIT_WORD = /^(?:secs?|seconds?|mins?|minutes?|reps?)\b/i
+/*
+ * Rungs of at most two digits. The corpus tops out at 20, and three numbers
+ * with dashes between is also how a date is written: "2026-04-16" at the top of
+ * a pasted email read as a ladder and claimed the next step as its main lift.
+ */
 const LADDER = new RegExp(
-  `^(?:counting:\\s*)?(\\(?\\d+\\)?(?:\\s*(?:[${DASH_CHARS},]|→|->)\\s*\\(?\\d+\\)?){2,})\\s*(.*)$`,
+  `^(?:counting:\\s*)?(\\(?\\d{1,2}\\)?(?:\\s*(?:[${DASH_CHARS},]|→|->)\\s*\\(?\\d{1,2}\\)?){2,})\\s*(.*)$`,
   'i',
 )
 /**

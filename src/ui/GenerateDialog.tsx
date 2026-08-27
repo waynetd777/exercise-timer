@@ -11,7 +11,7 @@ import type { BodyArea } from '../routines/exercises'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
 import { currentWeights } from '../storage/weights'
-import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
+import { describeRoutine, generateRoutine, seeded, SECTIONS_FEWEST } from '../routines/generate'
 import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
 import { estimated } from './format'
@@ -395,9 +395,9 @@ export function GenerateDialog({
             legend="How many sections"
             // From three, which is shorter than the instructor ever writes, to
             // the eight that is his longest.
-            options={Array.from({ length: SECTIONS_MAX - 3 + 1 }, (_, i) => ({
-              value: 3 + i,
-              label: String(3 + i),
+            options={Array.from({ length: SECTIONS_MAX - SECTIONS_FEWEST + 1 }, (_, i) => ({
+              value: SECTIONS_FEWEST + i,
+              label: String(SECTIONS_FEWEST + i),
             }))}
             value={sections}
             onChange={setSections}

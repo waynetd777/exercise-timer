@@ -894,3 +894,19 @@ describe('a heading with nothing under it', () => {
     expect(parsed.skipped).toEqual([{ line: 3, text: 'Cool down walk for 2 minutes' }])
   })
 })
+
+describe('a date is not a ladder', () => {
+  it('leaves "2026-04-16" out of the routine rather than reading it as rungs', () => {
+    const parsed = parseRoutine('2026-04-16\n10 x Squats')
+    const kinds: string[] = []
+    const walk = (blocks: readonly typeof parsed.blocks[number][]) => {
+      for (const block of blocks) {
+        kinds.push(block.kind)
+        if (block.kind !== 'segment') walk(block.children)
+      }
+    }
+    walk(parsed.blocks)
+    expect(kinds).not.toContain('ladder')
+    expect(parsed.skipped.map((entry) => entry.text)).toEqual(['2026-04-16'])
+  })
+})
