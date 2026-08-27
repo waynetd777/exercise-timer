@@ -9,6 +9,43 @@ import general from './emails/2026-07-20-general.txt?raw'
 import trampoline from './emails/2026-08-03-trampoline.txt?raw'
 import bands from './emails/2026-08-17-bands.txt?raw'
 import emom from './emails/2026-08-25-emom.txt?raw'
+import e20260416trampoline from './emails/2026-04-16-trampoline.txt?raw'
+import e20260423trampoline from './emails/2026-04-23-trampoline.txt?raw'
+import e20260504trampoline from './emails/2026-05-04-trampoline.txt?raw'
+import e20260511tabata from './emails/2026-05-11-tabata.txt?raw'
+import e20260518trampoline from './emails/2026-05-18-trampoline.txt?raw'
+import e20260526trampoline from './emails/2026-05-26-trampoline.txt?raw'
+import e20260601tabata from './emails/2026-06-01-tabata.txt?raw'
+import e20260622trampoline from './emails/2026-06-22-trampoline.txt?raw'
+import e20260629tabata from './emails/2026-06-29-tabata.txt?raw'
+import e20260706tabata from './emails/2026-07-06-tabata.txt?raw'
+import e20260713trampoline from './emails/2026-07-13-trampoline.txt?raw'
+import e20260720general from './emails/2026-07-20-general.txt?raw'
+import e20260727trampoline from './emails/2026-07-27-trampoline.txt?raw'
+import e20260803trampoline from './emails/2026-08-03-trampoline.txt?raw'
+import e20260817bands from './emails/2026-08-17-bands.txt?raw'
+import e20260825emom from './emails/2026-08-25-emom.txt?raw'
+
+/** Every routine we hold, for the bar the parser is held to. */
+const ALL_EMAILS: Record<string, string> = {
+  '2026-04-16-trampoline': e20260416trampoline,
+  '2026-04-23-trampoline': e20260423trampoline,
+  '2026-05-04-trampoline': e20260504trampoline,
+  '2026-05-11-tabata': e20260511tabata,
+  '2026-05-18-trampoline': e20260518trampoline,
+  '2026-05-26-trampoline': e20260526trampoline,
+  '2026-06-01-tabata': e20260601tabata,
+  '2026-06-22-trampoline': e20260622trampoline,
+  '2026-06-29-tabata': e20260629tabata,
+  '2026-07-06-tabata': e20260706tabata,
+  '2026-07-13-trampoline': e20260713trampoline,
+  '2026-07-20-general': e20260720general,
+  '2026-07-27-trampoline': e20260727trampoline,
+  '2026-08-03-trampoline': e20260803trampoline,
+  '2026-08-17-bands': e20260817bands,
+  '2026-08-25-emom': e20260825emom,
+}
+
 import { compile, SCHEMA_VERSION } from '../../engine'
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../../engine'
 import { parseItem, parseRoutine } from '../pasteFormat'
@@ -762,5 +799,71 @@ describe('a pyramid circuit', () => {
   it('reports the rows rather than dropping them when nothing defines them', () => {
     const parsed = parseRoutine('#1 Legs\n1 + 2\n1 + 2 + 3')
     expect(parsed.skipped).toHaveLength(2)
+  })
+})
+
+describe('the last of the earlier template', () => {
+  const clean = (text: string) => {
+    const parsed = parseRoutine(text)
+    expect(parsed.skipped).toEqual([])
+    return parsed
+  }
+
+  it('reads a course drawn in characters, and names its legs by the markers', () => {
+    /*
+     * The diagram is the shape of the room, not a step, so it becomes the
+     * section's note and its distance measures the legs beneath it. The markers
+     * are kept rather than turned into forwards and backwards: they are what
+     * the diagram labelled, and it is still there to point at.
+     */
+    const parsed = clean('#1 General body\nA🔺-------5m———🔺B\nWalking lunge A-B\nWalking lunge B-A')
+    const section = parsed.blocks.find((b) => b.kind === 'section')!
+    expect(section.note).toContain('5m')
+    expect(section.children.map((c) => (c.kind === 'segment' ? c.name : ''))).toEqual([
+      'Walking lunge 5m A-B',
+      'Walking lunge 5m B-A',
+    ])
+  })
+
+  it('lets a step wait for Next where its length cannot be worked out', () => {
+    // "Whatever is left of the minute" is not a number the app can know, and a
+    // made-up thirty seconds would be it inventing one.
+    const parsed = clean('#1 Finisher\nWall sit (time remaining after the 10 lunges per leg)')
+    const step = parsed.blocks.find((b) => b.kind === 'section')!.children[0]!
+    expect(step.kind === 'segment' && step.durationMs).toBeUndefined()
+  })
+
+  it('reads an interval pair as the two steps it is', () => {
+    const parsed = clean('#1 Legs\nSquats 20sec - 10sec squat hold')
+    const json = JSON.stringify(parsed.blocks)
+    expect(json).toContain('"durationMs":20000')
+    expect(json).toContain('"durationMs":10000')
+    expect(json).toContain('squat hold')
+  })
+
+  it('reads a ladder written with arrows', () => {
+    expect(JSON.stringify(clean('Push-Up wave:\n5 → 10 → 15 → 10 → 5\nPush-ups').blocks)).toContain(
+      '"counts":[5,10,15,10,5]',
+    )
+  })
+
+  it('reads a heading that ends in a colon, and one behind an emoji', () => {
+    for (const heading of ['Exercises:', '💥 Bonus Challenge', 'Optional Burner (if you want to)']) {
+      const blocks = clean(`${heading}\n10 x Squats`).blocks
+      expect(blocks.some((b) => b.kind === 'section')).toBe(true)
+    }
+  })
+})
+
+describe('the whole corpus', () => {
+  it('is understood, every line of all sixteen routines', () => {
+    /*
+     * The bar this parser is held to, and the assertion that fails first when
+     * the instructor writes something new. It was 53% when the twelve older
+     * routines were added on 2026-08-27.
+     */
+    for (const [name, text] of Object.entries(ALL_EMAILS)) {
+      expect(parseRoutine(text).skipped, name).toEqual([])
+    }
   })
 })

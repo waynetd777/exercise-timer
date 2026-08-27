@@ -75,7 +75,7 @@ const TRAILING_HASH_SECTION = /^(\d+)\s*#\s*(.*)$/
 const WORD_HASH_SECTION = /^#\s*(\p{L}.*)$/u
 
 /** "🔥 Final Burnout", "🔥 After Round 5:". */
-const FLAME_SECTION = /^🔥\s*(.+?):?$/
+const FLAME_SECTION = /^\p{Extended_Pictographic}\s*(.+?):?$/u
 
 /** "After Round 4", the same idea without the emoji. */
 const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
@@ -85,7 +85,7 @@ const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
  * heuristic like "Title Case on its own line" would swallow half the exercises.
  */
 const NAMED_SECTION =
-  /^((?:trampoline\s+)?warm[-\s]?up|cool[-\s]?down|final\s+burnout|band\s+burner|burnout\s+ladder|(?:[\p{L}&\s]{0,24}\s)?finisher)\b(.*)$/iu
+  /^((?:trampoline\s+)?warm[-\s]?up|cool[-\s]?down|final\s+burnout|(?:[\p{L}]+\s+)?burner|burnout\s+ladder|(?:[\p{L}&\s]{0,24}\s)?finisher)\b(.*)$/iu
 
 /**
  * A heading in capitals: "LEGS", "ARMS", "ABS".
@@ -148,7 +148,7 @@ const SETS_OF = new RegExp(`^(\\d+)\\s*[×x]\\s*${NUMBER}\\s*${UNIT}\\s*$`, 'i')
  */
 const UNIT_WORD = /^(?:secs?|seconds?|mins?|minutes?|reps?)\b/i
 const LADDER = new RegExp(
-  `^(?:counting:\\s*)?(\\(?\\d+\\)?(?:\\s*[${DASH_CHARS},]\\s*\\(?\\d+\\)?){2,})\\s*(.*)$`,
+  `^(?:counting:\\s*)?(\\(?\\d+\\)?(?:\\s*(?:[${DASH_CHARS},]|→|->)\\s*\\(?\\d+\\)?){2,})\\s*(.*)$`,
   'i',
 )
 /**
@@ -269,7 +269,7 @@ const BONUS = /^bonus:\s*(.+)$/i
 
 /** Instructions that belong on the section rather than on any one step. */
 const SECTION_NOTE =
-  /^(complete\b.*\b(?:exercise|count)\b|no rest between exercises|rest\b|reps? and sets?\b|as many\b|start a new\b|work\s*(?:→|->)\s*rest\b)/i
+  /^(complete\b|no rest between exercises|rest\b|reps? and sets?\b|as many\b|start a new\b|work\s*(?:→|->)\s*rest\b|use\b|after every round\b|repeat the sequence\b|keep climbing\b|\d[\d\s\p{Pd},]*(?:…|\.\.\.)|b-weights\b|tabata\b)/iu
 
 /**
  * `•side plank left` has no space after the bullet, and only `•` is allowed to
@@ -288,7 +288,47 @@ const NUMBERED_DASH = new RegExp(`^\\d+\\s*${DASH}\\s+(.+)$`)
 const NUMBERED_DASH_INDEX = new RegExp(`^(\\d+)\\s*${DASH}\\s+`)
 /** "1", "1 + 2", "1 + 2 + 3": one round of a pyramid circuit. */
 const PYRAMID_ROW = /^\d+(?:\s*\+\s*\d+)*$/
+/**
+ * A COURSE drawn in characters: "A🔺-------5m———🔺B".
+ *
+ * Two markers and the distance between them. The line itself is not a step, it
+ * is the shape of the room, so it becomes the section's note and the distance is
+ * kept for the lines beneath it.
+ */
+const COURSE = /^\s*A\s*\S*[\s\p{Pd}_.]*(\d+\s*m)\b[\s\p{Pd}_.]*\S*\s*B\s*$/iu
+
+/**
+ * "Walking lunge A-B", which is that course walked one way and then the other.
+ *
+ * The MARKERS are kept rather than turned into forwards and backwards: they are
+ * what the diagram above labelled, and the diagram is the section's note, so
+ * "Walking lunge 5m A-B" still points at something.
+ */
+const COURSE_LEG = /^(.+?)\s+([AB])\s*[\p{Pd}]\s*([AB])\s*$/iu
+
+/**
+ * A step whose length is described rather than stated: "wall sit till 1min is
+ * over", "Wall sit (time remaining after the 10 lunges per leg)".
+ *
+ * The app cannot work out what is left of someone else's minute, so the step
+ * waits for Next instead. Wayne's call, and it is the honest one: a made-up
+ * thirty seconds would be the app inventing the number it could not read.
+ */
+const OPEN_ENDED = /\btime (?:left|remaining)\b|\btill\b.*\bis over\b/i
+
 /** A lone "or …" line: the previous step's low-impact swap. */
+/** "Squats 20sec - 10sec squat hold": the work, then what to hold at the end. */
+const INTERVAL_PAIR = new RegExp(
+  `^(\\p{L}.*?)\\s+${NUMBER}\\s*${UNIT}\\s*${DASH}\\s*${NUMBER}\\s*${UNIT}\\s+(\\p{L}.*)$`,
+  'iu',
+)
+
+/** A heading that says so by ending in a colon, and states no number. */
+const COLON_HEADING = /^[^\d:]{2,40}:$/
+
+/** "10mins" alone under a heading: how long that section runs. */
+const BARE_DURATION = new RegExp(`^${NUMBER}\\s*${UNIT}\\s*$`, 'i')
+
 const ALTERNATIVE_LINE = /^or\s+(.+)$/i
 
 // ── Item parsing ────────────────────────────────────────────────────────────
@@ -683,6 +723,8 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
    * and in his routine it bookends the pyramid on both sides.
    */
   const pyramidRows: { rungs: number[]; line: number; text: string }[] = []
+  /** The distance a course states, for the "A-B" lines beneath it. */
+  let courseDistance: string | null = null
   /**
    * The numbered lines seen in this section, by identity rather than by a field
    * on `Segment`: this is parser bookkeeping and has no business in the schema,
@@ -759,6 +801,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     amrap = null
     pyramidRows.length = 0
     numberedItems.length = 0
+    courseDistance = null
   }
 
   /** Steps outside any section still need somewhere to go. */
@@ -855,8 +898,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      * matched without the marker and NAMED with it, because whether a block is
      * optional is the reader's to know, not the parser's to drop.
      */
-    const marker = LEADING_PAREN.exec(line)?.[0] ?? ''
-    const heading = line.slice(marker.length)
+    // "(Repeat 2x)" is the directive in brackets, not a marker on a heading.
+    const bracketed = /^\((.+)\)$/.exec(line)
+    const unwrapped =
+      bracketed && ROUNDS.test(bracketed[1]!.trim()) ? bracketed[1]!.trim() : line
+
+    const marker = LEADING_PAREN.exec(unwrapped)?.[0] ?? ''
+    const heading = unwrapped.slice(marker.length)
 
     const numbered = NUMBERED_SECTION.exec(heading)
     if (numbered) return openSection((marker + (numbered[1] || heading)).trim())
@@ -931,11 +979,15 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
     const trailing = LADDER_TRAILING.exec(line)
     const ladderCounts = LADDER.exec(line) ?? (trailing ? [line, trailing[2]!, trailing[1]!] : null)
-    const mainLift = ladderCounts?.[2]?.trim() ?? ''
+    let mainLift = ladderCounts?.[2]?.trim() ?? ''
+    // "Counting: 12-8-4-8-12-(16) (Complete all reps of the main exercise)": the
+    // parenthetical explains the ladder, it is not the lift.
+    const ladderNote = /^\((.+)\)$/.exec(mainLift)
+    if (ladderNote) mainLift = ''
     if (ladderCounts && (mainLift === '' || (/^\p{L}/u.test(mainLift) && !UNIT_WORD.test(mainLift)))) {
       flushAmrap()
       const counts = ladderCounts[1]!
-        .split(new RegExp(`[${DASH_CHARS},]`))
+        .split(new RegExp(`(?:[${DASH_CHARS},]|→|->)`))
         // A rung offered rather than required is written "(16)". It is still a
         // rung; the brackets are the instructor saying "if you have it in you".
         .map((part) => Number(part.replace(/[()]/g, '').trim()))
@@ -944,12 +996,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       ensureSection().children.push(group)
       target = { kind: 'ladder-main', group }
       eachMs = null
+      if (ladderNote) addNote(ladderNote[1]!)
       // Named on the same line, so it is the lift the rungs count.
       if (mainLift !== '') addItem(parseItem(mainLift))
       return
     }
 
-    const rounds = ROUNDS.exec(line)
+    const rounds = ROUNDS.exec(unwrapped)
     if (rounds) {
       flushAmrap()
       // "3–5 Rounds" stores the upper bound; the runner can end a section early.
@@ -1129,6 +1182,36 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     }
 
     /*
+     * The room, not a step. Kept as the section's note so it is still readable,
+     * and its distance is what the legs beneath it are measured in.
+     */
+    const course = COURSE.exec(line)
+    if (course) {
+      courseDistance = course[1]!.replace(/\s+/g, '')
+      addNote(line)
+      return
+    }
+
+    /*
+     * "Walking lunge A-B" and then "Walking lunge B-A": the same course walked
+     * out and back. Named for what is done rather than for the markers, since
+     * "A-B" means nothing once the diagram is off the screen.
+     */
+    const leg = COURSE_LEG.exec(line)
+    if (leg && courseDistance) {
+      const markers = `${leg[2]!.toUpperCase()}-${leg[3]!.toUpperCase()}`
+      return addItem(parseItem(`${tidy(leg[1]!)} ${courseDistance} ${markers}`))
+    }
+
+    /*
+     * A length the app cannot work out: "wall sit till 1min is over". It waits
+     * for Next rather than inventing a number.
+     */
+    if (OPEN_ENDED.test(line) && !BULLET.test(line)) {
+      return addItem({ name: tidy(line), perSide: PER_SIDE.test(line) })
+    }
+
+    /*
      * A row of a pyramid circuit: "1", "1 + 2", "1 + 2 + 3". Held rather than
      * built, because the numbered lines it spends may not have been read yet.
      */
@@ -1181,6 +1264,26 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       expectMain = false
       return addItem(parseItem(line))
     }
+
+    /*
+     * "Squats (heels on weights) 20sec - 10sec squat hold": two steps, not a
+     * range. The first is the work and the second is what to hold at the end of
+     * it, which is what the line says if you read it aloud.
+     */
+    const pair = INTERVAL_PAIR.exec(line)
+    if (pair) {
+      addItem(parseItem(`${tidy(pair[1]!)} - ${pair[2]!} ${pair[3]!}`))
+      return addItem(parseItem(`${tidy(pair[6]!)} - ${pair[4]!} ${pair[5]!}`))
+    }
+
+    /*
+     * A heading that says it is one by ending in a colon. LAST of all, so every
+     * rule that could have claimed the line has already declined it.
+     */
+    if (COLON_HEADING.test(line)) return openSection(line.replace(/:$/, ''))
+
+    // A length on its own under a heading is how long that section runs.
+    if (BARE_DURATION.test(line)) return addNote(line)
 
     /*
      * A bare line that states its own AMOUNT is a step, whether that amount is a
