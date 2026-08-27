@@ -628,7 +628,11 @@ button {
 .menu__list {
   /* Fixed, not absolute: the library shell clips its overflow, and a menu is
      worth nothing if it is cut off at the header's edge. Coordinates come from
-     the trigger's bounding rect. */
+     the trigger's bounding rect.
+
+     Fixed is only viewport-relative while NO ancestor is transformed, so the
+     list is portalled to the body rather than left where it is written. See the
+     comment on the portal in Menu.tsx, and `.library__scroll`. */
   position: fixed;
   z-index: 40;
   display: grid;
@@ -639,6 +643,11 @@ button {
   border: var(--hairline);
   border-radius: var(--radius);
   box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+  /* `max-height` is set from the room actually available; a menu taller than
+     that scrolls rather than hanging off the edge with its last item out of
+     reach. See `place()` in Menu.tsx. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .menu__item {

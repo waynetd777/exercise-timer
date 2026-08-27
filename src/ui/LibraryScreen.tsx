@@ -170,26 +170,33 @@ function Row({
                 {
                   label: 'Copy a share link',
                   icon: <ShareIcon />,
-                  title: 'A link to this routine. Steps only, no photos.',
+                  title: 'A link to this routine. Steps only, no images.',
                   onSelect: () => void onShare(workout),
                 },
                 {
                   label: 'Copy as text',
                   icon: <PasteIcon />,
-                  title: 'The routine as plain text, for an email or a note. No photos.',
+                  title: 'The routine as plain text, for an email or a note. No images.',
                   onSelect: () => void onCopyText(workout),
-                },
-                {
-                  label: 'Export as a file',
-                  icon: <ExportIcon />,
-                  title: 'A .json file holding everything, photos included.',
-                  onSelect: () => void onExport(workout),
                 },
                 {
                   label: 'Download as text',
                   icon: <ExportIcon />,
-                  title: 'A .txt file in the format the app can paste back. No photos.',
+                  title: 'A .txt file in the format the app can paste back. No images.',
                   onSelect: () => void onDownloadText(workout),
+                },
+                /*
+                 * Last, and the only one that carries everything, which is why
+                 * it is called a BACKUP rather than an export: the other three
+                 * send a routine to someone, this one keeps it. The two copies
+                 * are the quick ways to hand it over, then the text file, then
+                 * the format that loses nothing.
+                 */
+                {
+                  label: 'Backup incl. images',
+                  icon: <ExportIcon />,
+                  title: 'A .json file holding everything, images included.',
+                  onSelect: () => void onExport(workout),
                 },
               ]}
             />
@@ -321,8 +328,8 @@ export function LibraryScreen({
         workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
       setNotice(
         photos === 0
-          ? `Exported ${subject}`
-          : `Exported ${subject} with ${photos} photo${photos === 1 ? '' : 's'}`,
+          ? `Backed up ${subject}`
+          : `Backed up ${subject} with ${photos} image${photos === 1 ? '' : 's'}`,
       )
     } catch {
       setNotice('The export failed before anything was written. Try again.')
@@ -433,9 +440,9 @@ export function LibraryScreen({
                 onSelect: () => setPasting(true),
               },
               {
-                label: 'Export all as JSON',
+                label: 'Backup all incl. images',
                 icon: <ExportIcon />,
-                title: 'Download every routine as one file, photos included',
+                title: 'Download every routine as one file, images included',
                 disabled: library.workouts.length === 0,
                 onSelect: () => void exportRoutines(library.workouts, null),
               },

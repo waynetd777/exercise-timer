@@ -158,6 +158,19 @@ Each of these cost a real bug. They are recorded because they recur.
   its containing block.** Anchor a popover to a 42px wrapper and its available
   width is 42px, so shrink-to-fit falls back to min-content. Give a popover
   `width: max-content` and keep its widest child `nowrap`.
+- **A `transform` on any ancestor breaks `position: fixed`, and `translateY(0)`
+  counts.** The transformed element becomes the containing block, so a fixed
+  child is placed against IT rather than the viewport. `.library__scroll` is
+  transformed at all times to follow the finger for pull-to-refresh, which is why
+  a menu opened from a library row landed far below its button while the same
+  menu in the header was fine. Put the popover in a PORTAL on the body rather
+  than doing arithmetic against the offending ancestor: that way the rule holds
+  wherever the trigger lives. `filter`, `perspective`, `will-change` and
+  `contain` all do the same thing.
+- **Measure a popover, do not assume its size.** `Menu` hardcoded the 208px that
+  matches `width: 13rem`, which is only true while the root font size is 16px,
+  and never measured its height at all, so it could not know whether it fitted
+  below its trigger. Measure the rendered box in a layout effect, before paint.
 - **Never fade a saturated colour toward a near-black ground** to show an inactive
   state. Dark plus desaturated red is brown. Mix toward a mid neutral instead, or
   drop the hue.
@@ -399,7 +412,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `SoundsScreen.tsx` | The cue bench. **Dev only.** `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
 | `PasteDialog.tsx` | Paste a routine as text. Reports unparsed lines before saving, and hands over the template |
 | `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |
-| `Menu.tsx` | The dropdown behind the collapsed toolbars. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger |
+| `Menu.tsx` | The dropdown behind the collapsed toolbars, and behind a row's Send button. Hand-rolled, because the Popover API still needs CSS anchor positioning to sit under its trigger. Its list is PORTALLED to the body, and `place()` is pure and tested |
 | `useDismiss.ts` | Close-on-Escape and close-on-press-outside, shared by `Menu` and the editor row's controls panel |
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
 | `ConfirmDialog.tsx` | Asks before something irreversible. A modal, unlike the editor's inline confirm, because it is answered mid-workout |
