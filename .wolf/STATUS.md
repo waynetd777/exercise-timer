@@ -816,6 +816,9 @@ not disagree.
   has no way to say "whatever I lift".
 - "Fill n from my routines" takes what your saved routines already use for any
   row still blank. The placeholder shows it before you do.
+- v6.6: each row carries the manufacturer's illustration, tappable for the full
+  size. Bundled paths, so no blob to read; a row without one gets an empty frame
+  so the names still line up.
 
 ### The gap this leaves, and it is worth closing
 

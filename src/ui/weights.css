@@ -129,7 +129,7 @@
  */
 .weight {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7.5rem;
+  grid-template-columns: 44px minmax(0, 1fr) 7.5rem;
   align-items: center;
   gap: var(--step-3);
   padding: var(--step-2) var(--step-3);
@@ -160,4 +160,59 @@
 .weight__field::placeholder {
   color: var(--bone-faint);
   font-style: italic;
+}
+
+/*
+ * The picture, at the size the editor's row uses. A button where there is an
+ * illustration and an empty frame where there is not, so a section of rows
+ * without pictures still lines its names up with one that has them.
+ */
+.weight__thumb {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease);
+}
+
+.weight__thumb:hover,
+.weight__thumb:focus-visible {
+  border-color: var(--role-prepare);
+}
+
+.weight__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* The illustrations are line art on transparency and vanish on a dark ground. */
+  background: var(--bone);
+}
+
+.weight__thumb--none {
+  border-style: dashed;
+  border-color: color-mix(in oklab, var(--ink-600) 60%, transparent);
+  cursor: default;
+}
+
+/* ── The picture, full size ─────────────────────────────────────────────── */
+.weights__view {
+  width: min(100%, 34rem);
+}
+
+.weights__picture {
+  display: block;
+  /* `max-*`, so a small illustration is shown at its own size rather than
+     scaled up into a blur. Capped in `dvh` to leave the name and the button
+     room on a short window. */
+  max-width: 100%;
+  max-height: 58dvh;
+  object-fit: contain;
+  background: var(--bone);
+  border-radius: 6px;
 }

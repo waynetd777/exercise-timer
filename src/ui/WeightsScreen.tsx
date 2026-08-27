@@ -4,13 +4,13 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Workout } from '../engine'
 import type { Equipment } from '../routines/exercises'
 import { EXERCISES, LOADABLE_GROUPS, loadable } from '../routines/exercises'
 import { exerciseKey } from '../routines/loads'
 import { loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
-import { BackIcon } from './icons'
+import { BackIcon, CloseIcon } from './icons'
 import './weights.css'
 
 /**
@@ -46,6 +46,46 @@ function observed(workouts: readonly Workout[]): Map<string, string> {
   return found
 }
 
+/**
+ * One illustration, full size.
+ *
+ * Its own dialog rather than the editor's: that one carries Remove, which has
+ * no meaning here — the picture belongs to the exercise table, not to a step,
+ * and nothing on this page can take it away. Everything else is the same
+ * `.modal` sheet and `.notice` panel every dialog in the app uses.
+ */
+function ImageView({ src, name, onClose }: { src: string; name: string; onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    // Guarded: StrictMode runs effects twice in dev, and showModal() on an
+    // already-open dialog throws.
+    if (!dialog.current?.open) dialog.current?.showModal()
+  }, [])
+
+  return (
+    <dialog
+      ref={dialog}
+      className="modal"
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === dialog.current) onClose()
+      }}
+    >
+      <div className="notice weights__view">
+        <img className="weights__picture" src={src} alt={name} />
+        <p className="notice__text">{name}</p>
+        <div className="notice__actions">
+          <button type="button" className="chip" onClick={onClose} autoFocus>
+            <CloseIcon />
+            Close
+          </button>
+        </div>
+      </div>
+    </dialog>
+  )
+}
+
 export function WeightsScreen({
   workouts,
   onExit,
@@ -61,6 +101,14 @@ export function WeightsScreen({
    */
   const [weights, setWeights] = useState(loadWeights)
   const [query, setQuery] = useState('')
+  const [viewing, setViewing] = useState<{ src: string; name: string } | null>(null)
+
+  /*
+   * Every illustration here is a BUNDLED one: a short path under `public/`,
+   * shipped with the app. No blob to read and nothing to await, so the URL is
+   * the base plus the path and the row can render it directly.
+   */
+  const base = import.meta.env.BASE_URL
 
   const fromLibrary = useMemo(() => observed(workouts), [workouts])
 
@@ -165,6 +213,28 @@ export function WeightsScreen({
                   const id = `weight-${key.replace(/\s+/g, '-')}`
                   return (
                     <li key={exercise.name} className="weight">
+                      {/*
+                        A picture for the 41 multi-gym exercises the guide
+                        illustrates, and an empty frame for the rest so the
+                        names still line up. Tapping it opens the picture:
+                        43 pixels is enough to recognise a station and not
+                        enough to see how the seat is set.
+                      */}
+                      {exercise.media ? (
+                        <button
+                          type="button"
+                          className="weight__thumb"
+                          onClick={() =>
+                            setViewing({ src: `${base}${exercise.media}`, name: exercise.name })
+                          }
+                          aria-label={`Picture of ${exercise.name}`}
+                          title={`Picture of ${exercise.name}`}
+                        >
+                          <img src={`${base}${exercise.media}`} alt="" loading="lazy" />
+                        </button>
+                      ) : (
+                        <span className="weight__thumb weight__thumb--none" aria-hidden="true" />
+                      )}
                       <label className="weight__name" htmlFor={id}>
                         {exercise.name}
                       </label>
@@ -191,6 +261,10 @@ export function WeightsScreen({
           ))
         )}
       </div>
+
+      {viewing && (
+        <ImageView src={viewing.src} name={viewing.name} onClose={() => setViewing(null)} />
+      )}
     </main>
   )
 }

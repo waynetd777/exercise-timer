@@ -5,7 +5,7 @@
  */
 
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
@@ -91,5 +91,43 @@ describe('WeightsScreen', () => {
     render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
 
     expect(screen.queryByLabelText('Weight for Sit Ups')).toBeNull()
+  })
+})
+
+describe('the pictures', () => {
+  beforeAll(() => {
+    // jsdom does not implement the dialog methods; the open attribute is all
+    // the code under test observes.
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '')
+    }
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open')
+    }
+  })
+
+  it('shows a thumbnail for an exercise the guide illustrates', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    const thumb = screen.getByLabelText('Picture of Leg Press')
+    expect(thumb.querySelector('img')?.getAttribute('src')).toContain('exercises/Leg-Press.jpg')
+  })
+
+  it('offers no picture where there is none to offer', () => {
+    // A band exercise has no illustration in the guide, so the frame is empty
+    // and there is nothing to press.
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    expect(screen.queryByLabelText('Picture of Band Squats')).toBeNull()
+  })
+
+  it('opens it full size, and closes again', () => {
+    render(<WeightsScreen workouts={[]} onExit={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Leg Press'))
+    expect(screen.getByRole('img', { name: 'Leg Press' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('img', { name: 'Leg Press' })).toBeNull()
   })
 })

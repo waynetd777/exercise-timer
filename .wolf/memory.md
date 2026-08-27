@@ -237,3 +237,4 @@
 | 23:43 | Created src/storage/__tests__/weights.test.ts | — | ~1395 |
 | 23:44 | Created src/ui/__tests__/WeightsScreen.test.tsx | — | ~970 |
 | 23:58 | The weights settings page: one weight per exercise, resolved live | weights.ts, loads.ts, WeightsScreen, App, LibraryScreen, generate.ts, bundle.ts | v6.5, 965 green | ~120k |
+| 00:12 | Thumbnails and a full-size viewer on the weights page | WeightsScreen, weights.css, help.ts | v6.6, 968 green | ~18k |

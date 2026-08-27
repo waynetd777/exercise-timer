@@ -61,6 +61,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'Eleven multi-gym weights start filled in, from strengthlevel.com for a man of 55 at 88kg, taken at novice and rounded up to the nearest 5kg because that is where the pin goes. Change any of them. The rest are blank, because a guessed weight is worse than no weight.',
       'Fill from my routines takes the weights your saved routines already use for anything still blank. What a routine says about itself is left alone either way.',
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”.',
+      'The multi-gym exercises show the illustration from the manufacturer’s guide. Tap one to see it full size, which is the quickest way to find out what an exercise you have not done before actually is.',
       'They ride along in a backup and are merged back in on restore. They are not in a shared link or a text file: text carries the weight in force at the time it was written.',
     ],
   },
