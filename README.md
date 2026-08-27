@@ -71,8 +71,8 @@ across a gym, with the phone propped against a rack.
   images, with undo.
 - **Keeps what you lift in one place.** One weight per exercise, and any routine
   that does not state a weight of its own uses it, so moving up a plate is one
-  edit rather than seven. Nineteen start filled in, each with the illustration
-  from the manufacturer's guide beside it.
+  edit rather than seven. Every row starts blank, with the illustration from the
+  manufacturer's guide beside it, and a button fills them from your routines.
 - **Tidies the names**, putting each step's exercise back under the name the app
   knows it by, so weights and pictures find it. Counts, weights and anything in
   brackets are kept exactly as they are.

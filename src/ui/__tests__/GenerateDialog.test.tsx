@@ -9,6 +9,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
+import { saveWeights, withWeight } from '../../storage/weights'
 import { GenerateDialog } from '../GenerateDialog'
 
 beforeAll(() => {
@@ -184,6 +185,7 @@ describe('GenerateDialog', () => {
      * happens for an exercise Settings has never heard of; `generate.test.ts`
      * covers that, since it is the generator's rule rather than the dialog's.
      */
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
     const onGenerate = open([saved])
     fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))
     fireEvent.click(screen.getByRole('button', { name: 'Torso' }))

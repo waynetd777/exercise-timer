@@ -19,7 +19,7 @@ vi.mock('../../audio/speech', () => ({ unlockSpeech: () => {} }))
 
 import { RunScreen } from '../RunScreen'
 import { withWeights } from '../../routines/loads'
-import { currentWeights } from '../../storage/weights'
+import { currentWeights, saveWeights, withWeight } from '../../storage/weights'
 
 const timed = (): Workout => ({
   id: 'w1',
@@ -328,6 +328,7 @@ describe('RunScreen: a weight that comes from the weights page', () => {
   afterEach(cleanup)
 
   it('reads it after the exercise, exactly as a stated one does', () => {
+    saveWeights(withWeight({}, 'Seated Abdominal Crunch', '15kg'))
     render(<RunScreen workout={withWeights(following(), currentWeights())} />)
     fireEvent.click(screen.getByLabelText('Start'))
 

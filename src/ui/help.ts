@@ -156,7 +156,7 @@ export const WEIGHTS_HELP: readonly HelpSection[] = [
   {
     heading: 'Filling them in',
     points: [
-      'Most fields start blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on. A weight that starts filled in is a starting point, not a measurement: check it against what you lift.',
+      'Every field starts blank on purpose. An empty field asks the question; a guessed one answers it wrongly and gets loaded on.',
       'Fill from my routines takes the weight your saved routines already use for anything still blank. Better evidence than any website, and it shows you what it would take before you tap it.',
     ],
   },

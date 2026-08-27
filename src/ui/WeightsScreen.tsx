@@ -28,10 +28,9 @@ import './weights.css'
  * a number against is listed rather than only what you have used, because the
  * page is also how you find out what the multi-gym can do.
  *
- * Blank is a real answer. A few start with a number, from `SEED_WEIGHTS`; the
- * rest are empty because a
- * guessed weight is worse than no weight, and an empty field asks the question
- * instead of answering it wrongly.
+ * Blank is a real answer. Every field starts empty, because a guessed weight is
+ * worse than no weight: an empty field asks the question instead of answering
+ * it wrongly. "Fill from my routines" answers it from evidence.
  */
 
 /** What the saved library says you last lifted, for a row with nothing in it. */

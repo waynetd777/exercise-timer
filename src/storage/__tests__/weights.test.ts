@@ -10,14 +10,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Block } from '../../engine/types'
 import { exerciseKey, fillLoads, findLoad, stripLoads } from '../../routines/loads'
-import {
-  currentWeights,
-  loadWeights,
-  SEED_WEIGHTS,
-  saveWeights,
-  weightFor,
-  withWeight,
-} from '../weights'
+import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../weights'
 
 beforeEach(() => {
   globalThis.localStorage?.clear()
@@ -25,9 +18,10 @@ beforeEach(() => {
 })
 
 describe('the store', () => {
-  it('starts from the seeded numbers', () => {
-    expect(weightFor('Leg Press')).toBe(SEED_WEIGHTS['Leg Press'])
-    expect(weightFor('Lat Pulldown')).toBe('30kg')
+  it('starts empty: no seeds, every field blank', () => {
+    // It used to ship one person's numbers to every install.
+    expect(currentWeights().size).toBe(0)
+    expect(weightFor('Leg Press')).toBe('')
   })
 
   it('has nothing to say about an exercise no routine has loaded', () => {
@@ -37,33 +31,29 @@ describe('the store', () => {
   it('matches an exercise however the step spells it', () => {
     // The same lift is named three ways in a routine, and all three want the
     // same weight.
+    saveWeights(withWeight(loadWeights(), 'Leg Press', '65kg'))
     expect(weightFor('12 × Leg Press')).toBe('65kg')
     expect(weightFor('Leg press')).toBe('65kg')
   })
 
-  it('takes what was typed over the seed', () => {
+  it('clearing a weight removes it, and the store holds only what has a number', () => {
     saveWeights(withWeight(loadWeights(), 'Leg Press', '70kg'))
     expect(weightFor('Leg Press')).toBe('70kg')
-  })
-
-  it('lets a seeded weight be cleared, and does not put it back', () => {
-    /*
-     * The trap this exists for: if an empty field simply removed the key, the
-     * seed would return on the next render and the field could never be
-     * emptied. So an empty value is RECORDED.
-     */
-    saveWeights(withWeight(loadWeights(), 'Leg Press', ''))
-    expect(weightFor('Leg Press')).toBe('')
+    const cleared = withWeight(loadWeights(), 'Leg Press', '')
+    expect(cleared).toEqual({})
+    saveWeights(cleared)
     expect(currentWeights().has(exerciseKey('Leg Press'))).toBe(false)
   })
 
-  it('keeps the store to what actually differs', () => {
-    // Typing the seed back in is not a preference, so it is not written down.
-    const stored = withWeight(loadWeights(), 'Leg Press', '65kg')
-    expect(stored).toEqual({})
+  it('reads an older store that recorded a cleared field as an empty string', () => {
+    globalThis.localStorage?.setItem('davshack-timer-weights', '{"leg pres":"","lat pulldown":"30kg"}')
+    saveWeights(loadWeights())
+    expect(weightFor('Leg Press')).toBe('')
+    expect(weightFor('Lat Pulldown')).toBe('30kg')
   })
 
   it('drops the cache when a weight changes', () => {
+    saveWeights(withWeight(loadWeights(), 'Lat Pulldown', '30kg'))
     expect(weightFor('Lat Pulldown')).toBe('30kg')
     saveWeights(withWeight(loadWeights(), 'Lat Pulldown', '40kg'))
     expect(weightFor('Lat Pulldown')).toBe('40kg')
@@ -190,12 +180,14 @@ describe('the shorthand a routine is actually written in', () => {
    * never met.
    */
   it('finds the weight through an abbreviation', () => {
-    expect(weightFor('Seated Ab Crunch')).toBe(SEED_WEIGHTS['Seated Abdominal Crunch'])
+    saveWeights(withWeight(loadWeights(), 'Seated Abdominal Crunch', '15kg'))
+    expect(weightFor('Seated Ab Crunch')).toBe('15kg')
     expect(weightFor('12 × Seated Ab Crunch')).toBe('15kg')
     expect(weightFor('Get ready: Seated Ab Crunch')).toBe('15kg')
   })
 
   it('fills a step named that way, on the way into a run', () => {
+    saveWeights(withWeight(loadWeights(), 'Seated Abdominal Crunch', '15kg'))
     const blocks: Block[] = [
       { kind: 'segment', id: 'a', name: 'Get ready: Seated Ab Crunch', role: 'prepare', durationMs: 15_000 },
       { kind: 'segment', id: 'b', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
