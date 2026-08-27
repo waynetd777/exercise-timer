@@ -249,3 +249,10 @@
 | 01:38 | Tidy exercise names across the library | rename.ts, LibraryScreen, help.ts | v7.3, 995 green | ~30k |
 | 01:52 | Bring every README up to date: weights, paces, estimate, rename, harvests | 6 READMEs, docs/paste-format.md, README.md | v7.4, 995 green | ~30k |
 | 02:05 | Hide the tidy menu item when there is nothing to tidy | LibraryScreen, help.ts | v7.5, 995 green | ~5k |
+| 00:37 | Session end: 19 writes across 19 files (exercise_metadata.py, exercises.ts, exercises.other.ts, generate.ts, GenerateDialog.tsx) | 0 reads | ~34794 tok |
+| 00:38 | Session end: 19 writes across 19 files (exercise_metadata.py, exercises.ts, exercises.other.ts, generate.ts, GenerateDialog.tsx) | 0 reads | ~34794 tok |
+
+## Session: 2026-08-27 00:38
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

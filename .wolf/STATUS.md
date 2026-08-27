@@ -2,7 +2,47 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-27
+> Last updated: 2026-08-28
+
+---
+
+## ✅ Done: the review backlog, top to bottom (2026-08-28)
+
+A full code review (six parallel reviewers, findings verified by reading or by executed probes) produced a ranked
+backlog; the full list is in the session scratchpad `review.md` (session-specific). Every high and the mediums
+below are fixed and committed, one commit per group:
+
+- `930c4de` Audio: the @0 opening cue of every run now sounds (window looks back CANCEL_GRACE_MS; dedup set cleared per run).
+- `bba7125` Storage: writes report failure through `library.error` and Save waits; a corrupt IDB record no longer bricks the library;
+  favourite does not re-stamp; `openDb` un-caches any rejection; share links get full `isWorkout` validation and say when photos drop;
+  block ids required; duration sort uses timed + estimated; duplicate names read from the store.
+- `82e73b2` Help text made generic (no "your routines", weights section rewritten, em dashes out).
+- `f3610d7` Editor: two drags are two undo steps; Escape leaves nothing to undo; Cmd+Z stays with an uncommitted note;
+  `.efield--note` no longer zooms iOS; custom role shown; Recover default on retarget.
+- `6c4a256` Engine: a group collapses into one gate only inside a list section; imports and the editor refuse >10k steps;
+  new `ui/ErrorBoundary.tsx` around the screens.
+- `339a24c` Routines: Tidy keeps side/limb/count qualifiers; text export re-parses each line and drops a note that would misread;
+  an empty heading at the end of the text is reported (surfaced one lost line in the 2026-07-13 email).
+- `8775c9b` Dead code: synth-whistle machinery, hasGates(), KIND_RANK, COMPLETE_INDEX_OFFSET, tick's nextRun copy, cache stubs,
+  UpIcon/SpeakerIcon, --effort-* tokens, Exercise.load, ~20 un-exports. knip clean in src.
+- `1ec0b1e` Docs pass: every README/comment contradiction the review listed; em dashes gone.
+- Earlier: generated sections routines open on the parser's 5s Get ready (bug-074).
+
+- `d92be5f` Smaller fixes: run workout memoised (no recompile per render); paused cues not queued twice; `event.repeat` guard;
+  beforeunload during a run; SECTIONS_FEWEST used everywhere; two-digit ladder rungs (dates are not ladders); landscape safe-area
+  padding; wake-lock sentinel check; `tsconfig.scripts.json` typechecks scripts/ and the harvest config.
+
+Still open from the review (all medium/low), in rough priority:
+- Routines: rounds line after an AMRAP wraps the clock (pasteFormat.ts ~1007); `Then:` does not end an AMRAP (~1143); bulleted
+  duration ladders (~965); bare `Rest 30 seconds` becomes a note (~271); -ss plural folding (foldName.ts:38); generate.ts `totalMs`
+  vs `totalDurationMs` on ladders (~325); matcher duplicated in rename.ts/loads.ts; LADDER_COUNTS capped at 6 of 19 (generate.ts ~542);
+  torso mobility unreachable in warm-ups; `Minute N` joined pair split.
+- Storage/media: resolveMedia negative cache written before the read resolves (media/resolveMedia.ts:46, concurrent callers get null);
+  draft pins are per tab while the comment claims cross-tab (media/pin.ts); db.run resolves on request success not transaction complete.
+- UI: popstate/pushState routing for hardware Back (beforeunload is in); Ctrl+Y redo; focus after Delete/Add; group label/note store ''
+  instead of deleting; Menu items keyed by label; drop overlay flicker on onDragLeave; done-row contrast on the phase wash.
+- Quality: split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared with GenerateDialog;
+  add a linter; tests for LibraryScreen/App/audio engine. Product: SEED_WEIGHTS still ships one user's 21 weights to every install.
 
 ---
 
