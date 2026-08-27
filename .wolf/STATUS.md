@@ -602,6 +602,40 @@ one, so it survives the round trip and the migration lifts it out again.
 
 ---
 
+## 📌 Queued after the generator: a weights settings page
+
+Wayne's, 2026-08-27. A settings page listing every applicable exercise with a
+weight field, so a routine takes its load from there instead of carrying its own.
+Change a weight once and every routine follows, rather than editing each one.
+
+`Segment.load` already exists and `generate.ts` already seeds a weight from the
+saved library, so this replaces that lookup with a settings lookup and keeps the
+per-step field as an override.
+
+**Seed it from the strengthlevel.com numbers**, worked out 2026-08-27 for male,
+55, 88kg, targeting Novice. Those standards are ONE-REP MAXES and Wayne's sets
+are twelve reps, so the working weight is about 70% of the standard:
+
+| Exercise | Novice 1RM | 12-rep target | Wayne lifts |
+|---|---|---|---|
+| Leg Press | 90 | 63 | 65 |
+| Chest Press | 46 | 32 | 30 |
+| Lat Pulldown | 49 | 34 | 30 |
+| Seated Row | 49 | 34 | 30 |
+| Calf Press | 67 | 47 | 45 |
+| Shoulder Press | 37 | 26 | 10 |
+| Seated Leg Extension | 55 | 39 | 15 |
+| Hamstring Curl | 45 | 32 | 10 |
+| Hip Abductor | 52 | 36 | 15 |
+| Cable Fly | 47 | 33 | - |
+| Triceps Press | 27 | 19 | - |
+
+His COMPOUNDS are already at Novice; the gap is all in the isolation work. Note
+the caveat before using these as gospel: a Horizon stack is not a commercial
+machine, and 25 of the 41 exercises have no equivalent on the site at all.
+
+---
+
 ## 🚀 Next quest: generate the instructor's shape, not just a circuit
 
 The generator builds two circuit shapes. The routines Wayne is actually sent are
