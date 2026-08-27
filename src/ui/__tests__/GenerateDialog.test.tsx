@@ -191,6 +191,27 @@ describe('GenerateDialog', () => {
   })
 })
 
+describe('the name it suggests', () => {
+  it('follows the answers, and changes as they do', () => {
+    open()
+    const field = () => screen.getByLabelText('Routine name') as HTMLInputElement
+    expect(field().placeholder).toBe('Full Body Circuit, 45 min')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Upper body' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lower body' }))
+    expect(field().placeholder).toBe('Core Circuit, 45 min')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sections' }))
+    expect(field().placeholder).toMatch(/Core, \d sections/)
+  })
+
+  it('is what the routine is called when nothing is typed', () => {
+    const onGenerate = open()
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+    expect((onGenerate.mock.calls[0]![0] as Workout).name).toBe('Full Body Circuit, 45 min')
+  })
+})
+
 describe('the shape question', () => {
   const pick = (label: string) => fireEvent.click(screen.getByRole('button', { name: label }))
 

@@ -8,10 +8,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
-import { generateRoutine, seeded } from '../routines/generate'
+import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
 import { SECTIONS_MAX, SECTIONS_MIN, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
-import { duration, isoDate } from './format'
+import { duration } from './format'
 import { CloseIcon, PlusIcon } from './icons'
 
 /**
@@ -237,7 +237,19 @@ export function GenerateDialog({
     if (!dialog.current?.open) dialog.current?.showModal()
   }, [])
 
-  const fallback = `Generated - ${isoDate(new Date())}`
+  /*
+   * The name it would be given, shown as the placeholder rather than described.
+   * It follows the answers, so changing what the routine works changes what it
+   * would be called before you have committed to either.
+   */
+  const fallback = describeRoutine({
+    style,
+    sections,
+    totalMs: minutes * 60_000,
+    areas,
+    recovery,
+    equipment,
+  })
   const cardioOptions = useMemo(() => EXERCISES.filter((e) => e.use === 'cardio'), [])
 
   /*

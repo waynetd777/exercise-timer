@@ -13,7 +13,7 @@ import { PRESCRIPTIONS } from '../exercises.prescription'
 import { LADDER_COUNTS } from '../exercises.shapes'
 import { foldName } from '../foldName'
 import type { RoutineSpec } from '../generate'
-import { generateRoutine, seeded } from '../generate'
+import { describeRoutine, generateRoutine, seeded } from '../generate'
 
 const spec = (over: Partial<RoutineSpec> = {}): RoutineSpec => ({
   totalMs: 45 * 60_000,
@@ -576,5 +576,43 @@ describe('the instructor’s shape', () => {
     }
     walk(sections().workout.blocks)
     expect(new Set(names).size).toBe(names.length)
+  })
+})
+
+describe('what an unnamed routine is called', () => {
+  const named = (over: Partial<RoutineSpec>) => describeRoutine(spec(over))
+
+  it('says what it works and how big it is', () => {
+    // What a person scans a library for. "Generated - 2026-08-27" says neither,
+    // and a second one the same day says less.
+    expect(named({})).toBe('Full Body Circuit, 45 min')
+    expect(named({ totalMs: 35 * 60_000 })).toBe('Full Body Circuit, 35 min')
+  })
+
+  it('names the areas when they are not all of them, in body order', () => {
+    expect(named({ areas: ['torso'] })).toBe('Core Circuit, 45 min')
+    expect(named({ areas: ['lower', 'upper'] })).toBe('Upper Body & Lower Body Circuit, 45 min')
+  })
+
+  it('counts sections rather than minutes for the shape that has no length', () => {
+    expect(named({ style: 'sections', sections: 6 })).toBe('Full Body, 6 sections')
+  })
+
+  it('names the equipment only when it is worth naming', () => {
+    // Everything is on the multi-gym unless it says otherwise, so saying so on
+    // most of them would push the useful half off the end of a narrow row.
+    expect(named({ equipment: 'machine' })).toBe('Full Body Circuit, 45 min')
+    expect(named({ equipment: 'none' })).toBe('Bodyweight Full Body Circuit, 45 min')
+    expect(named({ equipment: 'mixed' })).toBe('Mixed Full Body Circuit, 45 min')
+  })
+
+  it('is what an unnamed routine actually gets called', () => {
+    const { workout } = generateRoutine(spec({ areas: ['lower'] }), { rng: seeded(1), now: 0 })
+    expect(workout.name).toBe('Lower Body Circuit, 45 min')
+  })
+
+  it('leaves a name alone when there is one', () => {
+    const { workout } = generateRoutine(spec({ name: '  Leg day  ' }), { rng: seeded(1), now: 0 })
+    expect(workout.name).toBe('Leg day')
   })
 })
