@@ -111,6 +111,10 @@ export function GenerateDialog({
   const [recovery, setRecovery] = useState<Recovery>('active')
   const [equipment, setEquipment] = useState<EquipmentScope>('machine')
   const [cardio, setCardio] = useState('Cycling')
+  /** What Random may draw from. Everything, until it is narrowed. */
+  const [pool, setPool] = useState<string[]>(() =>
+    EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name),
+  )
   const [sets, setSets] = useState(3)
   const [name, setName] = useState('')
   /** Bumped by "Try another", which is the only thing that should reroll. */
@@ -140,7 +144,7 @@ export function GenerateDialog({
           areas,
           recovery,
           ...(recovery === 'active' && cardio !== VARY ? { recoveryExercise: cardio } : {}),
-          ...(recovery === 'active' && cardio === VARY ? { varyRecovery: true } : {}),
+          ...(recovery === 'active' && cardio === VARY ? { recoveryPool: pool } : {}),
           equipment,
           sets,
         },
@@ -149,7 +153,7 @@ export function GenerateDialog({
     } catch {
       return null
     }
-  }, [areas, cardio, equipment, fallback, library, minutes, name, recovery, seed, sets])
+  }, [areas, cardio, equipment, fallback, library, minutes, name, pool, recovery, seed, sets])
 
   const chosen = useMemo(() => {
     if (!result) return []
@@ -165,6 +169,8 @@ export function GenerateDialog({
     walk(result.workout.blocks)
     return names
   }, [result])
+
+  const emptyPool = recovery === 'active' && cardio === VARY && pool.length === 0
 
   const toggle = (area: BodyArea) =>
     setAreas((current) =>
@@ -241,6 +247,39 @@ export function GenerateDialog({
           </label>
         )}
 
+        {/*
+          What Random may draw from, on all by default.
+          
+          The same multi-select chips as "What to work" rather than a column of
+          checkboxes: seventeen checkboxes is seventeen lines, and chips wrap into
+          four. Bounding the randomness is the point, since nobody wants a routine
+          willing to put burpees in every gap.
+        */}
+        {recovery === 'active' && cardio === VARY && (
+          <fieldset className="generate__field">
+            <legend className="label label--sm">Random, from</legend>
+            <div className="generate__options generate__options--pool">
+              {cardioOptions.map((option) => (
+                <button
+                  key={option.name}
+                  type="button"
+                  className="chip chip--action"
+                  aria-pressed={pool.includes(option.name)}
+                  onClick={() =>
+                    setPool((current) =>
+                      current.includes(option.name)
+                        ? current.filter((n) => n !== option.name)
+                        : [...current, option.name],
+                    )
+                  }
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
         <Choice
           legend="Equipment"
           options={EQUIPMENT}
@@ -263,6 +302,8 @@ export function GenerateDialog({
         <div className="paste__report">
           {areas.length === 0 ? (
             <p className="label label--sm">Pick at least one thing to work.</p>
+          ) : recovery === 'active' && cardio === VARY && pool.length === 0 ? (
+            <p className="label label--sm">Pick at least one thing to move with.</p>
           ) : result === null ? (
             <p className="label label--sm">Nothing matches that combination.</p>
           ) : (
@@ -301,8 +342,8 @@ export function GenerateDialog({
           <button
             type="button"
             className="chip chip--primary"
-            disabled={result === null}
-            onClick={() => result && onGenerate(result.workout)}
+            disabled={result === null || emptyPool}
+            onClick={() => result && !emptyPool && onGenerate(result.workout)}
           >
             <PlusIcon />
             Open in editor

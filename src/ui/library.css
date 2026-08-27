@@ -473,6 +473,30 @@
   padding: 0 var(--step-3);
 }
 
+/*
+ * Seventeen of them, which is a block rather than a row.
+ *
+ * Capped and scrollable so the list cannot push the answers above it off the
+ * top of a phone, and the chips are smaller here because these are names to
+ * pick from rather than a choice between three.
+ */
+.generate__options--pool {
+  max-height: 11rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--step-2);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.generate__options--pool .chip {
+  min-height: 36px;
+  padding: 0 var(--step-2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* The chosen one, on the same principle as the editor's colour swatches. */
 .generate__options .chip[aria-pressed='true'] {
   background: var(--phase);
