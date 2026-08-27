@@ -38,7 +38,7 @@ export type FlatBlock = {
  * adjustment: 30s to get set, 20s of work, 10s rest, 60s recovery between
  * exercises.
  */
-const DEFAULT_SECONDS: Record<SegmentRole, number> = {
+export const DEFAULT_SECONDS: Record<SegmentRole, number> = {
   prepare: 30,
   work: 20,
   rest: 10,

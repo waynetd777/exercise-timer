@@ -58,6 +58,31 @@ export function push<T>(history: History<T>, next: T, typing: string | null = nu
   }
 }
 
+/**
+ * Ends the run being typed, so the next push in the same field starts a fresh
+ * step. For a gesture that coalesces while it lasts and must not bleed into the
+ * next one: two drags were one undo step, because nothing ended the first.
+ */
+export function endRun<T>(history: History<T>): History<T> {
+  return history.typing === null ? history : { ...history, typing: null }
+}
+
+/**
+ * Throws the run being typed away: the present becomes the state before it and
+ * nothing goes to the redo stack. For a cancelled gesture. Pushing the original
+ * state back instead coalesced into the run, which left an undo step that
+ * visibly did nothing.
+ */
+export function discardRun<T>(history: History<T>): History<T> {
+  if (history.typing === null || !canUndo(history)) return history
+  return {
+    past: history.past.slice(0, -1),
+    present: history.past[history.past.length - 1]!,
+    future: history.future,
+    typing: null,
+  }
+}
+
 export function canUndo<T>(history: History<T>): boolean {
   return history.past.length > 0
 }

@@ -1392,6 +1392,71 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T01:30:00Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-08-28T01:50:00Z",
+      "error_message": "Two consecutive drags in the editor were one undo step; a cancelled drag left an undo step that did nothing.",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "Every drag frame pushed with the coalescing key 'drag' and onEnd never reset history.typing, so the next drag's first move coalesced into the previous drag. onCancel pushed the original tree under the same key, coalescing into the run and leaving present === past top.",
+      "fix": "history.ts gained endRun() (typing -> null) and discardRun() (drop the run, restore the state before it, nothing to redo). onEnd calls endRun, onCancel calls discardRun. Tests: two drags are two undo steps; Escape leaves Undo disabled.",
+      "tags": [
+        "editor",
+        "undo",
+        "history",
+        "drag",
+        "coalescing"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:50:00Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-08-28T01:50:00Z",
+      "error_message": "Cmd/Ctrl+Z while typing an uncommitted note deleted the step being typed in (undid the previous document edit).",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "The global keydown handler preventDefaulted native undo for every field, but note/alternative/weight are uncontrolled inputs committed on blur, so their keystrokes were not in the history yet.",
+      "fix": "The handler returns without acting when document.activeElement is an input whose value differs from its defaultValue (the routine name is controlled and exempt). Test types in a note, presses Cmd+Z, and expects the earlier rename to survive.",
+      "tags": [
+        "editor",
+        "undo",
+        "keyboard",
+        "uncontrolled-input"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:50:00Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-08-28T01:50:00Z",
+      "error_message": "Focusing a section's instruction field zoomed the page on iPhone.",
+      "file": "src/ui/editor.css",
+      "root_cause": ".efield--note floored its font-size at 0.9rem (14.4px); iOS Safari zooms any focused input under 16px. Every other .efield floors at 1rem for this reason.",
+      "fix": "Floor raised to 1rem with the reason in a comment.",
+      "tags": [
+        "css",
+        "ios",
+        "zoom",
+        "editor"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:50:00Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-08-28T01:50:00Z",
+      "error_message": "A .tabata step imported with role 'custom' showed 'Get ready' in the type select; a Recover step toggled to timed got 20s instead of 60s.",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "ROLES omitted 'custom' (a legal SegmentRole the importer emits), so <select value='custom'> had no matching option. retarget used a literal 20_000 instead of DEFAULT_SECONDS[role].",
+      "fix": "The select offers a Custom option only when the step already has that role, so the add bar gains no button. retarget uses DEFAULT_SECONDS (now exported from blocks.ts).",
+      "tags": [
+        "editor",
+        "roles",
+        "tabata",
+        "defaults"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T01:50:00Z"
     }
   ]
 }

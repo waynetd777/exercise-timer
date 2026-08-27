@@ -832,10 +832,12 @@
   letter-spacing: var(--track-name);
 }
 
-/* The section instruction, on its own line under the name and its buttons. */
+/* The section instruction, on its own line under the name and its buttons.
+   Floored at 1rem like every other field: under 16px, iOS Safari zooms the
+   page when the field is focused. */
 .efield--note {
   width: 100%;
-  font-size: max(0.9rem, min(1.5cqi, 1.05rem));
+  font-size: max(1rem, min(1.5cqi, 1.05rem));
   color: var(--bone-dim);
 }
 
