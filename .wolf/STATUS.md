@@ -621,10 +621,17 @@ list of forms; the short version is bare unbulleted lines, a lowercase `x`,
 ladder counts inline with the exercise name, bare `LEGS`/`ARMS`/`ABS` headings,
 ladders of DURATIONS, and ranges like `10/12 x` and `1-2mins`.
 
-So there is now a **phase 0**: widen the grammar, or harvest vocabulary from
-those ten with a looser pass that does not need the block structure. Ten
-routines' worth of exercises, rep counts and ladder shapes are behind that
-decision. The two July ones are nearly clean already (1 and 5 skipped lines).
+**PHASE 0 IS DONE** (2026-08-27, v5.0, commits c4f8a48 and ee0b410). The grammar
+was widened for the earlier template and the corpus now reads at **94%**, up from
+53%, with the four routines the parser was written for still at 100%. Eleven
+forms learned; see the emails README for the list and for what the remaining 42
+lines are.
+
+**Do not chase the last 6%.** Those lines are mostly not step definitions:
+accumulators written down the page (`1 + 2 + 3`), a countdown, a course drawn in
+characters, interval pairs on a line shaped like a range. Each needs a decision
+about what it MEANS before it can be read, and they sit in finishers rather than
+in the body of a routine.
 
 ### The gap
 
