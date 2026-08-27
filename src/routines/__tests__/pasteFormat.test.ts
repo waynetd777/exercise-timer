@@ -863,7 +863,34 @@ describe('the whole corpus', () => {
      * routines were added on 2026-08-27.
      */
     for (const [name, text] of Object.entries(ALL_EMAILS)) {
-      expect(parseRoutine(text).skipped, name).toEqual([])
+      expect(parseRoutine(text).skipped.map((entry) => entry.text), name).toEqual(
+        KNOWN_UNPLACED[name] ?? [],
+      )
     }
+  })
+})
+
+/**
+ * The lines the parser cannot place and SAYS so. One: a closing "challenge" that
+ * reads as a heading and has nothing under it. It was dropped silently until
+ * empty headings at the end of the text were reported; the rule is that a line
+ * lands somewhere or is reported, and this is the reporting.
+ */
+const KNOWN_UNPLACED: Record<string, string[]> = {
+  '2026-07-13-trampoline': [
+    '🔥 Challenge: Finish with a 60-second wall sit to empty the tank! 💪🏻 \u200e',
+  ],
+}
+
+describe('a heading with nothing under it', () => {
+  it('is reported rather than dropped', () => {
+    // "Cool down walk for 2 minutes" as the last line matched the heading
+    // vocabulary, opened a section, and vanished when the section closed empty.
+    const parsed = parseRoutine('#1 Legs\n10 x Squats\nCool down walk for 2 minutes')
+    expect(parsed.blocks.map((b) => (b.kind === 'section' ? b.name : b.kind))).toEqual([
+      'segment',
+      'Legs',
+    ])
+    expect(parsed.skipped).toEqual([{ line: 3, text: 'Cool down walk for 2 minutes' }])
   })
 })

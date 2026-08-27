@@ -60,23 +60,45 @@ const LEAD = /^(\s*(?:get\s+ready\s*:\s*)?(?:\d+\s*×\s*)?)/i
 const TRAILING_LOAD = /\s+\d+(?:\.\d+)?\s?(?:kg|lb|lbs)(?:\s+(?:each|per)\s+side)?$/i
 /** A parenthetical: "(knees or toes)", "(bodyweight)". */
 const TRAILING_NOTE = /\s*\([^)]*\)$/
-/** The paste format's dashed qualifier: "– 5 each leg". Spaces required. */
-const TRAILING_DASH = /\s+[–—-]\s+.*$/
+/**
+ * The paste format's dashed qualifier: "– 5 each leg". A space after the dash,
+ * so a hyphenated word stays whole; none required before it, since "squat– 5"
+ * is how it is sometimes typed.
+ */
+const TRAILING_DASH = /\s*[–—-]\s+.*$/
+/** The side, or the limb: "left", "right leg", "per leg", "each side". */
+const TRAILING_SIDE = /\s+(?:(?:left|right)(?:\s+(?:leg|arm|side))?|(?:per|each)\s+(?:leg|side|arm|direction))$/i
+/** A count written after the name: "× 3", "x12". */
+const TRAILING_COUNT = /\s*[×x]\s*\d+$/i
 
 function split(name: string): { lead: string; core: string; trail: string } {
   const lead = LEAD.exec(name)?.[1] ?? ''
   let core = name.slice(lead.length)
   let trail = ''
   // Peeled repeatedly, since a name can carry more than one: "Leg Press 65kg
-  // (both legs)" is a weight and a note.
+  // (both legs)" is a weight and a note. The side and a trailing count are
+  // peeled too: `foldName` throws both away to match, and a rename that put the
+  // canonical name back without them turned "side plank left" into "Side Plank".
   for (;;) {
-    const match = TRAILING_LOAD.exec(core) ?? TRAILING_NOTE.exec(core) ?? TRAILING_DASH.exec(core)
+    const match =
+      TRAILING_LOAD.exec(core) ??
+      TRAILING_NOTE.exec(core) ??
+      TRAILING_DASH.exec(core) ??
+      TRAILING_SIDE.exec(core) ??
+      TRAILING_COUNT.exec(core)
     if (!match) break
     trail = core.slice(match.index) + trail
     core = core.slice(0, match.index)
   }
   return { lead, core: core.trim(), trail }
 }
+
+/**
+ * Whether what is left is purely a name. A side or a number still in the core is
+ * a qualifier the peeling did not recognise, and `match()` would fold it away
+ * and lose it. Better to leave the step as written than to shorten it.
+ */
+const QUALIFIED = /\b(?:left|right)\b|\d/i
 
 /** Every exercise, by folded name. A fold shared by two is a fold that decides nothing. */
 function table(): Map<string, string[]> {
@@ -125,6 +147,7 @@ function match(core: string, byKey: Map<string, string[]>): string | null {
 /** The name this step should have, or `null` where it already has it. */
 export function canonicalName(name: string, byKey = table()): string | null {
   const { lead, core, trail } = split(name)
+  if (QUALIFIED.test(core)) return null
   const canonical = match(core, byKey)
   if (canonical === null || canonical === core) return null
   return `${lead}${canonical}${trail}`
