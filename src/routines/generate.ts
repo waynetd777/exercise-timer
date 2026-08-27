@@ -424,11 +424,21 @@ function sectionsRoutine(
     Math.max(SECTIONS_MIN, Math.round(spec.sections ?? SECTIONS_TYPICAL)),
   )
 
-  /** Everything eligible, by area, shuffled once so a section can draw freely. */
+  /**
+   * Everything eligible, by area, shuffled once so a section can draw freely.
+   *
+   * The EQUIPMENT choice does not apply to the warm-up. Nothing on the multi-gym
+   * is a stretch or a jog, so a machine-only routine came out with no warm-up at
+   * all: the section was built, found nothing, and was silently dropped. You warm
+   * up on the floor or the bike whatever the session is made of.
+   */
   const pool = (area: BodyArea, use: 'strength' | 'cardio' | 'mobility'): Exercise[] =>
     shuffled(
       EXERCISES.filter(
-        (e) => e.area === area && (e.use ?? 'strength') === use && eligible(spec.equipment, e),
+        (e) =>
+          e.area === area &&
+          (e.use ?? 'strength') === use &&
+          (use === 'strength' ? eligible(spec.equipment, e) : true),
       ),
       rng,
     )

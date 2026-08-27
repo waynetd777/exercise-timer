@@ -9,7 +9,8 @@ import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
 import { generateRoutine, seeded } from '../routines/generate'
-import type { EquipmentScope, Recovery } from '../routines/generate'
+import { SECTIONS_MAX, SECTIONS_MIN, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
+import type { EquipmentScope, Recovery, Style } from '../routines/generate'
 import { duration, isoDate } from './format'
 import { CloseIcon, PlusIcon } from './icons'
 
@@ -190,6 +191,16 @@ export function GenerateDialog({
   onGenerate: (workout: Workout) => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  /**
+   * Which shape to build, and it decides which of the other questions apply.
+   *
+   * A circuit is timed throughout, so it can be asked for a LENGTH. The
+   * instructor's shape is mostly self-paced, so it cannot: what it can be asked
+   * for is how many sections. Every question below that only makes sense for one
+   * of them is hidden for the other, rather than being shown and ignored.
+   */
+  const [style, setStyle] = useState<Style>('circuit')
+  const [sections, setSections] = useState(SECTIONS_TYPICAL)
   const [minutes, setMinutes] = useState(45)
   const [areas, setAreas] = useState<BodyArea[]>(['upper', 'torso', 'lower'])
   const [recovery, setRecovery] = useState<Recovery>('active')
@@ -240,6 +251,8 @@ export function GenerateDialog({
       return generateRoutine(
         {
           name: name.trim() || fallback,
+          style,
+          sections,
           totalMs: minutes * 60_000,
           areas,
           recovery,
@@ -274,7 +287,9 @@ export function GenerateDialog({
     pool,
     recovery,
     seed,
+    sections,
     sets,
+    style,
     warmUp,
     warmUpSecs,
     recoverSecs,
@@ -296,7 +311,8 @@ export function GenerateDialog({
     return names
   }, [result])
 
-  const emptyPool = recovery === 'active' && cardio === VARY && pool.length === 0
+  const circuit = style === 'circuit'
+  const emptyPool = circuit && recovery === 'active' && cardio === VARY && pool.length === 0
 
   const toggle = (area: BodyArea) =>
     setAreas((current) =>
@@ -321,11 +337,47 @@ export function GenerateDialog({
         </label>
 
         <Choice
-          legend="About how long"
-          options={LENGTHS.map((m) => ({ value: m, label: `${m} min` }))}
-          value={minutes}
-          onChange={setMinutes}
+          legend="Shape"
+          options={[
+            {
+              value: 'circuit' as Style,
+              label: 'Circuit',
+              title: 'One exercise at a time, everything on a clock',
+            },
+            {
+              value: 'sections' as Style,
+              label: 'Sections',
+              title: 'Named sections and ladders, counted reps, in the shape your routines come in',
+            },
+          ]}
+          value={style}
+          onChange={setStyle}
         />
+
+        {style === 'circuit' && (
+          <Choice
+            legend="About how long"
+            options={LENGTHS.map((m) => ({ value: m, label: `${m} min` }))}
+            value={minutes}
+            onChange={setMinutes}
+          />
+        )}
+
+        {/*
+          Sections rather than minutes, because a routine of counted steps has no
+          length: it ends when you have tapped through it.
+        */}
+        {style === 'sections' && (
+          <Choice
+            legend="How many sections"
+            options={Array.from({ length: SECTIONS_MAX - SECTIONS_MIN + 1 }, (_, i) => ({
+              value: SECTIONS_MIN + i,
+              label: String(SECTIONS_MIN + i),
+            }))}
+            value={sections}
+            onChange={setSections}
+          />
+        )}
 
         <fieldset className="generate__field">
           <legend className="label label--sm">What to work</legend>
@@ -351,7 +403,7 @@ export function GenerateDialog({
           onChange={setEquipment}
         />
 
-        {recovery === 'active' && (
+        {circuit && recovery === 'active' && (
           <Cardio
             legend="Warm up with"
             options={cardioOptions}
@@ -362,13 +414,16 @@ export function GenerateDialog({
           />
         )}
 
-        <Choice
-          legend="Sets"
-          options={[2, 3, 4].map((n) => ({ value: n, label: String(n) }))}
-          value={sets}
-          onChange={setSets}
-        />
+        {circuit && (
+          <Choice
+            legend="Sets"
+            options={[2, 3, 4].map((n) => ({ value: n, label: String(n) }))}
+            value={sets}
+            onChange={setSets}
+          />
+        )}
 
+        {circuit && (
         <Choice
           legend="Between sets"
           options={[
@@ -378,8 +433,9 @@ export function GenerateDialog({
           value={recovery}
           onChange={setRecovery}
         />
+        )}
 
-        {recovery === 'active' && (
+        {circuit && recovery === 'active' && (
           <Cardio
             legend="Moving how"
             options={cardioOptions}
@@ -399,7 +455,7 @@ export function GenerateDialog({
           four. Bounding the randomness is the point, since nobody wants a routine
           willing to put burpees in every gap.
         */}
-        {recovery === 'active' && cardio === VARY && (
+        {circuit && recovery === 'active' && cardio === VARY && (
           <fieldset className="generate__field">
             <legend className="label label--sm">Random, from</legend>
             <div className="generate__options generate__options--pool">
@@ -424,14 +480,14 @@ export function GenerateDialog({
           </fieldset>
         )}
 
-        {recovery === 'passive' && (
+        {circuit && recovery === 'passive' && (
           <label className="generate__field">
             <span className="label label--sm">Resting for</span>
             <Seconds value={recoverSecs} label="Resting for, seconds" onChange={setRecoverSecs} />
           </label>
         )}
 
-        {recovery === 'active' && (
+        {circuit && recovery === 'active' && (
           <Cardio
             legend="Cool down with"
             options={cardioOptions}
@@ -456,9 +512,16 @@ export function GenerateDialog({
             <p className="label label--sm">Nothing matches that combination.</p>
           ) : (
             <>
+              {/*
+                A circuit can promise a length. The sections shape cannot, and
+                saying "44:40" for a routine that ends when you stop tapping
+                would be the dialog inventing it.
+              */}
               <p className="label label--sm">
-                {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'} ·{' '}
-                {duration(result.workout.estimatedTotalMs ?? 0)}
+                {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'}
+                {circuit
+                  ? ` · ${duration(result.workout.estimatedTotalMs ?? 0)}`
+                  : ` · ${result.workout.blocks.length} sections`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>
               {result.notes.map((note) => (
