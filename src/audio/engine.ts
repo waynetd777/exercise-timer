@@ -197,8 +197,10 @@ class AudioEngine {
     const master = this.master
     if (!ctx || !master) return
 
-    // A cue whose moment has already passed is dropped rather than played late.
-    if (at < ctx.currentTime - 0.05) return
+    // A cue past its moment by more than the grace is dropped rather than
+    // played late. Within it, it plays: the scheduler arms a few milliseconds
+    // after the clock starts, and the whistle at zero must survive that.
+    if (at < ctx.currentTime - CANCEL_GRACE_MS / 1000) return
 
     // Every note of this cue is tagged with the CUE's moment, so cancelling
     // later cannot take the tail off a figure that has already begun.

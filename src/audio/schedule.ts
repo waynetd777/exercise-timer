@@ -14,11 +14,14 @@ export const LOOKAHEAD_MS = 30_000
 export const REARM_MS = LOOKAHEAD_MS / 3
 
 /**
- * How close to sounding a cue has to be for cancellation to spare it.
+ * How close to sounding a cue has to be for cancellation to spare it, and how
+ * far past its moment a cue may be queued and still play.
  *
  * Shared with the engine, because cancelling and re-arming have to agree on the
  * same line: a cue the engine keeps must not be queued a second time, and a cue
- * the engine drops must not be forgotten by the arm that follows.
+ * the engine drops must not be forgotten by the arm that follows. And the arm
+ * looks back by the same grace (see `dueCues`), so what it queues late is
+ * exactly what the engine will still play.
  */
 export const CANCEL_GRACE_MS = 150
 
@@ -34,6 +37,13 @@ export function cueKey(cue: CuePoint): string {
  * The cues an arm should queue: everything inside the lookahead window that has
  * not been queued already.
  *
+ * The window opens a grace BEHIND the clock, not at it. The arm runs a few
+ * milliseconds after the clock starts (React commits first), so a window that
+ * opened at `elapsedMs` never held the cue at zero: the whistle that starts a
+ * run, and the one answer a gate's tap gets, went unqueued. A cue inside the
+ * grace is queued a hair late and the engine plays it, since it drops only
+ * what is past the same grace. Deduplication stops it queueing twice.
+ *
  * Extracted from the hook so the rolling window can be simulated end to end:
  * every cue of a real routine scheduled exactly once, none missed, none twice.
  */
@@ -42,7 +52,7 @@ export function dueCues(
   elapsedMs: number,
   scheduled: ReadonlySet<string>,
 ): CuePoint[] {
-  return cuesBetween([...all], elapsedMs, elapsedMs + LOOKAHEAD_MS).filter(
+  return cuesBetween([...all], elapsedMs - CANCEL_GRACE_MS, elapsedMs + LOOKAHEAD_MS).filter(
     (cue) => !scheduled.has(cueKey(cue)),
   )
 }

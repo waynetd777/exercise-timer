@@ -75,6 +75,14 @@ Two consequences worth knowing:
   lands. `requeueable()` is what keeps that from playing a cue twice: cancellation
   spares a cue that has begun, so the re-arm has to forget only the cues it actually
   dropped. Both sides read `CANCEL_GRACE_MS`.
+- **The window opens a grace behind the clock, and the dedup set is per run.** The
+  first arm runs a few milliseconds after the clock starts, because React commits
+  first, so a window that opened at the clock never held the cue at zero: no run
+  started with its whistle, and a gate's one answer to the tap was silent. `dueCues`
+  now looks back by `CANCEL_GRACE_MS`, and the engine plays a cue that late rather
+  than dropping it. Separately, a cue's key is its moment WITHIN the run, so the set
+  of what has been queued is cleared when the run changes; kept, it swallowed every
+  opening cue after the first.
 
 ## The tones are measured, not invented
 

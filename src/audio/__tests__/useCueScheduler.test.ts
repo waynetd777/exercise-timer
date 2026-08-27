@@ -65,7 +65,7 @@ const routine = compile(workout('drill', [seg('push-ups', 25, 'work'), seg('rest
 /** Ends on a self-paced step, so the finish fires on the tap, not the clock. */
 const gated = compile(workout('gated', [step('plank')]))
 
-type Props = { status: RunStatus; muted: boolean; generation: number }
+type Props = { status: RunStatus; muted: boolean; generation: number; runIndex?: number }
 
 let elapsed = 0
 // Stable across renders, as the real timer's is: a fresh identity per render
@@ -75,10 +75,10 @@ const readElapsed = () => elapsed
 
 function renderScheduler(initial: Partial<Props> = {}, target = routine) {
   return renderHook(
-    ({ status, muted, generation }: Props) =>
+    ({ status, muted, generation, runIndex = 0 }: Props) =>
       useCueScheduler({
         routine: target,
-        runIndex: 0,
+        runIndex,
         status,
         muted,
         readElapsed,
@@ -106,6 +106,38 @@ describe('useCueScheduler lifecycle', () => {
     renderScheduler()
     // Everything within the 30s lookahead: cues at 0, 22, 23, 24, 25.
     expect(mock.state.tones).toEqual([100, 122, 123, 124, 125])
+  })
+
+  it('still queues the whistle at zero when the arm lands a few milliseconds late', () => {
+    /*
+     * The real clock is performance.now() based and React commits before the
+     * effect runs, so the first arm always sees a small positive elapsed. A
+     * window that opened AT the clock never held the cue at zero, and no run
+     * ever started with its whistle.
+     */
+    elapsed = 3
+    renderScheduler()
+    expect(mock.state.tones[0]).toBeCloseTo(100 - 0.003, 6)
+    expect(mock.state.tones).toHaveLength(5)
+  })
+
+  it('queues the opening cue of the next run, whose key matches the last one', () => {
+    // Timed work, then a gate, then timed rest: three runs, each opening on a
+    // cue at its own zero. The dedup set must not carry run 0's key into run 1.
+    const mixed = compile(
+      workout('mixed', [seg('jog', 25, 'work'), step('plank'), seg('rest', 30, 'rest')]),
+    )
+    const { rerender } = renderScheduler({}, mixed)
+    expect(mock.state.tones).toContain(100)
+
+    mock.state.tones.length = 0
+    elapsed = 0
+    rerender({ status: 'running', muted: false, generation: 2, runIndex: 1 })
+    expect(mock.state.tones).toContain(100)
+
+    mock.state.tones.length = 0
+    rerender({ status: 'running', muted: false, generation: 3, runIndex: 2 })
+    expect(mock.state.tones).toContain(100)
   })
 
   it('a clock jump cancels the stale queue and arms the new position at once', () => {

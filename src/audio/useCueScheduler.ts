@@ -51,7 +51,19 @@ export function useCueScheduler({
    */
   const scheduled = useRef(new Set<string>())
 
+  /**
+   * Which run's cues the set describes. A key is kind plus moment WITHIN the
+   * run, so the whistle that opens run 1 has the same key as the one that
+   * opened run 0. Kept across runs, the set swallowed every opening cue after
+   * the first: a gate's one answer to the tap, and the bell into every rest.
+   */
+  const armedFor = useRef(allCues)
+
   useEffect(() => {
+    if (armedFor.current !== allCues) {
+      armedFor.current = allCues
+      scheduled.current.clear()
+    }
     if (status !== 'running' || muted) {
       audio.cancelPending()
       scheduled.current.clear()
