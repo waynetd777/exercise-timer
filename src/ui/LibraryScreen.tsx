@@ -21,7 +21,7 @@ import { shareUrl } from '../storage/shareLink'
 import { updateApp } from '../state/updateApp'
 import { usePullToRefresh } from '../state/usePullToRefresh'
 import type { SortMode } from '../storage/library'
-import { duration } from './format'
+import { estimated } from './format'
 import { Menu } from './Menu'
 import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
@@ -114,10 +114,7 @@ function Row({
             time where it is not. A rep-based routine used to show only its
             rests, which was truthful and useless.
           */}
-          <span>
-            {rough && 'about '}
-            <span className="unit">{duration(totalMs + estimatedMs)}</span>
-          </span>
+          <span className="unit">{estimated(totalMs + estimatedMs, rough)}</span>
           <span>{steps} steps</span>
           {workout.lastRunAt !== undefined && (
             <span>Last run {new Date(workout.lastRunAt).toLocaleDateString()}</span>

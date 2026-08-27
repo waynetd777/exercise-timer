@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Run, TimelineEntry, Workout } from '../engine'
 import { groupEntries, groupOf, listMode, sectionOf, stepCount, totalDurationMs } from '../engine'
 import { audio } from '../audio/engine'
@@ -13,6 +13,7 @@ import { useSpokenCues } from '../audio/useSpokenCues'
 import { unlockSpeech } from '../audio/speech'
 import { useMuted } from '../audio/useMuted'
 import { useTimer } from '../state/useTimer'
+import { estimate } from '../routines/estimate'
 import type { RunStatus } from '../state/useTimer'
 import {
   clock,
@@ -24,6 +25,7 @@ import {
   fitList,
   nameWithEffort,
   nameWithLoad,
+  estimatedValue,
   fitPanel,
   groupCaption,
   listLines,
@@ -43,6 +45,7 @@ import {
 } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
 import { shortcutApplies } from './keys'
+import { currentRates, recordGate } from '../storage/paces'
 import { useMediaUrl } from './useMediaUrl'
 import './run-screen.css'
 
@@ -234,7 +237,20 @@ type Props = {
 }
 
 export function RunScreen({ workout, onExit, onStarted }: Props) {
-  const timer = useTimer(workout)
+  /*
+   * Every gate records how long it took, so the estimate for a rep-based routine
+   * stops being the instructor's average and becomes Wayne's own pace. Nonsense
+   * is thrown away rather than stored: see `recordGate`.
+   */
+  const timer = useTimer(workout, recordGate)
+
+  /*
+   * The Ready card's total, including the self-paced steps.
+   *
+   * Read once on mount rather than per render: a rate recorded during THIS run
+   * must not move the number on the card you are looking at.
+   */
+  const guess = useMemo(() => estimate(workout.blocks, currentRates()), [workout.blocks])
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
   const [leaving, setLeaving] = useState(false)
@@ -485,8 +501,13 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
           <p className="rest-state__title">Ready</p>
           <div className="rest-state__stats">
             <span className="stat">
-              <b>{duration(totalDurationMs(workout))}</b>
-              <span className="label">Total</span>
+              {/*
+                "about 35 min" where part of the routine is self-paced: the
+                clock cannot know how fast you do twelve reps, and an exact
+                figure on a guess would read as a promise.
+              */}
+              <b>{estimatedValue(totalDurationMs(workout) + guess.estimatedMs, guess.rough)}</b>
+              <span className="label">{guess.rough ? 'Est. total' : 'Total'}</span>
             </span>
             <span className="stat">
               <b>{stepCount(workout)}</b>

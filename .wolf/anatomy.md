@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:15:26.944Z
-> Files: 61 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T21:25:39.542Z
+> Files: 63 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -109,12 +109,14 @@
 ## src/storage/
 
 - `bundleMedia.ts` — The photos in an export file. (~890 tok)
+- `paces.ts` — Exercise Timer (~1674 tok)
 
 ## src/storage/__tests__/
 
 - `bundleMedia.test.ts` — Declares photo (~1635 tok)
 - `db.test.ts` — A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request (~1629 tok)
 - `migrate.test.ts` — Declares workout (~1336 tok)
+- `paces.test.ts` — Exercise Timer (~1540 tok)
 
 ## src/ui/
 

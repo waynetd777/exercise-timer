@@ -7,6 +7,7 @@
 import type { Workout } from '../engine'
 import { stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
+import { currentRates } from './paces'
 
 /**
  * Pure library operations: sorting, filtering, naming, stamping.
@@ -45,7 +46,7 @@ export function summary(workout: Workout): {
   rough: boolean
   steps: number
 } {
-  const guess = estimate(workout.blocks)
+  const guess = estimate(workout.blocks, currentRates())
   return {
     totalMs: workout.estimatedTotalMs ?? guess.knownMs,
     estimatedMs: guess.estimatedMs,

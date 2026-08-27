@@ -636,7 +636,46 @@ machine, and 25 of the 41 exercises have no equivalent on the site at all.
 
 ---
 
-## 🚀 Next quest: generate the instructor's shape, not just a circuit
+## ✅ Done: how long a rep-based routine takes (2026-08-27, v6.3)
+
+A self-paced step ends when you tap Next, so it contributes nothing to
+`totalDurationMs` and a whole session of counted work used to read "0s". Two
+pieces, and the second is the interesting one.
+
+**`src/routines/estimate.ts`** returns `{knownMs, estimatedMs, rough}`: the timed
+steps exactly, the counted ones at a seconds-per-rep rate. The rate is HARVESTED,
+not chosen — the instructor writes fourteen exercises both ways ("30-second
+Plank" one week, "20 x Plank" another), so `exercises.prescription.ts` carries a
+rate for those and the median (2.0s) covers the rest. It runs 1.0 to 6.0, which
+is why one flat rate would be wrong by six times at the edges.
+
+**`src/storage/paces.ts`** then measures YOUR pace. Every gate already times
+itself; the elapsed was being thrown away. `useTimer` takes an `onGate` callback,
+`RunScreen` passes `recordGate`, and after three samples the median beats the
+harvested rate for that exercise. In `localStorage` deliberately: per-device,
+small, and losing it costs nothing.
+
+**Dry runs are rejected**, which was Wayne's condition. Tapping Next through a
+routine to see what is in it produces a gate every few hundred ms; `MIN_GATE_MS`
+of 4s throws those away, along with rates outside 0.5–12 s/rep and gates over
+eight minutes. Timed steps inside a gate are subtracted from the elapsed rather
+than charged to the exercise beside them.
+
+Shown in ALL FOUR places (Wayne asked explicitly): the library row, the editor
+header, the generator preview and the Ready card. One formatter, `estimated()` /
+`estimatedValue()` in `format.ts` — a guess rounds to whole minutes and says
+"about", because "about 35:20" claims a precision it has not got. The Ready card
+uses the bare value with "Est. total" as its label, since the figure sits at
+title size where "about" reads as part of the number.
+
+`currentRates()` caches the parsed rates, dropped on save: the library asks once
+per row and re-parsing storage twenty times a render is work for nothing.
+
+Also v6.3: the generator offers 3 and 4 sections (`SECTIONS_FEWEST = 3`).
+
+---
+
+## ✅ Done: generate the instructor's shape, not just a circuit (v5.0 to v6.2)
 
 The generator builds two circuit shapes. The routines Wayne is actually sent are
 a different thing, and the gap was MEASURED on 2026-08-27 rather than guessed.
@@ -746,7 +785,26 @@ section empty and it was silently dropped. The warm-up ignores the equipment
 choice now, because you warm up on the floor or the bike whatever the session is
 made of.
 
-**THE QUEST IS COMPLETE.** Next: the weights settings page queued above.
+**THE QUEST IS COMPLETE.**
+
+---
+
+## 🚀 Next quest: the weights settings page
+
+Every routine carries its weights in the step's `load` field, so changing what
+you lift means editing every routine that names it. The settings page holds one
+weight per applicable exercise and routines take it from there.
+
+- One row per multi-gym exercise, seeded from the strengthlevel numbers in the
+  table above (male, 55, 88kg, Novice, x0.70 for a 12-rep working weight):
+  Leg Press 63, Chest Press 32, Lat Pulldown 34, Seated Row 34, Calf Press 47,
+  Shoulder Press 26, Leg Extension 39, Hamstring Curl 32, Hip Abductor 36,
+  Cable Fly 33, Triceps Press 19.
+- Decide where a routine's `load` comes from: read through at run time, or
+  stamped in at generate time and editable after. The first keeps every routine
+  current; the second keeps a saved routine reproducible. Ask Wayne.
+- The caveat from the table stands: a Horizon stack is not a commercial machine,
+  and 25 of the 41 exercises have no equivalent on the site at all.
 
 1. **Three fields on the exercise table, all harvestable.** Verified against the
    four: 33 exercises are counted only, 47 timed only, 12 appear both ways; rep

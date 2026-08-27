@@ -160,6 +160,14 @@ const WARM_UP_EACH_MS = 40_000
 const ROUND_REST_MS = 45_000
 /** Where nothing has ever been prescribed for a counted step. */
 const DEFAULT_REPS = 12
+/**
+ * The fewest sections that can be asked for.
+ *
+ * BELOW what the corpus does: no routine in the corpus has fewer than five, and
+ * `SECTIONS_MIN` says so. This is a shorter session than the instructor writes,
+ * which is a reasonable thing to want and not a claim about what he sends.
+ */
+const SECTIONS_FEWEST = 3
 
 /**
  * What one set of this exercise asks for.
@@ -419,10 +427,7 @@ function sectionsRoutine(
   rng: Rng,
   notes: string[],
 ): Block[] {
-  const wanted = Math.min(
-    SECTIONS_MAX,
-    Math.max(SECTIONS_MIN, Math.round(spec.sections ?? SECTIONS_TYPICAL)),
-  )
+  const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(spec.sections ?? SECTIONS_TYPICAL)))
 
   /**
    * Everything eligible, by area, shuffled once so a section can draw freely.

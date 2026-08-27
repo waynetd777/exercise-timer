@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { advance, compile, locate, retreat, START } from '../engine'
+import type { TimelineEntry } from '../engine/types'
 import type { Cursor, Routine, RoutinePosition, Run, Workout } from '../engine'
 import type { Anchor, Clock } from './clock'
 import { credited, elapsed, IDLE_CLOCK, paused, resumed, seeked, started, suspendedMs } from './clock'
@@ -86,7 +87,14 @@ const EMPTY_RUN: Run = { index: 0, entries: [], totalMs: 0, selfPaced: false }
  * end of the step, whichever comes first). About one callback per second instead
  * of sixty, with no loss of precision.
  */
-export function useTimer(workout: Workout): Timer {
+export function useTimer(
+  workout: Workout,
+  /**
+   * Called when a self-paced step is cleared, with how long it took and what it
+   * covered. See `storage/paces.ts` for what is done with it.
+   */
+  onGate?: (elapsedMs: number, cleared: readonly TimelineEntry[]) => void,
+): Timer {
   const routine = useMemo(() => compile(workout), [workout])
 
   const [status, setStatus] = useState<RunStatus>('idle')
@@ -251,13 +259,39 @@ export function useTimer(workout: Workout): Timer {
 
   const next = useCallback(() => {
     if (status === 'idle' || status === 'complete') return
-    const target = advance(routine, here())
+    const from = here()
+    const target = advance(routine, from)
+
+    /*
+     * How long that gate took, and what it cleared.
+     *
+     * Every self-paced step already measures itself: the clock parks here and is
+     * rebased on the way out, so the elapsed is exact and was being discarded.
+     * Reported rather than stored, because a hook that owns the run clock should
+     * not also own what anyone does with it.
+     *
+     * Only from a RUNNING routine. Tapping through a paused one is reading it,
+     * not doing it.
+     */
+    if (status === 'running' && onGate) {
+      const at = locate(routine, from)
+      const gate = at.entry
+      if (gate?.selfPaced === true) {
+        // Everything from this step up to wherever Next landed: with
+        // `advance: 'set'` one tap clears a whole round, and the elapsed covers
+        // all of it. A complete routine has no next step, so take the rest.
+        const until = locate(routine, target).entry?.step ?? Number.POSITIVE_INFINITY
+        const cleared = routine.entries.filter((e) => e.step >= gate.step && e.step < until)
+        onGate(from.elapsedInRunMs, cleared.length > 0 ? cleared : [gate])
+      }
+    }
+
     moveTo(target, status !== 'running')
     if (locate(routine, target).isComplete) {
       stopSession()
       setStatus('complete')
     }
-  }, [status, routine, here, moveTo, stopSession])
+  }, [status, routine, here, moveTo, stopSession, onGate])
 
   const previous = useCallback(() => {
     if (status === 'idle') return

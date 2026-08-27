@@ -9,10 +9,11 @@ import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
 import { estimate } from '../routines/estimate'
+import { currentRates } from '../storage/paces'
 import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
-import { SECTIONS_MAX, SECTIONS_MIN, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
+import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
-import { duration } from './format'
+import { estimated } from './format'
 import { CloseIcon, PlusIcon } from './icons'
 
 /**
@@ -310,7 +311,10 @@ export function GenerateDialog({
   ])
 
   const guess = useMemo(
-    () => (result ? estimate(result.workout.blocks) : { knownMs: 0, estimatedMs: 0, rough: false }),
+    () =>
+      result
+        ? estimate(result.workout.blocks, currentRates())
+        : { knownMs: 0, estimatedMs: 0, rough: false },
     [result],
   )
 
@@ -388,9 +392,11 @@ export function GenerateDialog({
         {style === 'sections' && (
           <Choice
             legend="How many sections"
-            options={Array.from({ length: SECTIONS_MAX - SECTIONS_MIN + 1 }, (_, i) => ({
-              value: SECTIONS_MIN + i,
-              label: String(SECTIONS_MIN + i),
+            // From three, which is shorter than the instructor ever writes, to
+            // the eight that is his longest.
+            options={Array.from({ length: SECTIONS_MAX - 3 + 1 }, (_, i) => ({
+              value: 3 + i,
+              label: String(3 + i),
             }))}
             value={sections}
             onChange={setSections}
@@ -531,22 +537,16 @@ export function GenerateDialog({
           ) : (
             <>
               {/*
-                A circuit can promise a length. The sections shape cannot, and
-                saying "44:40" for a routine that ends when you stop tapping
-                would be the dialog inventing it.
-              */}
-              {/*
-                A circuit promises a length; the sections shape can only estimate
-                one, and says "about". Saying "35:20" for a routine that ends
-                when you stop tapping would be the dialog inventing it.
+                A circuit promises a length; the sections shape can only
+                estimate one, and says "about". Saying "35:20" for a routine
+                that ends when you stop tapping would be the dialog inventing
+                it. Both come off the same figure, so a circuit that picked up a
+                counted step is counted rather than quietly dropped.
               */}
               <p className="label label--sm">
                 {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'}
-                {circuit
-                  ? ` · ${duration(result.workout.estimatedTotalMs ?? 0)}`
-                  : ` · ${result.workout.blocks.length} sections · about ${Math.round(
-                      (guess.knownMs + guess.estimatedMs) / 60_000,
-                    )} min`}
+                {!circuit && ` · ${result.workout.blocks.length} sections`}
+                {` · ${estimated(guess.knownMs + guess.estimatedMs, guess.rough)}`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>
               {result.notes.map((note) => (

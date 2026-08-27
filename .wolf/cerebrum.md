@@ -436,3 +436,24 @@
   Tree walks recurse on `isGroup`, never `kind === 'repeat'`. `setTiming` makes
   timed-or-counted exclusive and DELETES the other key, for the same
   `exactOptionalPropertyTypes` reason as `clearMedia`.
+
+## Estimating a rep-based routine (v6.3, 2026-08-27)
+
+- A self-paced step ends on a tap, so `totalDurationMs` is 0 for it. Anything
+  showing a routine's length must add `estimate()` or it lies about counted work.
+- The seconds-per-rep rates are HARVESTED, not invented: fourteen exercises the
+  instructor writes both ways. Median 2.0s, range 1.0 to 6.0.
+- `src/storage/paces.ts` measures the real thing from gate elapsed times.
+  `MIN_GATE_MS = 4_000` exists to throw away DRY RUNS — tapping Next through a
+  routine would otherwise teach it that a twelve-rep set takes half a second.
+  Wayne asked for this explicitly.
+- Timed steps inside a gate are subtracted from the elapsed, never charged to the
+  counted exercise beside them.
+- Three samples minimum before a measured rate is used; the median, not the mean.
+- ONE formatter: `estimated()` / `estimatedValue()` in `format.ts`. A guess reads
+  "about 35 min", never "about 35:20" — do not hand-roll the hedge at a call
+  site. `estimatedValue` is for a stat whose LABEL carries the hedge.
+- Wayne's ask was "show it in the generate dialog, editor, library AND run page".
+  All four now use the same figure; adding a fifth surface means using it too.
+- `currentRates()` caches; `savePaces()` drops the cache. The library calls
+  `summary()` once per row.

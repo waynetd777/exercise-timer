@@ -10,6 +10,8 @@ import {
   clockWidth,
   duration,
   effortLabel,
+  estimated,
+  estimatedValue,
   effortSuffix,
   FIT_ADVANCE,
   FIT_AVAILABLE,
@@ -73,6 +75,24 @@ describe('duration', () => {
     expect(duration(20_000)).toBe('20s')
     expect(duration(59_400)).toBe('59s')
     expect(duration(270_000)).toBe('4:30')
+  })
+})
+
+describe('estimated', () => {
+  it('keeps the seconds on a routine whose length is known', () => {
+    expect(estimated(270_000, false)).toBe('4:30')
+    expect(estimatedValue(270_000, false)).toBe('4:30')
+  })
+
+  it('drops to whole minutes and hedges where any of it was guessed', () => {
+    // "about 35:20" claims a precision the estimate has not got while saying in
+    // the same breath that it is a guess.
+    expect(estimated(2_120_000, true)).toBe('about 35 min')
+    expect(estimatedValue(2_120_000, true)).toBe('35 min')
+  })
+
+  it('never rounds a short routine down to nothing', () => {
+    expect(estimated(20_000, true)).toBe('about 1 min')
   })
 })
 

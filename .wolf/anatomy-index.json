@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T21:15:26.944Z",
-    "fileCount": 61,
+    "lastScanned": "2026-08-27T21:25:39.542Z",
+    "fileCount": 63,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "edec83bb56e0b3c2c63a13e54408e380ed4dc26f54028ff1f3ca9298adf5c62e",
-    "storeUpdatedAt": "2026-08-27T21:15:26.951Z"
+    "renderedHash": "f789ccb6934bb1ca8a05b26ac625faef2161054f33f0d4fc22913b723c8bbb90",
+    "storeUpdatedAt": "2026-08-27T21:25:39.549Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1354,6 +1354,84 @@
           "startLine": 68,
           "endLine": 122,
           "tokens": 544
+        }
+      ]
+    },
+    "src/storage/paces.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1674,
+      "hash": "46ae102b44046f06",
+      "size": 5858,
+      "mtimeMs": 1787865712529.9036,
+      "updatedAt": "2026-08-27T21:21:52.598Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "sampleFrom",
+          "kind": "fn",
+          "startLine": 72,
+          "endLine": 101,
+          "tokens": 301
+        },
+        {
+          "name": "withSample",
+          "kind": "fn",
+          "startLine": 102,
+          "endLine": 116,
+          "tokens": 136
+        },
+        {
+          "name": "ratesFrom",
+          "kind": "fn",
+          "startLine": 117,
+          "endLine": 127,
+          "tokens": 121
+        },
+        {
+          "name": "loadPaces",
+          "kind": "fn",
+          "startLine": 128,
+          "endLine": 145,
+          "tokens": 155
+        },
+        {
+          "name": "savePaces",
+          "kind": "fn",
+          "startLine": 146,
+          "endLine": 155,
+          "tokens": 101
+        },
+        {
+          "name": "recordGate",
+          "kind": "fn",
+          "startLine": 156,
+          "endLine": 162,
+          "tokens": 73
+        }
+      ]
+    },
+    "src/storage/__tests__/paces.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1540,
+      "hash": "f59ff0a76efb4ee9",
+      "size": 5390,
+      "mtimeMs": 1787865939477.347,
+      "updatedAt": "2026-08-27T21:25:39.542Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "counted",
+          "kind": "fn",
+          "startLine": 12,
+          "endLine": 20,
+          "tokens": 54
+        },
+        {
+          "name": "timed",
+          "kind": "fn",
+          "startLine": 21,
+          "endLine": 159,
+          "tokens": 1381
         }
       ]
     }

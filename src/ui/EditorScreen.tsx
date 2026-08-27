@@ -7,6 +7,8 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Block, Ladder, MediaRef, Repeat, RoutineColour, Section, Segment, SegmentRole, Workout } from '../engine'
 import { ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
+import { estimate } from '../routines/estimate'
+import { currentRates } from '../storage/paces'
 import {
   appendTo,
   clearMedia,
@@ -46,7 +48,7 @@ import { EDITOR_HELP } from './help'
 import type { ClipboardImage } from '../media/clipboard'
 import { canReadClipboard, imageFromClipboard, probeClipboardImage } from '../media/clipboard'
 import { pinDraft, storeFile, unpinDraft } from '../media/pin'
-import { duration } from './format'
+import { estimated } from './format'
 import { useMediaUrl } from './useMediaUrl'
 import { useDismiss } from './useDismiss'
 import {
@@ -1417,6 +1419,18 @@ export function EditorScreen({
     [workout, name, blocks, colour],
   )
 
+  /*
+   * The header total, including the steps that have no length.
+   *
+   * `totalDurationMs` alone reads 0:30 for a routine of twelve counted
+   * exercises and one rest, because a self-paced step contributes nothing until
+   * you tap Next. Adding the estimate is what makes the number move as you
+   * build. `rough` is what earns the word "about": the estimate is a rate, and
+   * how long you rest between sets is yours alone.
+   */
+  const rates = useMemo(() => currentRates(), [])
+  const guess = useMemo(() => estimate(blocks, rates), [blocks, rates])
+
   const pinnedUploads = useRef<string[]>([])
   useEffect(
     () => () => {
@@ -1617,7 +1631,10 @@ export function EditorScreen({
 
         <p className="editor__stats label label--sm">
           <span>
-            <span className="unit">{duration(totalDurationMs(preview))}</span> total
+            <span className="unit">
+              {estimated(totalDurationMs(preview) + guess.estimatedMs, guess.rough)}
+            </span>{' '}
+            total
           </span>
           <span>{stepCount(preview)} steps</span>
         </p>

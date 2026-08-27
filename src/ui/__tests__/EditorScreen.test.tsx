@@ -110,6 +110,23 @@ describe('EditorScreen', () => {
     delete navigator.permissions
   })
 
+  it('counts the self-paced steps in the header total', () => {
+    /*
+     * `totalDurationMs` alone reads 0s for a routine of counted reps, so the
+     * editor used to say "0s total" however much you built. The header now adds
+     * the estimate and hedges it, exactly as the library row does.
+     */
+    render(<EditorScreen {...props(sectioned())} />)
+
+    expect(screen.getByText(/about \d+ min/)).toBeTruthy()
+  })
+
+  it('gives an exact total where every step is timed', () => {
+    render(<EditorScreen {...props(timed())} />)
+
+    expect(screen.getByText('20s')).toBeTruthy()
+  })
+
   it('renames a step whose name is still the one its old type gave it', () => {
     // Switching an untouched Work to Rest left a step called "Exercise"
     // coloured and cued as a rest, to be renamed by hand every time.

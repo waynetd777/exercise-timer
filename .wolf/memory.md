@@ -226,3 +226,6 @@
 | 22:41 | Created scripts/harvest-exercises.test.ts | — | ~2319 |
 | 22:52 | Created scripts/harvest-shapes.test.ts | — | ~1829 |
 | 23:15 | Created src/routines/estimate.ts | — | ~1283 |
+| 23:21 | Created src/storage/paces.ts | — | ~1674 |
+| 23:25 | Created src/storage/__tests__/paces.test.ts | — | ~1540 |
+| 23:35 | Estimate a rep-based routine everywhere, and measure your own pace | estimate.ts, paces.ts, format.ts, EditorScreen, RunScreen, LibraryScreen, GenerateDialog, help.ts | v6.3, 939 tests green | ~95k |
