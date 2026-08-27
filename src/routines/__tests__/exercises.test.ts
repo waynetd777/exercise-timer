@@ -121,6 +121,15 @@ describe('the authored half, harvested from the corpus', () => {
     expect(area('torso').length).toBeGreaterThanOrEqual(15)
   })
 
+  it('offers both activities Wayne named, as activities rather than drills', () => {
+    // "A minute on the bike" and "a minute on the trampoline" are what the
+    // recovery question is asking, so both are single entries. The specific
+    // bounces are separate rows for anyone who wants to name one.
+    const cardio = OTHER_EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name)
+    expect(cardio).toContain('Cycling')
+    expect(cardio).toContain('Trampoline')
+  })
+
   it('offers cardio for a warm-up and for active recovery', () => {
     expect(use('cardio').length).toBeGreaterThanOrEqual(10)
     // Both of the recovery types Wayne named have somewhere to come from.

@@ -52,6 +52,17 @@ export type RoutineSpec = {
   recovery: Recovery
   /** A cardio exercise's name, for `active`. Defaults to Cycling. */
   recoveryExercise?: string
+  /**
+   * A DIFFERENT cardio exercise in every minute-long slot, rather than the same
+   * one throughout. Takes precedence over `recoveryExercise`.
+   *
+   * The WARM-UP and the COOL DOWN are not included. They bookend the routine and
+   * are named for what they are rather than for the exercise, so varying them
+   * would change a picture and nothing else. Ten minutes of one thing is also
+   * what a warm-up IS, and ten minutes of burpees is not something to hand
+   * anybody.
+   */
+  varyRecovery?: boolean
   equipment: EquipmentScope
   /** Sets per exercise. A per-side exercise gets two a side regardless. */
   sets?: number
@@ -284,6 +295,19 @@ export function generateRoutine(
     cardio.find((e) => e.name === spec.recoveryExercise) ??
     cardio.find((e) => e.name === 'Cycling') ??
     cardio[0]
+
+  /*
+   * Shuffled once and then walked in order, rather than picked afresh each time:
+   * an independent draw per slot repeats itself, and a minute of burpees twice
+   * running is the one thing nobody wants from "surprise me".
+   */
+  const spin = spec.varyRecovery ? shuffled(cardio, rng) : []
+  let spun = 0
+  const nextSpin = (): Exercise => {
+    const pick = spin[spun % spin.length] ?? recovery!
+    spun += 1
+    return pick
+  }
   if (spec.recovery === 'active' && spec.recoveryExercise && recovery?.name !== spec.recoveryExercise) {
     notes.push(`No cardio exercise called "${spec.recoveryExercise}", so ${recovery?.name} was used.`)
   }
@@ -369,13 +393,17 @@ export function generateRoutine(
     const pick =
       candidates.find((e) => station !== undefined && e.station === station) ?? candidates[0]!
 
+    const announce = body.length > 0 || spec.recovery !== 'active'
+    // Drawn only where a slot is actually going to be built, or the sequence
+    // advances on exercises that never make it past the budget check.
+    const spinner = spec.varyRecovery && announce && spec.recovery === 'active' ? nextSpin() : recovery
     const blocks = exerciseBlocks(
       pick,
       spec,
       loads.get(pick.name.toLowerCase()),
-      recovery?.name ?? 'Cycling',
-      recovery?.media,
-      body.length > 0 || spec.recovery !== 'active',
+      spinner?.name ?? 'Cycling',
+      spinner?.media,
+      announce,
     )
     const cost = totalMs(blocks)
 

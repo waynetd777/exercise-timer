@@ -54,6 +54,12 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
 
   // ── Cardio, for a warm-up and for active recovery between sets ───────────
   { name: 'Cycling', area: 'lower', equipment: 'bike', use: 'cardio', media: 'exercises/Cycling.jpg' },
+  /*
+   * The trampoline as an ACTIVITY, beside the specific moves further down. A
+   * minute of recovery on it is "a minute on the trampoline", the same way a
+   * minute on the bike is Cycling rather than a named pedalling drill.
+   */
+  { name: 'Trampoline', area: 'lower', equipment: 'trampoline', use: 'cardio' },
   { name: 'Jumping Jacks', area: 'lower', equipment: 'bodyweight', use: 'cardio' },
   { name: 'Jog on the Spot', area: 'lower', equipment: 'bodyweight', use: 'cardio' },
   { name: 'High Knees', area: 'lower', equipment: 'bodyweight', use: 'cardio' },

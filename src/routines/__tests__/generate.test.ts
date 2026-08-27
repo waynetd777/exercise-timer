@@ -139,6 +139,39 @@ describe('the shape it builds', () => {
     expect(spins).toHaveLength(distinct(workout).length - 1)
   })
 
+  it('puts a different exercise in every slot, when asked to vary', () => {
+    const { workout } = make({ varyRecovery: true, totalMs: 50 * 60_000 })
+    const cardioNames = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
+    const slots = workout.blocks.filter(
+      (b): b is Segment => b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
+    )
+    expect(slots.length).toBeGreaterThan(4)
+
+    // Never the same thing twice running, which is the whole point: an
+    // independent draw per slot would repeat and a minute of burpees twice over
+    // is what nobody wants from "surprise me".
+    for (let i = 1; i < slots.length; i++) expect(slots[i]!.name).not.toBe(slots[i - 1]!.name)
+    expect(new Set(slots.map((s) => s.name)).size).toBeGreaterThan(1)
+  })
+
+  it('leaves the ten-minute warm-up alone when varying', () => {
+    // Ten minutes of one thing is what a warm-up is. Ten minutes of burpees is
+    // not something to hand anybody.
+    const { workout } = make({ varyRecovery: true })
+    const warmUp = workout.blocks.find(
+      (b): b is Segment => b.kind === 'segment' && b.name === 'Warm Up',
+    )
+    expect(warmUp?.durationMs).toBe(600_000)
+  })
+
+  it('leaves the cool down alone as well', () => {
+    // It is named for what it is, not for the exercise, so varying it would
+    // change a picture and nothing else.
+    const { workout } = make({ varyRecovery: true })
+    const cool = workout.blocks.at(-1)
+    expect(cool?.kind === 'segment' && cool.name).toBe('Cool Down')
+  })
+
   it('recovers rather than cycling, when asked for passive', () => {
     const { workout } = make({ recovery: 'passive' })
     const names = workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
