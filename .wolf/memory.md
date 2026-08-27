@@ -229,3 +229,4 @@
 | 23:21 | Created src/storage/paces.ts | — | ~1674 |
 | 23:25 | Created src/storage/__tests__/paces.test.ts | — | ~1540 |
 | 23:35 | Estimate a rep-based routine everywhere, and measure your own pace | estimate.ts, paces.ts, format.ts, EditorScreen, RunScreen, LibraryScreen, GenerateDialog, help.ts | v6.3, 939 tests green | ~95k |
+| 23:42 | Hyphenate Full-Body in generated routine names | generate.ts, help.ts, 2 tests | v6.4, 939 green | ~6k |
