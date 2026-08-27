@@ -722,7 +722,20 @@ Three traps paid for, all worth remembering:
   because the EMOM says so, not because a bicep curl takes a minute. Circuit sets
   are capped at 45s for that reason.
 
-Still to do in phase 2: the ladder pyramids, and section composition.
+PHASE 2 AND PHASE 3 ARE DONE (v5.7). `exercises.shapes.ts` is harvested too:
+nineteen ladder pyramids used VERBATIM, the six section themes in the order the
+routines use them, and the typical counts (6 sections, 5 to 8; 4 exercises a
+section).
+
+`generateRoutine` now takes `style`. `circuit` is unchanged. `sections` builds
+the instructor's shape: a timed warm-up, then themed sections that are either a
+ladder (a main lift on the rungs, accessories keeping their own counts) or rounds
+of counted steps with a rest between. Mostly SELF-PACED, so it has no length, and
+`notes` says exactly that rather than the app pretending to a number. `sections`
+replaces `totalMs` for that style, which was Wayne's call.
+
+REMAINING: phase 4, the style question in the dialog. Then the weights settings
+page queued above.
 
 1. **Three fields on the exercise table, all harvestable.** Verified against the
    four: 33 exercises are counted only, 47 timed only, 12 appear both ways; rep

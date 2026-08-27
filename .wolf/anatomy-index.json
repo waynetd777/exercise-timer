@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T20:41:06.452Z",
-    "fileCount": 59,
+    "lastScanned": "2026-08-27T20:52:53.721Z",
+    "fileCount": 60,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "b82f8c5915ef0c7aac3b32fb74d19940af6bed188d1848cdb28cdaef133f9765",
-    "storeUpdatedAt": "2026-08-27T20:41:06.467Z"
+    "renderedHash": "03a6c0e57f843463ac8d55521e4065c16ed3d7b362f4262791f0e542a3566797",
+    "storeUpdatedAt": "2026-08-27T20:52:53.728Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1315,6 +1315,15 @@
           "tokens": 957
         }
       ]
+    },
+    "scripts/harvest-shapes.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1829,
+      "hash": "c05d76ac20194ec3",
+      "size": 6399,
+      "mtimeMs": 1787863973657.1426,
+      "updatedAt": "2026-08-27T20:52:53.720Z",
+      "source": "hook"
     }
   },
   "preamble": [
