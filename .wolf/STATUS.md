@@ -734,8 +734,19 @@ of counted steps with a rest between. Mostly SELF-PACED, so it has no length, an
 `notes` says exactly that rather than the app pretending to a number. `sections`
 replaces `totalMs` for that style, which was Wayne's call.
 
-REMAINING: phase 4, the style question in the dialog. Then the weights settings
-page queued above.
+PHASE 4 IS DONE (v5.8). The dialog asks for a SHAPE first, and the shape decides
+which other questions apply: a circuit is asked how long, sections is asked how
+many, and every question belonging to one is hidden for the other rather than
+shown and ignored. The preview says "12 exercises, 6 sections" rather than a
+duration it cannot know.
+
+One gap found by its own test: a machine-only sections routine had NO WARM-UP.
+Nothing on the multi-gym is a stretch or a jog, so the equipment filter left that
+section empty and it was silently dropped. The warm-up ignores the equipment
+choice now, because you warm up on the floor or the bike whatever the session is
+made of.
+
+**THE QUEST IS COMPLETE.** Next: the weights settings page queued above.
 
 1. **Three fields on the exercise table, all harvestable.** Verified against the
    four: 33 exercises are counted only, 47 timed only, 12 appear both ways; rep

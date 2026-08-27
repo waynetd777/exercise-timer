@@ -501,6 +501,18 @@ describe('the instructor’s shape', () => {
     expect(warm.children.every((c) => c.kind === 'segment' && c.durationMs === 40_000)).toBe(true)
   })
 
+  it('warms up even on the multi-gym, which has nothing to warm up with', () => {
+    /*
+     * Nothing on the machine is a stretch or a jog, so the equipment filter left
+     * the warm-up section empty and it was silently dropped. You warm up on the
+     * floor or the bike whatever the session is made of.
+     */
+    const first = sections({ equipment: 'machine' }).workout.blocks[0]
+    expect(first?.kind === 'section' && first.name).toBe('Warm-up')
+    if (first?.kind !== 'section') throw new Error('no warm-up')
+    expect(first.children.length).toBeGreaterThan(3)
+  })
+
   it('is mostly self-paced, which is the whole difference from a circuit', () => {
     const routine = compile(sections().workout)
     const steps = routine.runs.flatMap((r) => r.entries)

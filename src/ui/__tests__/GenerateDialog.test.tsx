@@ -190,3 +190,56 @@ describe('GenerateDialog', () => {
     expect(loads).toContain('65kg')
   })
 })
+
+describe('the shape question', () => {
+  const pick = (label: string) => fireEvent.click(screen.getByRole('button', { name: label }))
+
+  it('asks for a length for a circuit and for sections otherwise', () => {
+    /*
+     * A circuit is timed throughout, so it can be asked how long. The
+     * instructor's shape is mostly self-paced and cannot: it ends when you have
+     * tapped through it, so what it can be asked is how many sections.
+     */
+    open()
+    expect(screen.getByText('About how long')).toBeTruthy()
+    expect(screen.queryByText('How many sections')).toBeNull()
+
+    pick('Sections')
+    expect(screen.queryByText('About how long')).toBeNull()
+    expect(screen.getByText('How many sections')).toBeTruthy()
+  })
+
+  it('hides every question that belongs to the circuit alone', () => {
+    open()
+    pick('Sections')
+    for (const gone of ['Between sets', 'Sets', 'Warm up with', 'Moving how', 'Cool down with']) {
+      expect(screen.queryByText(gone)).toBeNull()
+    }
+    // What is left is what applies to both.
+    expect(screen.getByText('What to work')).toBeTruthy()
+    expect(screen.getByText('Equipment')).toBeTruthy()
+  })
+
+  it('previews sections rather than a length it cannot know', () => {
+    open()
+    pick('Sections')
+    expect(screen.getByText(/exercises · \d+ sections/)).toBeTruthy()
+    expect(screen.queryByText(/exercises · \d+:\d+/)).toBeNull()
+  })
+
+  it('warns that the length is unknowable', () => {
+    open()
+    pick('Sections')
+    expect(screen.getByText(/no length/)).toBeTruthy()
+  })
+
+  it('hands over a routine of sections', () => {
+    const onGenerate = open()
+    pick('Sections')
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+
+    const blocks = (onGenerate.mock.calls[0]![0] as Workout).blocks
+    expect(blocks.every((b) => b.kind === 'section')).toBe(true)
+    expect(blocks[0]!.kind === 'section' && blocks[0]!.name).toBe('Warm-up')
+  })
+})
