@@ -22,6 +22,15 @@ import { CloseIcon, PlusIcon } from './icons'
  */
 const LENGTHS = [35, 40, 45, 50]
 
+/**
+ * The "surprise me" value for the cardio question.
+ *
+ * A sentinel rather than a second control, because it is one more thing in a
+ * list you are already reading. It cannot collide with an exercise: nothing in
+ * the table is named with brackets.
+ */
+const VARY = '[random]'
+
 const AREAS: { area: BodyArea; label: string }[] = [
   { area: 'upper', label: 'Upper body' },
   { area: 'torso', label: 'Torso' },
@@ -130,7 +139,8 @@ export function GenerateDialog({
           totalMs: minutes * 60_000,
           areas,
           recovery,
-          ...(recovery === 'active' ? { recoveryExercise: cardio } : {}),
+          ...(recovery === 'active' && cardio !== VARY ? { recoveryExercise: cardio } : {}),
+          ...(recovery === 'active' && cardio === VARY ? { varyRecovery: true } : {}),
           equipment,
           sets,
         },
@@ -221,6 +231,7 @@ export function GenerateDialog({
               aria-label="Active recovery"
               onChange={(event) => setCardio(event.target.value)}
             >
+              <option value={VARY}>Random, a different one each time</option>
               {cardioOptions.map((option) => (
                 <option key={option.name} value={option.name}>
                   {option.name}
