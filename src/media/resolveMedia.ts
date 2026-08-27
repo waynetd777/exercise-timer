@@ -17,8 +17,15 @@ import { getBlob, onBlobStored } from './store'
  * images in a routine, which is a handful.
  */
 const objectUrls = new Map<string, string>()
-/** Hashes already looked up, misses included, so a blob is read at most once. */
-const known = new Set<string>()
+/**
+ * Hashes already looked up, misses included, so a blob is read at most once.
+ * The value is the read itself while it is in flight: a second caller for the
+ * same hash AWAITS it rather than finding the hash "known" and settling for
+ * the miss it was about to become. The run screen resolves the current and the
+ * next step in one render, and two sets sharing a photo left the next panel
+ * blank for good.
+ */
+const known = new Map<string, Promise<void>>()
 
 // A cached miss is only true until the blob is stored. Forgetting it then lets
 // the next resolve read the new blob instead of waiting for a reload.
@@ -42,10 +49,15 @@ export async function resolveMedia(
   const hash =
     ref.source === 'local' ? ref.hash : ref.source === 'remote' ? ref.cachedHash : undefined
 
-  if (hash && !objectUrls.has(hash) && !known.has(hash)) {
-    known.add(hash)
-    const blob = await getBlob(hash)
-    if (blob) objectUrls.set(hash, URL.createObjectURL(blob))
+  if (hash && !objectUrls.has(hash)) {
+    let read = known.get(hash)
+    if (!read) {
+      read = getBlob(hash).then((blob) => {
+        if (blob) objectUrls.set(hash, URL.createObjectURL(blob))
+      })
+      known.set(hash, read)
+    }
+    await read
   }
 
   return resolveMediaSync(ref, base)

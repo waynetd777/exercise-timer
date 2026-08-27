@@ -89,8 +89,22 @@ function attempt<T>(
   return new Promise<T>((resolve, reject) => {
     const transaction = db.transaction(store, mode)
     const request = action(transaction.objectStore(store))
-    request.onsuccess = () => resolve(request.result as T)
+    /*
+     * A write resolves when the TRANSACTION completes, not when the request
+     * succeeds: success means the write was accepted, completion means it was
+     * committed. `putBlob` announces a stored blob to listeners as soon as it
+     * resolves, and an abort at commit time (quota) left them believing in bytes
+     * that were never written. A read has nothing to commit.
+     */
+    let result: T
+    request.onsuccess = () => {
+      result = request.result as T
+      if (mode === 'readonly') resolve(result)
+    }
     request.onerror = () => reject(request.error)
+    transaction.oncomplete = () => {
+      if (mode !== 'readonly') resolve(result)
+    }
     transaction.onabort = () => reject(transaction.error)
   })
 }

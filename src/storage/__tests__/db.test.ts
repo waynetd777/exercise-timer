@@ -43,7 +43,10 @@ type FakeDb = {
   onclose: (() => void) | null
   onversionchange: (() => void) | null
   close: () => void
-  transaction: (store: string, mode: string) => { objectStore: (name: string) => unknown }
+  transaction: (
+    store: string,
+    mode: string,
+  ) => { objectStore: (name: string) => unknown; oncomplete: (() => void) | null }
   objectStoreNames: { contains: (name: string) => boolean }
 }
 
@@ -60,23 +63,31 @@ function makeDb(): FakeDb {
       // iOS kills idle connections without firing onclose; the corpse only
       // shows itself here, as an InvalidStateError.
       if (db.dead) throw named('InvalidStateError')
-      return {
+      // A write's transaction completes a tick after its request succeeds, as
+      // the real one does; `run` waits for that on a readwrite.
+      const tx: { objectStore: (name: string) => unknown; oncomplete: (() => void) | null } = {
+        oncomplete: null,
         objectStore: () => ({
           put: (value: unknown, key?: string) => {
             const id = key ?? (value as { id: string }).id
             rows.set(id, value)
-            return fakeRequest(id)
+            return commit(fakeRequest(id))
           },
           add: (value: unknown) => {
             const id = (value as { id: string }).id
             if (rows.has(id)) return fakeRequest(undefined, named('ConstraintError'))
             rows.set(id, value)
-            return fakeRequest(id)
+            return commit(fakeRequest(id))
           },
           get: (key: string) => fakeRequest(rows.get(key)),
           getAll: () => fakeRequest([...rows.values()]),
         }),
       }
+      const commit = (request: FakeRequest): FakeRequest => {
+        queueMicrotask(() => queueMicrotask(() => tx.oncomplete?.()))
+        return request
+      }
+      return tx
     },
   }
   return db

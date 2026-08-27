@@ -234,9 +234,11 @@ type Props = {
   onExit?: () => void
   /** Called when a run actually begins, so the library can stamp `lastRunAt`. */
   onStarted?: () => void
+  /** Bumped when the browser's Back is pressed; the screen answers as its own Back would. */
+  backRequest?: number
 }
 
-export function RunScreen({ workout, onExit, onStarted }: Props) {
+export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props) {
   /*
    * Every gate records how long it took, so the estimate for a rep-based routine
    * stops being the instructor's average and becomes Wayne's own pace. Nonsense
@@ -316,14 +318,15 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     : clock(timer.secondsLeft)
 
   /*
-   * Sized from the step's LONGEST string, the value at its top, not from what
-   * is on screen right now. Otherwise a 90s step counting through 1:00 to 59
-   * drops from 3.5 units to 2 and the numerals jump ~75% larger mid-step.
-   * Constant within a step, so the countdown never changes size while running.
+   * Sized from what is on screen NOW, so a step of minutes is not held at the
+   * size its "1:30" needed for its whole length. The width class changes only
+   * where the reading loses a character: 10:00 to 9:59, and 1:00 to 59. Those
+   * are the minute marks, deliberate steps up rather than a jump mid-count, and
+   * `clockWidth` floors at two units so 10 to 9 changes nothing.
    */
   const clockChars =
     entry && entry.durationMs !== undefined
-      ? clockWidth(clock(Math.ceil(entry.durationMs / 1000)))
+      ? clockWidth(clock(timer.secondsLeft))
       : selfPaced && entry.reps
         ? clockWidth(String(entry.reps.count))
         : 2
@@ -412,6 +415,12 @@ export function RunScreen({ workout, onExit, onStarted }: Props) {
     timer.pause()
     setLeaving(true)
   }
+  // The browser's Back asks the same question the in-app Back does.
+  useEffect(() => {
+    if (backRequest > 0) requestExit()
+    // requestExit reads live state; only the request count should re-run this.
+  }, [backRequest])
+
 
   const stay = () => {
     setLeaving(false)

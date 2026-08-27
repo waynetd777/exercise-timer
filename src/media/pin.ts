@@ -34,9 +34,11 @@ export async function storeFile(file: Blob): Promise<MediaRef> {
  *
  * The GC sweep counts references over PERSISTED workouts only, so a blob held
  * by an unsaved editor draft, or one just written during an import before its
- * routine lands, looks orphaned to it. A concurrent sweep (a delete in another
- * part of the UI, a second tab) would collect the bytes, and the routine saved
- * a moment later would reference an image that resolves to nothing.
+ * routine lands, looks orphaned to it. A sweep in this tab meanwhile (a delete
+ * from the library while an import is landing) would collect the bytes, and the
+ * routine saved a moment later would reference an image that resolves to
+ * nothing. Per tab: a second tab cannot see these pins, and its sweep can still
+ * collect a draft's bytes.
  *
  * Pinning parks a hash until the draft is saved or discarded. Counted rather
  * than boolean, because storage is content-addressed and two open drafts can
