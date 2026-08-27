@@ -710,8 +710,20 @@ saving to the library, same ending as Paste.
    Push/pull reviewed and accepted by Wayne 2026-08-27.
    **127 exercises total. Torso is machine 5, other 21, so the shortfall that
    prompted the whole one-table design is comfortably covered.**
-3. NEXT. The generator and its tests. No UI, driven from tests.
-4. The dialog, wired to the editor.
+3. DONE. `src/routines/generate.ts`, pure, 29 tests. `rng` is injected, so a seed
+   pins a routine and "generate another" differs.
+   **The length is not estimated and hoped for**: exercises are added one at a
+   time and each one's real cost is known, so a per-side exercise costing two
+   groups and an ankle-strap one costing five more seconds are exact rather than
+   averaged. A 45 minute machine routine comes out at 45m 05s.
+   Two bugs worth remembering, both found by tests:
+   - "never the same area twice" excluded the ONLY area when one was selected, so
+     a torso-only routine stopped after one exercise. The rule is about
+     alternating, so it only applies when there is something to alternate with.
+   - The FIRST exercise gets no announcement, correctly: the announcement is what
+     you read while the cardio minute runs, and the first comes off the warm-up.
+     A test pins it, since it looks like a bug otherwise.
+4. NEXT. The dialog, wired to the editor.
 
 ### Tests
 

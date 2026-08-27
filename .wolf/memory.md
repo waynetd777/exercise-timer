@@ -218,3 +218,5 @@
 | 20:18 | Guide-derived exercise metadata: scripts/exercise_metadata.py + exercises.machine.ts, 41 rows, 10 tests | scripts/exercise_metadata.py, src/routines/exercises*.ts | phase 1 of the generator complete, 778 tests green | ~46000 |
 | 20:20 | Created src/routines/exercises.other.ts | — | ~2802 |
 | 20:21 | Authored the non-machine exercise table from the corpus: exercises.other.ts, 86 rows, use field | src/routines/exercises.other.ts | phase 2 done, 127 exercises, 787 tests green | ~28000 |
+| 20:25 | Created src/routines/generate.ts | — | ~4235 |
+| 20:28 | The routine generator: pure, budget solve, area rotation, weights from history | src/routines/generate.ts | phase 3 done, 816 tests green | ~34000 |

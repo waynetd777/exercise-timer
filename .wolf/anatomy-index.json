@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T18:20:16.505Z",
-    "fileCount": 55,
+    "lastScanned": "2026-08-27T18:25:32.364Z",
+    "fileCount": 56,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "54667a1ee94fdc26f67ee15f769ac9a51a09ad188af1b36e8fc06084c160bb81",
-    "storeUpdatedAt": "2026-08-27T18:20:16.516Z"
+    "renderedHash": "d27ee77e425c171404a870a286a8ce4073c2d0783e0f806c205e7b0ed0b1f850",
+    "storeUpdatedAt": "2026-08-27T18:25:32.374Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1173,6 +1173,80 @@
       "mtimeMs": 1787854816427.3608,
       "updatedAt": "2026-08-27T18:20:16.505Z",
       "source": "hook"
+    },
+    "src/routines/generate.ts": {
+      "description": "Exercise Timer",
+      "tokens": 4235,
+      "hash": "4272b7d89b2a61e1",
+      "size": 14822,
+      "mtimeMs": 1787855132286.2283,
+      "updatedAt": "2026-08-27T18:25:32.363Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "seeded",
+          "kind": "fn",
+          "startLine": 85,
+          "endLine": 95,
+          "tokens": 82
+        },
+        {
+          "name": "shuffled",
+          "kind": "fn",
+          "startLine": 96,
+          "endLine": 114,
+          "tokens": 203
+        },
+        {
+          "name": "loadFrom",
+          "kind": "fn",
+          "startLine": 115,
+          "endLine": 135,
+          "tokens": 210
+        },
+        {
+          "name": "eligible",
+          "kind": "fn",
+          "startLine": 136,
+          "endLine": 147,
+          "tokens": 151
+        },
+        {
+          "name": "share",
+          "kind": "fn",
+          "startLine": 148,
+          "endLine": 165,
+          "tokens": 208
+        },
+        {
+          "name": "nextArea",
+          "kind": "fn",
+          "startLine": 166,
+          "endLine": 191,
+          "tokens": 254
+        },
+        {
+          "name": "totalMs",
+          "kind": "fn",
+          "startLine": 192,
+          "endLine": 209,
+          "tokens": 182
+        },
+        {
+          "name": "exerciseBlocks",
+          "kind": "fn",
+          "startLine": 210,
+          "endLine": 265,
+          "tokens": 550
+        },
+        {
+          "name": "generateRoutine",
+          "kind": "fn",
+          "startLine": 266,
+          "endLine": 417,
+          "tokens": 1506
+        }
+      ]
     }
   },
   "preamble": [
