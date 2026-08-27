@@ -206,8 +206,19 @@ export function GenerateDialog({
   )
   const [sets, setSets] = useState(3)
   const [name, setName] = useState('')
-  /** Bumped by "Try another", which is the only thing that should reroll. */
-  const [seed, setSeed] = useState(1)
+  /**
+   * Where the shuffle starts.
+   *
+   * Random ONCE, when the dialog opens, so two visits are two different
+   * routines. It was a constant, which made every first look identical until you
+   * pressed Try another: the generator was shuffling correctly and always being
+   * handed the same seed to shuffle with.
+   *
+   * State rather than a fresh draw per render, so changing an answer re-runs the
+   * generator without also reshuffling the exercises under you. Try another is
+   * the only thing that rerolls.
+   */
+  const [seed, setSeed] = useState(() => Math.floor(Math.random() * 2 ** 31))
 
   useEffect(() => {
     // Guarded: StrictMode runs effects twice in dev, and showModal() on an

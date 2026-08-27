@@ -709,3 +709,58 @@ describe('shapes the instructor writes that are not steps', () => {
     expect(JSON.stringify(parsed.blocks)).toContain('"count":10')
   })
 })
+
+describe('a pyramid circuit', () => {
+  const PYRAMID = `#1 General body - Pyramid circuit
+1 - 20 x Straight legs up overhead crunch
+2 - 15 x Plie squats
+3 - 10 x Around the world
+4 - 5 x Rev lunge/forward lunge
+
+1
+1 + 2
+1 + 2 + 3
+1 + 2 + 3 + 4
+1 + 2 + 3
+1 + 2
+1`
+
+  it('spends the numbered lines rather than doing them once each', () => {
+    /*
+     * The numbered lines are a VOCABULARY: they say what 1, 2, 3 and 4 mean.
+     * The rows below spend them, growing and then shrinking.
+     */
+    const parsed = parseRoutine(PYRAMID)
+    expect(parsed.skipped).toEqual([])
+    const section = parsed.blocks.find((b) => b.kind === 'section')!
+    const rounds = section.children.filter((c) => c.kind === 'repeat')
+    expect(rounds).toHaveLength(7)
+    expect(rounds.map((r) => r.children.length)).toEqual([1, 2, 3, 4, 3, 2, 1])
+    // And they are not left lying about as loose steps as well.
+    expect(section.children.filter((c) => c.kind === 'segment')).toEqual([])
+  })
+
+  it('works with the vocabulary written AFTER the rows', () => {
+    // One routine puts it each way round, which is why this happens at section
+    // close rather than as it reads.
+    const [heading, ...rest] = PYRAMID.split('\n')
+    const rows = rest.filter((l) => /^\d+(\s*\+|$)/.test(l.trim()) && !l.includes('x'))
+    const defs = rest.filter((l) => l.includes(' x '))
+    const parsed = parseRoutine([heading, ...rows, '', ...defs].join('\n'))
+    expect(parsed.skipped).toEqual([])
+    expect(parsed.blocks.find((b) => b.kind === 'section')!.children).toHaveLength(7)
+  })
+
+  it('leaves a lone numbered line alone, since it bookends rather than defines', () => {
+    // "1 - plank jacks x 10" on its own is an ordinary step. Wayne's reading:
+    // in his routine it bookends the pyramid on both sides.
+    const parsed = parseRoutine('#1 Legs\n1 - plank jacks x 10')
+    expect(parsed.skipped).toEqual([])
+    expect(JSON.stringify(parsed.blocks)).toContain('"name":"plank jacks"')
+  })
+
+  it('reports the rows rather than dropping them when nothing defines them', () => {
+    const parsed = parseRoutine('#1 Legs\n1 + 2\n1 + 2 + 3')
+    expect(parsed.skipped).toHaveLength(2)
+  })
+})

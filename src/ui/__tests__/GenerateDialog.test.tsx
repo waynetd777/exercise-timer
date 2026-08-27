@@ -61,6 +61,21 @@ describe('GenerateDialog', () => {
     expect(screen.getByText(/exercises ·/).textContent).not.toBe(before)
   })
 
+  it('opens on a different routine each time', () => {
+    /*
+     * The seed was a constant, so every first look was the same routine until
+     * you pressed Try another. Six opens: identical output from all six would
+     * mean the seed is fixed again.
+     */
+    const seen = new Set<string>()
+    for (let i = 0; i < 6; i++) {
+      open()
+      seen.add(screen.getByText(/exercises ·/).nextElementSibling?.textContent ?? '')
+      cleanup()
+    }
+    expect(seen.size).toBeGreaterThan(1)
+  })
+
   it('rerolls only when asked to', () => {
     open()
     const before = screen.getByText(/exercises ·/).nextElementSibling?.textContent
