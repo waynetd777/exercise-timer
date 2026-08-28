@@ -10,8 +10,9 @@
 
 Wayne asked whether the weights page should become Exercises, hold a picture per exercise picked or pasted like the
 editor's, and have the editor use it "the same way we use the weight". I recommended the DEFERRED model; he said
-"implement it all properly including doc and in-help app updates". Done, NOT committed, NOT seen in a browser beyond
-the two things he spotted live (below).
+"implement it all properly including doc and in-help app updates". Done. COMMITTED as 23d3fc7 with the picker and the
+cross-navigation, badge bumped to 8.7 ("love it, commit all but don't push yet"). NOT PUSHED. Seen in a browser only
+as far as the two things he spotted live (below).
 
 - **`storage/pictures.ts`** (new, 12 tests): one `MediaRef` per exercise, keyed by folded name, in localStorage with
   the bytes in IndexedDB. `currentPictures()` starts from the guide's 42 illustrations and lets the table override

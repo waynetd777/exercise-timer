@@ -293,3 +293,4 @@
 | 22:48 | Created src/storage/pictures.ts | — | ~1842 |
 | 23:04 | Created src/storage/__tests__/pictures.test.ts | — | ~1118 |
 | 23:20 | Weights page became Exercises: all 147 rows, a picture per exercise (pick/upload/paste), deferred into runs and previews like the weight, GC root + backup fields, editor shows the inherited picture | storage/pictures.ts, routines/loads.ts, ui/ExercisesScreen.tsx (+css), media/gc.ts, storage/{bundle,bundleMedia,useLibrary}.ts, ui/{App,EditorScreen,LibraryScreen,help}.tsx, editor/rows.tsx, ImageDialogs.tsx, 3 READMEs, +47 tests | 1159 tests, typecheck, lint, build green | ~180k |
+| 23:28 | Committed the whole session on main as 23d3fc7 (exercise picker, Exercises page, cross-navigation), badge to 8.7; not pushed at Wayne's request | 46 files | 1159 tests, typecheck, lint, build green | ~6k |
