@@ -107,7 +107,8 @@ export function newRepeat(
  * run to nine rungs and are easier to extend than to cut down.
  */
 export function newLadder(children: Block[] = [newRungStep()], counts = [5, 10, 15]): Ladder {
-  return { kind: 'ladder', id: newId(), counts, children, label: 'Set' }
+  // "Rung", not "Set": a ladder's iterations are its rungs, and "Set 3 of 9" on one read as a repeat.
+  return { kind: 'ladder', id: newId(), counts, children, label: 'Rung' }
 }
 
 /** A step whose rep count comes from the ladder around it. */

@@ -12,6 +12,7 @@ import { collectImages } from '../editor/images'
 import { IMAGE_CATALOGUE } from '../routines/imageCatalogue'
 import { SEED_ROUTINES } from '../routines/samples'
 import { decodeRoutine, routineParam } from '../storage/shareLink'
+import { migrateWorkout } from '../storage/migrate'
 import { useLibrary } from '../storage/useLibrary'
 import { EditorScreen } from './EditorScreen'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -250,7 +251,9 @@ function Screens() {
       onRun={(workout) => setView({ screen: 'run', workout })}
       onEdit={(workout) => setView({ screen: 'edit', workout })}
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
-      onDraft={(workout) => setView({ screen: 'edit', workout })}
+      // Migrated on the way in, as a stored routine is on the way out: a pasted
+      // routine's "Round" groups otherwise read "Round" until saved and reopened.
+      onDraft={(workout) => setView({ screen: 'edit', workout: migrateWorkout(workout) })}
       onSounds={() => setView({ screen: 'sounds' })}
       onWeights={() => setView({ screen: 'weights' })}
     />

@@ -36,6 +36,16 @@ const LEGACY_REPEAT_LABELS = ['Round', 'Rep', 'Reps']
 const REPEAT_LABEL = 'Set'
 
 /**
+ * A ladder's iterations are RUNGS. Every ladder the editor and the generator
+ * made carried the label "Set", so the run screen read "Set 3 of 9" over a
+ * ladder, exactly what a repeat group says, and the two were indistinguishable
+ * mid-workout. Same rule as above: only the exact defaults are touched, and a
+ * name someone typed themselves is left alone.
+ */
+const LEGACY_LADDER_LABELS = ['Set', 'Round']
+const LADDER_LABEL = 'Rung'
+
+/**
  * Illustrations that used to be postimages links and now ship with the app.
  *
  * Every URL the catalogue has ever held, including the two duplicate uploads it
@@ -167,12 +177,14 @@ function migrateBlocks(blocks: Block[]): Block[] {
     }
     const children = migrateBlocks(block.children)
     const relabel =
-      block.kind === 'repeat' &&
-      block.label !== undefined &&
-      LEGACY_REPEAT_LABELS.includes(block.label)
-    if (!relabel && children === block.children) return block
+      block.kind === 'repeat' && block.label !== undefined && LEGACY_REPEAT_LABELS.includes(block.label)
+        ? REPEAT_LABEL
+        : block.kind === 'ladder' && block.label !== undefined && LEGACY_LADDER_LABELS.includes(block.label)
+          ? LADDER_LABEL
+          : null
+    if (relabel === null && children === block.children) return block
     changed = true
-    return { ...block, ...(relabel ? { label: REPEAT_LABEL } : {}), children }
+    return { ...block, ...(relabel !== null ? { label: relabel } : {}), children }
   })
   return changed ? next : blocks
 }

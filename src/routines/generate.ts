@@ -561,7 +561,7 @@ function sectionsRoutine(
             kind: 'ladder',
             id: newId(),
             counts: [...shape.counts],
-            label: 'Set',
+            label: 'Rung',
             children: [
               segment({
                 name: main!.name,
@@ -589,7 +589,9 @@ function sectionsRoutine(
           kind: 'repeat',
           id: newId(),
           times: rounds,
-          label: 'Round',
+          // The app's word, so the editor and the run screen agree with what a
+          // reload would show; "Round" was migrated to "Set" on the next read.
+          label: 'Set',
           children: [
             ...chosen.map(counted),
             segment({ name: 'Rest', role: 'rest', durationMs: ROUND_REST_MS }),
