@@ -96,6 +96,7 @@ link above.
 npm install
 npm run dev        # http://localhost:35173
 npm test           # about a thousand tests, no browser needed
+npm run lint       # oxlint: correctness and the rules of hooks
 npm run typecheck
 npm run build
 ```

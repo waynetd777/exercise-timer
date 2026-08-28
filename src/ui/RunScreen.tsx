@@ -419,6 +419,7 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
   useEffect(() => {
     if (backRequest > 0) requestExit()
     // requestExit reads live state; only the request count should re-run this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backRequest])
 
 

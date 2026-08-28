@@ -29,7 +29,7 @@ function fakeWorker(state: string): FakeWorker {
     removeEventListener: vi.fn(),
     fireStateChange: (next: string) => {
       worker.state = next
-      for (const fn of [...listeners]) fn()
+      for (const fn of Array.from(listeners)) fn()
     },
   }
   return worker

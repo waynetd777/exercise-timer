@@ -197,6 +197,7 @@ export function EditorScreen({
   useEffect(() => {
     if (backRequest > 0) goBack()
     // goBack reads the live draft; only the request count should re-run this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backRequest])
 
   return (

@@ -221,7 +221,7 @@ describe('harvest exercises', () => {
         unplaceable += 1
         continue
       }
-      const row = { ...guessed, ...(CORRECTIONS[name] ?? {}) }
+      const row = { ...guessed, ...CORRECTIONS[name] }
       const fields = Object.entries(row).map(([k, v]) => `${k}: ${literal(v)}`)
       rows.push(`  { ${fields.join(', ')} },`)
     }

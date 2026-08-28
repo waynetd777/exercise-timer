@@ -49,7 +49,8 @@ describe('toneFor', () => {
       expect(Math.abs(ding.freq - bell.freq)).toBeGreaterThan(200)
     }
     // Struck in sequence, not at once.
-    expect(dings.map((d) => d.atMs)).toEqual([...dings.map((d) => d.atMs)].sort((a, b) => a - b))
+    const times = dings.map((d) => d.atMs)
+    expect(times).toEqual([...times].sort((a, b) => a - b))
     expect(new Set(dings.map((d) => d.atMs)).size).toBe(3)
   })
 
