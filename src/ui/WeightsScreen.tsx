@@ -175,6 +175,9 @@ export function WeightsScreen({
       }
     }
     return { rewritten, steps }
+    // `weights` is read through `currentWeights()`, not the closure, so it has
+    // to be named here for a weight typed just now to bring a routine into scope.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workouts, weights])
 
   const follow = () => {

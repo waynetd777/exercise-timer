@@ -30,6 +30,7 @@ jobs:
 
       # A broken timer is worse than a stale one, so gate the deploy on both.
       - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
 
       - run: npm run build

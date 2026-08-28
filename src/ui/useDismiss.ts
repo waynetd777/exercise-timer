@@ -42,5 +42,6 @@ export function useDismiss(open: boolean, close: () => void, inside: (target: No
     // them would rebind the listeners on every keystroke elsewhere in the screen;
     // neither closes over anything but a ref and a setter, so a stale one behaves
     // identically to a fresh one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 }
