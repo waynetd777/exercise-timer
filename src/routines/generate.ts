@@ -457,15 +457,20 @@ function sectionsRoutine(
     )
 
   const taken = new Set<string>()
+  /*
+   * Drawn ACROSS the areas, one from each in turn, rather than area by area.
+   * Walking the areas in order filled "four mobility, four cardio" from upper
+   * and torso before lower was ever reached, so twenty-two exercises, every
+   * lower-body stretch, jump and trampoline move, could not be generated.
+   */
   const draw = (areas: readonly string[], use: 'strength' | 'cardio' | 'mobility', want: number) => {
+    const pools = areas.map((area) => pool(area as BodyArea, use).filter((e) => !taken.has(e.name)))
     const out: Exercise[] = []
-    for (const area of areas) {
-      for (const exercise of pool(area as BodyArea, use)) {
-        if (out.length >= want) break
-        if (taken.has(exercise.name)) continue
-        taken.add(exercise.name)
-        out.push(exercise)
-      }
+    for (let turn = 0; out.length < want && pools.some((p) => p.length > 0); turn++) {
+      const exercise = pools[turn % pools.length]!.shift()
+      if (!exercise || taken.has(exercise.name)) continue
+      taken.add(exercise.name)
+      out.push(exercise)
     }
     return out
   }
