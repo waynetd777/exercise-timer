@@ -8,13 +8,13 @@
  * How long a rep of each exercise actually takes YOU.
  *
  * `estimate.ts` works a rep-based routine's length out from a rate the
- * instructor's own routines imply: he writes some exercises both ways, so a
+ * instructor's own routines imply: she writes some exercises both ways, so a
  * "30-second Plank" beside a "20 x Plank" says one takes 1.5 seconds. That is a
  * population of one instructor and fourteen exercises.
  *
  * Every self-paced step already measures itself. The runtime parks the clock at
  * a gate and rebases when you tap Next, so the elapsed time is known exactly and
- * was being thrown away. Recorded, the estimate stops being his average and
+ * was being thrown away. Recorded, the estimate stops being her average and
  * becomes your pace, on your machine, at your rest.
  *
  * IN `localStorage`, deliberately. It is small, it is per-device, and losing it

@@ -23,7 +23,7 @@
       "timestamp": "2026-08-20T23:40:00Z",
       "error_message": "Idle run screen rendered the 'Ready' panel AND a live countdown simultaneously, putting 4 children into a 3-row grid",
       "file": "src/ui/RunScreen.tsx",
-      "root_cause": "position(timeline, 0) legitimately returns the FIRST entry, not null \u2014 only completion yields a null entry. So `at.entry` is truthy before the workout starts, and gating the running body on `entry &&` alone was true during 'idle'.",
+      "root_cause": "position(timeline, 0) legitimately returns the FIRST entry, not null — only completion yields a null entry. So `at.entry` is truthy before the workout starts, and gating the running body on `entry &&` alone was true during 'idle'.",
       "fix": "Derive `const isRunning = status === 'running' || status === 'paused'` and gate on `isRunning ? at.entry : null`. Same flag unlights the effort strip when idle (currentIndex -1).",
       "tags": [
         "ui",
@@ -40,8 +40,8 @@
       "timestamp": "2026-08-20T23:40:00Z",
       "error_message": "Skipping a step while paused (or stepping back from complete) left the clock advancing, so the next Resume credited a huge bogus pause and jumped the workout forward",
       "file": "src/state/useTimer.ts",
-      "root_cause": "seekTo() re-anchored startedAt but only refreshed pausedAt if it was already non-zero. Stepping back from 'complete' set status to 'paused' while pausedAt stayed 0, so readElapsed() kept using now() \u2014 the clock ran while the UI said paused, and resume() then added (now - 0).",
-      "fix": "seekTo takes an explicit `freeze` flag (`status !== 'running'`) and always sets pausedAt accordingly. Also extracted the whole arithmetic into pure src/state/clock.ts (Clock + elapsed/started/paused/resumed/seeked) with 11 unit tests that need no DOM \u2014 including one named for this bug.",
+      "root_cause": "seekTo() re-anchored startedAt but only refreshed pausedAt if it was already non-zero. Stepping back from 'complete' set status to 'paused' while pausedAt stayed 0, so readElapsed() kept using now() — the clock ran while the UI said paused, and resume() then added (now - 0).",
+      "fix": "seekTo takes an explicit `freeze` flag (`status !== 'running'`) and always sets pausedAt accordingly. Also extracted the whole arithmetic into pure src/state/clock.ts (Clock + elapsed/started/paused/resumed/seeked) with 11 unit tests that need no DOM — including one named for this bug.",
       "tags": [
         "clock",
         "pause",
@@ -58,7 +58,7 @@
       "timestamp": "2026-08-20T23:40:00Z",
       "error_message": "max-height: 40cqh on the media panel had no container to resolve against",
       "file": "src/ui/run-screen.css",
-      "root_cause": "`.run` declares `container-type: inline-size`, which establishes an INLINE-axis query container only. cqh needs `container-type: size` (which requires a definite block size). With no eligible container, cqh silently falls back to the small viewport \u2014 right by accident, wrong by intent.",
+      "root_cause": "`.run` declares `container-type: inline-size`, which establishes an INLINE-axis query container only. cqh needs `container-type: size` (which requires a definite block size). With no eligible container, cqh silently falls back to the small viewport — right by accident, wrong by intent.",
       "fix": "Use `min(40svh, 26rem)` explicitly. Rule: with container-type: inline-size, only cqi/cqw are meaningful.",
       "tags": [
         "css",
@@ -74,8 +74,8 @@
       "timestamp": "2026-08-21T00:05:00Z",
       "error_message": "USER REPORTED: 'the countdown and image panels need to be responsive and size to occupy the available screen space. they're tiny on my laptop'",
       "file": "src/ui/run-screen.css",
-      "root_cause": "Both were capped in rem, so a big screen was wasted. `.count__clock` was clamp(5rem, 34cqi, 15rem) \u2014 on a 1440px laptop 34cqi computes to ~490px and the 15rem ceiling chopped it to 240px. The media column was minmax(16rem, 22rem), hard-capped at 352px. Neither considered available HEIGHT at all, and `.run` was container-type: inline-size so cqh was not even available.",
-      "fix": "Named containers (`shell` / inline-size for layout switching, `body` / size on .run__body so BOTH axes are queryable \u2014 safe because a 1fr row of a 100%-height grid has a definite block size). Countdown is now max(3rem, min(calc(84cqi / var(--chars)), 52cqh)) with --chars set from the string's em width (digit 1, colon 0.5) so '8' and '17' match while '4:30' steps down. Columns became minmax(0, 3fr) minmax(0, 2fr); the panel frame drops aspect-ratio on wide layouts and stretches to the row height with object-fit: contain.",
+      "root_cause": "Both were capped in rem, so a big screen was wasted. `.count__clock` was clamp(5rem, 34cqi, 15rem) — on a 1440px laptop 34cqi computes to ~490px and the 15rem ceiling chopped it to 240px. The media column was minmax(16rem, 22rem), hard-capped at 352px. Neither considered available HEIGHT at all, and `.run` was container-type: inline-size so cqh was not even available.",
+      "fix": "Named containers (`shell` / inline-size for layout switching, `body` / size on .run__body so BOTH axes are queryable — safe because a 1fr row of a 100%-height grid has a definite block size). Countdown is now max(3rem, min(calc(84cqi / var(--chars)), 52cqh)) with --chars set from the string's em width (digit 1, colon 0.5) so '8' and '17' match while '4:30' steps down. Columns became minmax(0, 3fr) minmax(0, 2fr); the panel frame drops aspect-ratio on wide layouts and stretches to the row height with object-fit: contain.",
       "fix_rule": "Do not cap a hero element in rem. Size it against both axes with cq units and let content length, not an arbitrary ceiling, be the limit.",
       "tags": [
         "css",
@@ -91,9 +91,9 @@
     {
       "id": "bug-006",
       "timestamp": "2026-08-21T00:55:00Z",
-      "error_message": "USER REPORTED: 'make all the small text much bigger' \u2014 labels, meta rows, button text and stats were unreadable",
+      "error_message": "USER REPORTED: 'make all the small text much bigger' — labels, meta rows, button text and stats were unreadable",
       "file": "src/ui/theme.css",
-      "root_cause": "The --label token was `600 0.7rem/1.2` (~11.2px) with 0.16em tracking \u2014 a sensible size for a desktop dashboard, and a deliberate typographic counterweight to the giant numerals, but it ignored this app's actual requirement: readable across a gym, mid-effort, at 2-3 metres. Fixed rem sizing also meant it never grew on a large screen.",
+      "root_cause": "The --label token was `600 0.7rem/1.2` (~11.2px) with 0.16em tracking — a sensible size for a desktop dashboard, and a deliberate typographic counterweight to the giant numerals, but it ignored this app's actual requirement: readable across a gym, mid-effort, at 2-3 metres. Fixed rem sizing also meant it never grew on a large screen.",
       "fix": "--label-size is now clamp(1rem, 1.6cqi, 1.6rem), so ~11px became 16px on a phone and 23px on a laptop; tracking eased to 0.11em since the same tracking reads much wider at a larger size. Also enlarged: exercise name floor 1.25rem -> 1.75rem, stat figures to clamp(1.75rem, 4cqi, 3rem), primary button its own clamp(1.05rem, 1.9cqi, 1.9rem), chevron glyphs their own larger scale, button targets 56px -> 64px (primary 76px).",
       "fix_rule": "Type scale must follow the VIEWING DISTANCE, not convention. For anything read at arm's length or further, treat ~1rem as the floor for secondary text and let it scale with the container.",
       "tags": [
@@ -132,7 +132,7 @@
       "error_message": "USER REPORTED: 'the progress bar on top - the muted red bars look brown'",
       "file": "src/ui/run-screen.css",
       "root_cause": "The effort strip used a single background colour with opacity per state (0.22 todo / 0.5 done / 1 current) over a near-black ground. Compositing a saturated hue down toward black is exactly how you make brown: red #EF4A3F at 22% resolves to #431F1D and at 50% to #802E2A. Green and blue muddied the same way, but red is the one that reads unmistakably as brown because dark desaturated red IS brown.",
-      "fix": "Dropped opacity for explicit per-state backgrounds. Upcoming steps are neutral `var(--ink-600)` \u2014 their HEIGHT already encodes work vs rest, so hue was redundant. Completed steps keep hue but mix toward a LIGHT grey rather than down toward black: `color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim))`, giving #C9716D for red. Only the current step is at full strength.",
+      "fix": "Dropped opacity for explicit per-state backgrounds. Upcoming steps are neutral `var(--ink-600)` — their HEIGHT already encodes work vs rest, so hue was redundant. Completed steps keep hue but mix toward a LIGHT grey rather than down toward black: `color-mix(in oklab, var(--step-colour) 55%, var(--bone-dim))`, giving #C9716D for red. Only the current step is at full strength.",
       "fix_rule": "Never dim a saturated colour toward a near-black ground to indicate an inactive state. Mix toward a mid or light neutral to keep the hue readable, or drop the hue entirely.",
       "tags": [
         "css",
@@ -150,7 +150,7 @@
       "timestamp": "2026-08-21T04:30:00Z",
       "error_message": "USER REPORTED (with screenshot): 'the countdown numbers are not centered'",
       "file": "src/ui/run-screen.css",
-      "root_cause": "CSS applies letter-spacing after EVERY character including the last, so with `letter-spacing: -0.045em` the line box is narrower than the visible glyphs by that amount. Centring the line box therefore leaves the glyphs offset by half of it \u2014 about 20px at a 459px font size, and visibly off next to the centred exercise name and meta row.",
+      "root_cause": "CSS applies letter-spacing after EVERY character including the last, so with `letter-spacing: -0.045em` the line box is narrower than the visible glyphs by that amount. Centring the line box therefore leaves the glyphs offset by half of it — about 20px at a 459px font size, and visibly off next to the centred exercise name and meta row.",
       "fix": "Hoisted the value into `--tracking` and added `padding-right: calc(-1 * var(--tracking))` on the block. Narrowing the content box by the same amount shifts the centred line back by exactly half of it. Kept as one variable so the two can never drift apart.",
       "fix_rule": "Centred text with non-zero letter-spacing is always offset by half the tracking. Compensate on the block with padding equal to the letter-spacing, from a shared custom property.",
       "tags": [
@@ -168,7 +168,7 @@
       "timestamp": "2026-08-21T04:30:00Z",
       "error_message": "USER REPORTED: 'when the number of digits reduces, the numbers get bigger pushing the rest of the content off the screen'",
       "file": "src/ui/format.ts",
-      "root_cause": "clockWidth() returned the literal em width of the string, so a single digit gave 1 and the font size became `coef * 1cqi / 1` instead of `/ 2`. The width term then stopped binding, the height term took over, and '9' rendered up to 100% larger than '10' \u2014 measured +100% at 342x710, +73% at 342x560, +59% at 600x900. The coefficient had been calibrated for two digits all along. A test even asserted clockWidth('8') === 1 under the name 'sizes one and two digits so the countdown does not jump', so the test guaranteed the very jump its name denied.",
+      "root_cause": "clockWidth() returned the literal em width of the string, so a single digit gave 1 and the font size became `coef * 1cqi / 1` instead of `/ 2`. The width term then stopped binding, the height term took over, and '9' rendered up to 100% larger than '10' — measured +100% at 342x710, +73% at 342x560, +59% at 600x900. The coefficient had been calibrated for two digits all along. A test even asserted clockWidth('8') === 1 under the name 'sizes one and two digits so the countdown does not jump', so the test guaranteed the very jump its name denied.",
       "fix": "clockWidth now returns Math.max(2, units), so the size only ever steps DOWN for longer strings. Test corrected to assert the floor, plus a new test asserting the sequence is monotonically non-increasing.",
       "fix_rule": "When a size divides by a content-derived factor, floor that factor at the value the coefficient was calibrated for. Otherwise short content grows instead of long content shrinking.",
       "tags": [
@@ -185,7 +185,7 @@
     {
       "id": "bug-011",
       "timestamp": "2026-08-21T04:30:00Z",
-      "error_message": "Media panel pushed below the fold on a short narrow window (visible in the same screenshot \u2014 no image panel at all)",
+      "error_message": "Media panel pushed below the fold on a short narrow window (visible in the same screenshot — no image panel at all)",
       "file": "src/ui/run-screen.css",
       "root_cause": "In the stacked layout the panel frame had `aspect-ratio: 4/3` with `max-height: min(40svh, 26rem)`, so it demanded a height proportional to its WIDTH regardless of how much vertical space was left. Countdown + name + meta + a 4:3 panel simply exceeds a short body, and the overflow went off-screen silently.",
       "fix": "Dropped aspect-ratio and max-height entirely; the frame is `height: 100%` in both layouts. `.run__body` stacked is now `grid-template-rows: auto minmax(0, 1fr)` so the countdown block takes what it needs and the panel absorbs the remainder. Also gave the clock its own `--clock-height` per layout: 40cqh stacked (the panel needs room below), 74cqh beside the panel. object-fit: contain means a smaller frame never distorts the image.",
@@ -205,9 +205,9 @@
       "timestamp": "2026-08-21T04:55:00Z",
       "error_message": "USER REPORTED: 'the text on the cards is the wrong way around - the routine name should be bigger and the text below it smaller'",
       "file": "src/ui/run-screen.css",
-      "root_cause": "`.label` was declared as `font: var(--label)` \u2014 the FONT SHORTHAND, which resets font-size. It lived in run-screen.css while `.row__meta` (which carries both classes) set its own smaller font-size in library.css. Equal specificity, so source order decided, and App.tsx imports LibraryScreen before RunScreen \u2014 so run-screen.css loaded last and `.label` silently clobbered the card's size. Card meta rendered at 44.5px against a 30.4px routine name on a laptop, inverted at every width.",
+      "root_cause": "`.label` was declared as `font: var(--label)` — the FONT SHORTHAND, which resets font-size. It lived in run-screen.css while `.row__meta` (which carries both classes) set its own smaller font-size in library.css. Equal specificity, so source order decided, and App.tsx imports LibraryScreen before RunScreen — so run-screen.css loaded last and `.label` silently clobbered the card's size. Card meta rendered at 44.5px against a 30.4px routine name on a laptop, inverted at every width.",
       "fix": "Moved `.label` and `.unit` to theme.css (loaded first by main.tsx, so components can override) and rewrote them with LONGHAND properties, so setting font-size or the --label-size token actually wins. `.row__meta` now steps down via `--label-size: var(--label-size-sm)`. Name/meta ratio is 1.5-2.07x depending on width.",
-      "fix_rule": "Never use the `font:` shorthand in a shared utility class \u2014 it resets font-size and family, so any component override becomes import-order dependent. Shared utilities belong in the globally-first stylesheet, in longhand, parameterised by a custom property.",
+      "fix_rule": "Never use the `font:` shorthand in a shared utility class — it resets font-size and family, so any component override becomes import-order dependent. Shared utilities belong in the globally-first stylesheet, in longhand, parameterised by a custom property.",
       "tags": [
         "css",
         "shorthand",
@@ -224,7 +224,7 @@
       "timestamp": "2026-08-21T04:55:00Z",
       "error_message": "USER REPORTED: 'something is off with the combination of fonts - the home screen seems different to the routine screens'",
       "file": "src/ui/library.css",
-      "root_cause": "No shared type scale. An audit found 11 ad-hoc font-size expressions and 5 different letter-spacing values (-0.03, -0.02, -0.01, 0.06, 0.1, 0.11em) split across library.css and run-screen.css, each invented per element. The same role was styled differently per screen \u2014 uppercase labels tracked 0.06em on one and 0.11em on the other, and screen titles used unrelated sizes \u2014 so the two screens read as different apps.",
+      "root_cause": "No shared type scale. An audit found 11 ad-hoc font-size expressions and 5 different letter-spacing values (-0.03, -0.02, -0.01, 0.06, 0.1, 0.11em) split across library.css and run-screen.css, each invented per element. The same role was styled differently per screen — uppercase labels tracked 0.06em on one and 0.11em on the other, and screen titles used unrelated sizes — so the two screens read as different apps.",
       "fix": "One scale in theme.css: three tracking tokens keyed to ROLE (--track-display -0.03em, --track-name -0.01em, --label-tracking 0.11em) and four size tokens (--size-display, --size-title, --size-name, --label-size plus --label-size-sm). Both stylesheets now reference tokens only; the sole remaining literal is .count__name, which needs a cqh term the tokens do not carry, and is commented as such.",
       "fix_rule": "Type scale belongs in the shared theme, keyed to role, before a second screen exists. Per-element clamps invented locally will diverge.",
       "tags": [
@@ -242,7 +242,7 @@
       "timestamp": "2026-08-21T05:30:00Z",
       "error_message": "USER REPORTED: the next-up line sits flush against the controls divider; a 3px nudge appeared to do nothing",
       "file": "src/ui/run-screen.css",
-      "root_cause": "`.run__body` in the STACKED layout had `padding: var(--step-5) var(--step-5) 0` \u2014 zero bottom padding \u2014 so the panel's bottom edge met the controls' border-top directly. The 3px margin DID apply (measurable as ~6 device px at 2x in the screenshot), it was simply the entire clearance that existed. The wide layout was fine because it has 24px bottom padding.",
+      "root_cause": "`.run__body` in the STACKED layout had `padding: var(--step-5) var(--step-5) 0` — zero bottom padding — so the panel's bottom edge met the controls' border-top directly. The 3px margin DID apply (measurable as ~6 device px at 2x in the screenshot), it was simply the entire clearance that existed. The wide layout was fine because it has 24px bottom padding.",
       "fix": "Gave the stacked body `var(--step-4)` (16px) bottom padding and removed the 3px margin as redundant. Fixing the missing padding rather than stacking a nudge on top of a zero.",
       "fix_rule": "When a nudge appears to do nothing, check what it is being added to. A margin against zero padding is the whole gap, not an adjustment to one.",
       "tags": [
@@ -259,9 +259,9 @@
       "timestamp": "2026-08-21T05:30:00Z",
       "error_message": "USER REPORTED: 'the sound after the 3s countdown is supposed to sound like a bell but it sounds like a click'",
       "file": "src/audio/engine.ts",
-      "root_cause": "TWO causes. (1) The envelope was a single exponential from peak, which is loud in the middle and silent by 500ms. Re-measuring the app's bell showed the real shape is a STRIKE plus a RING: it drops to 0.33 of peak within 25ms and is still audible at 1200ms. A single exponential is a tone being switched off; the quiet long tail is what makes it a bell. (2) `cancelPending()` stopped EVERY tracked oscillator including ones already sounding, and the scheduler re-arms its window every 10 seconds \u2014 so any cue overlapping a re-arm was cut off mid-ring, which is itself an audible click. With phase changes every 10-20s in a Tabata, collisions were frequent.",
+      "root_cause": "TWO causes. (1) The envelope was a single exponential from peak, which is loud in the middle and silent by 500ms. Re-measuring the app's bell showed the real shape is a STRIKE plus a RING: it drops to 0.33 of peak within 25ms and is still audible at 1200ms. A single exponential is a tone being switched off; the quiet long tail is what makes it a bell. (2) `cancelPending()` stopped EVERY tracked oscillator including ones already sounding, and the scheduler re-arms its window every 10 seconds — so any cue overlapping a re-arm was cut off mid-ring, which is itself an audible click. With phase changes every 10-20s in a Tabata, collisions were frequent.",
       "fix": "Note gained `sustain` (fraction of peak the strike falls to) and `strikeMs`, so the envelope is attack -> strike -> long tail. Bell is now sustain 0.33, strikeMs 22, durationMs 2050, with the inharmonic partial given decayScale 0.45 because high partials die before the body stops ringing. And `pending` became a Map of node -> scheduled start time, so `cancelPending` skips anything already sounding and only drops future cues.",
-      "fix_rule": "A percussive sound needs a two-part envelope: brief loud transient, then a much quieter long tail. And never stop a sounding oscillator to re-arm a scheduler \u2014 cutting audio mid-ring is a click.",
+      "fix_rule": "A percussive sound needs a two-part envelope: brief loud transient, then a much quieter long tail. And never stop a sounding oscillator to re-arm a scheduler — cutting audio mid-ring is a click.",
       "tags": [
         "audio",
         "web-audio",
@@ -293,9 +293,9 @@
       "timestamp": "2026-08-21T06:40:00Z",
       "error_message": "USER REPORTED: 'the countdown is still changing size when it transitions from 1:00 to 59 and squashing the image'",
       "file": "src/ui/RunScreen.tsx",
-      "root_cause": "TWO causes, both left over from bug-010's partial fix. (1) `--chars` was computed from the CURRENT clock string, so a step counting through the minute boundary went from '1:00' (3.5 units) to '59' (2 units) and the font grew ~75% mid-step. Flooring at 2 had only fixed the single-digit case. (2) The stacked layout used `grid-template-rows: auto minmax(0, 1fr)`, so the countdown block took whatever height it needed and the image absorbed the rest \u2014 meaning any change in numeral size resized the picture.",
-      "fix": "`--chars` now comes from the step's LONGEST string \u2014 clockWidth(clock(ceil(entry.durationMs / 1000))) \u2014 so it is constant for the whole step and the countdown cannot change size while running. And the stacked split is fixed proportions (56fr / 44fr) instead of auto, so the image never moves. Because the countdown now only gets 56% of the body while cqh still measures the whole body, --clock-height came down from 40cqh to 34cqh; verified the count block fits its row at six window sizes including 342x380.",
-      "fix_rule": "Size a countdown from the LONGEST value it will display, never the current one \u2014 otherwise it resizes as digits drop. And in a stacked layout, give a flexible neighbour a fixed proportion rather than the remainder, or it moves whenever its sibling does.",
+      "root_cause": "TWO causes, both left over from bug-010's partial fix. (1) `--chars` was computed from the CURRENT clock string, so a step counting through the minute boundary went from '1:00' (3.5 units) to '59' (2 units) and the font grew ~75% mid-step. Flooring at 2 had only fixed the single-digit case. (2) The stacked layout used `grid-template-rows: auto minmax(0, 1fr)`, so the countdown block took whatever height it needed and the image absorbed the rest — meaning any change in numeral size resized the picture.",
+      "fix": "`--chars` now comes from the step's LONGEST string — clockWidth(clock(ceil(entry.durationMs / 1000))) — so it is constant for the whole step and the countdown cannot change size while running. And the stacked split is fixed proportions (56fr / 44fr) instead of auto, so the image never moves. Because the countdown now only gets 56% of the body while cqh still measures the whole body, --clock-height came down from 40cqh to 34cqh; verified the count block fits its row at six window sizes including 342x380.",
+      "fix_rule": "Size a countdown from the LONGEST value it will display, never the current one — otherwise it resizes as digits drop. And in a stacked layout, give a flexible neighbour a fixed proportion rather than the remainder, or it moves whenever its sibling does.",
       "tags": [
         "css",
         "sizing",
@@ -312,7 +312,7 @@
       "timestamp": "2026-08-21T07:00:00Z",
       "error_message": "USER REPORTED: 'on a small screen can you shrink the image to fit the available space?'",
       "file": "src/ui/run-screen.css",
-      "root_cause": "Not an overflow \u2014 the image was already contained. The exercise illustrations are near-square (876x800 measured from the real file), so a SHORT WIDE frame fits them to its height and leaves the width unused: at a 342x103 frame the picture rendered at 0.13x, tiny inside a large empty bordered box. The fixed 56/44 stacked split gave the panel the same share regardless of how little vertical space there was.",
+      "root_cause": "Not an overflow — the image was already contained. The exercise illustrations are near-square (876x800 measured from the real file), so a SHORT WIDE frame fits them to its height and leaves the width unused: at a 342x103 frame the picture rendered at 0.13x, tiny inside a large empty bordered box. The fixed 56/44 stacked split gave the panel the same share regardless of how little vertical space there was.",
       "fix": "Two viewport-height tiers hand space to the image on short screens: at <=700px the split becomes 50/50 with --clock-height 28cqh, and at <=540px it becomes 46/54 with 22cqh plus lower name and label FLOORS (those floors, not the countdown, are what crowd the row at that height). Image renders 19-47% larger depending on size; a normal phone portrait (390x844) is unchanged. Declared before the wide container block, since the two-column layout overrides both rows and --clock-height and must not be affected.",
       "fix_rule": "`object-fit: contain` fits the SMALLER axis, so a box whose aspect ratio is far from the image's wastes the other axis. When the content is near-square, the box's aspect ratio matters more than its area.",
       "tags": [
@@ -328,10 +328,10 @@
     {
       "id": "bug-019",
       "timestamp": "2026-08-21T07:20:00Z",
-      "error_message": "USER REPORTED (screenshot): the exercise image is vertically truncated \u2014 the bottom of the picture is cut off at the frame edge",
+      "error_message": "USER REPORTED (screenshot): the exercise image is vertically truncated — the bottom of the picture is cut off at the frame edge",
       "file": "src/ui/run-screen.css",
-      "root_cause": "`.panel__frame img` had `width: 100%; height: 100%; object-fit: contain`, but as a normal grid item its `height: 100%` was resolving to AUTO. The box therefore took the image's natural aspect at full width (463x423 for an 876x800 image in a 463px frame), grew taller than the frame's 295px, and `overflow: hidden` cut the bottom off. `object-fit: contain` never letterboxed anything, because the box it was fitting into was already too tall. I had twice reasoned that 'contain means it cannot overflow' \u2014 which is only true once the box itself is bounded.",
-      "fix": "The image is absolutely positioned with `inset: 0` inside a `position: relative` frame. An absolutely-positioned box takes its dimensions from the containing block directly, so the height is definite regardless of the grid, and contain then shrinks the picture to fit \u2014 full height, letterboxed at the sides.",
+      "root_cause": "`.panel__frame img` had `width: 100%; height: 100%; object-fit: contain`, but as a normal grid item its `height: 100%` was resolving to AUTO. The box therefore took the image's natural aspect at full width (463x423 for an 876x800 image in a 463px frame), grew taller than the frame's 295px, and `overflow: hidden` cut the bottom off. `object-fit: contain` never letterboxed anything, because the box it was fitting into was already too tall. I had twice reasoned that 'contain means it cannot overflow' — which is only true once the box itself is bounded.",
+      "fix": "The image is absolutely positioned with `inset: 0` inside a `position: relative` frame. An absolutely-positioned box takes its dimensions from the containing block directly, so the height is definite regardless of the grid, and contain then shrinks the picture to fit — full height, letterboxed at the sides.",
       "fix_rule": "`object-fit` only constrains the picture WITHIN the element's box; it does nothing about the box itself. If a replaced element's percentage height may resolve to auto, use `position: absolute; inset: 0` to make the box definite, or the natural aspect will overflow and be clipped.",
       "tags": [
         "css",
@@ -349,7 +349,7 @@
       "timestamp": "2026-08-21T07:50:00Z",
       "error_message": "USER REPORTED: 'the save button is invisible' (editor header)",
       "file": "src/ui/theme.css",
-      "root_cause": "`.btn--primary` is `color: var(--ink-900); background: var(--phase)`, and `--phase` was only ever set as an inline style on `.run`. In the editor it is undefined, and an undefined custom property makes the whole `background` declaration INVALID at computed-value time \u2014 so the background fell back to transparent and the button rendered as dark text on a dark ground.",
+      "root_cause": "`.btn--primary` is `color: var(--ink-900); background: var(--phase)`, and `--phase` was only ever set as an inline style on `.run`. In the editor it is undefined, and an undefined custom property makes the whole `background` declaration INVALID at computed-value time — so the background fell back to transparent and the button rendered as dark text on a dark ground.",
       "fix": "Gave `--phase` a root default of `var(--role-rest)` in theme.css; the run screen still overrides it per step. Also moved `.btn*` and `.chip*` out of run-screen.css / library.css into theme.css, since three screens use them and they only worked from a screen-specific file because the bundler concatenates all CSS.",
       "fix_rule": "A custom property consumed outside the subtree that sets it needs a root default (or a `var(x, fallback)`), or the whole declaration silently drops. And a class used by more than one screen belongs in the shared stylesheet, not in whichever screen defined it first.",
       "tags": [
@@ -364,9 +364,9 @@
     {
       "id": "bug-021",
       "timestamp": "2026-08-21T00:35:00Z",
-      "error_message": "USER REPORTED: 'the fourth sound after a round is also broken like the other one was' \u2014 the workout-complete figure was truncated",
+      "error_message": "USER REPORTED: 'the fourth sound after a round is also broken like the other one was' — the workout-complete figure was truncated",
       "file": "src/audio/engine.ts",
-      "root_cause": "The completion cue is SEVEN notes spread over ~3.45s, queued as separate oscillators at future times. It fires at exactly totalMs \u2014 the same instant the timer sets status to 'complete', which re-runs the scheduler effect and called cancelPending(). The earlier fix spared oscillators whose OWN start time had passed, so the first note survived and every later note of the same figure was stopped. Per-note reasoning fixed the single-note bell and left the multi-note fanfare broken in exactly the same way.",
+      "root_cause": "The completion cue is SEVEN notes spread over ~3.45s, queued as separate oscillators at future times. It fires at exactly totalMs — the same instant the timer sets status to 'complete', which re-runs the scheduler effect and called cancelPending(). The earlier fix spared oscillators whose OWN start time had passed, so the first note survived and every later note of the same figure was stopped. Per-note reasoning fixed the single-note bell and left the multi-note fanfare broken in exactly the same way.",
       "fix": "Cancellation is judged per CUE, not per note: every oscillator is tagged with the moment its cue began, and a cue that has begun is left entirely alone including its remaining notes. Added a 0.15s grace so tick-versus-audio-clock skew cannot cancel a figure a hair before it starts, and added deduplication in the scheduler (keyed `kind@atMs`) so a spared cue cannot be re-queued by the next arm and played twice.",
       "fix_rule": "When a cue is a FIGURE rather than a single sound, cancellation has to reason about the figure. Track the group, not the note.",
       "tags": [
@@ -384,8 +384,8 @@
       "timestamp": "2026-08-21T00:45:00Z",
       "error_message": "USER REPORTED: the image placeholder text is truncated on a portrait iPad",
       "file": "src/ui/format.ts",
-      "root_cause": "`fitCqi`'s coefficient was 161, derived as 100 / 0.62 \u2014 two optimistic assumptions compounded. Bold uppercase advances nearer 0.68-0.72em, not 0.62, and the calculation used the FULL container width while `.panel__empty` had 12px of fixed padding either side. On a portrait iPad the wide layout gives the panel only ~250px, where 24px of padding is a tenth of the width, so every fallback name overflowed by about 20% and was clipped by the frame's overflow: hidden. It fitted on a laptop purely because the panel is twice as wide there and the padding proportionally trivial.",
-      "fix": "Padding is proportional on both axes (`4cqh 4cqi`), so the available share is a constant 92% at any size. The coefficient is now an explicit budget over an explicit advance \u2014 84 of the 92 available, divided by a 0.72em advance \u2014 and the gap between 84 and 92 is where all the safety lives, because the sizing maths is exact by construction. Added `overflow-wrap: anywhere` so a wider-than-assumed font breaks a word rather than clipping it, and a test asserting the fit holds against a PESSIMISTIC 0.78em advance, since testing against the assumed advance would prove nothing.",
+      "root_cause": "`fitCqi`'s coefficient was 161, derived as 100 / 0.62 — two optimistic assumptions compounded. Bold uppercase advances nearer 0.68-0.72em, not 0.62, and the calculation used the FULL container width while `.panel__empty` had 12px of fixed padding either side. On a portrait iPad the wide layout gives the panel only ~250px, where 24px of padding is a tenth of the width, so every fallback name overflowed by about 20% and was clipped by the frame's overflow: hidden. It fitted on a laptop purely because the panel is twice as wide there and the padding proportionally trivial.",
+      "fix": "Padding is proportional on both axes (`4cqh 4cqi`), so the available share is a constant 92% at any size. The coefficient is now an explicit budget over an explicit advance — 84 of the 92 available, divided by a 0.72em advance — and the gap between 84 and 92 is where all the safety lives, because the sizing maths is exact by construction. Added `overflow-wrap: anywhere` so a wider-than-assumed font breaks a word rather than clipping it, and a test asserting the fit holds against a PESSIMISTIC 0.78em advance, since testing against the assumed advance would prove nothing.",
       "fix_rule": "When sizing text by arithmetic, the assumed glyph advance is the whole risk. Leave an explicit margin between what the text claims and what is available, and test against a wider advance than you assumed.",
       "tags": [
         "css",
@@ -564,11 +564,11 @@
       "last_seen": "2026-08-21T15:05:00+02:00"
     },
     {
-      "error_message": "The first whistle of a workout \u2014 the one at the end of the get-ready \u2014 played the plain 2900Hz fallback tone instead of the recording",
+      "error_message": "The first whistle of a workout — the one at the end of the get-ready — played the plain 2900Hz fallback tone instead of the recording",
       "file": "src/audio/engine.ts",
       "root_cause": "A cue is BUILT when it is scheduled, not when it sounds: playNote reads this.samples.get(name) at schedule time and creates either a buffer source or the synthesised fallback there and then. unlock() starts the whistle fetch+decode without awaiting it, and useCueScheduler's first arm() runs synchronously in the same tick, queueing the whole 30s lookahead window before the bytes could possibly land. Dedup via `scheduled` then means those cues are never revisited, so every whistle in the first half-minute kept the fallback. It only looked intermittent because any clock mutation (pause, resume, skip, seek) bumps `generation`, which clears the dedup set and requeues with the recording.",
-      "fix": "Two parts. (1) samples.ts starts the download at module load and exposes sampleBytes() \u2014 the network is the slow half and needs no AudioContext, so it does not wait for the gesture. (2) engine.onSampleDecoded() notifies when a buffer lands; the scheduler cancels pending, forgets the keys requeueable() says were actually dropped, and re-arms. requeueable() shares CANCEL_GRACE_MS with cancelPending so a cue already sounding is spared rather than queued twice.",
-      "fix_rule": "Anything read at SCHEDULE time is frozen for up to LOOKAHEAD_MS. If a scheduling input can change after the fact (a decode, a setting, a tint), it must announce itself and the window must be re-armed \u2014 and any re-arm that clears the dedup set has to respect the same grace cancelPending() uses, or a sounding cue plays twice.",
+      "fix": "Two parts. (1) samples.ts starts the download at module load and exposes sampleBytes() — the network is the slow half and needs no AudioContext, so it does not wait for the gesture. (2) engine.onSampleDecoded() notifies when a buffer lands; the scheduler cancels pending, forgets the keys requeueable() says were actually dropped, and re-arms. requeueable() shares CANCEL_GRACE_MS with cancelPending so a cue already sounding is spared rather than queued twice.",
+      "fix_rule": "Anything read at SCHEDULE time is frozen for up to LOOKAHEAD_MS. If a scheduling input can change after the fact (a decode, a setting, a tint), it must announce itself and the window must be re-armed — and any re-arm that clears the dedup set has to respect the same grace cancelPending() uses, or a sounding cue plays twice.",
       "tags": [
         "audio",
         "scheduling",
@@ -582,11 +582,11 @@
       "last_seen": "2026-08-21T18:45:57+02:00"
     },
     {
-      "error_message": "Choosing images for two steps in a row shared ONE undo step \u2014 one press of undo took both pictures back",
+      "error_message": "Choosing images for two steps in a row shared ONE undo step — one press of undo took both pictures back",
       "file": "src/ui/EditorScreen.tsx",
       "root_cause": "patchSegment passed `coalesce = patch.role === undefined`, i.e. 'anything that is not the role is text'. A media patch from the picker, the upload or the link field therefore coalesced, and history.push replaces the present when the previous push was also coalescible. So a second image pick overwrote the first entry, and any image pick following a typing run was absorbed into it. The coalescing flag was also a single global boolean, so typing in two different fields collapsed together.",
-      "fix": "history.push now takes the FIELD being typed into (string | null) instead of a boolean, and only replaces the present when the field matches. isTypedPatch (editor/blocks.ts) names the only keystroke-by-keystroke field on a step \u2014 name \u2014 so media, role, note and alternative are discrete. The timing NUMBER box now coalesces (it is typed) while the unit select stays discrete.",
-      "fix_rule": "Coalescing must be keyed on the field, never on a 'this was text' flag: a shared flag silently merges unrelated edits and swallows any non-typing action that rides the same path. When adding a patch route, ask whether the field fires per keystroke \u2014 if not, it is discrete.",
+      "fix": "history.push now takes the FIELD being typed into (string | null) instead of a boolean, and only replaces the present when the field matches. isTypedPatch (editor/blocks.ts) names the only keystroke-by-keystroke field on a step — name — so media, role, note and alternative are discrete. The timing NUMBER box now coalesces (it is typed) while the unit select stays discrete.",
+      "fix_rule": "Coalescing must be keyed on the field, never on a 'this was text' flag: a shared flag silently merges unrelated edits and swallows any non-typing action that rides the same path. When adding a patch route, ask whether the field fires per keystroke — if not, it is discrete.",
       "tags": [
         "editor",
         "undo",
@@ -602,8 +602,8 @@
     {
       "error_message": "Focusing the image link field of a step with an uploaded photo and tabbing away deleted the photo; blurring an unchanged note left an undo step that undid nothing",
       "file": "src/ui/EditorScreen.tsx",
-      "root_cause": "Both fields commit on blur and committed unconditionally. commitUrl treated an empty box as 'clear the image' \u2014 but the box is ALWAYS empty for a local (uploaded) image, since mediaUrl() only returns a URL for source 'remote'. commitText re-patched the same note, and clearText on an absent field still returns a new tree, so either way push() stored a state identical to the present.",
-      "fix": "commitText returns when the trimmed value matches what is stored. commitUrl clears only when the media is source 'remote', returns on an unrecognised link, and writes only when the normalised URL differs from the current one. The new \u00d7 in the field is the deliberate way to remove any image, including an uploaded one.",
+      "root_cause": "Both fields commit on blur and committed unconditionally. commitUrl treated an empty box as 'clear the image' — but the box is ALWAYS empty for a local (uploaded) image, since mediaUrl() only returns a URL for source 'remote'. commitText re-patched the same note, and clearText on an absent field still returns a new tree, so either way push() stored a state identical to the present.",
+      "fix": "commitText returns when the trimmed value matches what is stored. commitUrl clears only when the media is source 'remote', returns on an unrecognised link, and writes only when the normalised URL differs from the current one. The new × in the field is the deliberate way to remove any image, including an uploaded one.",
       "fix_rule": "A blur-committed field must compare against stored state before writing, or focus alone becomes an edit. And never infer 'the user cleared it' from an empty control that was never populated for that data shape.",
       "tags": [
         "editor",
@@ -617,11 +617,11 @@
       "last_seen": "2026-08-21T19:31:41+02:00"
     },
     {
-      "error_message": "User-reported: after starting a routine by CLICKING play, the right arrow key did not skip \u2014 starting it with the spacebar and the arrows worked",
+      "error_message": "User-reported: after starting a routine by CLICKING play, the right arrow key did not skip — starting it with the spacebar and the arrows worked",
       "file": "src/ui/RunScreen.tsx",
       "root_cause": "The keyboard handler bailed out on `tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT'`. Clicking a control leaves it focused, so every later keydown targets a <button> and EVERY shortcut was dropped, arrows included. Starting with the spacebar left focus on <body>, so the same session had a working keyboard. The guard's stated intent was only to stop space double-firing on a focused button.",
       "fix": "Extracted `shortcutApplies(tagName, key)` to src/ui/keys.ts: a field or select takes every key, a button takes only Space and Enter (which activate it), and the arrows / m / k always belong to the screen. Tested without a DOM.",
-      "fix_rule": "A focus guard has to name the KEYS the focused thing consumes, not just its tag. 'Ignore all keys while X has focus' silently disables every unrelated shortcut, and the failure mode is silence \u2014 nothing logs, nothing throws.",
+      "fix_rule": "A focus guard has to name the KEYS the focused thing consumes, not just its tag. 'Ignore all keys while X has focus' silently disables every unrelated shortcut, and the failure mode is silence — nothing logs, nothing throws.",
       "tags": [
         "ui",
         "keyboard",
@@ -636,8 +636,8 @@
     {
       "error_message": "User-reported (iPhone, installed to the home screen): the top of the screen sits behind the camera indent, and the run screen's back button cannot be tapped while a routine is running",
       "file": "src/ui/theme.css",
-      "root_cause": "index.html sets viewport-fit=cover with apple-mobile-web-app-status-bar-style=black-translucent, so a standalone install owns the full display \u2014 but only .run inset anything, and only its bottom (the home indicator). Everything else painted under the notch. The unclickable back button is the same cause rather than a second bug: iOS consumes touches in the status bar region, so a control there is not merely clipped, it is unreachable.",
-      "fix": "--safe-top/right/bottom/left tokens in theme.css, applied to the band that holds controls: .run__header, .library, .editor (plus its bottom add bar), .sounds. Every @container (min-width: 46rem) override had to carry them too \u2014 a bare padding there undid the inset on an iPhone in landscape, which is over 46rem and still has an island.",
+      "root_cause": "index.html sets viewport-fit=cover with apple-mobile-web-app-status-bar-style=black-translucent, so a standalone install owns the full display — but only .run inset anything, and only its bottom (the home indicator). Everything else painted under the notch. The unclickable back button is the same cause rather than a second bug: iOS consumes touches in the status bar region, so a control there is not merely clipped, it is unreachable.",
+      "fix": "--safe-top/right/bottom/left tokens in theme.css, applied to the band that holds controls: .run__header, .library, .editor (plus its bottom add bar), .sounds. Every @container (min-width: 46rem) override had to carry them too — a bare padding there undid the inset on an iPhone in landscape, which is over 46rem and still has an island.",
       "fix_rule": "With viewport-fit=cover, EVERY screen owes an inset, and a wide-layout padding override silently cancels one. Inset the band that holds controls, never a wrapper around the screen, or the background gradient stops short of the edge.",
       "tags": [
         "ios",
@@ -654,9 +654,9 @@
     {
       "error_message": "User-reported with a screenshot (iPhone, home-screen install): the time remaining collided with the step name, and a large empty band sat below the controls",
       "file": "src/ui/theme.css",
-      "root_cause": "Two causes, one trigger. (1) `html, body, #root { height: 100% }` \u2014 on an iOS standalone install with viewport-fit=cover, a PERCENTAGE height resolves against the safe viewport (screen minus the 59pt status-bar strip) while the page paints under the island, so the app's box ended 59pt above the bottom of the screen. Measured from the screenshot: the hairline above the controls at 670pt, controls 108pt, safe-bottom 34pt = 812pt of content on an 874pt screen. (2) The countdown and the step name were sized in cqh of the BODY container, which includes the media panel, as a hand-tuned fraction that had to stay 'well under the row's share'. It was within a few points of overflowing, and the header's new safe-area inset tipped it over: the lead outgrew its row and the name's descenders landed on the meta row.",
+      "root_cause": "Two causes, one trigger. (1) `html, body, #root { height: 100% }` — on an iOS standalone install with viewport-fit=cover, a PERCENTAGE height resolves against the safe viewport (screen minus the 59pt status-bar strip) while the page paints under the island, so the app's box ended 59pt above the bottom of the screen. Measured from the screenshot: the hairline above the controls at 670pt, controls 108pt, safe-bottom 34pt = 812pt of content on an 874pt screen. (2) The countdown and the step name were sized in cqh of the BODY container, which includes the media panel, as a hand-tuned fraction that had to stay 'well under the row's share'. It was within a few points of overflowing, and the header's new safe-area inset tipped it over: the lead outgrew its row and the name's descenders landed on the meta row.",
       "fix": "(1) `height: 100dvh` with the percentage kept as a fallback line. (2) `.count` is now its own `size` container, so the clock (52cqh) and the name (14cqh) are budgeted against the column they live in rather than a fraction of a bigger box.",
-      "fix_rule": "Never size a full-screen layout with percentage heights when viewport-fit=cover is set \u2014 use dvh, or the box is smaller than what you are painting on. And a proportional type budget must be expressed in the box's OWN height, or it drifts silently when anything above it changes size.",
+      "fix_rule": "Never size a full-screen layout with percentage heights when viewport-fit=cover is set — use dvh, or the box is smaller than what you are painting on. And a proportional type budget must be expressed in the box's OWN height, or it drifts silently when anything above it changes size.",
       "tags": [
         "ios",
         "pwa",
@@ -671,11 +671,11 @@
       "last_seen": "2026-08-21T22:08:39+02:00"
     },
     {
-      "error_message": "User-reported with a screenshot (iOS, list mode): some groups rendered with names broken mid-word \u2014 'Spe / ed / Ska / ters' \u2014 while other groups looked fine",
+      "error_message": "User-reported with a screenshot (iOS, list mode): some groups rendered with names broken mid-word — 'Spe / ed / Ska / ters' — while other groups looked fine",
       "file": "src/ui/run-screen.css",
-      "root_cause": "`.sheet__list` sized its rows from the HEIGHT budget only \u2014 `clamp(1.05rem, 32cqh / var(--lines), 2.25rem)`. A row is three grid columns and two are fixed in em (the count at 3.4em and the per-side qualifier at 0.72em with white-space: nowrap), so a bigger font leaves the name column less width. With only three or four exercises the height term hit the 2.25rem ceiling; at that size the fixed columns took most of the row and `overflow-wrap: anywhere` on the name broke words a character at a time. It only happened to groups containing a per-side row, because that column collapses to nothing otherwise \u2014 which is why some groups looked fine.",
+      "root_cause": "`.sheet__list` sized its rows from the HEIGHT budget only — `clamp(1.05rem, 32cqh / var(--lines), 2.25rem)`. A row is three grid columns and two are fixed in em (the count at 3.4em and the per-side qualifier at 0.72em with white-space: nowrap), so a bigger font leaves the name column less width. With only three or four exercises the height term hit the 2.25rem ceiling; at that size the fixed columns took most of the row and `overflow-wrap: anywhere` on the name broke words a character at a time. It only happened to groups containing a per-side row, because that column collapses to nothing otherwise — which is why some groups looked fine.",
       "fix": "Added the width term the sizing was missing: min(32cqh / --lines, 6.5cqi), which leaves the name about 7em once both fixed columns and the padding have taken their share. The qualifier may now also wrap (nowrap removed), so it is compressible rather than the name being whatever is left.",
-      "fix_rule": "A font size chosen from a HEIGHT budget must still be capped by the WIDTH the text has left, whenever the same element sits beside columns measured in em \u2014 the bigger the type, the narrower its own column becomes. And treat `overflow-wrap: anywhere` as a smoke alarm: if it ever fires in normal use, the sizing above it is wrong.",
+      "fix_rule": "A font size chosen from a HEIGHT budget must still be capped by the WIDTH the text has left, whenever the same element sits beside columns measured in em — the bigger the type, the narrower its own column becomes. And treat `overflow-wrap: anywhere` as a smoke alarm: if it ever fires in normal use, the sizing above it is wrong.",
       "tags": [
         "ios",
         "layout",
@@ -691,9 +691,9 @@
     {
       "error_message": "User-reported: New routine, Duplicate routine and paste-import did nothing on laptop, iPhone and iPad alike",
       "file": "src/id.ts",
-      "root_cause": "Every id came from `crypto.randomUUID()`, which is SECURE-CONTEXT ONLY. All three devices were testing against the dev server over the LAN \u2014 a plain-HTTP origin \u2014 where the method is undefined, so each of those paths threw. It worked on the deployed HTTPS site, which is why it read as 'broken everywhere' rather than 'broken on one platform'.",
+      "root_cause": "Every id came from `crypto.randomUUID()`, which is SECURE-CONTEXT ONLY. All three devices were testing against the dev server over the LAN — a plain-HTTP origin — where the method is undefined, so each of those paths threw. It worked on the deployed HTTPS site, which is why it read as 'broken everywhere' rather than 'broken on one platform'.",
       "fix": "`newId()` in src/id.ts: randomUUID when available, otherwise a real version-4 UUID built from getRandomValues (no secure-context restriction), and Math.random as a last resort. All 14 call sites now use it.",
-      "fix_rule": "Anything under `crypto` that is secure-context only \u2014 randomUUID, subtle \u2014 will be undefined on the plain-HTTP origin used for device testing. Wrap it with a fallback, or the app is broken in the one place it most needs trying out. `crypto.subtle` (image hashing) still has this problem: uploads fail over plain HTTP.",
+      "fix_rule": "Anything under `crypto` that is secure-context only — randomUUID, subtle — will be undefined on the plain-HTTP origin used for device testing. Wrap it with a fallback, or the app is broken in the one place it most needs trying out. `crypto.subtle` (image hashing) still has this problem: uploads fail over plain HTTP.",
       "tags": [
         "crypto",
         "secure-context",
@@ -710,7 +710,7 @@
       "file": "src/ui/theme.css",
       "root_cause": "The panel WAS the <dialog>, held to its content by `height: fit-content` plus `align-self: center` and `align-content: center`. On iOS that box takes the height available instead of hugging, and the implicit auto rows then stretch (align-content: normal behaves as stretch in grid) to share out the spare height. Removing align-content made the stretch obvious; keeping it made the content overflow a scroll container upward so the title was clipped. Both symptoms, one wrong premise.",
       "fix": "Two elements. `.modal` is a transparent sheet filling the viewport whose job is to centre a panel inside the safe area (and to carry overscroll-behavior: contain, so the screen behind cannot move). The panel is a plain div with the ground, border, padding and rows, and `align-content: start` so rows hug. Applied to the notice, confirm, paste and picker dialogs; the lightbox was already a sheet and only needed the insets.",
-      "fix_rule": "Never style a <dialog> as the panel. Make it the sheet and put the box in a child \u2014 `height: fit-content` on the dialog is not dependable, and a stretched grid row turns every button into a slab. A third round of tuning a layout means the structure is wrong, not the numbers.",
+      "fix_rule": "Never style a <dialog> as the panel. Make it the sheet and put the box in a child — `height: fit-content` on the dialog is not dependable, and a stretched grid row turns every button into a slab. A third round of tuning a layout means the structure is wrong, not the numbers.",
       "tags": [
         "ios",
         "dialog",
@@ -726,8 +726,8 @@
     {
       "error_message": "User-reported: \"Let's go!\" did not play on the first routine started after opening the app, and worked on every start after that",
       "file": "src/audio/speech.ts",
-      "root_cause": "iOS drops the FIRST utterance a page makes unless `speak()` is called inside a user gesture. The opening line is fired from a React effect and then a setTimeout (AFTER_START_CUE_MS), so it is never itself in the gesture \u2014 the tap is over by the time it runs. The first attempt was therefore swallowed, and it also served as the page's first utterance, which is why every later line was audible.",
-      "fix": "`unlockSpeech()` in speech.ts speaks a single space at zero volume, called synchronously from every control alongside `audio.unlock()` \u2014 the same problem the AudioContext has and the same shape of answer. Idempotent, inaudible, and it leaves nothing queued for the first real line to cancel.",
+      "root_cause": "iOS drops the FIRST utterance a page makes unless `speak()` is called inside a user gesture. The opening line is fired from a React effect and then a setTimeout (AFTER_START_CUE_MS), so it is never itself in the gesture — the tap is over by the time it runs. The first attempt was therefore swallowed, and it also served as the page's first utterance, which is why every later line was audible.",
+      "fix": "`unlockSpeech()` in speech.ts speaks a single space at zero volume, called synchronously from every control alongside `audio.unlock()` — the same problem the AudioContext has and the same shape of answer. Idempotent, inaudible, and it leaves nothing queued for the first real line to cancel.",
       "fix_rule": "Anything gated on a user gesture must be primed FROM the gesture, not from whatever the gesture eventually causes. An effect or a timeout is a different task, and iOS counts tasks. The AudioContext taught this once already: when a second API turns out to be gesture-gated, wire it into the same `withAudio` wrapper rather than hoping the activation carries.",
       "tags": [
         "ios",
@@ -761,10 +761,10 @@
     {
       "id": "bug-044",
       "timestamp": "2026-08-22T17:05:00Z",
-      "error_message": "User-reported with screenshots (narrow laptop window and iPhone portrait): the editor step row's buttons wrapped badly. On the phone the note button was stranded alone on a line; on both, the six-button action cluster sat hard right on a line of its own under short field lines, so no two rows agreed on where any button was. First attempt (a single `.erow__band` holding every button) made the phone WORSE \u2014 four lines instead of three \u2014 and was reverted. Second attempt (pairing the buttons plus fixing the unit select's width) was still wrong on the iPhone; the user proposed collapsing the buttons behind one button instead.",
+      "error_message": "User-reported with screenshots (narrow laptop window and iPhone portrait): the editor step row's buttons wrapped badly. On the phone the note button was stranded alone on a line; on both, the six-button action cluster sat hard right on a line of its own under short field lines, so no two rows agreed on where any button was. First attempt (a single `.erow__band` holding every button) made the phone WORSE — four lines instead of three — and was reverted. Second attempt (pairing the buttons plus fixing the unit select's width) was still wrong on the iPhone; the user proposed collapsing the buttons behind one button instead.",
       "file": "src/ui/editor.css",
-      "root_cause": "The image control, the note toggle and `.erow__actions` were three independent items in `.erow__main`'s `flex-wrap` flow, so wrap position was decided per item and the two 42px buttons split, stranding the note button. The deeper cause of the cramping was the unit select: a native `<select>` takes the width of its WIDEST option, so a step showing 's' held the width of 'rung each side' \u2014 about 140pt of a phone's ~311pt row, nearly all empty. That left the row ~7pt short of fitting [secs][unit][image][note] on one line. The first fix, gathering all eight buttons into one wrapping `.erow__band`, failed because flexbox places items by MAX-CONTENT width and only then shrinks them: the band measured ~380pt, so it could never share the 311pt line whatever it would have done once wrapped. It took a line of its own and split inside it \u2014 four lines where there had been three.",
-      "fix": "Two changes. (1) `.erow__own` pairs the image control with the note toggle \u2014 a pair cannot split \u2014 and stays LOOSE in the fields' wrap flow rather than being gathered into a band, so it rides along with the timing fields where the room is. `.erow__actions` keeps its bare `margin-left: auto`, which holds the right-hand column on whichever line it lands. (2) `.efield--unit` is sized by the label it SHOWS, via `data-unit` on the select and three widths in `em` (5.5 / 9 / 10.5, in em so they track the type scale). That reclaimed ~50pt \u2014 real headroom rather than a 7pt pixel race. Result: one line when wide, fields + (image, note, cluster) on a narrow window, and role/name + timing/image/note + cluster on a phone. Neither was enough \u2014 the row wants ~380pt of buttons against a phone's ~313pt, a 70pt gap no arrangement closes. Final fix: `.erow__tools` holds all eight buttons and has two jobs chosen by CSS alone \u2014 under `@container (min-width: 64rem)` it is an absolutely-positioned panel off the row's bottom-right, hidden behind a new `.erow__more` (\u22ef) trigger; at 64rem and over it is laid out inline at the trailing edge and the trigger is `display: none`. No width is measured in JS, so nothing needs correcting on a resize. `[data-open]` is repeated inside the container query because it beats the bare class on specificity. The panel is `position: absolute` against `.erow` (which takes `z-index` while open) rather than viewport-fixed like `Menu`, so it travels with its row on a scroll; it closes on any click inside it, since every button in it is a deed. Escape and press-outside come from the new shared `ui/useDismiss.ts`, also adopted by `Menu`.",
+      "root_cause": "The image control, the note toggle and `.erow__actions` were three independent items in `.erow__main`'s `flex-wrap` flow, so wrap position was decided per item and the two 42px buttons split, stranding the note button. The deeper cause of the cramping was the unit select: a native `<select>` takes the width of its WIDEST option, so a step showing 's' held the width of 'rung each side' — about 140pt of a phone's ~311pt row, nearly all empty. That left the row ~7pt short of fitting [secs][unit][image][note] on one line. The first fix, gathering all eight buttons into one wrapping `.erow__band`, failed because flexbox places items by MAX-CONTENT width and only then shrinks them: the band measured ~380pt, so it could never share the 311pt line whatever it would have done once wrapped. It took a line of its own and split inside it — four lines where there had been three.",
+      "fix": "Two changes. (1) `.erow__own` pairs the image control with the note toggle — a pair cannot split — and stays LOOSE in the fields' wrap flow rather than being gathered into a band, so it rides along with the timing fields where the room is. `.erow__actions` keeps its bare `margin-left: auto`, which holds the right-hand column on whichever line it lands. (2) `.efield--unit` is sized by the label it SHOWS, via `data-unit` on the select and three widths in `em` (5.5 / 9 / 10.5, in em so they track the type scale). That reclaimed ~50pt — real headroom rather than a 7pt pixel race. Result: one line when wide, fields + (image, note, cluster) on a narrow window, and role/name + timing/image/note + cluster on a phone. Neither was enough — the row wants ~380pt of buttons against a phone's ~313pt, a 70pt gap no arrangement closes. Final fix: `.erow__tools` holds all eight buttons and has two jobs chosen by CSS alone — under `@container (min-width: 64rem)` it is an absolutely-positioned panel off the row's bottom-right, hidden behind a new `.erow__more` (⋯) trigger; at 64rem and over it is laid out inline at the trailing edge and the trigger is `display: none`. No width is measured in JS, so nothing needs correcting on a resize. `[data-open]` is repeated inside the container query because it beats the bare class on specificity. The panel is `position: absolute` against `.erow` (which takes `z-index` while open) rather than viewport-fixed like `Menu`, so it travels with its row on a scroll; it closes on any click inside it, since every button in it is a deed. Escape and press-outside come from the new shared `ui/useDismiss.ts`, also adopted by `Menu`.",
       "tags": [
         "container-query",
         "css",
@@ -785,10 +785,10 @@
     {
       "id": "bug-045",
       "timestamp": "2026-08-22T18:00:00Z",
-      "error_message": "User-reported: pressing outside the editor row's \u22ef controls panel did not close it. Introduced in the same session as the panel itself.",
+      "error_message": "User-reported: pressing outside the editor row's ⋯ controls panel did not close it. Introduced in the same session as the panel itself.",
       "file": "src/ui/EditorScreen.tsx",
-      "root_cause": "`useDismiss`'s `inside` predicate was `row.current?.contains(target)` \u2014 the whole `<li>`. So every press within the step's own row counted as inside, including its name field, its role select and its padding, leaving the panel hanging open over the row below. Only a press in a DIFFERENT row or outside the list closed it.",
-      "fix": "Scoped the predicate to the panel and its trigger: `panel.current?.contains(target) || more.current?.contains(target)`. The trigger must stay inside \u2014 otherwise pointerdown closes the panel and the click that follows toggles it straight back open, so it never appears to close. The row ref is gone; `.erow[data-tools]` still carries the z-index lift.",
+      "root_cause": "`useDismiss`'s `inside` predicate was `row.current?.contains(target)` — the whole `<li>`. So every press within the step's own row counted as inside, including its name field, its role select and its padding, leaving the panel hanging open over the row below. Only a press in a DIFFERENT row or outside the list closed it.",
+      "fix": "Scoped the predicate to the panel and its trigger: `panel.current?.contains(target) || more.current?.contains(target)`. The trigger must stay inside — otherwise pointerdown closes the panel and the click that follows toggles it straight back open, so it never appears to close. The row ref is gone; `.erow[data-tools]` still carries the z-index lift.",
       "tags": [
         "react",
         "popover",
@@ -802,10 +802,10 @@
     {
       "id": "bug-046",
       "timestamp": "2026-08-22T18:15:00Z",
-      "error_message": "User-reported: the editor row's \u22ef controls panel always opened downward, so on the last rows of the list it was clipped by the scrolling container. Also reported: it opened under the whole ROW rather than under the button. Then, after the re-anchor, the panel rendered as a single vertical column of buttons instead of two horizontal rows.",
+      "error_message": "User-reported: the editor row's ⋯ controls panel always opened downward, so on the last rows of the list it was clipped by the scrolling container. Also reported: it opened under the whole ROW rather than under the button. Then, after the re-anchor, the panel rendered as a single vertical column of buttons instead of two horizontal rows.",
       "file": "src/ui/EditorScreen.tsx",
       "root_cause": "`.erow__tools` was pinned to `top: calc(100% + var(--step-1))` with no notion of available space. CSS has no way to ask; the feature that would (anchor positioning with position-try) is the same one this project already rejected as undependable, which is why Menu.tsx is hand-rolled.",
-      "fix": "A `useLayoutEffect` keyed on the open flag measures the row's box against `.editor__scroll`'s visible box and the panel's own `offsetHeight`, then sets `data-up`, which swaps `top` for `bottom: calc(100% + var(--step-1))`. useLayoutEffect rather than useEffect so the flip is applied in the frame the panel first paints \u2014 a plain effect renders it in the wrong place and jumps. It flips only when that helps (`below < needed && above > below`): with too little room on either side, downward can at least be scrolled into view, and a first row will not flip up into the scroller's top edge. The 4px in the measurement is `--step-1` in the CSS; the two have to agree. Then re-anchored: `.erow__menu` wraps the panel and the \u22ef button and is `position: relative`, so with the button as its only in-flow child on a narrow screen the wrapper's box IS the button's box and the panel opens directly under (or over) it. Anchoring to the row put it below both lines of a phone row, and below the note fields as well when those were open. The flip measurement moved to the button's rect for the same reason. The wrapper carries the trailing-edge auto margin in both modes, so `.erow__tools` no longer needs one. The cluster is also allowed to wrap inside the panel (never in the row) with a `100vw`-based cap, for a phone too narrow for six buttons in a line \u2014 undone again above the breakpoint in case a row was opened while narrow and then widened. That vertical collapse was caused by the re-anchor plus the wrap: an absolutely positioned box with `width: auto` is shrink-to-fit sized against its CONTAINING BLOCK, which was now the 42px `.erow__menu`, so shrink-to-fit fell back to min-content \u2014 and the wrap had made min-content one button wide. Fixed with `width: max-content` on the panel (independent of what it is anchored to) and by dropping the cluster's wrap, along with the wide-mode rule that undid it. The panel is 288px against a phone's ~361px of list, so the wrap was never needed.",
+      "fix": "A `useLayoutEffect` keyed on the open flag measures the row's box against `.editor__scroll`'s visible box and the panel's own `offsetHeight`, then sets `data-up`, which swaps `top` for `bottom: calc(100% + var(--step-1))`. useLayoutEffect rather than useEffect so the flip is applied in the frame the panel first paints — a plain effect renders it in the wrong place and jumps. It flips only when that helps (`below < needed && above > below`): with too little room on either side, downward can at least be scrolled into view, and a first row will not flip up into the scroller's top edge. The 4px in the measurement is `--step-1` in the CSS; the two have to agree. Then re-anchored: `.erow__menu` wraps the panel and the ⋯ button and is `position: relative`, so with the button as its only in-flow child on a narrow screen the wrapper's box IS the button's box and the panel opens directly under (or over) it. Anchoring to the row put it below both lines of a phone row, and below the note fields as well when those were open. The flip measurement moved to the button's rect for the same reason. The wrapper carries the trailing-edge auto margin in both modes, so `.erow__tools` no longer needs one. The cluster is also allowed to wrap inside the panel (never in the row) with a `100vw`-based cap, for a phone too narrow for six buttons in a line — undone again above the breakpoint in case a row was opened while narrow and then widened. That vertical collapse was caused by the re-anchor plus the wrap: an absolutely positioned box with `width: auto` is shrink-to-fit sized against its CONTAINING BLOCK, which was now the 42px `.erow__menu`, so shrink-to-fit fell back to min-content — and the wrap had made min-content one button wide. Fixed with `width: max-content` on the panel (independent of what it is anchored to) and by dropping the cluster's wrap, along with the wide-mode rule that undid it. The panel is 288px against a phone's ~361px of list, so the wrap was never needed.",
       "tags": [
         "react",
         "useLayoutEffect",
@@ -822,8 +822,8 @@
       "timestamp": "2026-08-22T18:35:00Z",
       "error_message": "User-reported on iPhone in a Safari TAB: the editor's add-button footer fell partly below the bottom of the screen; after showing and dismissing the keyboard the footer became fully visible but the fixed header went off the top, with no way to scroll back and exit the editor.",
       "file": "src/ui/theme.css",
-      "root_cause": "`html, body, #root { height: 100lvh }`. The LARGE viewport is the screen with the browser UI RETRACTED, so in a tab with Safari's address bar and toolbar showing the shell was taller than the visible screen by their height. Both symptoms follow from that: the bottom band of each screen sat under the toolbar, and content taller than the viewport is scrollable OVERFLOW which `overflow: hidden` only clips, not prevents \u2014 so the keyboard's focus-reveal scrolled the document and left it scrolled, and `hidden` meant the user could not scroll back what the browser had scrolled. `lvh` had been chosen over `dvh` to stop the keyboard reflowing the app, which was correct but overshot: it fixed the keyboard by picking the TALLEST stable viewport when the SHORTEST was the one that always fits.",
-      "fix": "`height: 100svh`. The small viewport is the screen with the browser UI showing, so the shell always fits what can be seen and there is no overflow to be left scrolled in; and since nothing here scrolls, the browser UI never retracts to leave a gap. svh and lvh are both STABLE \u2014 neither responds to the keyboard \u2014 so the original dvh problem stays fixed. On a home-screen install there is no browser UI, so svh == lvh == dvh and the install is unchanged. `.modal` keeps `100dvh` deliberately: a dialog should track the keyboard.",
+      "root_cause": "`html, body, #root { height: 100lvh }`. The LARGE viewport is the screen with the browser UI RETRACTED, so in a tab with Safari's address bar and toolbar showing the shell was taller than the visible screen by their height. Both symptoms follow from that: the bottom band of each screen sat under the toolbar, and content taller than the viewport is scrollable OVERFLOW which `overflow: hidden` only clips, not prevents — so the keyboard's focus-reveal scrolled the document and left it scrolled, and `hidden` meant the user could not scroll back what the browser had scrolled. `lvh` had been chosen over `dvh` to stop the keyboard reflowing the app, which was correct but overshot: it fixed the keyboard by picking the TALLEST stable viewport when the SHORTEST was the one that always fits.",
+      "fix": "`height: 100svh`. The small viewport is the screen with the browser UI showing, so the shell always fits what can be seen and there is no overflow to be left scrolled in; and since nothing here scrolls, the browser UI never retracts to leave a gap. svh and lvh are both STABLE — neither responds to the keyboard — so the original dvh problem stays fixed. On a home-screen install there is no browser UI, so svh == lvh == dvh and the install is unchanged. `.modal` keeps `100dvh` deliberately: a dialog should track the keyboard.",
       "tags": [
         "css",
         "ios",
@@ -859,7 +859,7 @@
       "error_message": "Significant refactor of useCueScheduler.ts",
       "file": "src/audio/useCueScheduler.ts",
       "root_cause": "13 lines replaced/restructured",
-      "fix": "Rewrote 67\u219276 lines (13 removed)",
+      "fix": "Rewrote 67→76 lines (13 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -923,7 +923,7 @@
       "error_message": "Wrong reference: return should be secondsLeft",
       "file": "src/audio/useSpokenCues.ts",
       "root_cause": "Used \"return\" instead of \"secondsLeft\"",
-      "fix": "Changed return \u2192 secondsLeft",
+      "fix": "Changed return → secondsLeft",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -971,7 +971,7 @@
       "error_message": "Significant refactor of useTimer.ts",
       "file": "src/state/useTimer.ts",
       "root_cause": "4 lines replaced/restructured",
-      "fix": "Rewrote 40\u219268 lines (4 removed)",
+      "fix": "Rewrote 40→68 lines (4 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -1144,7 +1144,7 @@
       "error_message": "Pasted 25 Aug email: 28 lines reported as skipped, and five 30/30 exercises silently replaced by five steps named \"WORK\"",
       "file": "src/routines/pasteFormat.ts",
       "root_cause": "The grammar was built against one email template. The 25 Aug email arrived on a second one whose forms name no exercise on the line that times them (\"30 sec WORK\" then the exercise below), state the round count AFTER the block (\"Repeat 2 rounds\"), and use EMOM/AMRAP block headings. Read line by line in isolation, \"30 sec WORK\" parsed as a 30-second step named WORK and the real exercise on the next line fell through to skipped, and \"5-Minute EMOM\" became a five-minute step with its minutes stranded after it.",
-      "fix": "Added the idea a directive can license the line below it (expectItem/pendingMs), so \"30 sec WORK\", \"Minute 4\", \"LAST 20 SECONDS\" and \"Every time you finish a round:\" name the step on the next bare line. EMOM minutes compile to 60s steps carrying their rep target, with the balance returned as rest when the step states a shorter time. ROUNDS accepts \"Repeat\" and \"\u00d7\" and wraps the loose steps above it when read below them (guarded to plain lists so a ladder is never swallowed). Added SETS_OF, BETWEEN_REST, THEN, REPLACE_WITH, BLOCK_HEADING and a leading-marker strip on all four heading forms. AMRAP is deliberately kept as a note: no primitive means it, and a round count read out of it would be a silent guess. Fixture 2026-08-25-emom.txt now parses with zero skipped.",
+      "fix": "Added the idea a directive can license the line below it (expectItem/pendingMs), so \"30 sec WORK\", \"Minute 4\", \"LAST 20 SECONDS\" and \"Every time you finish a round:\" name the step on the next bare line. EMOM minutes compile to 60s steps carrying their rep target, with the balance returned as rest when the step states a shorter time. ROUNDS accepts \"Repeat\" and \"×\" and wraps the loose steps above it when read below them (guarded to plain lists so a ladder is never swallowed). Added SETS_OF, BETWEEN_REST, THEN, REPLACE_WITH, BLOCK_HEADING and a leading-marker strip on all four heading forms. AMRAP is deliberately kept as a note: no primitive means it, and a round count read out of it would be a silent guess. Fixture 2026-08-25-emom.txt now parses with zero skipped.",
       "tags": [
         "parser",
         "paste",
@@ -1177,7 +1177,7 @@
       "timestamp": "2026-08-25T11:20:00+02:00",
       "error_message": "iPhone Safari: the section heading drew over the header and the step count drew over the step name",
       "file": "src/ui/RunScreen.tsx",
-      "root_cause": "The section heading was added to `.count__lead`, whose column budget is documented in the `--clock-max` comment as meta 20 + label 12 + name 14 + clock 52 = 98cqh, leaving about 2cqh of slack. A long section name (\"FULL-LEG BURN \u2013 EVERY MINUTE ON THE MINUTE\") wrapped to two lines on the narrowest phone, the lead outgrew its `minmax(0, 1fr)` row, and because it is `align-content: center` the overflow spilled BOTH ways: up onto the header and down onto the meta row. The `.count` comment already recorded this exact failure from a previous occasion, which is what named the cause.",
+      "root_cause": "The section heading was added to `.count__lead`, whose column budget is documented in the `--clock-max` comment as meta 20 + label 12 + name 14 + clock 52 = 98cqh, leaving about 2cqh of slack. A long section name (\"FULL-LEG BURN – EVERY MINUTE ON THE MINUTE\") wrapped to two lines on the narrowest phone, the lead outgrew its `minmax(0, 1fr)` row, and because it is `align-content: center` the overflow spilled BOTH ways: up onto the header and down onto the meta row. The `.count` comment already recorded this exact failure from a previous occasion, which is what named the cause.",
       "fix": "Moved the heading out of the count column into `.run__heading` in the header, under the routine name. That row is `auto`, so it takes the height it needs and the body's `1fr` gives way: no budget to re-tune, and the count column is byte-identical to before. It also removed a duplication, since the list layout had its own `<h2>` for the same thing, so the section is now named once for both layouts. Clamped to two lines with `-webkit-line-clamp` so a long name cannot grow the header and take the space from the countdown it captions. A test asserts the heading appears exactly once, inside the `header`, and never inside `.count__lead`.",
       "tags": [
         "ui",
@@ -1495,9 +1495,9 @@
     {
       "id": "bug-088",
       "timestamp": "2026-08-28T02:40:00Z",
-      "error_message": "Tidy exercise names dropped side qualifiers and trailing counts: 'side plank left' -> 'Side Plank', 'Quad stretch \u00d7 3 (left & right)' lost the \u00d7 3.",
+      "error_message": "Tidy exercise names dropped side qualifiers and trailing counts: 'side plank left' -> 'Side Plank', 'Quad stretch × 3 (left & right)' lost the × 3.",
       "file": "src/routines/rename.ts",
-      "root_cause": "split() peeled only a trailing load, parenthesis or spaced dash into `trail`; foldName() throws left/right/per leg/counts away to match, and the canonical name replaced the whole core without them. TRAILING_DASH also required a space before the dash, so 'squat\u2013 5 each side' was not peeled.",
+      "root_cause": "split() peeled only a trailing load, parenthesis or spaced dash into `trail`; foldName() throws left/right/per leg/counts away to match, and the canonical name replaced the whole core without them. TRAILING_DASH also required a space before the dash, so 'squat– 5 each side' was not peeled.",
       "fix": "split() also peels TRAILING_SIDE and TRAILING_COUNT, TRAILING_DASH allows no space before the dash, and canonicalName refuses a core that still holds a side word or a digit. Tests cover each form and the refusal.",
       "tags": [
         "routines",
@@ -1511,7 +1511,7 @@
     {
       "id": "bug-089",
       "timestamp": "2026-08-28T02:40:00Z",
-      "error_message": "Text export corrupted a step whose note contained 'for N seconds' or a parenthesis: 'Plank (hold for 2 seconds\u2026) - 40 seconds' read back as a 2-second step called 'Plank (hold', with `lost` empty.",
+      "error_message": "Text export corrupted a step whose note contained 'for N seconds' or a parenthesis: 'Plank (hold for 2 seconds…) - 40 seconds' read back as a 2-second step called 'Plank (hold', with `lost` empty.",
       "file": "src/routines/writeRoutine.ts",
       "root_cause": "The grammar has no escaping; FOR_DURATION is tried before TRAILING_DURATION in parseItem and TRAILING_PAREN is [^()]*, so the note's text was read as the step's timing or name. The writer never checked what it emitted.",
       "fix": "stepLines re-parses each line it writes (bullet stripped) and compares name, duration and count; a mismatch drops the note and reports it, and a line still wrong is reported. Two round-trip tests.",
@@ -1530,7 +1530,7 @@
       "timestamp": "2026-08-28T02:40:00Z",
       "error_message": "A heading with nothing under it at the end of the text vanished with no `skipped` entry ('Cool down walk for 2 minutes' as the last line).",
       "file": "src/routines/pasteFormat.ts",
-      "root_cause": "closeSection() discarded a childless section silently. NAMED_SECTION matches 'cool down\u2026' so the line opened a section that closed empty at end of input.",
+      "root_cause": "closeSection() discarded a childless section silently. NAMED_SECTION matches 'cool down…' so the line opened a section that closed empty at end of input.",
       "fix": "The parser records the line that opened a section and the count of lines read under it; a section closed at the END of the text with no children and no lines under it is pushed to `skipped`. Mid-text empty headings (a title split over two lines, or lines already refused) stay silent. The corpus test now records the one line this surfaces in 2026-07-13-trampoline, a closing 'Challenge' heading that was being dropped.",
       "tags": [
         "routines",
@@ -1810,7 +1810,7 @@
       "timestamp": "2026-08-28T05:20:00Z",
       "error_message": "Routines lows: shouted REST read as a heading; '0 Rounds' built an empty group; '10 xtreme pushups' lost its x; a pyramid row naming an undefined rung was shortened silently; unknown warm-up/cool-down exercises fell back silently; sections with no areas built a warm-up-only routine and sections:NaN threw a misleading error; group/ladder labels other than Set were dropped from text export without a word; the two-pass fuzzy matcher was duplicated in rename.ts and loads.ts.",
       "file": "src/routines/pasteFormat.ts",
-      "root_cause": "See each: SHOUTED_SECTION had no word list; ROUNDS accepted 0; LEADING_COUNT's [\u00d7x]\\s* ate a leading x; expandPyramid filtered undefined rungs quietly; named() had no note; sectionsRoutine did not validate areas or sections; repeatLines/ladderLines ignored labels; findLoad and match() each carried the matcher.",
+      "root_cause": "See each: SHOUTED_SECTION had no word list; ROUNDS accepted 0; LEADING_COUNT's [×x]\\s* ate a leading x; expandPyramid filtered undefined rungs quietly; named() had no note; sectionsRoutine did not validate areas or sections; repeatLines/ladderLines ignored labels; findLoad and match() each carried the matcher.",
       "fix": "SHOUTED_SECTION excludes rest/work and needs a 3-letter word; 0 rounds is reported in skipped; LEADING_COUNT requires whitespace after x; undefined rungs report the row; named() notes the fallback; areas:[] throws the dialog's message and NaN falls to the typical count; labels other than Set/Round are reported in lost; closestKey() in foldName.ts is shared. Tests for each.",
       "tags": [
         "pasteFormat",
@@ -1852,6 +1852,51 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T07:30:00Z"
+    },
+    {
+      "id": "bug-111",
+      "timestamp": "2026-08-28T20:45:00Z",
+      "error_message": "USER REPORTED (assessment): generated sections routines put the ladders on General Body and Core and rounds on Legs and Finisher; the instructor writes the Finisher as a ladder in 14/16 and Core as rounds in every routine since July.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "sectionsRoutine dealt shapes by position (asLadder = blocks.length % 3 === 1) instead of by theme, used one ladder form (main + accessories) for every ladder, and never read PRESCRIPTIONS[].rung when choosing a main lift.",
+      "fix": "THEME_SHAPE maps each theme to its corpus shape (climb / rounds / ladder / coreRounds / finisher); mains drawn preferring rung-capable lifts; holds excluded from counted draws; Core and Finisher get their loose tails; warm-up is cardio-then-mobility from WARM_UP_MOVES. 13 new tests, including a write-then-parse round trip.",
+      "tags": [
+        "generator",
+        "sections",
+        "shape"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T20:45:00Z"
+    },
+    {
+      "id": "bug-112",
+      "timestamp": "2026-08-28T20:45:00Z",
+      "error_message": "USER REPORTED: the area filters looked broken in sections mode. A Core-only routine was named 'Bodyweight Core, 6 sections' while holding 4, and kept sections named 'General Body' and 'Finisher'.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "describeRoutine was given the count ASKED, and the dialog passed that name in so the generator could not correct it; theme names ignored the area narrowing. The filter itself was correct (probed: no out-of-area strength exercise in 10 combinations).",
+      "fix": "generateRoutine names a sections routine from sections.length; the dialog leaves the name to the generator and shows result.workout.name as the placeholder; themeName() renames narrowed themes (Abs, Lower Body, Upper Body & Abs, Legs Finisher, Core Finisher).",
+      "tags": [
+        "generator",
+        "naming",
+        "areas"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T20:45:00Z"
+    },
+    {
+      "id": "bug-113",
+      "timestamp": "2026-08-28T20:45:00Z",
+      "error_message": "During the rewrite: 'Sit-ups with a Reach' came out as a 30-second hold, and Front Punches opened every generated warm-up.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "HOLD_LIKE = /\\b(plank|hold|sit)\\b/ matched the 'Sit' of 'Sit-ups'; the warm-up drew one cardio move per area in turn and the upper body has exactly one warm-up cardio move.",
+      "fix": "HOLD_LIKE says 'wall sit' whole; the warm-up draws cardio and mobility from one mixed, shuffled pool (drawMixed).",
+      "tags": [
+        "generator",
+        "regex",
+        "warm-up"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T20:45:00Z"
     }
   ]
 }

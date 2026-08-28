@@ -17,6 +17,9 @@
 
 ## Key Learnings
 
+- [2026-08-28] **a gym instructor is a woman: she/her.** Wayne's correction after a day of "he" in comments, docs and
+  test names, all fixed. Nothing in the emails names her; do not guess a pronoun from a role.
+
 - [2026-08-28] **The project is on TypeScript 7; typescript-eslint's peer range stops at 6.1, so ESLint cannot be installed cleanly.** The linter is oxlint (`npm run lint`, `.oxlintrc.json`): correctness + suspicious + rules-of-hooks as errors, exhaustive-deps as a warning with `// eslint-disable-next-line react-hooks/exhaustive-deps` where an omission is deliberate. The React Compiler style rules (refs, immutability, set-state-in-effect) are OFF because the code uses the "latest ref" pattern on purpose.
 - [2026-08-28] **`npm install` needs `--cache <scratchpad>/npm-cache`** in this environment: the default /tmp/npm-cache is not writable.
 - [2026-08-28] **Generator reachability check:** probe 600 seeds and list catalogue exercises never drawn. Filling a quota "area by area" silently starves the last area; draw across areas in turn (bug-110).
@@ -330,6 +333,24 @@
   and the run sheet grows its rows to fill the screen. A page of text set that way is four rows long. The preview
   holds a reading size and scrolls, which is the one place it deliberately parts company with the run screen.
 - **`content-visibility: auto` with `contain-intrinsic-size`** on the rows: a long routine is a few hundred of them.
+- **Library row tools read look → change → copy → send → destroy: Preview, Edit, Duplicate, Send, Delete.** Preview
+  first because it is the only tool that changes nothing, and it and Edit are the two that OPEN the routine, so they
+  sit together nearest the name. Delete stays last. A preview from the row must not stamp Last run: `markRun` is
+  wired to `onStarted`, never to the run view opening.
+- **Generator vs instructor (2026-08-28):** the shape of a section belongs to its THEME (`THEME_SHAPE` in
+  generate.ts), never to its position. Finisher = ladder (14/16), Legs = ladder (6/7 since July), Core = rounds ending
+  on a hold (every one since July), General Body = all-climb ladder, Arms = rounds. Ladder mains come from
+  `PRESCRIPTIONS[].rung`; warm-up cardio from harvested `WARM_UP_MOVES` (phrase match on folded names, which are
+  ragged). Her template routines estimate at 56–91 min: a 45-minute sections routine is 4–5 sections, not her 6.
+- **`\bsit\b` matches "Sit-ups".** A hold pattern must say `wall sit` whole. Found when "Sit-ups with a Reach" came
+  out as a 30-second hold.
+- **When dumping a table for review, print the field you mean.** `reps ?? seconds` printed Bulgarian Split Squats as
+  `time:5` and I reported a harvest bug that did not exist. Check a surprising data claim against the source row.
+- **Draw across areas only where alternating is the point.** The warm-up's one upper-body cardio move (Front Punches)
+  opened every routine because a turn went to each area; a mixed pool is proportional.
+- **Short sections routines rotate which body theme is dropped (Wayne's pick, 2026-08-28).** Priority shuffled per
+  seed with General Body protected, assembled in her canonical order. Not "drop the largest": that is always the
+  Legs ladder, her signature. Not "in order": that is always Core.
 
 ## Session 2026-08-21 — terminology, verification, and what shipped
 

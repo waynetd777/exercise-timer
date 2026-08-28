@@ -790,7 +790,7 @@ describe('a pyramid circuit', () => {
 
   it('leaves a lone numbered line alone, since it bookends rather than defines', () => {
     // "1 - plank jacks x 10" on its own is an ordinary step. Wayne's reading:
-    // in his routine it bookends the pyramid on both sides.
+    // in her routine it bookends the pyramid on both sides.
     const parsed = parseRoutine('#1 Legs\n1 - plank jacks x 10')
     expect(parsed.skipped).toEqual([])
     expect(JSON.stringify(parsed.blocks)).toContain('"name":"plank jacks"')

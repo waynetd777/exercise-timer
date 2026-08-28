@@ -11,8 +11,8 @@
  * `npm run harvest`.
  *
  * A generator that knows the exercises but not the shape produces a list. These
- * are the ladders the instructor actually writes and the sections he actually
- * names, so what comes out reads like what he sends rather than like arithmetic.
+ * are the ladders the instructor actually writes and the sections she actually
+ * names, so what comes out reads like what she sends rather than like arithmetic.
  */
 
 export type LadderShape = {
@@ -24,7 +24,7 @@ export type LadderShape = {
 
 /**
  * Used VERBATIM, never generated. `4-9-14-9-4` would be arithmetically fine and
- * unlike anything he has been given; `2-4-6-8-10-8-6-4-2` is what he knows.
+ * unlike anything she has been given; `2-4-6-8-10-8-6-4-2` is what she knows.
  * Commonest first.
  */
 export const LADDER_COUNTS: readonly LadderShape[] = [
@@ -77,3 +77,56 @@ export const SECTIONS_MAX = 8
 
 /** Exercises in a themed section. */
 export const SECTION_SIZE = 4
+
+/**
+ * Every movement that has opened one of her sessions, folded the way
+ * `exercises.prescription.ts` folds names. What a warm-up may be made of.
+ */
+export const WARM_UP_MOVES: readonly string[] = [
+  'alternating front punch',
+  'alternating reverse lunge',
+  'arm circle',
+  'arm swing across chest overhead',
+  'bodyweight squat',
+  'butt kick',
+  'butt stretch',
+  'buttkick',
+  'cardio',
+  'easy bounce',
+  'easy jog high knee',
+  'fast feet step shuffle',
+  'forward backward run',
+  'front heel dig',
+  'front lift',
+  'glute stretch',
+  'ham string stretch',
+  'hampstring stretch',
+  'hamstring curl arm pull',
+  'hamstring stretch',
+  'high knee lift',
+  'inchworm',
+  'inchworm shoulder tap',
+  'jog on the spot increase the tempo',
+  'jogging',
+  'jump jump squat',
+  'jumping jack',
+  'jumping jack tabata timer',
+  'knee drive opposite elbow',
+  'knee lift',
+  'lateral lunge overhead reach',
+  'leg swing',
+  'march jog on the spot',
+  'quad hamstring stretch',
+  'quad stretch',
+  'rebound',
+  'side to side squat with a reach',
+  'ski jump side to side jump with feet together',
+  'sprint finish fast feet',
+  'standing hip rotation torso twist',
+  'standing knee hug',
+  'torso rotation with arm extended',
+  'toy soldier kick',
+  'windmill',
+  'world s greatest stretch',
+  'world s greatest stretch alternate',
+]

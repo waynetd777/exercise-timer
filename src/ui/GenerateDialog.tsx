@@ -11,8 +11,7 @@ import type { BodyArea } from '../routines/exercises'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
 import { currentWeights } from '../storage/weights'
-import { describeRoutine, generateRoutine, seeded, SECTIONS_FEWEST } from '../routines/generate'
-import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
+import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
 import { estimated } from './format'
 import { CloseIcon, PlusIcon } from './icons'
@@ -191,17 +190,27 @@ export function GenerateDialog({
   /**
    * Which shape to build, and it decides which of the other questions apply.
    *
-   * A circuit is timed throughout, so it can be asked for a LENGTH. The
-   * instructor's shape is mostly self-paced, so it cannot: what it can be asked
-   * for is how many sections. Every question below that only makes sense for one
+   * Both are asked for a LENGTH. A circuit is timed throughout and comes out at
+   * it; the instructor's shape is mostly self-paced, so whole sections are
+   * fitted to an estimate of it. Every question below that only makes sense for one
    * of them is hidden for the other, rather than being shown and ignored.
    */
   const [style, setStyle] = useState<Style>('circuit')
-  const [sections, setSections] = useState(SECTIONS_TYPICAL)
   const [minutes, setMinutes] = useState(45)
   const [areas, setAreas] = useState<BodyArea[]>(['upper', 'torso', 'lower'])
   const [recovery, setRecovery] = useState<Recovery>('active')
+  /*
+   * Each shape has its own default. Wayne's circuits are on the multi-gym; the
+   * instructor's sections never are, and a sections routine of Seated Leg
+   * Extension ladders read like nothing she has ever sent. The default follows
+   * the shape only until the equipment is chosen by hand.
+   */
   const [equipment, setEquipment] = useState<EquipmentScope>('machine')
+  const [equipmentChosen, setEquipmentChosen] = useState(false)
+  const chooseStyle = (next: Style) => {
+    setStyle(next)
+    if (!equipmentChosen) setEquipment(next === 'sections' ? 'none' : 'machine')
+  }
   const [cardio, setCardio] = useState('Cycling')
   const [warmUp, setWarmUp] = useState('Cycling')
   const [coolDown, setCoolDown] = useState('Cycling')
@@ -235,7 +244,6 @@ export function GenerateDialog({
    */
   const fallback = describeRoutine({
     style,
-    sections,
     totalMs: minutes * 60_000,
     areas,
     recovery,
@@ -253,9 +261,8 @@ export function GenerateDialog({
     try {
       return generateRoutine(
         {
-          name: name.trim() || fallback,
+          ...(name.trim() ? { name: name.trim() } : {}),
           style,
-          sections,
           totalMs: minutes * 60_000,
           areas,
           recovery,
@@ -283,14 +290,12 @@ export function GenerateDialog({
     cardio,
     coolDown,
     equipment,
-    fallback,
     library,
     minutes,
     name,
     pool,
     recovery,
     seed,
-    sections,
     sets,
     style,
     warmUp,
@@ -341,7 +346,7 @@ export function GenerateDialog({
           <input
             className="paste__name"
             value={name}
-            placeholder={fallback}
+            placeholder={result?.workout.name ?? fallback}
             aria-label="Routine name"
             onChange={(event) => setName(event.target.value)}
           />
@@ -362,35 +367,21 @@ export function GenerateDialog({
             },
           ]}
           value={style}
-          onChange={setStyle}
+          onChange={chooseStyle}
         />
 
-        {style === 'circuit' && (
-          <Choice
-            legend="About how long"
-            options={LENGTHS.map((m) => ({ value: m, label: `${m} min` }))}
-            value={minutes}
-            onChange={setMinutes}
-          />
-        )}
-
         {/*
-          Sections rather than minutes, because a routine of counted steps has no
-          length: it ends when you have tapped through it.
+          The same question for both shapes. A circuit is that long; a routine of
+          counted steps ends when you have tapped through it, so the generator
+          fits whole sections to an ESTIMATE and the report below says "about".
+          It used to ask how many sections, which nobody plans a session in.
         */}
-        {style === 'sections' && (
-          <Choice
-            legend="How many sections"
-            // From three, which is shorter than the instructor ever writes, to
-            // the eight that is his longest.
-            options={Array.from({ length: SECTIONS_MAX - SECTIONS_FEWEST + 1 }, (_, i) => ({
-              value: SECTIONS_FEWEST + i,
-              label: String(SECTIONS_FEWEST + i),
-            }))}
-            value={sections}
-            onChange={setSections}
-          />
-        )}
+        <Choice
+          legend="About how long"
+          options={LENGTHS.map((m) => ({ value: m, label: `${m} min` }))}
+          value={minutes}
+          onChange={setMinutes}
+        />
 
         <fieldset className="generate__field">
           <legend className="label label--sm">What to work</legend>
@@ -413,7 +404,10 @@ export function GenerateDialog({
           legend="Equipment"
           options={EQUIPMENT}
           value={equipment}
-          onChange={setEquipment}
+          onChange={(next) => {
+            setEquipment(next)
+            setEquipmentChosen(true)
+          }}
         />
 
         {circuit && recovery === 'active' && (

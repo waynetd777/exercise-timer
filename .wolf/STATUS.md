@@ -6,6 +6,50 @@
 
 ---
 
+## ✅ Done: Preview from the library row (2026-08-28, later)
+
+- `RunScreen` takes `preview?: boolean` and opens in the reading mode; `App`'s run view carries `preview: true`
+  from a new `onPreview` on `LibraryScreen`. `markRun` still fires only from `onStarted`, so a preview does not
+  stamp Last run. Header toggle leads to the Ready card as before.
+- Row tools now read look → change → copy → send → destroy: **Preview, Edit, Duplicate, Send, Delete**. Preview
+  first because it changes nothing and it and Edit are the two that open the routine. `ListIcon`, same as the run
+  screen. Help line and README updated. Two tests added (row order + callback; RunScreen opens reading).
+- Tests, typecheck, lint, build green. NOT committed, NOT looked at in a browser.
+
+## ✅ Done: the sections generator writes what the instructor writes (2026-08-28, later)
+
+Assessment (report in the session scratchpad `generator-vs-instructor.md`): counts matched, placement did not.
+Wayne: "fix all of these issues", the section names and the name bug, and fit sections to 35–50 minutes. Done:
+
+- `THEME_SHAPE` (generate.ts): shape by theme, not position. General Body = all-climb ladder; Arms & Shoulders =
+  5–6 moves × 4–5 rounds; Legs = main-lift ladder + 2–3 accessories; Core = 4 counted + a hold × 3–5 rounds, then
+  "After Round N" loose steps; Finisher = ladder + "Final Burnout" closed on a wall sit. Mains from
+  `PRESCRIPTIONS[].rung`; holds (`isHold`, and `HOLD_LIKE = /plank|hold|wall sit/`, NOT `sit`, which caught Sit-ups)
+  never drawn where a count is needed.
+- Warm-up: cardio 40 s first then stretches 30 s, one mixed pool (a per-area turn opened every routine with Front
+  Punches), cardio only from `WARM_UP_MOVES`, newly harvested by `scripts/harvest-shapes.test.ts` (phrase match on
+  folded names). `Side-to-Side Squats with a Reach` reclassified `use: 'cardio'`.
+- Narrowed theme names: "Abs", "Lower Body", "Upper Body & Abs", "Legs Finisher", "Core Finisher". Routine named for
+  sections BUILT (bug: "Core, 6 sections" over 4).
+- FIT TO MINUTES (Wayne, same day): sections style takes the same "About how long" as the circuit. Warm-up and
+  finisher built first and bookend; body themes in her order while the `estimate.ts` cost fits (half-a-section rule);
+  those that did not fit named ("No room for Legs, Core in 35 minutes"). Her template routines estimate 56–91 min, so
+  45 min ≈ 4–5 sections. `spec.sections` kept as an override; `generateRoutine` takes `rates` (dialog passes
+  `currentRates()`). Dialog: "How many sections" gone; equipment defaults to "No multi-gym" for Sections unless
+  chosen by hand; placeholder shows the generator's own name.
+- `prescribed()` memoised (a routine cost ~100 ms before; <15 ms now).
+- Docs: routines README (theme table), help text, generate.ts comments. Tests: +13 in generate.test, dialog tests.
+- 1072 tests, typecheck, lint, build green. NOT committed, NOT seen in a browser.
+
+- ROTATION (Wayne, after my recommendation): which body themes get the room is shuffled per seed, General Body
+  always first; assembled in her order regardless. Test: over 20 seeds at 40 min every theme appears and General Body
+  is never dropped. (Alternative rejected: drop the largest, which would have dropped the Legs ladder every time.)
+- Pronouns: the instructor is a woman. 60+ "he/his" lines corrected across code, docs, tests, harvest output and .wolf.
+
+**Next:** Wayne's eyes on the Generate dialog (Sections) and the library row's Preview button in a browser, then
+commit.
+Unused now: `SECTION_SIZE` in exercises.shapes.ts (still harvested, nothing reads it).
+
 ## ✅ Done: preview mode (2026-08-28)
 
 Wayne asked whether the whole routine could be previewed on one long scrolling run screen. It could, and cheaply:

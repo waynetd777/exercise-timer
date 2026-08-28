@@ -14,6 +14,9 @@ import { LADDER_COUNTS } from '../exercises.shapes'
 import { foldName } from '../foldName'
 import type { RoutineSpec } from '../generate'
 import { describeRoutine, generateRoutine, seeded } from '../generate'
+import { estimate } from '../estimate'
+import { parseRoutine } from '../pasteFormat'
+import { writeRoutine } from '../writeRoutine'
 
 const spec = (over: Partial<RoutineSpec> = {}): RoutineSpec => ({
   totalMs: 45 * 60_000,
@@ -497,18 +500,190 @@ describe('the instructor’s shape', () => {
     expect(sectionsOf(sections()).every((b) => b.kind === 'section')).toBe(true)
   })
 
+  const namesOf = (result: ReturnType<typeof sections>) =>
+    sectionsOf(result).map((b) => (b.kind === 'section' ? b.name : ''))
+  const sectionNamed = (result: ReturnType<typeof sections>, name: string) => {
+    const found = sectionsOf(result).find((b) => b.kind === 'section' && b.name === name)
+    if (found?.kind !== 'section') throw new Error(`no ${name} section`)
+    return found
+  }
+
   it('builds named sections in the order the routines use', () => {
-    const names = sectionsOf(sections()).map((b) => (b.kind === 'section' ? b.name : ''))
+    const names = namesOf(sections())
     expect(names[0]).toBe('Warm-up')
     expect(names.at(-1)).toBe('Finisher')
-    expect(names).toContain('Core')
+    // The body between keeps her order whatever was dropped: a subsequence, opening on General Body.
+    const order = ['General Body', 'Arms & Shoulders', 'Legs', 'Core']
+    const between = names.slice(1, -1)
+    expect(between[0]).toBe('General Body')
+    const positions = between.map((n) => order.indexOf(n))
+    expect(positions).toEqual(positions.slice().sort((a, b) => a - b))
+    expect(namesOf(sections({ sections: 6 }))).toEqual(['Warm-up', ...order, 'Finisher'])
+  })
+
+  it('rotates which themes get the room, and protects General Body', () => {
+    /*
+     * In her order, Core was the casualty of every short routine; dropping the
+     * largest would have made it Legs every time. Her shorter routines differ in
+     * which theme is missing, so over a run of seeds each one gets its turn, and
+     * General Body, which opens thirteen of sixteen, is never the one dropped.
+     */
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 20; seed++) {
+      const names = namesOf(sections({ totalMs: 40 * 60_000 }, seed))
+      expect(names[1]).toBe('General Body')
+      for (const name of names) seen.add(name)
+    }
+    for (const theme of ['Arms & Shoulders', 'Legs', 'Core']) expect(seen).toContain(theme)
+  })
+
+  it('keeps the finisher last whatever the count', () => {
+    // It used to fall off the end of a short routine, which is the one section
+    // she closes fourteen of sixteen with.
+    expect(namesOf(sections({ sections: 3 }))).toEqual(['Warm-up', 'General Body', 'Finisher'])
+    expect(namesOf(sections({ sections: 4 }))).toEqual(['Warm-up', 'General Body', 'Arms & Shoulders', 'Finisher'])
+  })
+
+  it('fits whole sections to the minutes asked, by estimate', () => {
+    /*
+     * The same estimate the library row shows. Her template routines come to
+     * 56 to 91 minutes by it, so a 45-minute routine is four sections or so.
+     * Whole sections, so any one routine can be a section off; the average
+     * over a run of seeds should sit on the target.
+     */
+    const mean = (minutes: number) => {
+      let total = 0
+      for (let seed = 1; seed <= 20; seed++) {
+        const { workout } = sections({ totalMs: minutes * 60_000 }, seed)
+        const guess = estimate(workout.blocks)
+        total += (guess.knownMs + guess.estimatedMs) / 60_000
+      }
+      return total / 20
+    }
+    expect(Math.abs(mean(35) - 35)).toBeLessThan(6)
+    expect(Math.abs(mean(50) - 50)).toBeLessThan(6)
+    expect(mean(50)).toBeGreaterThan(mean(35))
+  })
+
+  it('names the sections that did not fit, rather than dropping them quietly', () => {
+    expect(sections({ totalMs: 35 * 60_000 }).notes.join(' ')).toMatch(/No room for .* in 35 minutes/)
+  })
+
+  it('puts each shape where she puts it', () => {
+    /*
+     * A ladder every third section put the ladders on General Body and Core.
+     * Since July the Finisher has been a ladder every time and Core rounds every
+     * time, so the shape belongs to the theme.
+     */
+    const result = sections({ sections: 6 })
+    expect(sectionNamed(result, 'Legs').children[0]?.kind).toBe('ladder')
+    expect(sectionNamed(result, 'Finisher').children[0]?.kind).toBe('ladder')
+    expect(sectionNamed(result, 'Arms & Shoulders').children[0]?.kind).toBe('repeat')
+    expect(sectionNamed(result, 'Core').children[0]?.kind).toBe('repeat')
+
+    // General Body: "Complete one exercise before moving to the next", so EVERY move climbs.
+    const general = sectionNamed(result, 'General Body').children[0]
+    if (general?.kind !== 'ladder') throw new Error('General Body is not a ladder')
+    expect(general.children.length).toBeGreaterThanOrEqual(4)
+    expect(general.children.every((c) => c.kind === 'segment' && c.reps?.kind === 'rung')).toBe(true)
+  })
+
+  it('carries a ladder on a lift that has carried one of her', () => {
+    // `PRESCRIPTIONS[].rung` says which. Seated Leg Extension has never climbed a pyramid.
+    for (let seed = 1; seed <= 20; seed++) {
+      const walk = (blocks: readonly Block[]) => {
+        for (const block of blocks) {
+          if (block.kind === 'ladder') {
+            const main = block.children[0]
+            if (main?.kind !== 'segment') throw new Error('empty ladder')
+            expect(PRESCRIPTIONS.find((p) => p.name === foldName(main.name))?.rung).toBe(true)
+          }
+          if (block.kind !== 'segment') walk(block.children)
+        }
+      }
+      walk(sections({ sections: 6 }, seed).workout.blocks)
+    }
+  })
+
+  it('closes each core round on a hold, then adds more after the rounds', () => {
+    // "30-second Plank" ends every Core round since July, and "After Round N:" follows.
+    const core = sectionNamed(sections({ sections: 6 }), 'Core')
+    const rounds = core.children[0]
+    if (rounds?.kind !== 'repeat') throw new Error('Core is not rounds')
+    const work = rounds.children.filter((c): c is Segment => c.kind === 'segment' && c.role === 'work')
+    expect(work.length).toBe(5)
+    expect(work.at(-1)?.durationMs).toBeDefined()
+    expect(work.slice(0, -1).every((c) => c.reps !== undefined)).toBe(true)
+    expect(core.children.length).toBeGreaterThan(1)
+    expect(core.children.slice(1).every((c) => c.kind === 'segment')).toBe(true)
+  })
+
+  it('finishes on a burnout after the finisher’s ladder', () => {
+    // "Final Burnout (No Rest)": loose steps after the ladder, done once.
+    const finisher = sectionNamed(sections({ sections: 6 }), 'Finisher')
+    expect(finisher.children[0]?.kind).toBe('ladder')
+    expect(finisher.children.slice(1).length).toBeGreaterThanOrEqual(3)
+    expect(finisher.children.slice(1).every((c) => c.kind === 'segment')).toBe(true)
+  })
+
+  it('sizes Arms & Shoulders as she does', () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const rounds = sectionNamed(sections({ sections: 6 }, seed), 'Arms & Shoulders').children[0]
+      if (rounds?.kind !== 'repeat') throw new Error('not rounds')
+      expect(rounds.times).toBeGreaterThanOrEqual(4)
+      expect(rounds.times).toBeLessThanOrEqual(5)
+      const work = rounds.children.filter((c) => c.kind === 'segment' && c.role === 'work').length
+      expect(work).toBeGreaterThanOrEqual(5)
+      expect(work).toBeLessThanOrEqual(6)
+    }
+  })
+
+  it('warms up with what she warms up with', () => {
+    // The cardio pool also holds burpees and plank jacks, and no warm-up of her has either.
+    const never = ['Burpees', 'Plank Jacks', 'Mountain Climbers', 'Cross-Body Mountain Climbers', 'Speed Skaters']
+    for (let seed = 1; seed <= 30; seed++) {
+      const warm = sectionNamed(sections({}, seed), 'Warm-up')
+      for (const step of warm.children) {
+        if (step.kind === 'segment') expect(never).not.toContain(step.name)
+      }
+    }
+  })
+
+  it('names a narrowed theme for what is left in it', () => {
+    // "General Body" of nothing but legs is not general, and "Legs Finisher" is her own heading.
+    expect(namesOf(sections({ areas: ['lower'], sections: 6 }))).toEqual(['Warm-up', 'Lower Body', 'Legs', 'Legs Finisher'])
+    expect(namesOf(sections({ areas: ['torso'], sections: 6 }))).toEqual(['Warm-up', 'Abs', 'Core', 'Core Finisher'])
+    expect(namesOf(sections({ areas: ['upper', 'torso'], sections: 6 }))).toContain('Upper Body & Abs')
+  })
+
+  it('names the routine for the sections it built, not the count asked', () => {
+    // "Core, 6 sections" over a routine of four was a name that lied while a note told the truth.
+    expect(sections({ areas: ['torso'], sections: 8 }).workout.name).toMatch(/Core, 4 sections$/)
+  })
+
+  it('pastes back in the shape it was written', () => {
+    // Send as text, then Paste: the tails after a group are written with `Then:` and read back loose.
+    const shape = (blocks: readonly Block[]): string =>
+      blocks
+        .map((b) => (b.kind === 'segment' ? (b.role === 'work' ? 's' : 'r') : `${b.kind[0]}(${shape(b.children)})`))
+        .join('')
+    for (let seed = 1; seed <= 5; seed++) {
+      const { workout } = sections({ sections: 6 }, seed)
+      const back = parseRoutine(writeRoutine(workout).text, workout.name)
+      expect(back.skipped).toEqual([])
+      expect(shape(back.blocks)).toBe(shape(workout.blocks))
+    }
   })
 
   it('opens on a timed warm-up, which is the one part that is not self-paced', () => {
     const warm = sectionsOf(sections())[0]
     expect(warm?.kind === 'section' && warm.name).toBe('Warm-up')
     if (warm?.kind !== 'section') throw new Error('no warm-up')
-    expect(warm.children.every((c) => c.kind === 'segment' && c.durationMs === 40_000)).toBe(true)
+    const durations = warm.children.map((c) => (c.kind === 'segment' ? c.durationMs : undefined))
+    // Cardio first at forty seconds, then the stretches at thirty, never the other way round.
+    expect(durations.every((d) => d === 40_000 || d === 30_000)).toBe(true)
+    expect(durations[0]).toBe(40_000)
+    expect(durations.slice(durations.indexOf(30_000)).every((d) => d === 30_000)).toBe(true)
   })
 
   it('warms up even on the multi-gym, which has nothing to warm up with', () => {
@@ -537,7 +712,7 @@ describe('the instructor’s shape', () => {
 
   it('uses a ladder the instructor actually writes, never a generated one', () => {
     /*
-     * "4-9-14-9-4" would be arithmetically fine and unlike anything he has been
+     * "4-9-14-9-4" would be arithmetically fine and unlike anything she has been
      * given. Every ladder must be one of the nineteen in the corpus.
      */
     const known = new Set(LADDER_COUNTS.map((l) => l.counts.join('-')))
@@ -556,9 +731,11 @@ describe('the instructor’s shape', () => {
   })
 
   it('scales the ladder’s main lift and leaves the accessories alone', () => {
-    // "Main exercise:" then "After every set:", which is the shape his ladders
+    // "Main exercise:" then "After every set:", which is the shape her ladders
     // take: rung 2 is two of the lift and still twelve of the rest.
-    const routine = compile(sections().workout)
+    // The Legs one: General Body's ladder scales EVERY exercise, by design.
+    const { workout } = sections({ sections: 6 })
+    const routine = compile({ ...workout, blocks: [sectionNamed(sections({ sections: 6 }), 'Legs')] })
     const rungs = routine.runs
       .flatMap((r) => r.entries)
       .filter((e) => e.path.some((p) => p.kind === 'ladder'))
@@ -615,8 +792,8 @@ describe('the instructor’s shape', () => {
     expect(sectionsOf(sections({ sections: 3 }))).toHaveLength(3)
     /*
      * Clamped to three at the bottom, which is SHORTER than the instructor ever
-     * writes: no routine of his has fewer than five. A shorter session is a
-     * reasonable thing to want, and asking for one is not a claim about him.
+     * writes: no routine of her has fewer than five. A shorter session is a
+     * reasonable thing to want, and asking for one is not a claim about her.
      */
     expect(sectionsOf(sections({ sections: 1 })).length).toBeGreaterThanOrEqual(3)
     expect(sectionsOf(sections({ sections: 99 })).length).toBeLessThanOrEqual(8)

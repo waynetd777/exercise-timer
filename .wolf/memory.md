@@ -267,3 +267,9 @@
 | 20:16 | Created src/ui/__tests__/preview.test.ts | — | ~1318 |
 | 20:16 | Created src/ui/__tests__/PreviewList.test.tsx | — | ~1394 |
 | 20:30 | Preview mode: the whole routine read expanded as a scrolling mode of the run screen's idle state, from Wayne's "is that possible?" | src/ui/preview.ts, PreviewList.tsx, preview.css, RunScreen.tsx, icons.tsx, engine/navigate.ts, help.ts, READMEs, 12 new tests | 1057 tests green, typecheck/build/lint clean | ~48k |
+| 20:26 | Session end: 5 writes across 5 files (preview.ts, PreviewList.tsx, preview.css, preview.test.ts, PreviewList.test.tsx) | 0 reads | ~6131 tok |
+
+## Session: 2026-08-28 20:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

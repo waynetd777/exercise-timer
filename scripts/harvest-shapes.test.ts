@@ -19,19 +19,25 @@
  *   LADDER_COUNTS   the pyramids the instructor actually writes, commonest
  *                   first. Nineteen of them, and nearly all symmetric. Used
  *                   verbatim: a generated `4-9-14-9-4` would be arithmetically
- *                   fine and unlike anything he has ever been given.
+ *                   fine and unlike anything she has ever been given.
  *
  *   SECTION_THEMES  the headings, in the order they appear. Warm-up, General
  *                   Body, Arms & Shoulders, Legs, Core, Finisher. Every routine
  *                   is a subset of that in that order.
  *
  *   SECTION_SIZE    how many exercises a themed section holds.
+ *
+ *   WARM_UP_MOVES   every movement that has opened a session, by folded name.
+ *                   The warm-up draws its cardio from these and nothing else:
+ *                   the cardio pool also holds burpees and plank jacks, which
+ *                   she has never asked anyone to warm up with.
  */
 
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import type { Block } from '../src/engine/types'
 import { parseRoutine } from '../src/routines/pasteFormat'
+import { foldName } from '../src/routines/foldName'
 
 const EMAILS = 'src/routines/__tests__/emails'
 const OUT = 'src/routines/exercises.shapes.ts'
@@ -58,6 +64,7 @@ describe('harvest shapes', () => {
     const ladders = new Map<string, number>()
     const themeCounts = new Map<string, number>()
     const sizes: number[] = []
+    const warmUpMoves = new Set<string>()
     let routines = 0
     const sectionsPer: number[] = []
 
@@ -74,6 +81,16 @@ describe('harvest shapes', () => {
             sections += 1
             const theme = THEMES.find((t) => t.test.test(block.name))?.theme
             if (theme) themeCounts.set(theme, (themeCounts.get(theme) ?? 0) + 1)
+            if (theme === 'Warm-up') {
+              const steps = (blocks: readonly Block[]): void => {
+                for (const b of blocks) {
+                  if (b.kind === 'segment') {
+                    if (b.role === 'work' && foldName(b.name)) warmUpMoves.add(foldName(b.name))
+                  } else steps(b.children)
+                }
+              }
+              steps(block.children)
+            }
             // Exercises, not groups: a ladder counts as the one thing it is.
             if (block.children.length > 1) sizes.push(block.children.length)
           }
@@ -93,6 +110,7 @@ describe('harvest shapes', () => {
     console.log(`  sections each    : ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}`)
     console.log(`  exercises a piece: ${median(sizes)} typical`)
     for (const { theme } of THEMES) console.log(`      ${theme}: ${themeCounts.get(theme) ?? 0}`)
+    console.log(`  warm-up moves    : ${warmUpMoves.size}`)
 
     const rungs = ordered
       .map(([counts, seen]) => `  { counts: [${counts.split('-').join(', ')}], seen: ${seen} },`)
@@ -117,8 +135,8 @@ describe('harvest shapes', () => {
  * \`npm run harvest\`.
  *
  * A generator that knows the exercises but not the shape produces a list. These
- * are the ladders the instructor actually writes and the sections he actually
- * names, so what comes out reads like what he sends rather than like arithmetic.
+ * are the ladders the instructor actually writes and the sections she actually
+ * names, so what comes out reads like what she sends rather than like arithmetic.
  */
 
 export type LadderShape = {
@@ -130,7 +148,7 @@ export type LadderShape = {
 
 /**
  * Used VERBATIM, never generated. \`4-9-14-9-4\` would be arithmetically fine and
- * unlike anything he has been given; \`2-4-6-8-10-8-6-4-2\` is what he knows.
+ * unlike anything she has been given; \`2-4-6-8-10-8-6-4-2\` is what she knows.
  * Commonest first.
  */
 export const LADDER_COUNTS: readonly LadderShape[] = [
@@ -160,6 +178,14 @@ export const SECTIONS_MAX = ${Math.max(...sectionsPer)}
 
 /** Exercises in a themed section. */
 export const SECTION_SIZE = ${median(sizes)}
+
+/**
+ * Every movement that has opened one of her sessions, folded the way
+ * \`exercises.prescription.ts\` folds names. What a warm-up may be made of.
+ */
+export const WARM_UP_MOVES: readonly string[] = [
+${[...warmUpMoves].sort().map((m) => `  '${m.replace(/'/g, "\\'")}',`).join('\n')}
+]
 `,
       'utf8',
     )

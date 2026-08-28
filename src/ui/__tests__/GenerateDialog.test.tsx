@@ -233,19 +233,35 @@ describe('the name it suggests', () => {
 describe('the shape question', () => {
   const pick = (label: string) => fireEvent.click(screen.getByRole('button', { name: label }))
 
-  it('asks for a length for a circuit and for sections otherwise', () => {
+  it('asks about how long for both shapes, and never how many sections', () => {
     /*
      * A circuit is timed throughout, so it can be asked how long. The
-     * instructor's shape is mostly self-paced and cannot: it ends when you have
-     * tapped through it, so what it can be asked is how many sections.
+     * instructor's shape is mostly self-paced, so the generator fits whole
+     * sections to an estimate of the same minutes. It used to ask how many
+     * sections, which nobody plans a session in.
      */
     open()
     expect(screen.getByText('About how long')).toBeTruthy()
-    expect(screen.queryByText('How many sections')).toBeNull()
 
     pick('Sections')
-    expect(screen.queryByText('About how long')).toBeNull()
-    expect(screen.getByText('How many sections')).toBeTruthy()
+    expect(screen.getByText('About how long')).toBeTruthy()
+    expect(screen.queryByText('How many sections')).toBeNull()
+  })
+
+  it('defaults sections to no multi-gym, unless the equipment was chosen by hand', () => {
+    // The instructor has never written a machine exercise, so a sections
+    // routine of Seated Leg Extension ladders read like nothing she has sent.
+    open()
+    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+    pick('Sections')
+    expect(screen.getByRole('button', { name: 'No multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+    pick('Circuit')
+    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+
+    // Chosen by hand, it stays put when the shape changes.
+    pick('Mixed')
+    pick('Sections')
+    expect(screen.getByRole('button', { name: 'Mixed' }).getAttribute('aria-pressed')).toBe('true')
   })
 
   it('hides every question that belongs to the circuit alone', () => {
