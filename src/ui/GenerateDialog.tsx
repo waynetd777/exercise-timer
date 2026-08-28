@@ -16,6 +16,7 @@ import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
 import { estimated } from './format'
 import { CloseIcon, PlusIcon } from './icons'
+import { CountField } from './CountField'
 import { useModal } from './useModal'
 
 /**
@@ -53,8 +54,8 @@ const EQUIPMENT: { value: EquipmentScope; label: string; title: string }[] = [
  *
  * Seconds rather than minutes because two of the three are under two minutes,
  * and a field that reads 1.5 is worse than one that reads 90. Committed as typed
- * and clamped, the same as the editor's own duration field; an emptied box holds
- * its draft rather than snapping to the minimum under the cursor.
+ * and clamped by the editor's own `CountField`; an emptied box holds its draft
+ * rather than snapping to the minimum under the cursor.
  */
 function Seconds({
   value,
@@ -65,23 +66,15 @@ function Seconds({
   label: string
   onChange: (seconds: number) => void
 }) {
-  const [draft, setDraft] = useState<string | null>(null)
   return (
     <span className="generate__secs">
-      <input
-        className="paste__name generate__number"
-        type="number"
+      <CountField
+        value={value}
         min={5}
         max={3600}
-        value={draft ?? String(value)}
-        aria-label={label}
-        onChange={(event) => {
-          setDraft(event.target.value)
-          const entered = Number(event.target.value)
-          if (event.target.value === '' || !Number.isFinite(entered)) return
-          onChange(Math.min(3600, Math.max(5, Math.round(entered))))
-        }}
-        onBlur={() => setDraft(null)}
+        label={label}
+        className="paste__name generate__number"
+        onCommit={onChange}
       />
       <span className="label label--sm" aria-hidden="true">
         s
