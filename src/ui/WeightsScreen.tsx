@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Block, Workout } from '../engine'
 import type { Equipment } from '../routines/exercises'
 import { EXERCISES, LOADABLE_GROUPS, loadable } from '../routines/exercises'
@@ -15,6 +15,7 @@ import { ConfirmDialog } from './ConfirmDialog'
 import { HelpTray } from './HelpTray'
 import { WEIGHTS_HELP } from './help'
 import './weights.css'
+import { useModal } from './useModal'
 
 /**
  * Where what you lift is written down.
@@ -58,23 +59,10 @@ function observed(workouts: readonly Workout[]): Map<string, string> {
  * `.modal` sheet and `.notice` panel every dialog in the app uses.
  */
 function ImageView({ src, name, onClose }: { src: string; name: string; onClose: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    // Guarded: StrictMode runs effects twice in dev, and showModal() on an
-    // already-open dialog throws.
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
+  const { dialog, onBackdropClick } = useModal(onClose)
 
   return (
-    <dialog
-      ref={dialog}
-      className="modal"
-      onClose={onClose}
-      onClick={(event) => {
-        if (event.target === dialog.current) onClose()
-      }}
-    >
+    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
       <div className="notice weights__view">
         <img className="weights__picture" src={src} alt={name} />
         <p className="notice__text">{name}</p>

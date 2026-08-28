@@ -4,8 +4,8 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useRef } from 'react'
 import { CheckIcon, CloseIcon } from './icons'
+import { useModal } from './useModal'
 
 /**
  * Asks before something that cannot be undone.
@@ -30,21 +30,10 @@ export function ConfirmDialog({
   onConfirm: () => void
   onCancel: () => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
+  const { dialog, onBackdropClick } = useModal(onCancel)
 
   return (
-    <dialog
-      ref={dialog}
-      className="modal"
-      onClose={onCancel}
-      onClick={(event) => {
-        if (event.target === dialog.current) onCancel()
-      }}
-    >
+    <dialog ref={dialog} className="modal" onClose={onCancel} onClick={onBackdropClick}>
       {/* The panel is its own element: a <dialog> styled as the box does not hug
           its content on iOS. See `.modal` in theme.css. */}
       <div className="notice">
