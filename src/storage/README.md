@@ -46,8 +46,8 @@ routines are, and no schema step has to run before anything can be read. It retu
 its input unchanged when there is nothing to fix, so React sees no needless new
 objects.
 
-Four fixes exist today: repeat labels, rehosted images, the AMRAP note split, and
-the trailing load lifted out of a name.
+Five fixes exist today: repeat labels, ladder labels ("Set" to "Rung"), rehosted
+images, the AMRAP note split, and the trailing load lifted out of a name.
 
 **Repeat labels.** Groups were called "rounds", and every one the editor created
 stored the literal label `'Round'`. The label is **data**, so a code-only rename

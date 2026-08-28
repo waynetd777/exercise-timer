@@ -104,7 +104,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'Sets repeats everything inside it. While running it reads “Set 3 of 8”, or the name you give the group.',
       'A row’s buttons always read the same way: add, group or ungroup, duplicate, delete.',
       'The sets button on a step wraps that one step in a group of its own.',
-      'Ladder changes the count each time round: 5-10-15. A step set to rung takes its number from the ladder.',
+      'Ladder changes the count each time round: 5-10-15. A step set to rung takes its number from the ladder. While running it reads “Rung 2 of 3”.',
       'Section is a named part of the routine, shown as a list while running.',
       'Ungroup, on a sets group, keeps the steps and drops the group.',
       'A rest inside a group does not run after the last set. To rest at the end too, put a rest step after the group.',

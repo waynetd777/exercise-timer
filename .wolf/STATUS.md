@@ -45,6 +45,7 @@ Still open (quality only): split EditorScreen.tsx (seams in the review); one use
 with GenerateDialog; add a linter; tests for LibraryScreen/App/audio engine.
 Decided: per-side exercises in the circuit stay as two groups of sets around "Change Sides", unnamed (Wayne: leave it).
 v8.2 pushed 2026-08-28 with the lows.
+- Ladders are labelled Rung (with a migration for stored Set), group rows carry a kind badge, generated/pasted drafts are migrated into the editor so sets read Set not Round (bug-109). Uncommitted to a version yet.
 
 ---
 

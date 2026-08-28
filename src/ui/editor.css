@@ -214,6 +214,26 @@
 }
 
 /*
+ * The kind of a group row, named: Sets, Ladder, Section. The label field beside
+ * it is free text, and a ladder whose label said "Set" read as a group of sets.
+ * Coloured with the row's own rule so the word and the edge agree.
+ */
+.erow__kind {
+  flex: none;
+  color: var(--group-reps);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.erow--ladder .erow__kind {
+  color: var(--group-ladder);
+}
+
+.erow--section .erow__kind {
+  color: var(--group-section);
+}
+
+/*
  * The drag grip.
  *
  * `touch-action: none` ONLY here, never on the row: the list has to keep

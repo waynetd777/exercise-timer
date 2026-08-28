@@ -1820,6 +1820,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T05:20:00Z"
+    },
+    {
+      "id": "bug-109",
+      "timestamp": "2026-08-28T06:10:00Z",
+      "error_message": "USER REPORTED: in the editor a ladder row was labelled 'Set' and a sets row 'Round'; the run screen read 'Set 3 of 9' over a ladder.",
+      "file": "src/editor/blocks.ts",
+      "root_cause": "newLadder, the generator and compile's fallback all gave ladders the label 'Set'; the generator's sections shape and the parser emit 'Round' for repeat groups, and a generated or pasted draft went into the editor without the migration that turns 'Round' into 'Set' on read. The group rows had no text but the free-text label field, so the kind was invisible.",
+      "fix": "Ladders default to 'Rung' (editor, generator, compile fallback, run captions) and migrate.ts relabels a stored 'Set'/'Round' ladder to 'Rung', leaving a typed name alone; the generator emits 'Set'; App migrates every draft on its way into the editor; each group row shows a kind badge (Sets / Ladder / Section) in the group's colour.",
+      "tags": [
+        "editor",
+        "ladder",
+        "labels",
+        "migration",
+        "generator"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T06:10:00Z"
     }
   ]
 }

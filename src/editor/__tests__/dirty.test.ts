@@ -206,7 +206,7 @@ describe('isDirty: sections and ladders', () => {
       'changed section display': updateSection(w.blocks, [0], { display: 'timer' }),
       'changed section advance': updateSection(w.blocks, [0], { advance: 'step' }),
       'edited a step inside the section': updateSegment(w.blocks, [0, 0], { name: 'Squats' }),
-      'changed ladder label': updateLadder(w.blocks, [1], { label: 'Rung' }),
+      'changed ladder label': updateLadder(w.blocks, [1], { label: 'Pyramid' }),
       'changed one rung': updateLadder(w.blocks, [1], { counts: [5, 12, 15] }),
       'added a rung': updateLadder(w.blocks, [1], { counts: [5, 10, 15, 20] }),
       'changed ladder advance': updateLadder(w.blocks, [1], { advance: 'step' }),

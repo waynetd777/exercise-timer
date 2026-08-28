@@ -1126,6 +1126,9 @@ function RepeatRow({
     >
       <div className="erow__main">
         <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
+        {/* The kind, named. The label field is free text, so a row whose label
+            said "Set" or "Round" gave no other clue what it was. */}
+        <span className="erow__kind label label--sm">Sets</span>
         <input
           className="efield efield--name"
           value={repeat.label ?? 'Set'}
@@ -1238,9 +1241,10 @@ function LadderRow({
     >
       <div className="erow__main">
         <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
+        <span className="erow__kind label label--sm">Ladder</span>
         <input
           className="efield efield--name"
-          value={ladder.label ?? 'Set'}
+          value={ladder.label ?? 'Rung'}
           aria-label="Ladder label"
           onChange={(event) => onPatch(path, { label: event.target.value })}
         />
@@ -1329,6 +1333,7 @@ function SectionRow({
     >
       <div className="erow__main">
         <Grip grip={grip} onNudge={(delta) => onMove(path, delta)} />
+        <span className="erow__kind label label--sm">Section</span>
         <input
           className="efield efield--name efield--section"
           value={section.name}

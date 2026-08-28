@@ -209,8 +209,10 @@ function stepLines(segment: Segment, lost: string[]): string[] {
 
 /** A ladder: the counts, the lift that scales, and the accessories that do not. */
 function ladderLines(ladder: Ladder, counter: { n: number }, lost: string[]): string[] {
-  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== 'Set') {
-    lost.push(`The name "${ladder.label}" on a ladder; it will come back as "Set"`)
+  // The grammar has no ladder label; the reader's default is "Rung", and older
+  // ladders carrying "Set" are migrated to it, so neither is worth a word.
+  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== 'Rung' && ladder.label !== 'Set') {
+    lost.push(`The name "${ladder.label}" on a ladder; it will come back as "Rung"`)
   }
   const lines = [`Counting: ${ladder.counts.join('-')}`]
 

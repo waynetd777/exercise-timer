@@ -144,7 +144,8 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
     of,
     rung,
     // `||`, not `??`: the editor stores an empty string for a deleted label.
-    label: block.label?.trim() || 'Set',
+    // A ladder's iterations are rungs; "Set" here read as a repeat group.
+    label: block.label?.trim() || 'Rung',
     ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
 }

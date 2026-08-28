@@ -138,7 +138,7 @@ describe('ladders', () => {
     expect(fourthRung.path.at(-1)).toEqual({
       kind: 'ladder',
       id: expect.any(String),
-      label: 'Set',
+      label: 'Rung',
       iteration: 4,
       of: 5,
       rung: 8,

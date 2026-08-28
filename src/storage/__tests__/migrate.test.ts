@@ -165,6 +165,18 @@ describe('rehosted illustrations', () => {
     },
   )
 
+  it('relabels a ladder that carried the old default "Set" to "Rung"', () => {
+    // Every editor- and generator-made ladder said "Set 3 of 9" while running,
+    // indistinguishable from a repeat group.
+    const w = workout([
+      { kind: 'ladder', id: 'l', counts: [5, 10], label: 'Set', children: [] },
+      { kind: 'ladder', id: 'm', counts: [5, 10], label: 'Pyramid', children: [] },
+    ])
+    const [ladder, named] = migrateWorkout(w).blocks
+    expect(ladder).toMatchObject({ kind: 'ladder', label: 'Rung' })
+    expect(named).toMatchObject({ kind: 'ladder', label: 'Pyramid' })
+  })
+
   it('leaves a group someone named themselves alone', () => {
     // Only the exact former defaults move. "Rounds" and "Set" are theirs.
     for (const label of ['Rounds', 'Round 1', 'Set', 'Superset']) {
