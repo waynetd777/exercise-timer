@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
@@ -16,6 +16,7 @@ import { SECTIONS_MAX, SECTIONS_TYPICAL } from '../routines/exercises.shapes'
 import type { EquipmentScope, Recovery, Style } from '../routines/generate'
 import { estimated } from './format'
 import { CloseIcon, PlusIcon } from './icons'
+import { useModal } from './useModal'
 
 /**
  * The lengths a session actually runs to.
@@ -193,7 +194,7 @@ export function GenerateDialog({
   onCancel: () => void
   onGenerate: (workout: Workout) => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog } = useModal()
   /**
    * Which shape to build, and it decides which of the other questions apply.
    *
@@ -233,12 +234,6 @@ export function GenerateDialog({
    * the only thing that rerolls.
    */
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 2 ** 31))
-
-  useEffect(() => {
-    // Guarded: StrictMode runs effects twice in dev, and showModal() on an
-    // already-open dialog throws.
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
 
   /*
    * The name it would be given, shown as the placeholder rather than described.

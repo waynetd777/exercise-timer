@@ -71,6 +71,7 @@ import {
   UndoIcon,
 } from './icons'
 import './editor.css'
+import { useModal } from './useModal'
 
 /** One undo step: name, colour and steps together, so they cannot drift apart. */
 type Draft = { name: string; blocks: Block[]; colour: RoutineColour | null }
@@ -113,21 +114,10 @@ function ImageDialog({
   onRemove: () => void
   onClose: () => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
+  const { dialog, onBackdropClick } = useModal(onClose)
 
   return (
-    <dialog
-      ref={dialog}
-      className="modal"
-      onClose={onClose}
-      onClick={(event) => {
-        if (event.target === dialog.current) onClose()
-      }}
-    >
+    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
       {/* The panel is its own element. See `.modal` in theme.css. */}
       <div className="notice imgview">
         {view.src ? (
@@ -197,18 +187,12 @@ function ImagePicker({
   onError: (message: string) => void
   onClose: () => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog, onBackdropClick } = useModal(onClose)
   const upload = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
   const [clipboard, setClipboard] = useState<ClipboardImage>(() =>
     canReadClipboard() ? 'unknown' : 'unsupported',
   )
-
-  useEffect(() => {
-    // Guarded like every other dialog here: StrictMode runs effects twice in
-    // dev, and showModal() on an already-open dialog throws.
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
 
   /*
    * Whether the clipboard holds an image, re-asked whenever this window comes
@@ -272,14 +256,7 @@ function ImagePicker({
   }, [images, query])
 
   return (
-    <dialog
-      ref={dialog}
-      className="modal"
-      onClose={onClose}
-      onClick={(event) => {
-        if (event.target === dialog.current) onClose()
-      }}
-    >
+    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
       {/* The panel is its own element. See `.modal` in theme.css. */}
       <div className="picker">
       <header className="picker__head">

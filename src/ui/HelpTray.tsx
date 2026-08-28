@@ -4,8 +4,9 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useId, useRef } from 'react'
+import { useId } from 'react'
 import { CloseIcon } from './icons'
+import { useModal } from './useModal'
 
 export type HelpSection = {
   heading: string
@@ -46,24 +47,11 @@ export function HelpTray({
   sections: readonly HelpSection[]
   onClose: () => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog, onBackdropClick } = useModal(onClose)
   const group = useId()
 
-  useEffect(() => {
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
-
   return (
-    <dialog
-      ref={dialog}
-      className="tray"
-      aria-label={title}
-      onClose={onClose}
-      onClick={(event) => {
-        // The backdrop is the dialog's own box outside the panel.
-        if (event.target === dialog.current) onClose()
-      }}
-    >
+    <dialog ref={dialog} className="tray" aria-label={title} onClose={onClose} onClick={onBackdropClick}>
       <div className="tray__head">
         <h2 className="tray__title">{title}</h2>
         <button

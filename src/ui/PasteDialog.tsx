@@ -4,13 +4,14 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
 import type { ParsedRoutine } from '../routines/pasteFormat'
 import { PASTE_TEMPLATE } from '../routines/pasteTemplate'
 import { isoDate } from './format'
 import { CopyIcon, CloseIcon, PlusIcon } from './icons'
 import { NoticeDialog } from './NoticeDialog'
+import { useModal } from './useModal'
 
 /**
  * What a pasted routine is called unless it is renamed.
@@ -44,7 +45,7 @@ export function PasteDialog({
   onCancel: () => void
   onImport: (parsed: ParsedRoutine) => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog } = useModal()
   const [text, setText] = useState('')
   // Read once, on open: a dialog left open over midnight should not rename itself.
   const [fallback] = useState(() => defaultRoutineName(new Date()))
@@ -52,11 +53,6 @@ export function PasteDialog({
   /** The acknowledgement after copying the template, or null. */
   const [copied, setCopied] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Guarded: StrictMode runs effects twice in dev, and showModal() on an
-    // already-open dialog throws.
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
 
   /**
    * Hands over an example of everything the parser understands.

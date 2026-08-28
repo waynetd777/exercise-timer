@@ -4,8 +4,8 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useRef } from 'react'
 import { CloseIcon } from './icons'
+import { useModal } from './useModal'
 
 /**
  * Reports the outcome of something the user asked for, and waits to be
@@ -28,11 +28,8 @@ export function NoticeDialog({
   busy: boolean
   onClose: () => void
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    if (!dialog.current?.open) dialog.current?.showModal()
-  }, [])
+  // The backdrop does nothing while work is in flight, like Escape below.
+  const { dialog, onBackdropClick } = useModal(busy ? undefined : onClose)
 
   return (
     <dialog
@@ -45,9 +42,7 @@ export function NoticeDialog({
       onClose={() => {
         if (!busy) onClose()
       }}
-      onClick={(event) => {
-        if (!busy && event.target === dialog.current) onClose()
-      }}
+      onClick={onBackdropClick}
     >
       {/* The panel is its own element: a <dialog> styled as the box does not hug
           its content on iOS. See `.modal` in theme.css. */}
