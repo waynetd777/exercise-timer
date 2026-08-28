@@ -37,6 +37,7 @@ import {
   BackIcon,
   CloseIcon,
   ListIcon,
+  PencilIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -241,9 +242,24 @@ type Props = {
   backRequest?: number
   /** Open reading the routine rather than on the Ready card. The library's Preview lands here. */
   preview?: boolean
+  /**
+   * Open this routine in the editor.
+   *
+   * Offered only before a run starts. Mid-workout the way out is Back, which
+   * pauses and asks first; an Edit button there would be a second exit that
+   * skipped the question.
+   */
+  onEdit?: () => void
 }
 
-export function RunScreen({ workout, onExit, onStarted, backRequest = 0, preview = false }: Props) {
+export function RunScreen({
+  workout,
+  onExit,
+  onStarted,
+  backRequest = 0,
+  preview = false,
+  onEdit,
+}: Props) {
   /*
    * Every gate records how long it took, so the estimate for a rep-based routine
    * stops being the instructor's average and becomes Wayne's own pace. Nonsense
@@ -481,7 +497,7 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0, preview
 
   return (
     <main className="run" style={{ ['--phase' as string]: phase }}>
-      <header className="run__header">
+      <header className="run__header" data-tools={status === 'idle' && onEdit ? '' : undefined}>
         {onExit ? (
           <button
             className="btn btn--ghost"
@@ -520,16 +536,33 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0, preview
            * In the slot the stopwatch takes once a routine is running, which is
            * empty until then. The toggle has to live outside the panel it
            * replaces, or opening the preview would take its own way out with it.
+           *
+           * Two buttons here rather than one, which is why the header's side
+           * columns widen while a routine is idle: see `[data-tools]` in
+           * run-screen.css. Reading a routine and finding something to change in
+           * it is one errand, so Edit is where the reading happens.
            */
-          <button
-            className="btn btn--ghost"
-            onClick={() => setPreviewing((open) => !open)}
-            aria-pressed={previewing}
-            aria-label={previewing ? 'Back to ready' : 'Preview the routine'}
-            title={previewing ? 'Back to ready' : 'Read the whole routine'}
-          >
-            {previewing ? <CloseIcon /> : <ListIcon />}
-          </button>
+          <div className="run__tools">
+            {onEdit && (
+              <button
+                className="btn btn--ghost"
+                onClick={onEdit}
+                aria-label="Edit this routine"
+                title="Edit this routine"
+              >
+                <PencilIcon />
+              </button>
+            )}
+            <button
+              className="btn btn--ghost"
+              onClick={() => setPreviewing((open) => !open)}
+              aria-pressed={previewing}
+              aria-label={previewing ? 'Back to ready' : 'Preview the routine'}
+              title={previewing ? 'Back to ready' : 'Read the whole routine'}
+            >
+              {previewing ? <CloseIcon /> : <ListIcon />}
+            </button>
+          </div>
         ) : (
           <span
             className="run__elapsed"

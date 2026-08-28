@@ -9,6 +9,7 @@ import type { Block, Ladder, Repeat, Section, Segment } from '../../engine'
 import { compile, listMode, SCHEMA_VERSION, totalDurationMs } from '../../engine'
 import {
   appendTo,
+  applyExercise,
   blockAt,
   clearText,
   duplicateAt,
@@ -915,5 +916,105 @@ describe('clearing a group field removes it', () => {
     // A real value still lands.
     const named = updateSection(blocks, [0], { note: 'Faster' })[0]
     expect(named?.kind === 'section' && named.note).toBe('Faster')
+  })
+})
+
+describe('a step given an exercise from the table', () => {
+  const work = (extra: Partial<Segment> = {}): Block[] => [
+    { kind: 'segment', id: 'w', name: 'Exercise', role: 'work', durationMs: 20_000, ...extra },
+  ]
+  const first = (blocks: Block[]): Segment => {
+    const block = blocks[0]
+    if (block?.kind !== 'segment') throw new Error('not a segment')
+    return block
+  }
+
+  it('takes the table\'s name and its illustration', () => {
+    // The name is the whole point: `weightFor`, `paces` and `estimate` all key
+    // on it, and a name typed by hand matches none of them.
+    const next = first(applyExercise(work(), [0], { name: 'Leg Press', media: 'exercises/Leg-Press.jpg' }))
+
+    expect(next.name).toBe('Leg Press')
+    expect(next.media).toEqual({ source: 'bundled', path: 'exercises/Leg-Press.jpg' })
+  })
+
+  it('drops a bundled picture the new exercise has none of', () => {
+    // It came from the table and now illustrates the wrong movement.
+    const before = work({ media: { source: 'bundled', path: 'exercises/Leg-Press.jpg' } })
+    const next = first(applyExercise(before, [0], { name: 'Ski Jumps' }))
+
+    expect('media' in next).toBe(false)
+  })
+
+  it('keeps a photo the user uploaded or pasted', () => {
+    /*
+     * The user put it there, and this app cannot know it was of the old
+     * exercise. Silently deleting someone's photograph is worse than leaving one
+     * that may still be right.
+     */
+    const before = work({ media: { source: 'local', hash: 'abc', mime: 'image/jpeg' } })
+    const next = first(applyExercise(before, [0], { name: 'Ski Jumps' }))
+
+    expect(next.media).toEqual({ source: 'local', hash: 'abc', mime: 'image/jpeg' })
+
+    const remote = work({ media: { source: 'remote', url: 'https://x/y.jpg' } })
+    expect(first(applyExercise(remote, [0], { name: 'Ski Jumps' })).media).toEqual({
+      source: 'remote',
+      url: 'https://x/y.jpg',
+    })
+  })
+
+  it('writes per side onto a count, and takes it off again', () => {
+    const counted = work({ reps: { kind: 'fixed', count: 12 } })
+    const side = first(applyExercise(counted, [0], { name: 'Glute Kickback', perSide: true }))
+    expect(side.reps).toEqual({ kind: 'fixed', count: 12, perSide: true })
+
+    // Both ways round: picking a two-sided exercise must stop the row saying
+    // "each side", or the flag outlives the exercise that needed it.
+    const back = first(applyExercise([side], [0], { name: 'Leg Press' }))
+    expect(back.reps).toEqual({ kind: 'fixed', count: 12 })
+    expect(back.reps && 'perSide' in back.reps).toBe(false)
+  })
+
+  it('keeps a rung a rung', () => {
+    const rung = work({ reps: { kind: 'rung' } })
+    const next = first(applyExercise(rung, [0], { name: 'Glute Kickback', perSide: true }))
+
+    expect(next.reps).toEqual({ kind: 'rung', perSide: true })
+  })
+
+  it('leaves a purely timed step timed', () => {
+    // A minute of cycling has no reps to qualify, and inventing a count here
+    // would change what the step asks of you.
+    const next = first(applyExercise(work(), [0], { name: 'Cycling', perSide: true }))
+
+    expect('reps' in next).toBe(false)
+    expect(next.durationMs).toBe(20_000)
+  })
+
+  it('never touches the clock, the weight, the note or the alternative', () => {
+    const before = work({
+      durationMs: 45_000,
+      load: '65kg',
+      note: 'chest up',
+      alternative: 'box squat',
+    })
+    const next = first(applyExercise(before, [0], { name: 'Leg Press' }))
+
+    expect(next.durationMs).toBe(45_000)
+    expect(next.load).toBe('65kg')
+    expect(next.note).toBe('chest up')
+    expect(next.alternative).toBe('box squat')
+  })
+
+  it('reaches a step nested in a group and leaves the group alone', () => {
+    const blocks: Block[] = [
+      { kind: 'repeat', id: 'r', times: 3, label: 'Set', children: work() },
+    ]
+    const next = applyExercise(blocks, [0, 0], { name: 'Leg Press' })
+    const group = next[0]
+
+    expect(group?.kind === 'repeat' && group.children.length).toBe(1)
+    expect(group?.kind === 'repeat' && group.children[0]?.kind === 'segment' && group.children[0].name).toBe('Leg Press')
   })
 })

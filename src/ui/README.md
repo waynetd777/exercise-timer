@@ -370,7 +370,7 @@ mirror image leaves. All three open the same `HelpTray`, a modal `<dialog>` pinn
 to the right edge, with native `<details>` sections of bullet points.
 
 A screen with a rule of its own gets its own sections rather than a heading in
-somebody else's list. `WEIGHTS_HELP` exists because "an empty field means
+somebody else's list. `EXERCISES_HELP` exists because "an empty field means
 something" is the one thing that page cannot afford to have buried deep in the
 library's tray.
 
@@ -425,12 +425,13 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 
 | | |
 |---|---|
-| `App.tsx` | Routing between library, run, edit and weights. Consumes a shared routine from the URL, and fills a routine's empty weights in on the way into a run |
+| `App.tsx` | Routing between library, run, edit and exercises. Consumes a shared routine from the URL, and fills a routine's empty weights AND pictures in on the way into a run |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
-| `PreviewList.tsx`, `preview.ts` | The whole routine read before it is run. A mode of the run screen's idle state, not a screen: the header and the controls stay put, so Start is under your thumb at the end of the list. `preview.ts` cuts `routine.entries` into the blocks it prints and is pure |
+| `PreviewList.tsx`, `preview.ts` | The whole routine read before it is run. A mode of the run screen's idle state, not a screen: the header and the controls stay put, so Start is under your thumb at the end of the list. `preview.ts` cuts `routine.entries` into the blocks it prints and is pure. Shared with the editor, which reads its unsaved draft through it — which is why `.editor` names its container `shell`, the one `preview.css` asks for by name |
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
-| `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs |
-| `WeightsScreen.tsx` | What you lift, per exercise: every loadable exercise, searchable, each with its illustration. Holds the two bulk actions, filling from your routines and letting your routines follow the page |
+| `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs. Reading the draft is a MODE of this screen for the same reason previewing is a mode of the run screen: leaving would lose the draft or make it the new baseline |
+| `editor/ExerciseField.tsx` | A work step's name: type it, or pick it off the exercise table. A combobox, portalled and placed by `Menu`'s `place()`; the table comes from `routines/exerciseOptions.ts` and what a pick means is `applyExercise`. It always filters on what the field says, so the caret opens on the step's own exercise, ticked; an opening nobody has typed into falls back to the whole list rather than to an empty box |
+| `ExercisesScreen.tsx` | Every exercise the app knows, searchable: what each one looks like and what you lift for it. All 147, not only the ones with a number to keep, since a press-up still has a picture. Holds the two bulk actions, filling weights from your routines and letting your routines follow the page. Images are resolved ONCE for the page, never per row: 147 rows each resolving asynchronously is 147 state updates, each re-rendering all 147 |
 | `SoundsScreen.tsx` | The cue bench. **Dev only.** `App.tsx` loads it through a dynamic import inside a `DEV` branch, which a production build drops along with its CSS |
 | `PasteDialog.tsx` | Paste a routine as text. Reports unparsed lines before saving, and hands over the template |
 | `HelpTray.tsx`, `help.ts` | The right-edge help tray, and the bullet points it shows |
@@ -441,7 +442,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
 | `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
 | `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
-| `library.css`, `run-screen.css`, `preview.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
+| `library.css`, `run-screen.css`, `preview.css`, `editor.css`, `exercises.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs. `estimated()` is the one place a guessed length is worded |
 | `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

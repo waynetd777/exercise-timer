@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useRef, useState } from 'react'
-import type { Workout } from '../engine'
+import type { Block, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
 import { importRoutineFiles, looksImportable } from '../routines/importFiles'
 import { GenerateDialog } from './GenerateDialog'
@@ -24,6 +24,7 @@ import type { SortMode } from '../storage/library'
 import { estimated } from './format'
 import { withWeights } from '../routines/loads'
 import { currentWeights, loadWeights } from '../storage/weights'
+import { loadPictures, pictureHashes, picturesFor } from '../storage/pictures'
 import { Menu } from './Menu'
 import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
@@ -58,6 +59,19 @@ const SORTS: { mode: SortMode; label: string }[] = [
   { mode: 'name', label: 'Name' },
   { mode: 'duration', label: 'Longest' },
 ]
+
+/** Every step name across some routines, for deciding what an export needs. */
+function stepNames(workouts: readonly Workout[]): string[] {
+  const names: string[] = []
+  const walk = (blocks: readonly Block[]): void => {
+    for (const block of blocks) {
+      if (block.kind === 'segment') names.push(block.name)
+      else walk(block.children)
+    }
+  }
+  for (const workout of workouts) walk(workout.blocks)
+  return names
+}
 
 function Row({
   workout,
@@ -250,7 +264,7 @@ export function LibraryScreen({
   onNew,
   onDraft,
   onSounds,
-  onWeights,
+  onExercises,
 }: {
   library: Library
   onRun: (workout: Workout) => void
@@ -264,7 +278,7 @@ export function LibraryScreen({
    */
   onDraft: (workout: Workout) => void
   onSounds: () => void
-  onWeights: () => void
+  onExercises: () => void
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('recent')
@@ -388,7 +402,16 @@ export function LibraryScreen({
    * it. Only an uploaded photo has to travel, and since the image-link field went
    * this is the only way one reaches another device.
    */
-  const exportRoutines = async (workouts: readonly Workout[], name: string | null) => {
+  const exportRoutines = async (
+    workouts: readonly Workout[],
+    name: string | null,
+    /**
+     * This file is the whole library, so it is a RESTORE and must be complete.
+     * A single routine is a thing you send, and it carries only the exercise
+     * pictures its own steps can use. See `picturesFor`.
+     */
+    whole = false,
+  ) => {
     setNoticeBusy(true)
     setNotice(workouts.length === 1 ? 'Preparing the routine…' : 'Preparing your routines…')
 
@@ -398,12 +421,16 @@ export function LibraryScreen({
      * behind an undismissable modal until a reload.
      */
     try {
-      const media = await collectMedia(workouts, getBlob)
+      // The exercises page's own photos travel too: they belong to no step, so
+      // `collectMedia` cannot find them by walking the routines.
+      const table = loadPictures()
+      const pictures = whole ? table : picturesFor(stepNames(workouts), table)
+      const media = await collectMedia(workouts, getBlob, pictureHashes(pictures, true))
       const photos = Object.keys(media).length
       downloadJson(
         bundleFilename(name, new Date()),
         // The weights ride along: most routines state none of their own now.
-        toBundle(workouts, Date.now(), media, loadWeights()),
+        toBundle(workouts, Date.now(), media, loadWeights(), pictures),
       )
 
       const subject =
@@ -552,17 +579,18 @@ export function LibraryScreen({
                   ]
                 : []),
               {
-                label: 'Weights',
+                label: 'Exercises',
                 icon: <WeightIcon />,
-                title: 'What you lift, per exercise, used by every routine that does not say',
-                onSelect: onWeights,
+                title:
+                  'What each exercise looks like and what you lift for it, used by every routine that does not say',
+                onSelect: onExercises,
               },
               {
                 label: 'Backup all incl. images',
                 icon: <ExportIcon />,
                 title: 'Download every routine as one file, images included',
                 disabled: library.workouts.length === 0,
-                onSelect: () => void exportRoutines(library.workouts, null),
+                onSelect: () => void exportRoutines(library.workouts, null, true),
               },
               // Development only, and the screen itself is not in a production
               // build. See the note in App.tsx.

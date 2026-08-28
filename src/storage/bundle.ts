@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import type { Block, SegmentRole, Workout } from '../engine'
+import type { Block, MediaRef, SegmentRole, Workout } from '../engine'
 import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, SCHEMA_VERSION, stepCount } from '../engine'
 import { migrateWorkout } from './migrate'
 
@@ -39,6 +39,15 @@ export type Bundle = {
    * missing from all of them.
    */
   weights?: Record<string, string>
+  /**
+   * The pictures kept on the exercises page, keyed by folded exercise name.
+   *
+   * OPTIONAL, exactly like `weights`, and for the same reason: a file written
+   * before the field existed simply leaves what is here alone. The BYTES of an
+   * uploaded one ride in `media` beside a step's own photos, keyed by the same
+   * content hash, so a photo used both by the page and by a step travels once.
+   */
+  pictures?: Record<string, MediaRef>
 }
 
 export class BundleError extends Error {
@@ -53,6 +62,7 @@ export function toBundle(
   now: number,
   media: Record<string, string> = {},
   weights: Record<string, string> = {},
+  pictures: Record<string, MediaRef> = {},
 ): Bundle {
   return {
     kind: 'davshack-timer-bundle',
@@ -61,8 +71,10 @@ export function toBundle(
     workouts: workouts.map((workout) => ({ ...workout })),
     media,
     // Omitted entirely when there is nothing to say, so a file that carries no
-    // weights looks exactly like one written before the field existed.
+    // weights looks exactly like one written before the field existed. Same for
+    // the pictures.
     ...(Object.keys(weights).length > 0 ? { weights } : {}),
+    ...(Object.keys(pictures).length > 0 ? { pictures } : {}),
   }
 }
 
@@ -220,6 +232,8 @@ type BundleContents = {
   rejected: string[]
   /** The weights the file carried, if any. See `Bundle.weights`. */
   weights: Record<string, string>
+  /** The exercise pictures the file carried, if any. See `Bundle.pictures`. */
+  pictures: Record<string, MediaRef>
 }
 
 /**
@@ -266,7 +280,22 @@ export function fromBundle(json: unknown, now: number): BundleContents {
     ),
     rejected,
     weights: readWeights(bundle.weights),
+    pictures: readPictures(bundle.pictures),
   }
+}
+
+/**
+ * Refs only, and never throws: a damaged pictures map must not lose the
+ * routines. Each entry is checked with the same guard a step's media gets, since
+ * whatever passes here is stored and then rendered on every run.
+ */
+function readPictures(value: unknown): Record<string, MediaRef> {
+  if (typeof value !== 'object' || value === null) return {}
+  const out: Record<string, MediaRef> = {}
+  for (const [name, ref] of Object.entries(value as Record<string, unknown>)) {
+    if (isMedia(ref)) out[name] = ref as MediaRef
+  }
+  return out
 }
 
 /** Strings only, and never throws: a damaged weights map must not lose the routines. */

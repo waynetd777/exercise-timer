@@ -6,6 +6,9 @@
 
 import { useId, useLayoutEffect, useRef, useState, useEffect } from 'react'
 import type { Ladder, Repeat, Section, Segment, SegmentRole } from '../../engine'
+import type { MediaRef } from '../../engine'
+import type { ExerciseOption } from '../../routines/exerciseOptions'
+import { findFor } from '../../routines/loads'
 import type { Path, Timing } from '../../editor/blocks'
 import { retypeSegment } from '../../editor/blocks'
 import { weightFor } from '../../storage/weights'
@@ -13,6 +16,7 @@ import { ROW_ID, useRowDrag } from '../useRowDrag'
 import { useDismiss } from '../useDismiss'
 import { useMediaUrl } from '../useMediaUrl'
 import { CountField } from '../CountField'
+import { ExerciseField } from './ExerciseField'
 import { TimingField } from './TimingField'
 import type { ImageView } from './ImageDialogs'
 import {
@@ -94,6 +98,9 @@ export function SegmentRow({
   onPatch,
   onTiming,
   onClearText,
+  exercises,
+  onPickExercise,
+  pictures,
   onWrap,
   onPreview,
   onChoose,
@@ -107,11 +114,25 @@ export function SegmentRow({
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onTiming: (path: Path, timing: Timing, typed?: boolean) => void
   onClearText: (path: Path, field: 'note' | 'alternative' | 'load') => void
+  /** The exercise table, built once by the screen rather than per row. */
+  exercises: readonly ExerciseOption[]
+  onPickExercise: (path: Path, option: ExerciseOption) => void
+  /** The pictures the exercises page supplies, for a step carrying none. */
+  pictures: ReadonlyMap<string, MediaRef>
   onWrap: (path: Path) => void
   onPreview: (view: ImageView) => void
   onChoose: (path: Path) => void
 }) {
-  const imageUrl = useMediaUrl(segment.media)
+  /*
+   * What this step will actually show, which is not always its own picture.
+   *
+   * A step carrying none takes the exercises page's, exactly as an empty weight
+   * field takes that page's number, so the row has to show what the run will.
+   * Faintly, and marked, because it is a hint rather than a property of this
+   * routine: see `.erow__thumb[data-inherited]`.
+   */
+  const inherited = segment.media === undefined ? findFor(pictures, segment.name) : undefined
+  const imageUrl = useMediaUrl(segment.media ?? inherited)
 
   /*
    * The rest that does not run after the final rep. Marked in the row itself
@@ -250,12 +271,27 @@ export function SegmentRow({
           ))}
         </select>
 
-        <input
-          className="efield efield--name"
-          value={segment.name}
-          aria-label="Step name"
-          onChange={(event) => onPatch(path, { name: event.target.value })}
-        />
+        {/*
+          A work step's name is the one that has a table behind it, so that is
+          the only row that gets the picker. Everywhere else it is the plain
+          input it always was: see `ExerciseField` for why the distinction is
+          the role rather than the field.
+        */}
+        {segment.role === 'work' ? (
+          <ExerciseField
+            value={segment.name}
+            options={exercises}
+            onType={(name) => onPatch(path, { name })}
+            onPick={(option) => onPickExercise(path, option)}
+          />
+        ) : (
+          <input
+            className="efield efield--name"
+            value={segment.name}
+            aria-label="Step name"
+            onChange={(event) => onPatch(path, { name: event.target.value })}
+          />
+        )}
 
         {betweenRepsOnly && (
           <span
@@ -310,15 +346,26 @@ export function SegmentRow({
           onClick={() => setTools(false)}
         >
           <div className="erow__own">
-            {segment.media !== undefined ? (
+            {segment.media !== undefined || (inherited && !listed) ? (
               <button
                 type="button"
                 className="erow__thumb"
+                data-inherited={inherited !== undefined || undefined}
                 onClick={() =>
-                  onPreview({ path, src: imageUrl, alt: segment.name, unseen: listed })
+                  onPreview({
+                    path,
+                    src: imageUrl,
+                    alt: segment.name,
+                    unseen: listed,
+                    ...(inherited ? { inherited: true } : {}),
+                  })
                 }
-                aria-label={`Image for ${segment.name}. Preview or remove it.`}
-                title="Preview image"
+                aria-label={
+                  inherited
+                    ? `Image for ${segment.name}, from the Exercises page. Preview it, or use your own.`
+                    : `Image for ${segment.name}. Preview or remove it.`
+                }
+                title={inherited ? 'From the Exercises page' : 'Preview image'}
               >
                 {/* Empty frame when the ref is set and its file is not on this
                     device. The button still opens, because that is the only way

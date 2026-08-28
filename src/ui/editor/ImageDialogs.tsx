@@ -10,7 +10,7 @@ import type { Path } from '../../editor/blocks'
 import type { KnownImage } from '../../editor/images'
 import type { ClipboardImage } from '../../media/clipboard'
 import { canReadClipboard, imageFromClipboard, probeClipboardImage } from '../../media/clipboard'
-import { CloseIcon, ImportIcon, PasteIcon, TrashIcon } from '../icons'
+import { CloseIcon, ImageIcon, ImportIcon, PasteIcon, TrashIcon } from '../icons'
 import { useModal } from '../useModal'
 
 /**
@@ -20,7 +20,19 @@ import { useModal } from '../useModal'
  * row. `src` may be null: a stored ref whose file is not on this device still has
  * to be viewable enough to be removed.
  */
-export type ImageView = { path: Path; src: string | null; alt: string; unseen: boolean }
+export type ImageView = {
+  path: Path
+  src: string | null
+  alt: string
+  unseen: boolean
+  /**
+   * The picture is the exercises page's, not this step's.
+   *
+   * Then there is nothing here to remove, and the useful offer is the opposite
+   * one: give this step a picture of its own, which is what overriding means.
+   */
+  inherited?: boolean
+}
 
 /**
  * A step's picture, and the way to take it off.
@@ -38,10 +50,13 @@ export type ImageView = { path: Path; src: string | null; alt: string; unseen: b
 export function ImageDialog({
   view,
   onRemove,
+  onChoose,
   onClose,
 }: {
   view: ImageView
   onRemove: () => void
+  /** Give this step its own picture, for one it is only borrowing. */
+  onChoose: () => void
   onClose: () => void
 }) {
   const { dialog, onBackdropClick } = useModal(onClose)
@@ -66,6 +81,14 @@ export function ImageDialog({
 
         {view.alt !== '' && <p className="notice__text">{view.alt}</p>}
 
+        {/* Where it comes from, said plainly: a picture nobody put on this step
+            looks like a bug until you know the page supplies it. */}
+        {view.inherited === true && (
+          <p className="notice__detail label label--sm">
+            From the Exercises page, which every routine naming this exercise follows.
+          </p>
+        )}
+
         {/* Only for a step that runs as a row of its section's list, where the
             picture it is holding will never be drawn. */}
         {view.unseen && (
@@ -81,13 +104,22 @@ export function ImageDialog({
             <CloseIcon />
             Close
           </button>
-          {/* A trash can is unambiguous HERE: the row's own trash can, which
-              deletes the whole step, is nowhere in sight, and the word says what
-              goes. In the row itself it could only have meant one of the two. */}
-          <button type="button" className="chip chip--danger" onClick={onRemove}>
-            <TrashIcon />
-            Remove image
-          </button>
+          {view.inherited === true ? (
+            /* Nothing to remove: this picture is not the step's. Overriding is
+               the only thing the step can say about it. */
+            <button type="button" className="chip chip--action" onClick={onChoose}>
+              <ImageIcon />
+              Use my own
+            </button>
+          ) : (
+            /* A trash can is unambiguous HERE: the row's own trash can, which
+               deletes the whole step, is nowhere in sight, and the word says what
+               goes. In the row itself it could only have meant one of the two. */
+            <button type="button" className="chip chip--danger" onClick={onRemove}>
+              <TrashIcon />
+              Remove image
+            </button>
+          )}
         </div>
       </div>
     </dialog>

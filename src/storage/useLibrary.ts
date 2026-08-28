@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
 import { orphanedHashes } from '../media/gc'
 import { draftPinnedHashes } from '../media/pin'
+import { loadPictures, pictureHashes } from './pictures'
 import { forgetBlob } from '../media/resolveMedia'
 import { deleteBlob, storedHashes } from '../media/store'
 import { requestPersistence } from './db'
@@ -141,7 +142,14 @@ export function useLibrary(seed: readonly Workout[]): Library {
      * routine may well have shared images with one that is staying.
      */
     try {
-      for (const hash of orphanedHashes(await storedHashes(), remaining, draftPinnedHashes())) {
+      for (const hash of orphanedHashes(
+        await storedHashes(),
+        remaining,
+        draftPinnedHashes(),
+        // The exercises page holds photos no routine references. Without this
+        // the first delete would sweep them.
+        pictureHashes(loadPictures()),
+      )) {
         await deleteBlob(hash)
         forgetBlob(hash)
       }

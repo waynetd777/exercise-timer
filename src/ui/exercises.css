@@ -159,11 +159,11 @@
 }
 
 /*
- * The picture, at the size the editor's row uses. A button where there is an
- * illustration and an empty frame where there is not, so a section of rows
- * without pictures still lines its names up with one that has them.
+ * The picture, at the size the editor's row uses. Always a button now: an
+ * exercise with no picture is one press away from having one, and the frame is
+ * what says so.
  */
-.weight__thumb {
+.exrow__thumb {
   display: grid;
   place-items: center;
   width: 44px;
@@ -177,12 +177,12 @@
   transition: border-color 150ms var(--ease);
 }
 
-.weight__thumb:hover,
-.weight__thumb:focus-visible {
+.exrow__thumb:hover,
+.exrow__thumb:focus-visible {
   border-color: var(--role-prepare);
 }
 
-.weight__thumb img {
+.exrow__thumb img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -190,18 +190,43 @@
   background: var(--bone);
 }
 
-.weight__thumb--none {
+/*
+ * An empty frame, drawn rather than filled with an icon.
+ *
+ * 105 of the 147 exercises have no picture, and an icon element each was four
+ * hundred DOM nodes saying nothing. The dashed border reads as "space for one"
+ * and the plus says it can be filled.
+ */
+.exrow__thumb[data-empty] {
   border-style: dashed;
-  border-color: color-mix(in oklab, var(--ink-600) 60%, transparent);
-  cursor: default;
+  border-color: color-mix(in oklab, var(--ink-600) 80%, transparent);
+  color: var(--bone-faint);
 }
 
-/* ── The picture, full size ─────────────────────────────────────────────── */
-.weights__view {
+.exrow__thumb[data-empty]::after {
+  content: '+';
+  font-size: 1.1rem;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.exrow__thumb[data-empty]:hover::after,
+.exrow__thumb[data-empty]:focus-visible::after {
+  color: var(--bone-dim);
+}
+
+/* A row with nothing to weigh keeps the column, so the names stay in line. */
+.weight__field--none {
+  border-color: transparent;
+  background: none;
+}
+
+/* ── One exercise's picture, full size ───────────────────────────────────── */
+.exview {
   width: min(100%, 34rem);
 }
 
-.weights__picture {
+.exview__picture {
   display: block;
   /* `max-*`, so a small illustration is shown at its own size rather than
      scaled up into a blur. Capped in `dvh` to leave the name and the button
@@ -211,4 +236,12 @@
   object-fit: contain;
   background: var(--bone);
   border-radius: 6px;
+}
+
+/* A ref whose bytes are not on this device: a backup restored without its
+   photos. Saying so beats an empty frame. */
+.exview__missing {
+  padding: var(--step-5);
+  color: var(--bone-dim);
+  text-align: center;
 }

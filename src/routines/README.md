@@ -242,7 +242,8 @@ parallel list of names to keep in sync. The filenames are the exercise names.
 | `imageCatalogue.ts` | The 43 bundled illustration paths, in the note's original order and grouping |
 | `*.tabata.json` | Importer fixtures, not imported by the app |
 | `foldName.ts` | The ONE way to ask whether two written names are the same exercise |
-| `loads.ts` | Filling a step's empty weight in from the weights page, and taking a stated one back off |
+| `exerciseOptions.ts` | `EXERCISES` as the editor's name field needs it: grouped by kit, illustrated, and matched against what has been typed. Pure, and shared with nothing else |
+| `loads.ts` | Filling a step's empty weight and picture in from the exercises page, and taking a stated weight back off |
 | `rename.ts` | Putting a step's exercise back under the name the table knows it by |
 | `estimate.ts` | Roughly how long a routine takes, including the parts that have no length |
 | `exercises.harvested.ts` | GENERATED. Movements the authored tables never named |
@@ -378,7 +379,8 @@ differently, and that difference cost the weights page a whole exercise until it
 was found. So two lookups sit on top of the fold, and they use the same two
 passes on purpose:
 
-- `findLoad()` in `loads.ts`, for a weight.
+- `findFor()` in `loads.ts`, for a weight or a picture (`findLoad` is the named
+  weight case).
 - `canonicalName()` in `rename.ts`, for the name itself.
 
 Both try the exact fold, then match word by word with a shorter word allowed to
@@ -388,17 +390,60 @@ from `Incline Cable Converging Chest Press` and `abductor` away from `adductor`,
 since neither of those starts the other. **Two candidates return nothing.** A
 wrong number gets loaded onto a stack.
 
-Keep the two in step. A step the weights page can answer for is exactly a step
+Keep the two in step. A step the exercises page can answer for is exactly a step
 the rename can fix, and a rule that held in one and not the other would be a bug
 waiting to be found in the gap.
 
-## Weights a routine does not state
+## The editor picks from the same table the generator does
 
-`loads.ts` is the rule that makes the weights page work: **an empty `load` does
-not mean unloaded**, it means "whatever I lift for this". It is filled in on the
-way into a run, a text export and the editor's placeholder, and never written
-back, so one number on the page changes every routine that does not disagree. A
-step that DOES state a load keeps it, because it is overriding on purpose.
+`exerciseOptions.ts` is a VIEW of `EXERCISES`, never a second list. The generator
+has chosen from that table since it was written; until now the editor could not
+see it, so a work step's name was typed by hand — and a name typed by hand is
+what `weightFor()`, `storage/paces.ts` and `estimate.ts` then fail to recognise.
+Of the 19 distinct step names in Wayne's own library, 15 match the table exactly;
+the two that do not are his wording for exercises that are in it, and the last
+two are "Warm Up" and "Cool Down", which are not exercises at all.
+
+That last pair is why the field is a text box that GROWS a list rather than a
+select. Three rules worth keeping in mind:
+
+- **Matching folds both sides**, so "ab crunch" finds Seated Abdominal Crunch.
+  But `foldName` alone is wrong for a QUERY: it drops a trailing limb, so "leg"
+  folded to nothing and a search answered with all 147 exercises. `needleOf`
+  keeps the letters where folding leaves nothing.
+- **Ranked, not merely filtered.** Whatever is first is what Enter picks, so a
+  name that starts with what you typed beats one that only contains it. Ties keep
+  table order, which for the multi-gym is station order.
+- **Containment runs both ways.** The last rule matches where what was TYPED
+  contains the whole exercise, because a step's name often says more than the
+  exercise does: `pasteFormat` writes a course leg as "Walking lunge 5m A-B", and
+  a name read "12 × Leg Press 65kg" before the count and the weight became
+  fields. It needs a two-word exercise, or "squat" would claim any sentence
+  mentioning one. `indexOfName` leans on it as its third pass, after an exact
+  fold and `closestKey`, so opening the list beside such a step lands on the
+  exercise inside it.
+- **Two shapes.** Nothing typed lists everything under its kit's heading;
+  something typed ranks the matches flat, since a heading over two results is
+  noise and ranked order would repeat it.
+
+What a pick carries onto the step is `applyExercise`'s decision, in
+`editor/blocks.ts`, not this file's.
+
+## Weights and pictures a routine does not state
+
+`loads.ts` is the rule that makes the exercises page work: **an empty `load` does
+not mean unloaded**, it means "whatever I lift for this", and a step with **no
+`media` means the same about what the exercise looks like**. Both are filled in on
+the way into a run, a text export, the editor's preview and the editor row's
+hint, and neither is written back, so one number or one photo on the page changes
+every routine that does not disagree. A step that DOES state one keeps it, because
+it is overriding on purpose.
+
+`fillLoads` and `fillPictures` are the same walk with the same identity rule: they
+return the SAME blocks where nothing changed, because they run on the way into
+every run and a fresh array would recompile the timeline for nothing. `findFor` is
+the one lookup under both, so the picture and the weight can never disagree about
+which exercise a step is about.
 
 `stripLoads()` is the other direction and the destructive one. Routines written
 before the page carry their own weight on every step, so they override it

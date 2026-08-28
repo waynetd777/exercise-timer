@@ -44,6 +44,29 @@ Emptying either one calls `clearText`, which DELETES the key. Same reason as
 `clearMedia` and `setTiming`: `""` and absent are different, and the empty string
 would leave a blank line under the step for ever.
 
+## Picking an exercise is one operation
+
+`applyExercise` writes a step's name, its picture and the per-side flag on its
+count in ONE tree operation, so one press of undo takes the whole pick back.
+Three patches would be three history entries, and the middle one would be a step
+named for the new exercise still wearing the old one's photo.
+
+Its argument is STRUCTURAL — `{ name, media?, perSide? }` — not
+`routines/exercises`'s `Exercise`. Everything here is pure operations on a block
+tree and has no business knowing about body areas, stations or attachments; the
+name field maps one to the other.
+
+Two decisions inside it:
+
+- Where the table illustrates the new exercise, the picture follows. Where it
+  does not, a **bundled** picture is removed (it came from the table and now
+  shows the wrong movement) and an **uploaded or pasted** one is kept: the user
+  put it there, and silently deleting someone's photograph is worse than leaving
+  one that may still be right.
+- Per side is written onto an existing count, both ways round, so picking a
+  kickback says "each side" and picking a leg press stops saying it. A step with
+  no count is left timed — a minute of cycling has no reps to qualify.
+
 ## Rules worth knowing
 
 - **`moveStep` moves a row through the routine as it *reads*.** Next to a group

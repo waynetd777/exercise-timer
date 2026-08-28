@@ -320,6 +320,77 @@ export function updateSegment(
 }
 
 /**
+ * An exercise chosen from the table, as this module needs it.
+ *
+ * STRUCTURAL, not `routines/exercises`'s `Exercise`. Everything here is pure
+ * operations on a block tree, and it has no business knowing about body areas,
+ * stations or attachments; three fields is all a step can carry. The name field
+ * maps one to the other. See `routines/exerciseOptions.ts`.
+ */
+export type ExerciseChoice = {
+  name: string
+  /** A path under `public/`, where the guide illustrates it. */
+  media?: string
+  /** Worked one side at a time. */
+  perSide?: boolean
+}
+
+/**
+ * A step given an exercise picked from the table: its name, its picture, and
+ * whether the count is per side.
+ *
+ * ONE operation rather than three patches, so one press of undo takes the whole
+ * pick back. Three would also mean three history entries, and the middle one
+ * would be a step named for the new exercise still wearing the old one's photo.
+ *
+ * The rules, each of which is a decision:
+ *
+ *  - The NAME is the table's spelling, which is the point of picking rather than
+ *    typing: `weightFor()`, `storage/paces.ts` and `estimate.ts` all key on the
+ *    name, and "Cable Bicep Curl" typed by hand matches none of them.
+ *  - The PICTURE follows where the table has one. Where it does not, a bundled
+ *    picture is REMOVED, because it came from the table and now illustrates the
+ *    wrong exercise, but an uploaded or pasted one is KEPT: the user put it
+ *    there, this app cannot know it was of the old movement, and silently
+ *    deleting a photo is worse than leaving one that may still be right.
+ *  - PER SIDE is written onto the count, both ways round, so picking a kickback
+ *    says "each side" and picking a leg press stops saying it. A step with no
+ *    count at all is left timed: a minute of cycling has no reps to qualify, and
+ *    inventing one here would change what the step asks of you.
+ *
+ * The duration, the load, the note and the alternative are never touched. They
+ * are the user's, and a pick is a pick, not a reset.
+ */
+export function applyExercise(
+  blocks: readonly Block[],
+  path: Path,
+  choice: ExerciseChoice,
+): Block[] {
+  return mapAt(blocks, path, (block) => {
+    if (block.kind !== 'segment') return block
+
+    const next: Segment = { ...block, name: choice.name }
+
+    if (choice.media !== undefined) next.media = { source: 'bundled', path: choice.media }
+    else if (block.media?.source === 'bundled') delete next.media
+
+    const reps = next.reps
+    if (reps) {
+      // Rebuilt rather than spread with `perSide: undefined`: under
+      // `exactOptionalPropertyTypes` present-and-undefined is not absent, and it
+      // would be exported as `"perSide": undefined`.
+      const perSide = choice.perSide === true ? { perSide: true as const } : {}
+      next.reps =
+        reps.kind === 'rung'
+          ? { kind: 'rung', ...perSide }
+          : { kind: 'fixed', count: reps.count, ...perSide }
+    }
+
+    return next
+  })
+}
+
+/**
  * Removes a step's note or alternative.
  *
  * A separate operation for the same reason as `clearMedia`: with

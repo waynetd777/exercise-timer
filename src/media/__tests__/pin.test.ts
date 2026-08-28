@@ -37,3 +37,19 @@ describe('draft pins', () => {
     expect(() => unpinDraft('h-unknown')).not.toThrow()
   })
 })
+
+describe('the exercises page is a second root', () => {
+  it('keeps a picture no routine references', () => {
+    /*
+     * That page's photos belong to no step, so the walk over the routines cannot
+     * see them, and the first delete of any routine would have collected them.
+     * See `storage/pictures.ts`.
+     */
+    expect(orphanedHashes(['h-page'], [], new Set(), ['h-page'])).toEqual([])
+  })
+
+  it('still collects one nothing holds any more', () => {
+    // A photo removed from the page, and used by no step: dead bytes.
+    expect(orphanedHashes(['h-page'], [], new Set(), [])).toEqual(['h-page'])
+  })
+})

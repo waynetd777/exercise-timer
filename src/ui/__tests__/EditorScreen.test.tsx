@@ -10,6 +10,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { EditorScreen } from '../EditorScreen'
+import { savePictures, withPicture } from '../../storage/pictures'
 
 const sectioned = (): Workout => ({
   id: 'w1',
@@ -103,6 +104,10 @@ describe('EditorScreen', () => {
 
   afterEach(cleanup)
 
+  // The exercises page's table is localStorage, and a picture written by one
+  // test would be inherited by every step named the same in the next.
+  beforeEach(() => savePictures({}))
+
   afterEach(() => {
     // @ts-expect-error jsdom ships neither, so the stubs come off entirely.
     delete navigator.clipboard
@@ -168,6 +173,97 @@ describe('EditorScreen', () => {
 
     expect(screen.getByText('Discard your changes?')).toBeTruthy()
     expect(p.onCancel).not.toHaveBeenCalled()
+  })
+
+  it('picks an exercise into a work step: name, picture and per side at once', () => {
+    /*
+     * The point of picking rather than typing. "Cable Bicep Curl" typed by hand
+     * matches nothing in the weights table or the pace table; the table's own
+     * spelling matches both, and brings the illustration with it.
+     */
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.change(screen.getByLabelText('Step name'), { target: { value: 'kickback' } })
+    // The table holds "Band Glute Kickbacks" too, so the row is chosen by its
+    // exact name rather than by a substring of it.
+    fireEvent.mouseDown(screen.getByRole('option', { name: /^Glute Kickback,/ }))
+
+    expect((screen.getByLabelText('Step name') as HTMLInputElement).value).toBe('Glute Kickback')
+    // The step now has an image, so the row offers to preview rather than add one.
+    expect(screen.getByLabelText(/Image for Glute Kickback/)).toBeTruthy()
+  })
+
+  it('is one undo step, whatever the pick changed', () => {
+    // Three patches would be three history entries, and the middle one a step
+    // named for the new exercise still wearing the old one's photo.
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.change(screen.getByLabelText('Step name'), { target: { value: 'kickback' } })
+    fireEvent.mouseDown(screen.getByRole('option', { name: /^Glute Kickback,/ }))
+    fireEvent.click(screen.getByLabelText('Undo'))
+
+    // Back to what typing left behind, with the picture gone with it.
+    expect((screen.getByLabelText('Step name') as HTMLInputElement).value).toBe('kickback')
+    expect(screen.queryByLabelText(/Image for/)).toBeNull()
+  })
+
+  it('leaves the other roles a plain text field', () => {
+    // `retypeSegment` already names a rest "Rest"; a list offering that over a
+    // field which says it would be furniture.
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.change(screen.getByLabelText('Type of step'), { target: { value: 'rest' } })
+
+    expect(screen.queryByLabelText('Choose an exercise')).toBeNull()
+    expect(screen.getByLabelText('Step name').getAttribute('role')).toBeNull()
+  })
+
+  it('reads the draft end to end, then goes back to editing', () => {
+    /*
+     * A MODE of this screen, not a trip to the run screen: navigating away and
+     * back would either lose the unsaved draft or hand it back as the editor's
+     * new baseline, leaving a never-saved routine looking clean.
+     */
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.change(screen.getByLabelText('Step name'), { target: { value: 'Leg Press' } })
+    fireEvent.click(screen.getByLabelText('Preview the routine'))
+
+    // The rows are gone, and the unsaved name is in the reading list.
+    expect(screen.queryByLabelText('Step name')).toBeNull()
+    expect(screen.getByText('Leg Press')).toBeTruthy()
+
+    fireEvent.click(screen.getByLabelText('Back to editing'))
+
+    expect((screen.getByLabelText('Step name') as HTMLInputElement).value).toBe('Leg Press')
+  })
+
+  it('shows the picture the exercises page supplies, marked as borrowed', () => {
+    /*
+     * The same rule as the weight hint: a step that carries none takes the
+     * page's, so the row has to show what the run will show. Faintly, and
+     * marked, because it is not something this routine has said.
+     */
+    savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
+    render(<EditorScreen {...props(timed())} />)
+
+    const thumb = screen.getByLabelText(/Image for Squats, from the Exercises page/)
+    expect(thumb.dataset.inherited).toBe('true')
+    expect(thumb.querySelector('img')?.getAttribute('src')).toContain('Deadlift')
+  })
+
+  it('offers to override a borrowed picture rather than to remove it', () => {
+    // There is nothing to remove: the picture is not the step's. Overriding is
+    // the only thing the step can say about it.
+    savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
+    render(<EditorScreen {...props(timed())} />)
+
+    fireEvent.click(screen.getByLabelText(/Image for Squats, from the Exercises page/))
+
+    expect(screen.getByText(/From the Exercises page/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /Remove image/ })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /Use my own/ }))
+    expect(screen.getByRole('heading', { name: 'Add an image' })).toBeTruthy()
   })
 
   it('undoes with Cmd+Z, except while a modal owns the keyboard', () => {

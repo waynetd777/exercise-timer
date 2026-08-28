@@ -5,23 +5,24 @@
  */
 
 /**
- * Filling a routine's empty weights in from the ones you keep in Settings.
+ * Filling a routine's empty WEIGHTS and PICTURES in from the exercises page.
  *
  * A step that states no load is not saying "unloaded": it is saying "whatever I
- * lift for this". So the weight is resolved on the way INTO a run, an export or
- * the editor's placeholder, and never written back. Change the number in
- * Settings and every routine that does not override it follows, which is the
- * whole point of having the page.
+ * lift for this". A step with no picture is saying the same about what the
+ * exercise looks like. So both are resolved on the way INTO a run, an export or
+ * the editor's hint, and neither is written back. Change the number or the
+ * photo on the page and every routine that does not override it follows, which
+ * is the whole point of having the page.
  *
- * A step that DOES state a load is left exactly as it is, because it is saying
- * something the table cannot: that this routine, deliberately, is not your
- * usual weight.
+ * A step that DOES state one is left exactly as it is, because it is saying
+ * something the table cannot: that this routine, deliberately, is not the usual
+ * weight, or shows a different picture.
  *
  * Pure, and takes the table as an argument, so nothing here reads storage and a
  * test gets the same answer whatever is in the browser.
  */
 
-import type { Block, Workout } from '../engine/types'
+import type { Block, MediaRef, Workout } from '../engine/types'
 import { closestKey, foldName } from './foldName'
 
 /**
@@ -40,7 +41,8 @@ export function exerciseKey(name: string): string {
 }
 
 /**
- * The weight for a written name, allowing for the SHORTHAND people write.
+ * A per-exercise table's entry for a written name, allowing for the SHORTHAND
+ * people write. The weight and the picture both come through here.
  *
  * The exact key first. That misses more than it looks: the exercise table takes
  * its names from the manufacturer's guide, and a routine is written by a person
@@ -55,18 +57,30 @@ export function exerciseKey(name: string): string {
  * those is the start of the other.
  *
  * AMBIGUITY REFUSES TO GUESS. Two matches mean no answer: putting the wrong
- * number on a bar is worse than putting none on it.
+ * number on a bar is worse than putting none on it, and the same goes for
+ * showing the wrong machine.
+ */
+export function findFor<T>(table: ReadonlyMap<string, T>, name: string): T | undefined {
+  const key = exerciseKey(name)
+  const exact = table.get(key)
+  if (exact !== undefined) return exact
+
+  const hit = closestKey(key, table.keys())
+  return hit === null ? undefined : table.get(hit)
+}
+
+/**
+ * The weight for a written name. `findFor` over the weights table.
+ *
+ * Kept as its own name because it reads at every call site as what it is, and
+ * because the generic is what the picture table needed rather than a second copy
+ * of the same three lines.
  */
 export function findLoad(
   weights: ReadonlyMap<string, string>,
   name: string,
 ): string | undefined {
-  const key = exerciseKey(name)
-  const exact = weights.get(key)
-  if (exact !== undefined) return exact
-
-  const hit = closestKey(key, weights.keys())
-  return hit === null ? undefined : weights.get(hit)
+  return findFor(weights, name)
 }
 
 /**
@@ -103,6 +117,52 @@ export function fillLoads(
 /** The same, for a whole routine. Identity-preserving in the same way. */
 export function withWeights(workout: Workout, weights: ReadonlyMap<string, string>): Workout {
   const blocks = fillLoads(workout.blocks, weights)
+  return blocks === workout.blocks ? workout : { ...workout, blocks: [...blocks] }
+}
+
+/**
+ * Every step's picture, filled in where the step carries none.
+ *
+ * The same shape and the same rules as `fillLoads`, including returning the SAME
+ * blocks where nothing changed, so a fully illustrated routine costs one walk
+ * and React sees no new identities.
+ *
+ * A step that carries a picture keeps it, whatever the table says: an uploaded
+ * photo on a step is the routine disagreeing on purpose. A step with a picture
+ * is also the ONLY thing a share link or a text export can carry, which is the
+ * other reason this never writes back.
+ */
+export function fillPictures(
+  blocks: readonly Block[],
+  pictures: ReadonlyMap<string, MediaRef>,
+): readonly Block[] {
+  if (pictures.size === 0) return blocks
+
+  let changed = false
+  const walk = (list: readonly Block[]): Block[] =>
+    list.map((block) => {
+      if (block.kind === 'segment') {
+        if (block.media !== undefined) return block
+        const media = findFor(pictures, block.name)
+        if (!media) return block
+        changed = true
+        return { ...block, media }
+      }
+      const children = walk(block.children)
+      if (children.every((child, at) => child === block.children[at])) return block
+      return { ...block, children } as Block
+    })
+
+  const next = walk(blocks)
+  return changed ? next : blocks
+}
+
+/** The same, for a whole routine. Identity-preserving in the same way. */
+export function withPictures(
+  workout: Workout,
+  pictures: ReadonlyMap<string, MediaRef>,
+): Workout {
+  const blocks = fillPictures(workout.blocks, pictures)
   return blocks === workout.blocks ? workout : { ...workout, blocks: [...blocks] }
 }
 

@@ -45,7 +45,7 @@ const props = (lib: Library) => ({
   onNew: vi.fn(),
   onDraft: vi.fn(),
   onSounds: vi.fn(),
-  onWeights: vi.fn(),
+  onExercises: vi.fn(),
 })
 
 afterEach(cleanup)

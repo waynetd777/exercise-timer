@@ -400,3 +400,40 @@ describe('the weights a backup carries', () => {
     expect(contents.weights).toEqual({})
   })
 })
+
+describe('the exercise pictures a backup carries', () => {
+  const photo = { source: 'local' as const, hash: 'abc', mime: 'image/webp' }
+
+  it('rides along, and comes back', () => {
+    /*
+     * The page's own photos belong to no step, so nothing else in the file
+     * carries them, and a restore without them would put back a page of empty
+     * frames. Their BYTES ride in `media` beside a step's, keyed by the same
+     * content hash, so one used in both places travels once.
+     */
+    const bundle = toBundle([workout('Legs')], 1000, {}, {}, { squat: photo })
+    expect(bundle.pictures).toEqual({ squat: photo })
+    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).pictures).toEqual({ squat: photo })
+  })
+
+  it('says nothing when there is nothing to say', () => {
+    expect(toBundle([workout('Legs')], 1000)).not.toHaveProperty('pictures')
+  })
+
+  it('reads a file that predates the field', () => {
+    expect(fromBundle({ ...toBundle([workout('Legs')], 1000) }, 2000).pictures).toEqual({})
+  })
+
+  it('drops an entry that is not a media ref, and keeps the routines', () => {
+    // Same guard a step's own media gets: whatever passes here is stored and
+    // then rendered on every run.
+    const damaged = {
+      ...toBundle([workout('Legs')], 1000),
+      pictures: { squat: { source: 'local' }, plank: photo },
+    }
+    const contents = fromBundle(damaged, 2000)
+
+    expect(contents.workouts).toHaveLength(1)
+    expect(contents.pictures).toEqual({ plank: photo })
+  })
+})
