@@ -171,6 +171,11 @@ const DEFAULT_REPS = 12
  */
 export const SECTIONS_FEWEST = 3
 
+/** The section count asked for, or the usual one where the spec has none or nonsense (NaN). */
+function sectionsAsked(spec: RoutineSpec): number {
+  return spec.sections !== undefined && Number.isFinite(spec.sections) ? spec.sections : SECTIONS_TYPICAL
+}
+
 /**
  * What one set of this exercise asks for.
  *
@@ -428,7 +433,9 @@ function sectionsRoutine(
   rng: Rng,
   notes: string[],
 ): Block[] {
-  const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(spec.sections ?? SECTIONS_TYPICAL)))
+  // Nothing to work is the same answer the circuit gives, not a routine of one warm-up.
+  if (spec.areas.length === 0) throw new Error('No exercises match that combination of areas and equipment.')
+  const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(sectionsAsked(spec))))
 
   /**
    * Everything eligible, by area, shuffled once so a section can draw freely.
@@ -633,7 +640,7 @@ export function describeRoutine(spec: RoutineSpec): string {
     spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
 
   if (spec.style === 'sections') {
-    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, spec.sections ?? SECTIONS_TYPICAL))
+    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, sectionsAsked(spec)))
     return `${kit}${worked}, ${count} sections`
   }
   const minutes = Math.round(spec.totalMs / 60_000)
@@ -741,9 +748,14 @@ export function generateRoutine(
   const recoverMs = span(spec.recoveryMs, RECOVER_MS)
   const coolDownMs = span(spec.coolDownMs, COOL_DOWN_MS)
 
-  const named = (want: string | undefined) => cardio.find((e) => e.name === want) ?? recovery
-  const warmUp = named(spec.warmUpExercise)
-  const coolDown = named(spec.coolDownExercise)
+  // Never silent: the recovery exercise said when it fell back, these did not.
+  const named = (want: string | undefined, slot: string) => {
+    const found = cardio.find((e) => e.name === want)
+    if (want && !found) notes.push(`No cardio exercise called "${want}" for the ${slot}, so ${recovery?.name} was used.`)
+    return found ?? recovery
+  }
+  const warmUp = named(spec.warmUpExercise, 'warm-up')
+  const coolDown = named(spec.coolDownExercise, 'cool-down')
   let spun = 0
   const nextSpin = (): Exercise => {
     const pick = spin[spun % spin.length] ?? recovery!

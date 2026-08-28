@@ -209,6 +209,9 @@ function stepLines(segment: Segment, lost: string[]): string[] {
 
 /** A ladder: the counts, the lift that scales, and the accessories that do not. */
 function ladderLines(ladder: Ladder, counter: { n: number }, lost: string[]): string[] {
+  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== 'Set') {
+    lost.push(`The name "${ladder.label}" on a ladder; it will come back as "Set"`)
+  }
   const lines = [`Counting: ${ladder.counts.join('-')}`]
 
   const scaling = ladder.children.filter(
@@ -234,6 +237,11 @@ function repeatLines(repeat: Repeat, counter: { n: number }, lost: string[]): st
   const rest = trailingRest(repeat.children)
   const body = rest ? repeat.children.slice(0, -1) : repeat.children
 
+  // The grammar names every group "Rounds"; the reader's migration then calls
+  // it "Set". Any other name is the user's, and does not survive.
+  if (repeat.label && repeat.label !== 'Set' && repeat.label !== 'Round') {
+    lost.push(`The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`)
+  }
   const lines = [`${repeat.times} Rounds`]
   lines.push(...siblingLines(body, counter, lost, false))
   if (rest) lines.push(`Rest ${durationText(rest.durationMs!)} after each round`)
@@ -281,7 +289,7 @@ function siblingLines(
     const next = blocks[i + 1]
     const heading = next === undefined ? headingAfter : next.kind === 'section'
     out.push(...blockLines(block, counter, lost, heading))
-    if (next !== undefined && !isGroup(next) && claimsWhatFollows(block, heading)) out.push('Then:')
+    if (next !== undefined && !isGroup(next) && claimsWhatFollows(block)) out.push('Then:')
   })
   return out
 }
@@ -294,7 +302,7 @@ function siblingLines(
  * either: nothing short of a section heading ends its round, so it is never
  * WRITTEN as an AMRAP unless a heading already follows. See `blockLines`.
  */
-function claimsWhatFollows(block: Block, _headingAfter: boolean): boolean {
+function claimsWhatFollows(block: Block): boolean {
   return block.kind === 'repeat' || block.kind === 'ladder'
 }
 
@@ -383,7 +391,7 @@ export function writeRoutine(workout: Workout): WrittenRoutine {
     // The end of the text closes an AMRAP as surely as a heading does.
     const heading = next === undefined ? true : next.kind === 'section'
     const lines = blockLines(block, counter, lost, heading)
-    if (next !== undefined && !isGroup(next) && claimsWhatFollows(block, heading)) lines.push('Then:')
+    if (next !== undefined && !isGroup(next) && claimsWhatFollows(block)) lines.push('Then:')
     /*
      * A blank line sets a group or a section apart from what surrounds it. A run
      * of loose steps is just a list and reads better without the gaps, which on

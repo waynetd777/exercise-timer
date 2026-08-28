@@ -171,6 +171,17 @@ export function recordGate(elapsedMs: number, cleared: readonly TimelineEntry[])
  */
 let cached: Map<string, number> | null = null
 
+/*
+ * Another tab saving drops this tab's cache. Without it two open tabs each kept
+ * their own copy, and the second to save wrote stale values over the first's.
+ * `storage` fires only in OTHER tabs, which is exactly the set that needs it.
+ */
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === KEY || event.key === null) cached = null
+  })
+}
+
 export function currentRates(): ReadonlyMap<string, number> {
   cached ??= ratesFrom(loadPaces())
   return cached

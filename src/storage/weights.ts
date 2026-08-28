@@ -47,6 +47,17 @@ export type Weights = Record<string, string>
 
 let cached: Map<string, string> | null = null
 
+/*
+ * Another tab saving drops this tab's cache. Without it two open tabs each kept
+ * their own copy, and the second to save wrote stale values over the first's.
+ * `storage` fires only in OTHER tabs, which is exactly the set that needs it.
+ */
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === KEY || event.key === null) cached = null
+  })
+}
+
 /** Only what has been typed. Never throws: a broken store means no weights. */
 export function loadWeights(): Weights {
   try {

@@ -92,7 +92,12 @@ export function usePullToRefresh(
       if (distanceAtRelease >= THRESHOLD) {
         busyRef.current = true
         setBusy(true)
-        void refresh.current()
+        // `updateApp` ends in a reload, so this rarely runs; any other refresher
+        // would otherwise leave the indicator on "Updating" for good.
+        void Promise.resolve(refresh.current()).finally(() => {
+          busyRef.current = false
+          setBusy(false)
+        })
       }
     }
 

@@ -51,6 +51,10 @@ export function dataUrlToBlob(value: string): Blob | null {
   const match = DATA_URL.exec(value)
   if (!match || match[2] === undefined) return null
 
+  // Refused by its encoded length first: a hand-edited entry of a hundred
+  // megabytes was decoded in full before the cap was consulted.
+  if (match[3]!.length > Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 4) return null
+
   try {
     const binary = atob(match[3]!)
     if (binary.length > MAX_IMAGE_BYTES) return null
