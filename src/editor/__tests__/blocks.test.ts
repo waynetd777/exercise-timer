@@ -899,3 +899,21 @@ describe('isTypedPatch: which edits share an undo step', () => {
     expect(isTypedPatch({})).toBe(false)
   })
 })
+
+describe('clearing a group field removes it', () => {
+  it('drops a label or a note patched to the empty string', () => {
+    // Exports carried `"note": ""` for every section whose note had been
+    // cleared; absent is what the model means by "none".
+    const blocks: Block[] = [
+      { kind: 'section', id: 's', name: 'Legs', display: 'list', note: 'Go steady', children: [] },
+      { kind: 'repeat', id: 'r', times: 3, label: 'Round', children: [] },
+    ]
+    const section = updateSection(blocks, [0], { note: '' })[0]
+    expect(section?.kind === 'section' && 'note' in section).toBe(false)
+    const repeat = updateRepeat(blocks, [1], { label: '' })[1]
+    expect(repeat?.kind === 'repeat' && 'label' in repeat).toBe(false)
+    // A real value still lands.
+    const named = updateSection(blocks, [0], { note: 'Faster' })[0]
+    expect(named?.kind === 'section' && named.note).toBe('Faster')
+  })
+})

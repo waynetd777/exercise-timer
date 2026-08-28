@@ -1432,6 +1432,34 @@ export function EditorScreen({
 
   const rows = useMemo(() => flatten(blocks), [blocks])
 
+  /*
+   * Where focus lands after a row is added, copied or deleted. The button that
+   * was pressed unmounts with its row, and focus fell to the body: the next
+   * keyboard press went nowhere. A row's index in the flat list survives the
+   * edit, so the target is named by index and found after the render.
+   */
+  const focusAfter = useRef<{ index: number; selector: string } | null>(null)
+  useEffect(() => {
+    const want = focusAfter.current
+    if (!want) return
+    focusAfter.current = null
+    const row = list.current?.querySelectorAll<HTMLElement>('[data-row-id]')[want.index]
+    row?.querySelector<HTMLElement>(want.selector)?.focus()
+  })
+  const rowIndex = (path: Path) => rows.findIndex((row) => row.path.join('.') === path.join('.'))
+  const removeRow = (path: Path) => {
+    focusAfter.current = { index: Math.max(0, rowIndex(path) - 1), selector: '.erow__grip' }
+    editBlocks((current) => removeAt(current, path))
+  }
+  const duplicateRow = (path: Path) => {
+    focusAfter.current = { index: rowIndex(path) + 1, selector: '.erow__grip' }
+    editBlocks((current) => duplicateAt(current, path))
+  }
+  const addRow = (path: Path, role: SegmentRole) => {
+    focusAfter.current = { index: rowIndex(path) + 1, selector: '[aria-label="Step name"]' }
+    editBlocks((current) => insertAfter(current, path, newSegment(role)))
+  }
+
   /**
    * Dragging a row, which is `moveStep` called once per row crossed.
    *
@@ -1544,7 +1572,10 @@ export function EditorScreen({
    */
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return
+      const key = event.key.toLowerCase()
+      // Ctrl+Y is redo on Windows; Shift+Cmd/Ctrl+Z everywhere.
+      const redoKey = key === 'y' && event.ctrlKey
+      if (!(event.metaKey || event.ctrlKey) || !(key === 'z' || redoKey)) return
       // A modal on top owns the keyboard. Undoing the draft from behind the
       // image picker edits state the user cannot see, and steals the native
       // text undo from the picker's own search box.
@@ -1562,7 +1593,7 @@ export function EditorScreen({
         return
       }
       event.preventDefault()
-      setHistory(event.shiftKey ? redo : undo)
+      setHistory(redoKey || event.shiftKey ? redo : undo)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -1777,8 +1808,8 @@ export function EditorScreen({
                   grip={drag.gripProps(block.id)}
                   dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
-                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
-                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onDuplicate={duplicateRow}
+                  onRemove={removeRow}
                   onPatch={patchSection}
                   onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
                 />
@@ -1791,8 +1822,8 @@ export function EditorScreen({
                   grip={drag.gripProps(block.id)}
                   dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
-                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
-                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onDuplicate={duplicateRow}
+                  onRemove={removeRow}
                   onPatch={patchLadder}
                   onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
                 />
@@ -1807,9 +1838,9 @@ export function EditorScreen({
                   dragging={held(path)}
                   listed={shownAsList(blocks, path)}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
-                  onAdd={(p, role) => editBlocks((c) => insertAfter(c, p, newSegment(role)))}
-                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
-                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onAdd={addRow}
+                  onDuplicate={duplicateRow}
+                  onRemove={removeRow}
                   onPatch={patchSegment}
                   onTiming={patchTiming}
                   onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
@@ -1826,8 +1857,8 @@ export function EditorScreen({
                   grip={drag.gripProps(block.id)}
                   dragging={held(path)}
                   onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
-                  onDuplicate={(p) => editBlocks((c) => duplicateAt(c, p))}
-                  onRemove={(p) => editBlocks((c) => removeAt(c, p))}
+                  onDuplicate={duplicateRow}
+                  onRemove={removeRow}
                   onPatch={patchRepeat}
                   onAddChild={(p) => editBlocks((c) => appendTo(c, p, newSegment('work')))}
                   onUnwrap={(p) => editBlocks((c) => unwrapRepeat(c, p))}

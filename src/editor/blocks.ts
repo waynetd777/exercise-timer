@@ -355,13 +355,28 @@ export function clearMedia(blocks: readonly Block[], path: Path): Block[] {
   })
 }
 
+/**
+ * A group with a patch applied, where a field patched to '' is REMOVED. The
+ * label and note fields are typed straight into, and clearing one used to
+ * store an empty string: harmless on screen, since every reader guards with a
+ * truthiness test, but every export carried `"note": ""`, and absent is what
+ * the model means by "none".
+ */
+function patched<T extends Repeat | Ladder | Section>(block: T, patch: Partial<T>): T {
+  const next = { ...block, ...patch } as Record<string, unknown>
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === '') delete next[key]
+  }
+  return next as unknown as T
+}
+
 export function updateRepeat(
   blocks: readonly Block[],
   path: Path,
   patch: Partial<Omit<Repeat, 'kind' | 'id' | 'children'>>,
 ): Block[] {
   return mapAt(blocks, path, (block) =>
-    block.kind === 'repeat' ? { ...block, ...patch } : block,
+    block.kind === 'repeat' ? patched(block, patch as Partial<Repeat>) : block,
   )
 }
 
@@ -370,7 +385,9 @@ export function updateLadder(
   path: Path,
   patch: Partial<Omit<Ladder, 'kind' | 'id' | 'children'>>,
 ): Block[] {
-  return mapAt(blocks, path, (block) => (block.kind === 'ladder' ? { ...block, ...patch } : block))
+  return mapAt(blocks, path, (block) =>
+    block.kind === 'ladder' ? patched(block, patch as Partial<Ladder>) : block,
+  )
 }
 
 export function updateSection(
@@ -378,7 +395,9 @@ export function updateSection(
   path: Path,
   patch: Partial<Omit<Section, 'kind' | 'id' | 'children'>>,
 ): Block[] {
-  return mapAt(blocks, path, (block) => (block.kind === 'section' ? { ...block, ...patch } : block))
+  return mapAt(blocks, path, (block) =>
+    block.kind === 'section' ? patched(block, patch as Partial<Section>) : block,
+  )
 }
 
 /**

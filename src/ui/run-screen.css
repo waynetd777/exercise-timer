@@ -728,7 +728,10 @@
 }
 
 .sheet__row[data-state='done'] {
-  color: var(--bone-faint);
+  /* --bone-dim, not --bone-faint: on the phase wash at the top of the sheet the
+     fainter grey fell to about 3.6:1, under the 4.5 the rest of the screen holds.
+     The strike-through carries the state; the colour need not carry it too. */
+  color: var(--bone-dim);
   /* Struck through rather than merely faded: "done" should survive a glance in
      bad light, where a lightness difference alone does not. */
   text-decoration: line-through;

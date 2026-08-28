@@ -206,11 +206,13 @@ export function Menu({
               visibility: at ? undefined : 'hidden',
             }}
           >
-            {items.map((item) => (
+            {items.map((item, index) => (
               <button
-                key={item.label}
+                // Position as well as label: two items may read the same.
+                key={`${index}:${item.label}`}
                 type="button"
-                role="menuitem"
+                // A choosable item is a radio; aria-checked is not valid on a plain menuitem.
+                role={item.selected === undefined ? 'menuitem' : 'menuitemradio'}
                 className="menu__item"
                 disabled={item.disabled ?? false}
                 title={item.title ?? item.label}
