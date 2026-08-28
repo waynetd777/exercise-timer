@@ -1837,6 +1837,21 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T06:10:00Z"
+    },
+    {
+      "id": "bug-110",
+      "timestamp": "2026-08-28T07:30:00Z",
+      "error_message": "USER REPORTED: the generator did not choose from the full set of exercises. 22 of 147 were never drawn: every lower-body cardio and mobility move, the trampoline moves included.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "sectionsRoutine's draw() walked the areas in order and stopped at the quota, so 'four mobility, four cardio' for the warm-up filled from upper and torso before lower was reached.",
+      "fix": "draw() takes one exercise from each area in turn until the quota is met. Probe after the fix: every catalogue exercise is drawn within 600 section routines. Test: over 40 seeds the warm-up includes a lower-body cardio or mobility move.",
+      "tags": [
+        "generator",
+        "warm-up",
+        "reachability"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T07:30:00Z"
     }
   ]
 }

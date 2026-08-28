@@ -700,6 +700,22 @@ describe('what the sections shape can reach', () => {
     expect(seen.size).toBeGreaterThan(6)
   })
 
+  it('reaches every area in the warm-up, lower body included', () => {
+    // Filling the quota area by area never got past upper and torso: no leg
+    // stretch, jump or trampoline move could be generated at all.
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 40; seed++) {
+      const { workout } = generateRoutine(
+        spec({ style: 'sections', equipment: 'none', recovery: 'passive' }),
+        { rng: seeded(seed), now: 0 },
+      )
+      const warm = workout.blocks.find((b) => b.kind === 'section')
+      if (warm?.kind === 'section') for (const name of steps(warm.children)) seen.add(name)
+    }
+    const lower = EXERCISES.filter((e) => e.area === 'lower' && (e.use === 'mobility' || e.use === 'cardio'))
+    expect(lower.some((e) => seen.has(e.name))).toBe(true)
+  })
+
   it('can warm up with a torso stretch', () => {
     // The warm-up theme listed lower and upper only, so the two torso mobility
     // moves could never be drawn.
