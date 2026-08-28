@@ -313,7 +313,16 @@ export function ExercisesScreen({
     // Only what the synchronous pass could not answer: an uploaded photo, or a
     // pinned copy of a link. Usually a handful, and often none at all.
     const pending = [...shownPictures].filter(([name]) => !syncSrc.has(name))
-    if (pending.length === 0) return
+    if (pending.length === 0) {
+      /*
+       * Nothing needs a blob any more, so whatever the last table left here has
+       * to GO. Returning early instead is what made a removed photo carry on
+       * being shown: this map is consulted first, and it still held the URL of
+       * the picture that had just been taken away.
+       */
+      setBlobSrc((current) => (current.size === 0 ? current : new Map()))
+      return
+    }
 
     let live = true
     void Promise.all(
@@ -329,7 +338,16 @@ export function ExercisesScreen({
     }
   }, [shownPictures, syncSrc, base])
 
-  const srcOf = (name: string): string | null => blobSrc.get(name) ?? syncSrc.get(name) ?? null
+  /*
+   * The synchronous answer first, then the blob one, and NEITHER for an exercise
+   * that no longer has a picture: both maps are rebuilt from `shownPictures`,
+   * but the effect that fills the second one lands a frame later, so the guard
+   * is what makes a removal show immediately.
+   */
+  const srcOf = (name: string): string | null => {
+    if (!shownPictures.has(name)) return null
+    return syncSrc.get(name) ?? blobSrc.get(name) ?? null
+  }
 
   /*
    * What is in force, not what is stored: a seeded row has a weight without

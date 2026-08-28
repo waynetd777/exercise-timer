@@ -183,6 +183,36 @@ describe('the pictures', () => {
     expect(thumb.querySelector('img')?.getAttribute('src')).toContain('exercises/Leg-Press.jpg')
   })
 
+  it('takes an uploaded photo off the row the moment it is removed', () => {
+    /*
+     * A photo is a blob, resolved a frame after the render, into a map the row
+     * consults FIRST. That map only ever grew, so a picture removed went on
+     * being shown until the page was left and reopened.
+     */
+    savePictures(withPicture({}, 'Squats', { source: 'local', hash: 'abc', mime: 'image/webp' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Squats. Change it.'))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    const row = screen.getByLabelText('Add a picture of Squats')
+    expect(row.querySelector('img')).toBeNull()
+    expect(row.dataset.empty).toBe('true')
+  })
+
+  it('swaps the row over when one picture replaces another', () => {
+    savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Squats. Change it.'))
+    // "Change" exactly: the row's own button is labelled "…Change it." too.
+    fireEvent.click(screen.getByRole('button', { name: 'Change' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Leg Press' }))
+
+    const row = screen.getByLabelText('Picture of Squats. Change it.')
+    expect(row.querySelector('img')?.getAttribute('src')).toContain('Leg-Press')
+  })
+
   it('removes one outright where the guide has nothing to fall back on', () => {
     savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
     render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)

@@ -172,7 +172,7 @@ export const EXERCISES_HELP: readonly HelpSection[] = [
   {
     heading: 'Pictures',
     points: [
-      'The multi-gym exercises start with the illustration from the manufacturer’s guide, 42 of them. Everything else starts with an empty frame: the guide only draws the machine.',
+      'The multi-gym exercises start with the illustration from the manufacturer’s guide, 41 of them, and the bike has a photo of its own. Everything else starts with an empty frame: the guide only draws the machine.',
       'Tap a picture to see it full size, which is the quickest way to find out what an exercise you have not done before actually is. Tap an empty frame to add one.',
       'Change offers the same three ways the editor does: an illustration that ships with the app, a photo from this device, or an image you have copied. A photo is scaled down before it is stored, so a page of them is a few megabytes rather than a few hundred.',
       'On an exercise the guide draws, removing your photo puts the guide’s drawing back. On one it does not, removing leaves an empty frame again.',
