@@ -13,7 +13,7 @@
  * human decision in that script's `CORRECTIONS` so it survives the next run.
  *
  * `exercises.other.ts` is the hand-authored core, written when there were four
- * routines. This is the rest, found by reading all sixteen. The area and the
+ * routines. This is the rest, found by reading all of them. The area and the
  * equipment are read off the name and are usually right; `use` is the least
  * confident of the four fields.
  */

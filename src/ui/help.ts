@@ -133,14 +133,14 @@ export const EDITOR_HELP: readonly HelpSection[] = [
  *
  * Its own tray rather than a section of the library's, because the page is the
  * one place in the app where an EMPTY field means something, and that is not a
- * detail to bury eight sections down someone else's list.
+ * detail to bury deep in someone else's list.
  */
 export const WEIGHTS_HELP: readonly HelpSection[] = [
   {
     heading: 'What this is',
     points: [
       'What you lift, per exercise, in one place. A weight belongs to your gym rather than to a routine: written into each routine instead, moving up a plate means editing every routine that names the lift.',
-      'Sixty-eight exercises: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
+      'Every exercise you can put a number against: everything on the multi-gym, plus the dumbbells, the kettlebell and the bands. A press-up and the trampoline are not here, since neither has a number to keep.',
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”. Anything you would write on a step, you can write here.',
     ],
   },

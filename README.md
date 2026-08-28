@@ -64,7 +64,7 @@ across a gym, with the phone propped against a rack.
   plain-text routines.
 - **Generates** a routine from a few answers: how long, what to work, whether to
   keep moving between sets, and what equipment. It builds in the shape of the
-  routines it has been given, from a table of 147 exercises whose multi-gym half
+  routines it has been given, from a table of exercises whose multi-gym half
   is read out of the manufacturer's guide. It leaves out any weight the settings
   page can supply, so the routine follows what you lift rather than freezing it.
 - **Edits** routines: steps, durations, reps, weights, sets, ladders, sections and
@@ -95,7 +95,7 @@ link above.
 ```bash
 npm install
 npm run dev        # http://localhost:35173
-npm test           # about a thousand tests, no browser needed
+npm test           # no browser needed
 npm run lint       # oxlint: correctness and the rules of hooks
 npm run typecheck
 npm run build
@@ -175,7 +175,7 @@ IndexedDB, and images live beside them once pinned. Backups, share links and the
 
 ## Testing
 
-About a thousand tests, all of which run in Node in a few seconds. There is no browser in
+The tests all run in Node in a few seconds. There is no browser in
 the test setup and none is needed. The parts with rules in them are pure and
 tested directly; the hooks that own timers, listeners and external handles (the
 tick chain, the cue scheduler, the wake lock, IndexedDB's connection) are tested
