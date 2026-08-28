@@ -43,8 +43,8 @@ below are fixed and committed, one commit per group:
 
 Still open (quality only): split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared
 with GenerateDialog; add a linter; tests for LibraryScreen/App/audio engine.
-Open question for Wayne: per-side exercises in the circuit read as duplicates (two groups of sets around "Change Sides");
-proposed naming the halves "(first side)" / "(other side)".
+Decided: per-side exercises in the circuit stay as two groups of sets around "Change Sides", unnamed (Wayne: leave it).
+v8.2 pushed 2026-08-28 with the lows.
 
 ---
 
