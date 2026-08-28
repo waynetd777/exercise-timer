@@ -10,7 +10,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { loadWeights, saveWeights, weightFor, withWeight } from '../../storage/weights'
-import { WeightsScreen } from '../WeightsScreen'
+import { loadPictures, pictureFor, savePictures, withPicture } from '../../storage/pictures'
+import { ExercisesScreen } from '../ExercisesScreen'
 
 const saved = (name: string, load: string): Workout => ({
   id: 'w1',
@@ -36,13 +37,14 @@ beforeAll(() => {
 beforeEach(() => {
   globalThis.localStorage?.clear()
   saveWeights({})
+  savePictures({})
 })
 afterEach(cleanup)
 
-describe('WeightsScreen', () => {
+describe('ExercisesScreen', () => {
   it('shows the weight in force, and asks where there is none', () => {
     saveWeights(withWeight({}, 'Leg Press', '65kg'))
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(field('Leg Press').value).toBe('65kg')
     // Nothing is guessed, so it asks.
@@ -50,7 +52,7 @@ describe('WeightsScreen', () => {
   })
 
   it('writes a change straight through, so closing the page cannot lose it', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     fireEvent.change(field('Leg Press'), { target: { value: '70kg' } })
 
@@ -60,7 +62,7 @@ describe('WeightsScreen', () => {
 
   it('lets a weight be emptied', () => {
     saveWeights(withWeight({}, 'Leg Press', '65kg'))
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     fireEvent.change(field('Leg Press'), { target: { value: '' } })
 
@@ -73,7 +75,7 @@ describe('WeightsScreen', () => {
      * The Toe Raise has no looked-up weight, but a routine has been using
      * 15kg for it. That is better evidence than anything on a website.
      */
-    render(<WeightsScreen workouts={[saved('Toe Raise', '15kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[saved('Toe Raise', '15kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(field('Toe Raise').placeholder).toBe('15kg')
     fireEvent.click(screen.getByRole('button', { name: /Fill 1 from my routines/ }))
@@ -85,14 +87,14 @@ describe('WeightsScreen', () => {
   it('does not offer to overwrite a weight that is already set', () => {
     // The Leg Press is set, so a routine saying 40kg is not an offer to make.
     saveWeights(withWeight({}, 'Leg Press', '65kg'))
-    render(<WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(screen.queryByRole('button', { name: /from my routines/ })).toBeNull()
     expect(field('Leg Press').value).toBe('65kg')
   })
 
   it('filters by name', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     fireEvent.change(screen.getByLabelText('Search exercises'), { target: { value: 'pulldown' } })
 
@@ -101,7 +103,7 @@ describe('WeightsScreen', () => {
   })
 
   it('leaves the bodyweight exercises out entirely', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(screen.queryByLabelText('Weight for Sit Ups')).toBeNull()
   })
@@ -119,29 +121,77 @@ describe('the pictures', () => {
     }
   })
 
-  it('shows a thumbnail for an exercise the guide illustrates', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+  it('shows the guide’s illustration where it draws one', () => {
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
-    const thumb = screen.getByLabelText('Picture of Leg Press')
+    const thumb = screen.getByLabelText('Picture of Leg Press. Change it.')
     expect(thumb.querySelector('img')?.getAttribute('src')).toContain('exercises/Leg-Press.jpg')
   })
 
-  it('offers no picture where there is none to offer', () => {
-    // A band exercise has no illustration in the guide, so the frame is empty
-    // and there is nothing to press.
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+  it('offers to add one where the guide draws none', () => {
+    /*
+     * The whole point of the page growing pictures. The guide only illustrates
+     * the machine, so 105 of the 147 had nowhere to keep one and no routine
+     * could show them without a photo pasted onto every step.
+     */
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
-    expect(screen.queryByLabelText('Picture of Band Squats')).toBeNull()
+    expect(screen.getByLabelText('Add a picture of Band Squats')).toBeTruthy()
+    expect(screen.queryByLabelText('Picture of Band Squats. Change it.')).toBeNull()
+  })
+
+  it('lists exercises with no weight to keep, which the page used to leave out', () => {
+    // A press-up has no number and still has a picture, so the row is here with
+    // the field left off rather than empty.
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    expect(screen.getByText('Squats')).toBeTruthy()
+    expect(screen.queryByLabelText('Weight for Squats')).toBeNull()
+    expect(screen.getByLabelText('Weight for Leg Press')).toBeTruthy()
   })
 
   it('opens it full size, and closes again', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
-    fireEvent.click(screen.getByLabelText('Picture of Leg Press'))
+    fireEvent.click(screen.getByLabelText('Picture of Leg Press. Change it.'))
     expect(screen.getByRole('img', { name: 'Leg Press' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(screen.queryByRole('img', { name: 'Leg Press' })).toBeNull()
+  })
+
+  it('picks a picture for an exercise, and every routine follows it', () => {
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Add a picture of Squats'))
+    // The editor's own picker, offering the illustrations that ship with the app.
+    fireEvent.click(screen.getByRole('button', { name: 'Deadlift' }))
+
+    expect(loadPictures()).toEqual({ squat: { source: 'bundled', path: 'exercises/Deadlift.jpg' } })
+    expect(pictureFor('12 × Squats')).toEqual({ source: 'bundled', path: 'exercises/Deadlift.jpg' })
+  })
+
+  it('puts the guide’s drawing back when a chosen one is removed', () => {
+    savePictures(withPicture({}, 'Leg Press', { source: 'bundled', path: 'exercises/Cycling.jpg' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Leg Press. Change it.'))
+    fireEvent.click(screen.getByRole('button', { name: "Use the guide's" }))
+
+    expect(loadPictures()).toEqual({})
+    const thumb = screen.getByLabelText('Picture of Leg Press. Change it.')
+    expect(thumb.querySelector('img')?.getAttribute('src')).toContain('exercises/Leg-Press.jpg')
+  })
+
+  it('removes one outright where the guide has nothing to fall back on', () => {
+    savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Squats. Change it.'))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    expect(loadPictures()).toEqual({})
+    expect(screen.getByLabelText('Add a picture of Squats')).toBeTruthy()
   })
 })
 
@@ -154,7 +204,7 @@ describe('letting routines follow the page', () => {
     saveWeights(withWeight({}, 'Leg Press', '65kg'))
     const onFollow = vi.fn()
     render(
-      <WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
+      <ExercisesScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
     )
 
     fireEvent.click(screen.getByRole('button', { name: /Let 1 routine follow these/ }))
@@ -168,7 +218,7 @@ describe('letting routines follow the page', () => {
   })
 
   it('says nothing when every routine already follows', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     expect(screen.queryByRole('button', { name: /follow these/ })).toBeNull()
   })
@@ -178,7 +228,7 @@ describe('letting routines follow the page', () => {
     // is the only record of it.
     const onFollow = vi.fn()
     render(
-      <WeightsScreen workouts={[saved('Band Squats', 'red')]} onExit={vi.fn()} onFollow={onFollow} />,
+      <ExercisesScreen workouts={[saved('Band Squats', 'red')]} onExit={vi.fn()} onFollow={onFollow} />,
     )
 
     expect(screen.queryByRole('button', { name: /follow these/ })).toBeNull()
@@ -188,7 +238,7 @@ describe('letting routines follow the page', () => {
     // Typing a weight for the Band Squats brings that routine into scope: the
     // page can answer for it now, so its own weight can go.
     render(
-      <WeightsScreen workouts={[saved('Band Squats', 'red')]} onExit={vi.fn()} onFollow={vi.fn()} />,
+      <ExercisesScreen workouts={[saved('Band Squats', 'red')]} onExit={vi.fn()} onFollow={vi.fn()} />,
     )
 
     fireEvent.change(field('Band Squats'), { target: { value: 'green' } })
@@ -200,7 +250,7 @@ describe('letting routines follow the page', () => {
     saveWeights(withWeight({}, 'Leg Press', '65kg'))
     const onFollow = vi.fn()
     render(
-      <WeightsScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
+      <ExercisesScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
     )
 
     fireEvent.click(screen.getByRole('button', { name: /Let 1 routine follow these/ }))
@@ -212,12 +262,12 @@ describe('letting routines follow the page', () => {
 
 describe('help', () => {
   it('opens a tray of its own, not the library’s', () => {
-    render(<WeightsScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
 
     fireEvent.click(screen.getByLabelText('Help'))
 
     // The rule an empty field carries is the one thing this page must explain.
-    expect(screen.getByText(/How a routine uses it/)).toBeTruthy()
-    expect(screen.getByRole('dialog', { name: 'Weights' })).toBeTruthy()
+    expect(screen.getByText(/How a routine uses them/)).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: 'Exercises' })).toBeTruthy()
   })
 })

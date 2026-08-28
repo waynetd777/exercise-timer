@@ -9,7 +9,11 @@
  * shape as the library, so the two screens behave alike.
  */
 .editor {
-  container-type: inline-size;
+  /* NAMED `shell`, like the run screen's own shell, because `PreviewList` is
+     shared with it and its wide-screen rules ask for that container by name.
+     The unnamed queries below still match this element: an unnamed query takes
+     the nearest container whatever it is called. */
+  container: shell / inline-size;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: var(--step-3);
@@ -34,16 +38,42 @@
 
 .editor__head {
   display: grid;
-  /* Back, name, Save, help. The name takes the slack; the three controls keep
-     their intrinsic widths. */
-  grid-template-columns: auto 1fr auto auto;
+  /*
+   * Back, name, Save, read, help. FIVE columns, one per control: the header is a
+   * grid, so a sixth item would open an implicit ROW, which is exactly what
+   * happened when the read toggle was added to a four-column track and Help
+   * dropped to a line of its own.
+   *
+   * `minmax(0, 1fr)`, not `1fr`. A grid item's minimum is its content, and an
+   * input's intrinsic width is about twenty characters, so a plain `1fr` refused
+   * to shrink and pushed the last button out instead. The name is the one thing
+   * here that can afford to be short: it is a field you type in once, while the
+   * four controls are pressed on every visit.
+   */
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: var(--step-3);
+  gap: var(--step-2);
+}
+
+@container (min-width: 30rem) {
+  .editor__head {
+    gap: var(--step-3);
+  }
 }
 
 .editor__head .btn {
-  width: 48px;
-  height: 48px;
+  /* 44px on a phone, which is the touch guideline exactly, and 48 once there is
+     room: four controls plus a usable name field do not fit a 320pt screen at
+     48. See the column note above. */
+  width: 44px;
+  height: 44px;
+}
+
+@container (min-width: 30rem) {
+  .editor__head .btn {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 /* While confirming, the prompt takes the whole header row. */
@@ -77,6 +107,10 @@
 }
 
 .editor__name {
+  /* The input's own minimum, as well as the track's: `minmax(0, 1fr)` sizes the
+     COLUMN, and a replaced element still refuses to go below its intrinsic width
+     without this. Both are needed. */
+  min-width: 0;
   font-size: max(1.25rem, min(2.6cqi, 2rem));
   font-weight: 700;
   letter-spacing: var(--track-name);
@@ -517,6 +551,22 @@
   transition: border-color 150ms var(--ease);
 }
 
+/*
+ * A picture the step does not own: the exercises page's, shown because that is
+ * what the run will show. Faded and dashed, the same way an empty weight field's
+ * placeholder is greyed: both say "this is what you would get", and neither is
+ * something this routine has said.
+ */
+.erow__thumb[data-inherited] {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.erow__thumb[data-inherited]:hover,
+.erow__thumb[data-inherited]:focus-visible {
+  opacity: 1;
+}
+
 .erow__thumb:hover,
 .erow__thumb:focus-visible {
   border-color: var(--role-rest);
@@ -726,6 +776,192 @@
  */
 .esecs__unit {
   font-size: var(--step--1);
+}
+
+/* ── The exercise name field ───────────────────────────────────────────────
+ *
+ * A text field with the exercise table behind it. The wrapper takes the flex
+ * sizing `.efield--name` used to carry, so the row's layout is unchanged; the
+ * caret is overlaid on the field's right-hand end rather than placed beside it,
+ * the same trick as `.efield-clear`, so the name still gets the full width.
+ */
+.ename {
+  position: relative;
+  flex: 1 1 9rem;
+  display: flex;
+  min-width: 0;
+}
+
+.ename .efield--name {
+  /* Room for the caret, so a long name does not run under it. */
+  padding-right: 1.9rem;
+}
+
+.ename__caret {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  color: var(--bone-faint);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ename__caret:hover,
+.ename__caret:focus-visible {
+  color: var(--bone);
+  background: var(--ink-700);
+}
+
+.ename__caret .icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/*
+ * The suggestion list. Fixed and portalled to the body, for the same two reasons
+ * as `.menu__list`: `.editor__scroll` clips its overflow, and `position: fixed`
+ * is only viewport-relative while no ancestor is transformed. Coordinates come
+ * from `place()` in Menu.tsx.
+ */
+.ename__list {
+  position: fixed;
+  z-index: 40;
+  width: min(22rem, calc(100vw - 1rem));
+  padding: var(--step-2);
+  background: var(--ink-700);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+  /* 147 exercises never fit on a screen, so the list scrolls inside whatever
+     room `place()` found rather than hanging off the edge of it. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/*
+ * SIZES IN REM, and no `.label` classes anywhere in this list.
+ *
+ * The list is portalled to the body, and the label scale is written in `cqi`,
+ * which resolves against the nearest CONTAINER. There is none on the body, so
+ * the units fall back to the viewport: on a laptop that set the names at 22px
+ * and the hints in wide uppercase tracking, which is what pushed the row apart.
+ * A dropdown is dense by nature and does not want the screen's type scale.
+ */
+
+/* The kit, over the exercises that need it. Sticky, because the multi-gym's 42
+   scroll well past their own heading. */
+.ename__group {
+  position: sticky;
+  top: calc(-1 * var(--step-2));
+  z-index: 1;
+  margin: 0;
+  padding: var(--step-2) var(--step-2) var(--step-1);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  background: var(--ink-700);
+}
+
+.ename__option {
+  display: grid;
+  /* The picture, everything else, then the tick. The name and the hint are
+     STACKED inside the middle column rather than sharing the row: the hint does
+     not wrap, so beside the name it took what it needed and left a column one
+     letter wide. The tick's column is `auto`, so it costs nothing on the 146
+     rows that do not have one. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--step-3);
+  padding: var(--step-2);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* One rule for hover and for the arrow keys: `data-active` is set from the same
+   index `aria-activedescendant` points at, so both agree on what is selected. */
+.ename__option[data-active] {
+  background: var(--ink-600);
+  /* Inset, so the row does not change size when it becomes the active one. */
+  box-shadow: inset 0 0 0 1px var(--role-rest);
+}
+
+.ename__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* The exercise the step is already on. Same tick, same colour, as the one a
+   chosen item carries in `Menu`. */
+.ename__tick {
+  display: grid;
+  place-items: center;
+  color: var(--role-prepare);
+}
+
+.ename__tick .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ename__thumb {
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  background: var(--bone);
+  border-radius: 6px;
+}
+
+/* The 105 exercises the guide does not illustrate. An empty tile, not a missing
+   one: the names stay in one column either way. */
+.ename__thumb--none {
+  background: var(--ink-900);
+  border: var(--hairline);
+}
+
+.ename__label {
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--bone);
+  /* Two lines at most for a name like "Cable Converging Shoulder Press", then
+     an ellipsis. A 147-row list wants rows of one height. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.ename__hint {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--bone-faint);
+  /* One line, cut rather than wrapped: it is the row's second thought. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* A name of your own: not an error, and nothing to press. */
+.ename__empty {
+  margin: 0;
+  padding: var(--step-3);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--bone-dim);
 }
 
 /* ── Routine colour ────────────────────────────────────────────────────────

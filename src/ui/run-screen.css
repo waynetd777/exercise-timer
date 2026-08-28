@@ -55,6 +55,27 @@
   height: 44px;
 }
 
+/*
+ * Two buttons in the trailing slot, Edit and the preview toggle, which only
+ * appear while a routine is idle.
+ *
+ * The widening is on `[data-tools]` rather than unconditional because BOTH side
+ * columns have to move together — the title is centred between them — and a
+ * running routine has one thing on each side. Giving a phone's header 11.8rem of
+ * furniture while a workout is on would take it from the section caption for no
+ * reason: neither button is offered then.
+ */
+.run__header[data-tools] {
+  grid-template-columns: 5.9rem 1fr 5.9rem;
+}
+
+.run__tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--step-1);
+}
+
 @container shell (min-width: 46rem) {
   .run__header {
     /* The insets survive the wider padding: an iPhone in landscape is over 46rem

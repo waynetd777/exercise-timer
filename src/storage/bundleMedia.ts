@@ -33,14 +33,23 @@ type MediaReport = {
   skipped: { hash: string; reason: string }[]
 }
 
-/** The `media` map for an export: every uploaded photo the routines reference. */
+/**
+ * The `media` map for an export: every uploaded photo the routines reference,
+ * plus the ones the exercises page holds.
+ *
+ * `alsoLocal` is that second set. Those photos belong to no step, so the walk
+ * over the routines cannot find them, and a backup without them would restore a
+ * page of empty frames. Keyed by hash like everything else, so a photo used both
+ * on the page and on a step is carried once.
+ */
 export async function collectMedia(
   workouts: readonly Workout[],
   read: ReadBlob,
+  alsoLocal: readonly string[] = [],
 ): Promise<Record<string, string>> {
   const media: Record<string, string> = {}
 
-  for (const hash of localHashes(workouts)) {
+  for (const hash of new Set([...localHashes(workouts), ...alsoLocal])) {
     const blob = await read(hash)
     // A missing blob is not an error worth stopping an export for: the step will
     // simply have no picture on the other side, exactly as it has none here.

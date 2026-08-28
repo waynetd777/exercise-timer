@@ -10,6 +10,7 @@ import { fromBundle } from '../storage/bundle'
 import { restoreMedia } from '../storage/bundleMedia'
 import { migrateWorkout } from '../storage/migrate'
 import { loadWeights, saveWeights } from '../storage/weights'
+import { loadPictures, savePictures } from '../storage/pictures'
 import { hasBlob, putBlob } from '../media/store'
 import { pinDraft } from '../media/pin'
 import { parseRoutine } from './pasteFormat'
@@ -124,6 +125,13 @@ export async function importRoutineFiles(
          */
         if (Object.keys(contents.weights).length > 0) {
           saveWeights({ ...loadWeights(), ...contents.weights })
+        }
+
+        // The exercise pictures, merged the same way and for the same reason. A
+        // ref whose blob did not survive the checks above simply shows nothing,
+        // exactly as a step's own photo would.
+        if (Object.keys(contents.pictures).length > 0) {
+          savePictures({ ...loadPictures(), ...contents.pictures })
         }
         continue
       }

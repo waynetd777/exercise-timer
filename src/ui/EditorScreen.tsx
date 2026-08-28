@@ -6,11 +6,16 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { SegmentRole, Workout } from '../engine'
-import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
+import { compile, MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
+import { collectExercises } from '../routines/exerciseOptions'
 import { currentRates } from '../storage/paces'
+import { currentWeights } from '../storage/weights'
+import { currentPictures } from '../storage/pictures'
+import { withPictures, withWeights } from '../routines/loads'
 import {
   appendTo,
+  applyExercise,
   clearMedia,
   clearText,
   duplicateAt,
@@ -33,6 +38,7 @@ import { isDirty } from '../editor/dirty'
 import type { KnownImage } from '../editor/images'
 import { canRedo, canUndo, redo, undo } from '../editor/history'
 import { HelpTray } from './HelpTray'
+import { PreviewList } from './PreviewList'
 import { NoticeDialog } from './NoticeDialog'
 import { EDITOR_HELP } from './help'
 import { pinDraft, storeFile, unpinDraft } from '../media/pin'
@@ -41,7 +47,7 @@ import { ImageDialog, ImagePicker, type ImageView } from './editor/ImageDialogs'
 import { LadderRow, RepeatRow, ROLES, SectionRow, SegmentRow } from './editor/rows'
 import { useDraftHistory } from './editor/useDraftHistory'
 import { useDraftDrag } from './editor/useDraftDrag'
-import { BackIcon, CheckIcon, HelpIcon, PlusIcon, RedoIcon, UndoIcon } from './icons'
+import { BackIcon, CheckIcon, CloseIcon, HelpIcon, ListIcon, PlusIcon, RedoIcon, UndoIcon } from './icons'
 import './editor.css'
 
 export function EditorScreen({
@@ -112,6 +118,33 @@ export function EditorScreen({
   const { list, drag, held } = useDraftDrag({ history, rows, editBlocks, setHistory })
 
   /*
+   * The exercise table the name field offers, built ONCE for the screen.
+   *
+   * A routine runs to sixty rows and the table is 147 entries; building it per
+   * row would be nine thousand objects per keystroke. Same reason `knownImages`
+   * is collected by the library and handed down rather than gathered per picker.
+   */
+  const exercises = useMemo(() => collectExercises(undefined, import.meta.env.BASE_URL), [])
+
+  /*
+   * What the exercises page supplies for a step that carries no picture of its
+   * own. Read once for the screen: every row asks, and the identity has to be
+   * stable or each row's media effect would re-arm on every keystroke.
+   */
+  const pictures = useMemo(() => currentPictures(), [])
+
+  /*
+   * Reading the draft, as the run screen reads a saved routine.
+   *
+   * A MODE of this screen rather than a trip to the run screen, for one reason:
+   * the draft. Navigating away and back would either lose the unsaved edits or
+   * hand them back as the editor's new baseline, which would leave the screen
+   * looking clean with a routine that has never been saved. Nothing leaves this
+   * component, so there is nothing to lose.
+   */
+  const [previewing, setPreviewing] = useState(false)
+
+  /*
    * `colour` is optional on a Workout, and under exactOptionalPropertyTypes a key
    * set to undefined is not the same as an absent key. So the untinted case
    * DELETES the key rather than assigning undefined, which also keeps exported
@@ -122,6 +155,22 @@ export function EditorScreen({
     return colour ? { ...rest, name, blocks, colour } : { ...rest, name, blocks }
   }, [workout, name, blocks, colour])
   const steps = stepCount(preview)
+  /*
+   * The weights are filled in for the reading, exactly as `App` fills them on
+   * the way into a run: a step that states no load of its own means "whatever I
+   * lift for this", and the preview is here to be read as the routine will run.
+   * Nothing is written back; `preview` itself is untouched.
+   *
+   * Only while it is being read. Compiling a sixty-step routine on every
+   * keystroke to render nothing would be work for its own sake.
+   */
+  const previewRoutine = useMemo(
+    () =>
+      previewing
+        ? compile(withPictures(withWeights(preview, currentWeights()), currentPictures()))
+        : null,
+    [previewing, preview],
+  )
   /*
    * `compile()` refuses a routine of more than this many steps, and it does so
    * in the run screen's render. Refused here first, with the count in view, so
@@ -249,6 +298,21 @@ export function EditorScreen({
               Save
             </button>
 
+            {/*
+              Read the draft end to end, the same list the run screen shows
+              before a routine starts. Between Save and Help, so Save keeps the
+              position the thumb already knows.
+            */}
+            <button
+              className="btn btn--ghost"
+              onClick={() => setPreviewing((open) => !open)}
+              aria-pressed={previewing}
+              aria-label={previewing ? 'Back to editing' : 'Preview the routine'}
+              title={previewing ? 'Back to editing' : 'Read the whole routine'}
+            >
+              {previewing ? <CloseIcon /> : <ListIcon />}
+            </button>
+
             {/* Last in the row, so Save keeps the position the thumb already
                 knows. */}
             <button
@@ -322,6 +386,9 @@ export function EditorScreen({
         </p>
       </div>
 
+      {previewing && previewRoutine ? (
+        <PreviewList routine={previewRoutine} />
+      ) : (
       <div className="editor__scroll">
         {rows.length === 0 ? (
           <p className="editor__empty label label--sm">No steps yet. Add one below.</p>
@@ -377,6 +444,19 @@ export function EditorScreen({
                   onPatch={patchSegment}
                   onTiming={patchTiming}
                   onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
+                  exercises={exercises}
+                  pictures={pictures}
+                  /* One tree operation, so one press of undo takes the whole
+                     pick back: the name, the picture and the per-side flag. */
+                  onPickExercise={(p, option) =>
+                    editBlocks((c) =>
+                      applyExercise(c, p, {
+                        name: option.name,
+                        ...(option.media !== undefined ? { media: option.media } : {}),
+                        ...(option.perSide === true ? { perSide: true } : {}),
+                      }),
+                    )
+                  }
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                   onPreview={setImagePreview}
                   onChoose={setChoosingFor}
@@ -401,6 +481,7 @@ export function EditorScreen({
           </ul>
         )}
       </div>
+      )}
 
       {choosingFor && (
         <ImagePicker
@@ -432,6 +513,10 @@ export function EditorScreen({
             editBlocks((c) => clearMedia(c, imagePreview.path))
             setImagePreview(null)
           }}
+          onChoose={() => {
+            setChoosingFor(imagePreview.path)
+            setImagePreview(null)
+          }}
           onClose={() => setImagePreview(null)}
         />
       )}
@@ -445,6 +530,9 @@ export function EditorScreen({
         adds will carry. See `.editor__add .chip[data-kind]`. The word stays,
         because the colour is the second cue and never the only one.
       */}
+      {/* Gone while the draft is being read: every one of these adds a row to a
+          list that is not on screen, and the reading page takes the height. */}
+      {!previewing && (
       <div className="editor__add">
         {ROLES.map(({ role, label }) => (
           <button
@@ -484,6 +572,7 @@ export function EditorScreen({
           Section
         </button>
       </div>
+      )}
     </main>
   )
 }

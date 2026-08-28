@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T18:16:50.905Z
-> Files: 76 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T21:04:01.730Z
+> Files: 84 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -63,6 +63,7 @@
 
 ## src/editor/
 
+- `blocks.ts` — Exercise Timer (~6720 tok)
 - `images.ts` — An image a step can be given, whether it ships with the app or a routine (~1416 tok)
 - `README.md` — Project documentation (~4492 tok)
 
@@ -81,6 +82,7 @@
 ## src/routines/
 
 - `estimate.ts` — Exercise Timer (~1283 tok)
+- `exerciseOptions.ts` — Exercise Timer (~2666 tok)
 - `exercises.other.ts` — Exercise Timer (~2802 tok)
 - `exercises.ts` — Exercise Timer (~1064 tok)
 - `generate.ts` — Exercise Timer (~4235 tok)
@@ -92,6 +94,7 @@
 
 ## src/routines/__tests__/
 
+- `exerciseOptions.test.ts` — Exercise Timer (~1578 tok)
 - `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
 - `rename.test.ts` — Exercise Timer (~1224 tok)
 
@@ -113,6 +116,7 @@
 
 - `bundleMedia.ts` — The photos in an export file. (~890 tok)
 - `paces.ts` — Exercise Timer (~1674 tok)
+- `pictures.ts` — Exercise Timer (~1842 tok)
 - `weights.ts` — Exercise Timer (~1404 tok)
 
 ## src/storage/__tests__/
@@ -121,6 +125,7 @@
 - `db.test.ts` — A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request (~1629 tok)
 - `migrate.test.ts` — Declares workout (~1336 tok)
 - `paces.test.ts` — Exercise Timer (~1540 tok)
+- `pictures.test.ts` — Exercise Timer (~1118 tok)
 - `weights.test.ts` — Exercise Timer (~1395 tok)
 
 ## src/ui/
@@ -141,7 +146,13 @@
 ## src/ui/__tests__/
 
 - `EditorScreen.test.tsx` — A step that runs as its own countdown, so it gets an image button. (~2424 tok)
+- `ExerciseField.test.tsx` — Exercise Timer (~1859 tok)
 - `preview.test.ts` — Exercise Timer (~1318 tok)
 - `PreviewList.test.tsx` — Exercise Timer (~1394 tok)
 - `RunScreen.test.tsx` — The audio layer is exercised by its own hook tests; here it would only try (~1010 tok)
 - `WeightsScreen.test.tsx` — Exercise Timer (~970 tok)
+
+## src/ui/editor/
+
+- `ExerciseField.tsx` — Exercise Timer (~3350 tok)
+- `rows.tsx` — Exercise Timer (~8487 tok)

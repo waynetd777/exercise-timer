@@ -9,7 +9,8 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Block } from '../../engine/types'
-import { exerciseKey, fillLoads, findLoad, stripLoads } from '../../routines/loads'
+import type { MediaRef } from '../../engine'
+import { exerciseKey, fillLoads, fillPictures, findLoad, stripLoads } from '../../routines/loads'
 import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../weights'
 
 beforeEach(() => {
@@ -215,5 +216,71 @@ describe('the shorthand a routine is actually written in', () => {
   it('keeps a one-letter word from matching half the table', () => {
     const table = new Map([[exerciseKey('Seated Abdominal Crunch'), '15kg']])
     expect(findLoad(table, 'Seated A Crunch')).toBeUndefined()
+  })
+})
+
+describe('fillPictures', () => {
+  const drawing: MediaRef = { source: 'bundled', path: 'exercises/Leg-Press.jpg' }
+  const photo: MediaRef = { source: 'local', hash: 'abc', mime: 'image/webp' }
+  const table = new Map<string, MediaRef>([[exerciseKey('Leg Press'), drawing]])
+
+  const step = (name: string, media?: MediaRef): Block => ({
+    kind: 'segment',
+    id: 's',
+    name,
+    role: 'work',
+    durationMs: 20_000,
+    ...(media ? { media } : {}),
+  })
+
+  it('gives a step with no picture the one the page holds', () => {
+    // The whole point: a photo taken once shows up in every routine that names
+    // the exercise, including the ones written before it was taken.
+    const [filled] = fillPictures([step('Leg Press')], table)
+
+    expect(filled?.kind === 'segment' && filled.media).toEqual(drawing)
+  })
+
+  it('leaves a step that carries its own alone', () => {
+    // An override, and a deliberate one: this routine shows something else.
+    const [filled] = fillPictures([step('Leg Press', photo)], table)
+
+    expect(filled?.kind === 'segment' && filled.media).toEqual(photo)
+  })
+
+  it('reads through a count and an announcement', () => {
+    const blocks = fillPictures([step('12 × Leg Press'), step('Get ready: Leg Press')], table)
+
+    for (const block of blocks) {
+      expect(block.kind === 'segment' && block.media).toEqual(drawing)
+    }
+  })
+
+  it('reaches inside every kind of group', () => {
+    const nested: Block[] = [
+      {
+        kind: 'section',
+        id: 'sec',
+        name: 'Legs',
+        display: 'list',
+        children: [
+          { kind: 'repeat', id: 'r', times: 3, label: 'Set', children: [step('Leg Press')] },
+        ],
+      },
+    ]
+
+    const [section] = fillPictures(nested, table)
+    const group = section?.kind === 'section' ? section.children[0] : undefined
+    const inner = group?.kind === 'repeat' ? group.children[0] : undefined
+    expect(inner?.kind === 'segment' && inner.media).toEqual(drawing)
+  })
+
+  it('returns the SAME blocks where nothing changed', () => {
+    // Identity matters: this runs on the way into every run and every preview,
+    // and a new array each time recompiles the timeline for nothing.
+    const blocks = [step('Warm Up')]
+
+    expect(fillPictures(blocks, table)).toBe(blocks)
+    expect(fillPictures(blocks, new Map())).toBe(blocks)
   })
 })

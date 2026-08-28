@@ -2,9 +2,74 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-28
+> Last updated: 2026-08-28 (latest: exercise picker + cross-navigation)
 
 ---
+
+## ✅ Done: the Exercises page — pictures beside weights (2026-08-28, latest)
+
+Wayne asked whether the weights page should become Exercises, hold a picture per exercise picked or pasted like the
+editor's, and have the editor use it "the same way we use the weight". I recommended the DEFERRED model; he said
+"implement it all properly including doc and in-help app updates". Done, NOT committed, NOT seen in a browser beyond
+the two things he spotted live (below).
+
+- **`storage/pictures.ts`** (new, 12 tests): one `MediaRef` per exercise, keyed by folded name, in localStorage with
+  the bytes in IndexedDB. `currentPictures()` starts from the guide's 42 illustrations and lets the table override
+  them, so the table holds only what it adds. `picturesFor` filters it to one routine's steps for a single backup.
+- **`routines/loads.ts`**: `findFor` (the generic lookup `findLoad` now calls) plus `fillPictures`/`withPictures`,
+  identity-preserving like the loads. Applied in `App` on the way into a run and in the editor's preview.
+- **`ExercisesScreen`** (was `WeightsScreen`; `weights.css` → `exercises.css`, `WEIGHTS_HELP` → `EXERCISES_HELP`,
+  route `weights` → `exercises`, nav label Weights → Exercises): all 147 exercises grouped by the new shared
+  `KIT_GROUPS`, weight field only where loadable, a 44px thumbnail per row opening a `PictureDialog` (Change / Use the
+  guide's / Remove) and the EDITOR's own `ImagePicker` for choosing. 20 tests.
+- **Editor row**: a step with no picture shows the page's, dashed and at 0.6 opacity, and its dialog offers "Use my
+  own" instead of Remove. `ImageView` gained `inherited`.
+- **Plumbing**: `liveHashes`/`orphanedHashes` take an `alsoLive` root and `useLibrary` passes the page's hashes;
+  `bundle.pictures` (optional, validated with the same `isMedia`); `collectMedia(…, alsoLocal)`; import merges the
+  table like the weights.
+- **Two things Wayne caught live**: the exercises list showed full-size images (the component had been renamed to
+  `.exrow__thumb` while the CSS still said `.weight__thumb`, so the thumbnails had NO styling); and "does backup all
+  back up the exercises" — it did already, but a single routine's backup was carrying the whole table, now filtered.
+- Docs: storage README (a section on the table, the export format, the files table), routines README (weights AND
+  pictures a routine does not state), ui README. Help: `EXERCISES_HELP` rewritten with a Pictures section, plus the
+  library's nav mention, the editor's inherited-picture line and both backup lines.
+- 1159 tests, typecheck, lint, build green.
+
+**Watch out for**: the page's test file is ~10s on its own (jsdom resolves `<label>` by walking the document, and
+this page has 68 of them). Cut from 41s by labelling only rows that have a field and drawing the empty frame in CSS.
+
+## ✅ Done: pick an exercise in the editor, and cross-navigation (2026-08-28, earlier)
+
+Wayne, on the library file he had just exported: make the name field a selector that can be picked from a list or
+typed, with thumbnails; then "add an edit icon to the run screen/preview screen and a preview icon to the edit
+screen". Both done, NOT committed, NOT seen in a browser (dev server was handed over at localhost:35173).
+
+- **`routines/exerciseOptions.ts`** (new, pure, 13 tests): `EXERCISES` as the field needs it — grouped by kit
+  (Multi-gym, Bike, Trampoline, Bodyweight, Dumbbells, Kettlebell, Bands), deduplicated by folded name, thumbnail
+  resolved through `resolvePlan`, plus `exerciseRows()` which lists everything under headings while nothing is typed
+  and ranks the matches flat once something is. `needleOf` exists because `foldName` drops a trailing limb, so the
+  query "leg" folded to nothing and a search answered with all 147.
+- **`editor/blocks.ts` → `applyExercise`** (8 tests): name + picture + per-side in ONE tree op, so one undo takes the
+  pick back. A bundled picture the new exercise has none of is dropped; an uploaded or pasted one is kept. Per side
+  is written onto an existing count both ways round; a purely timed step stays timed.
+- **`ui/editor/ExerciseField.tsx`** (11 tests): a text field that grows a list. Caret (or ArrowDown) browses the whole
+  table, typing filters, Enter picks the top match, Escape/Tab close, `aria-activedescendant` and `data-active` come
+  from one index. Portalled to the body and placed by `Menu`'s exported `place()`. Only on WORK rows; every other role
+  keeps the plain input. Options carry an explicit `aria-label`, since the computed name ran the spans together.
+- **Run screen → editor**: `onEdit?` renders a pencil beside the preview toggle while the routine is IDLE only
+  (mid-run the way out is Back, which pauses and asks). `.run__header[data-tools]` widens both side columns to
+  5.9rem so the centred title stays centred. `App` passes `view.workout`, NOT the weight-filled `running` copy.
+- **Editor → preview**: a MODE of the editor, not a trip to the run screen — navigating away would lose the draft or
+  make it the new baseline. `PreviewList` replaces the row list in the same grid row, the add toolbar goes, and
+  `.editor` now names its container `shell` so `preview.css`'s wide-screen rules match there too.
+- Help: two points on the name field, a new "Reading it" section, and the pencil in the library's list. READMEs:
+  routines (a section on picking from the same table the generator uses), editor (`applyExercise`'s decisions), ui.
+- 1113 tests, typecheck, lint green.
+
+**Also this session:** `~/Downloads/library-2026-08-28.timer.json` rewritten so every 20s strength step is the
+editor's `× in` unit — 24 stripped a "12 × " prefix out of the name, 20 bare-named ones got `count: 12` (the
+generator's `DEFAULT_REPS`). Verified through `fromBundle` + `compile`: same step counts and totals, ids/durations/
+media byte-identical. Backup left at `library-2026-08-28.timer.json.bak`.
 
 ## ✅ Done: Preview from the library row (2026-08-28, later)
 

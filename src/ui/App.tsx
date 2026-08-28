@@ -18,9 +18,10 @@ import { EditorScreen } from './EditorScreen'
 import { ErrorBoundary } from './ErrorBoundary'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
-import { WeightsScreen } from './WeightsScreen'
-import { withWeights } from '../routines/loads'
+import { ExercisesScreen } from './ExercisesScreen'
+import { withPictures, withWeights } from '../routines/loads'
 import { currentWeights } from '../storage/weights'
+import { currentPictures } from '../storage/pictures'
 import { newId } from '../id'
 
 /**
@@ -49,7 +50,7 @@ type View =
   | { screen: 'run'; workout: Workout; preview?: boolean }
   | { screen: 'edit'; workout: Workout }
   | { screen: 'sounds' }
-  | { screen: 'weights' }
+  | { screen: 'exercises' }
 
 function blankRoutine(): Workout {
   const now = Date.now()
@@ -192,17 +193,22 @@ function Screens() {
    * `markRun` landed and this component re-rendered.
    */
   const running = useMemo(
-    () => (view.screen === 'run' ? withWeights(view.workout, currentWeights()) : null),
+    () =>
+      view.screen === 'run'
+        ? withPictures(withWeights(view.workout, currentWeights()), currentPictures())
+        : null,
     [view],
   )
 
   if (view.screen === 'run' && running) {
     /*
-     * The weights are filled in HERE, on the way into the run, and never saved
-     * back. A step that states no load of its own is not unloaded: it means
-     * "whatever I lift for this", so it reads the settings page every time it
-     * is opened and follows a change made there. A step that does state one is
-     * left alone, because it is overriding on purpose.
+     * The weights AND the pictures are filled in HERE, on the way into the run,
+     * and never saved back. A step that states no load of its own is not
+     * unloaded: it means "whatever I lift for this", and a step with no picture
+     * means the same about what the exercise looks like. Both read the exercises
+     * page every time the routine is opened and follow a change made there. A
+     * step that does state one is left alone, because it is overriding on
+     * purpose.
      */
     return (
       <RunScreen
@@ -211,13 +217,20 @@ function Screens() {
         onStarted={onStarted}
         backRequest={backRequest}
         {...(view.preview ? { preview: true } : {})}
+        /*
+         * `view.workout`, NOT `running`: the copy handed to the run screen has
+         * the settings page's weights filled into every step that states none of
+         * its own, and opening THAT in the editor would save them onto the
+         * routine, turning "whatever I lift for this" into a fixed number.
+         */
+        onEdit={() => setView({ screen: 'edit', workout: view.workout })}
       />
     )
   }
 
-  if (view.screen === 'weights') {
+  if (view.screen === 'exercises') {
     return (
-      <WeightsScreen
+      <ExercisesScreen
         workouts={library.workouts}
         onExit={toLibrary}
         /* One save each, in order: `add` replaces a routine by id and returns
@@ -261,7 +274,7 @@ function Screens() {
       // routine's "Round" groups otherwise read "Round" until saved and reopened.
       onDraft={(workout) => setView({ screen: 'edit', workout: migrateWorkout(workout) })}
       onSounds={() => setView({ screen: 'sounds' })}
-      onWeights={() => setView({ screen: 'weights' })}
+      onExercises={() => setView({ screen: 'exercises' })}
     />
   )
 }

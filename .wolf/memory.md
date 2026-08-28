@@ -273,3 +273,23 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-08-28 21:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:59 | Created src/routines/exerciseOptions.ts | — | ~2426 |
+| 22:00 | Edited src/editor/blocks.ts | added optional chaining | ~944 |
+| 22:00 | Created src/ui/editor/ExerciseField.tsx | — | ~3287 |
+| 22:01 | Edited src/ui/editor/rows.tsx | CSS: was | ~230 |
+| 22:03 | Created src/routines/__tests__/exerciseOptions.test.ts | — | ~1578 |
+| 22:03 | Edited src/routines/exerciseOptions.ts | added 1 condition(s) | ~255 |
+| 22:04 | Created src/ui/__tests__/ExerciseField.test.tsx | — | ~1859 |
+| 22:05 | Edited src/ui/editor/ExerciseField.tsx | CSS: assumed | ~150 |
+| 22:17 | Exercise picker on work steps (type or pick, thumbnails, one-undo apply), run/preview to editor and editor to preview, editor header refitted to five columns | routines/exerciseOptions.ts, editor/blocks.ts, ui/editor/ExerciseField.tsx, ui/{RunScreen,EditorScreen,App,help}.tsx, editor.css, run-screen.css, +34 tests | 1113 tests, typecheck, lint, build green; not committed | ~95k |
+| 22:25 | Exercise dropdown fixes: stacked row (name over hint, rem sizes, no cqi in the portal), scroll inside the list no longer closes it, opens on and scrolls to the exercise the step names, capped at 384px and placed from scrollHeight | ui/editor/ExerciseField.tsx, ui/editor.css, routines/exerciseOptions.ts (indexOfName), +8 tests | 1121 tests, lint, build green | ~25k |
+| 22:34 | Exercise search matches both ways: a typed line that CONTAINS an exercise now finds it, so a paste-parser course leg ("Walking lunge 5m A-B") and an old-style "12 x Leg Press 65kg" open the list on the right row | routines/exerciseOptions.ts, routines/README.md, +4 tests | 1125 tests, typecheck, lint, build green | ~12k |
+| 22:41 | Caret on a filled row now filters to that exercise and ticks it (browse is the empty/no-match fallback); tick tracks the field, highlight tracks the cursor | ui/editor/ExerciseField.tsx, ui/editor.css, ui/help.ts, ui/README.md, +4 tests | 1128 tests, typecheck, lint, build green | ~18k |
+| 22:48 | Created src/storage/pictures.ts | — | ~1842 |
+| 23:04 | Created src/storage/__tests__/pictures.test.ts | — | ~1118 |
+| 23:20 | Weights page became Exercises: all 147 rows, a picture per exercise (pick/upload/paste), deferred into runs and previews like the weight, GC root + backup fields, editor shows the inherited picture | storage/pictures.ts, routines/loads.ts, ui/ExercisesScreen.tsx (+css), media/gc.ts, storage/{bundle,bundleMedia,useLibrary}.ts, ui/{App,EditorScreen,LibraryScreen,help}.tsx, editor/rows.tsx, ImageDialogs.tsx, 3 READMEs, +47 tests | 1159 tests, typecheck, lint, build green | ~180k |

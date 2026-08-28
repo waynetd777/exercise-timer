@@ -115,16 +115,32 @@ export function loadable(exercise: Exercise): boolean {
 }
 
 /**
- * Everything you can put a weight against, grouped the way the settings page
- * shows it: the multi-gym first, since that is most of a session, then what is
- * in the corner of the room.
+ * EVERY kit, in the order the app lists it: the multi-gym first, since that is
+ * most of a session and all but one of the illustrations, then the two that
+ * stand in the room and need no rigging, then everything you pick up.
+ *
+ * ONE ordering, used by the exercises page and by the editor's name field, so
+ * the two cannot disagree about what the groups are called or which comes first.
  */
-export const LOADABLE_GROUPS: readonly { kit: Equipment; label: string }[] = [
+export const KIT_GROUPS: readonly { kit: Equipment; label: string }[] = [
   { kit: 'machine', label: 'Multi-gym' },
+  { kit: 'bike', label: 'Bike' },
+  { kit: 'trampoline', label: 'Trampoline' },
+  { kit: 'bodyweight', label: 'Bodyweight' },
   { kit: 'dumbbell', label: 'Dumbbells' },
   { kit: 'kettlebell', label: 'Kettlebell' },
   { kit: 'band', label: 'Bands' },
 ]
+
+/**
+ * The subset you can put a weight against.
+ *
+ * Derived from `KIT_GROUPS` rather than listed again, so adding a kit in one
+ * place cannot leave the other behind. A press-up and the trampoline are not
+ * here: neither has a number to keep.
+ */
+export const LOADABLE_GROUPS: readonly { kit: Equipment; label: string }[] =
+  KIT_GROUPS.filter((group) => LOADABLE.includes(group.kit))
 
 /**
  * The longer get-ready, for anything you have to put ON.

@@ -2,7 +2,7 @@
 
 > OpenWolf's learning memory. Updated automatically as the AI learns from interactions.
 > Do not edit manually unless correcting an error.
-> Last updated: 2026-08-20
+> Last updated: 2026-08-28
 
 ## User Preferences
 
@@ -293,6 +293,67 @@
 - [2026-08-23] **`navigator.clipboard` is undefined on an insecure origin**, like `crypto.randomUUID` (bug-040) and `crypto.subtle`. So the LAN plain-HTTP dev server cannot test paste OR upload — both need the deployed HTTPS build. Third member of the same family; assume any `crypto`/`clipboard` API is secure-context only until proven otherwise.
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
+
+## The exercises page: pictures beside weights (2026-08-28)
+
+- **The weights page became the EXERCISES page.** All 147 are listed, not the 68 loadable ones, because the 79
+  bodyweight/trampoline/bike exercises had nowhere to keep a picture. The weight field is simply absent on a row with
+  nothing to weigh; the row keeps the column so the names line up.
+- **A picture resolves like a weight: deferred, never written back.** `fillPictures`/`withPictures` in `loads.ts` sit
+  beside `fillLoads`/`withWeights`, applied in `App` on the way into a run and in the editor's preview. A step that
+  carries `media` overrides, exactly as a stated `load` does.
+- **`currentPictures()` starts from the guide.** The stored table only holds what it ADDS, so a routine typed by hand
+  still shows the machine it names, and clearing a chosen photo falls back to the illustration.
+- **A localStorage table holding blobs needs a GC root.** `liveHashes`/`orphanedHashes` take an `alsoLive` list and
+  `useLibrary` passes `pictureHashes(loadPictures())`; without it the first delete of any routine collects a photo only
+  the page holds. Any future table that references blobs needs the same.
+- **147 rows × `useMediaUrl` is 147 state updates, each re-rendering 147 rows.** The page resolves every image ONCE
+  (a sync pass for bundled paths, one effect for blobs) and hands rows a plain `src`. Building a `MediaRef` inline per
+  render was worse still: a new object per render re-armed every effect and the page span. Memoise refs.
+- **`<label htmlFor>` pointing at nothing is slow as well as invalid.** jsdom resolves a label by walking the
+  document, so 79 dangling labels turned one `getByLabelText` into 2.9 seconds. Label only what has a field.
+- **A whole-library backup carries the whole table; a single routine's carries only what it uses** (`picturesFor`).
+  One is a restore, the other is something you send. The weights ride whole either way; they are strings.
+
+## The exercise name field, and reading a draft (2026-08-28)
+
+- **The editor and the generator now pick from ONE table.** `routines/exerciseOptions.ts` is a view of `EXERCISES`,
+  never a second list, and the editor's name field is a text box that GROWS a suggestion list. It cannot be a select:
+  "Warm Up" and "Cool Down" are in Wayne's own library and in no table, and two more names there are his wording for
+  exercises that are.
+- **`foldName` is for a NAME, not for a half-typed query.** It drops a trailing limb, so `foldName('leg')` is `''`.
+  Anything that folds user input as it arrives must handle "folded to nothing" as "keep the letters", not as "nothing
+  typed". See `needleOf`, and bug-117.
+- **A picked exercise is applied in one tree operation** (`applyExercise`), never as three patches. Three would be
+  three undo steps, and the middle one a step named for the new exercise wearing the old one's photo. Whatever a
+  future pick learns to carry, add it there.
+- **`Menu`'s `place()` is the shared popover arithmetic.** The suggestion list portals to the body and calls it, for
+  the same two reasons `Menu` does: `.editor__scroll` clips its overflow, and `position: fixed` is only
+  viewport-relative while no ancestor is transformed. Do not write a third copy.
+- **Previewing a DRAFT has to be a mode of the editor.** Navigating to the run screen and back would either lose the
+  unsaved draft or hand it back as the editor's new baseline, which leaves a never-saved routine looking clean.
+  `PreviewList` simply replaces the row list in the same grid row.
+- **`.editor` names its container `shell`.** `preview.css` asks for `@container shell` by name, so the shared preview
+  only gets its wide-screen column inside a container called that. An unnamed `@container` query still matches the
+  nearest container whatever it is called, so the editor's own queries were unaffected.
+- **The name field's list always filters on what the field SAYS** (Wayne, reversing my first call): the caret beside
+  a filled row opens on that exercise, matched, highlighted and ticked. Browsing the whole table is what an EMPTY
+  field gets, and what a name the table does not hold falls back to, so the caret can never open onto nothing. The
+  tick (`aria-current`) is the step's exercise; the highlight (`data-active`, `aria-selected`) is the arrow keys'
+  cursor. They coincide on opening and part company on the first keystroke.
+- **A portalled popover must not use the `.label` classes or any `cqi` size.** The type scale is written in container
+  units; on the body there is no container, so they fall back to the VIEWPORT and a dropdown comes out set in the
+  screen's display scale. Write rem sizes inside a portal. See bug-119.
+- **A close-on-scroll listener on the capture phase sees its own list scrolling.** Scroll events do not bubble, which
+  is why the listener is on capture in the first place, so it must skip a target inside the popover or the list closes
+  the moment you drag it. `Menu` has the same code and never showed it: seven items never scroll. See bug-120.
+- **Place a popover from `scrollHeight`, not from its measured box**, once a previous placement has applied a
+  `max-height`: the box is then that height, and the side it opens on would depend on which placement ran first.
+- **jsdom has no layout, so no `scrollIntoView`.** An effect that calls it unconditionally throws and React tears the
+  subtree down, which reads as "the component never renders". Feature-test it. See bug-116.
+- **An accessible name computed from adjacent grid spans runs the words together.** "Glute KickbackStation 7". A
+  whitespace text node would be an anonymous grid item and would shift the columns, so set an explicit `aria-label`
+  instead. See bug-118.
 
 ## Do-Not-Repeat
 

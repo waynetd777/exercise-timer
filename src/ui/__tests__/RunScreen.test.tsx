@@ -315,6 +315,49 @@ describe('RunScreen: the Ready card', () => {
   })
 })
 
+describe('RunScreen: the way to the editor', () => {
+  afterEach(cleanup)
+
+  it('offers Edit beside the preview toggle before a run starts', () => {
+    // Reading a routine and finding something to change in it is one errand.
+    const onEdit = vi.fn()
+    render(<RunScreen workout={timed()} onEdit={onEdit} />)
+
+    fireEvent.click(screen.getByLabelText('Edit this routine'))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers it while the routine is being read, too', () => {
+    const onEdit = vi.fn()
+    render(<RunScreen workout={timed()} onEdit={onEdit} preview />)
+
+    expect(screen.getByLabelText('Back to ready')).toBeTruthy()
+    expect(screen.getByLabelText('Edit this routine')).toBeTruthy()
+  })
+
+  it('takes it away once a routine is running', () => {
+    /*
+     * Mid-workout the way out is Back, which pauses and asks first. An Edit
+     * button there would be a second exit that skipped the question, and the
+     * slot it sits in is the stopwatch's once a run has started.
+     */
+    render(<RunScreen workout={timed()} onEdit={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Start'))
+
+    expect(screen.queryByLabelText('Edit this routine')).toBeNull()
+  })
+
+  it('shows nothing where there is nowhere to go', () => {
+    // The prop is optional: the screen is rendered without it in tests, and
+    // could be embedded somewhere with no editor to reach.
+    render(<RunScreen workout={timed()} />)
+
+    expect(screen.queryByLabelText('Edit this routine')).toBeNull()
+  })
+})
+
 /**
  * A step whose weight comes from the weights page rather than from itself.
  *

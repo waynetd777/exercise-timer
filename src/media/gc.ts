@@ -13,8 +13,19 @@ import type { Block, MediaRef, Workout } from '../engine'
  * deleting a routine must not delete an image another one still points at. This
  * is pure set arithmetic over the whole library, the only safe way to decide.
  */
-export function liveHashes(workouts: readonly Workout[]): Set<string> {
-  const live = new Set<string>()
+export function liveHashes(
+  workouts: readonly Workout[],
+  /**
+   * Hashes held OUTSIDE any routine: the exercises page's own pictures.
+   *
+   * A second root, and the sweep is wrong without it. That page's photos are
+   * referenced by no step at all, so the walk below cannot see them, and the
+   * first delete of any routine would have collected them. See
+   * `storage/pictures.ts`.
+   */
+  alsoLive: readonly string[] = [],
+): Set<string> {
+  const live = new Set<string>(alsoLive)
   forEachMedia(workouts, (media) => {
     if (media.source === 'local') live.add(media.hash)
     // A pinned remote image also owns its blob.
@@ -62,7 +73,9 @@ export function orphanedHashes(
   stored: readonly string[],
   workouts: readonly Workout[],
   pinned: ReadonlySet<string> = new Set(),
+  /** The exercises page's pictures, which no routine references. See `liveHashes`. */
+  alsoLive: readonly string[] = [],
 ): string[] {
-  const live = liveHashes(workouts)
+  const live = liveHashes(workouts, alsoLive)
   return stored.filter((hash) => !live.has(hash) && !pinned.has(hash))
 }

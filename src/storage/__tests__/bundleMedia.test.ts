@@ -168,3 +168,29 @@ describe('restoreMedia: what an import will trust', () => {
     }
   })
 })
+
+describe('the exercises page’s own photos in an export', () => {
+  it('carries them even though no step references them', async () => {
+    /*
+     * They belong to the page, not to a routine, so walking the routines cannot
+     * find them and a backup without them restores a page of empty frames.
+     */
+    const blob = photo(32, 3)
+    const hash = await sha256(blob)
+
+    const media = await collectMedia([workout([step('Squats')])], async () => blob, [hash])
+
+    expect(Object.keys(media)).toEqual([hash])
+  })
+
+  it('carries a photo used by both a step and the page ONCE', async () => {
+    // Keyed by content hash, like everything else in the store.
+    const blob = photo(48, 5)
+    const hash = await sha256(blob)
+    const routines = [workout([step('Squats', { source: 'local', hash, mime: 'image/webp' })])]
+
+    const media = await collectMedia(routines, async () => blob, [hash])
+
+    expect(Object.keys(media)).toEqual([hash])
+  })
+})

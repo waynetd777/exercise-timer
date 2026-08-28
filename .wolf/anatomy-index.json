@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-28T18:16:50.905Z",
-    "fileCount": 76,
+    "lastScanned": "2026-08-28T21:04:01.730Z",
+    "fileCount": 84,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "8d2fa3d5ecea3035de4d07f7bde07519f7bc2a838d4c34b25ad33241e7ae95e9",
-    "storeUpdatedAt": "2026-08-28T18:16:50.916Z"
+    "renderedHash": "e5cdc730eaf90bd88ee1076e3d4448e210488b08453d8fd0a353c4dbbc95c7f0",
+    "storeUpdatedAt": "2026-08-28T21:04:01.740Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1741,6 +1741,468 @@
       "size": 4877,
       "mtimeMs": 1787941010834.3733,
       "updatedAt": "2026-08-28T18:16:50.905Z",
+      "source": "hook"
+    },
+    "src/routines/exerciseOptions.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2666,
+      "hash": "3348f51d45b28d91",
+      "size": 9331,
+      "mtimeMs": 1787947425499.4248,
+      "updatedAt": "2026-08-28T20:03:45.567Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "hintFor",
+          "kind": "fn",
+          "startLine": 71,
+          "endLine": 92,
+          "tokens": 295
+        },
+        {
+          "name": "collectExercises",
+          "kind": "fn",
+          "startLine": 93,
+          "endLine": 149,
+          "tokens": 621
+        },
+        {
+          "name": "score",
+          "kind": "fn",
+          "startLine": 150,
+          "endLine": 178,
+          "tokens": 393
+        },
+        {
+          "name": "needleOf",
+          "kind": "fn",
+          "startLine": 179,
+          "endLine": 201,
+          "tokens": 222
+        },
+        {
+          "name": "exerciseRows",
+          "kind": "fn",
+          "startLine": 202,
+          "endLine": 233,
+          "tokens": 299
+        },
+        {
+          "name": "optionsOf",
+          "kind": "fn",
+          "startLine": 234,
+          "endLine": 237,
+          "tokens": 44
+        }
+      ]
+    },
+    "src/editor/blocks.ts": {
+      "description": "Exercise Timer",
+      "tokens": 6720,
+      "hash": "f6d6f1610f3d3bf8",
+      "size": 23519,
+      "mtimeMs": 1787947206926.8386,
+      "updatedAt": "2026-08-28T20:00:06.999Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "retypeSegment",
+          "kind": "fn",
+          "startLine": 73,
+          "endLine": 77,
+          "tokens": 65
+        },
+        {
+          "name": "newSegment",
+          "kind": "fn",
+          "startLine": 78,
+          "endLine": 94,
+          "tokens": 147
+        },
+        {
+          "name": "newRepeat",
+          "kind": "fn",
+          "startLine": 95,
+          "endLine": 108,
+          "tokens": 142
+        },
+        {
+          "name": "newLadder",
+          "kind": "fn",
+          "startLine": 109,
+          "endLine": 114,
+          "tokens": 97
+        },
+        {
+          "name": "newRungStep",
+          "kind": "fn",
+          "startLine": 115,
+          "endLine": 125,
+          "tokens": 64
+        },
+        {
+          "name": "newRepsStep",
+          "kind": "fn",
+          "startLine": 126,
+          "endLine": 142,
+          "tokens": 129
+        },
+        {
+          "name": "newSection",
+          "kind": "fn",
+          "startLine": 143,
+          "endLine": 151,
+          "tokens": 103
+        },
+        {
+          "name": "newRoutineBlocks",
+          "kind": "fn",
+          "startLine": 152,
+          "endLine": 155,
+          "tokens": 40
+        },
+        {
+          "name": "blockAt",
+          "kind": "fn",
+          "startLine": 156,
+          "endLine": 165,
+          "tokens": 112
+        },
+        {
+          "name": "mapAt",
+          "kind": "fn",
+          "startLine": 166,
+          "endLine": 184,
+          "tokens": 153
+        },
+        {
+          "name": "withSiblings",
+          "kind": "fn",
+          "startLine": 185,
+          "endLine": 199,
+          "tokens": 126
+        },
+        {
+          "name": "insertAfter",
+          "kind": "fn",
+          "startLine": 200,
+          "endLine": 208,
+          "tokens": 100
+        },
+        {
+          "name": "insertAt",
+          "kind": "fn",
+          "startLine": 209,
+          "endLine": 216,
+          "tokens": 79
+        },
+        {
+          "name": "appendTo",
+          "kind": "fn",
+          "startLine": 217,
+          "endLine": 228,
+          "tokens": 116
+        },
+        {
+          "name": "withNewIds",
+          "kind": "fn",
+          "startLine": 229,
+          "endLine": 234,
+          "tokens": 78
+        },
+        {
+          "name": "duplicateAt",
+          "kind": "fn",
+          "startLine": 235,
+          "endLine": 240,
+          "tokens": 60
+        },
+        {
+          "name": "removeAt",
+          "kind": "fn",
+          "startLine": 241,
+          "endLine": 248,
+          "tokens": 79
+        },
+        {
+          "name": "moveBy",
+          "kind": "fn",
+          "startLine": 249,
+          "endLine": 276,
+          "tokens": 345
+        },
+        {
+          "name": "moveStep",
+          "kind": "fn",
+          "startLine": 277,
+          "endLine": 311,
+          "tokens": 372
+        },
+        {
+          "name": "updateSegment",
+          "kind": "fn",
+          "startLine": 312,
+          "endLine": 363,
+          "tokens": 652
+        },
+        {
+          "name": "applyExercise",
+          "kind": "fn",
+          "startLine": 364,
+          "endLine": 400,
+          "tokens": 354
+        },
+        {
+          "name": "clearText",
+          "kind": "fn",
+          "startLine": 401,
+          "endLine": 420,
+          "tokens": 159
+        },
+        {
+          "name": "clearMedia",
+          "kind": "fn",
+          "startLine": 421,
+          "endLine": 436,
+          "tokens": 171
+        },
+        {
+          "name": "patched",
+          "kind": "fn",
+          "startLine": 437,
+          "endLine": 444,
+          "tokens": 81
+        },
+        {
+          "name": "updateRepeat",
+          "kind": "fn",
+          "startLine": 445,
+          "endLine": 454,
+          "tokens": 78
+        },
+        {
+          "name": "updateLadder",
+          "kind": "fn",
+          "startLine": 455,
+          "endLine": 464,
+          "tokens": 78
+        },
+        {
+          "name": "updateSection",
+          "kind": "fn",
+          "startLine": 465,
+          "endLine": 488,
+          "tokens": 259
+        },
+        {
+          "name": "setTiming",
+          "kind": "fn",
+          "startLine": 489,
+          "endLine": 510,
+          "tokens": 262
+        },
+        {
+          "name": "timingOf",
+          "kind": "fn",
+          "startLine": 511,
+          "endLine": 528,
+          "tokens": 212
+        },
+        {
+          "name": "wrapInRepeat",
+          "kind": "fn",
+          "startLine": 529,
+          "endLine": 634,
+          "tokens": 1323
+        }
+      ]
+    },
+    "src/ui/editor/ExerciseField.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 3350,
+      "hash": "7b1b284b9ed62c09",
+      "size": 11732,
+      "mtimeMs": 1787947520402.1692,
+      "updatedAt": "2026-08-28T20:05:20.474Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "ExerciseField",
+          "kind": "fn",
+          "startLine": 32,
+          "endLine": 300,
+          "tokens": 2958
+        }
+      ]
+    },
+    "src/ui/editor/rows.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 8487,
+      "hash": "bd732294ff465924",
+      "size": 29712,
+      "mtimeMs": 1787947260498.9468,
+      "updatedAt": "2026-08-28T20:01:00.583Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Grip",
+          "kind": "fn",
+          "startLine": 61,
+          "endLine": 81,
+          "tokens": 180
+        },
+        {
+          "name": "SegmentRow",
+          "kind": "fn",
+          "startLine": 82,
+          "endLine": 509,
+          "tokens": 4893
+        },
+        {
+          "name": "LoadField",
+          "kind": "fn",
+          "startLine": 510,
+          "endLine": 559,
+          "tokens": 405
+        },
+        {
+          "name": "RepeatRow",
+          "kind": "fn",
+          "startLine": 560,
+          "endLine": 661,
+          "tokens": 866
+        },
+        {
+          "name": "LadderRow",
+          "kind": "fn",
+          "startLine": 662,
+          "endLine": 768,
+          "tokens": 976
+        },
+        {
+          "name": "SectionRow",
+          "kind": "fn",
+          "startLine": 769,
+          "endLine": 840,
+          "tokens": 578
+        }
+      ]
+    },
+    "src/routines/__tests__/exerciseOptions.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1578,
+      "hash": "21fe750f634389ec",
+      "size": 5523,
+      "mtimeMs": 1787947389166.8381,
+      "updatedAt": "2026-08-28T20:03:09.240Z",
+      "source": "hook"
+    },
+    "src/ui/__tests__/ExerciseField.test.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 1859,
+      "hash": "b486482920d71cc9",
+      "size": 6505,
+      "mtimeMs": 1787947480560.186,
+      "updatedAt": "2026-08-28T20:04:40.627Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Field",
+          "kind": "fn",
+          "startLine": 35,
+          "endLine": 38,
+          "tokens": 56
+        },
+        {
+          "name": "field",
+          "kind": "fn",
+          "startLine": 39,
+          "endLine": 39,
+          "tokens": 16
+        },
+        {
+          "name": "names",
+          "kind": "fn",
+          "startLine": 40,
+          "endLine": 183,
+          "tokens": 1467
+        }
+      ]
+    },
+    "src/storage/pictures.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1842,
+      "hash": "b5f20638081eb442",
+      "size": 6447,
+      "mtimeMs": 1787950088870.4363,
+      "updatedAt": "2026-08-28T20:48:08.940Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "isMediaRef",
+          "kind": "fn",
+          "startLine": 66,
+          "endLine": 81,
+          "tokens": 157
+        },
+        {
+          "name": "loadPictures",
+          "kind": "fn",
+          "startLine": 82,
+          "endLine": 97,
+          "tokens": 128
+        },
+        {
+          "name": "savePictures",
+          "kind": "fn",
+          "startLine": 98,
+          "endLine": 116,
+          "tokens": 206
+        },
+        {
+          "name": "currentPictures",
+          "kind": "fn",
+          "startLine": 117,
+          "endLine": 133,
+          "tokens": 177
+        },
+        {
+          "name": "pictureFor",
+          "kind": "fn",
+          "startLine": 134,
+          "endLine": 138,
+          "tokens": 55
+        },
+        {
+          "name": "chosenPicture",
+          "kind": "fn",
+          "startLine": 139,
+          "endLine": 147,
+          "tokens": 95
+        },
+        {
+          "name": "withPicture",
+          "kind": "fn",
+          "startLine": 148,
+          "endLine": 162,
+          "tokens": 140
+        },
+        {
+          "name": "pictureHashes",
+          "kind": "fn",
+          "startLine": 163,
+          "endLine": 174,
+          "tokens": 102
+        }
+      ]
+    },
+    "src/storage/__tests__/pictures.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1118,
+      "hash": "affa62302f9bda42",
+      "size": 3913,
+      "mtimeMs": 1787951041657.2512,
+      "updatedAt": "2026-08-28T21:04:01.730Z",
       "source": "hook"
     }
   },

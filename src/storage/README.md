@@ -1,7 +1,7 @@
 # storage
 
 IndexedDB, the routine library, the export format, share links, and the two small
-things kept per device: your weights and your pace.
+things kept per device: your weights, your exercise pictures and your pace.
 
 ## Why IndexedDB, not localStorage
 
@@ -98,6 +98,27 @@ Rules that are not obvious:
 
 The resolution rule lives in `routines/loads.ts`, not here. See that README.
 
+## What an exercise looks like
+
+`pictures.ts` is the same idea as `weights.ts`, one `MediaRef` per exercise, keyed
+the same way, and it exists because 105 of the 147 exercises had no picture
+anywhere: the guide only draws the machine, so the only way to see a press-up was
+to attach a photo to a step, in every routine that used it, one at a time.
+
+Three things about it that the weights table does not have to think about:
+
+- **The guide is the floor.** `currentPictures()` starts from the illustrations
+  that ship with the app and lets the stored table override them, so the table
+  holds only what it ADDS, and a routine typed by hand still shows the machine it
+  names.
+- **The blob sweep needs it as a root.** These photos are referenced by no step,
+  so the walk over the routines in `gc.ts` cannot see them; without the extra root
+  the first delete of any routine would collect them. `useLibrary` passes
+  `pictureHashes(loadPictures())` into `orphanedHashes`.
+- **Values are checked on the way OUT**, not only in. What is here is rendered on
+  every step of every run, and a hand-edited entry would throw in React rather
+  than showing no picture.
+
 ## How fast you work
 
 `paces.ts` records the real length of a self-paced step so `routines/estimate.ts`
@@ -114,7 +135,7 @@ samples minimum, then the median of the last eight.
 ## The export format
 
 One JSON file, versioned from the start: `{ kind, version, exportedAt, workouts,
-media, weights }`. `kind` is a marker so the importer never has to guess, and a file from a
+media, weights, pictures }`. `kind` is a marker so the importer never has to guess, and a file from a
 *newer* version is refused rather than half-read.
 
 Every block field is type-checked on the way in (`isBlock` in `bundle.ts`), and
@@ -152,6 +173,16 @@ of them. On the way in they are MERGED over what is already here, the file winni
 where both say something, so a restore does not silently drop weights the file has
 never heard of.
 
+**`pictures` carries the exercises page's photos**, optional in the same way and
+merged in the same way. A whole-library backup carries the WHOLE table, because
+that file is the restore; a single routine's backup carries only the entries its
+own steps can use (`picturesFor`), because that file is something you send and
+sending one routine should not post every photo you own. The weights ride whole
+either way: sixty-seven short strings are not a payload. Their BYTES ride in `media` beside a step's own, keyed by
+the same content hash, so a photo used both on the page and on a step travels
+once; `collectMedia` takes them as its `alsoLocal` argument, since walking the
+routines cannot find a photo no step references.
+
 Both exports go through one function in `LibraryScreen`, so **Export all** and a
 routine's own file button cannot drift into carrying different things.
 
@@ -179,5 +210,6 @@ and none of the sender's favourites or run history: it is their copy now.
 | `bundleMedia.ts` | The photos in an export: collected on the way out, re-hashed on the way in |
 | `shareLink.ts` | Routine to URL and back |
 | `download.ts` | Handing the user a file, and the clipboard |
-| `weights.ts` | One weight per exercise, and the seeds. localStorage |
+| `weights.ts` | One weight per exercise. localStorage |
+| `pictures.ts` | One picture per exercise, over the guide's illustrations. localStorage, with the bytes in IndexedDB. A second root for the blob sweep |
 | `paces.ts` | How long a rep of each exercise actually takes you. localStorage |
