@@ -42,7 +42,11 @@ const SoundsScreen = import.meta.env.DEV
 
 type View =
   | { screen: 'library' }
-  | { screen: 'run'; workout: Workout }
+  /**
+   * `preview` opens the run screen reading the routine instead of on the
+   * Ready card. Same screen, same way back; only the first thing shown differs.
+   */
+  | { screen: 'run'; workout: Workout; preview?: boolean }
   | { screen: 'edit'; workout: Workout }
   | { screen: 'sounds' }
   | { screen: 'weights' }
@@ -206,6 +210,7 @@ function Screens() {
         onExit={toLibrary}
         onStarted={onStarted}
         backRequest={backRequest}
+        {...(view.preview ? { preview: true } : {})}
       />
     )
   }
@@ -249,6 +254,7 @@ function Screens() {
     <LibraryScreen
       library={library}
       onRun={(workout) => setView({ screen: 'run', workout })}
+      onPreview={(workout) => setView({ screen: 'run', workout, preview: true })}
       onEdit={(workout) => setView({ screen: 'edit', workout })}
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
       // Migrated on the way in, as a stored routine is on the way out: a pasted
