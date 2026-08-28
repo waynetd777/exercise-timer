@@ -214,7 +214,15 @@ export function cursorForStep(routine: Routine, step: number): Cursor {
   return { runIndex: entry.runIndex, elapsedInRunMs: entry.startMs }
 }
 
-function sameLevel(a: PathStep, b: PathStep): boolean {
+/**
+ * The same group, on the same time through it.
+ *
+ * Both halves matter: the id alone puts every round of a circuit in the same
+ * place, and the iteration alone confuses two different groups on their second
+ * round. Exported because the preview screen cuts the routine on exactly this
+ * question and had no business asking it a second way.
+ */
+export function samePathStep(a: PathStep, b: PathStep): boolean {
   return a.id === b.id && a.iteration === b.iteration
 }
 
@@ -237,7 +245,7 @@ export function groupEntries(routine: Routine, entry: TimelineEntry): TimelineEn
   return routine.entries.filter(
     (other) =>
       other.path.length >= depth &&
-      entry.path.every((step, i) => sameLevel(step, other.path[i]!)),
+      entry.path.every((step, i) => samePathStep(step, other.path[i]!)),
   )
 }
 

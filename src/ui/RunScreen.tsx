@@ -35,6 +35,8 @@ import {
 } from './format'
 import {
   BackIcon,
+  CloseIcon,
+  ListIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -44,6 +46,7 @@ import {
   SoundOnIcon,
 } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
+import { PreviewList } from './PreviewList'
 import { shortcutApplies } from './keys'
 import { currentRates, recordGate } from '../storage/paces'
 import { useMediaUrl } from './useMediaUrl'
@@ -257,6 +260,13 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
   const [muted, toggleMuted] = useMuted()
   const [leaving, setLeaving] = useState(false)
   const [resetting, setResetting] = useState(false)
+  /*
+   * Reading the routine instead of the Ready card. A MODE of the idle state
+   * rather than a screen of its own, so the header, the progress rule and the
+   * controls all stay where they are: you read to the end of a routine and
+   * Start is already under your thumb.
+   */
+  const [previewing, setPreviewing] = useState(false)
 
   useCueScheduler({
     // One run at a time: cues are scheduled on one clock, and a gate ends it.
@@ -378,6 +388,15 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
     return () => window.removeEventListener('keydown', listener)
   }, [])
 
+  /*
+   * The preview belongs to the idle state alone. Closed when the routine starts
+   * rather than merely hidden, so a reset lands back on the Ready card: the
+   * screen you left is not the one you would want after starting over.
+   */
+  useEffect(() => {
+    if (status !== 'idle') setPreviewing(false)
+  }, [status])
+
   const begin = () => {
     onStarted?.()
     timer.start()
@@ -492,7 +511,20 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
           those run in the list layout with no countdown at all.
         */}
         {status === 'idle' ? (
-          <span />
+          /*
+           * In the slot the stopwatch takes once a routine is running, which is
+           * empty until then. The toggle has to live outside the panel it
+           * replaces, or opening the preview would take its own way out with it.
+           */
+          <button
+            className="btn btn--ghost"
+            onClick={() => setPreviewing((open) => !open)}
+            aria-pressed={previewing}
+            aria-label={previewing ? 'Back to ready' : 'Preview the routine'}
+            title={previewing ? 'Back to ready' : 'Read the whole routine'}
+          >
+            {previewing ? <CloseIcon /> : <ListIcon />}
+          </button>
         ) : (
           <span
             className="run__elapsed"
@@ -522,7 +554,9 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
         <span />
       </div>
 
-      {status === 'idle' && (
+      {status === 'idle' && previewing && <PreviewList routine={routine} />}
+
+      {status === 'idle' && !previewing && (
         <div className="rest-state">
           <p className="rest-state__title">Ready</p>
           <div className="rest-state__stats">
@@ -540,6 +574,17 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
               <span className="label">Steps</span>
             </span>
           </div>
+          {/* The way IN. The header carries the same toggle, but an icon in a
+              corner is not how anyone finds a feature the first time. */}
+          <button
+            type="button"
+            className="chip"
+            onClick={() => setPreviewing(true)}
+            title="Read the whole routine before you start"
+          >
+            <ListIcon />
+            Preview
+          </button>
         </div>
       )}
 

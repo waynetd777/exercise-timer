@@ -53,6 +53,11 @@ across a gym, with the phone propped against a rack.
   can wait for you. The whole round or ladder rung is on screen at once and one
   Next clears it. Timed steps mixed in, like a 45-second rest or a 30-second
   plank, still count themselves down.
+- **Reads a routine out before you run it.** Preview, on the Ready card, prints
+  the whole thing end to end: every section, every round written out in the order
+  it will run, with the pictures, the weights and the how-to for each step. It is
+  a mode of the run screen rather than a page of its own, so Start is still under
+  your thumb at the end of the list.
 - **Holds a library** of routines in the browser, searchable, with favourites and
   a colour per routine.
 - **Takes a routine as pasted text,** which is how they arrive. An email from a

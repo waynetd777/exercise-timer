@@ -23,6 +23,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     heading: 'Your routines',
     points: [
       'Tap a routine to open it, then Start.',
+      'Preview, on the Ready card, reads the whole routine end to end before you start it. Every round is written out in the order it will run, with the pictures, the weights and the how-to for each step. The list button in the top corner opens and closes it.',
       'The star pins a favourite to the top of the list.',
       'Paste and Generate both open in the editor rather than saving. Nothing is in your library until you save it there, so a routine you do not like costs you a Back.',
       'Each row also edits, duplicates, sends itself, and deletes. Send offers all four ways: a share link, plain text, a text file, or a backup including images.',
