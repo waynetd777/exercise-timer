@@ -44,7 +44,7 @@ below are fixed and committed, one commit per group:
 - Refactors done (2026-08-28, after v8.3): useModal() for the 8 dialogs (219ab44); EditorScreen split into ui/editor/* with a shared
   ui/CountField (593cd8b); oxlint added and wired into CI, typescript-eslint does not run on TS 7 (2bdde5b); tests for LibraryScreen,
   App and the audio engine. Also: the sections warm-up now draws across every area (bug-110, bf8b0df).
-- Open question: should a group label typed as "Round" survive? migrate.ts renames the exact word to "Set" on read.
+- Decided (Wayne, 2026-08-28): labels stay as they are. migrate.ts keeps renaming a group labelled "Round" to "Set" on read.
 v8.4 pushed 2026-08-28 with the refactors, the warm-up draw fix, oxlint and the new tests. Nothing from the review is open.
 Decided: per-side exercises in the circuit stay as two groups of sets around "Change Sides", unnamed (Wayne: leave it).
 v8.2 pushed 2026-08-28 with the lows.
