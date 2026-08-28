@@ -315,6 +315,22 @@
 - [2026-08-20] **Routine library is first-class — unbounded build/save/load.** Free from the id-keyed store; the work is a Library home screen (list/create/duplicate/rename/delete/load) plus `Workout` metadata (`createdAt`, `updatedAt`, `lastRunAt`, `favourite`, `estimatedTotalMs` denormalised at save so the list needn't compile every routine). Flat searchable list sorted by recently-run with favourites pinned — folders/tags deferred until a flat list actually hurts.
 - [2026-08-20] **Build order: engine first (phase 1), UI second.** Correctness lives in the timeline compiler; getting it right and tested before any React removes the hardest class of bug from later phases.
 
+## Preview mode (2026-08-28)
+
+- **A preview is a reading of the COMPILED routine, never of the tree.** `compile()` already drops a group's trailing
+  rest on the last iteration and resolves a ladder's rung counts, so reading the tree would show a rest that never
+  plays. A test pins this: a two-round circuit stating a 45s rest shows that rest once.
+- **Expanded, by Wayne's choice.** Round 3 of 8 prints as round 3 of 8. The collapsed reading already exists twice
+  over (the editor tree, `writeRoutine`'s text), and the point of a preview is what the run will actually do.
+- **It is a MODE of the run screen's idle state, not a screen of its own.** The header, the progress rule and the
+  controls stay where they are, so Start is under your thumb the moment you finish reading, and there was no history,
+  back-button or weights-filling wiring to repeat. A toggle that opens a panel must live OUTSIDE that panel, or
+  opening it takes its own way out with it: the header's idle slot (empty until the stopwatch needs it) carries it.
+- **This list is read in the hand.** Every other list in the app is sized to be read from where a phone is propped,
+  and the run sheet grows its rows to fill the screen. A page of text set that way is four rows long. The preview
+  holds a reading size and scrolls, which is the one place it deliberately parts company with the run screen.
+- **`content-visibility: auto` with `contain-intrinsic-size`** on the rows: a long routine is a few hundred of them.
+
 ## Session 2026-08-21 — terminology, verification, and what shipped
 
 - **"Reps", always plural.** User correction: it is short for repetitions. The

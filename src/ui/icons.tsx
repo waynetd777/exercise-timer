@@ -345,3 +345,20 @@ export function NoteIcon() {
     </Svg>
   )
 }
+
+/**
+ * A list: the routine written out, rather than one step of it.
+ *
+ * Dots and rules, not the note icon's page: what it opens is the SAME steps in
+ * another arrangement, and a page would say a document had been produced.
+ */
+export function ListIcon() {
+  return (
+    <Svg>
+      <circle cx="5.5" cy="7" r="1.4" fill="currentColor" />
+      <circle cx="5.5" cy="12" r="1.4" fill="currentColor" />
+      <circle cx="5.5" cy="17" r="1.4" fill="currentColor" />
+      <path d="M10 7h9M10 12h9M10 17h6" {...STROKE} />
+    </Svg>
+  )
+}

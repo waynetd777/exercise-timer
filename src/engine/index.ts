@@ -16,6 +16,7 @@ export {
   nextRun,
   retreat,
   runIsOver,
+  samePathStep,
   sectionOf,
   START,
 } from './navigate'

@@ -128,7 +128,7 @@ walks past 10,000 group iterations to get there, which
 | `compile.ts` | Tree to timeline, and the cheap whole-routine measures |
 | `runtime.ts` | `position()`, and the seek helpers behind skip forward/back |
 | `cues.ts` | Cue points, at offsets within a run, and the half-open window the audio scheduler arms |
-| `navigate.ts` | The layer above runs: `locate`, `advance`, `retreat`, and `groupEntries`, which is what list mode draws |
+| `navigate.ts` | The layer above runs: `locate`, `advance`, `retreat`, and `groupEntries`, which is what list mode draws. `samePathStep` (same group, same time through it) is exported, since the preview cuts the routine on the same question |
 | `index.ts` | The package surface. Import from `'../engine'`, not from a file inside it |
 
 `runtime.ts` and `cues.ts` work on one run; `runCues` and `finishesOnTap` are the

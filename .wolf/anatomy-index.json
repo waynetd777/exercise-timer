@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-27T22:27:10.368Z",
-    "fileCount": 71,
+    "lastScanned": "2026-08-28T18:16:50.905Z",
+    "fileCount": 76,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "92519ae96a75bf9b84f3f3e6b0dd156185f76edbb272674961750c2efe560716",
-    "storeUpdatedAt": "2026-08-27T22:27:10.375Z"
+    "renderedHash": "8d2fa3d5ecea3035de4d07f7bde07519f7bc2a838d4c34b25ad33241e7ae95e9",
+    "storeUpdatedAt": "2026-08-28T18:16:50.916Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -1648,6 +1648,99 @@
       "size": 4295,
       "mtimeMs": 1787869630307.0364,
       "updatedAt": "2026-08-27T22:27:10.368Z",
+      "source": "hook"
+    },
+    "src/ui/preview.ts": {
+      "description": "Exercise Timer",
+      "tokens": 674,
+      "hash": "6b9a0b2d8ab84ef0",
+      "size": 2359,
+      "mtimeMs": 1787940812441.8818,
+      "updatedAt": "2026-08-28T18:13:32.523Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "previewBlocks",
+          "kind": "fn",
+          "startLine": 45,
+          "endLine": 75,
+          "tokens": 213
+        }
+      ]
+    },
+    "src/ui/PreviewList.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 1204,
+      "hash": "486536bd405905f0",
+      "size": 4212,
+      "mtimeMs": 1787940852502.5476,
+      "updatedAt": "2026-08-28T18:14:12.575Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Row",
+          "kind": "fn",
+          "startLine": 32,
+          "endLine": 68,
+          "tokens": 438
+        },
+        {
+          "name": "Heading",
+          "kind": "fn",
+          "startLine": 69,
+          "endLine": 92,
+          "tokens": 184
+        },
+        {
+          "name": "PreviewList",
+          "kind": "fn",
+          "startLine": 93,
+          "endLine": 115,
+          "tokens": 222
+        }
+      ]
+    },
+    "src/ui/preview.css": {
+      "description": "Exercise Timer",
+      "tokens": 1541,
+      "hash": "3a30fd88900c9343",
+      "size": 5651,
+      "mtimeMs": 1787940886069.0364,
+      "updatedAt": "2026-08-28T18:14:46.138Z",
+      "source": "hook"
+    },
+    "src/ui/__tests__/preview.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1318,
+      "hash": "5da5e5912859c69a",
+      "size": 4613,
+      "mtimeMs": 1787940979786.5833,
+      "updatedAt": "2026-08-28T18:16:19.877Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "names",
+          "kind": "fn",
+          "startLine": 30,
+          "endLine": 33,
+          "tokens": 48
+        },
+        {
+          "name": "headings",
+          "kind": "fn",
+          "startLine": 34,
+          "endLine": 158,
+          "tokens": 1082
+        }
+      ]
+    },
+    "src/ui/__tests__/PreviewList.test.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 1394,
+      "hash": "65ded22a61e67791",
+      "size": 4877,
+      "mtimeMs": 1787941010834.3733,
+      "updatedAt": "2026-08-28T18:16:50.905Z",
       "source": "hook"
     }
   },

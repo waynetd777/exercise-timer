@@ -427,6 +427,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 |---|---|
 | `App.tsx` | Routing between library, run, edit and weights. Consumes a shared routine from the URL, and fills a routine's empty weights in on the way into a run |
 | `RunScreen.tsx` | The countdown, the media panel, keyboard control |
+| `PreviewList.tsx`, `preview.ts` | The whole routine read before it is run. A mode of the run screen's idle state, not a screen: the header and the controls stay put, so Start is under your thumb at the end of the list. `preview.ts` cuts `routine.entries` into the blocks it prints and is pure |
 | `LibraryScreen.tsx` | Routines, import, export, share, colour, pull-to-update |
 | `EditorScreen.tsx` | Steps, sets, images, undo, and the image chooser and preview dialogs |
 | `WeightsScreen.tsx` | What you lift, per exercise: every loadable exercise, searchable, each with its illustration. Holds the two bulk actions, filling from your routines and letting your routines follow the page |
@@ -440,7 +441,7 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
 | `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
 | `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
-| `library.css`, `run-screen.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
+| `library.css`, `run-screen.css`, `preview.css`, `editor.css`, `weights.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs. `estimated()` is the one place a guessed length is worded |
 | `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

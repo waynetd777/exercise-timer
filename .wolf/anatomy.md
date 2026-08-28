@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T22:27:10.368Z
-> Files: 71 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T18:16:50.905Z
+> Files: 76 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -130,6 +130,9 @@
 - `help.ts` — The help text, kept out of the screens that show it. (~1562 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
 - `keys.ts` — Whether the run screen's shortcuts should act on a key, given what has focus. (~422 tok)
+- `preview.css` — Exercise Timer (~1541 tok)
+- `preview.ts` — Exercise Timer (~674 tok)
+- `PreviewList.tsx` — Exercise Timer (~1204 tok)
 - `useDismiss.ts` — Closes a transient overlay — a menu, a popover — on Escape or a press outside (~448 tok)
 - `useRowDrag.ts` — Exercise Timer (~2422 tok)
 - `weights.css` — Exercise Timer (~914 tok)
@@ -138,5 +141,7 @@
 ## src/ui/__tests__/
 
 - `EditorScreen.test.tsx` — A step that runs as its own countdown, so it gets an image button. (~2424 tok)
+- `preview.test.ts` — Exercise Timer (~1318 tok)
+- `PreviewList.test.tsx` — Exercise Timer (~1394 tok)
 - `RunScreen.test.tsx` — The audio layer is exercised by its own hook tests; here it would only try (~1010 tok)
 - `WeightsScreen.test.tsx` — Exercise Timer (~970 tok)

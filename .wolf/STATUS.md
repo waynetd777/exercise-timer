@@ -6,6 +6,37 @@
 
 ---
 
+## ✅ Done: preview mode (2026-08-28)
+
+Wayne asked whether the whole routine could be previewed on one long scrolling run screen. It could, and cheaply:
+`compile()` already produces the flat ordered `entries` a preview needs, so nothing in the engine changed.
+
+- `src/ui/preview.ts` (pure, 7 tests) cuts `routine.entries` into blocks: a run of consecutive steps in the same
+  place, plus the headings that open above them. A block ends when the path CHANGES, not only when it deepens, or a
+  step following a section would print as though it were still inside it.
+- `src/ui/PreviewList.tsx` + `preview.css`: section headings (sticky, teal, `.label--section`), round and rung
+  captions, then rows of effort / per-side / name with the load, the alternative, the how-to and a 3rem thumbnail.
+  Read in the HAND, so it holds a reading size and scrolls, unlike the run sheet which grows to be read at distance.
+  Role colours the effort column. `content-visibility: auto` and lazy images, since a long routine is a few hundred rows.
+- EXPANDED, Wayne's choice: round 3 of 8 prints as round 3 of 8. The collapsed reading already exists twice, in the
+  editor tree and in `writeRoutine`'s text.
+- A MODE of the run screen's idle state, not a screen: header, progress rule and controls stay put, so Start is under
+  your thumb at the end of the list, and no history or back wiring was needed. In from the `Preview` chip on the Ready
+  card, in and out from the header slot the running stopwatch takes (new `ListIcon`). Closed when the routine starts.
+- `samePathStep` is now exported from the engine, so `groupEntries` and the preview ask "same group, same time through
+  it" one way rather than two.
+- Help: one bullet under "Your routines". `src/ui/README.md` files table updated.
+- Docs: the root README's feature list, `src/ui/README.md`'s files table, `src/engine/README.md` on the exported
+  `samePathStep`, and one bullet of in-app help under "Your routines".
+- 1057 tests green, typecheck, build and oxlint clean. Committed and pushed as v8.5. NOT yet looked at in a browser.
+
+**Next:** Wayne's eyes on it, on the deployed v8.5 or at http://localhost:35173/ (network http://192.168.1.157:35173/).
+The badge on the library screen must read 8.5, or the build did not land.
+Deferred on purpose: tapping a row to start the routine from that step. It is not a single seek once gates are in
+play, it is picking a run and rebasing, and the preview is better read-only until that is designed.
+
+---
+
 ## ✅ Done: the review backlog, top to bottom (2026-08-28)
 
 A full code review (six parallel reviewers, findings verified by reading or by executed probes) produced a ranked
