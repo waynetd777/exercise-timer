@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T21:04:01.730Z
-> Files: 84 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T21:58:53.879Z
+> Files: 88 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -11,6 +11,7 @@
 
 - `AGENTS.md` — OpenWolf (~75 tok)
 - `CLAUDE.md` — OpenWolf (~34 tok)
+- `CREDITS.md` — Credits (~477 tok)
 - `vite.config.ts` — /*.test.{ts,tsx}'], (~791 tok)
 
 ## .claude/
@@ -41,10 +42,12 @@
 ## scripts/
 
 - `exercise_metadata.py` — Exercise Timer (~2649 tok)
+- `exercise_plates_free.py` — api, resolve, plain, square (~3584 tok)
 - `exercise_plates.py` — page_text, exercise_names, slug, plate (~1651 tok)
 - `harvest-exercises.test.ts` — Exercise Timer (~2319 tok)
 - `harvest-prescription.test.ts` — Exercise Timer (~1861 tok)
 - `harvest-shapes.test.ts` — Exercise Timer (~1829 tok)
+- `write_plate_map.py` — Exercise Timer (~1284 tok)
 
 ## src/
 
@@ -96,6 +99,7 @@
 
 - `exerciseOptions.test.ts` — Exercise Timer (~1578 tok)
 - `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
+- `plates.test.ts` — Exercise Timer (~791 tok)
 - `rename.test.ts` — Exercise Timer (~1224 tok)
 
 ## src/state/

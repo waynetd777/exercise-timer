@@ -2,11 +2,33 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-28 (latest: exercise picker + cross-navigation)
+> Last updated: 2026-08-29 (free illustrations tried and reverted; thumbnail refresh fix kept)
 
 ---
 
-## ✅ Done: the Exercises page — pictures beside weights (2026-08-28, latest)
+## ❌ Tried and REVERTED: free illustrations for the unpictured exercises (2026-08-29)
+
+Wayne asked for images for the 105 exercises the guide does not draw, ideally one for every exercise. Sourced,
+shipped, and then removed at his word: **"these images are not good enough. remove them all from the app and revert
+the additional credits etc."** Nothing of it remains in the tree. Read this before offering it again.
+
+- **What was tried**: Everkinetic on Wikimedia Commons (CC BY-SA 3.0, line art on white, 451 exercises) plus the
+  CDC's Growing Stronger set (public domain), fetched and squared into `public/exercises/*.webp`, laid over the
+  tables by a generated `exercises.plates.ts`, credited file by file in a new CREDITS.md.
+- **Why it failed, in order.** Coverage: only ~50 of 105 could be matched at all. Quality: the first batch was
+  blurry (my error: fetched at the target width, cropped, then upscaled) and lossy WebP rang along the line art;
+  both were fixed. Fit: Wayne then rejected the parent stand-ins ("they don't really explain the exercise"), which
+  cut it to 30 exercises. Finally the drawings themselves were not good enough beside the guide's photographs.
+- **What to remember**: `free-exercise-db` is NOT usable (873 exercises, Unlicense, but the images are a commercial
+  site's photographs). Commons is the only source with a per-file licence you can verify. The sourcing lessons are
+  in cerebrum.md; the scripts are gone, and the mapping work is in the session scratchpad if it is ever wanted.
+- **The gap remains**: 42 of 147 exercises have a picture. The Exercises page is how the other 105 get one, a photo
+  at a time, which is the answer Wayne is left with and a better one than someone else's drawings.
+
+**Kept from that session**: the thumbnail on the exercises page now refreshes the moment a picture is removed or
+replaced (`srcOf` guarded by `shownPictures`; the blob map used to only ever grow). Two tests. UNCOMMITTED.
+
+## ✅ Done: the Exercises page — pictures beside weights (2026-08-28, earlier)
 
 Wayne asked whether the weights page should become Exercises, hold a picture per exercise picked or pasted like the
 editor's, and have the editor use it "the same way we use the weight". I recommended the DEFERRED model; he said

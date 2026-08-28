@@ -294,3 +294,10 @@
 | 23:04 | Created src/storage/__tests__/pictures.test.ts | — | ~1118 |
 | 23:20 | Weights page became Exercises: all 147 rows, a picture per exercise (pick/upload/paste), deferred into runs and previews like the weight, GC root + backup fields, editor shows the inherited picture | storage/pictures.ts, routines/loads.ts, ui/ExercisesScreen.tsx (+css), media/gc.ts, storage/{bundle,bundleMedia,useLibrary}.ts, ui/{App,EditorScreen,LibraryScreen,help}.tsx, editor/rows.tsx, ImageDialogs.tsx, 3 READMEs, +47 tests | 1159 tests, typecheck, lint, build green | ~180k |
 | 23:28 | Committed the whole session on main as 23d3fc7 (exercise picker, Exercises page, cross-navigation), badge to 8.7; not pushed at Wayne's request | 46 files | 1159 tests, typecheck, lint, build green | ~6k |
+| 23:43 | Created scripts/exercise_plates_free.py | — | ~3584 |
+| 23:54 | Created src/routines/__tests__/plates.test.ts | — | ~791 |
+| 23:58 | Created scripts/write_plate_map.py | — | ~1284 |
+| 23:58 | Created CREDITS.md | — | ~509 |
+| 00:20 | Shipped 28 free illustrations (Everkinetic CC BY-SA, CDC public domain) for 30 exercises the guide does not draw, with CREDITS.md and two fetch scripts; tightened to one-drawing-one-exercise after Wayne saw the parent stand-ins | scripts/exercise_plates_free.py, scripts/write_plate_map.py, routines/exercises.plates.ts, exercises.ts, imageCatalogue.ts, CREDITS.md, README, help.ts, vite.config.ts, public/exercises/*.webp, +6 tests | 1167 tests, lint, build green; 72 of 147 pictured | ~120k |
+| 00:35 | Removed the free illustrations entirely at Wayne's word ("not good enough"): 28 webp, exercises.plates.ts, CREDITS.md, both scripts and every doc/help/test change reverted; kept the thumbnail-refresh fix | git checkout of 10 files + 6 deletions | 1161 tests, typecheck, lint, build green; back to 42 of 147 pictured | ~15k |
+| 00:45 | Docs/help audit after the revert: help said 42 guide illustrations (41 plus the bike), ui README gained the shrinking-cache trap, buglog entry for the stale thumbnail | ui/help.ts, ui/README.md, .wolf/buglog.json | 1161 tests, typecheck, lint, build green | ~8k |

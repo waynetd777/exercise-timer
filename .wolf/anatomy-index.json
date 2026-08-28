@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-28T21:04:01.730Z",
-    "fileCount": 84,
+    "lastScanned": "2026-08-28T21:58:53.879Z",
+    "fileCount": 88,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "e5cdc730eaf90bd88ee1076e3d4448e210488b08453d8fd0a353c4dbbc95c7f0",
-    "storeUpdatedAt": "2026-08-28T21:04:01.740Z"
+    "renderedHash": "e4333b0db01f3223edb14d9d23632919723a12396d853e323ca0a05847f95217",
+    "storeUpdatedAt": "2026-08-28T21:58:53.887Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -2203,6 +2203,88 @@
       "size": 3913,
       "mtimeMs": 1787951041657.2512,
       "updatedAt": "2026-08-28T21:04:01.730Z",
+      "source": "hook"
+    },
+    "scripts/exercise_plates_free.py": {
+      "description": "api, resolve, plain, square",
+      "tokens": 3584,
+      "hash": "68a3aa9410a2d9bc",
+      "size": 13194,
+      "mtimeMs": 1787953380938.488,
+      "updatedAt": "2026-08-28T21:43:01.003Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "api",
+          "kind": "fn",
+          "startLine": 160,
+          "endLine": 165,
+          "tokens": 65
+        },
+        {
+          "name": "resolve",
+          "kind": "fn",
+          "startLine": 166,
+          "endLine": 207,
+          "tokens": 424
+        },
+        {
+          "name": "square",
+          "kind": "fn",
+          "startLine": 208,
+          "endLine": 247,
+          "tokens": 415
+        },
+        {
+          "name": "slug",
+          "kind": "fn",
+          "startLine": 248,
+          "endLine": 258,
+          "tokens": 108
+        },
+        {
+          "name": "main",
+          "kind": "fn",
+          "startLine": 259,
+          "endLine": 299,
+          "tokens": 433
+        }
+      ]
+    },
+    "src/routines/__tests__/plates.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 791,
+      "hash": "ee2adee084ece65f",
+      "size": 2768,
+      "mtimeMs": 1787954044552.0466,
+      "updatedAt": "2026-08-28T21:54:04.611Z",
+      "source": "hook"
+    },
+    "scripts/write_plate_map.py": {
+      "description": "Exercise Timer",
+      "tokens": 1284,
+      "hash": "bfa9c092cb7c3f8f",
+      "size": 4493,
+      "mtimeMs": 1787954320242.4238,
+      "updatedAt": "2026-08-28T21:58:40.308Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "main",
+          "kind": "fn",
+          "startLine": 59,
+          "endLine": 113,
+          "tokens": 650
+        }
+      ]
+    },
+    "CREDITS.md": {
+      "description": "Credits",
+      "tokens": 477,
+      "hash": "c93b4d3d7c5f33c8",
+      "size": 1916,
+      "mtimeMs": 1787954333813.8154,
+      "updatedAt": "2026-08-28T21:58:53.878Z",
       "source": "hook"
     }
   },

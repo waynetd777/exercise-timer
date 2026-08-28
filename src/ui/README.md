@@ -129,6 +129,11 @@ Each of these cost a real bug. They are recorded because they recur.
   picture *within* the box, and if the box is too big the picture is clipped. Make
   the box definite (`position: absolute; inset: 0`) rather than trusting a
   percentage height to resolve.
+- **A cache of resolved image URLs must be able to SHRINK.** The exercises page
+  resolves its pictures once for the whole page, into a map the rows read before
+  the synchronous one. That map only ever grew, so a picture you removed went on
+  being shown until the page was left and reopened. Rebuild it, and guard the
+  lookup with "does this exercise still have a picture at all".
 - **Centred text with letter-spacing is off-centre by half the tracking,** because
   the spacing is applied after the last glyph too. Compensate with padding.
 - **With `container-type: inline-size`, only `cqi` and `cqw` mean anything.** `cqh`

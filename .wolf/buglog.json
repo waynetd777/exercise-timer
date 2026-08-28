@@ -2013,6 +2013,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T20:24:20Z"
+    },
+    {
+      "id": "bug-121",
+      "timestamp": "2026-08-28T23:49:23Z",
+      "error_message": "USER REPORTED: removing an image on the Exercises page left the old thumbnail in the row",
+      "file": "src/ui/ExercisesScreen.tsx",
+      "root_cause": "The page resolves its 147 images once, in two passes: a synchronous one for bundled paths and an effect for blobs. The effect's map only ever GREW (it returned early when nothing needed a blob), and srcOf read it FIRST, so a removed photo's URL was still there and still preferred.",
+      "fix": "The effect clears the map when nothing is pending, srcOf reads the synchronous map first, and both are guarded by `shownPictures.has(name)` so an exercise with no picture resolves to null immediately. Two tests: removal, and one picture replacing another.",
+      "tags": [
+        "react",
+        "effects",
+        "cache",
+        "exercises-page",
+        "media"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T23:49:23Z"
     }
   ]
 }

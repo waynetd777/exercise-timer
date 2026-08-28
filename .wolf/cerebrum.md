@@ -294,6 +294,29 @@
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
 
+## Sourcing pictures for the app (2026-08-29)
+
+**OUTCOME FIRST: the free line art was rejected and removed.** "These images are not good enough." The app's own
+plates are photographs of Wayne's actual machine, and a generic line drawing beside them reads as filler. Do not
+offer a free illustration library for this app again without asking first. The lessons below still hold for any
+other sourcing job.
+
+- **A repo's LICENSE does not launder someone else's copyright.** `free-exercise-db` is Unlicense and its images are
+  bodybuilding.com's photographs. Check what the images ARE, not what the repo says.
+- **Wikimedia Commons is the dependable source**, because the licence is per FILE and machine-readable
+  (`extmetadata.LicenseShortName`), and its thumbnail API rasterises SVG for you at any width, which removes the need
+  for a local renderer.
+- **Fetch bigger than you need, and never upscale.** The first batch was fetched at the target width, cropped to the
+  subject, then stretched back: soft, and Wayne noticed immediately. Fetch at 1600, cap at 640, resize DOWN only.
+- **Line art wants LOSSLESS WebP.** Lossy rings along every edge and, on flat white with hard black lines, comes out
+  BIGGER than lossless anyway.
+- **A picture of a different exercise is worse than no picture** (Wayne, reversing his own earlier call once he saw
+  it): the empty frame asks a question, the wrong picture answers it wrongly. A variant of the same movement is
+  fine; a parent exercise standing in for its family is not.
+- **Check a contact sheet before shipping a batch.** Everkinetic's two frames per exercise follow no fixed
+  convention — the squat's second frame is the squat, the lunge's first is the lunge — and one image read of a grid
+  settles thirty decisions.
+
 ## The exercises page: pictures beside weights (2026-08-28)
 
 - **The weights page became the EXERCISES page.** All 147 are listed, not the 68 loadable ones, because the 79
