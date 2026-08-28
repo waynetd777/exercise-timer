@@ -146,11 +146,9 @@ export async function importRoutineFiles(
         reason:
           cause instanceof TabataImportError
             ? cause.message
-            : cause instanceof SyntaxError
-              ? 'Not valid JSON.'
-              : cause instanceof Error
-                ? cause.message
-                : 'Could not be read.',
+            : cause instanceof Error
+              ? cause.message
+              : 'Could not be read.',
       })
     }
   }

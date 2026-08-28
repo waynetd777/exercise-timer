@@ -139,7 +139,7 @@ export type Segment = {
 export type Repeat = {
   kind: 'repeat'
   id: string
-  /** Shown as e.g. "Reps 3 of 8" while running. */
+  /** Shown as e.g. "Set 3 of 8" while running. */
   label?: string
   /** Iteration count. Floored; anything below 1 contributes nothing. */
   times: number
@@ -265,7 +265,7 @@ export type Workout = {
 
 /**
  * One level of grouping above a timeline entry: a section, a repeat iteration or
- * a ladder rung. Renders as "Reps 3 of 8", "Set 4 of 9".
+ * a ladder rung. Renders as "Set 3 of 8", "Round 4 of 9".
  *
  * A section contributes a level with `iteration: 1, of: 1`, which `pathLabel()`
  * filters out of the caption; it is there so the run screen can find the entries

@@ -1755,6 +1755,71 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T04:10:00Z"
+    },
+    {
+      "id": "bug-105",
+      "timestamp": "2026-08-28T05:20:00Z",
+      "error_message": "Editor lows: no Ctrl+Y redo; focus fell to the body after Delete/Add/Duplicate; a cleared group label or section note was stored as ''; Menu items keyed by label with aria-checked on menuitem.",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "Redo only on Shift+Z; the pressed button unmounted with its row; updateRepeat/Ladder/Section spread the patch without deleting empties; Menu used label keys and a plain menuitem role for choosable items.",
+      "fix": "Ctrl+Y redoes; focusAfter names a row index and selector applied after render; patched() deletes keys set to ''; Menu keys by index+label and uses menuitemradio when selectable. Tests for focus and empty-field removal.",
+      "tags": [
+        "editor",
+        "undo",
+        "focus",
+        "menu",
+        "a11y"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T05:20:00Z"
+    },
+    {
+      "id": "bug-106",
+      "timestamp": "2026-08-28T05:20:00Z",
+      "error_message": "Library lows: drop overlay flickered crossing children; done rows on the run sheet fell under 4.5:1 on the phase wash.",
+      "file": "src/ui/LibraryScreen.tsx",
+      "root_cause": "dragleave fires entering a child; --bone-faint over the gradient top measured ~3.6:1.",
+      "fix": "Enter/leave counter drives the overlay; done rows use --bone-dim (the strike-through carries the state).",
+      "tags": [
+        "library",
+        "drag-drop",
+        "contrast"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T05:20:00Z"
+    },
+    {
+      "id": "bug-107",
+      "timestamp": "2026-08-28T05:20:00Z",
+      "error_message": "Storage/media lows: a large backup download could be cancelled by an early object-URL revoke; an all-rejected bundle threw and lost the names; two tabs kept stale weights/paces caches; pull-to-refresh 'busy' never reset; a huge data URL was decoded before the size cap; AudioContext construction and resume() were unguarded.",
+      "file": "src/storage/download.ts",
+      "root_cause": "Revoke on the next macrotask; fromBundle threw when no routine was readable even with rejected names collected; no storage-event listener; no finally on the refresh promise; cap checked after atob; ctx.resume() unhandled and new AudioContext() outside try.",
+      "fix": "Revoke after 60s; fromBundle returns {workouts: [], rejected} unless the file had no routines at all; weights.ts/paces.ts drop their cache on a storage event; finally resets busy; encoded length checked first; AudioContext guarded and resume().catch(). Bundle tests updated to expect the names.",
+      "tags": [
+        "storage",
+        "download",
+        "bundle",
+        "cross-tab",
+        "audio"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T05:20:00Z"
+    },
+    {
+      "id": "bug-108",
+      "timestamp": "2026-08-28T05:20:00Z",
+      "error_message": "Routines lows: shouted REST read as a heading; '0 Rounds' built an empty group; '10 xtreme pushups' lost its x; a pyramid row naming an undefined rung was shortened silently; unknown warm-up/cool-down exercises fell back silently; sections with no areas built a warm-up-only routine and sections:NaN threw a misleading error; group/ladder labels other than Set were dropped from text export without a word; the two-pass fuzzy matcher was duplicated in rename.ts and loads.ts.",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "See each: SHOUTED_SECTION had no word list; ROUNDS accepted 0; LEADING_COUNT's [\u00d7x]\\s* ate a leading x; expandPyramid filtered undefined rungs quietly; named() had no note; sectionsRoutine did not validate areas or sections; repeatLines/ladderLines ignored labels; findLoad and match() each carried the matcher.",
+      "fix": "SHOUTED_SECTION excludes rest/work and needs a 3-letter word; 0 rounds is reported in skipped; LEADING_COUNT requires whitespace after x; undefined rungs report the row; named() notes the fallback; areas:[] throws the dialog's message and NaN falls to the typical count; labels other than Set/Round are reported in lost; closestKey() in foldName.ts is shared. Tests for each.",
+      "tags": [
+        "pasteFormat",
+        "generator",
+        "writeRoutine",
+        "matcher"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T05:20:00Z"
     }
   ]
 }

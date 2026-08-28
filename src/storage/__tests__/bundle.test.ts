@@ -186,7 +186,7 @@ describe('fromBundle', () => {
         },
       ],
     }
-    expect(() => fromBundle(huge, NOW)).toThrow(BundleError)
+    expect(fromBundle(huge, NOW).rejected).toEqual(['Too big'])
   })
 
   it('rejects anything that is not one of our exports', () => {
@@ -201,12 +201,18 @@ describe('fromBundle', () => {
     ).toThrow(/newer version/)
   })
 
-  it('rejects a bundle whose routines are all unreadable', () => {
+  it('names the routines it could not read, even when that is all of them', () => {
+    // Throwing here lost the names it had just collected; the file is the
+    // user's only copy, so which routines are gone is the one thing to say.
+    const contents = fromBundle(
+      { kind: 'davshack-timer-bundle', version: 1, workouts: [{ id: 1, name: 2 }] },
+      NOW,
+    )
+    expect(contents.workouts).toEqual([])
+    expect(contents.rejected).toEqual(['Unnamed routine'])
+    // A file with no routines at all is still an error.
     expect(() =>
-      fromBundle(
-        { kind: 'davshack-timer-bundle', version: 1, workouts: [{ id: 1, name: 2 }] },
-        NOW,
-      ),
+      fromBundle({ kind: 'davshack-timer-bundle', version: 1, workouts: [] }, NOW),
     ).toThrow(/no readable routines/)
   })
 
@@ -237,7 +243,7 @@ describe('fromBundle', () => {
         { id: 'x', name: 'Bad', blocks: [{ kind: 'repeat', id: 'r', times: 2, children: [42] }] },
       ],
     }
-    expect(() => fromBundle(bad, NOW)).toThrow(/no readable routines/)
+    expect(fromBundle(bad, NOW).rejected).toEqual(['Bad'])
   })
 })
 
@@ -270,7 +276,9 @@ describe('field validation', () => {
   })
 
   const rejects = (blocks: unknown[]): void => {
-    expect(() => fromBundle(bundleWith(blocks), NOW)).toThrow(/no readable routines/)
+    const contents = fromBundle(bundleWith(blocks), NOW)
+    expect(contents.workouts).toHaveLength(0)
+    expect(contents.rejected).toEqual(['Suspect'])
   }
   const accepts = (blocks: unknown[]): void => {
     expect(fromBundle(bundleWith(blocks), NOW).workouts).toHaveLength(1)
@@ -356,7 +364,7 @@ describe('field validation', () => {
       version: 1,
       workouts: [{ id: 'x', name: 'Suspect', createdAt: 'yesterday', blocks: [] }],
     }
-    expect(() => fromBundle(damaged, NOW)).toThrow(/no readable routines/)
+    expect(fromBundle(damaged, NOW).rejected).toEqual(['Suspect'])
   })
 })
 

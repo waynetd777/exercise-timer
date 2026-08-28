@@ -27,7 +27,7 @@
 
 import type { Block, Workout } from '../engine/types'
 import { EXERCISES } from './exercises'
-import { foldName } from './foldName'
+import { closestKey, foldName } from './foldName'
 
 /**
  * Bare names with one obvious owner on this machine.
@@ -127,21 +127,10 @@ function match(core: string, byKey: Map<string, string[]>): string | null {
   const alias = ALIASES[key]
   if (alias) return alias
 
-  const wanted = key.split(' ').filter(Boolean)
-  let found: string | null = null
-  for (const [candidate, names] of byKey) {
-    const words = candidate.split(' ')
-    if (words.length !== wanted.length || names.length !== 1) continue
-    const alike = words.every((word, at) => {
-      const other = wanted[at]!
-      const [short, long] = word.length <= other.length ? [word, other] : [other, word]
-      return short.length >= 2 && long.startsWith(short)
-    })
-    if (!alike) continue
-    if (found !== null) return null
-    found = names[0]!
-  }
-  return found
+  // Only folds owned by ONE exercise are candidates; a shared fold decides nothing.
+  const singles = [...byKey].filter(([, names]) => names.length === 1).map(([fold]) => fold)
+  const hit = closestKey(key, singles)
+  return hit === null ? null : byKey.get(hit)![0]!
 }
 
 /** The name this step should have, or `null` where it already has it. */

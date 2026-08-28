@@ -22,6 +22,35 @@
  * hyphens, and a plural. "10x Bicycle Crunches (per leg)", "Bicycle crunch" and
  * "Bicycle-Crunches" all arrive here as `bicycle crunch`.
  */
+/**
+ * The one candidate that reads as `key`, or null.
+ *
+ * Word by word: the same number of words, in the same order, each the start of
+ * the other ("ab" finds "abdominal"), and at least two letters, since one would
+ * match half the table. Two candidates decide nothing: putting the wrong number
+ * on a bar is worse than putting none on it. Shared by the weight lookup and the
+ * renamer, which used to carry a copy each with a comment asking that they be
+ * kept in step.
+ */
+export function closestKey(key: string, candidates: Iterable<string>): string | null {
+  const wanted = key.split(' ').filter(Boolean)
+  if (wanted.length === 0) return null
+  let found: string | null = null
+  for (const candidate of candidates) {
+    const words = candidate.split(' ')
+    if (words.length !== wanted.length) continue
+    const alike = words.every((word, at) => {
+      const other = wanted[at]!
+      const [short, long] = word.length <= other.length ? [word, other] : [other, word]
+      return short.length >= 2 && long.startsWith(short)
+    })
+    if (!alike) continue
+    if (found !== null) return null
+    found = candidate
+  }
+  return found
+}
+
 export function foldName(name: string): string {
   return name
     .toLowerCase()

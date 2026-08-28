@@ -37,11 +37,14 @@ below are fixed and committed, one commit per group:
   db.run resolves on transaction completion, hardware Back routed through the screens' own exit handlers, and the countdown
   re-measured at the minute marks (Wayne's pick).
 
-Still open from the review (all low, plus quality):
-- UI lows: Ctrl+Y redo; focus after Delete/Add; group label/note store '' instead of deleting; Menu items keyed by label;
-  drop overlay flicker on onDragLeave; done-row contrast on the phase wash; matcher still duplicated in rename.ts/loads.ts.
-- Quality: split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared with
-  GenerateDialog; add a linter; tests for LibraryScreen/App/audio engine.
+- 2026-08-28 (later): the lows, all of them (commits 10f1185 and the one after): editor focus/redo/empty fields, menu roles,
+  drop overlay, done-row contrast, download revoke, all-rejected bundles report names, cross-tab cache invalidation,
+  pull-to-refresh busy reset, data-URL cap, AudioContext guards, parser/generator/writer lows, shared closestKey matcher.
+
+Still open (quality only): split EditorScreen.tsx (seams in the review); one useModal() for the 8 dialog copies; CountField shared
+with GenerateDialog; add a linter; tests for LibraryScreen/App/audio engine.
+Open question for Wayne: per-side exercises in the circuit read as duplicates (two groups of sets around "Change Sides");
+proposed naming the halves "(first side)" / "(other side)".
 
 ---
 

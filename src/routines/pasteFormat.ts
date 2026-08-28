@@ -379,7 +379,8 @@ const TRAILING_DURATION = new RegExp(
   'i',
 )
 /** "12 × Hammer Curls", and the bare "20 Flutter Kicks". */
-const LEADING_COUNT = /^(\d+)\s*(?:[×x]\s*|\s)(.+)$/
+// The "x" must stand alone: "10 xtreme pushups" is not ten of "treme pushups".
+const LEADING_COUNT = /^(\d+)\s*(?:×\s*|x\s+|\s)(.+)$/
 /**
  * A RANGE where one number is expected: "10/12 x lateral raises",
  * "10-15 x Fire hydrant left leg", "1-2mins Jumping jacks".
@@ -761,6 +762,11 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     }
 
     const spent = new Set(numbered.filter((e) => vocabulary.get(e.index) === e.block).map((e) => e.at))
+    // A row naming a rung no line defined loses that rung: said, rather than a
+    // shorter round built quietly.
+    for (const row of pyramidRows) {
+      if (row.rungs.some((rung) => !vocabulary.has(rung))) skipped.push({ line: row.line, text: row.text })
+    }
     const rounds: Block[] = pyramidRows.map((row) => ({
       kind: 'repeat',
       id: nextId('rep'),
@@ -977,7 +983,9 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
     if (
       SHOUTED_SECTION.test(heading.trim()) &&
-      /\p{L}/u.test(heading) &&
+      // A real word, and not a step's own shout: "REST" and "WORK" are steps.
+      /\p{L}{3}/u.test(heading) &&
+      !/^(?:rest|work)$/i.test(heading.trim()) &&
       !AMRAP_HEADING.test(heading) &&
       !EMOM_HEADING.test(heading)
     ) {
@@ -1048,6 +1056,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       flushAmrap()
       // "3–5 Rounds" stores the upper bound; the runner can end a section early.
       const times = Number(rounds[2] ?? rounds[1])
+      // "0 Rounds" is not a round count; reported rather than built as a group
+      // that never runs.
+      if (times < 1) {
+        skipped.push({ line: number, text: line })
+        return
+      }
       const group: Repeat = { kind: 'repeat', id: nextId('rep'), times, children: [], label: 'Round' }
       const host = ensureSection()
       /*

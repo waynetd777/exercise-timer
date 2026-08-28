@@ -715,3 +715,14 @@ describe('what the sections shape can reach', () => {
     expect([...seen].some((name) => ['Torso Rotations', 'Inchworms'].includes(name))).toBe(true)
   })
 })
+
+describe('what it says when a chosen exercise is unknown', () => {
+  it('notes a warm-up or cool-down it could not find, as it does for the recovery', () => {
+    const { notes } = generateRoutine(
+      spec({ recovery: 'active', warmUpExercise: 'Unicycling', coolDownExercise: 'Levitation' }),
+      { rng: seeded(1), now: 0 },
+    )
+    expect(notes.join(' ')).toMatch(/"Unicycling" for the warm-up/)
+    expect(notes.join(' ')).toMatch(/"Levitation" for the cool-down/)
+  })
+})

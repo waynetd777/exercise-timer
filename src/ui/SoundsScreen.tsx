@@ -11,6 +11,7 @@ import { lastStrikeMs, sequenceFor, toneFor } from '../audio/tones'
 import type { Note, ToneSpec } from '../audio/tones'
 import { BackIcon, PlayIcon } from './icons'
 import './sounds.css'
+import { AFTER_LAST_DING_MS } from '../audio/useSpokenCues'
 
 /**
  * A bench for the cue sounds.
@@ -170,7 +171,8 @@ export function SoundsScreen({ onExit }: { onExit: () => void }) {
     const complete = toneFor('workout-complete')!
     audio.preview(sequenceFor('workout-complete'))
     if (canSpeak()) {
-      window.setTimeout(() => speak(SPOKEN.thatsAWrap), 3000 + lastStrikeMs(complete) + 450)
+      // 3000ms is the sequence's own lead-in before the completion figure.
+      window.setTimeout(() => speak(SPOKEN.thatsAWrap), 3000 + lastStrikeMs(complete) + AFTER_LAST_DING_MS)
     }
   }
 

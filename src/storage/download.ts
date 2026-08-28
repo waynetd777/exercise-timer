@@ -9,9 +9,12 @@
  *
  * A temporary anchor rather than anything cleverer: it is the only approach that
  * works in every browser, including an installed PWA. The object URL is revoked
- * on the next tick. Revoking it immediately can cancel the download in some
- * browsers before it has started reading.
+ * a minute later, not on the next tick: Safari starts reading the blob
+ * asynchronously, and a multi-megabyte backup with photos in it was cancelled
+ * before it had begun. A minute of one URL is nothing; a lost backup is not.
  */
+const REVOKE_AFTER_MS = 60_000
+
 function download(filename: string, blob: Blob): void {
   const url = URL.createObjectURL(blob)
 
@@ -23,7 +26,7 @@ function download(filename: string, blob: Blob): void {
   anchor.click()
   anchor.remove()
 
-  setTimeout(() => URL.revokeObjectURL(url), 0)
+  setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER_MS)
 }
 
 export function downloadJson(filename: string, data: unknown): void {

@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import type { Block, Workout } from '../engine'
+import type { Block, MediaRef, Workout } from '../engine'
 
 /**
  * Which stored blobs are still referenced, and which are orphaned.
@@ -15,24 +15,23 @@ import type { Block, Workout } from '../engine'
  */
 export function liveHashes(workouts: readonly Workout[]): Set<string> {
   const live = new Set<string>()
+  forEachMedia(workouts, (media) => {
+    if (media.source === 'local') live.add(media.hash)
+    // A pinned remote image also owns its blob.
+    if (media.source === 'remote' && media.cachedHash) live.add(media.cachedHash)
+  })
+  return live
+}
 
+/** Every step's media across the routines. Any group kind: missing one would orphan live images. */
+function forEachMedia(workouts: readonly Workout[], visit: (media: MediaRef) => void): void {
   const walk = (blocks: readonly Block[]): void => {
     for (const block of blocks) {
-      // Any group, not just `repeat`. Missing one would orphan live images.
-      if (block.kind !== 'segment') {
-        walk(block.children)
-        continue
-      }
-      const media = block.media
-      if (!media) continue
-      if (media.source === 'local') live.add(media.hash)
-      // A pinned remote image also owns its blob.
-      if (media.source === 'remote' && media.cachedHash) live.add(media.cachedHash)
+      if (block.kind !== 'segment') walk(block.children)
+      else if (block.media) visit(block.media)
     }
   }
-
   for (const workout of workouts) walk(workout.blocks)
-  return live
 }
 
 /**
@@ -46,18 +45,9 @@ export function liveHashes(workouts: readonly Workout[]): Set<string> {
  */
 export function localHashes(workouts: readonly Workout[]): string[] {
   const found = new Set<string>()
-
-  const walk = (blocks: readonly Block[]): void => {
-    for (const block of blocks) {
-      if (block.kind !== 'segment') {
-        walk(block.children)
-        continue
-      }
-      if (block.media?.source === 'local') found.add(block.media.hash)
-    }
-  }
-
-  for (const workout of workouts) walk(workout.blocks)
+  forEachMedia(workouts, (media) => {
+    if (media.source === 'local') found.add(media.hash)
+  })
   return [...found].sort()
 }
 

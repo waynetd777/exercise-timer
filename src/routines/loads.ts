@@ -22,7 +22,7 @@
  */
 
 import type { Block, Workout } from '../engine/types'
-import { foldName } from './foldName'
+import { closestKey, foldName } from './foldName'
 
 /**
  * The exercise a step is about, under whatever the step is called.
@@ -65,25 +65,8 @@ export function findLoad(
   const exact = weights.get(key)
   if (exact !== undefined) return exact
 
-  const wanted = key.split(' ').filter(Boolean)
-  if (wanted.length === 0) return undefined
-
-  let found: string | undefined
-  for (const [candidate, load] of weights) {
-    const words = candidate.split(' ')
-    if (words.length !== wanted.length) continue
-    const alike = words.every((word, at) => {
-      const other = wanted[at]!
-      const [short, long] = word.length <= other.length ? [word, other] : [other, word]
-      // Two letters is the shortest abbreviation worth honouring; one would
-      // match half the table.
-      return short.length >= 2 && long.startsWith(short)
-    })
-    if (!alike) continue
-    if (found !== undefined) return undefined
-    found = load
-  }
-  return found
+  const hit = closestKey(key, weights.keys())
+  return hit === null ? undefined : weights.get(hit)
 }
 
 /**

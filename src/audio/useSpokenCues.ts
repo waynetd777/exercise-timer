@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react'
 import type { RoutinePosition } from '../engine'
 import { canSpeak, speak, SPOKEN } from './speech'
 import { lastStrikeMs, toneFor } from './tones'
+import type { RunStatus } from '../state/useTimer'
 
 /** Steps shorter than this never announce: the countdown beeps cover them. */
 const MIN_STEP_MS = 20_000
@@ -32,7 +33,7 @@ const ANNOUNCE_FLOOR = 8
  * Measured from the strike rather than from the end of its tail: the tail is long
  * and quiet, and waiting it out would leave an awkward silence before the voice.
  */
-const AFTER_LAST_DING_MS = 450
+export const AFTER_LAST_DING_MS = 450
 
 /**
  * Gap between pressing start and the opening line.
@@ -55,7 +56,7 @@ const AFTER_START_CUE_MS = 900
  */
 export function useSpokenCues(
   at: RoutinePosition,
-  status: 'idle' | 'running' | 'paused' | 'complete',
+  status: RunStatus,
   muted: boolean,
 ): void {
   const announced = useRef<number | null>(null)

@@ -961,3 +961,26 @@ describe('blocks that used to bleed into each other', () => {
     expect(step?.kind === 'segment' && step.durationMs).toBe(60_000)
   })
 })
+
+describe('small refusals that used to be silent', () => {
+  it('reports a pyramid row that names a rung nothing defined', () => {
+    const parsed = parseRoutine('#1 Body\n1 - 20 x Squats\n2 - 15 x Lunges\n\n1\n1 + 2\n1 + 2 + 5')
+    expect(parsed.skipped.map((entry) => entry.text)).toEqual(['1 + 2 + 5'])
+  })
+
+  it('does not read a shouted REST as a heading', () => {
+    const parsed = parseRoutine('#1 Legs\n10 x Squats\nREST\n10 x Lunges')
+    expect(parsed.blocks.filter((b) => b.kind === 'section').map((b) => b.name)).toEqual(['Legs'])
+  })
+
+  it('refuses "0 Rounds" rather than building a group that never runs', () => {
+    const parsed = parseRoutine('0 Rounds\n10 x Squats')
+    expect(parsed.skipped.map((entry) => entry.text)).toEqual(['0 Rounds'])
+  })
+
+  it('does not take the x off a word that starts with one', () => {
+    expect(parseItem('10 xtreme pushups')).toMatchObject({ name: 'xtreme pushups', count: 10 })
+    expect(parseItem('10x Squats')).toMatchObject({ name: 'Squats', count: 10 })
+    expect(parseItem('10 x Squats')).toMatchObject({ name: 'Squats', count: 10 })
+  })
+})

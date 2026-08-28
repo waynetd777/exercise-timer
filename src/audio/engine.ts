@@ -46,7 +46,12 @@ class AudioEngine {
    */
   unlock(): void {
     if (!this.ctx) {
-      this.ctx = new AudioContext()
+      try {
+        this.ctx = new AudioContext()
+      } catch {
+        // No Web Audio here. The timer still runs; it is silent.
+        return
+      }
       // Announced, because resumption is asynchronous: the caller that asked
       // for it has moved on by the time the state actually flips.
       this.ctx.addEventListener('statechange', () => {
@@ -133,7 +138,11 @@ class AudioEngine {
   resume(): void {
     const ctx = this.ctx
     if (!ctx || ctx.state === 'closed') return
-    if (ctx.state !== 'running') void ctx.resume()
+    if (ctx.state !== 'running') {
+      // Rejected when the page is not allowed to make sound yet; the statechange
+      // listener arms again when it is, so there is nothing to do here.
+      ctx.resume().catch(() => {})
+    }
   }
 
   get ready(): boolean {

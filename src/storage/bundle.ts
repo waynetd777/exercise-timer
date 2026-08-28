@@ -250,7 +250,10 @@ export function fromBundle(json: unknown, now: number): BundleContents {
     const name = (entry as { name?: unknown } | null)?.name
     rejected.push(typeof name === 'string' && name.trim() !== '' ? name : 'Unnamed routine')
   }
-  if (workouts.length === 0) throw new BundleError('no readable routines')
+  // Nothing readable AND nothing to name is an empty file. Nothing readable but
+  // names to report is a result: the caller says which routines were lost,
+  // which the thrown message could not.
+  if (workouts.length === 0 && rejected.length === 0) throw new BundleError('no readable routines')
 
   return {
     workouts: workouts.map((workout) =>
