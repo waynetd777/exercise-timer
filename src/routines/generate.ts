@@ -27,28 +27,32 @@
  *    and its weight, a minute of cardio while you set the machine up, get ready,
  *    then the sets. Wrapped in a ten-minute cardio warm-up and a cool down.
  *
+ * And a third, `sections`, read off the instructor's sixteen: see `THEME_SHAPE`.
+ *
  * The length is not estimated and then hoped for. Exercises are added one at a
  * time and each one's real cost is known, so a per-side exercise costing two
  * blocks and an ankle-strap one costing five more seconds are both accounted for
  * exactly rather than averaged.
  */
 
-import type { Block, Repeat, Segment, Workout } from '../engine/types'
+import type { Block, Repeat, Section, Segment, Workout } from '../engine/types'
 import { SCHEMA_VERSION } from '../engine/types'
 import { blocksDurationMs } from '../engine'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
+import type { Prescription } from './exercises.prescription'
 import { PRESCRIPTIONS } from './exercises.prescription'
 import {
   LADDER_COUNTS,
-  SECTION_SIZE,
   SECTION_THEMES,
   SECTIONS_MAX,
   SECTIONS_TYPICAL,
+  WARM_UP_MOVES,
 } from './exercises.shapes'
 import { foldName } from './foldName'
 import { exerciseKey } from './loads'
+import { estimate } from './estimate'
 import { GET_READY_MS } from './pasteFormat'
 
 export type Recovery = 'passive' | 'active'
@@ -59,11 +63,12 @@ export type Recovery = 'passive' | 'active'
  * `circuit` is the shape Wayne's own mixed-cardio routines take: one exercise at
  * a time, everything on a clock, so the length is knowable and solvable.
  *
- * `sections` is the shape his instructor sends: six named sections, two or three
+ * `sections` is the shape his instructor sends: named sections, two or three
  * of them ladders, and most steps COUNTED rather than timed. Its length is not
- * knowable, because a self-paced step ends when you tap Next, so the question
- * that shape asks is how many sections rather than how many minutes. Wayne's
- * decision.
+ * knowable, because a self-paced step ends when you tap Next, so it is ESTIMATED
+ * at a seconds-per-rep rate and whole sections are fitted to the minutes asked.
+ * It was asked how many sections instead; Wayne's later decision (2026-08-28)
+ * was that both shapes should be asked the same question.
  */
 export type Style = 'circuit' | 'sections'
 
@@ -115,10 +120,8 @@ export type RoutineSpec = {
   /** Defaults to `circuit`. */
   style?: Style
   /**
-   * Sections, for `sections`. Defaults to what the routines typically hold.
-   *
-   * This is what replaces `totalMs` for that style: a routine of self-paced
-   * steps has no length to aim at, so the size of it is counted in sections.
+   * Sections, for `sections`, as an OVERRIDE. Left out, the count is fitted to
+   * `totalMs` by estimate. Given, that many are built, bookends included.
    */
   sections?: number
 }
@@ -167,7 +170,7 @@ const DEFAULT_REPS = 12
  *
  * BELOW what the corpus does: no routine in the corpus has fewer than five, and
  * `SECTIONS_MIN` in `exercises.shapes.ts` says so. This is a shorter session than the instructor writes,
- * which is a reasonable thing to want and not a claim about what he sends.
+ * which is a reasonable thing to want and not a claim about what she sends.
  */
 export const SECTIONS_FEWEST = 3
 
@@ -227,7 +230,7 @@ export function seeded(seed: number): Rng {
 
 /**
  * One of `items`, more often the ones seen more. Every ladder the instructor
- * has written is a candidate, in proportion to how often he wrote it: a fixed
+ * has written is a candidate, in proportion to how often she wrote it: a fixed
  * cut of the first six left thirteen of the nineteen unreachable.
  */
 function weightedPick<T>(items: readonly T[], weight: (item: T) => number, rng: Rng): T {
@@ -415,6 +418,113 @@ function exerciseBlocks(
 }
 
 /**
+ * What each theme IS, read off the 16 routines. The counts are in
+ * `README.md` under "Generating a routine".
+ *
+ *  - `climb`: General Body. One pyramid, and EVERY exercise climbs it:
+ *    "Complete one exercise before moving to the next." Four or five moves.
+ *  - `rounds`: Arms & Shoulders. Five or six counted moves, four or five
+ *    rounds, "Rest 45 seconds after each round".
+ *  - `ladder`: Legs. "Main Exercise:" then "After every set:", two or three
+ *    accessories keeping their own count.
+ *  - `coreRounds`: Core. Four counted moves and a timed hold to close each
+ *    round, three to five rounds, then "After Round N:" loose steps.
+ *  - `finisher`: a Legs ladder, then "Final Burnout": loose steps done once,
+ *    ending on a wall sit where there is one.
+ *
+ * It used to be positional, a ladder every third section, which put the
+ * ladders on General Body and Core. Since July she has written the Finisher as
+ * a ladder every time and Core as rounds every time. The shape belongs to the
+ * theme.
+ */
+type ThemeShape = 'warmUp' | 'climb' | 'rounds' | 'ladder' | 'coreRounds' | 'finisher'
+const THEME_SHAPE: Readonly<Record<string, ThemeShape>> = {
+  'Warm-up': 'warmUp',
+  'General Body': 'climb',
+  'Arms & Shoulders': 'rounds',
+  Legs: 'ladder',
+  Core: 'coreRounds',
+  Finisher: 'finisher',
+}
+
+/** Cardio moves in a warm-up, at `WARM_UP_EACH_MS`, before the stretches. */
+const WARM_UP_CARDIO = 4
+/** Stretches after them, which she writes as "Then finish with 30 sec each". */
+const WARM_UP_MOBILITY = 4
+const MOBILITY_EACH_MS = 30_000
+/**
+ * A hold nobody has ever put a time on. The corpus writes planks at 20, 30, 40,
+ * 45 and 60 seconds; thirty is the median, and "12 × Plank" is not a thing.
+ */
+const HOLD_MS = 30_000
+// "wall sit" whole, or `\bsit\b` turns Sit-ups into a thirty-second hold.
+const HOLD_LIKE = /\b(plank|hold|wall sit)\b/i
+
+/**
+ * Said for this exercise, by folded name, which is how the harvest keys them.
+ *
+ * Memoised: the draws test every exercise in a pool against `isRung` and
+ * `isHold`, and folding a name then scanning 192 prescriptions for each of 147
+ * exercises on every draw made one routine cost a tenth of a second.
+ */
+const PRESCRIBED = new Map<string, Prescription | undefined>()
+const prescribed = (exercise: Exercise): Prescription | undefined => {
+  if (!PRESCRIBED.has(exercise.name)) {
+    const key = foldName(exercise.name)
+    PRESCRIBED.set(exercise.name, PRESCRIPTIONS.find((p) => p.name === key))
+  }
+  return PRESCRIBED.get(exercise.name)
+}
+
+/** It has carried one of her ladders, so it can carry one here. */
+const isRung = (exercise: Exercise): boolean => prescribed(exercise)?.rung === true
+
+/** Timed rather than counted: a plank, a wall sit, a hollow hold. */
+const isHold = (exercise: Exercise): boolean => {
+  const said = prescribed(exercise)
+  if (said) return said.prescribe === 'time' && said.seconds !== undefined
+  return HOLD_LIKE.test(exercise.name)
+}
+
+/**
+ * Something she has opened a session with.
+ *
+ * The cardio pool also holds burpees, mountain climbers and plank jacks, none
+ * of which has ever been a warm-up. Matched as a PHRASE inside a harvested
+ * name, because those fold raggedly: "jog on the spot increase the tempo"
+ * holds "jog on the spot", and "high knee lift" holds "high knee".
+ */
+const warmsUpWith = (exercise: Exercise): boolean => {
+  const key = ` ${foldName(exercise.name)} `
+  return key.trim() !== '' && WARM_UP_MOVES.some((move) => ` ${move} `.includes(key))
+}
+
+/** Between `low` and `high` inclusive, from the injected rng. */
+const between = (low: number, high: number, rng: Rng) => low + Math.floor(rng() * (high - low + 1))
+
+/**
+ * The name a theme takes once the areas have been narrowed to what was asked.
+ *
+ * "General Body" of nothing but legs is not general, and a Finisher of core
+ * work is not her Legs Finisher. So a narrowed theme is named for what is left
+ * in it, in her own words where she has them: "Legs Finisher" is her heading,
+ * and "Abs" is what she calls a core section that is not the Core one.
+ */
+function themeName(theme: string, areas: readonly BodyArea[], all: readonly string[]): string {
+  if (areas.length === all.length) return theme
+  const order: BodyArea[] = ['upper', 'torso', 'lower']
+  const kept = order.filter((area) => areas.includes(area))
+  if (theme === 'Finisher') {
+    return kept.length === 1 && kept[0] === 'lower' ? 'Legs Finisher' : 'Core Finisher'
+  }
+  if (theme === 'General Body') {
+    const words: Record<BodyArea, string> = { upper: 'Upper Body', torso: 'Abs', lower: 'Lower Body' }
+    return kept.map((area) => words[area]).join(' & ')
+  }
+  return theme
+}
+
+/**
  * A routine in the instructor's shape: named sections, ladders, counted steps.
  *
  * SELF-PACED, which is the whole difference. A rep-based step has no duration
@@ -422,20 +532,21 @@ function exerciseBlocks(
  * rather than the app pretending to a number. That is why the spec asks for
  * sections instead of minutes here.
  *
- * The skeleton and the ladders are not invented. `exercises.shapes.ts` is read
- * out of the instructor's routines: warm-up first, finisher last, the body between,
- * and his own pyramids used verbatim because `4-9-14-9-4` would be
- * arithmetically fine and unlike anything he has ever been given.
+ * The skeleton, the ladders and the shape of each section are not invented.
+ * `exercises.shapes.ts` is read out of the instructor's routines: warm-up
+ * first, finisher last, the body between, and her own pyramids used verbatim
+ * because `4-9-14-9-4` would be arithmetically fine and unlike anything she has
+ * ever been given. `THEME_SHAPE` says which kind of section each theme is.
  */
 function sectionsRoutine(
   spec: RoutineSpec,
   loads: (name: string) => string | undefined,
+  rates: ReadonlyMap<string, number>,
   rng: Rng,
   notes: string[],
 ): Block[] {
   // Nothing to work is the same answer the circuit gives, not a routine of one warm-up.
   if (spec.areas.length === 0) throw new Error('No exercises match that combination of areas and equipment.')
-  const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(sectionsAsked(spec))))
 
   /**
    * Everything eligible, by area, shuffled once so a section can draw freely.
@@ -462,9 +573,12 @@ function sectionsRoutine(
    * Walking the areas in order filled "four mobility, four cardio" from upper
    * and torso before lower was ever reached, so twenty-two exercises, every
    * lower-body stretch, jump and trampoline move, could not be generated.
+   *
+   * `keep` narrows the draw: to lifts that can carry a ladder, to holds, to
+   * what she warms up with. A narrowed draw that comes up short is topped up by
+   * the caller with an open one, so a preference never empties a section.
    */
-  const draw = (areas: readonly string[], use: 'strength' | 'cardio' | 'mobility', want: number) => {
-    const pools = areas.map((area) => pool(area as BodyArea, use).filter((e) => !taken.has(e.name)))
+  const take = (pools: Exercise[][], want: number): Exercise[] => {
     const out: Exercise[] = []
     for (let turn = 0; out.length < want && pools.some((p) => p.length > 0); turn++) {
       const exercise = pools[turn % pools.length]!.shift()
@@ -474,24 +588,90 @@ function sectionsRoutine(
     }
     return out
   }
+  const pools = (
+    areas: readonly BodyArea[],
+    use: 'strength' | 'cardio' | 'mobility',
+    keep: (exercise: Exercise) => boolean,
+  ) => areas.map((area) => pool(area, use).filter((e) => !taken.has(e.name) && keep(e)))
+  const draw = (
+    areas: readonly BodyArea[],
+    use: 'strength' | 'cardio' | 'mobility',
+    want: number,
+    keep: (exercise: Exercise) => boolean = () => true,
+  ) => take(pools(areas, use, keep), want)
+  /**
+   * The same, from ONE pool rather than a turn from each area.
+   *
+   * For the warm-up, where alternating areas is the wrong instinct: the only
+   * upper-body cardio she has warmed up with is punches, so a turn for the upper
+   * body opened every routine with Front Punches. Mixed, the punches come up
+   * about as often as she writes them.
+   */
+  const drawMixed = (
+    areas: readonly BodyArea[],
+    use: 'strength' | 'cardio' | 'mobility',
+    want: number,
+    keep: (exercise: Exercise) => boolean = () => true,
+  ) => take([shuffled(pools(areas, use, keep).flat(), rng)], want)
+  /** `want` of them, the preferred kind first and anything eligible after. */
+  const drawPreferring = (
+    areas: readonly BodyArea[],
+    want: number,
+    prefer: (exercise: Exercise) => boolean,
+  ): Exercise[] => {
+    const first = draw(areas, 'strength', want, prefer)
+    return [...first, ...draw(areas, 'strength', want - first.length, (e) => !isHold(e))]
+  }
 
   /** A counted step, which is what most of an instructor routine is made of. */
   const counted = (exercise: Exercise): Segment => {
-    const said = PRESCRIPTIONS.find((p) => p.name === foldName(exercise.name))
+    const said = prescribed(exercise)
     const load = loads(exercise.name)
-    const timed = said?.prescribe === 'time' && said.seconds !== undefined
+    const timed = said ? said.prescribe === 'time' && said.seconds !== undefined : HOLD_LIKE.test(exercise.name)
     return segment({
       name: exercise.name,
       role: 'work',
       ...(timed
-        ? { durationMs: said!.seconds! * 1000 }
+        ? { durationMs: (said?.seconds ?? HOLD_MS / 1000) * 1000 }
         : { reps: { kind: 'fixed', count: said?.reps ?? DEFAULT_REPS, ...(exercise.perSide ? { perSide: true } : {}) } }),
       ...(load ? { load } : {}),
       ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
     })
   }
-
-  const blocks: Block[] = []
+  /** The lift a ladder scales: its count is the rung's. */
+  const rung = (exercise: Exercise): Segment =>
+    segment({
+      name: exercise.name,
+      role: 'work',
+      reps: { kind: 'rung', ...(exercise.perSide ? { perSide: true } : {}) },
+      ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
+      ...(loads(exercise.name) ? { load: loads(exercise.name)! } : {}),
+    })
+  const rest = () => segment({ name: 'Rest', role: 'rest', durationMs: ROUND_REST_MS })
+  const ladderOf = (main: Exercise, accessories: readonly Exercise[]): Block => ({
+    kind: 'ladder',
+    id: newId(),
+    counts: [...weightedPick(LADDER_COUNTS, (l) => l.seen, rng).counts],
+    label: 'Rung',
+    children: [rung(main), ...accessories.map(counted)],
+  })
+  const roundsOf = (times: number, moves: readonly Exercise[]): Block => ({
+    kind: 'repeat',
+    id: newId(),
+    times,
+    // The app's word, so the editor and the run screen agree with what a
+    // reload would show; "Round" was migrated to "Set" on the next read.
+    label: 'Set',
+    children: [...moves.map(counted), rest()],
+  })
+  const section = (name: string, children: Block[], over: Partial<Section> = {}): Section => ({
+    kind: 'section',
+    id: newId(),
+    name,
+    display: 'list',
+    children,
+    ...over,
+  })
 
   /*
    * Every theme narrowed to what was asked for, and a theme left with nothing
@@ -506,104 +686,196 @@ function sectionsRoutine(
    */
   const themes = SECTION_THEMES.map((entry) => ({
     ...entry,
-    areas:
-      entry.theme === 'Warm-up'
-        ? entry.areas
-        : entry.areas.filter((area) => spec.areas.includes(area as BodyArea)),
-  }))
-    .filter((entry) => entry.areas.length > 0)
-    .slice(0, wanted)
+    areas: (entry.theme === 'Warm-up'
+      ? entry.areas
+      : entry.areas.filter((area) => spec.areas.includes(area as BodyArea))) as BodyArea[],
+  })).filter((entry) => entry.areas.length > 0)
 
-  if (themes.length < wanted) {
-    notes.push(
-      `Only ${themes.length} sections suit what you asked to work; the rest would have had nothing in them.`,
-    )
+  /** One section in its theme's shape, or null where the pool could not fill it. */
+  const build = ({ theme, areas }: { theme: string; areas: BodyArea[] }): Section | null => {
+    const name = themeName(theme, areas, SECTION_THEMES.find((t) => t.theme === theme)!.areas)
+    const shape = THEME_SHAPE[theme] ?? 'rounds'
+    const short = () => {
+      notes.push(`Not enough left for a ${name} section with the equipment chosen.`)
+      return null
+    }
+
+    if (shape === 'warmUp') {
+      /*
+       * Every area, whatever the theme lists: a torso stretch warms you up too,
+       * and the two torso mobility moves could never be drawn otherwise.
+       *
+       * Cardio FIRST, at forty seconds, then the stretches at thirty, which is
+       * the order and the timing of every warm-up she has written since July:
+       * "40 sec each (continuous movement)" then "Then finish with 30 sec each".
+       * The cardio is drawn from what she has actually opened a session with.
+       */
+      const everywhere: BodyArea[] = ['upper', 'torso', 'lower']
+      const cardio = drawMixed(everywhere, 'cardio', WARM_UP_CARDIO, warmsUpWith)
+      const mobility = drawMixed(everywhere, 'mobility', WARM_UP_MOBILITY)
+      if (cardio.length + mobility.length === 0) return null
+      return section(
+        name,
+        [
+          ...cardio.map((e) => segment({ name: e.name, role: 'work', durationMs: WARM_UP_EACH_MS })),
+          ...mobility.map((e) => segment({ name: e.name, role: 'work', durationMs: MOBILITY_EACH_MS })),
+        ],
+        { display: 'timer', note: `${WARM_UP_EACH_MS / 1000} seconds each, continuous movement` },
+      )
+    }
+
+    if (shape === 'climb') {
+      // Lifts that have carried her ladders first, then whatever fills it. A hold
+      // cannot climb a rep ladder, so none is drawn here.
+      const moves = drawPreferring(areas, between(4, 5, rng), isRung)
+      if (moves.length < 2) return short()
+      return section(name, [
+        {
+          kind: 'ladder',
+          id: newId(),
+          counts: [...weightedPick(LADDER_COUNTS, (l) => l.seen, rng).counts],
+          label: 'Rung',
+          children: moves.map(rung),
+        },
+      ])
+    }
+
+    if (shape === 'ladder' || shape === 'finisher') {
+      const [main] = drawPreferring(areas, 1, isRung)
+      const accessories = draw(areas, 'strength', between(2, 3, rng))
+      if (!main || accessories.length === 0) return short()
+      const children: Block[] = [ladderOf(main, accessories)]
+      if (shape === 'finisher') {
+        /*
+         * "Final Burnout (No Rest)": done once, straight through, and closed on
+         * a wall sit where the pool still has one. Loose in the section after
+         * the ladder, which the text writer separates with `Then:` so it
+         * pastes back as written.
+         */
+        const burnout = draw(areas, 'strength', 3, (e) => !isHold(e))
+        const hold = draw(areas, 'strength', 1, isHold)
+        children.push(...burnout.map(counted), ...hold.map(counted))
+      }
+      return section(name, children)
+    }
+
+    if (shape === 'coreRounds') {
+      // Four counted, then ONE hold to close the round, which is her Core every time since July.
+      const moves = draw(areas, 'strength', 4, (e) => !isHold(e))
+      const hold = draw(areas, 'strength', 1, isHold)
+      if (moves.length < 2) return short()
+      const children: Block[] = [roundsOf(between(3, 5, rng), [...moves, ...hold])]
+      // "After Round N:" a couple more, and a hold to finish where one is left.
+      const tail = [...draw(areas, 'strength', 2, (e) => !isHold(e)), ...draw(areas, 'strength', 1, isHold)]
+      children.push(...tail.map(counted))
+      return section(name, children)
+    }
+
+    // `rounds`: Arms & Shoulders, and any theme this table has not met.
+    const moves = draw(areas, 'strength', between(5, 6, rng), (e) => !isHold(e))
+    if (moves.length < 2) return short()
+    return section(name, [roundsOf(between(4, 5, rng), moves)])
   }
 
-  for (const { theme, areas } of themes) {
-    if (theme === 'Warm-up') {
-      // Every area, whatever the theme lists: a torso stretch warms you up too,
-      // and the two torso mobility moves could never be drawn otherwise.
-      const everywhere: BodyArea[] = ['upper', 'torso', 'lower']
-      const moves = [...draw(everywhere, 'mobility', 4), ...draw(everywhere, 'cardio', 4)]
-      if (moves.length === 0) continue
-      blocks.push({
-        kind: 'section',
-        id: newId(),
-        name: theme,
-        display: 'timer',
-        note: `${WARM_UP_EACH_MS / 1000} seconds each, continuous movement`,
-        children: moves.map((exercise) =>
-          segment({ name: exercise.name, role: 'work', durationMs: WARM_UP_EACH_MS }),
-        ),
-      })
-      continue
-    }
+  /*
+   * The bookends first, then the body between them.
+   *
+   * A warm-up opens every routine of her and a finisher closes fourteen of
+   * sixteen, whatever else is in it, so those two are built before the count is
+   * decided rather than falling off the end of it when the count is small.
+   * Building the finisher before the body only changes which exercises it
+   * draws, not where it goes.
+   */
+  const bookend = (theme: string) => {
+    const entry = themes.find((t) => t.theme === theme)
+    return entry ? build(entry) : null
+  }
+  const warmUp = bookend('Warm-up')
+  const finisher = bookend('Finisher')
+  const body = themes.filter((t) => t.theme !== 'Warm-up' && t.theme !== 'Finisher')
+  const ends = (warmUp ? 1 : 0) + (finisher ? 1 : 0)
 
-    const chosen = draw(areas, 'strength', SECTION_SIZE)
-    if (chosen.length < 2) {
-      notes.push(`Not enough left for a ${theme} section with the equipment chosen.`)
-      continue
-    }
+  /** Roughly how long a section takes, timed steps plus a rate on the counted ones. */
+  const cost = (block: Block) => {
+    const guess = estimate([block], rates)
+    return guess.knownMs + guess.estimatedMs
+  }
 
+  const middle: Block[] = []
+  if (spec.sections !== undefined && Number.isFinite(spec.sections)) {
+    // Asked for a count outright: that many, the bookends included.
+    const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(spec.sections)))
+    for (const entry of body.slice(0, Math.max(0, wanted - ends))) {
+      const built = build(entry)
+      if (built) middle.push(built)
+    }
+    if (middle.length + ends < wanted) {
+      notes.push(
+        `Only ${middle.length + ends} sections suit what you asked to work; the rest would have had nothing in them.`,
+      )
+    }
+  } else {
     /*
-     * A ladder needs a lift that can carry the rungs and accessories that keep
-     * their own count, which is the shape the instructor's ladders take: "Main
-     * exercise:" then "After every set:". Every third section, so a routine has
-     * two or three of them rather than six.
+     * Fitted to the minutes asked, the way the circuit is fitted: whole sections
+     * until the next would overshoot by more than half of itself. The length is
+     * an ESTIMATE, since counted steps end when you tap Next, but it is the same
+     * estimate the library row and the Ready card show, so what the dialog
+     * promises is what those will say.
+     *
+     * Her own routines run long by this measure: the template ones since July
+     * come to 56 to 91 minutes. A 45-minute routine is therefore four sections
+     * or so rather than her six, and the ones that did not fit are named.
+     *
+     * WHICH themes get the room rotates with the seed. Taking them in her order
+     * made Core the casualty of every short routine; dropping the largest would
+     * have made it Legs, her signature ladder, every time. Her four body themes
+     * appear about equally often across the sixteen, and her shorter routines
+     * differ in which one is missing, so the priority is shuffled, with General
+     * Body protected: it opens thirteen of sixteen, and a routine of Warm-up,
+     * Core, Finisher is not one she has sent. The sections are then ASSEMBLED in
+     * her order whatever the priority was, so the routine still reads like hers.
      */
-    const asLadder = blocks.length % 3 === 1
-    if (asLadder) {
-      const shape = weightedPick(LADDER_COUNTS, (l) => l.seen, rng)
-      const [main, ...rest] = chosen
-      blocks.push({
-        kind: 'section',
-        id: newId(),
-        name: theme,
-        display: 'list',
-        children: [
-          {
-            kind: 'ladder',
-            id: newId(),
-            counts: [...shape.counts],
-            label: 'Rung',
-            children: [
-              segment({
-                name: main!.name,
-                role: 'work',
-                reps: { kind: 'rung', ...(main!.perSide ? { perSide: true } : {}) },
-                ...(main!.media ? { media: { source: 'bundled', path: main!.media } } : {}),
-                ...(loads(main!.name) ? { load: loads(main!.name)! } : {}),
-              }),
-              ...rest.map(counted),
-            ],
-          },
-        ],
-      })
-      continue
+    const budget = spec.totalMs - (warmUp ? cost(warmUp) : 0) - (finisher ? cost(finisher) : 0)
+    const priority = [
+      ...body.filter((t) => t.theme === 'General Body'),
+      ...shuffled(body.filter((t) => t.theme !== 'General Body'), rng),
+    ]
+    let spent = 0
+    const left: string[] = []
+    const fitted = new Map<string, Section>()
+    for (const entry of priority) {
+      if (left.length > 0) {
+        left.push(entry.theme)
+        continue
+      }
+      const built = build(entry)
+      if (!built) continue
+      const price = cost(built)
+      // Half a section past the target is further from it than stopping here.
+      if (fitted.size > 0 && spent + price > budget + price / 2) {
+        left.push(entry.theme)
+        continue
+      }
+      fitted.set(entry.theme, built)
+      spent += price
     }
+    for (const entry of body) {
+      const built = fitted.get(entry.theme)
+      if (built) middle.push(built)
+    }
+    left.sort((a, b) => body.findIndex((t) => t.theme === a) - body.findIndex((t) => t.theme === b))
+    if (left.length > 0) {
+      notes.push(`No room for ${left.join(', ')} in ${Math.round(spec.totalMs / 60_000)} minutes.`)
+    }
+  }
 
-    const rounds = 3 + Math.floor(rng() * 2)
-    blocks.push({
-      kind: 'section',
-      id: newId(),
-      name: theme,
-      display: 'list',
-      children: [
-        {
-          kind: 'repeat',
-          id: newId(),
-          times: rounds,
-          // The app's word, so the editor and the run screen agree with what a
-          // reload would show; "Round" was migrated to "Set" on the next read.
-          label: 'Set',
-          children: [
-            ...chosen.map(counted),
-            segment({ name: 'Rest', role: 'rest', durationMs: ROUND_REST_MS }),
-          ],
-        },
-      ],
-    })
+  const blocks: Block[] = [...(warmUp ? [warmUp] : []), ...middle, ...(finisher ? [finisher] : [])]
+  const came = blocks.reduce((sum, block) => sum + cost(block), 0)
+  const off = Math.round((came - spec.totalMs) / 60_000)
+  if (spec.sections === undefined && Math.abs(off) >= 5) {
+    notes.push(
+      `It should come out about ${Math.abs(off)} minutes ${off > 0 ? 'longer' : 'shorter'} than asked: sections come whole.`,
+    )
   }
 
   notes.push(
@@ -673,6 +945,12 @@ export function generateRoutine(
      * still reads nothing from storage.
      */
     weights?: ReadonlyMap<string, string>
+    /**
+     * Seconds-per-rep rates measured on this phone, for fitting the sections
+     * shape to a length. Empty by default, which falls back to the harvested
+     * rates, so a test gets the same answer whatever the browser has stored.
+     */
+    rates?: ReadonlyMap<string, number>
   } = {},
 ): GeneratedRoutine {
   const rng = options.rng ?? Math.random
@@ -694,7 +972,7 @@ export function generateRoutine(
    * through, because a function that did both would be mostly `if (style)`.
    */
   if (spec.style === 'sections') {
-    const sections = sectionsRoutine(spec, loads, rng, notes)
+    const sections = sectionsRoutine(spec, loads, options.rates ?? new Map(), rng, notes)
     if (sections.length === 0) {
       throw new Error('No exercises match that combination of areas and equipment.')
     }
@@ -711,7 +989,12 @@ export function generateRoutine(
     return {
       workout: {
         id: newId(),
-        name: spec.name?.trim() || describeRoutine(spec),
+        /*
+         * Named for what was BUILT, not what was asked. Asking for six sections
+         * of core work builds four, and "Core, 6 sections" over a routine of
+         * four was a name that lied while a note told the truth underneath.
+         */
+        name: spec.name?.trim() || describeRoutine({ ...spec, sections: sections.length }),
         blocks,
         schemaVersion: SCHEMA_VERSION,
         createdAt: now,

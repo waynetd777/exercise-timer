@@ -726,7 +726,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
    *
    * The definitions are the ascending run 1..N. A lone "1 - plank jacks x 10"
    * that is not part of such a run is an ordinary step: Wayne's confirmation,
-   * and in his routine it bookends the pyramid on both sides.
+   * and in her routine it bookends the pyramid on both sides.
    */
   const pyramidRows: { rungs: number[]; line: number; text: string }[] = []
   /** The distance a course states, for the "A-B" lines beneath it. */

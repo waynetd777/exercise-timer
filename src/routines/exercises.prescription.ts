@@ -30,7 +30,7 @@ export type Prescription = {
   seconds?: number
   /**
    * How long one rep takes, where the instructor has written this exercise BOTH
-   * ways and so said so himself. Absent for most of them.
+   * ways and so said so herself. Absent for most of them.
    */
   secondsPerRep?: number
   /** It has been a ladder's main lift, so it can scale with the rungs. */

@@ -21,7 +21,7 @@
  * that is the whole of the work below.
  *
  * The vocabulary is therefore Wayne's instructor's, so a generated routine reads
- * like the ones he is actually sent. A handful of obvious siblings are added
+ * like the ones she is actually sent. A handful of obvious siblings are added
  * where the corpus has one of a pair and the generator would otherwise be unable
  * to balance a session; each is marked ADDED.
  *
@@ -107,7 +107,8 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
   { name: 'Sumo Squats', area: 'lower', equipment: 'bodyweight' },
   { name: 'Sumo Squat Pulses', area: 'lower', equipment: 'bodyweight' },
   { name: 'Squat Jumps', area: 'lower', equipment: 'bodyweight' },
-  { name: 'Side-to-Side Squats with a Reach', area: 'lower', equipment: 'bodyweight' },
+  // In her "40 sec each (continuous movement)" warm-up block with the jog and the jacks, never a set.
+  { name: 'Side-to-Side Squats with a Reach', area: 'lower', equipment: 'bodyweight', use: 'cardio' },
   { name: 'Walking Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Reverse Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Alternating Curtsy Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },

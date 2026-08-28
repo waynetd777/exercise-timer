@@ -295,8 +295,8 @@ hold what the guide draws.
 Two more tables come out of the same harvest. `exercises.prescription.ts` says how
 each movement is prescribed, including a seconds-per-rep rate for the ones the
 instructor has written both ways. `exercises.shapes.ts` holds the ladder
-pyramids he actually writes, used VERBATIM, and the section themes in the
-order his routines use them.
+pyramids she actually writes, used VERBATIM, and the section themes in the
+order her routines use them.
 
 Equipment is a FIELD, not a partition. Asking for a multi-gym routine filters;
 it does not select a different table. That matters because the machine has five
@@ -307,9 +307,39 @@ its length is SOLVED rather than estimated: exercises are added one at a time an
 each one's real cost is known, so a per-side exercise costing two groups and a
 band or ankle-strap one costing five more seconds are exact. **Sections** is the
 shape the instructor's routines arrive in — named sections, ladders, counted reps
-— and it has no length at all, because a self-paced step ends when you tap Next.
-That shape is asked how many SECTIONS instead of how many minutes. Both shapes
-open on a get-ready. The circuit's is the fifteen seconds before its first set.
+— and it has no exact length, because a self-paced step ends when you tap Next.
+It is asked the same minutes and FITTED by `estimate.ts`: the warm-up and the
+finisher are built first and bookend the routine, then body sections are added
+until the next would overshoot by more than half of itself, and the ones that
+did not fit are named in `notes`. WHICH body themes get the room rotates with the
+seed, General Body always first (it opens 13 of 16), the other three in a
+shuffled priority; the sections are then assembled in her order regardless, so
+the routine still reads like hers. Taking them in her order made Core the
+casualty of every short routine, and dropping the largest would have made it
+Legs, her signature ladder. Her own template routines estimate at 56 to 91
+minutes, so 45 minutes is four sections or so rather than her six.
+Both shapes open on a get-ready.
+
+Each theme has a SHAPE, `THEME_SHAPE` in `generate.ts`, read off the sixteen
+routines rather than dealt out by position (a ladder every third section put the
+ladders on General Body and Core, and since July she has written the Finisher as
+a ladder every time and Core as rounds every time):
+
+| Theme | Shape | In the corpus |
+|---|---|---|
+| Warm-up | cardio at 40 s then stretches at 30 s, timed | every routine; "40 sec each (continuous movement)", "Then finish with 30 sec each" |
+| General Body | one pyramid every exercise climbs, 4 to 5 moves | a ladder in 8 to 10 of 16; "Complete one exercise before moving to the next" |
+| Arms & Shoulders | 5 to 6 counted moves, 4 to 5 rounds, rest 45 s | rounds in every template routine, a ladder in 2 early ones |
+| Legs | main lift on the rungs, 2 to 3 accessories "after every set" | a ladder in 6 of the 7 since July |
+| Core | 4 counted moves and a hold to close each round, 3 to 5 rounds, then "After Round N" loose steps | rounds ending on a plank in every one since July; a ladder in 0 of those |
+| Finisher | a Legs ladder, then "Final Burnout" done once, closed on a wall sit | a ladder in 14 of 16; a burnout after it in 4 of the last 6 |
+
+A ladder's main lift is drawn from the movements that have carried one of her
+(`PRESCRIPTIONS[].rung`), and the warm-up's cardio from `WARM_UP_MOVES`, the
+movements she has actually opened a session with: the cardio pool also holds
+burpees and plank jacks. A theme narrowed by the areas asked is renamed for what
+is left in it ("Abs", "Lower Body", "Legs Finisher", "Core Finisher"), and an
+unnamed routine is named for the sections it BUILT, not the count asked. The circuit's is the fifteen seconds before its first set.
 The sections one gets the parser's five seconds, loose and above the warm-up,
 so a generated routine and a pasted one start the same way and Send as text
 treats them alike.
