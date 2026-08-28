@@ -23,7 +23,7 @@ import { newId } from '../id'
  */
 export type Path = readonly number[]
 
-type FlatBlock = {
+export type FlatBlock = {
   block: Block
   path: Path
   /** 0 for a top-level block, 1 inside one repeat, and so on. */
