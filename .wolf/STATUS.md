@@ -46,8 +46,8 @@ Wayne: "fix all of these issues", the section names and the name bug, and fit se
   is never dropped. (Alternative rejected: drop the largest, which would have dropped the Legs ladder every time.)
 - Pronouns: the instructor is a woman. 60+ "he/his" lines corrected across code, docs, tests, harvest output and .wolf.
 
-**Next:** Wayne's eyes on the Generate dialog (Sections) and the library row's Preview button in a browser, then
-commit.
+v8.6 committed and pushed 2026-08-28 (library Preview button; sections generator in her shape, fitted to minutes,
+rotating themes). **Next:** Wayne's eyes on the Generate dialog (Sections) and the row's Preview button; the badge must read 8.6.
 Unused now: `SECTION_SIZE` in exercises.shapes.ts (still harvested, nothing reads it).
 
 ## ✅ Done: preview mode (2026-08-28)
