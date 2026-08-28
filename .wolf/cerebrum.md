@@ -294,6 +294,15 @@
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
 
+## Reading a test run (2026-08-29)
+
+- **`Tests 1161 passed` is not a green run.** vitest reports unhandled errors on a separate `Errors` line and still
+  exits non-zero. Grepping the output for `Tests |FAIL` hid a failure that CI then caught. Read the TAIL of the run,
+  or check `$?`.
+- **`resolveMedia` can reject, not just resolve null.** `openDb` throws where site data is blocked: a private
+  window, a browser refusing storage, and every jsdom test without a fake IndexedDB. Every caller needs a catch;
+  the row then shows no picture, which is what it shows for a photo left on another device anyway.
+
 ## Sourcing pictures for the app (2026-08-29)
 
 **OUTCOME FIRST: the free line art was rejected and removed.** "These images are not good enough." The app's own

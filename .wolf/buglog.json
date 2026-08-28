@@ -2030,6 +2030,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T23:49:23Z"
+    },
+    {
+      "id": "bug-122",
+      "timestamp": "2026-08-28T23:54:10Z",
+      "error_message": "CI (Deploy to GitHub Pages) failed: ReferenceError: indexedDB is not defined \u2014 src/storage/db.ts:37, via ExercisesScreen's image effect. All 1161 tests passed; vitest reported '1 error' and exited 1.",
+      "file": "src/ui/ExercisesScreen.tsx",
+      "root_cause": "The page's image effect awaited resolveMedia with no catch. Reading a blob can THROW rather than miss: openDb throws where site data is blocked, which is a private window, a browser refusing storage, and jsdom. The new test wrote a local MediaRef, so the effect took that path for the first time. useMediaUrl had the same unguarded pattern.",
+      "fix": "Catch per read in the page effect and in useMediaUrl: a failed read resolves to null, so the row shows no picture, exactly as for a photo left on another device. Test added with an unreadable local ref.",
+      "tags": [
+        "ci",
+        "jsdom",
+        "indexeddb",
+        "promises",
+        "media",
+        "verification"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T23:54:10Z"
     }
   ]
 }

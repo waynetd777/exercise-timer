@@ -22,9 +22,18 @@ export function useMediaUrl(ref: MediaRef | undefined): string | null {
   useEffect(() => {
     let cancelled = false
     setUrl(resolveMediaSync(ref, base))
-    void resolveMedia(ref, base).then((resolved) => {
-      if (!cancelled) setUrl(resolved)
-    })
+    /*
+     * `catch`, because reading a blob can FAIL rather than merely miss: `openDb`
+     * throws where site data is blocked, which is a private window or a browser
+     * set to refuse storage. A step then shows no picture, which is the same
+     * outcome as a photo that is not on this device, instead of an unhandled
+     * rejection from every row at once.
+     */
+    void resolveMedia(ref, base)
+      .catch(() => null)
+      .then((resolved) => {
+        if (!cancelled) setUrl(resolved)
+      })
     return () => {
       cancelled = true
     }
