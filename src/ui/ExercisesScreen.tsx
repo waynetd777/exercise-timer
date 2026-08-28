@@ -326,7 +326,21 @@ export function ExercisesScreen({
 
     let live = true
     void Promise.all(
-      pending.map(async ([name, ref]) => [name, await resolveMedia(ref, base)] as const),
+      /*
+       * Each read is caught HERE rather than around the whole batch, so one
+       * unreadable photo costs its own row and not the other twenty-nine.
+       *
+       * Reading a blob can fail outright, not just come back empty: `openDb`
+       * throws where site data is blocked, which is a private window, a browser
+       * set to refuse storage, and every test environment without a fake
+       * IndexedDB. Unhandled, that surfaced as an error beside a passing test
+       * run, and in a browser it would have been an unhandled rejection on a
+       * page that should simply have shown no picture.
+       */
+      pending.map(async ([name, ref]) => {
+        const src = await resolveMedia(ref, base).catch(() => null)
+        return [name, src] as const
+      }),
     ).then((pairs) => {
       if (!live) return
       const map = new Map<string, string>()

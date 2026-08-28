@@ -200,6 +200,21 @@ describe('the pictures', () => {
     expect(row.dataset.empty).toBe('true')
   })
 
+  it('shows no picture, and no error, where the blob cannot be read at all', () => {
+    /*
+     * jsdom has no IndexedDB, which is the same shape as a private window or a
+     * browser set to refuse site data: `openDb` THROWS rather than coming back
+     * empty. Unhandled, that failed a CI run whose every test had passed.
+     */
+    savePictures(withPicture({}, 'Squats', { source: 'local', hash: 'nope', mime: 'image/webp' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    // The row still says it HAS a picture, because the table says so; there is
+    // simply nothing to draw, exactly as for a photo left on another device.
+    const row = screen.getByLabelText('Picture of Squats. Change it.')
+    expect(row.querySelector('img')).toBeNull()
+  })
+
   it('swaps the row over when one picture replaces another', () => {
     savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'exercises/Deadlift.jpg' }))
     render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
