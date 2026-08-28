@@ -423,8 +423,8 @@ function exerciseBlocks(
  * sections instead of minutes here.
  *
  * The skeleton and the ladders are not invented. `exercises.shapes.ts` is read
- * out of the sixteen routines: warm-up first, finisher last, the body between,
- * and nineteen pyramids used verbatim because `4-9-14-9-4` would be
+ * out of the instructor's routines: warm-up first, finisher last, the body between,
+ * and his own pyramids used verbatim because `4-9-14-9-4` would be
  * arithmetically fine and unlike anything he has ever been given.
  */
 function sectionsRoutine(

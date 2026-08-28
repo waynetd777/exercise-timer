@@ -88,7 +88,7 @@ export function WeightsScreen({
   onFollow: (workouts: readonly Workout[]) => Promise<void> | void
 }) {
   /*
-   * The store is held here and written through on every keystroke. Sixty-eight
+   * The store is held here and written through on every keystroke. Dozens of
    * small strings in localStorage is not worth debouncing, and a settings page
    * that loses the last thing you typed because you closed it too quickly is
    * the one failure that would matter.

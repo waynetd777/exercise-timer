@@ -371,8 +371,8 @@ to the right edge, with native `<details>` sections of bullet points.
 
 A screen with a rule of its own gets its own sections rather than a heading in
 somebody else's list. `WEIGHTS_HELP` exists because "an empty field means
-something" is the one thing that page cannot afford to have buried eight sections
-down the library's tray.
+something" is the one thing that page cannot afford to have buried deep in the
+library's tray.
 
 Three decisions worth keeping:
 
