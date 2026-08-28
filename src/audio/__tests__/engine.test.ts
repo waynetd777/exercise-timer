@@ -47,7 +47,7 @@ class FakeContext {
   destination = new FakeNode()
   sources: FakeSource[] = []
   constructor() {
-    made = this
+    contexts.push(this)
   }
   createGain(): FakeGain {
     return new FakeGain()
@@ -68,13 +68,15 @@ class FakeContext {
     return Promise.reject(new Error('no decoder here'))
   }
 }
-let made: FakeContext | null = null
+/** Every context built, newest last. */
+const contexts: FakeContext[] = []
+const made = () => contexts[contexts.length - 1]!
 
 const beep = toneFor('countdown')!
 
 async function freshEngine() {
   vi.resetModules()
-  made = null
+  contexts.length = 0
   vi.stubGlobal('AudioContext', FakeContext)
   // The whistle download starts at module load; there is no network here.
   vi.stubGlobal('fetch', () => Promise.resolve({ ok: false }))
@@ -91,10 +93,10 @@ describe('the audio engine', () => {
   it('drops a cue later than the grace, and plays one within it', async () => {
     const audio = await freshEngine()
     audio.scheduleTone(100 - 0.2, beep)
-    expect(made!.sources.filter((s) => s.started !== null)).toHaveLength(0)
+    expect(made().sources.filter((s) => s.started !== null)).toHaveLength(0)
 
     audio.scheduleTone(100 - 0.1, beep)
-    const played = made!.sources.filter((s) => s.started !== null)
+    const played = made().sources.filter((s) => s.started !== null)
     expect(played.length).toBeGreaterThan(0)
     // Never in the past: the audio clock cannot start a source before now.
     for (const source of played) expect(source.started).toBeGreaterThanOrEqual(100)
@@ -104,8 +106,8 @@ describe('the audio engine', () => {
     const audio = await freshEngine()
     audio.scheduleTone(101, beep)
     audio.scheduleTone(100.1, beep)
-    const far = made!.sources.filter((s) => s.started === 101)
-    const near = made!.sources.filter((s) => s.started === 100.1)
+    const far = made().sources.filter((s) => s.started === 101)
+    const near = made().sources.filter((s) => s.started === 100.1)
     expect(far.length).toBeGreaterThan(0)
     expect(near.length).toBeGreaterThan(0)
 
@@ -120,14 +122,9 @@ describe('the audio engine', () => {
 
   it('is silent, not broken, where there is no Web Audio', async () => {
     vi.resetModules()
-    vi.stubGlobal(
-      'AudioContext',
-      class {
-        constructor() {
-          throw new Error('not here')
-        }
-      },
-    )
+    vi.stubGlobal('AudioContext', () => {
+      throw new Error('not here')
+    })
     vi.stubGlobal('fetch', () => Promise.resolve({ ok: false }))
     const { audio } = await import('../engine')
     expect(() => audio.unlock()).not.toThrow()

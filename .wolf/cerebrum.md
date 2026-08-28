@@ -17,6 +17,9 @@
 
 ## Key Learnings
 
+- [2026-08-28] **The project is on TypeScript 7; typescript-eslint's peer range stops at 6.1, so ESLint cannot be installed cleanly.** The linter is oxlint (`npm run lint`, `.oxlintrc.json`): correctness + suspicious + rules-of-hooks as errors, exhaustive-deps as a warning with `// eslint-disable-next-line react-hooks/exhaustive-deps` where an omission is deliberate. The React Compiler style rules (refs, immutability, set-state-in-effect) are OFF because the code uses the "latest ref" pattern on purpose.
+- [2026-08-28] **`npm install` needs `--cache <scratchpad>/npm-cache`** in this environment: the default /tmp/npm-cache is not writable.
+- [2026-08-28] **Generator reachability check:** probe 600 seeds and list catalogue exercises never drawn. Filling a quota "area by area" silently starves the last area; draw across areas in turn (bug-110).
 - [2026-08-28] **`opening ??= new Promise(executor)` cannot un-cache itself from inside the executor.** The executor runs before the assignment, so a `forget()` inside it clears nothing. Assign first, then `promise.catch(forget)`. (db.ts, bug-080)
 - [2026-08-28] **A rolling cue window must open BEHIND the clock.** The first arm runs after React commits, so `elapsed` is already >0 and a cue at 0 is outside `[elapsed, elapsed+lookahead)`. Look back by the shared grace and let the engine play a cue that late. (bug-075)
 - [2026-08-28] **A gate collapses a group only where the list view can draw it.** `gateKey` and `listMode` must ask the same question of the nearest section; the countdown view shows one step. (bug-086)
