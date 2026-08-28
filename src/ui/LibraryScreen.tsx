@@ -249,6 +249,9 @@ export function LibraryScreen({
   const [sort, setSort] = useState<SortMode>('recent')
   const [helping, setHelping] = useState(false)
   const [dragging, setDragging] = useState(false)
+  /* dragleave fires on the way INTO a child, so the overlay flickered on every
+     element crossed. Counted enters and leaves: over the screen while > 0. */
+  const dragDepth = useRef(0)
   const [pasting, setPasting] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [tidying, setTidying] = useState(false)
@@ -444,13 +447,18 @@ export function LibraryScreen({
     <main
       className="library"
       data-dragging={dragging}
-      onDragOver={(event) => {
-        event.preventDefault()
+      onDragOver={(event) => event.preventDefault()}
+      onDragEnter={() => {
+        dragDepth.current += 1
         setDragging(true)
       }}
-      onDragLeave={() => setDragging(false)}
+      onDragLeave={() => {
+        dragDepth.current = Math.max(0, dragDepth.current - 1)
+        if (dragDepth.current === 0) setDragging(false)
+      }}
       onDrop={(event) => {
         event.preventDefault()
+        dragDepth.current = 0
         setDragging(false)
         void ingest(Array.from(event.dataTransfer.files))
       }}

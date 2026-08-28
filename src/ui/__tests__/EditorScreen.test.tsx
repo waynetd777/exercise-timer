@@ -594,6 +594,14 @@ describe('EditorScreen: dragging a row by its grip', () => {
     expect((screen.getByLabelText('Undo') as HTMLButtonElement).disabled).toBe(true)
   })
 
+  it('moves focus to the row above after a delete, not to the body', () => {
+    // The Delete button unmounts with its row; the next key press went nowhere.
+    render(<EditorScreen {...props(three())} />)
+    fireEvent.click(screen.getAllByLabelText('Delete step')[1]!)
+    expect(order()).toEqual(['A', 'C'])
+    expect(document.activeElement).toBe(grips()[0])
+  })
+
   it('makes two drags two undo steps', () => {
     // The first drag's run was never ended, so the second coalesced into it
     // and one Undo took both back.

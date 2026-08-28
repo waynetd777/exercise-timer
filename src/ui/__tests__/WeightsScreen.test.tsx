@@ -23,6 +23,16 @@ const saved = (name: string, load: string): Workout => ({
 
 const field = (name: string) => screen.getByLabelText(`Weight for ${name}`) as HTMLInputElement
 
+// jsdom has no dialog methods. File-level, because the help tray needs them
+// too and running one describe alone used to throw.
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute('open', '')
+  }
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute('open')
+  }
+})
 beforeEach(() => {
   globalThis.localStorage?.clear()
   saveWeights({})
@@ -136,15 +146,6 @@ describe('the pictures', () => {
 })
 
 describe('letting routines follow the page', () => {
-  beforeAll(() => {
-    HTMLDialogElement.prototype.showModal = function () {
-      this.setAttribute('open', '')
-    }
-    HTMLDialogElement.prototype.close = function () {
-      this.removeAttribute('open')
-    }
-  })
-
   it('offers to clear the weights a routine states for itself', () => {
     /*
      * A routine written before this page carries its own weight on every step,
