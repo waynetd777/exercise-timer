@@ -40,6 +40,7 @@ function library(workouts: Workout[], over: Partial<Library> = {}): Library {
 const props = (lib: Library) => ({
   library: lib,
   onRun: vi.fn(),
+  onPreview: vi.fn(),
   onEdit: vi.fn(),
   onNew: vi.fn(),
   onDraft: vi.fn(),
@@ -58,6 +59,22 @@ describe('LibraryScreen', () => {
     expect(screen.getByText('Core')).toBeTruthy()
     fireEvent.click(screen.getByLabelText('Start Legs'))
     expect(p.onRun).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }))
+  })
+
+  it('Preview opens a routine without starting it, and reads before edit in the row', () => {
+    const p = props(library([workout('a', 'Legs')]))
+    render(<LibraryScreen {...p} />)
+
+    fireEvent.click(screen.getByLabelText('Preview Legs'))
+    expect(p.onPreview).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }))
+    expect(p.onRun).not.toHaveBeenCalled()
+
+    // Look, change, copy, send, destroy: the order the tools do more in.
+    const labels = screen
+      .getAllByRole('button')
+      .map((b) => b.getAttribute('aria-label'))
+      .filter((l) => l && ['Preview Legs', 'Edit routine', 'Duplicate', 'Delete'].includes(l))
+    expect(labels).toEqual(['Preview Legs', 'Edit routine', 'Duplicate', 'Delete'])
   })
 
   it('filters by name as you type', () => {

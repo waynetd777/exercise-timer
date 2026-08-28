@@ -124,6 +124,16 @@ describe('RunScreen: the countdown layout', () => {
     fireEvent.click(screen.getByLabelText('Start'))
   }
 
+  it('opens reading the routine when the library asks, with the Ready card one tap away', () => {
+    render(<RunScreen workout={timed()} preview />)
+
+    // The preview is up, and the header toggle already reads as the way back.
+    expect(screen.getByLabelText('Back to ready')).toBeTruthy()
+    expect(screen.queryByText('Ready')).toBeNull()
+    fireEvent.click(screen.getByLabelText('Back to ready'))
+    expect(screen.getByText('Ready')).toBeTruthy()
+  })
+
   it('shows the count a step asks for, not just its clock', () => {
     /*
      * An EMOM minute is timed AND counted. The countdown has no effort column

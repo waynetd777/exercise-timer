@@ -39,6 +39,7 @@ import {
   ExportIcon,
   HelpIcon,
   ImportIcon,
+  ListIcon,
   PasteIcon,
   PencilIcon,
   PlusIcon,
@@ -62,6 +63,7 @@ function Row({
   workout,
   library,
   onRun,
+  onPreview,
   onEdit,
   onShare,
   onExport,
@@ -71,6 +73,7 @@ function Row({
   workout: Workout
   library: Library
   onRun: (workout: Workout) => void
+  onPreview: (workout: Workout) => void
   onEdit: (workout: Workout) => void
   onShare: (workout: Workout) => Promise<void>
   onExport: (workout: Workout) => Promise<void>
@@ -145,6 +148,21 @@ function Row({
           </>
         ) : (
           <>
+            {/*
+              The tools read in the order of how much they do to the routine:
+              look, change, copy, send, destroy. Preview is first because it is
+              the only one that changes nothing, and because it and Edit are the
+              two that OPEN the routine, so they sit together nearest its name.
+              Delete stays last, furthest from the tools you reach for often.
+            */}
+            <button
+              className="btn btn--ghost"
+              onClick={() => onPreview(workout)}
+              aria-label={`Preview ${workout.name}`}
+              title="Read the whole routine"
+            >
+              <ListIcon />
+            </button>
             <button
               className="btn btn--ghost"
               onClick={() => onEdit(workout)}
@@ -227,6 +245,7 @@ function Row({
 export function LibraryScreen({
   library,
   onRun,
+  onPreview,
   onEdit,
   onNew,
   onDraft,
@@ -235,6 +254,8 @@ export function LibraryScreen({
 }: {
   library: Library
   onRun: (workout: Workout) => void
+  /** Opens the run screen reading the routine, so it can be checked without starting it. */
+  onPreview: (workout: Workout) => void
   onEdit: (workout: Workout) => void
   onNew: () => void
   /**
@@ -626,6 +647,7 @@ export function LibraryScreen({
               workout={workout}
               library={library}
               onRun={onRun}
+              onPreview={onPreview}
               onEdit={onEdit}
               onShare={share}
               onExport={(workout) => exportRoutines([workout], workout.name)}

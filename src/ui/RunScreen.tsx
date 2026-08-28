@@ -239,9 +239,11 @@ type Props = {
   onStarted?: () => void
   /** Bumped when the browser's Back is pressed; the screen answers as its own Back would. */
   backRequest?: number
+  /** Open reading the routine rather than on the Ready card. The library's Preview lands here. */
+  preview?: boolean
 }
 
-export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props) {
+export function RunScreen({ workout, onExit, onStarted, backRequest = 0, preview = false }: Props) {
   /*
    * Every gate records how long it took, so the estimate for a rep-based routine
    * stops being the instructor's average and becomes Wayne's own pace. Nonsense
@@ -265,8 +267,11 @@ export function RunScreen({ workout, onExit, onStarted, backRequest = 0 }: Props
    * rather than a screen of its own, so the header, the progress rule and the
    * controls all stay where they are: you read to the end of a routine and
    * Start is already under your thumb.
+   *
+   * Open from the start when the library asked for it: the same mode, entered
+   * one tap earlier, and the header toggle still leads to the Ready card.
    */
-  const [previewing, setPreviewing] = useState(false)
+  const [previewing, setPreviewing] = useState(preview)
 
   useCueScheduler({
     // One run at a time: cues are scheduled on one clock, and a gate ends it.
