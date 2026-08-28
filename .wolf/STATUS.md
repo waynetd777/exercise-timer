@@ -45,7 +45,7 @@ below are fixed and committed, one commit per group:
   ui/CountField (593cd8b); oxlint added and wired into CI, typescript-eslint does not run on TS 7 (2bdde5b); tests for LibraryScreen,
   App and the audio engine. Also: the sections warm-up now draws across every area (bug-110, bf8b0df).
 - Open question: should a group label typed as "Round" survive? migrate.ts renames the exact word to "Set" on read.
-Nothing from the review is open. Next: whatever Wayne reports from testing v8.3+.
+v8.4 pushed 2026-08-28 with the refactors, the warm-up draw fix, oxlint and the new tests. Nothing from the review is open.
 Decided: per-side exercises in the circuit stay as two groups of sets around "Change Sides", unnamed (Wayne: leave it).
 v8.2 pushed 2026-08-28 with the lows.
 - Ladders are labelled Rung (with a migration for stored Set), group rows carry a kind badge, generated/pasted drafts are migrated into the editor so sets read Set not Round (bug-109). v8.3 pushed 2026-08-28.
