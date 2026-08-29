@@ -2,9 +2,28 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (review closed, v8.8 pushed; Exercises page width fix 130c801 pushed, awaiting Wayne's phone check)
+> Last updated: 2026-08-29 (README and in-app help rewritten shorter and friendlier, v8.9 pushed)
 
 ---
+
+## ✍️ README and in-app help rewritten (2026-08-29, done, v8.9)
+
+Wayne: "i am not happy with the main readme and the in-app help. they're too verbose and the writing style is off."
+Both were dense and aphoristic, with 50-word bullets and long comma-chained sentences.
+
+**README.md** now opens with the one-liner, the live link, and a six-bullet **What it does best** ABOVE the
+screenshots (countdown, rep-based work, paste, generate, one place for weights, local-only). The screenshots keep
+their alt text; the captions are trimmed. Everything else moved below into **The rest of it**, then the local-dev,
+architecture, decisions, testing and licence sections, all cut down. 202 lines to 190, and much shorter sentences.
+
+**src/ui/help.ts** restructured, not just trimmed. Library help went from 5 sections to 7: the mixed-up "Adding a
+routine" list split into **Adding a routine** / **Generating one**, and all the send-and-backup lines pulled out
+into **Sending and backing up**. Editor help split "Steps" into **Steps** / **Weights, notes and pictures**.
+Exercises help kept the heading "How a routine uses them" because `ExercisesScreen.test.tsx:352` asserts on it.
+Every bullet rewritten short. No em dashes (Wayne's standing rule).
+
+**Verified:** typecheck, oxlint, 1184 tests in 62 files, and a production build all clean.
+**Next:** Wayne reads the badge 8.9 build and says whether the voice is right now.
 
 ## 📱 Exercises page wider than an iPhone (2026-08-29, fixed, pushed as 130c801, unverified on the phone)
 
