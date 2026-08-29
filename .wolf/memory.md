@@ -337,3 +337,4 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 12:45 | Rewrote README and in-app help shorter and friendlier, bumped to v8.9, pushed | README.md, src/ui/help.ts, src/version.ts | 3033c01 pushed; typecheck, lint, 1184 tests, build all clean | ~35k |
