@@ -133,7 +133,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
     (id: string) =>
       guarded('delete the routine', async () => {
     await deleteWorkout(id)
-    const remaining = await listWorkouts()
+    const { workouts: remaining, heldHashes } = await readWorkouts()
     setWorkouts(remaining)
 
     /*
@@ -146,9 +146,11 @@ export function useLibrary(seed: readonly Workout[]): Library {
         await storedHashes(),
         remaining,
         draftPinnedHashes(),
-        // The exercises page holds photos no routine references. Without this
-        // the first delete would sweep them.
-        pictureHashes(loadPictures()),
+        // Two more roots the walk over `remaining` cannot see: the exercises
+        // page holds photos no routine references, and a record this build
+        // cannot read is still in the store with photos of its own. Without
+        // either, the first delete swept them.
+        [...pictureHashes(loadPictures()), ...heldHashes],
       )) {
         await deleteBlob(hash)
         forgetBlob(hash)

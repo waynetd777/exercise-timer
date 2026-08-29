@@ -69,4 +69,24 @@ describe('App', () => {
     expect(screen.getByLabelText('Search routines')).toBeTruthy()
     expect(back).toHaveBeenCalledTimes(1)
   })
+
+  it('does not carry a Back request into the next screen', () => {
+    /*
+     * The request count only ever went up, and both screens act on `> 0` in an
+     * effect that also runs at mount, so after one Back every run and every
+     * edit opened afterwards left the instant it appeared.
+     */
+    vi.spyOn(history, 'pushState')
+    vi.spyOn(history, 'back').mockImplementation(() => {})
+    render(<App />)
+
+    fireEvent.click(screen.getByLabelText('Edit routine'))
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    expect(screen.getByLabelText('Search routines')).toBeTruthy()
+
+    fireEvent.click(screen.getByLabelText('Edit routine'))
+    expect(screen.getByLabelText('Routine name')).toBeTruthy()
+  })
 })

@@ -70,7 +70,7 @@ screen. The cache is bounded by the number of distinct images in a routine.
 | | |
 |---|---|
 | `hash.ts` | sha256 of a blob |
-| `gc.ts` | `liveHashes` and `orphanedHashes`, both pure |
+| `gc.ts` | `liveHashes`, `orphanedHashes` and `hashesIn` (the refs in a record of unknown shape, for the routines `readWorkouts` cannot read), all pure |
 | `resolve.ts` | `resolvePlan`, the pure resolution rules |
 | `resolveMedia.ts` | Blob reads and the object URL cache |
 | `store.ts` | IndexedDB blob access |

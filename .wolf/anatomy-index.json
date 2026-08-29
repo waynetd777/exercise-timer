@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-28T21:58:53.879Z",
-    "fileCount": 88,
+    "lastScanned": "2026-08-29T00:36:41.659Z",
+    "fileCount": 96,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "e4333b0db01f3223edb14d9d23632919723a12396d853e323ca0a05847f95217",
-    "storeUpdatedAt": "2026-08-28T21:58:53.887Z"
+    "renderedHash": "3ed0a1926c9399e8fc259ea9c4b34e749566e71964b761e3a6ea1b85d540cde3",
+    "storeUpdatedAt": "2026-08-29T00:36:41.666Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -874,90 +874,20 @@
       ]
     },
     "src/ui/EditorScreen.tsx": {
-      "description": "One undo step: name, colour and steps together, so they cannot drift apart.",
-      "tokens": 16521,
-      "hash": "97af8205218a1334",
-      "size": 57847,
-      "mtimeMs": 1787499904168.59,
-      "updatedAt": "2026-08-23T15:45:04.258Z",
+      "description": "Exercise Timer",
+      "tokens": 6322,
+      "hash": "3736d0ee3a422ef4",
+      "size": 22125,
+      "mtimeMs": 1787963453535.5781,
+      "updatedAt": "2026-08-29T00:30:53.591Z",
       "source": "hook",
       "symbols": [
         {
-          "name": "ImageDialog",
-          "kind": "fn",
-          "startLine": 97,
-          "endLine": 176,
-          "tokens": 799
-        },
-        {
-          "name": "ImagePicker",
-          "kind": "fn",
-          "startLine": 177,
-          "endLine": 399,
-          "tokens": 2120
-        },
-        {
-          "name": "unitOf",
-          "kind": "fn",
-          "startLine": 400,
-          "endLine": 405,
-          "tokens": 66
-        },
-        {
-          "name": "keyOf",
-          "kind": "fn",
-          "startLine": 406,
-          "endLine": 418,
-          "tokens": 154
-        },
-        {
-          "name": "CountField",
-          "kind": "fn",
-          "startLine": 419,
-          "endLine": 460,
-          "tokens": 304
-        },
-        {
-          "name": "TimingField",
-          "kind": "fn",
-          "startLine": 461,
-          "endLine": 522,
-          "tokens": 606
-        },
-        {
-          "name": "SegmentRow",
-          "kind": "fn",
-          "startLine": 523,
-          "endLine": 904,
-          "tokens": 4178
-        },
-        {
-          "name": "RepeatRow",
-          "kind": "fn",
-          "startLine": 905,
-          "endLine": 1015,
-          "tokens": 933
-        },
-        {
-          "name": "LadderRow",
-          "kind": "fn",
-          "startLine": 1016,
-          "endLine": 1133,
-          "tokens": 1057
-        },
-        {
-          "name": "SectionRow",
-          "kind": "fn",
-          "startLine": 1134,
-          "endLine": 1216,
-          "tokens": 650
-        },
-        {
           "name": "EditorScreen",
           "kind": "fn",
-          "startLine": 1217,
-          "endLine": 1657,
-          "tokens": 4790
+          "startLine": 53,
+          "endLine": 585,
+          "tokens": 5804
         }
       ]
     },
@@ -1359,54 +1289,61 @@
     },
     "src/storage/paces.ts": {
       "description": "Exercise Timer",
-      "tokens": 1674,
-      "hash": "46ae102b44046f06",
-      "size": 5858,
-      "mtimeMs": 1787865712529.9036,
-      "updatedAt": "2026-08-27T21:21:52.598Z",
+      "tokens": 1997,
+      "hash": "5ab12cecb4e46bae",
+      "size": 6989,
+      "mtimeMs": 1787963525516.8804,
+      "updatedAt": "2026-08-29T00:32:05.581Z",
       "source": "hook",
       "symbols": [
         {
           "name": "sampleFrom",
           "kind": "fn",
-          "startLine": 72,
-          "endLine": 101,
+          "startLine": 73,
+          "endLine": 102,
           "tokens": 301
         },
         {
           "name": "withSample",
           "kind": "fn",
-          "startLine": 102,
-          "endLine": 116,
+          "startLine": 103,
+          "endLine": 117,
           "tokens": 136
         },
         {
           "name": "ratesFrom",
           "kind": "fn",
-          "startLine": 117,
-          "endLine": 127,
+          "startLine": 118,
+          "endLine": 128,
           "tokens": 121
         },
         {
           "name": "loadPaces",
           "kind": "fn",
-          "startLine": 128,
-          "endLine": 145,
-          "tokens": 155
+          "startLine": 129,
+          "endLine": 150,
+          "tokens": 220
         },
         {
           "name": "savePaces",
           "kind": "fn",
-          "startLine": 146,
-          "endLine": 155,
-          "tokens": 101
+          "startLine": 151,
+          "endLine": 161,
+          "tokens": 106
         },
         {
           "name": "recordGate",
           "kind": "fn",
-          "startLine": 156,
-          "endLine": 162,
-          "tokens": 73
+          "startLine": 162,
+          "endLine": 189,
+          "tokens": 284
+        },
+        {
+          "name": "currentRates",
+          "kind": "fn",
+          "startLine": 190,
+          "endLine": 194,
+          "tokens": 34
         }
       ]
     },
@@ -1437,54 +1374,47 @@
     },
     "src/storage/weights.ts": {
       "description": "Exercise Timer",
-      "tokens": 1404,
-      "hash": "c092b799c95cd934",
-      "size": 4914,
-      "mtimeMs": 1787866551398.169,
-      "updatedAt": "2026-08-27T21:35:51.455Z",
+      "tokens": 1424,
+      "hash": "3d3bcf1a0b6fdad3",
+      "size": 4984,
+      "mtimeMs": 1787963520292.015,
+      "updatedAt": "2026-08-29T00:32:00.345Z",
       "source": "hook",
       "symbols": [
         {
-          "name": "seeded",
-          "kind": "fn",
-          "startLine": 65,
-          "endLine": 71,
-          "tokens": 76
-        },
-        {
           "name": "loadWeights",
           "kind": "fn",
-          "startLine": 72,
-          "endLine": 87,
-          "tokens": 130
+          "startLine": 63,
+          "endLine": 82,
+          "tokens": 195
         },
         {
           "name": "saveWeights",
           "kind": "fn",
-          "startLine": 88,
-          "endLine": 107,
-          "tokens": 208
+          "startLine": 83,
+          "endLine": 102,
+          "tokens": 206
         },
         {
           "name": "currentWeights",
           "kind": "fn",
-          "startLine": 108,
-          "endLine": 119,
-          "tokens": 106
+          "startLine": 103,
+          "endLine": 120,
+          "tokens": 190
         },
         {
           "name": "weightFor",
           "kind": "fn",
-          "startLine": 120,
-          "endLine": 130,
-          "tokens": 106
+          "startLine": 121,
+          "endLine": 128,
+          "tokens": 70
         },
         {
           "name": "withWeight",
           "kind": "fn",
-          "startLine": 131,
-          "endLine": 139,
-          "tokens": 81
+          "startLine": 129,
+          "endLine": 136,
+          "tokens": 65
         }
       ]
     },
@@ -1798,11 +1728,11 @@
     },
     "src/editor/blocks.ts": {
       "description": "Exercise Timer",
-      "tokens": 6720,
-      "hash": "f6d6f1610f3d3bf8",
-      "size": 23519,
-      "mtimeMs": 1787947206926.8386,
-      "updatedAt": "2026-08-28T20:00:06.999Z",
+      "tokens": 6872,
+      "hash": "115c0be84ec00352",
+      "size": 24050,
+      "mtimeMs": 1787963638539.9575,
+      "updatedAt": "2026-08-29T00:33:58.596Z",
       "source": "hook",
       "symbols": [
         {
@@ -1942,77 +1872,77 @@
           "name": "updateSegment",
           "kind": "fn",
           "startLine": 312,
-          "endLine": 363,
-          "tokens": 652
+          "endLine": 367,
+          "tokens": 743
         },
         {
           "name": "applyExercise",
           "kind": "fn",
-          "startLine": 364,
-          "endLine": 400,
-          "tokens": 354
+          "startLine": 368,
+          "endLine": 403,
+          "tokens": 326
         },
         {
           "name": "clearText",
           "kind": "fn",
-          "startLine": 401,
-          "endLine": 420,
+          "startLine": 404,
+          "endLine": 423,
           "tokens": 159
         },
         {
           "name": "clearMedia",
           "kind": "fn",
-          "startLine": 421,
-          "endLine": 436,
-          "tokens": 171
+          "startLine": 424,
+          "endLine": 445,
+          "tokens": 253
         },
         {
           "name": "patched",
           "kind": "fn",
-          "startLine": 437,
-          "endLine": 444,
-          "tokens": 81
+          "startLine": 446,
+          "endLine": 453,
+          "tokens": 87
         },
         {
           "name": "updateRepeat",
           "kind": "fn",
-          "startLine": 445,
-          "endLine": 454,
+          "startLine": 454,
+          "endLine": 463,
           "tokens": 78
         },
         {
           "name": "updateLadder",
           "kind": "fn",
-          "startLine": 455,
-          "endLine": 464,
+          "startLine": 464,
+          "endLine": 473,
           "tokens": 78
         },
         {
           "name": "updateSection",
           "kind": "fn",
-          "startLine": 465,
-          "endLine": 488,
+          "startLine": 474,
+          "endLine": 497,
           "tokens": 259
         },
         {
           "name": "setTiming",
           "kind": "fn",
-          "startLine": 489,
-          "endLine": 510,
+          "startLine": 498,
+          "endLine": 519,
           "tokens": 262
         },
         {
           "name": "timingOf",
           "kind": "fn",
-          "startLine": 511,
-          "endLine": 528,
+          "startLine": 520,
+          "endLine": 537,
           "tokens": 212
         },
         {
           "name": "wrapInRepeat",
           "kind": "fn",
-          "startLine": 529,
-          "endLine": 634,
+          "startLine": 538,
+          "endLine": 643,
           "tokens": 1323
         }
       ]
@@ -2131,67 +2061,74 @@
     },
     "src/storage/pictures.ts": {
       "description": "Exercise Timer",
-      "tokens": 1842,
-      "hash": "b5f20638081eb442",
-      "size": 6447,
-      "mtimeMs": 1787950088870.4363,
-      "updatedAt": "2026-08-28T20:48:08.940Z",
+      "tokens": 2201,
+      "hash": "d38ba2cc4f49ff14",
+      "size": 7702,
+      "mtimeMs": 1787963530846.1714,
+      "updatedAt": "2026-08-29T00:32:10.899Z",
       "source": "hook",
       "symbols": [
         {
           "name": "isMediaRef",
           "kind": "fn",
-          "startLine": 66,
-          "endLine": 81,
+          "startLine": 67,
+          "endLine": 82,
           "tokens": 157
         },
         {
           "name": "loadPictures",
           "kind": "fn",
-          "startLine": 82,
-          "endLine": 97,
-          "tokens": 128
+          "startLine": 83,
+          "endLine": 102,
+          "tokens": 193
         },
         {
           "name": "savePictures",
           "kind": "fn",
-          "startLine": 98,
-          "endLine": 116,
+          "startLine": 103,
+          "endLine": 121,
           "tokens": 206
         },
         {
           "name": "currentPictures",
           "kind": "fn",
-          "startLine": 117,
-          "endLine": 133,
+          "startLine": 122,
+          "endLine": 138,
           "tokens": 177
         },
         {
           "name": "pictureFor",
           "kind": "fn",
-          "startLine": 134,
-          "endLine": 138,
+          "startLine": 139,
+          "endLine": 143,
           "tokens": 55
         },
         {
           "name": "chosenPicture",
           "kind": "fn",
-          "startLine": 139,
-          "endLine": 147,
+          "startLine": 144,
+          "endLine": 152,
           "tokens": 95
         },
         {
           "name": "withPicture",
           "kind": "fn",
-          "startLine": 148,
-          "endLine": 162,
-          "tokens": 140
+          "startLine": 153,
+          "endLine": 172,
+          "tokens": 231
+        },
+        {
+          "name": "picturesFor",
+          "kind": "fn",
+          "startLine": 173,
+          "endLine": 190,
+          "tokens": 191
         },
         {
           "name": "pictureHashes",
           "kind": "fn",
-          "startLine": 163,
-          "endLine": 174,
+          "startLine": 191,
+          "endLine": 202,
           "tokens": 102
         }
       ]
@@ -2286,6 +2223,253 @@
       "mtimeMs": 1787954333813.8154,
       "updatedAt": "2026-08-28T21:58:53.878Z",
       "source": "hook"
+    },
+    "src/ui/App.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 2991,
+      "hash": "5bdf2659c8406bbe",
+      "size": 10467,
+      "mtimeMs": 1787963437219.9102,
+      "updatedAt": "2026-08-29T00:30:37.278Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "blankRoutine",
+          "kind": "fn",
+          "startLine": 55,
+          "endLine": 77,
+          "tokens": 215
+        },
+        {
+          "name": "App",
+          "kind": "fn",
+          "startLine": 78,
+          "endLine": 86,
+          "tokens": 61
+        },
+        {
+          "name": "Screens",
+          "kind": "fn",
+          "startLine": 87,
+          "endLine": 288,
+          "tokens": 2083
+        }
+      ]
+    },
+    "src/storage/refold.ts": {
+      "description": "Exercise Timer",
+      "tokens": 735,
+      "hash": "2c31b0c13becf5dc",
+      "size": 2570,
+      "mtimeMs": 1787963515546.668,
+      "updatedAt": "2026-08-29T00:31:55.827Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "doubleSWords",
+          "kind": "fn",
+          "startLine": 30,
+          "endLine": 41,
+          "tokens": 101
+        },
+        {
+          "name": "refoldKey",
+          "kind": "fn",
+          "startLine": 42,
+          "endLine": 53,
+          "tokens": 102
+        },
+        {
+          "name": "refoldKeys",
+          "kind": "fn",
+          "startLine": 54,
+          "endLine": 70,
+          "tokens": 177
+        }
+      ]
+    },
+    "src/media/gc.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1203,
+      "hash": "f9c6d6cf2462eef9",
+      "size": 4209,
+      "mtimeMs": 1787963536090.4167,
+      "updatedAt": "2026-08-29T00:32:16.145Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "liveHashes",
+          "kind": "fn",
+          "startLine": 16,
+          "endLine": 47,
+          "tokens": 386
+        },
+        {
+          "name": "hashesIn",
+          "kind": "fn",
+          "startLine": 48,
+          "endLine": 66,
+          "tokens": 191
+        },
+        {
+          "name": "forEachMedia",
+          "kind": "fn",
+          "startLine": 67,
+          "endLine": 85,
+          "tokens": 226
+        },
+        {
+          "name": "localHashes",
+          "kind": "fn",
+          "startLine": 86,
+          "endLine": 100,
+          "tokens": 148
+        },
+        {
+          "name": "orphanedHashes",
+          "kind": "fn",
+          "startLine": 101,
+          "endLine": 111,
+          "tokens": 112
+        }
+      ]
+    },
+    "src/storage/workouts.ts": {
+      "description": "Exercise Timer",
+      "tokens": 903,
+      "hash": "ae97bc0778b0f07f",
+      "size": 3160,
+      "mtimeMs": 1787963547320.337,
+      "updatedAt": "2026-08-29T00:32:27.374Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "readWorkouts",
+          "kind": "fn",
+          "startLine": 24,
+          "endLine": 45,
+          "tokens": 228
+        },
+        {
+          "name": "listWorkouts",
+          "kind": "fn",
+          "startLine": 46,
+          "endLine": 49,
+          "tokens": 30
+        },
+        {
+          "name": "saveWorkout",
+          "kind": "fn",
+          "startLine": 50,
+          "endLine": 64,
+          "tokens": 190
+        },
+        {
+          "name": "addWorkoutIfMissing",
+          "kind": "fn",
+          "startLine": 65,
+          "endLine": 75,
+          "tokens": 119
+        },
+        {
+          "name": "putWorkout",
+          "kind": "fn",
+          "startLine": 76,
+          "endLine": 80,
+          "tokens": 47
+        },
+        {
+          "name": "deleteWorkout",
+          "kind": "fn",
+          "startLine": 81,
+          "endLine": 85,
+          "tokens": 40
+        }
+      ]
+    },
+    "src/storage/useLibrary.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1925,
+      "hash": "3eb66a380f612281",
+      "size": 6748,
+      "mtimeMs": 1787963553362.12,
+      "updatedAt": "2026-08-29T00:32:33.414Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "now",
+          "kind": "fn",
+          "startLine": 20,
+          "endLine": 40,
+          "tokens": 206
+        },
+        {
+          "name": "useLibrary",
+          "kind": "fn",
+          "startLine": 41,
+          "endLine": 196,
+          "tokens": 1508
+        }
+      ]
+    },
+    "src/routines/importFiles.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2425,
+      "hash": "7e1615b833bd9b73",
+      "size": 8485,
+      "mtimeMs": 1787963628055.9688,
+      "updatedAt": "2026-08-29T00:33:48.110Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "importRoutineFiles",
+          "kind": "fn",
+          "startLine": 65,
+          "endLine": 182,
+          "tokens": 1406
+        },
+        {
+          "name": "pasted",
+          "kind": "fn",
+          "startLine": 183,
+          "endLine": 202,
+          "tokens": 184
+        },
+        {
+          "name": "looksImportable",
+          "kind": "fn",
+          "startLine": 203,
+          "endLine": 214,
+          "tokens": 87
+        }
+      ]
+    },
+    "src/storage/__tests__/refold.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 868,
+      "hash": "b8f99eb2289d57ad",
+      "size": 3035,
+      "mtimeMs": 1787963793089.952,
+      "updatedAt": "2026-08-29T00:36:33.144Z",
+      "source": "hook"
+    },
+    "src/routines/__tests__/importPictures.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 664,
+      "hash": "5e2c6973e9da0c52",
+      "size": 2322,
+      "mtimeMs": 1787963801601.6992,
+      "updatedAt": "2026-08-29T00:36:41.658Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "routine",
+          "kind": "fn",
+          "startLine": 29,
+          "endLine": 62,
+          "tokens": 378
+        }
+      ]
     }
   },
   "preamble": [

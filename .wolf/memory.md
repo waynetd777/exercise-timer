@@ -302,3 +302,29 @@
 | 00:35 | Removed the free illustrations entirely at Wayne's word ("not good enough"): 28 webp, exercises.plates.ts, CREDITS.md, both scripts and every doc/help/test change reverted; kept the thumbnail-refresh fix | git checkout of 10 files + 6 deletions | 1161 tests, typecheck, lint, build green; back to 42 of 147 pictured | ~15k |
 | 00:45 | Docs/help audit after the revert: help said 42 guide illustrations (41 plus the bike), ui README gained the shrinking-cache trap, buglog entry for the stale thumbnail | ui/help.ts, ui/README.md, .wolf/buglog.json | 1161 tests, typecheck, lint, build green | ~8k |
 | 01:55 | CI failed on an unhandled indexedDB rejection from the new blob path (all tests had passed; vitest's Errors line and exit 1). Caught the read in ExercisesScreen and useMediaUrl, test added | ui/ExercisesScreen.tsx, ui/useMediaUrl.ts, +1 test | 1162 tests, exit 0, lint, build green | ~10k |
+| 01:57 | Session end: 14 writes across 12 files (exerciseOptions.ts, blocks.ts, ExerciseField.tsx, rows.tsx, exerciseOptions.test.ts) | 10 reads | ~20342 tok |
+
+## Session: 2026-08-28 01:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 02:30 | Edited src/ui/App.tsx | modified if() | ~153 |
+| 02:30 | Edited src/editor/blocks.ts | modified patched() | ~201 |
+| 02:30 | Edited src/ui/EditorScreen.tsx | CSS: cap | ~363 |
+| 02:30 | Edited src/ui/EditorScreen.tsx | CSS: Save | ~82 |
+| 02:31 | Created src/storage/refold.ts | — | ~735 |
+| 02:31 | Edited src/storage/weights.ts | added 1 condition(s) | ~127 |
+| 02:32 | Edited src/storage/weights.ts | added 1 import(s) | ~25 |
+| 02:32 | Edited src/storage/paces.ts | added 1 condition(s) | ~153 |
+| 02:32 | Edited src/storage/paces.ts | added 1 import(s) | ~25 |
+| 02:32 | Edited src/storage/pictures.ts | added 1 condition(s) | ~125 |
+| 02:32 | Edited src/storage/pictures.ts | added 1 import(s) | ~25 |
+| 02:32 | Edited src/media/gc.ts | added 4 condition(s) | ~364 |
+| 02:32 | Edited src/storage/workouts.ts | added 1 import(s) | ~35 |
+| 02:32 | Edited src/storage/useLibrary.ts | listWorkouts() → readWorkouts() | ~240 |
+| 02:33 | Edited src/routines/importFiles.ts | added 1 condition(s) | ~295 |
+| 02:33 | Edited src/editor/blocks.ts | 7→5 lines | ~30 |
+| 02:33 | Edited src/editor/blocks.ts | expanded (+6 lines) | ~225 |
+| 02:33 | Edited src/editor/blocks.ts | 4→3 lines | ~34 |
+| 02:36 | Created src/storage/__tests__/refold.test.ts | — | ~868 |
+| 02:36 | Created src/routines/__tests__/importPictures.test.ts | — | ~664 |

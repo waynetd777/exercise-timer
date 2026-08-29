@@ -203,15 +203,23 @@ describe('readWorkouts', () => {
     // A development build's write, or a corrupted row: no block list at all,
     // and a group with no children. Either used to throw out of the list and
     // take every routine down with it.
-    db.rows.set('bad-1', { id: 'bad-1', name: 'No blocks', schemaVersion: SCHEMA_VERSION })
+    db.rows.set('bad-1', {
+      id: 'bad-1',
+      name: 'No blocks',
+      schemaVersion: SCHEMA_VERSION,
+      // A newer shape's photo. Left in the store means left WITH it: the sweep
+      // after a delete used to take it for an orphan.
+      steps: [{ media: { source: 'local', hash: 'held-1', mime: 'image/jpeg' } }],
+    })
     db.rows.set('bad-2', {
       ...routine('bad-2', 'Childless group'),
       blocks: [{ kind: 'repeat', id: 'r', times: 2 }],
     })
 
-    const { workouts, unreadable } = await readWorkouts()
+    const { workouts, unreadable, heldHashes } = await readWorkouts()
     expect(workouts.map((w) => w.name)).toEqual(['Readable'])
     expect(unreadable).toBe(2)
+    expect(heldHashes).toEqual(['held-1'])
     expect(db.rows.size).toBe(3)
   })
 })

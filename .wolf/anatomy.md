@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T21:58:53.879Z
-> Files: 88 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T00:36:41.659Z
+> Files: 96 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -66,7 +66,7 @@
 
 ## src/editor/
 
-- `blocks.ts` — Exercise Timer (~6720 tok)
+- `blocks.ts` — Exercise Timer (~6872 tok)
 - `images.ts` — An image a step can be given, whether it ships with the app or a routine (~1416 tok)
 - `README.md` — Project documentation (~4492 tok)
 
@@ -74,6 +74,7 @@
 
 - `clipboard.ts` — The clipboard as a source of images. (~1141 tok)
 - `dataUrl.ts` — Blobs as text, so an image can travel inside an export file. (~630 tok)
+- `gc.ts` — Exercise Timer (~1203 tok)
 - `README.md` — Project documentation (~1065 tok)
 
 ## src/media/__tests__/
@@ -90,6 +91,7 @@
 - `exercises.ts` — Exercise Timer (~1064 tok)
 - `generate.ts` — Exercise Timer (~4235 tok)
 - `imageCatalogue.ts` — Exercise illustrations available to every routine. (~1025 tok)
+- `importFiles.ts` — Exercise Timer (~2425 tok)
 - `loads.ts` — Exercise Timer (~820 tok)
 - `pasteTemplate.ts` — A routine written in every part of the grammar the paste parser understands, (~569 tok)
 - `rename.ts` — Exercise Timer (~1930 tok)
@@ -98,6 +100,7 @@
 ## src/routines/__tests__/
 
 - `exerciseOptions.test.ts` — Exercise Timer (~1578 tok)
+- `importPictures.test.ts` — Exercise Timer (~664 tok)
 - `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
 - `plates.test.ts` — Exercise Timer (~791 tok)
 - `rename.test.ts` — Exercise Timer (~1224 tok)
@@ -119,9 +122,12 @@
 ## src/storage/
 
 - `bundleMedia.ts` — The photos in an export file. (~890 tok)
-- `paces.ts` — Exercise Timer (~1674 tok)
-- `pictures.ts` — Exercise Timer (~1842 tok)
-- `weights.ts` — Exercise Timer (~1404 tok)
+- `paces.ts` — Exercise Timer (~1997 tok)
+- `pictures.ts` — Exercise Timer (~2201 tok)
+- `refold.ts` — Exercise Timer (~735 tok)
+- `useLibrary.ts` — Exercise Timer (~1925 tok)
+- `weights.ts` — Exercise Timer (~1424 tok)
+- `workouts.ts` — Exercise Timer (~903 tok)
 
 ## src/storage/__tests__/
 
@@ -130,11 +136,13 @@
 - `migrate.test.ts` — Declares workout (~1336 tok)
 - `paces.test.ts` — Exercise Timer (~1540 tok)
 - `pictures.test.ts` — Exercise Timer (~1118 tok)
+- `refold.test.ts` — Exercise Timer (~868 tok)
 - `weights.test.ts` — Exercise Timer (~1395 tok)
 
 ## src/ui/
 
-- `EditorScreen.tsx` — One undo step: name, colour and steps together, so they cannot drift apart. (~16521 tok)
+- `App.tsx` — Exercise Timer (~2991 tok)
+- `EditorScreen.tsx` — Exercise Timer (~6322 tok)
 - `GenerateDialog.tsx` — Exercise Timer (~2855 tok)
 - `help.ts` — The help text, kept out of the screens that show it. (~1562 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)

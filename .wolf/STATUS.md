@@ -2,7 +2,31 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (free illustrations tried and reverted; thumbnail refresh fix kept)
+> Last updated: 2026-08-29 (code review of c69ab2a..HEAD: all seven Highs fixed, uncommitted)
+
+---
+
+## 🔍 Code review of c69ab2a..HEAD (2026-08-29): Highs fixed, mediums open
+
+Full report: session scratchpad `review-2026-08-29.md` (bc2f2356 session). 48 verified candidates: 37 confirmed,
+7 plausible, 4 refuted. Every finding from the 2026-08-28 review is closed.
+
+**Done (working tree, NOT committed; 1171 tests, typecheck, lint green; buglog bug-130..136):**
+- `App.tsx` resets `backRequest` on every screen change (was never reset; every run/edit after one Back exited on open).
+- `editor/blocks.ts` `patched()` deletes only `label`/`note` on `''`; a section's `name` stays.
+- `storage/refold.ts` (new): moves keys written under the old fold (`leg pres` -> `leg press`) in weights, paces
+  and pictures on first read. Folding is not idempotent, so it uses the table's double-s vocabulary, not a re-fold.
+- Editor Preview disabled and the compile memo guarded when `tooLarge`.
+- `readWorkouts` returns `heldHashes` (via `gc.hashesIn` over the raw record); the delete sweep takes them as a root.
+- `importFiles` drops a `local` picture ref whose blob did not arrive (counted in `droppedImages`).
+- A pick writes NO picture (deferred to the Exercises page like the weight); `ExerciseOption.picture: MediaRef`
+  from `collectExercises(exercises, pictures)`; `ExerciseField`'s `Thumb` resolves it. `ExerciseChoice.media` gone.
+  Docs: editor/README, help.ts, storage/README, media/README, cerebrum.
+
+**Next quest:** commit the above (Wayne to say), then the 10 mediums in the report, starting with `useMediaUrl`
+falling back to the sync URL + `resolveMedia` forgetting a rejected read, `follow()` catching a rethrowing
+`guarded`, the Cmd+Z number-field guard, `readWeights` dropping `''`, the `12xSquats` regex, and the
+"3 sections" name. Then the lows and the ~20 cleanups.
 
 ---
 

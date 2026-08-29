@@ -5,6 +5,7 @@
  */
 
 import type { Workout } from '../engine'
+import { hashesIn } from '../media/gc'
 import { run, STORE_WORKOUTS } from './db'
 import { stamp } from './library'
 import { migrateWorkout } from './migrate'
@@ -20,14 +21,26 @@ import { migrateWorkout } from './migrate'
  * back short of clearing site data. Such a record is now skipped, counted so
  * the library can say so, and left in place for a build that can read it.
  */
-export async function readWorkouts(): Promise<{ workouts: Workout[]; unreadable: number }> {
+export async function readWorkouts(): Promise<{
+  workouts: Workout[]
+  unreadable: number
+  /**
+   * The photos the skipped records refer to. Left in place means left WITH
+   * their pictures: the blob sweep after a delete walks only the readable
+   * routines, and without this list it took an unreadable one's photos for
+   * orphans. See `hashesIn`.
+   */
+  heldHashes: string[]
+}> {
   const stored = await run<unknown[]>(STORE_WORKOUTS, 'readonly', (store) => store.getAll())
   const workouts: Workout[] = []
+  const held = new Set<string>()
   let unreadable = 0
   for (const record of stored) {
     const candidate = record as Partial<Workout> | null
     if (typeof candidate !== 'object' || candidate === null || !Array.isArray(candidate.blocks)) {
       unreadable += 1
+      for (const hash of hashesIn(record)) held.add(hash)
       continue
     }
     try {
@@ -37,9 +50,10 @@ export async function readWorkouts(): Promise<{ workouts: Workout[]; unreadable:
       workouts.push(migrateWorkout(candidate as Workout))
     } catch {
       unreadable += 1
+      for (const hash of hashesIn(record)) held.add(hash)
     }
   }
-  return { workouts, unreadable }
+  return { workouts, unreadable, heldHashes: [...held].sort() }
 }
 
 export async function listWorkouts(): Promise<Workout[]> {

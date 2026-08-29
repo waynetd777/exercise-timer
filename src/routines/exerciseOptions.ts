@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { resolvePlan } from '../media/resolve'
+import type { MediaRef } from '../engine'
 import type { Equipment, Exercise } from './exercises'
 import { EXERCISES, KIT_GROUPS } from './exercises'
 import { closestKey, foldName } from './foldName'
@@ -22,10 +22,13 @@ import { closestKey, foldName } from './foldName'
 export type ExerciseOption = {
   /** The table's own spelling, which is what a pick writes to the step. */
   name: string
-  /** A thumbnail URL, or '' where the guide does not illustrate it. */
-  src: string
-  /** The path under `public/`, for the step's media ref. Absent where none. */
-  media?: string
+  /**
+   * The picture in force for the exercise: the exercises page's where one was
+   * chosen there, else the guide's illustration, else none. For the thumbnail
+   * only; a pick writes no picture onto the step, since the step takes this
+   * same picture on the way into a run.
+   */
+  picture?: MediaRef
   /** Worked one side at a time, so a pick sets the count's per-side flag. */
   perSide?: boolean
   /** The kit, named as the list's heading names it: "Multi-gym", "Bands". */
@@ -80,8 +83,12 @@ function hintFor(exercise: Exercise): string {
  */
 export function collectExercises(
   exercises: readonly Exercise[] = EXERCISES,
-  /** `import.meta.env.BASE_URL`, for resolving a bundled path to a thumbnail. */
-  base = '/',
+  /**
+   * `currentPictures()`, keyed by folded name: the exercises page's table laid
+   * over the guide. Without it the guide's own illustrations stand in, which is
+   * what a test wants and what the page would supply with nothing chosen.
+   */
+  pictures?: ReadonlyMap<string, MediaRef>,
 ): ExerciseOption[] {
   const byKit = new Map<Equipment, ExerciseOption[]>()
   const seen = new Set<string>()
@@ -97,19 +104,13 @@ export function collectExercises(
     // group if one is ever added.
     if (!group) continue
 
-    /*
-     * `resolvePlan` rather than a `${base}${path}` of our own, for the same
-     * reason `collectImages` uses it: two places building the same URL is two
-     * places to get a subpath host wrong.
-     */
-    const plan = exercise.media
-      ? resolvePlan({ source: 'bundled', path: exercise.media }, () => false, base)
-      : { kind: 'none' as const }
+    const picture =
+      pictures?.get(key) ??
+      (exercise.media ? { source: 'bundled' as const, path: exercise.media } : undefined)
 
     const option: ExerciseOption = {
       name: exercise.name,
-      src: plan.kind === 'url' ? plan.url : '',
-      ...(exercise.media !== undefined ? { media: exercise.media } : {}),
+      ...(picture !== undefined ? { picture } : {}),
       ...(exercise.perSide === true ? { perSide: true } : {}),
       kit: group.label,
       hint: hintFor(exercise),

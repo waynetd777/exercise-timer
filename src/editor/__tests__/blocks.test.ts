@@ -917,6 +917,15 @@ describe('clearing a group field removes it', () => {
     const named = updateSection(blocks, [0], { note: 'Faster' })[0]
     expect(named?.kind === 'section' && named.note).toBe('Faster')
   })
+
+  it('keeps a section name cleared to nothing, since a section must have one', () => {
+    // Select-all and Backspace in the title used to delete the key: the
+    // controlled input lost its value and the routine failed `isBlock` on
+    // export and share.
+    const blocks: Block[] = [{ kind: 'section', id: 's', name: 'Legs', display: 'list', children: [] }]
+    const section = updateSection(blocks, [0], { name: '' })[0]
+    expect(section?.kind === 'section' && section.name).toBe('')
+  })
 })
 
 describe('a step given an exercise from the table', () => {
@@ -929,13 +938,18 @@ describe('a step given an exercise from the table', () => {
     return block
   }
 
-  it('takes the table\'s name and its illustration', () => {
-    // The name is the whole point: `weightFor`, `paces` and `estimate` all key
-    // on it, and a name typed by hand matches none of them.
-    const next = first(applyExercise(work(), [0], { name: 'Leg Press', media: 'exercises/Leg-Press.jpg' }))
+  it('takes the table\'s name, and leaves the picture to the exercises page', () => {
+    /*
+     * The name is the whole point: `weightFor`, `paces` and `estimate` all key
+     * on it, and a name typed by hand matches none of them. The picture is NOT
+     * written: a step with none takes the page's on the way into a run, the
+     * user's photo over the guide's drawing, and stamping the guide's here made
+     * the picked steps the only ones deaf to that page.
+     */
+    const next = first(applyExercise(work(), [0], { name: 'Leg Press' }))
 
     expect(next.name).toBe('Leg Press')
-    expect(next.media).toEqual({ source: 'bundled', path: 'exercises/Leg-Press.jpg' })
+    expect('media' in next).toBe(false)
   })
 
   it('drops a bundled picture the new exercise has none of', () => {

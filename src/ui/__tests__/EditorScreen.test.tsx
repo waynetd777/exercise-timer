@@ -218,6 +218,28 @@ describe('EditorScreen', () => {
     expect(screen.getByLabelText('Step name').getAttribute('role')).toBeNull()
   })
 
+  it('will not preview a draft over the step cap, since compiling it would throw', () => {
+    // Save was already disabled there. Preview compiled in render, and the
+    // error boundary that caught it took the unsaved draft with it.
+    type Block = Workout['blocks'][number]
+    const step = (id: string): Block => ({ kind: 'segment', id, name: 'Squats', role: 'work', durationMs: 20_000 })
+    const huge: Workout = {
+      ...timed(),
+      blocks: [
+        {
+          kind: 'repeat',
+          id: 'r1',
+          times: 99,
+          children: [{ kind: 'repeat', id: 'r2', times: 99, children: [step('a'), step('b')] }],
+        },
+      ],
+    }
+    render(<EditorScreen {...props(huge)} />)
+
+    expect((screen.getByLabelText('Preview the routine') as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByLabelText('Save routine') as HTMLButtonElement).disabled).toBe(true)
+  })
+
   it('reads the draft end to end, then goes back to editing', () => {
     /*
      * A MODE of this screen, not a trip to the run screen: navigating away and

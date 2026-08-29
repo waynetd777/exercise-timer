@@ -294,6 +294,35 @@
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
 
+## foldName is a storage key, and it is not idempotent (2026-08-29)
+
+Three localStorage tables (weights, paces, pictures) are keyed by `foldName(name)`. Any change to the
+fold silently re-keys all three, and folding an already-folded key gives something else again
+(`leg pres` folds to `leg pre`), so a migration cannot just re-fold. `storage/refold.ts` is the
+pattern: derive the affected vocabulary from EXERCISES and move stale keys on first read, current keys
+winning. Add a case there for any future fold change rather than a new migration.
+
+## A pick writes no picture (2026-08-29)
+
+`applyExercise` used to stamp the guide's bundled illustration onto a picked step; that made the
+picked steps the only ones deaf to the Exercises page (fill only covers steps with no media). Now a
+pick writes the name and the per-side flag only, removes a bundled picture already there, keeps an
+uploaded one, and the picker's thumbnails come from `currentPictures()` through `ExerciseOption.picture`
+(a `MediaRef`, resolved by `useMediaUrl` in `ExerciseField`'s `Thumb`). Same deferred model as the
+weight. Do not reintroduce a `media` path on `ExerciseChoice`/`ExerciseOption`.
+
+## Running /code-review on a large range (2026-08-29)
+
+The skill forks a reviewer that spawns finder agents, then verifier agents, and each time it yields to wait on them
+its task ends; the finders' idle notices and result messages route to the MAIN session, and reach the reviewer one at
+a time only when something resumes it. Twice it sat stalled after all children had finished. What worked: the finder
+and verifier transcripts are on disk at
+`~/.claude/projects/-Users-wayned-Projects-exercise-timer/<session>/subagents/agent-afinder-*.jsonl` and
+`agent-averify-*.jsonl`; pull the last JSON array out of each into one scratchpad file and SendMessage the reviewer
+the path with "do not wait for further deliveries". Also the ten-finding cap cuts confirmed lows and every cleanup;
+the verifier verdicts (with the assignment prompt that names each candidate) are the complete list, so build the
+report from those, not only from the reviewer's final ten. Review reports go in the scratchpad as .md, no Artifact.
+
 ## Reading a test run (2026-08-29)
 
 - **`Tests 1161 passed` is not a green run.** vitest reports unhandled errors on a separate `Errors` line and still
