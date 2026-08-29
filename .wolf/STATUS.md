@@ -2,11 +2,11 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (eight new screenshots converted and wired into the README; committed, NOT pushed)
+> Last updated: 2026-08-29 (eight new screenshots converted and wired into the README; 4741837 pushed)
 
 ---
 
-## 📸 Screenshots refreshed, four to eight (2026-08-29, done, committed, NOT pushed)
+## 📸 Screenshots refreshed, four to eight (2026-08-29, done, pushed as 4741837)
 
 Wayne dropped eight PNGs (1904x2482) into `docs/screenshots/`: replacements for the existing four plus four new
 ones (exercises, generator, paste, preview).
@@ -24,7 +24,7 @@ the new captions now cover; the paste-format link stayed.
 **Two crops worth reshooting if Wayne cares:** `exercises.webp` opens mid-scroll with "Calf Press" clipped at the
 top, and `preview.webp` clips its first row ("10:00 Warm Up"). Both read fine, neither is deliberate.
 
-**Next:** Wayne's eye on the README, then a push (docs-only, no version bump, no code touched).
+**Next:** Wayne's eye on the README as GitHub renders it. Docs-only, so no version bump and the badge stays 8.9.
 
 ## ✍️ README and in-app help rewritten (2026-08-29, done, v8.9)
 
