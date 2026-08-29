@@ -36,6 +36,7 @@
 import type { MediaRef } from '../engine'
 import { EXERCISES } from '../routines/exercises'
 import { foldName } from '../routines/foldName'
+import { refoldKeys } from './refold'
 import { findFor } from '../routines/loads'
 
 const KEY = 'davshack-timer-pictures'
@@ -89,7 +90,11 @@ export function loadPictures(): Pictures {
     for (const [name, ref] of Object.entries(parsed as Record<string, unknown>)) {
       if (isMediaRef(ref)) out[name] = ref
     }
-    return out
+    // Keys written under the older fold ("leg pres") move to the current one
+    // ("leg press"), once, on the first read. See `refold.ts`.
+    const { table, changed } = refoldKeys(out)
+    if (changed) savePictures(table)
+    return table
   } catch {
     return {}
   }

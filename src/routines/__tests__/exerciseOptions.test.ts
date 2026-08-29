@@ -7,6 +7,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise } from '../exercises'
 import { EXERCISES } from '../exercises'
+import type { MediaRef } from '../../engine'
 import { collectExercises, exerciseRows, indexOfName, optionsOf } from '../exerciseOptions'
 
 const ex = (name: string, extra: Partial<Exercise> = {}): Exercise => ({
@@ -29,18 +30,23 @@ describe('the exercise table as the name field offers it', () => {
     expect(options.map((o) => o.kit)).toEqual(['Multi-gym', 'Bike', 'Trampoline', 'Dumbbells'])
   })
 
-  it('resolves a thumbnail through BASE_URL, and leaves it empty where there is none', () => {
-    // A subpath host is the case this exists for: the ref keeps a base-less path
-    // so a routine survives being opened somewhere else.
-    const [drawn, undrawn] = collectExercises(
-      [ex('Leg Press', { media: 'exercises/Leg-Press.jpg' }), ex('Squat', { equipment: 'bodyweight' })],
-      '/exercise-timer/',
+  it('carries the picture in force: the exercises page over the guide, none where neither has one', () => {
+    // The thumbnail must show what the step will: a photo chosen on the page
+    // used to be invisible here, and the guide's drawing was stamped on the pick.
+    const chosen: MediaRef = { source: 'local', hash: 'mine', mime: 'image/jpeg' }
+    const options = collectExercises(
+      [
+        ex('Leg Press', { media: 'exercises/Leg-Press.jpg' }),
+        ex('Squat', { equipment: 'bodyweight' }),
+        ex('Bicep Curl', { media: 'exercises/Bicep-Curl.jpg', equipment: 'dumbbell' }),
+      ],
+      new Map([['leg press', chosen]]),
     )
+    const by = (name: string) => options.find((o) => o.name === name)
 
-    expect(drawn?.src).toBe('/exercise-timer/exercises/Leg-Press.jpg')
-    expect(drawn?.media).toBe('exercises/Leg-Press.jpg')
-    expect(undrawn?.src).toBe('')
-    expect(undrawn && 'media' in undrawn).toBe(false)
+    expect(by('Leg Press')?.picture).toEqual(chosen)
+    expect(by('Bicep Curl')?.picture).toEqual({ source: 'bundled', path: 'exercises/Bicep-Curl.jpg' })
+    expect(by('Squat') && 'picture' in by('Squat')!).toBe(false)
   })
 
   it('says the station, what the exercise is for, and whether it is per side', () => {

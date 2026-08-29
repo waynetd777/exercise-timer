@@ -28,6 +28,7 @@
  */
 
 import { foldName } from '../routines/foldName'
+import { refoldKeys } from './refold'
 import { findLoad } from '../routines/loads'
 
 const KEY = 'davshack-timer-weights'
@@ -69,7 +70,11 @@ export function loadWeights(): Weights {
     for (const [name, load] of Object.entries(parsed as Record<string, unknown>)) {
       if (typeof load === 'string') out[name] = load
     }
-    return out
+    // Keys written under the older fold ("leg pres") move to the current one
+    // ("leg press"), once, on the first read. See `refold.ts`.
+    const { table, changed } = refoldKeys(out)
+    if (changed) saveWeights(table)
+    return table
   } catch {
     return {}
   }

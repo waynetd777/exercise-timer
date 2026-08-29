@@ -115,6 +115,10 @@ Three things about it that the weights table does not have to think about:
   so the walk over the routines in `gc.ts` cannot see them; without the extra root
   the first delete of any routine would collect them. `useLibrary` passes
   `pictureHashes(loadPictures())` into `orphanedHashes`.
+- A record `readWorkouts` cannot read is left in the store WITH its photos: its
+  `heldHashes` (found by `media/gc.ts`'s `hashesIn`, a walk over the raw record)
+  go into the same sweep as a further root. Without them the first delete of any
+  other routine took those photos for orphans.
 - **Values are checked on the way OUT**, not only in. What is here is rendered on
   every step of every run, and a hand-edited entry would throw in React rather
   than showing no picture.

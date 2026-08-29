@@ -127,11 +127,26 @@ export async function importRoutineFiles(
           saveWeights({ ...loadWeights(), ...contents.weights })
         }
 
-        // The exercise pictures, merged the same way and for the same reason. A
-        // ref whose blob did not survive the checks above simply shows nothing,
-        // exactly as a step's own photo would.
-        if (Object.keys(contents.pictures).length > 0) {
-          savePictures({ ...loadPictures(), ...contents.pictures })
+        /*
+         * The exercise pictures, merged the same way and for the same reason,
+         * MINUS any whose photo did not arrive. The export writes the table as it
+         * stands while `collectMedia` skips a blob that is missing or too large,
+         * and `restoreMedia` drops one whose bytes do not match; a step's own
+         * photo in that state simply shows nothing, but a ref stored HERE sits
+         * over the guide's illustration, so keeping it would turn a picture that
+         * worked into no picture at all. Counted with the dropped images, so the
+         * notice says so.
+         */
+        const pictures: typeof contents.pictures = {}
+        for (const [key, ref] of Object.entries(contents.pictures)) {
+          if (ref.source === 'local' && !(await hasBlob(ref.hash))) {
+            droppedImages += 1
+            continue
+          }
+          pictures[key] = ref
+        }
+        if (Object.keys(pictures).length > 0) {
+          savePictures({ ...loadPictures(), ...pictures })
         }
         continue
       }

@@ -140,6 +140,13 @@ function Screens() {
   const pushed = useRef(false)
   const popping = useRef(false)
   useEffect(() => {
+    /*
+     * A request belongs to the screen it was made on. The count only ever went
+     * up, and both screens act on `> 0` in an effect that also runs at mount,
+     * so after one Back every run and every edit opened afterwards left the
+     * instant it appeared, until a reload.
+     */
+    setBackRequest(0)
     if (view.screen !== 'library' && !pushed.current) {
       history.pushState({ screen: view.screen }, '')
       pushed.current = true

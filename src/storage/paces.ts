@@ -31,6 +31,7 @@
 
 import type { TimelineEntry } from '../engine/types'
 import { foldName } from '../routines/foldName'
+import { refoldKeys } from './refold'
 
 const KEY = 'davshack-timer-paces'
 /** Samples kept per exercise. Enough to have a median, few enough to keep up. */
@@ -137,7 +138,11 @@ export function loadPaces(): Paces {
         out[name] = samples.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
       }
     }
-    return out
+    // Keys written under the older fold ("leg pres") move to the current one
+    // ("leg press"), once, on the first read. See `refold.ts`.
+    const { table, changed } = refoldKeys(out)
+    if (changed) savePaces(table)
+    return table
   } catch {
     return {}
   }

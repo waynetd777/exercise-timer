@@ -329,8 +329,6 @@ export function updateSegment(
  */
 export type ExerciseChoice = {
   name: string
-  /** A path under `public/`, where the guide illustrates it. */
-  media?: string
   /** Worked one side at a time. */
   perSide?: boolean
 }
@@ -348,11 +346,17 @@ export type ExerciseChoice = {
  *  - The NAME is the table's spelling, which is the point of picking rather than
  *    typing: `weightFor()`, `storage/paces.ts` and `estimate.ts` all key on the
  *    name, and "Cable Bicep Curl" typed by hand matches none of them.
- *  - The PICTURE follows where the table has one. Where it does not, a bundled
- *    picture is REMOVED, because it came from the table and now illustrates the
- *    wrong exercise, but an uploaded or pasted one is KEPT: the user put it
- *    there, this app cannot know it was of the old movement, and silently
- *    deleting a photo is worse than leaving one that may still be right.
+ *  - The PICTURE is not written. A step with no picture of its own takes the
+ *    exercises page's on the way into every run and preview, the table's photo
+ *    over the guide's illustration, and that is what a picked step should show:
+ *    stamping the guide's drawing here made the step deaf to the page, so a
+ *    photo chosen for Leg Press showed on every step but the picked ones. A
+ *    bundled picture already on the step is REMOVED for the same reason (it
+ *    came from the table and now illustrates the wrong exercise; the fill
+ *    supplies the right one), but an uploaded or pasted one is KEPT: the user
+ *    put it there, this app cannot know it was of the old movement, and
+ *    silently deleting a photo is worse than leaving one that may still be
+ *    right.
  *  - PER SIDE is written onto the count, both ways round, so picking a kickback
  *    says "each side" and picking a leg press stops saying it. A step with no
  *    count at all is left timed: a minute of cycling has no reps to qualify, and
@@ -371,8 +375,7 @@ export function applyExercise(
 
     const next: Segment = { ...block, name: choice.name }
 
-    if (choice.media !== undefined) next.media = { source: 'bundled', path: choice.media }
-    else if (block.media?.source === 'bundled') delete next.media
+    if (block.media?.source === 'bundled') delete next.media
 
     const reps = next.reps
     if (reps) {
@@ -433,11 +436,17 @@ export function clearMedia(blocks: readonly Block[], path: Path): Block[] {
  * store an empty string: harmless on screen, since every reader guards with a
  * truthiness test, but every export carried `"note": ""`, and absent is what
  * the model means by "none".
+ *
+ * Only the OPTIONAL fields. A section's `name` is required, and select-all
+ * plus Backspace in its title used to delete the key: the controlled input
+ * lost its value, and the saved routine failed `isBlock` on export and share.
  */
+const CLEARABLE = new Set<string>(['label', 'note'])
+
 function patched<T extends Repeat | Ladder | Section>(block: T, patch: Partial<T>): T {
   const next = { ...block, ...patch } as Record<string, unknown>
   for (const [key, value] of Object.entries(patch)) {
-    if (value === '') delete next[key]
+    if (value === '' && CLEARABLE.has(key)) delete next[key]
   }
   return next as unknown as T
 }

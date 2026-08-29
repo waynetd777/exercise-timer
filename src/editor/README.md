@@ -46,23 +46,26 @@ would leave a blank line under the step for ever.
 
 ## Picking an exercise is one operation
 
-`applyExercise` writes a step's name, its picture and the per-side flag on its
-count in ONE tree operation, so one press of undo takes the whole pick back.
-Three patches would be three history entries, and the middle one would be a step
-named for the new exercise still wearing the old one's photo.
+`applyExercise` writes a step's name and the per-side flag on its count in ONE
+tree operation, so one press of undo takes the whole pick back. Two patches would
+be two history entries, and the middle state a step named for the new exercise
+still wearing the old one's photo.
 
-Its argument is STRUCTURAL — `{ name, media?, perSide? }` — not
+Its argument is STRUCTURAL, `{ name, perSide? }`, not
 `routines/exercises`'s `Exercise`. Everything here is pure operations on a block
 tree and has no business knowing about body areas, stations or attachments; the
 name field maps one to the other.
 
 Two decisions inside it:
 
-- Where the table illustrates the new exercise, the picture follows. Where it
-  does not, a **bundled** picture is removed (it came from the table and now
-  shows the wrong movement) and an **uploaded or pasted** one is kept: the user
-  put it there, and silently deleting someone's photograph is worse than leaving
-  one that may still be right.
+- No picture is written. A step with none takes the Exercises page's on the way
+  into every run and preview, the page's photo over the guide's illustration, and
+  a picked step should show exactly that; stamping the guide's drawing here made
+  the picked steps the only ones deaf to the page. A **bundled** picture already
+  on the step is removed (it came from the table and now shows the wrong
+  movement; the fill supplies the right one) and an **uploaded or pasted** one is
+  kept: the user put it there, and silently deleting someone's photograph is
+  worse than leaving one that may still be right.
 - Per side is written onto an existing count, both ways round, so picking a
   kickback says "each side" and picking a leg press stops saying it. A step with
   no count is left timed — a minute of cycling has no reps to qualify.

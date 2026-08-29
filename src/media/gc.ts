@@ -35,6 +35,35 @@ export function liveHashes(
 }
 
 /** Every step's media across the routines. Any group kind: missing one would orphan live images. */
+/**
+ * Every blob hash a value of unknown shape refers to.
+ *
+ * For the records `readWorkouts` cannot read. They are left in the store for a
+ * build that can read them, and their photos have to be left with them: without
+ * this, the first delete of any other routine swept those photos as orphans, and
+ * the routine came back one day without its pictures. The shape is unknown by
+ * definition, so this walks everything and takes whatever looks like a media
+ * ref, by the same two rules as `liveHashes`.
+ */
+export function hashesIn(value: unknown): string[] {
+  const found = new Set<string>()
+  const walk = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item)
+      return
+    }
+    if (typeof node !== 'object' || node === null) return
+    const record = node as Record<string, unknown>
+    if (record['source'] === 'local' && typeof record['hash'] === 'string') found.add(record['hash'])
+    if (record['source'] === 'remote' && typeof record['cachedHash'] === 'string') {
+      found.add(record['cachedHash'])
+    }
+    for (const child of Object.values(record)) walk(child)
+  }
+  walk(value)
+  return [...found].sort()
+}
+
 function forEachMedia(workouts: readonly Workout[], visit: (media: MediaRef) => void): void {
   const walk = (blocks: readonly Block[]): void => {
     for (const block of blocks) {

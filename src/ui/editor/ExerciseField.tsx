@@ -6,11 +6,13 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import type { MediaRef } from '../../engine'
 import type { ExerciseOption } from '../../routines/exerciseOptions'
 import { exerciseRows, indexOfName, optionsOf } from '../../routines/exerciseOptions'
 import { CheckIcon, DownIcon } from '../icons'
 import { place } from '../Menu'
 import { useDismiss } from '../useDismiss'
+import { useMediaUrl } from '../useMediaUrl'
 
 /**
  * The tallest the list is allowed to be, in pixels.
@@ -342,15 +344,7 @@ export function ExerciseField({
                       }}
                       onMouseEnter={() => setActive(mine)}
                     >
-                      {option.src ? (
-                        <img className="ename__thumb" src={option.src} alt="" loading="lazy" />
-                      ) : (
-                        /* An empty tile, so the names stay in one column whether
-                           the guide draws the exercise or not. 105 of the 147
-                           have no picture; a ragged left edge over that many
-                           rows is harder to read than a blank square. */
-                        <span className="ename__thumb ename__thumb--none" aria-hidden="true" />
-                      )}
+                      <Thumb picture={option.picture} />
                       {/*
                         The name over the hint, in ONE column beside the picture.
                         Side by side they competed for the row: the hint does not
@@ -380,5 +374,23 @@ export function ExerciseField({
           document.body,
         )}
     </div>
+  )
+}
+
+/**
+ * The row's picture, resolved as a run resolves one: a bundled path is a URL at
+ * once, an uploaded photo is read out of the blob store and lands a frame later.
+ * Its own component so the hook runs per row, and so a photo chosen on the
+ * exercises page shows here exactly as it will on the step.
+ */
+function Thumb({ picture }: { picture: MediaRef | undefined }) {
+  const url = useMediaUrl(picture)
+  return url ? (
+    <img className="ename__thumb" src={url} alt="" loading="lazy" />
+  ) : (
+    /* An empty tile, so the names stay in one column whether the exercise has a
+       picture or not. 105 of the 147 have none; a ragged left edge over that
+       many rows is harder to read than a blank square. */
+    <span className="ename__thumb ename__thumb--none" aria-hidden="true" />
   )
 }

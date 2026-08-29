@@ -118,20 +118,21 @@ export function EditorScreen({
   const { list, drag, held } = useDraftDrag({ history, rows, editBlocks, setHistory })
 
   /*
-   * The exercise table the name field offers, built ONCE for the screen.
-   *
-   * A routine runs to sixty rows and the table is 147 entries; building it per
-   * row would be nine thousand objects per keystroke. Same reason `knownImages`
-   * is collected by the library and handed down rather than gathered per picker.
-   */
-  const exercises = useMemo(() => collectExercises(undefined, import.meta.env.BASE_URL), [])
-
-  /*
    * What the exercises page supplies for a step that carries no picture of its
    * own. Read once for the screen: every row asks, and the identity has to be
    * stable or each row's media effect would re-arm on every keystroke.
    */
   const pictures = useMemo(() => currentPictures(), [])
+
+  /*
+   * The exercise table the name field offers, built ONCE for the screen, with
+   * the same pictures on its thumbnails that the rows and the run will show.
+   *
+   * A routine runs to sixty rows and the table is 147 entries; building it per
+   * row would be nine thousand objects per keystroke. Same reason `knownImages`
+   * is collected by the library and handed down rather than gathered per picker.
+   */
+  const exercises = useMemo(() => collectExercises(undefined, pictures), [pictures])
 
   /*
    * Reading the draft, as the run screen reads a saved routine.
@@ -156,6 +157,13 @@ export function EditorScreen({
   }, [workout, name, blocks, colour])
   const steps = stepCount(preview)
   /*
+   * `compile()` refuses a routine of more than this many steps, and it does so
+   * in the run screen's render. Refused here first, with the count in view, so
+   * a nested repeat that overshoots is fixed in the editor rather than found
+   * on Start.
+   */
+  const tooLarge = steps > MAX_TIMELINE_ENTRIES
+  /*
    * The weights are filled in for the reading, exactly as `App` fills them on
    * the way into a run: a step that states no load of its own means "whatever I
    * lift for this", and the preview is here to be read as the routine will run.
@@ -163,21 +171,18 @@ export function EditorScreen({
    *
    * Only while it is being read. Compiling a sixty-step routine on every
    * keystroke to render nothing would be work for its own sake.
+   *
+   * And never over the cap: `compile()` throws there, this is a render, and the
+   * error boundary that catches it takes the unsaved draft with it. The Preview
+   * button is disabled on the same condition; this is the guard behind it.
    */
   const previewRoutine = useMemo(
     () =>
-      previewing
+      previewing && !tooLarge
         ? compile(withPictures(withWeights(preview, currentWeights()), currentPictures()))
         : null,
-    [previewing, preview],
+    [previewing, tooLarge, preview],
   )
-  /*
-   * `compile()` refuses a routine of more than this many steps, and it does so
-   * in the run screen's render. Refused here first, with the count in view, so
-   * a nested repeat that overshoots is fixed in the editor rather than found
-   * on Start.
-   */
-  const tooLarge = steps > MAX_TIMELINE_ENTRIES
   const dirty = useMemo(
     () => isDirty(workout, name, blocks, colour),
     [workout, name, blocks, colour],
@@ -306,6 +311,8 @@ export function EditorScreen({
             <button
               className="btn btn--ghost"
               onClick={() => setPreviewing((open) => !open)}
+              // Same bar as Save: the reading compiles, and compiling over the cap throws.
+              disabled={tooLarge}
               aria-pressed={previewing}
               aria-label={previewing ? 'Back to editing' : 'Preview the routine'}
               title={previewing ? 'Back to editing' : 'Read the whole routine'}
@@ -447,12 +454,12 @@ export function EditorScreen({
                   exercises={exercises}
                   pictures={pictures}
                   /* One tree operation, so one press of undo takes the whole
-                     pick back: the name, the picture and the per-side flag. */
+                     pick back: the name and the per-side flag. The picture is
+                     not written; the step takes the exercises page's. */
                   onPickExercise={(p, option) =>
                     editBlocks((c) =>
                       applyExercise(c, p, {
                         name: option.name,
-                        ...(option.media !== undefined ? { media: option.media } : {}),
                         ...(option.perSide === true ? { perSide: true } : {}),
                       }),
                     )
