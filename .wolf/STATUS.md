@@ -2,9 +2,18 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (review of c69ab2a..HEAD fully closed: highs, mediums, lows and cleanups; v8.8 pushed)
+> Last updated: 2026-08-29 (review closed, v8.8 pushed; Exercises page width fix 130c801 pushed, awaiting Wayne's phone check)
 
 ---
+
+## 📱 Exercises page wider than an iPhone (2026-08-29, fixed, pushed as 130c801, unverified on the phone)
+
+Wayne: "the exercises screen is exceeding the available width on iphone". Cause: `.weights__count` was
+`white-space: nowrap`, the Exercises page made it two clauses (uppercase, tracked), and `.weights` had an implicit
+`auto` grid column that grows to its widest child. Fix in exercises.css: `grid-template-columns: minmax(0, 1fr)`
+on `.weights` and the count wraps. buglog bug-152. **Next:** Wayne confirms on the phone after the Pages deploy
+(badge 8.8; CSS-only change). If still wide, the next suspects are the two chips in `.weights__tools` and the
+search input's intrinsic width on iOS.
 
 ## 🔍 Code review of c69ab2a..HEAD (2026-08-29): closed, v8.8
 
