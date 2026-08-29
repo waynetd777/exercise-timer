@@ -8,11 +8,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Block, MediaRef, Workout } from '../engine'
 import type { Equipment } from '../routines/exercises'
 import { EXERCISES, KIT_GROUPS, loadable } from '../routines/exercises'
-import { IMAGE_CATALOGUE } from '../routines/imageCatalogue'
 import { exerciseKey, withoutStatedLoads } from '../routines/loads'
-import { collectImages } from '../editor/images'
+import type { KnownImage } from '../editor/images'
 import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
-import { chosenPicture, loadPictures, savePictures, withPicture } from '../storage/pictures'
+import { chosenPicture, loadPictures, picturesOver, savePictures, withPicture } from '../storage/pictures'
 import { sweepOrphans } from '../storage/sweep'
 import { storeFile } from '../media/pin'
 import { resolveMedia, resolveMediaSync } from '../media/resolveMedia'
@@ -20,10 +19,10 @@ import { BackIcon, CloseIcon, HelpIcon, ImageIcon, TrashIcon } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
 import { NoticeDialog } from './NoticeDialog'
 import { HelpTray } from './HelpTray'
-import { ImagePicker } from './editor/ImageDialogs'
+import { ImagePicker, ImageSheet } from './editor/ImageDialogs'
 import { EXERCISES_HELP } from './help'
 import './exercises.css'
-import { useModal } from './useModal'
+import { foldName } from '../routines/foldName'
 
 /**
  * The exercises themselves: what each one looks like, and what you lift for it.
@@ -70,8 +69,8 @@ function observed(workouts: readonly Workout[]): Map<string, string> {
  * puts the exercise back on the illustration that ships with the app, which is
  * why it appears only where there is one to go back to.
  *
- * Everything else is the same `.modal` sheet and `.notice` panel every dialog in
- * the app uses.
+ * The sheet, the picture and the line that stands in for a missing one are the
+ * editor's `ImageSheet`; only what is said and offered underneath is this one's.
  */
 function PictureDialog({
   src,
@@ -92,21 +91,8 @@ function PictureDialog({
   onClear: () => void
   onClose: () => void
 }) {
-  const { dialog, onBackdropClick } = useModal(onClose)
-
   return (
-    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
-      <div className="notice exview">
-        {src ? (
-          <img className="exview__picture" src={src} alt={name} />
-        ) : (
-          /* A ref whose bytes are not on this device: a backup restored without
-             its photos. Saying so beats an empty frame, and Change is offered
-             anyway. */
-          <p className="exview__missing label label--sm">
-            This picture is not on this device, so it cannot be shown.
-          </p>
-        )}
+    <ImageSheet src={src} alt={name} onClose={onClose}>
         <p className="notice__text">{name}</p>
         {chosen && (
           <p className="notice__detail label label--sm">
@@ -131,8 +117,7 @@ function PictureDialog({
             </button>
           )}
         </div>
-      </div>
-    </dialog>
+    </ImageSheet>
   )
 }
 
@@ -176,10 +161,13 @@ function Thumb({
 
 export function ExercisesScreen({
   workouts,
+  knownImages,
   onExit,
   onFollow,
 }: {
   workouts: readonly Workout[]
+  /** The catalogue plus every image the routines use, collected once by App. */
+  knownImages: readonly KnownImage[]
   onExit: () => void
   /** Saves the routines this page rewrote. See `follow` below. */
   onFollow: (workouts: readonly Workout[]) => Promise<void> | void
@@ -207,15 +195,6 @@ export function ExercisesScreen({
   const [helping, setHelping] = useState(false)
 
   const fromLibrary = useMemo(() => observed(workouts), [workouts])
-
-  /*
-   * The catalogue the picker offers, plus whatever the routines already use.
-   * Built once: `collectImages` walks the whole library.
-   */
-  const knownImages = useMemo(
-    () => collectImages(workouts, IMAGE_CATALOGUE, import.meta.env.BASE_URL),
-    [workouts],
-  )
 
   const rows = useMemo(() => {
     const wanted = query.trim().toLowerCase()
@@ -276,7 +255,7 @@ export function ExercisesScreen({
    *
    * ONE map, rebuilt only when the table changes, and the identity of what it
    * holds matters as much as the value. `useMediaUrl` keys its effect on the ref
-   * object, so building `{ source: 'bundled', path }` per render gave all 147
+   * object, so building a bundled ref per render gave all 147
    * rows a new ref every time, which re-armed 147 effects, which set state,
    * which rendered again: the page span rather than opened, and its tests timed
    * out. Memoised, each row's effect runs once.
@@ -285,17 +264,9 @@ export function ExercisesScreen({
    * `pictureFor`, which reads SAVED storage: a picture just cleared must not come
    * straight back out of that cache.
    */
-  const shownPictures = useMemo(() => {
-    const map = new Map<string, MediaRef>()
-    for (const exercise of EXERCISES) {
-      const own = chosenPicture(pictures, exercise.name)
-      if (own) map.set(exercise.name, own)
-      else if (exercise.media) map.set(exercise.name, { source: 'bundled', path: exercise.media })
-    }
-    return map
-  }, [pictures])
+  const shownPictures = useMemo(() => picturesOver(pictures), [pictures])
 
-  const pictureOf = (name: string): MediaRef | undefined => shownPictures.get(name)
+  const pictureOf = (name: string): MediaRef | undefined => shownPictures.get(foldName(name))
 
   /*
    * Every row's image URL, resolved for the page rather than by the row.
@@ -355,8 +326,10 @@ export function ExercisesScreen({
    * is what makes a removal show immediately.
    */
   const srcOf = (name: string): string | null => {
-    if (!shownPictures.has(name)) return null
-    return syncSrc.get(name) ?? blobSrc.get(name) ?? null
+    // Every map here is keyed as `picturesOver` keys: by folded name.
+    const key = foldName(name)
+    if (!shownPictures.has(key)) return null
+    return syncSrc.get(key) ?? blobSrc.get(key) ?? null
   }
 
   /*

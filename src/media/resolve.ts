@@ -6,6 +6,11 @@
 
 import type { MediaRef } from '../engine'
 
+/** A ref to an image that ships with the app, by its path under `public/`. */
+export function bundled(path: string): MediaRef {
+  return { source: 'bundled', path }
+}
+
 /**
  * What a media ref resolves to, decided without touching storage or the DOM so
  * it can be tested on its own.

@@ -5,6 +5,10 @@
  */
 
 import type { HelpSection } from './HelpTray'
+import { EXERCISES } from '../routines/exercises'
+
+/** How many multi-gym exercises the guide illustrates. Counted, not typed: the typed count drifted twice. */
+const DRAWN = EXERCISES.filter((exercise) => exercise.equipment === 'machine' && exercise.media !== undefined).length
 
 /**
  * The help text, kept out of the screens that show it.
@@ -91,7 +95,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'Every kind has its own colour. The bar on an add button matches the edge of the row it makes.',
       'The unit beside the number: s counts seconds, × waits for Next, × each side counts per side, and × in does both, for a minute that also has a target.',
       'A Work step’s name offers the exercises the app knows, illustrated where the guide draws them. The arrow beside the field opens the list on the exercise the step is already on, ticked, so you can see which one it is. Type to search it instead: names, part-names and the app’s own spellings all find their exercise.',
-      'On an empty step, or one named something the table does not hold, the same arrow shows the whole list grouped by kit. Typing your own name is always fine — Warm Up is not an exercise and never will be.',
+      'On an empty step, or one named something the table does not hold, the same arrow shows the whole list grouped by kit. Typing your own name is always fine: Warm Up is not an exercise and never will be.',
       'Picking one off the list spells the name the way the Exercises page and the pace estimate know it, so the step shows that page’s picture and lifts its weight, and where the exercise is worked one side at a time the count is set to each side. One undo takes the whole pick back.',
       'On a narrow screen a step shows its fields and one ⋯ button, which opens the rest of its controls. On a wide screen they are all on the row already.',
       'Each row can be dragged by its grip to reorder, or focused and moved with the arrow keys. It can also duplicate itself, add a step below, or delete.',
@@ -155,7 +159,7 @@ export const EXERCISES_HELP: readonly HelpSection[] = [
     heading: 'What this is',
     points: [
       'Every exercise the app knows, with what it looks like and what you lift for it. Both belong to your gym rather than to a routine: written into each routine instead, moving up a plate or taking a better photo means editing every routine that names the exercise.',
-      'All 147 are listed, not only the ones you can put a number against, because a press-up has no weight and still has a picture. The weight field simply does not appear on a row with nothing to weigh.',
+      `All ${EXERCISES.length} are listed, not only the ones you can put a number against, because a press-up has no weight and still has a picture. The weight field simply does not appear on a row with nothing to weigh.`,
       'A weight is free text, so a band can be “red” and a dumbbell exercise “5kg each hand”. Anything you would write on a step, you can write here.',
     ],
   },
@@ -172,7 +176,7 @@ export const EXERCISES_HELP: readonly HelpSection[] = [
   {
     heading: 'Pictures',
     points: [
-      'The multi-gym exercises start with the illustration from the manufacturer’s guide, 41 of them, and the bike has a photo of its own. Everything else starts with an empty frame: the guide only draws the machine.',
+      `The multi-gym exercises start with the illustration from the manufacturer’s guide, ${DRAWN} of them, and the bike has a photo of its own. Everything else starts with an empty frame: the guide only draws the machine.`,
       'Tap a picture to see it full size, which is the quickest way to find out what an exercise you have not done before actually is. Tap an empty frame to add one.',
       'Change offers the same three ways the editor does: an illustration that ships with the app, a photo from this device, or an image you have copied. A photo is scaled down before it is stored, so a page of them is a few megabytes rather than a few hundred.',
       'On an exercise the guide draws, removing your photo puts the guide’s drawing back. On one it does not, removing leaves an empty frame again.',

@@ -37,7 +37,10 @@ import type { MediaRef } from '../engine'
 import { EXERCISES } from '../routines/exercises'
 import { foldName } from '../routines/foldName'
 import { refoldKeys } from './refold'
-import { findFor } from '../routines/loads'
+import { findFor, keyFor } from '../routines/loads'
+import { bundled } from '../media/resolve'
+import { readPictures } from './bundle'
+import { blobHashOf } from '../media/gc'
 
 const KEY = 'davshack-timer-pictures'
 
@@ -57,39 +60,14 @@ if (typeof window !== 'undefined') {
   })
 }
 
-/**
- * A stored value that is actually a `MediaRef`.
- *
- * Checked on the way OUT of storage, not just on the way in. What is here is
- * rendered on every step of every run, and a hand-edited or half-written entry
- * would throw in React rather than simply showing no picture.
- */
-export function isMediaRef(value: unknown): value is MediaRef {
-  if (typeof value !== 'object' || value === null) return false
-  const ref = value as Record<string, unknown>
-  switch (ref['source']) {
-    case 'bundled':
-      return typeof ref['path'] === 'string'
-    case 'remote':
-      return typeof ref['url'] === 'string'
-    case 'local':
-      return typeof ref['hash'] === 'string' && typeof ref['mime'] === 'string'
-    default:
-      return false
-  }
-}
-
 /** Only what has been chosen. Never throws: a broken store means no pictures. */
 export function loadPictures(): Pictures {
   try {
     const raw = globalThis.localStorage?.getItem(KEY)
     if (!raw) return {}
-    const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null) return {}
-    const out: Pictures = {}
-    for (const [name, ref] of Object.entries(parsed as Record<string, unknown>)) {
-      if (isMediaRef(ref)) out[name] = ref
-    }
+    // The same reader a backup's pictures get: a ref stored here is rendered on
+    // every run, so it is checked as a step's media is.
+    const out: Pictures = readPictures(JSON.parse(raw))
     // Keys written under the older fold ("leg pres") move to the current one
     // ("leg press"), once, on the first read. See `refold.ts`.
     const { table, changed } = refoldKeys(out)
@@ -121,12 +99,22 @@ export function savePictures(pictures: Pictures): void {
  */
 export function currentPictures(): ReadonlyMap<string, MediaRef> {
   if (cached) return cached
+  cached = picturesOver(loadPictures())
+  return cached
+}
+
+/**
+ * The guide's illustrations with a table laid over them, keyed by folded name.
+ * `currentPictures` is this over the SAVED table; the exercises page runs it
+ * over its own draft, so a picture just cleared does not come back out of the
+ * cache.
+ */
+export function picturesOver(table: Pictures): Map<string, MediaRef> {
   const out = new Map<string, MediaRef>()
   for (const exercise of EXERCISES) {
-    if (exercise.media) out.set(foldName(exercise.name), { source: 'bundled', path: exercise.media })
+    if (exercise.media) out.set(foldName(exercise.name), bundled(exercise.media))
   }
-  for (const [name, ref] of Object.entries(loadPictures())) out.set(name, ref)
-  cached = out
+  for (const [name, ref] of Object.entries(table)) out.set(name, ref)
   return out
 }
 
@@ -171,11 +159,10 @@ export function withPicture(pictures: Pictures, name: string, ref: MediaRef | nu
  * reaches the same entry the run would.
  */
 export function picturesFor(names: Iterable<string>, pictures: Pictures): Pictures {
-  // key -> key, so `findFor` hands back the KEY that answers rather than the ref.
-  const keys = new Map(Object.keys(pictures).map((key) => [key, key]))
+  const table = new Map(Object.entries(pictures))
   const out: Pictures = {}
   for (const name of names) {
-    const key = findFor(keys, name)
+    const key = keyFor(table, name)
     if (key !== undefined) out[key] = pictures[key]!
   }
   return out
@@ -194,8 +181,8 @@ export function pictureHashes(
 ): string[] {
   const found = new Set<string>()
   for (const ref of Object.values(pictures)) {
-    if (ref.source === 'local') found.add(ref.hash)
-    else if (!uploadedOnly && ref.source === 'remote' && ref.cachedHash) found.add(ref.cachedHash)
+    const hash = blobHashOf(ref, uploadedOnly)
+    if (hash) found.add(hash)
   }
   return [...found].sort()
 }

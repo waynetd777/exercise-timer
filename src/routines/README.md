@@ -290,7 +290,7 @@ what the other two never named.
 
 `exercises.other.ts` is defined by the guide having no PICTURE of a movement,
 not by the multi-gym being unable to do it. A machine exercise the guide leaves
-out — the Low Pulley Squat — lives there, because the generated table can only
+out, the Low Pulley Squat, lives there, because the generated table can only
 hold what the guide draws.
 
 Two more tables come out of the same harvest. `exercises.prescription.ts` says how
@@ -307,8 +307,8 @@ torso exercises, so a torso-focused session needs somewhere to go.
 its length is SOLVED rather than estimated: exercises are added one at a time and
 each one's real cost is known, so a per-side exercise costing two groups and a
 band or ankle-strap one costing five more seconds are exact. **Sections** is the
-shape the instructor's routines arrive in — named sections, ladders, counted reps
-— and it has no exact length, because a self-paced step ends when you tap Next.
+shape the instructor's routines arrive in (named sections, ladders, counted reps),
+and it has no exact length, because a self-paced step ends when you tap Next.
 It is asked the same minutes and FITTED by `estimate.ts`: the warm-up and the
 finisher are built first and bookend the routine, then body sections are added
 until the next would overshoot by more than half of itself, and the ones that
@@ -384,7 +384,7 @@ passes on purpose:
 - `canonicalName()` in `rename.ts`, for the name itself.
 
 Both try the exact fold, then match word by word with a shorter word allowed to
-start a longer one — `ab` finds `abdominal`. The shape has to line up exactly,
+start a longer one: `ab` finds `abdominal`. The shape has to line up exactly,
 same number of words in the same order, which keeps `Incline Chest Press` away
 from `Incline Cable Converging Chest Press` and `abductor` away from `adductor`,
 since neither of those starts the other. **Two candidates return nothing.** A
@@ -398,7 +398,7 @@ waiting to be found in the gap.
 
 `exerciseOptions.ts` is a VIEW of `EXERCISES`, never a second list. The generator
 has chosen from that table since it was written; until now the editor could not
-see it, so a work step's name was typed by hand — and a name typed by hand is
+see it, so a work step's name was typed by hand, and a name typed by hand is
 what `weightFor()`, `storage/paces.ts` and `estimate.ts` then fail to recognise.
 Of the 19 distinct step names in Wayne's own library, 15 match the table exactly;
 the two that do not are his wording for exercises that are in it, and the last
@@ -452,8 +452,8 @@ for keeps its weight, since the routine is then the only record of it.
 
 ## How long a rep-based routine takes
 
-`estimate.ts` returns both halves — the timed steps exactly, the counted ones at
-a seconds-per-rep rate — and the caller says which it has. `totalDurationMs`
+`estimate.ts` returns both halves (the timed steps exactly, the counted ones at
+a seconds-per-rep rate), and the caller says which it has. `totalDurationMs`
 alone reads zero for a routine of counted exercises, which is truthful and
 useless.
 
@@ -473,14 +473,14 @@ minutes", never "35:20", which is a promise only the timed shapes can keep.
 What it will not do matters more than what it will. A step is called far more
 than its exercise: "Get ready: 12 × Seated Ab Crunch 15kg (bodyweight)" is an
 announcement, a count, an exercise, a weight and a note. Only the exercise is
-touched and everything else is put back exactly where it was — a rename that
+touched and everything else is put back exactly where it was: a rename that
 quietly dropped "(knees or toes)" would be deleting the only record of the easier
 option. A name matching two exercises is left alone, and so is one matching none:
 renaming "Squat + Shoulder Press" to whichever half came first would be worse
 than leaving it unreadable.
 
 `ALIASES` is a short list of bare names with one obvious owner, and holds exactly
-one entry — "Chest Press" is the standard one, since the table has five and no
+one entry: "Chest Press" is the standard one, since the table has five and no
 plain one. "Shoulder Press" is deliberately absent: a dumbbell exercise already
 owns that exact name, and nothing in a step can tell the two apart.
 

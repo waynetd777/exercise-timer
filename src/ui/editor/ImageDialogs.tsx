@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { MediaRef } from '../../engine'
 import type { Path } from '../../editor/blocks'
 import type { KnownImage } from '../../editor/images'
@@ -35,6 +35,45 @@ export type ImageView = {
 }
 
 /**
+ * The sheet both image dialogs share: the `.modal` and its `.notice` panel, the
+ * picture at a size you can check it at, or the line that stands in for a
+ * picture whose file is not on this device (an uploaded photo that arrived in
+ * an export without its blob). Saying so beats an empty frame, and the actions
+ * underneath are offered anyway: the alternative is a picture nothing can show
+ * and nothing can take off. What is said and offered under it is each dialog's
+ * own.
+ */
+export function ImageSheet({
+  src,
+  alt,
+  onClose,
+  children,
+}: {
+  src: string | null
+  alt: string
+  onClose: () => void
+  children: ReactNode
+}) {
+  const { dialog, onBackdropClick } = useModal(onClose)
+
+  return (
+    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
+      {/* The panel is its own element. See `.modal` in theme.css. */}
+      <div className="notice imgview">
+        {src ? (
+          <img className="imgview__img" src={src} alt={alt} />
+        ) : (
+          <p className="imgview__missing label label--sm">
+            This image is not on this device, so it cannot be shown.
+          </p>
+        )}
+        {children}
+      </div>
+    </dialog>
+  )
+}
+
+/**
  * A step's picture, and the way to take it off.
  *
  * Both in one dialog because they are the same errand: you open the preview to
@@ -59,26 +98,8 @@ export function ImageDialog({
   onChoose: () => void
   onClose: () => void
 }) {
-  const { dialog, onBackdropClick } = useModal(onClose)
-
   return (
-    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
-      {/* The panel is its own element. See `.modal` in theme.css. */}
-      <div className="notice imgview">
-        {view.src ? (
-          <img className="imgview__img" src={view.src} alt={view.alt} />
-        ) : (
-          /*
-           * The step carries a ref whose file is not here: an uploaded photo
-           * that arrived in an export without its blob. Saying so beats an empty
-           * frame, and Remove is offered anyway: the alternative is a step with a
-           * picture nothing can show and nothing can take off.
-           */
-          <p className="imgview__missing label label--sm">
-            This image is not on this device, so it cannot be shown.
-          </p>
-        )}
-
+    <ImageSheet src={view.src} alt={view.alt} onClose={onClose}>
         {view.alt !== '' && <p className="notice__text">{view.alt}</p>}
 
         {/* Where it comes from, said plainly: a picture nobody put on this step
@@ -121,8 +142,7 @@ export function ImageDialog({
             </button>
           )}
         </div>
-      </div>
-    </dialog>
+    </ImageSheet>
   )
 }
 

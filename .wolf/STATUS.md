@@ -2,11 +2,24 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (code review of c69ab2a..HEAD: highs, mediums and lows all fixed and committed)
+> Last updated: 2026-08-29 (review of c69ab2a..HEAD fully closed: highs, mediums, lows and cleanups; v8.8 pushed)
 
 ---
 
-## 🔍 Code review of c69ab2a..HEAD (2026-08-29): bugs all fixed, cleanups open
+## 🔍 Code review of c69ab2a..HEAD (2026-08-29): closed, v8.8
+
+**Third commit (cleanups, v8.8):** `bundled(path)` in media/resolve.ts is the one way to write a bundled ref;
+`bundle.ts` exports `isMedia`/`readPictures` and pictures.ts uses them; `picturesOver(table)` in pictures.ts serves
+`currentPictures` and the Exercises page (all its maps are keyed by FOLDED name now); `keyFor` in loads.ts under
+`findFor`; `blobHashOf` in gc.ts is the one local/cachedHash rule; `compile.ts` uses `sectionOf`;
+`DEFAULT_REPEAT_LABEL`/`DEFAULT_LADDER_LABEL` exported from engine and used in nine places; `ImageSheet` in
+ImageDialogs.tsx is the shared dialog shell (`.exview` CSS gone); `storage/tables.ts` `fromTables(workout)` fills
+weights+pictures for App and the editor preview; ExercisesScreen takes `knownImages` from App; generate.ts has one
+`ladder()`, `isHold`/`prescribed` reused, `WARM_UP`/`GENERAL_BODY`/`FINISHER` constants and no `!`; ExerciseField
+`listRows`; preview.ts one push; rows.tsx memoises the inherited picture; rename.ts caches `singles` per table;
+help.ts derives its counts from EXERCISES; 12 em dashes gone. **Next quest:** Wayne's eyes on 8.8 (badge must read
+8.8): Exercises page thumbnails and dialog, editor picker thumbnails showing a page-chosen photo, skip-back whistle.
+
 
 **Second commit (mediums + lows, buglog bug-137..151; 1184 tests, typecheck, lint, build green):**
 - `resolveMedia` never rejects and forgets a failed read; `useMediaUrl`/ExercisesScreen dropped their catches.

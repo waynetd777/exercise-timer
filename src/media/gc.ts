@@ -27,14 +27,12 @@ export function liveHashes(
 ): Set<string> {
   const live = new Set<string>(alsoLive)
   forEachMedia(workouts, (media) => {
-    if (media.source === 'local') live.add(media.hash)
-    // A pinned remote image also owns its blob.
-    if (media.source === 'remote' && media.cachedHash) live.add(media.cachedHash)
+    const hash = blobHashOf(media)
+    if (hash) live.add(hash)
   })
   return live
 }
 
-/** Every step's media across the routines. Any group kind: missing one would orphan live images. */
 /**
  * Every blob hash a value of unknown shape refers to.
  *
@@ -64,6 +62,19 @@ export function hashesIn(value: unknown): string[] {
   return [...found].sort()
 }
 
+/**
+ * The blob a ref owns, or null. An uploaded photo's always; a linked image's
+ * pinned copy too, unless `uploadedOnly`: the sweep must keep a pinned copy
+ * alive, an export wants only the bytes nothing else has. The one place this
+ * split is written; the pictures table and both hash walks read it from here.
+ */
+export function blobHashOf(media: MediaRef, uploadedOnly = false): string | null {
+  if (media.source === 'local') return media.hash
+  if (!uploadedOnly && media.source === 'remote' && media.cachedHash) return media.cachedHash
+  return null
+}
+
+/** Every step's media across the routines. Any group kind: missing one would orphan live images. */
 function forEachMedia(workouts: readonly Workout[], visit: (media: MediaRef) => void): void {
   const walk = (blocks: readonly Block[]): void => {
     for (const block of blocks) {
@@ -86,7 +97,8 @@ function forEachMedia(workouts: readonly Workout[], visit: (media: MediaRef) => 
 export function localHashes(workouts: readonly Workout[]): string[] {
   const found = new Set<string>()
   forEachMedia(workouts, (media) => {
-    if (media.source === 'local') found.add(media.hash)
+    const hash = blobHashOf(media, true)
+    if (hash) found.add(hash)
   })
   return [...found].sort()
 }

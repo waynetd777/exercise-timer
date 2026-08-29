@@ -294,6 +294,14 @@
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
 
+## Batch edits: imports in this repo span lines (2026-08-29)
+
+Several files open with a multi-line `import type {\n ... } from`. A script that finds "the last import
+line" with `^import .*\n` lands INSIDE that statement and breaks the file (compile.ts, 2026-08-29, seen
+as a Vite overlay). Match whole import statements (through `from '...'`), or use the Edit tool with an
+explicit anchor. Also: `{ source: 'bundled', path }` (shorthand) exists alongside `path: x`; `bundled()`
+in media/resolve.ts is now the only way to write one.
+
 ## Two counters on the timer: generation and seeks (2026-08-29)
 
 `Timer.generation` bumps on EVERY clock mutation including pause and resume; `Timer.seeks` bumps only

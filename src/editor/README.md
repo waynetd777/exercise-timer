@@ -68,7 +68,7 @@ Two decisions inside it:
   worse than leaving one that may still be right.
 - Per side is written onto an existing count, both ways round, so picking a
   kickback says "each side" and picking a leg press stops saying it. A step with
-  no count is left timed — a minute of cycling has no reps to qualify.
+  no count is left timed: a minute of cycling has no reps to qualify.
 
 ## Rules worth knowing
 

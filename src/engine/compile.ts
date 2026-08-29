@@ -17,6 +17,16 @@ import type {
   TimelineEntry,
   Workout,
 } from './types'
+import { sectionOf } from './navigate'
+
+/**
+ * What a group is called when its label says nothing: sets are "Set 2 of 3",
+ * a ladder's iterations are rungs. Spelled here once; the editor's new groups,
+ * the generator, the run captions, the text writer and the migration all read
+ * these rather than the word.
+ */
+export const DEFAULT_REPEAT_LABEL = 'Set'
+export const DEFAULT_LADDER_LABEL = 'Rung'
 
 /**
  * Guard against a pathological authoring tree (e.g. two nested repeats of 1000)
@@ -145,7 +155,7 @@ function ladderStep(block: Ladder, iteration: number, of: number, rung: number):
     rung,
     // `||`, not `??`: the editor stores an empty string for a deleted label.
     // A ladder's iterations are rungs; "Set" here read as a repeat group.
-    label: block.label?.trim() || 'Rung',
+    label: block.label?.trim() || DEFAULT_LADDER_LABEL,
     ...(block.advance !== undefined ? { advance: block.advance } : {}),
   }
 }
@@ -175,8 +185,7 @@ function gateKey(entry: TimelineEntry): string | null {
   // exercise at a time must not be overruled by the group enclosing it.
   if (innermost.advance === 'step') return null
   // The NEAREST section owns the display, so it is the one that decides.
-  const section = [...entry.path].reverse().find((step) => step.kind === 'section')
-  if (section?.display !== 'list') return null
+  if (sectionOf(entry)?.display !== 'list') return null
   // The WHOLE path, not just the innermost level. Two rounds of a repeat around
   // a one-rung ladder are the same rung of the same ladder, and a key that
   // stopped there merged them into one gate: one tap cleared both rounds.

@@ -5,7 +5,7 @@
  */
 
 import type { Block, MediaRef, Workout } from '../engine'
-import { resolvePlan } from '../media/resolve'
+import { resolvePlan, bundled } from '../media/resolve'
 
 /**
  * An image a step can be given, whether it ships with the app or a routine
@@ -35,7 +35,7 @@ export type KnownImage = {
 export function refFor(entry: string): MediaRef {
   return entry.startsWith('https://')
     ? { source: 'remote', url: entry }
-    : { source: 'bundled', path: entry }
+    : bundled(entry)
 }
 
 /** The identity of a ref, for deduplication. Local blobs have no picker entry. */
