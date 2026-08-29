@@ -11,6 +11,12 @@
 .weights {
   container-type: inline-size;
   display: grid;
+  /* `minmax(0, 1fr)`, not the implicit `auto`: an auto column is at least as
+     wide as its widest child's min-content, so one line that refuses to wrap
+     (the count below, once it grew a second clause) pushed the whole page past
+     an iPhone's width. Bounded, an overlong child overflows itself and nothing
+     else, and this container clips it. */
+  grid-template-columns: minmax(0, 1fr);
   /* Header, tools, then the rows. The standing explanation lives in the help
      tray now: a caption you have read once is a line of screen you read past
      every time after that. */
@@ -55,7 +61,10 @@
 
 .weights__count {
   color: var(--bone-faint);
-  white-space: nowrap;
+  /* Wraps. It is uppercase with tracking and grew to two clauses ("weighed",
+     "pictured"); on one line it was wider than a phone, and `nowrap` here is
+     what carried that width up into the page. The middle dot is where it breaks. */
+  min-width: 0;
 }
 
 .weights__tools {
