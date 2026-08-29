@@ -14,9 +14,12 @@ import type { MediaRef } from '../../engine'
  */
 const blobs = new Map<string, Blob>()
 const listeners = new Set<(hash: string) => void>()
+/** Hashes whose read FAILS, as it does where site data is blocked. */
+const failing = new Set<string>()
 
 vi.mock('../store', () => ({
-  getBlob: (hash: string) => Promise.resolve(blobs.get(hash)),
+  getBlob: (hash: string) =>
+    failing.has(hash) ? Promise.reject(new Error('closed')) : Promise.resolve(blobs.get(hash)),
   onBlobStored: (listener: (hash: string) => void) => {
     listeners.add(listener)
   },
@@ -50,6 +53,26 @@ describe('resolveMedia: the negative cache', () => {
     // or the image stays invisible until the next full reload.
     storeBlob('h-late', new Blob(['pixels']))
     expect(await resolveMedia(local('h-late'), '/')).toMatch(/^blob:/)
+  })
+
+  it('answers with what it can when a read fails, and does not remember the failure', async () => {
+    /*
+     * Two bugs. The rejection was cached in `known`, so one transient IndexedDB
+     * failure kept a picture missing until a reload; and every caller caught it
+     * itself, one of them replacing a linked image's perfectly good URL with
+     * nothing.
+     */
+    const { resolveMedia } = await import('../resolveMedia')
+    failing.add('h-fail')
+
+    const linked: MediaRef = { source: 'remote', url: 'https://x/y.jpg', cachedHash: 'h-fail' }
+    expect(await resolveMedia(linked, '/')).toBe('https://x/y.jpg')
+    expect(await resolveMedia(local('h-fail'), '/')).toBeNull()
+
+    // Storage is back, and nothing told `resolveMedia` so: the next read must try.
+    failing.delete('h-fail')
+    blobs.set('h-fail', new Blob(['pixels']))
+    expect(await resolveMedia(local('h-fail'), '/')).toMatch(/^blob:/)
   })
 
   it('reads a stored blob at most once', async () => {

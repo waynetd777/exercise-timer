@@ -297,6 +297,7 @@ export function RunScreen({
     muted,
     readElapsed: timer.readElapsed,
     generation: timer.generation,
+    seeks: timer.seeks,
   })
 
   useSpokenCues(at, status, muted)

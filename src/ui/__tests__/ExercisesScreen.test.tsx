@@ -11,7 +11,12 @@ import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { loadWeights, saveWeights, weightFor, withWeight } from '../../storage/weights'
 import { loadPictures, pictureFor, savePictures, withPicture } from '../../storage/pictures'
+import { sweepOrphans } from '../../storage/sweep'
 import { ExercisesScreen } from '../ExercisesScreen'
+
+// The sweep reads IndexedDB, which this environment has none of; that it is
+// asked for is the assertion.
+vi.mock('../../storage/sweep', () => ({ sweepOrphans: vi.fn(async () => {}) }))
 
 const saved = (name: string, load: string): Workout => ({
   id: 'w1',
@@ -200,6 +205,16 @@ describe('the pictures', () => {
     expect(row.dataset.empty).toBe('true')
   })
 
+  it('sweeps the photo it took off the page, rather than leaving it until a routine is deleted', () => {
+    savePictures(withPicture({}, 'Squats', { source: 'local', hash: 'abc', mime: 'image/webp' }))
+    render(<ExercisesScreen workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Picture of Squats. Change it.'))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    expect(sweepOrphans).toHaveBeenCalledWith({})
+  })
+
   it('shows no picture, and no error, where the blob cannot be read at all', () => {
     /*
      * jsdom has no IndexedDB, which is the same shape as a private window or a
@@ -260,6 +275,23 @@ describe('letting routines follow the page', () => {
     const rewritten = onFollow.mock.calls[0]![0] as Workout[]
     expect(rewritten).toHaveLength(1)
     expect((rewritten[0]!.blocks[0] as { load?: string }).load).toBeUndefined()
+  })
+
+  it('says so when the routines could not be rewritten', async () => {
+    // A failed save part-way used to be an unhandled rejection: the page that
+    // asked showed nothing, and the last routines still stated their weights.
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
+    const onFollow = vi.fn(async () => {
+      throw new Error('Could not save the routine: quota exceeded')
+    })
+    render(
+      <ExercisesScreen workouts={[saved('Leg Press', '40kg')]} onExit={vi.fn()} onFollow={onFollow} />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Let 1 routine follow these/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Clear 1' }))
+
+    expect((await screen.findByText(/quota exceeded/)).textContent).toMatch(/still state their own weights/)
   })
 
   it('says nothing when every routine already follows', () => {

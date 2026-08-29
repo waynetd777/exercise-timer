@@ -482,6 +482,7 @@ export function SegmentRow({
               key={segment.note ?? ''}
               className="efield"
               defaultValue={segment.note ?? ''}
+              data-commits="blur"
               placeholder="How to do it"
               aria-label="Note"
               onBlur={(event) => commitText('note', event.target.value)}
@@ -493,6 +494,7 @@ export function SegmentRow({
               key={segment.alternative ?? ''}
               className="efield"
               defaultValue={segment.alternative ?? ''}
+              data-commits="blur"
               placeholder="Lower-impact swap"
               aria-label="Alternative"
               onBlur={(event) => commitText('alternative', event.target.value)}
@@ -565,6 +567,10 @@ function LoadField({
          */
         placeholder={hint || '65kg, red band'}
         aria-label="Weight"
+        // Read by the editor's Cmd+Z: text here is not in the history until it
+        // commits on blur, and `data-committed` is what the history holds.
+        data-commits="blur"
+        data-committed={value}
         onChange={(event) => setText(event.target.value)}
         onBlur={(event) => onCommit(event.target.value)}
       />

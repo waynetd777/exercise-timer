@@ -22,6 +22,8 @@ type Options = {
   readElapsed: () => number
   /** Bumped by every clock mutation (start / pause / resume / seek / reset). */
   generation: number
+  /** See `Timer.seeks`: bumped only when the position was MOVED. */
+  seeks: number
 }
 
 /**
@@ -39,6 +41,7 @@ export function useCueScheduler({
   muted,
   readElapsed,
   generation,
+  seeks,
 }: Options): void {
   const allCues = useMemo(() => runCues(routine, runIndex), [routine, runIndex])
 
@@ -58,10 +61,24 @@ export function useCueScheduler({
    * the first: a gate's one answer to the tap, and the bell into every rest.
    */
   const armedFor = useRef(allCues)
+  const seenSeeks = useRef(seeks)
 
   useEffect(() => {
     if (armedFor.current !== allCues) {
       armedFor.current = allCues
+      scheduled.current.clear()
+    }
+    /*
+     * A seek forgets everything queued. The set exists so a cue is not queued
+     * twice, and after a skip back the whistle at the step's start is a cue
+     * that HAS played and must play again; kept in the set, it was filtered
+     * out of the re-arm and the restarted step opened in silence. Nothing
+     * pending is lost: what the cancellation below spares was aimed at the old
+     * position, and the re-arm queues it again only if the new position is
+     * still to reach it, which is exactly when it should sound.
+     */
+    if (seenSeeks.current !== seeks) {
+      seenSeeks.current = seeks
       scheduled.current.clear()
     }
     if (status !== 'running' || muted) {
@@ -149,7 +166,7 @@ export function useCueScheduler({
       window.clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [generation, status, muted, allCues, readElapsed])
+  }, [generation, seeks, status, muted, allCues, readElapsed])
 
   /*
    * The finish, when the routine ends on a self-paced step.

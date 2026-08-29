@@ -174,9 +174,19 @@ const DEFAULT_REPS = 12
  */
 export const SECTIONS_FEWEST = 3
 
+/** Whether the spec names a section count at all. NaN and Infinity do not count. */
+function hasSectionCount(spec: RoutineSpec): spec is RoutineSpec & { sections: number } {
+  return spec.sections !== undefined && Number.isFinite(spec.sections)
+}
+
+/** A count the builder will honour: whole, and within the bounds. */
+function clampSections(count: number): number {
+  return Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(count)))
+}
+
 /** The section count asked for, or the usual one where the spec has none or nonsense (NaN). */
 function sectionsAsked(spec: RoutineSpec): number {
-  return spec.sections !== undefined && Number.isFinite(spec.sections) ? spec.sections : SECTIONS_TYPICAL
+  return hasSectionCount(spec) ? spec.sections : SECTIONS_TYPICAL
 }
 
 /**
@@ -802,9 +812,9 @@ function sectionsRoutine(
   }
 
   const middle: Block[] = []
-  if (spec.sections !== undefined && Number.isFinite(spec.sections)) {
+  if (hasSectionCount(spec)) {
     // Asked for a count outright: that many, the bookends included.
-    const wanted = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, Math.round(spec.sections)))
+    const wanted = clampSections(spec.sections)
     for (const entry of body.slice(0, Math.max(0, wanted - ends))) {
       const built = build(entry)
       if (built) middle.push(built)
@@ -872,7 +882,9 @@ function sectionsRoutine(
   const blocks: Block[] = [...(warmUp ? [warmUp] : []), ...middle, ...(finisher ? [finisher] : [])]
   const came = blocks.reduce((sum, block) => sum + cost(block), 0)
   const off = Math.round((came - spec.totalMs) / 60_000)
-  if (spec.sections === undefined && Math.abs(off) >= 5) {
+  // The same test as the builder's: a count of NaN took the fitted path above
+  // and then suppressed this note, as if a count had been honoured.
+  if (!hasSectionCount(spec) && Math.abs(off) >= 5) {
     notes.push(
       `It should come out about ${Math.abs(off)} minutes ${off > 0 ? 'longer' : 'shorter'} than asked: sections come whole.`,
     )
@@ -899,7 +911,15 @@ function sectionsRoutine(
  * Exported so the dialog can show it as the placeholder: what you would get is
  * better than a description of what you would get.
  */
-export function describeRoutine(spec: RoutineSpec): string {
+export function describeRoutine(
+  spec: RoutineSpec,
+  /**
+   * The section count actually BUILT, where the caller knows it. Without it the
+   * name says what was asked, clamped to what can be asked for, and a routine
+   * of two sections was called "3 sections" because three is the fewest.
+   */
+  built?: number,
+): string {
   const AREA_NAMES: Record<BodyArea, string> = {
     upper: 'Upper Body',
     torso: 'Core',
@@ -919,7 +939,7 @@ export function describeRoutine(spec: RoutineSpec): string {
     spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
 
   if (spec.style === 'sections') {
-    const count = Math.min(SECTIONS_MAX, Math.max(SECTIONS_FEWEST, sectionsAsked(spec)))
+    const count = built ?? clampSections(sectionsAsked(spec))
     return `${kit}${worked}, ${count} sections`
   }
   const minutes = Math.round(spec.totalMs / 60_000)
@@ -994,7 +1014,7 @@ export function generateRoutine(
          * of core work builds four, and "Core, 6 sections" over a routine of
          * four was a name that lied while a note told the truth underneath.
          */
-        name: spec.name?.trim() || describeRoutine({ ...spec, sections: sections.length }),
+        name: spec.name?.trim() || describeRoutine(spec, sections.length),
         blocks,
         schemaVersion: SCHEMA_VERSION,
         createdAt: now,

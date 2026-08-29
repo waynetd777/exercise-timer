@@ -22,18 +22,11 @@ export function useMediaUrl(ref: MediaRef | undefined): string | null {
   useEffect(() => {
     let cancelled = false
     setUrl(resolveMediaSync(ref, base))
-    /*
-     * `catch`, because reading a blob can FAIL rather than merely miss: `openDb`
-     * throws where site data is blocked, which is a private window or a browser
-     * set to refuse storage. A step then shows no picture, which is the same
-     * outcome as a photo that is not on this device, instead of an unhandled
-     * rejection from every row at once.
-     */
-    void resolveMedia(ref, base)
-      .catch(() => null)
-      .then((resolved) => {
-        if (!cancelled) setUrl(resolved)
-      })
+    // Never rejects: a blob that cannot be read answers with the synchronous
+    // best guess, so a linked image keeps its URL where storage is blocked.
+    void resolveMedia(ref, base).then((resolved) => {
+      if (!cancelled) setUrl(resolved)
+    })
     return () => {
       cancelled = true
     }

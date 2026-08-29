@@ -60,6 +60,9 @@ export function useDraftDrag({
       editBlocks((current) => moveStep(current, row.path, delta), 'drag')
     },
     onEnd: () => {
+      // A grip pressed and let go without a move is not a drag. Ending a run
+      // then split the name being typed beside it into two undo steps.
+      if (beforeDrag.current === null) return
       beforeDrag.current = null
       // The drag's run ends with the finger. Left open, the next drag's first
       // move coalesced into this one and a single Undo took both back.

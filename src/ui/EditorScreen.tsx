@@ -107,7 +107,10 @@ export function EditorScreen({
     editBlocks((current) => removeAt(current, path))
   }
   const duplicateRow = (path: Path) => {
-    focusAfter.current = { index: rowIndex(path) + 1, selector: '.erow__grip' }
+    // The copy lands after the whole block, descendants included: for a group,
+    // index + 1 was its own first child.
+    const within = rows.filter((row) => path.every((at, i) => row.path[i] === at)).length
+    focusAfter.current = { index: rowIndex(path) + within, selector: '.erow__grip' }
     editBlocks((current) => duplicateAt(current, path))
   }
   const addRow = (path: Path, role: SegmentRole) => {

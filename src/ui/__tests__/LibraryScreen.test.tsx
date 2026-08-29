@@ -28,6 +28,7 @@ function library(workouts: Workout[], over: Partial<Library> = {}): Library {
     workouts,
     loading: false,
     error: null,
+    notice: null,
     add: vi.fn(async (w: Workout) => w),
     remove: vi.fn(async () => {}),
     duplicate: vi.fn(async () => {}),
@@ -117,6 +118,23 @@ describe('LibraryScreen', () => {
       />,
     )
     expect(screen.getByRole('alert').textContent).toMatch(/Could not save/)
+  })
+
+  it('keeps saying which routines it could not read, apart from a failed write', () => {
+    // The two shared one field, so the first successful write erased the
+    // notice that some routines were missing.
+    render(
+      <LibraryScreen
+        {...props(
+          library([workout('a', 'Legs')], {
+            error: null,
+            notice: 'One routine in storage could not be read. It was left in place, and the rest are shown.',
+          }),
+        )}
+      />,
+    )
+    expect(screen.getByRole('status').textContent).toMatch(/could not be read/)
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 
   it('explains itself when there is nothing yet', () => {

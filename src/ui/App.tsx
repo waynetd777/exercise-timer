@@ -78,7 +78,18 @@ function blankRoutine(): Workout {
 export function App() {
   const [generation, setGeneration] = useState(0)
   return (
-    <ErrorBoundary onReset={() => setGeneration((n) => n + 1)}>
+    <ErrorBoundary
+      onReset={() => {
+        /*
+         * The screens that crashed pushed one history entry while a screen
+         * other than the library was open, and the bookkeeping that takes it
+         * back dies with them. Taken back here, or the next Back popped an
+         * entry nothing answered to and the one after that left the app.
+         */
+        if ((history.state as { screen?: unknown } | null)?.screen !== undefined) history.back()
+        setGeneration((n) => n + 1)
+      }}
+    >
       <Screens key={generation} />
     </ErrorBoundary>
   )

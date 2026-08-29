@@ -114,7 +114,7 @@ Three things about it that the weights table does not have to think about:
 - **The blob sweep needs it as a root.** These photos are referenced by no step,
   so the walk over the routines in `gc.ts` cannot see them; without the extra root
   the first delete of any routine would collect them. `useLibrary` passes
-  `pictureHashes(loadPictures())` into `orphanedHashes`.
+  `pictureHashes(loadPictures())` into `orphanedHashes` (through `sweep.ts`).
 - A record `readWorkouts` cannot read is left in the store WITH its photos: its
   `heldHashes` (found by `media/gc.ts`'s `hashesIn`, a walk over the raw record)
   go into the same sweep as a further root. Without them the first delete of any
@@ -208,7 +208,9 @@ and none of the sender's favourites or run history: it is their copy now.
 | `library.ts` | Pure ordering, naming and stamping rules |
 | `migrate.ts` | Forward-only fixes applied on read |
 | `workouts.ts` | IndexedDB CRUD |
-| `useLibrary.ts` | React wiring, seeding, and the orphan sweep on delete |
+| `useLibrary.ts` | React wiring and seeding. `error` is a failed write; `notice` is the routines this build could not read, kept apart so a successful write does not erase it |
+| `sweep.ts` | `sweepOrphans`: the one blob sweep, run after a routine is deleted and after a picture is removed or replaced on the exercises page. Roots: the readable routines, draft pins, the exercises page's pictures, and the photos of unreadable records |
+| `refold.ts` | Moves the weights, paces and pictures keys written under an older `foldName` to the current one, once, on first read |
 | `seeded.ts` | Which seeds have been offered |
 | `bundle.ts` | The versioned export format |
 | `bundleMedia.ts` | The photos in an export: collected on the way out, re-hashed on the way in |

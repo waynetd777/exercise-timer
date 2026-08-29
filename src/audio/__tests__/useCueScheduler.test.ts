@@ -65,7 +65,7 @@ const routine = compile(workout('drill', [seg('push-ups', 25, 'work'), seg('rest
 /** Ends on a self-paced step, so the finish fires on the tap, not the clock. */
 const gated = compile(workout('gated', [step('plank')]))
 
-type Props = { status: RunStatus; muted: boolean; generation: number; runIndex?: number }
+type Props = { status: RunStatus; muted: boolean; generation: number; runIndex?: number; seeks?: number }
 
 let elapsed = 0
 // Stable across renders, as the real timer's is: a fresh identity per render
@@ -75,7 +75,7 @@ const readElapsed = () => elapsed
 
 function renderScheduler(initial: Partial<Props> = {}, target = routine) {
   return renderHook(
-    ({ status, muted, generation, runIndex = 0 }: Props) =>
+    ({ status, muted, generation, runIndex = 0, seeks = 0 }: Props) =>
       useCueScheduler({
         routine: target,
         runIndex,
@@ -83,6 +83,7 @@ function renderScheduler(initial: Partial<Props> = {}, target = routine) {
         muted,
         readElapsed,
         generation,
+        seeks,
       }),
     { initialProps: { status: 'running' as RunStatus, muted: false, generation: 1, ...initial } },
   )
@@ -155,6 +156,25 @@ describe('useCueScheduler lifecycle', () => {
     expect(mock.state.tones).not.toContain(100.1)
     // The next window is queued as usual.
     expect(mock.state.tones.length).toBeGreaterThan(0)
+  })
+
+  it('sounds the start of a step skipped back to, which had already sounded once', () => {
+    /*
+     * The bell at 25s was queued in the opening window and its key kept. Skip
+     * back to 25s while paused, resume: the re-arm's window reached back to it,
+     * and the key filtered it out, so the restarted step opened in silence.
+     */
+    const { rerender } = renderScheduler()
+    elapsed = 30_000
+    rerender({ status: 'paused', muted: false, generation: 2 })
+    elapsed = 25_000
+    rerender({ status: 'paused', muted: false, generation: 3, seeks: 1 })
+    mock.state.tones.length = 0
+
+    rerender({ status: 'running', muted: false, generation: 4, seeks: 1 })
+
+    // The bell at 25s, due now.
+    expect(mock.state.tones).toContain(100)
   })
 
   it('a clock jump cancels the stale queue and arms the new position at once', () => {

@@ -6,11 +6,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
-import { orphanedHashes } from '../media/gc'
-import { draftPinnedHashes } from '../media/pin'
-import { loadPictures, pictureHashes } from './pictures'
-import { forgetBlob } from '../media/resolveMedia'
-import { deleteBlob, storedHashes } from '../media/store'
+import { loadPictures } from './pictures'
+import { sweepOrphans } from './sweep'
 import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
@@ -22,7 +19,14 @@ const now = () => Date.now()
 export type Library = {
   workouts: Workout[]
   loading: boolean
+  /** A write that failed. Cleared by the next write that succeeds. */
   error: string | null
+  /**
+   * Routines in storage this build could not read, if any. Its own field: it
+   * used to share `error`, so the first star, run or save that succeeded
+   * cleared the only sign that some routines were missing.
+   */
+  notice: string | null
   add: (workout: Workout) => Promise<Workout>
   remove: (id: string) => Promise<void>
   duplicate: (workout: Workout) => Promise<void>
@@ -42,6 +46,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -63,7 +68,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
         if (cancelled) return
         setWorkouts(stored)
         if (unreadable > 0) {
-          setError(
+          setNotice(
             unreadable === 1
               ? 'One routine in storage could not be read. It was left in place, and the rest are shown.'
               : `${unreadable} routines in storage could not be read. They were left in place, and the rest are shown.`,
@@ -136,29 +141,8 @@ export function useLibrary(seed: readonly Workout[]): Library {
     const { workouts: remaining, heldHashes } = await readWorkouts()
     setWorkouts(remaining)
 
-    /*
-     * Sweep blobs nothing references any more. Computed against the WHOLE
-     * remaining library, because storage is content-addressed: the deleted
-     * routine may well have shared images with one that is staying.
-     */
-    try {
-      for (const hash of orphanedHashes(
-        await storedHashes(),
-        remaining,
-        draftPinnedHashes(),
-        // Two more roots the walk over `remaining` cannot see: the exercises
-        // page holds photos no routine references, and a record this build
-        // cannot read is still in the store with photos of its own. Without
-        // either, the first delete swept them.
-        [...pictureHashes(loadPictures()), ...heldHashes],
-      )) {
-        await deleteBlob(hash)
-        forgetBlob(hash)
-      }
-    } catch {
-      // A failed sweep leaves dead bytes behind, which is harmless, the same
-      // sweep runs on the next delete.
-    }
+    // Dead bytes from a failed sweep are harmless; the next sweep gets them.
+    await sweepOrphans(loadPictures(), { workouts: remaining, heldHashes }).catch(() => {})
       }),
     [guarded],
   )
@@ -191,5 +175,5 @@ export function useLibrary(seed: readonly Workout[]): Library {
     [guarded, replace],
   )
 
-  return { workouts, loading, error, add, remove, duplicate, toggleFavourite, markRun }
+  return { workouts, loading, error, notice, add, remove, duplicate, toggleFavourite, markRun }
 }

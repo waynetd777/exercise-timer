@@ -170,6 +170,29 @@ describe('fromBundle', () => {
     expect(back[0]).toMatchObject({ createdAt: NOW, updatedAt: NOW, schemaVersion: SCHEMA_VERSION })
   })
 
+  it('keeps only the fields it knows, and brings a last run in the future back to now', () => {
+    // A file is hand-editable. Unknown keys used to land in the store, and a
+    // last-run of 2250 sat at the top of the library for good.
+    const bundle = toBundle([workout('Legs')], 1000)
+    const entry = bundle.workouts[0] as Record<string, unknown>
+    bundle.workouts[0] = { ...entry, lastRunAt: 9e15, favourite: true, surprise: 'x' } as never
+    const [back] = fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).workouts
+    expect(back).not.toHaveProperty('surprise')
+    expect(back?.lastRunAt).toBe(2000)
+    expect(back?.favourite).toBe(true)
+  })
+
+  it('gives a block with no id one, rather than refusing the file', () => {
+    // Required by the run (a gate is keyed on it), so it is filled in on the
+    // way in instead of turning a hand-written file away.
+    const bundle = toBundle([workout('Legs')], 1000)
+    const first = bundle.workouts[0]!.blocks[0] as Record<string, unknown>
+    delete first['id']
+    const { workouts, rejected } = fromBundle(JSON.parse(JSON.stringify(bundle)), 2000)
+    expect(rejected).toEqual([])
+    expect(typeof workouts[0]?.blocks[0]?.id).toBe('string')
+  })
+
   it('rejects a routine that would expand past the step limit', () => {
     // `compile()` throws on more than MAX_TIMELINE_ENTRIES steps, in the run
     // screen's render. A file is the one way such a routine arrives without
@@ -398,6 +421,12 @@ describe('the weights a backup carries', () => {
     const contents = fromBundle(damaged, 2000)
     expect(contents.workouts).toHaveLength(1)
     expect(contents.weights).toEqual({})
+  })
+
+  it('drops an empty weight, which an older export wrote for a cleared one', () => {
+    // Merged over the local table on import, that '' emptied a real number.
+    const bundle = toBundle([workout('Legs')], 1000, {}, { 'leg press': '', 'seated row': '40kg' })
+    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).weights).toEqual({ 'seated row': '40kg' })
   })
 })
 

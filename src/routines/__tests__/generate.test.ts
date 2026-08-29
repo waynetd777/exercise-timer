@@ -661,6 +661,18 @@ describe('the instructor’s shape', () => {
     expect(sections({ areas: ['torso'], sections: 8 }).workout.name).toMatch(/Core, 4 sections$/)
   })
 
+  it('says two sections when two is what it built, though two is fewer than can be asked for', () => {
+    // The built count went through the same clamp as an asked one, so a
+    // routine of two sections was named "3 sections".
+    const { workout } = generateRoutine(
+      { style: 'sections', totalMs: 10 * 60_000, areas: ['upper'], equipment: 'none', recovery: 'passive' },
+      { rng: seeded(1), library: [], now: 0 },
+    )
+    const built = workout.blocks.filter((block) => block.kind === 'section').length
+    expect(built).toBeLessThan(3)
+    expect(workout.name).toMatch(new RegExp(`, ${built} sections$`))
+  })
+
   it('pastes back in the shape it was written', () => {
     // Send as text, then Paste: the tails after a group are written with `Then:` and read back loose.
     const shape = (blocks: readonly Block[]): string =>

@@ -333,6 +333,23 @@ describe('EditorScreen', () => {
     expect(name.value).toBe('Strength day')
   })
 
+  it('undoes a count typed a moment ago, rather than leaving Cmd+Z to the number field', () => {
+    /*
+     * A count commits on every keystroke, so it IS in the history. The guard
+     * that leaves blur-committed fields alone told them apart by value against
+     * defaultValue, which React does not keep in step on a focused number
+     * input, so Cmd+Z after typing a count did nothing at all.
+     */
+    render(<EditorScreen {...props(timed())} />)
+    const seconds = screen.getByLabelText('Seconds') as HTMLInputElement
+    seconds.focus()
+    fireEvent.change(seconds, { target: { value: '45' } })
+    expect(seconds.value).toBe('45')
+
+    fireEvent.keyDown(window, { key: 'z', metaKey: true })
+    expect(seconds.value).toBe('20')
+  })
+
   it('shows a step that is counted AND timed as both, and keeps both', () => {
     /*
      * The row used to hold ONE number, and `timingOf` preferred the count, so an
@@ -406,6 +423,23 @@ describe('EditorScreen', () => {
      */
     fireEvent.change(screen.getByLabelText('Timed or counted'), { target: { value: 'reps-timed' } })
     expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('20')
+  })
+
+  it("gives a step going timed its role's own default clock, not twenty seconds", () => {
+    // A recover going "× in" got its sixty seconds; going "s" it got twenty.
+    const p = props({
+      id: 'w1',
+      name: 'Rest day',
+      blocks: [{ kind: 'segment', id: 's1', name: 'Walk', role: 'recover', reps: { kind: 'fixed', count: 10 } }],
+      schemaVersion: SCHEMA_VERSION,
+      createdAt: 0,
+      updatedAt: 0,
+    })
+    render(<EditorScreen {...p} />)
+
+    fireEvent.change(screen.getByLabelText('Timed or counted'), { target: { value: 'timed' } })
+
+    expect((screen.getByLabelText('Seconds') as HTMLInputElement).value).toBe('60')
   })
 
   it('gives a timed step a count without resetting its clock', () => {
@@ -718,6 +752,32 @@ describe('EditorScreen: dragging a row by its grip', () => {
     fireEvent.click(screen.getAllByLabelText('Delete step')[1]!)
     expect(order()).toEqual(['A', 'C'])
     expect(document.activeElement).toBe(grips()[0])
+  })
+
+  it('lands focus on the copy of a group, not on its first child', () => {
+    // The copy is inserted after the whole block, descendants included; the
+    // focus target was the row below the original, which for a group is its
+    // own first child.
+    render(<EditorScreen {...props(sectioned())} />)
+    const before = grips().length
+    fireEvent.click(screen.getByLabelText('Duplicate this section'))
+    expect(grips().length).toBeGreaterThan(before)
+    // sectioned(): the section, its one child, then the copy.
+    expect(document.activeElement).toBe(grips()[2])
+  })
+
+  it('does not end a typing run when a grip is tapped without a drag', () => {
+    // A press and release on a grip with no move ended the run all the same,
+    // so the name being typed beside it became two undo steps.
+    render(<EditorScreen {...props(three())} />)
+    const name = screen.getByLabelText('Routine name') as HTMLInputElement
+    fireEvent.change(name, { target: { value: 'Ren' } })
+    fireEvent.pointerDown(grips()[0]!, { button: 0, clientY: centreOf(0) })
+    fireEvent.pointerUp(window)
+    fireEvent.change(name, { target: { value: 'Renamed' } })
+
+    fireEvent.click(screen.getByLabelText('Undo'))
+    expect(name.value).toBe('Tabata')
   })
 
   it('makes two drags two undo steps', () => {

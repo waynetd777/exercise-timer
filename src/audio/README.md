@@ -143,3 +143,15 @@ cue.
 | `referee-whistle-cc0.wav` | 44KB, 22.05kHz mono, CC0. See `samples.ts` before touching it |
 | `useMuted.ts` | Mute, persisted to localStorage, the right home for a UI flag |
 | `speech.ts`, `useSpokenCues.ts` | The spoken lines, and why they are not scheduled cues |
+
+## A seek is not a pause
+
+`useCueScheduler` takes two counters from the timer. `generation` bumps on every clock
+mutation (start, pause, resume, seek, reset) and drives the re-arm. `seeks` bumps only
+in `moveTo`, and on it the scheduler forgets every queued key. The set of keys exists
+so a cue is never queued twice, and after a skip back the whistle at the step's start is
+a cue that HAS played and must play again; kept in the set, it was filtered out of the
+re-arm and the restarted step opened in silence. Pausing must NOT clear the set (a cue
+the cancellation spared would be queued again on resume), which is why the two events
+need two counters: `generation` alone cannot say whether the clock moved or merely
+stopped.

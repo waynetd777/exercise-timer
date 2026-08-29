@@ -982,5 +982,8 @@ describe('small refusals that used to be silent', () => {
     expect(parseItem('10 xtreme pushups')).toMatchObject({ name: 'xtreme pushups', count: 10 })
     expect(parseItem('10x Squats')).toMatchObject({ name: 'Squats', count: 10 })
     expect(parseItem('10 x Squats')).toMatchObject({ name: 'Squats', count: 10 })
+    // The "xtreme" fix took these two with it.
+    expect(parseItem('12xSquats')).toMatchObject({ name: 'Squats', count: 12 })
+    expect(parseItem('10 X Squats')).toMatchObject({ name: 'Squats', count: 10 })
   })
 })

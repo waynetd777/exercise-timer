@@ -167,9 +167,11 @@ function isBlockArray(value: unknown): value is Block[] {
 function isBlock(value: unknown): value is Block {
   if (typeof value !== 'object' || value === null) return false
   const block = value as Record<string, unknown>
-  // Required, not optional: the run keys a gate on `${id}@${iteration}`, so two
-  // groups without one would be cleared by a single tap.
-  if (typeof block['id'] !== 'string') return false
+  // Optional here: a hand-written file or an older link may omit it, and
+  // `migrateBlocks` gives such a block one on the way in. The run keys a gate
+  // on `${id}@${iteration}`, so two groups without one would be cleared by a
+  // single tap; that is why it is filled rather than ignored.
+  if (!isOptionalString(block['id'])) return false
   switch (block['kind']) {
     case 'segment':
       return isSegment(block)
@@ -258,7 +260,26 @@ export function fromBundle(json: unknown, now: number): BundleContents {
   const rejected: string[] = []
   for (const entry of bundle.workouts) {
     if (isWorkout(entry)) {
-      workouts.push(entry)
+      /*
+       * Named fields only. A file is hand-editable and `isWorkout` checks the
+       * types of what it knows, not the absence of what it does not, so an
+       * unknown key used to land in the store. A last run in the future, which
+       * would sit at the top of the library for years, is brought back to now.
+       */
+      const { id, name, colour, blocks, createdAt, updatedAt, lastRunAt, favourite, estimatedTotalMs } =
+        entry
+      workouts.push({
+        id,
+        name,
+        blocks,
+        createdAt,
+        updatedAt,
+        schemaVersion: SCHEMA_VERSION,
+        ...(colour !== undefined ? { colour } : {}),
+        ...(lastRunAt !== undefined ? { lastRunAt: Math.min(lastRunAt, now) } : {}),
+        ...(favourite !== undefined ? { favourite } : {}),
+        ...(estimatedTotalMs !== undefined ? { estimatedTotalMs } : {}),
+      })
       continue
     }
     const name = (entry as { name?: unknown } | null)?.name
@@ -298,12 +319,16 @@ function readPictures(value: unknown): Record<string, MediaRef> {
   return out
 }
 
-/** Strings only, and never throws: a damaged weights map must not lose the routines. */
+/**
+ * Strings only, and never throws: a damaged weights map must not lose the
+ * routines. Empty strings are dropped too: an older export wrote a cleared
+ * weight as '', and merged over the local table that emptied a real number.
+ */
 function readWeights(value: unknown): Record<string, string> {
   if (typeof value !== 'object' || value === null) return {}
   const out: Record<string, string> = {}
   for (const [name, load] of Object.entries(value as Record<string, unknown>)) {
-    if (typeof load === 'string') out[name] = load
+    if (typeof load === 'string' && load.trim() !== '') out[name] = load
   }
   return out
 }
