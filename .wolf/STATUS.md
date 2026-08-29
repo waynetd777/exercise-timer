@@ -2,9 +2,31 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (eight new screenshots converted and wired into the README; 4741837 pushed)
+> Last updated: 2026-08-29 (Preview thumbnails open full size, v9.0; committed, NOT pushed)
 
 ---
+
+## 🖼️ Preview thumbnails open full size (2026-08-29, done, v9.0, committed, NOT pushed)
+
+Wayne: "make the image thumbnails in the preview clickable so that the user can seen it enlarged."
+
+**PreviewList.tsx** owns the whole thing, so the run screen's Preview and the editor's reading both get it without
+either knowing a picture can be opened. A row with a picture wraps its thumb in `.prow__shot`, a bare button
+(`cursor: zoom-in`, global :focus-visible outline, no border: a hundred rows must not look like a hundred buttons).
+An empty frame stays a `<span>`: nothing behind it to enlarge. `ShotDialog` is the third dialog over the editor's
+`ImageSheet` and the only read-only one, offering Close and nothing else, because Preview is a reading.
+
+**Bug found and fixed on the way (bug-153):** the run screen's keydown handler only stood down for its own two
+dialogs (`leaving || resetting`), so M muted the app from behind the new picture. The arrows were already safe
+(`next`/`previous` return early while idle) and Space is eaten by the focused Close button, so M was the only key
+that did something invisible. Fixed with `document.querySelector('dialog[open]')`, the idiom useDraftHistory
+already uses. **My first attempt guarded the arrows and claimed a bug that could not happen; the control test
+caught it.** Every guard test here has a control test beside it for that reason.
+
+**Also:** two help lines added (library "Your routines", editor "Reading it back") saying a picture can be tapped.
+
+**Verified:** typecheck, oxlint, 1189 tests in 62 files (+5), production build. **Next:** Wayne taps a thumbnail on
+the badge 9.0 build.
 
 ## 📸 Screenshots refreshed, four to eight (2026-08-29, done, pushed as 4741837)
 

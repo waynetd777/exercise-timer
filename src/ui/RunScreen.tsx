@@ -376,8 +376,14 @@ export function RunScreen({
     if (event.metaKey || event.ctrlKey || event.altKey) return
     // A held key is one press. Auto-repeat skipped a step every 30ms.
     if (event.repeat) return
-    // A dialog owns the keyboard while it is open.
+    // A dialog owns the keyboard while it is open. `leaving` and `resetting` are
+    // this screen's own two; the query catches any other, which since Preview
+    // learned to open a picture means one this screen knows nothing about. The
+    // arrows are already safe, since `next` and `previous` ignore an idle
+    // routine, and Space is taken by the dialog's focused button. M was not:
+    // it muted the app from behind a picture. Same idiom as `useDraftHistory`.
     if (leaving || resetting) return
+    if (document.querySelector('dialog[open]')) return
     // Leave the key alone only if what has focus actually uses it: a button
     // takes Space and Enter, a field takes everything. See `shortcutApplies`.
     if (!shortcutApplies((event.target as HTMLElement | null)?.tagName, event.key)) return

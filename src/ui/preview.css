@@ -139,6 +139,22 @@
   display: block;
 }
 
+/*
+ * The button a picture sits in. Bare on purpose: the thumbnail already reads as
+ * its own object, and a border or a hover tint around it would make a list of a
+ * hundred rows look like a list of a hundred buttons. `zoom-in` is the whole
+ * affordance on a pointer, and the global :focus-visible outline is the whole
+ * of it on a keyboard.
+ */
+.prow__shot {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: calc(var(--radius) - 4px);
+  cursor: zoom-in;
+}
+
 .prow__effort {
   font-weight: 650;
   font-variant-numeric: tabular-nums;

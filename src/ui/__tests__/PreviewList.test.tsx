@@ -5,7 +5,7 @@
  */
 
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { Block, Workout } from '../../engine'
 import { compile, SCHEMA_VERSION } from '../../engine'
@@ -61,6 +61,39 @@ const circuit = (): Workout =>
       ],
     },
   ])
+
+/** A routine whose one work step carries a picture. */
+const pictured = (): Workout =>
+  workout([
+    {
+      kind: 'segment',
+      id: 'a',
+      name: 'Leg Press',
+      role: 'work',
+      reps: { kind: 'fixed', count: 12 },
+      load: '65kg',
+      // Remote, because `resolveMediaSync` answers with the url and no blob
+      // store has to exist for the thumbnail to have a src in jsdom.
+      media: { source: 'remote', url: 'https://example.test/leg-press.png' },
+    },
+    // Self-paced too, so both steps come up in the same layout and the assertion
+    // below is reading one element rather than two different ones.
+    { kind: 'segment', id: 'b', name: 'Cycling', role: 'work', reps: { kind: 'fixed', count: 20 } },
+  ])
+
+// jsdom has no dialog methods, and opening a picture needs them.
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute('open', '')
+  }
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute('open')
+  }
+})
+
+// Mute is remembered in localStorage, so one test muting leaves the next one
+// starting muted and asserting nothing.
+beforeEach(() => globalThis.localStorage?.clear())
 
 afterEach(cleanup)
 
@@ -148,5 +181,69 @@ describe('RunScreen: the preview', () => {
     expect(screen.queryByText('Round 2 of 2')).toBeNull()
     // The toggle goes with it: the slot it sat in is the running stopwatch's.
     expect(screen.queryByLabelText('Preview the routine')).toBeNull()
+  })
+})
+
+describe('PreviewList: a picture, full size', () => {
+  it('opens the picture a thumbnail stands for, named and loaded', () => {
+    render(<PreviewList routine={compile(pictured())} />)
+
+    // The thumbnail itself is alt="", so the button carries the name: a
+    // hundred rows of "Leg Press 65kg" images would be a hundred read-outs.
+    fireEvent.click(screen.getByRole('button', { name: 'Leg Press 65kg, full size' }))
+
+    const shown = screen.getByRole('dialog')
+    expect(shown.querySelector('img')?.getAttribute('src')).toBe('https://example.test/leg-press.png')
+    // The load reads with the name, exactly as it does in the row.
+    expect(screen.getAllByText('Leg Press 65kg').length).toBeGreaterThan(1)
+  })
+
+  it('closes again, leaving the reading where it was', () => {
+    render(<PreviewList routine={compile(pictured())} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Leg Press 65kg, full size' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Leg Press 65kg, full size' })).toBeTruthy()
+  })
+
+  it('leaves an empty frame alone: there is nothing behind it to enlarge', () => {
+    render(<PreviewList routine={compile(circuit())} />)
+
+    // Nothing in `circuit` carries an image, so not one row offers the button.
+    expect(screen.queryByRole('button', { name: /full size/ })).toBeNull()
+  })
+})
+
+describe('RunScreen: a picture opened from Preview', () => {
+  const sound = () => screen.queryByLabelText('Turn sound off') !== null
+
+  const openPreview = () => {
+    render(<RunScreen workout={pictured()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+  }
+
+  it('still takes M as mute when no picture is open', () => {
+    // The control for the test below: without it, that one passes vacuously.
+    openPreview()
+    expect(sound()).toBe(true)
+
+    fireEvent.keyDown(window, { key: 'm' })
+
+    expect(sound()).toBe(false)
+  })
+
+  it('does not mute from behind the picture', () => {
+    // A dialog owns the keyboard. The arrows were already safe, since `next`
+    // and `previous` ignore an idle routine, and Space is taken by the
+    // dialog's own focused button. M reached through and muted the app.
+    openPreview()
+    fireEvent.click(screen.getByRole('button', { name: 'Leg Press 65kg, full size' }))
+
+    fireEvent.keyDown(window, { key: 'm' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(sound()).toBe(true)
   })
 })

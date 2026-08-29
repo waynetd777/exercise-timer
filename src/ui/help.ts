@@ -26,6 +26,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Tap a routine to open it, then Start.',
       'Preview reads a routine out before you run it. Every round in order, with the pictures, weights and how-to. The list button in the top corner opens and closes it.',
+      'Tap any picture in a preview to see it full size. The quickest way to find out what an exercise you have not done before actually is.',
       'The pencil opens the routine in the editor.',
       'The star pins a favourite to the top.',
       'Search by name. Sort by Recent, Name or Longest.',
@@ -141,6 +142,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
     points: [
       'The list button in the top corner reads your draft end to end, the same way Preview reads a saved routine. It reads what is on screen, unsaved changes included.',
       'The same button, now a ×, takes you back to editing. Nothing is saved or lost on the way in or out.',
+      'Tap any picture in the reading to see it full size.',
     ],
   },
   {

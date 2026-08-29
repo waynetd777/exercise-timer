@@ -4,9 +4,11 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { PathStep, Routine, TimelineEntry } from '../engine'
+import { ImageSheet } from './editor/ImageDialogs'
 import { effortLabel, effortSuffix, groupCaption, nameWithLoad } from './format'
+import { CloseIcon } from './icons'
 import { previewBlocks } from './preview'
 import { useMediaUrl } from './useMediaUrl'
 import './preview.css'
@@ -28,9 +30,13 @@ import './preview.css'
  * scrolls, because nothing here is read while moving.
  */
 
+/** A picture being looked at, and the step it belongs to. */
+type Shot = { src: string; name: string }
+
 /** One step, as a line to read: the effort, the name, and what it looks like. */
-function Row({ entry }: { entry: TimelineEntry }) {
+function Row({ entry, onOpen }: { entry: TimelineEntry; onOpen: (shot: Shot) => void }) {
   const src = useMediaUrl(entry.media)
+  const name = nameWithLoad(entry)
 
   return (
     <li className="prow" data-role={entry.role}>
@@ -39,9 +45,22 @@ function Row({ entry }: { entry: TimelineEntry }) {
         line up down the page either way, and a ragged left edge is harder to
         read than a few blanks. `loading="lazy"` because a long routine is a
         couple of hundred of these and only a handful are on screen.
+
+        A picture is a button, because a 3rem thumbnail is enough to recognise a
+        machine and not enough to learn an exercise from, which is most of the
+        reason to read a routine before doing it. An empty frame is not: there
+        is nothing behind it to enlarge.
       */}
       {src ? (
-        <img className="prow__thumb" src={src} alt="" loading="lazy" decoding="async" />
+        <button
+          type="button"
+          className="prow__shot"
+          onClick={() => onOpen({ src, name })}
+          aria-label={`${name}, full size`}
+          title="See it full size"
+        >
+          <img className="prow__thumb" src={src} alt="" loading="lazy" decoding="async" />
+        </button>
       ) : (
         <span className="prow__thumb prow__thumb--none" aria-hidden="true" />
       )}
@@ -50,7 +69,7 @@ function Row({ entry }: { entry: TimelineEntry }) {
       <span className="prow__side">{effortSuffix(entry)}</span>
 
       <span className="prow__name">
-        {nameWithLoad(entry)}
+        {name}
         {entry.alternative && <em className="prow__sub">or {entry.alternative}</em>}
         {/*
           EVERY row's note, unlike the run sheet, which shows only the one you
@@ -90,8 +109,36 @@ function Heading({ step }: { step: PathStep }) {
   )
 }
 
+/**
+ * A step's picture, full size, with nothing to do to it.
+ *
+ * The third dialog over the editor's `ImageSheet`, and the only read-only one:
+ * `ImageDialog` can take a step's picture off and `PictureDialog` can change an
+ * exercise's, because both are opened from something you are editing. Preview is
+ * a reading. Close is the whole of what it offers, which is why it is a plain
+ * sheet rather than either of those two with its buttons hidden.
+ *
+ * `src` is a string, never null: the thumbnail is only a button where there is
+ * something behind it, so the missing-file line `ImageSheet` can show is
+ * unreachable from here.
+ */
+function ShotDialog({ shot, onClose }: { shot: Shot; onClose: () => void }) {
+  return (
+    <ImageSheet src={shot.src} alt={shot.name} onClose={onClose}>
+      <p className="notice__text">{shot.name}</p>
+      <div className="notice__actions">
+        <button type="button" className="chip" onClick={onClose} autoFocus>
+          <CloseIcon />
+          Close
+        </button>
+      </div>
+    </ImageSheet>
+  )
+}
+
 export function PreviewList({ routine }: { routine: Routine }) {
   const blocks = useMemo(() => previewBlocks(routine.entries), [routine])
+  const [shot, setShot] = useState<Shot | null>(null)
 
   return (
     <div className="preview">
@@ -104,11 +151,18 @@ export function PreviewList({ routine }: { routine: Routine }) {
           ))}
           <ol className="preview__list">
             {block.rows.map((row) => (
-              <Row key={row.step} entry={row} />
+              <Row key={row.step} entry={row} onOpen={setShot} />
             ))}
           </ol>
         </section>
       ))}
+
+      {/*
+        Owned here rather than by the two screens that show a preview, so the
+        run screen's Preview and the editor's reading both get it without either
+        knowing a picture can be opened at all.
+      */}
+      {shot && <ShotDialog shot={shot} onClose={() => setShot(null)} />}
     </div>
   )
 }

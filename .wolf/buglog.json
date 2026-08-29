@@ -2556,6 +2556,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-29T09:23:30.000Z"
+    },
+    {
+      "id": "bug-153",
+      "timestamp": "2026-08-29T16:45:00Z",
+      "error_message": "Pressing M while a picture opened from Preview was on screen muted the app from behind the dialog.",
+      "file": "src/ui/RunScreen.tsx",
+      "root_cause": "The run screen's window keydown handler only stood down for its OWN two dialogs (`leaving || resetting`). Preview's new full-size picture dialog is owned by PreviewList, which the run screen knows nothing about, so every shortcut still reached through it. The arrows happened to be safe (`next`/`previous` return early while the routine is idle) and Space is consumed by the dialog's focused Close button, which left M as the one key that actually did something invisible.",
+      "fix": "Added `if (document.querySelector('dialog[open]')) return` after the existing check, the same idiom useDraftHistory already uses to keep Cmd+Z off the draft behind a modal. Covered by 'does not mute from behind the picture' in PreviewList.test.tsx, with a control test asserting M still mutes when no picture is open, so the guard cannot rot into a vacuous pass.",
+      "tags": [
+        "keyboard",
+        "dialog",
+        "run-screen",
+        "preview",
+        "regression-test"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T16:45:00Z"
     }
   ]
 }
