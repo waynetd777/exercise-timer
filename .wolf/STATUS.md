@@ -2,9 +2,29 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (README and in-app help rewritten shorter and friendlier, v8.9 pushed)
+> Last updated: 2026-08-29 (eight new screenshots converted and wired into the README; committed, NOT pushed)
 
 ---
+
+## 📸 Screenshots refreshed, four to eight (2026-08-29, done, committed, NOT pushed)
+
+Wayne dropped eight PNGs (1904x2482) into `docs/screenshots/`: replacements for the existing four plus four new
+ones (exercises, generator, paste, preview).
+
+**Conversion:** `cwebp -quiet -resize 900 0 -q 80 -m 6 <name>.png -o <name>.webp`, matching the 900px width of the
+originals. All eight land between 38KB and 67KB. The PNG sources are now gitignored (`docs/screenshots/*.png`):
+1-2MB each, and the README only ever serves the webp. The cwebp line is recorded in the .gitignore comment so the
+next refresh does not have to guess it.
+
+**README:** the screenshot table went from 2x2 to 2x4, ordered as a story: run-timed + run-list (the core), paste +
+generator (getting a routine in), library + preview (living with them), editor + exercises (changing them). Alt
+text rewritten from the actual pixels. "The rest of it" lost its Preview, library and editing paragraphs, which
+the new captions now cover; the paste-format link stayed.
+
+**Two crops worth reshooting if Wayne cares:** `exercises.webp` opens mid-scroll with "Calf Press" clipped at the
+top, and `preview.webp` clips its first row ("10:00 Warm Up"). Both read fine, neither is deliberate.
+
+**Next:** Wayne's eye on the README, then a push (docs-only, no version bump, no code touched).
 
 ## ✍️ README and in-app help rewritten (2026-08-29, done, v8.9)
 

@@ -35,14 +35,26 @@ from across a gym, with the phone propped against a rack.
 <table>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/run-timed.webp" width="420" alt="A timed step running: a large red 9:45 countdown above the step name Warm Up, the time left and step number, the exercise illustration below it, and the next step named underneath." />
+      <img src="docs/screenshots/run-timed.webp" width="420" alt="A timed step running: a large red 9:43 countdown above the step name Warm Up, then 40:17 left and step 2 of 82, a photo of the exercise bike, and NEXT GET READY 15s underneath." />
       <br /><b>A timed step.</b> The number is sized to be read from across a
       room, and the picture says which machine without a word.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/run-list.webp" width="420" alt="A rep-based round shown as a list: Set 4 of 9, 12 reps, five exercises each with its count, one carrying a lower-impact alternative, and a full-width Next button." />
-      <br /><b>A rep-based round.</b> The whole set is on screen, and one Next
+      <img src="docs/screenshots/run-list.webp" width="420" alt="A ladder rung shown as a list: Rung 1 of 9, 3 reps, five exercises each with its count, one marked each side and one carrying a lower-impact alternative, and a full-width Next button." />
+      <br /><b>A rep-based rung.</b> The whole thing is on screen, and one Next
       clears it. You do not tap through a round with your hands full.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/paste.webp" width="420" alt="The paste dialog: a name field, a monospace box holding a routine written as text with a warm-up, a numbered list, a numbered section and a ladder written 3-6-9-12-15-12-9-6-3, and a footer reading 8 sections, every line understood." />
+      <br /><b>Pasting one in.</b> A routine as it arrives, in text. The footer
+      counts what it found and owns up to any line it could not read.
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/generator.webp" width="420" alt="The generate dialog: name, shape, about how long, what to work, equipment, warm up with, sets, between sets, moving how and cool down with, then a summary reading 11 exercises, 46:45, the exercises listed, and a note that it came out 2 minutes longer than asked." />
+      <br /><b>Generating one.</b> Every answer updates the summary at the
+      bottom, so you see the routine before you commit to it.
     </td>
   </tr>
   <tr>
@@ -52,28 +64,30 @@ from across a gym, with the phone propped against a rack.
       colour makes it findable at a glance.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name and a duration, a group holding two of them, the per-row controls panel open showing an image thumbnail and a note button, and coloured add buttons along the bottom." />
+      <img src="docs/screenshots/preview.webp" width="420" alt="Preview reading a routine out: a scrolling list of every step with its thumbnail, duration or count and name, broken up by headings reading Set 1 of 3, Set 2 of 3 and Set 3 of 3, with the transport controls at the bottom." />
+      <br /><b>Preview.</b> The whole routine written out in the order it will
+      run, weights included, with Start still under your thumb.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name, a count and a unit, a sets group holding two of them, the per-row controls panel open showing an image thumbnail and a note button, and coloured add buttons along the bottom." />
       <br /><b>The editor.</b> Steps, sets, ladders and sections, with undo. The
       coloured edge on a row is its step type, and the add buttons match.
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/exercises.webp" width="420" alt="The exercises page: a search box, a count reading 21 of 68 weighed and 147 of 147 pictured, and rows grouped under Multi-Gym, Bike, Trampoline and Bodyweight, each with a thumbnail and, where there is something to weigh, a weight field." />
+      <br /><b>The exercises page.</b> One picture and one weight per exercise,
+      grouped by kit. Change a weight here and every routine follows.
     </td>
   </tr>
 </table>
 
 ## The rest of it
 
-**Reads a routine out before you run it.** Preview prints the whole thing end to
-end: every round in the order it will run, with pictures, weights and how-to. It
-is a mode of the run screen, so Start is still under your thumb at the end.
-
-**Keeps a library** in the browser, searchable, with favourites and a colour per
-routine.
-
 **Imports** `.tabata` files from the Tabata Timer app, its own backups, and plain
-text. See [the paste format](docs/paste-format.md) for what the parser reads,
-with an example using every part of it.
-
-**Edits** steps, durations, reps, weights, sets, ladders, sections and images,
-with undo.
+text. See [the paste format](docs/paste-format.md) for everything the parser
+reads, with an example using every part of it.
 
 **Tidies names,** putting each step's exercise back under the name the app knows
 it by, so weights and pictures find it. Counts, weights and brackets are left
