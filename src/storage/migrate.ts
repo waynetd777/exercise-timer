@@ -4,6 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
+import { newId } from '../id'
 import type { Block, Segment, Workout } from '../engine'
 
 /**
@@ -168,7 +169,15 @@ function migrateSegment(segment: Segment): Segment {
  */
 function migrateBlocks(blocks: Block[]): Block[] {
   let changed = false
-  const next = blocks.map((block) => {
+  const next = blocks.map((given) => {
+    // A block with no id (a hand-written file, an older share link) gets one:
+    // the run keys a gate on `${id}@${iteration}`, so two id-less groups would
+    // be cleared by a single tap.
+    let block = given
+    if (typeof (block as { id?: unknown }).id !== 'string') {
+      changed = true
+      block = { ...block, id: newId() }
+    }
     if (block.kind === 'segment') {
       const migrated = migrateSegment(block)
       if (migrated === block) return block

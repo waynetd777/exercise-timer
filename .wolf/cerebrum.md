@@ -294,6 +294,21 @@
 
 - [2026-08-24] **The dev server is on 35173, the preview server on 35174, both `strictPort: true`** (`vite.config.ts` `server` / `preview`). Vite's default 5173 belongs to another local project (sft-hire) and whichever started second drifted silently to 5174, so no URL was dependable. `strictPort` is the point of the change as much as the number is: a clash must fail loudly rather than move. Use `http://localhost:35173` for anything that hands the user a dev URL, and do not reintroduce 5173 in docs or scripts.
 
+## Two counters on the timer: generation and seeks (2026-08-29)
+
+`Timer.generation` bumps on EVERY clock mutation including pause and resume; `Timer.seeks` bumps only
+in `moveTo`. The cue scheduler clears its played-key set on `seeks`, never on `generation`: clearing
+on pause re-queues a spared cue (double beep), not clearing on a seek silences the whistle of the step
+skipped back to. If a new "position moved" consumer appears, use `seeks`.
+
+## Fields that commit on blur say so (2026-08-29)
+
+The editor's global Cmd+Z leaves a field alone while it holds uncommitted text. Those fields (note,
+alternative, weight in `rows.tsx`) carry `data-commits="blur"`; LoadField also `data-committed` since
+it is controlled. Do not detect "uncommitted" by `value !== defaultValue`: React does not sync
+defaultValue on a focused number input, which swallowed Cmd+Z after typing a count. A new
+blur-committed field needs the attribute or undo will stomp it.
+
 ## foldName is a storage key, and it is not idempotent (2026-08-29)
 
 Three localStorage tables (weights, paces, pictures) are keyed by `foldName(name)`. Any change to the

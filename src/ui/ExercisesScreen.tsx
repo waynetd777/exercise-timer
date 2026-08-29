@@ -13,6 +13,7 @@ import { exerciseKey, withoutStatedLoads } from '../routines/loads'
 import { collectImages } from '../editor/images'
 import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
 import { chosenPicture, loadPictures, savePictures, withPicture } from '../storage/pictures'
+import { sweepOrphans } from '../storage/sweep'
 import { storeFile } from '../media/pin'
 import { resolveMedia, resolveMediaSync } from '../media/resolveMedia'
 import { BackIcon, CloseIcon, HelpIcon, ImageIcon, TrashIcon } from './icons'
@@ -252,6 +253,13 @@ export function ExercisesScreen({
     const next = withPicture(pictures, name, ref)
     setPictures(next)
     savePictures(next)
+    // A photo taken off the page, or replaced, has no owner left unless a
+    // routine states it. Swept now: it used to sit in IndexedDB until some
+    // unrelated routine was deleted.
+    const before = chosenPicture(pictures, name)
+    if (before !== undefined && before.source !== 'bundled' && before !== ref) {
+      void sweepOrphans(next).catch(() => {})
+    }
   }
 
   const upload = async (name: string, file: Blob) => {
@@ -326,21 +334,9 @@ export function ExercisesScreen({
 
     let live = true
     void Promise.all(
-      /*
-       * Each read is caught HERE rather than around the whole batch, so one
-       * unreadable photo costs its own row and not the other twenty-nine.
-       *
-       * Reading a blob can fail outright, not just come back empty: `openDb`
-       * throws where site data is blocked, which is a private window, a browser
-       * set to refuse storage, and every test environment without a fake
-       * IndexedDB. Unhandled, that surfaced as an error beside a passing test
-       * run, and in a browser it would have been an unhandled rejection on a
-       * page that should simply have shown no picture.
-       */
-      pending.map(async ([name, ref]) => {
-        const src = await resolveMedia(ref, base).catch(() => null)
-        return [name, src] as const
-      }),
+      // One read per row, and `resolveMedia` never rejects, so a photo that
+      // cannot be read costs its own row and not the other twenty-nine.
+      pending.map(async ([name, ref]) => [name, await resolveMedia(ref, base)] as const),
     ).then((pairs) => {
       if (!live) return
       const map = new Map<string, string>()
@@ -416,7 +412,13 @@ export function ExercisesScreen({
 
   const follow = () => {
     setAsking(false)
-    void onFollow(overriding.rewritten)
+    // The saves run one after another in App, so a failure part-way leaves the
+    // earlier routines rewritten and the rest as they were. Said here, on the
+    // page that asked, rather than left as an unhandled rejection.
+    void Promise.resolve(onFollow(overriding.rewritten)).catch((cause: unknown) => {
+      const reason = cause instanceof Error ? cause.message : 'Could not save'
+      setNotice(`${reason}. The routines not yet rewritten still state their own weights; try again.`)
+    })
   }
 
   const total = EXERCISES.filter((e) => loadable(e)).length

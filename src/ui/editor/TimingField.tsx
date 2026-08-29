@@ -80,7 +80,9 @@ export function TimingField({
         ...(durationMs !== undefined ? { durationMs } : {}),
       })
     }
-    onChange({ kind: 'timed', durationMs: segment.durationMs ?? 20_000 })
+    // The role's own default, as the counted-and-timed branch above uses: a
+    // rest going timed used to get twenty seconds this way and its ten the other.
+    onChange({ kind: 'timed', durationMs: segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000 })
   }
 
   const value = timing.kind === 'timed' ? Math.round(timing.durationMs / 1000) : counted ? timing.count : 0

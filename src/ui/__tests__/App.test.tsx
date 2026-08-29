@@ -25,6 +25,7 @@ const stub: Library = {
   workouts: [legs],
   loading: false,
   error: null,
+  notice: null,
   add: vi.fn(async (w: Workout) => w),
   remove: vi.fn(async () => {}),
   duplicate: vi.fn(async () => {}),

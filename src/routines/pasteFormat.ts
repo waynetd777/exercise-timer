@@ -379,8 +379,9 @@ const TRAILING_DURATION = new RegExp(
   'i',
 )
 /** "12 × Hammer Curls", and the bare "20 Flutter Kicks". */
-// The "x" must stand alone: "10 xtreme pushups" is not ten of "treme pushups".
-const LEADING_COUNT = /^(\d+)\s*(?:×\s*|x\s+|\s)(.+)$/
+// The "x" must stand alone, or be glued to a capital: "10 xtreme pushups" is
+// not ten of "treme pushups", but "12xSquats" is twelve squats.
+const LEADING_COUNT = /^(\d+)\s*(?:×\s*|[xX]\s+|x(?=[A-Z])|\s)(.+)$/
 /**
  * A RANGE where one number is expected: "10/12 x lateral raises",
  * "10-15 x Fire hydrant left leg", "1-2mins Jumping jacks".

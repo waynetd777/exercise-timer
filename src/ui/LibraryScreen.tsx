@@ -658,6 +658,11 @@ export function LibraryScreen({
             {library.error}
           </p>
         )}
+        {library.notice && (
+          <p className="library__notice label" role="status">
+            {library.notice}
+          </p>
+        )}
 
         {library.loading ? (
           <p className="library__empty label">Opening your routines…</p>

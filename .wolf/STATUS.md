@@ -2,11 +2,30 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (code review of c69ab2a..HEAD: all seven Highs fixed, uncommitted)
+> Last updated: 2026-08-29 (code review of c69ab2a..HEAD: highs, mediums and lows all fixed and committed)
 
 ---
 
-## 🔍 Code review of c69ab2a..HEAD (2026-08-29): Highs fixed, mediums open
+## 🔍 Code review of c69ab2a..HEAD (2026-08-29): bugs all fixed, cleanups open
+
+**Second commit (mediums + lows, buglog bug-137..151; 1184 tests, typecheck, lint, build green):**
+- `resolveMedia` never rejects and forgets a failed read; `useMediaUrl`/ExercisesScreen dropped their catches.
+- `follow()` surfaces a failed rewrite as a notice. `Library.notice` holds the unreadable-routines message apart
+  from `error`. `readWeights` drops `''`. `LEADING_COUNT` reads `12xSquats` and `10 X Squats` again.
+- `generate.ts`: `hasSectionCount`/`clampSections` once; `describeRoutine(spec, built)` names the built count.
+- `App` takes back the crashed screens' history entry in `onReset` (no test: not reproducible in App.test).
+- `storage/sweep.ts` `sweepOrphans` runs after a delete AND after a picture is removed/replaced on the Exercises page.
+- `TimingField` timed default is the role's. Duplicate focuses the copy of a group. A grip tap without a move does
+  not end a typing run. Cmd+Z guard reads `data-commits="blur"` (note/alternative/weight), not defaultValue.
+- `fromBundle` builds from named fields (keeps favourite, clamps lastRunAt to now); a block without an id gets one
+  in `migrateBlocks` and `isBlock` allows it.
+- `Timer.seeks` (bumped in `moveTo` only) lets the cue scheduler clear its played-key set on a seek, so the whistle
+  of a step skipped back to sounds again. Documented in audio/README ("A seek is not a pause").
+
+**Next quest:** the cleanups in the report's section 2 (R1-R6, S1-S3, S5-S6, E1-E3, T2-T6, the 12 em dashes); S4
+and T1 are done. Then bump the version.
+
+## Earlier in the session: Highs (committed 844b97a)
 
 Full report: session scratchpad `review-2026-08-29.md` (bc2f2356 session). 48 verified candidates: 37 confirmed,
 7 plausible, 4 refuted. Every finding from the 2026-08-28 review is closed.

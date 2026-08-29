@@ -57,7 +57,22 @@ export async function resolveMedia(
       })
       known.set(hash, read)
     }
-    await read
+    try {
+      await read
+    } catch {
+      /*
+       * A read can FAIL rather than miss: `openDb` throws where site data is
+       * blocked (a private window, a browser set to refuse storage) and a
+       * connection can close under iOS. Not cached: a rejected promise left in
+       * `known` replayed one transient error to every later resolve of that
+       * hash until a reload. And not thrown: the caller gets the best answer
+       * there is, which for a linked image is its URL and for an uploaded photo
+       * is nothing, the same as a photo that is not on this device. Every
+       * caller used to catch this itself, and one of them then replaced a good
+       * URL with null.
+       */
+      known.delete(hash)
+    }
   }
 
   return resolveMediaSync(ref, base)

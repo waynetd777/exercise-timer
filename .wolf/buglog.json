@@ -2288,6 +2288,254 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-29T00:38:21.000Z"
+    },
+    {
+      "id": "bug-137",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M1: a blob read that threw turned a linked image's good URL into no picture, and the rejected promise was cached so one transient IDB failure kept the picture missing until reload.",
+      "file": "src/media/resolveMedia.ts",
+      "root_cause": "useMediaUrl did .catch(() => null) then setUrl(null) unconditionally; resolveMedia stored the rejected getBlob promise in `known` with no cleanup.",
+      "fix": "resolveMedia catches the read itself, deletes the hash from `known`, and answers with resolveMediaSync; both callers dropped their catch. resolveMedia.test 'answers with what it can when a read fails'.",
+      "tags": [
+        "media",
+        "resolveMedia",
+        "useMediaUrl",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-138",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M2: a failed save while rewriting routines to follow the weights page was an unhandled rejection; the page that asked showed nothing.",
+      "file": "src/ui/ExercisesScreen.tsx",
+      "root_cause": "follow() did `void onFollow(...)`; App's onFollow awaits guarded saves that rethrow.",
+      "fix": "Promise.resolve(onFollow(...)).catch(setNotice(...)). ExercisesScreen.test 'says so when the routines could not be rewritten'.",
+      "tags": [
+        "ExercisesScreen",
+        "unhandled-rejection",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-139",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M3: Cmd/Ctrl+Z after typing in a count field did nothing: the draft undo never ran.",
+      "file": "src/ui/editor/useDraftHistory.ts",
+      "root_cause": "The 'still being typed' guard compared value !== defaultValue, and React does not sync defaultValue on a focused type=number input, so a controlled CountField looked uncommitted.",
+      "fix": "Blur-committed fields (note, alternative, weight) carry data-commits=\"blur\" (LoadField also data-committed=value) and the guard reads that. EditorScreen.test 'undoes a count typed a moment ago'.",
+      "tags": [
+        "editor",
+        "undo",
+        "CountField",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-140",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M4: the load-time 'N routines could not be read' notice vanished on the first successful star, run or save.",
+      "file": "src/storage/useLibrary.ts",
+      "root_cause": "guarded() set error to null on any success, and the unreadable notice was stored in the same `error` state.",
+      "fix": "Library gained `notice: string | null` for the unreadable count; LibraryScreen shows it as role=status beside the error alert. LibraryScreen.test added; App.test/LibraryScreen.test literals gained notice.",
+      "tags": [
+        "useLibrary",
+        "notice",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-141",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M5: importing an older backup emptied a real weight, because the file recorded a cleared weight as ''.",
+      "file": "src/storage/bundle.ts",
+      "root_cause": "readWeights kept any string; the import merges the file's weights over the local table.",
+      "fix": "readWeights drops empty strings. bundle.test 'drops an empty weight'.",
+      "tags": [
+        "bundle",
+        "weights",
+        "import",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-142",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M6: '12xSquats' stopped parsing as 12 squats (and '10 X Squats' kept the X in the name) after the 'xtreme' fix.",
+      "file": "src/routines/pasteFormat.ts",
+      "root_cause": "LEADING_COUNT required whitespace after a lowercase x and had no uppercase form.",
+      "fix": "Regex accepts [xX] followed by space, or x glued to a capital. pasteFormat.test extended.",
+      "tags": [
+        "pasteFormat",
+        "regex",
+        "regression",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-143",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M7 (+L3, S4): a sections routine that built two sections was named '3 sections'; the fit note was gated on a different test than the builder; the clamp and the finite-count test were each written twice.",
+      "file": "src/routines/generate.ts",
+      "root_cause": "describeRoutine clamped the BUILT count up to SECTIONS_FEWEST; the note checked spec.sections === undefined while the builder checked Number.isFinite.",
+      "fix": "hasSectionCount() type guard and clampSections() used everywhere; describeRoutine(spec, built?) prints the built count unclamped. generate.test 'says two sections when two is what it built'.",
+      "tags": [
+        "generate",
+        "naming",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-144",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M8: after a crash card's 'Back to routines', the next browser Back did nothing and the one after left the app.",
+      "file": "src/ui/App.tsx",
+      "root_cause": "The pushed-history bookkeeping lived in Screens, which the ErrorBoundary remounts with a new key, so the pushed entry was orphaned.",
+      "fix": "ErrorBoundary onReset takes the entry back (history.back() when history.state.screen is set) before remounting. No test (a crash inside Screens is not reproducible in App.test).",
+      "tags": [
+        "App",
+        "history",
+        "ErrorBoundary",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-145",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M9: a photo removed or replaced on the Exercises page stayed in IndexedDB until some unrelated routine was deleted.",
+      "file": "src/storage/sweep.ts",
+      "root_cause": "The only orphan sweep lived inside useLibrary.remove.",
+      "fix": "New storage/sweep.ts sweepOrphans(pictures, store?) used by useLibrary.remove and by ExercisesScreen.setPicture when a non-bundled picture is dropped or replaced. ExercisesScreen.test asserts the sweep.",
+      "tags": [
+        "gc",
+        "sweep",
+        "ExercisesScreen",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-146",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review M10: a rest/recover step switched to plain timed got 20s while switched to 'x in' it got its role's default.",
+      "file": "src/ui/editor/TimingField.tsx",
+      "root_cause": "The timed branch hard-coded 20_000.",
+      "fix": "DEFAULT_SECONDS[segment.role] * 1000 in both branches. EditorScreen.test added.",
+      "tags": [
+        "editor",
+        "TimingField",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-147",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review L1: duplicating a group focused its first child instead of the copy.",
+      "file": "src/ui/EditorScreen.tsx",
+      "root_cause": "duplicateAt inserts after the whole subtree but duplicateRow focused flat index + 1.",
+      "fix": "Index + number of flat rows within the block. EditorScreen.test 'lands focus on the copy of a group'.",
+      "tags": [
+        "editor",
+        "focus",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-148",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review L2: a grip pressed and released without moving split the name being typed into two undo steps.",
+      "file": "src/ui/editor/useDraftDrag.ts",
+      "root_cause": "onEnd called endRun on every pointerup, drag or not.",
+      "fix": "onEnd returns unless a step happened (beforeDrag set). EditorScreen.test 'does not end a typing run when a grip is tapped'.",
+      "tags": [
+        "editor",
+        "drag",
+        "undo",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-149",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review L4: a hand-edited backup could store unknown keys and a last-run in the future (top of the library for years).",
+      "file": "src/storage/bundle.ts",
+      "root_cause": "fromBundle pushed the validated entry whole.",
+      "fix": "Built from named fields; lastRunAt clamped to now. bundle.test added.",
+      "tags": [
+        "bundle",
+        "import",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-150",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review L5: a bundle or link whose blocks carry no id was refused outright.",
+      "file": "src/storage/migrate.ts",
+      "root_cause": "isBlock required id after the previous review made gates key on it; nothing assigned a missing one.",
+      "fix": "isBlock accepts an optional id; migrateBlocks assigns newId() where missing. bundle.test 'gives a block with no id one'.",
+      "tags": [
+        "bundle",
+        "migrate",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
+    },
+    {
+      "id": "bug-151",
+      "timestamp": "2026-08-29T08:58:22.000Z",
+      "error_message": "Review L6: after a skip back (paused or running) the whistle at the restarted step's start never sounded.",
+      "file": "src/audio/useCueScheduler.ts",
+      "root_cause": "The played-key set survived the seek; dueCues' grace lookback found the cue and the set filtered it. Pausing must not clear the set (the spared-cue double beep), and `generation` cannot tell a seek from a pause.",
+      "fix": "useTimer exposes `seeks` (bumped in moveTo only); the scheduler clears its set when it changes. useCueScheduler.test 'sounds the start of a step skipped back to'.",
+      "tags": [
+        "audio",
+        "cues",
+        "seek",
+        "review-2026-08-29"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T08:58:22.000Z"
     }
   ]
 }

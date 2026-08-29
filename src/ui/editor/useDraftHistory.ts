@@ -117,12 +117,16 @@ export function useDraftHistory(workout: Workout): {
       // A note, alternative or weight is committed on blur, so text still being
       // typed there is not in the history yet. Undoing the draft under it took
       // back the previous edit, deleting the very step being typed in. Leave
-      // the browser's own undo to that field until it commits.
+      // the browser's own undo to that field until it commits. Those fields
+      // SAY they commit on blur; every other field's text is in the history as
+      // it is typed. Telling them apart by value against defaultValue caught
+      // the count fields too, since React does not keep defaultValue in step
+      // on a focused number input, and Cmd+Z after typing a count went nowhere.
       const field = document.activeElement
       if (
         field instanceof HTMLInputElement &&
-        field.value !== field.defaultValue &&
-        field.getAttribute('aria-label') !== 'Routine name'
+        field.dataset['commits'] === 'blur' &&
+        field.value !== (field.dataset['committed'] ?? field.defaultValue)
       ) {
         return
       }

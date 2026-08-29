@@ -44,6 +44,13 @@ export type Timer = {
   readElapsed: () => number
   /** Increments on every clock mutation, so the audio scheduler can re-arm. */
   generation: number
+  /**
+   * Increments on every SEEK (skip, retreat, restart of a step), and on nothing
+   * else. The scheduler forgets every queued cue on a seek: the step skipped
+   * back to must sound its whistle again, and `generation` cannot say whether
+   * the clock moved or merely paused.
+   */
+  seeks: number
   start: () => void
   pause: () => void
   resume: () => void
@@ -100,6 +107,7 @@ export function useTimer(
   const [status, setStatus] = useState<RunStatus>('idle')
   const [cursor, setCursor] = useState<Cursor>(START)
   const [generation, setGeneration] = useState(0)
+  const [seeks, setSeeks] = useState(0)
 
   const clock = useRef<Clock>(IDLE_CLOCK)
   const readElapsed = useCallback(() => elapsed(clock.current, now()), [])
@@ -141,6 +149,7 @@ export function useTimer(
     (to: Cursor, freeze: boolean) => {
       clock.current = seeked(now(), to.elapsedInRunMs, freeze)
       setCursor(to)
+      setSeeks((s) => s + 1)
       bump()
     },
     [bump],
@@ -334,6 +343,7 @@ export function useTimer(
     sessionMs: elapsed(session.current, now()),
     readElapsed,
     generation,
+    seeks,
     start,
     pause,
     resume,
