@@ -2,11 +2,11 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (Preview thumbnails open full size, v9.0; committed, NOT pushed)
+> Last updated: 2026-08-29 (Preview thumbnails open full size, v9.0, d4a6619 pushed)
 
 ---
 
-## 🖼️ Preview thumbnails open full size (2026-08-29, done, v9.0, committed, NOT pushed)
+## 🖼️ Preview thumbnails open full size (2026-08-29, done, v9.0, pushed as d4a6619)
 
 Wayne: "make the image thumbnails in the preview clickable so that the user can seen it enlarged."
 

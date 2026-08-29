@@ -339,4 +339,4 @@
 |------|--------|---------|---------|--------|
 | 12:45 | Rewrote README and in-app help shorter and friendlier, bumped to v8.9, pushed | README.md, src/ui/help.ts, src/version.ts | 3033c01 pushed; typecheck, lint, 1184 tests, build all clean | ~35k |
 | 16:35 | Converted 8 new screenshots to webp and rebuilt the README screenshot section (2x2 to 2x4) | docs/screenshots/*.webp, README.md, .gitignore | pushed as 4741837 | ~30k |
-| 16:46 | Preview thumbnails open full size; fixed M muting from behind the dialog (bug-153); v9.0 | PreviewList.tsx, preview.css, RunScreen.tsx, help.ts, PreviewList.test.tsx | 1189 tests green; committed, not pushed | ~55k |
+| 16:46 | Preview thumbnails open full size; fixed M muting from behind the dialog (bug-153); v9.0 | PreviewList.tsx, preview.css, RunScreen.tsx, help.ts, PreviewList.test.tsx | 1189 tests green; pushed as d4a6619 | ~55k |
