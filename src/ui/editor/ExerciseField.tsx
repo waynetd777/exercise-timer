@@ -28,7 +28,7 @@ const MAX_LIST_PX = 384
  * A work step's name: type it, or pick it off the exercise table.
  *
  * A TEXT FIELD that grows a list, never a select. Two of the names in Wayne's own
- * library — "Warm Up" and "Cool Down" — are not exercises at all, and two more
+ * library, "Warm Up" and "Cool Down", are not exercises at all, and two more
  * are his own wording for one that is, so a closed list would lock out the cases
  * the field has to carry. Typing is unchanged: the same input, the same
  * `aria-label`, the same patch on every keystroke.
@@ -60,8 +60,8 @@ export function ExerciseField({
    *
    * The list always filters on what the field says, so the caret beside a step
    * that reads "Leg Press" opens on Leg Press, matched and highlighted. But a
-   * step can be called something the table does not hold — "Warm Up", or a
-   * course leg the paste parser wrote — and there the caret would open on
+   * step can be called something the table does not hold ("Warm Up", or a
+   * course leg the paste parser wrote), and there the caret would open on
    * nothing at all. So an opening that has not been typed into falls back to the
    * whole table rather than to an empty box.
    *
@@ -79,14 +79,7 @@ export function ExerciseField({
   const listId = useId()
   const optionId = (index: number) => `${listId}-${index}`
 
-  const rows = useMemo(() => {
-    if (!open) return []
-    const filtered = exerciseRows(options, value)
-    if (filtered.length > 0 || typed) return filtered
-    // Nothing matches the name the step already has, and nobody has typed. See
-    // `typed` above.
-    return exerciseRows(options, '')
-  }, [open, options, value, typed])
+  const rows = useMemo(() => (open ? listRows(options, value, !typed) : []), [open, options, value, typed])
   const shown = useMemo(() => optionsOf(rows), [rows])
   /** True while the list is showing everything, which is the only time it has headings. */
   const grouped = rows.some((row) => row.kind === 'group')
@@ -187,8 +180,7 @@ export function ExerciseField({
    * strings, on a press.
    */
   const show = () => {
-    const filtered = optionsOf(exerciseRows(options, value))
-    const listed = filtered.length > 0 ? filtered : optionsOf(exerciseRows(options, ''))
+    const listed = optionsOf(listRows(options, value, true))
     setTyped(false)
     setActive(indexOfName(listed, value))
     setOpen(true)
@@ -393,4 +385,15 @@ function Thumb({ picture }: { picture: MediaRef | undefined }) {
        many rows is harder to read than a blank square. */
     <span className="ename__thumb ename__thumb--none" aria-hidden="true" />
   )
+}
+
+/**
+ * The rows for what the field says. Where nothing matches and `wholeTable` is
+ * allowed (nobody has typed; see `typed`), the whole list instead of an empty
+ * box. The one place the rule lives: the memo and `show()` both read it, so the
+ * list that opens is the list the caret is placed in.
+ */
+function listRows(options: readonly ExerciseOption[], value: string, wholeTable: boolean) {
+  const filtered = exerciseRows(options, value)
+  return filtered.length > 0 || !wholeTable ? filtered : exerciseRows(options, '')
 }

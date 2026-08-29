@@ -40,6 +40,7 @@
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../engine/types'
 import { isGroup } from '../engine/types'
 import { DESCRIPTION_CHARS, GET_READY_MS, parseItem, PREPARE_NAME, REST_NAME } from './pasteFormat'
+import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 
 /**
  * The shortest parenthesis the parser treats as a note rather than as part of
@@ -211,7 +212,7 @@ function stepLines(segment: Segment, lost: string[]): string[] {
 function ladderLines(ladder: Ladder, counter: { n: number }, lost: string[]): string[] {
   // The grammar has no ladder label; the reader's default is "Rung", and older
   // ladders carrying "Set" are migrated to it, so neither is worth a word.
-  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== 'Rung' && ladder.label !== 'Set') {
+  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== DEFAULT_LADDER_LABEL && ladder.label !== DEFAULT_REPEAT_LABEL) {
     lost.push(`The name "${ladder.label}" on a ladder; it will come back as "Rung"`)
   }
   const lines = [`Counting: ${ladder.counts.join('-')}`]
@@ -241,7 +242,7 @@ function repeatLines(repeat: Repeat, counter: { n: number }, lost: string[]): st
 
   // The grammar names every group "Rounds"; the reader's migration then calls
   // it "Set". Any other name is the user's, and does not survive.
-  if (repeat.label && repeat.label !== 'Set' && repeat.label !== 'Round') {
+  if (repeat.label && repeat.label !== DEFAULT_REPEAT_LABEL && repeat.label !== 'Round') {
     lost.push(`The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`)
   }
   const lines = [`${repeat.times} Rounds`]

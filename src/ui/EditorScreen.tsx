@@ -10,9 +10,8 @@ import { compile, MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDuratio
 import { estimate } from '../routines/estimate'
 import { collectExercises } from '../routines/exerciseOptions'
 import { currentRates } from '../storage/paces'
-import { currentWeights } from '../storage/weights'
 import { currentPictures } from '../storage/pictures'
-import { withPictures, withWeights } from '../routines/loads'
+import { fromTables } from '../storage/tables'
 import {
   appendTo,
   applyExercise,
@@ -182,7 +181,7 @@ export function EditorScreen({
   const previewRoutine = useMemo(
     () =>
       previewing && !tooLarge
-        ? compile(withPictures(withWeights(preview, currentWeights()), currentPictures()))
+        ? compile(fromTables(preview))
         : null,
     [previewing, tooLarge, preview],
   )

@@ -128,7 +128,8 @@ function isReps(value: unknown): boolean {
   return reps.kind === 'fixed' && isFiniteNumber(reps.count)
 }
 
-function isMedia(value: unknown): boolean {
+/** Exported for the pictures table, which stores the same refs and used to carry a copy of this. */
+export function isMedia(value: unknown): value is MediaRef {
   if (typeof value !== 'object' || value === null) return false
   const media = value as Record<string, unknown>
   if (!isOptionalFinite(media['w']) || !isOptionalFinite(media['h'])) return false
@@ -310,11 +311,11 @@ export function fromBundle(json: unknown, now: number): BundleContents {
  * routines. Each entry is checked with the same guard a step's media gets, since
  * whatever passes here is stored and then rendered on every run.
  */
-function readPictures(value: unknown): Record<string, MediaRef> {
+export function readPictures(value: unknown): Record<string, MediaRef> {
   if (typeof value !== 'object' || value === null) return {}
   const out: Record<string, MediaRef> = {}
   for (const [name, ref] of Object.entries(value as Record<string, unknown>)) {
-    if (isMedia(ref)) out[name] = ref as MediaRef
+    if (isMedia(ref)) out[name] = ref
   }
   return out
 }

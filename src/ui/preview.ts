@@ -48,8 +48,9 @@ export function previewBlocks(entries: readonly TimelineEntry[]): PreviewBlock[]
   for (const entry of entries) {
     const previous = blocks.at(-1)
 
+    // How much of the path the previous block already printed.
+    let shared = 0
     if (previous) {
-      let shared = 0
       while (
         shared < previous.path.length &&
         shared < entry.path.length &&
@@ -57,17 +58,13 @@ export function previewBlocks(entries: readonly TimelineEntry[]): PreviewBlock[]
       ) {
         shared++
       }
-
       if (shared === previous.path.length && shared === entry.path.length) {
         previous.rows.push(entry)
         continue
       }
-
-      blocks.push({ path: entry.path, carried: shared, rows: [entry] })
-      continue
     }
 
-    blocks.push({ path: entry.path, carried: 0, rows: [entry] })
+    blocks.push({ path: entry.path, carried: shared, rows: [entry] })
   }
 
   return blocks

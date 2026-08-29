@@ -5,7 +5,7 @@
  */
 
 import type { Block, Ladder, Repeat, Section, Segment, SegmentRole } from '../engine'
-import { isGroup } from '../engine'
+import { isGroup, DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 import { newId } from '../id'
 
 /**
@@ -96,7 +96,7 @@ export function newRepeat(
   children: Block[] = [newSegment('work'), newSegment('rest')],
   times = 3,
 ): Repeat {
-  return { kind: 'repeat', id: newId(), times, children, label: 'Set' }
+  return { kind: 'repeat', id: newId(), times, children, label: DEFAULT_REPEAT_LABEL }
 }
 
 /**
@@ -108,7 +108,7 @@ export function newRepeat(
  */
 export function newLadder(children: Block[] = [newRungStep()], counts = [5, 10, 15]): Ladder {
   // "Rung", not "Set": a ladder's iterations are its rungs, and "Set 3 of 9" on one read as a repeat.
-  return { kind: 'ladder', id: newId(), counts, children, label: 'Rung' }
+  return { kind: 'ladder', id: newId(), counts, children, label: DEFAULT_LADDER_LABEL }
 }
 
 /** A step whose rep count comes from the ladder around it. */

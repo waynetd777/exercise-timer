@@ -37,7 +37,7 @@
 
 import type { Block, Repeat, Section, Segment, Workout } from '../engine/types'
 import { SCHEMA_VERSION } from '../engine/types'
-import { blocksDurationMs } from '../engine'
+import { blocksDurationMs, DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
@@ -54,6 +54,7 @@ import { foldName } from './foldName'
 import { exerciseKey } from './loads'
 import { estimate } from './estimate'
 import { GET_READY_MS } from './pasteFormat'
+import { bundled } from '../media/resolve'
 
 export type Recovery = 'passive' | 'active'
 
@@ -204,9 +205,7 @@ function sectionsAsked(spec: RoutineSpec): number {
 function asks(exercise: Exercise, machineReps: number): { durationMs: number; count?: number } {
   if (exercise.equipment === 'machine') return { durationMs: WORK_MS, count: machineReps }
 
-  // Folded, because that is how the harvest keys them: one name for every
-  // spelling the instructor uses.
-  const said = PRESCRIPTIONS.find((p) => p.name === foldName(exercise.name))
+  const said = prescribed(exercise)
   if (!said) return { durationMs: WORK_MS }
   /*
    * Capped at `MAX_SET_MS`, because some of the harvested durations are the
@@ -352,7 +351,7 @@ const sets = (child: Segment, times: number): Repeat => ({
   kind: 'repeat',
   id: newId(),
   times,
-  label: 'Set',
+  label: DEFAULT_REPEAT_LABEL,
   children: [child, segment({ name: 'Rest', role: 'rest', durationMs: REST_MS })],
 })
 
@@ -376,7 +375,7 @@ function exerciseBlocks(
     durationMs: set.durationMs,
     ...(set.count !== undefined ? { reps: { kind: 'fixed' as const, count: set.count } } : {}),
     ...(load ? { load } : {}),
-    ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
+    ...(exercise.media ? { media: bundled(exercise.media) } : {}),
   })
   const count = exercise.perSide ? PER_SIDE_SETS : (spec.sets ?? DEFAULT_SETS)
 
@@ -404,7 +403,7 @@ function exerciseBlocks(
           name: recoveryName,
           role: 'work',
           durationMs: recoverMs,
-          ...(recoveryMedia ? { media: { source: 'bundled', path: recoveryMedia } } : {}),
+          ...(recoveryMedia ? { media: bundled(recoveryMedia) } : {}),
         }),
       )
     }
@@ -447,10 +446,15 @@ function exerciseBlocks(
  * a ladder every time and Core as rounds every time. The shape belongs to the
  * theme.
  */
+/** The three themes the builder treats specially, spelled as the harvest spells them. */
+const WARM_UP = 'Warm-up'
+const GENERAL_BODY = 'General Body'
+const FINISHER = 'Finisher'
+
 type ThemeShape = 'warmUp' | 'climb' | 'rounds' | 'ladder' | 'coreRounds' | 'finisher'
 const THEME_SHAPE: Readonly<Record<string, ThemeShape>> = {
-  'Warm-up': 'warmUp',
-  'General Body': 'climb',
+  [WARM_UP]: 'warmUp',
+  [GENERAL_BODY]: 'climb',
   'Arms & Shoulders': 'rounds',
   Legs: 'ladder',
   Core: 'coreRounds',
@@ -524,10 +528,10 @@ function themeName(theme: string, areas: readonly BodyArea[], all: readonly stri
   if (areas.length === all.length) return theme
   const order: BodyArea[] = ['upper', 'torso', 'lower']
   const kept = order.filter((area) => areas.includes(area))
-  if (theme === 'Finisher') {
+  if (theme === FINISHER) {
     return kept.length === 1 && kept[0] === 'lower' ? 'Legs Finisher' : 'Core Finisher'
   }
-  if (theme === 'General Body') {
+  if (theme === GENERAL_BODY) {
     const words: Record<BodyArea, string> = { upper: 'Upper Body', torso: 'Abs', lower: 'Lower Body' }
     return kept.map((area) => words[area]).join(' & ')
   }
@@ -637,7 +641,7 @@ function sectionsRoutine(
   const counted = (exercise: Exercise): Segment => {
     const said = prescribed(exercise)
     const load = loads(exercise.name)
-    const timed = said ? said.prescribe === 'time' && said.seconds !== undefined : HOLD_LIKE.test(exercise.name)
+    const timed = isHold(exercise)
     return segment({
       name: exercise.name,
       role: 'work',
@@ -645,7 +649,7 @@ function sectionsRoutine(
         ? { durationMs: (said?.seconds ?? HOLD_MS / 1000) * 1000 }
         : { reps: { kind: 'fixed', count: said?.reps ?? DEFAULT_REPS, ...(exercise.perSide ? { perSide: true } : {}) } }),
       ...(load ? { load } : {}),
-      ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
+      ...(exercise.media ? { media: bundled(exercise.media) } : {}),
     })
   }
   /** The lift a ladder scales: its count is the rung's. */
@@ -654,24 +658,27 @@ function sectionsRoutine(
       name: exercise.name,
       role: 'work',
       reps: { kind: 'rung', ...(exercise.perSide ? { perSide: true } : {}) },
-      ...(exercise.media ? { media: { source: 'bundled', path: exercise.media } } : {}),
+      ...(exercise.media ? { media: bundled(exercise.media) } : {}),
       ...(loads(exercise.name) ? { load: loads(exercise.name)! } : {}),
     })
   const rest = () => segment({ name: 'Rest', role: 'rest', durationMs: ROUND_REST_MS })
-  const ladderOf = (main: Exercise, accessories: readonly Exercise[]): Block => ({
+  /** One of her pyramids, drawn by how often each shape appears, around whatever climbs it. */
+  const ladder = (children: Block[]): Block => ({
     kind: 'ladder',
     id: newId(),
     counts: [...weightedPick(LADDER_COUNTS, (l) => l.seen, rng).counts],
-    label: 'Rung',
-    children: [rung(main), ...accessories.map(counted)],
+    label: DEFAULT_LADDER_LABEL,
+    children,
   })
+  const ladderOf = (main: Exercise, accessories: readonly Exercise[]): Block =>
+    ladder([rung(main), ...accessories.map(counted)])
   const roundsOf = (times: number, moves: readonly Exercise[]): Block => ({
     kind: 'repeat',
     id: newId(),
     times,
     // The app's word, so the editor and the run screen agree with what a
     // reload would show; "Round" was migrated to "Set" on the next read.
-    label: 'Set',
+    label: DEFAULT_REPEAT_LABEL,
     children: [...moves.map(counted), rest()],
   })
   const section = (name: string, children: Block[], over: Partial<Section> = {}): Section => ({
@@ -696,14 +703,16 @@ function sectionsRoutine(
    */
   const themes = SECTION_THEMES.map((entry) => ({
     ...entry,
-    areas: (entry.theme === 'Warm-up'
+    /** Every area the theme covers, for naming a section that works only some of them. */
+    all: entry.areas,
+    areas: (entry.theme === WARM_UP
       ? entry.areas
       : entry.areas.filter((area) => spec.areas.includes(area as BodyArea))) as BodyArea[],
   })).filter((entry) => entry.areas.length > 0)
 
   /** One section in its theme's shape, or null where the pool could not fill it. */
-  const build = ({ theme, areas }: { theme: string; areas: BodyArea[] }): Section | null => {
-    const name = themeName(theme, areas, SECTION_THEMES.find((t) => t.theme === theme)!.areas)
+  const build = ({ theme, areas, all }: { theme: string; areas: BodyArea[]; all: readonly string[] }): Section | null => {
+    const name = themeName(theme, areas, all)
     const shape = THEME_SHAPE[theme] ?? 'rounds'
     const short = () => {
       notes.push(`Not enough left for a ${name} section with the equipment chosen.`)
@@ -740,13 +749,7 @@ function sectionsRoutine(
       const moves = drawPreferring(areas, between(4, 5, rng), isRung)
       if (moves.length < 2) return short()
       return section(name, [
-        {
-          kind: 'ladder',
-          id: newId(),
-          counts: [...weightedPick(LADDER_COUNTS, (l) => l.seen, rng).counts],
-          label: 'Rung',
-          children: moves.map(rung),
-        },
+        ladder(moves.map(rung)),
       ])
     }
 
@@ -800,9 +803,9 @@ function sectionsRoutine(
     const entry = themes.find((t) => t.theme === theme)
     return entry ? build(entry) : null
   }
-  const warmUp = bookend('Warm-up')
-  const finisher = bookend('Finisher')
-  const body = themes.filter((t) => t.theme !== 'Warm-up' && t.theme !== 'Finisher')
+  const warmUp = bookend(WARM_UP)
+  const finisher = bookend(FINISHER)
+  const body = themes.filter((t) => t.theme !== WARM_UP && t.theme !== FINISHER)
   const ends = (warmUp ? 1 : 0) + (finisher ? 1 : 0)
 
   /** Roughly how long a section takes, timed steps plus a rate on the counted ones. */
@@ -847,8 +850,8 @@ function sectionsRoutine(
      */
     const budget = spec.totalMs - (warmUp ? cost(warmUp) : 0) - (finisher ? cost(finisher) : 0)
     const priority = [
-      ...body.filter((t) => t.theme === 'General Body'),
-      ...shuffled(body.filter((t) => t.theme !== 'General Body'), rng),
+      ...body.filter((t) => t.theme === GENERAL_BODY),
+      ...shuffled(body.filter((t) => t.theme !== GENERAL_BODY), rng),
     ]
     let spent = 0
     const left: string[] = []
@@ -1099,7 +1102,7 @@ export function generateRoutine(
             name: warmUp ? `Warm Up: ${warmUp.name}` : 'Warm Up',
             role: 'work',
             durationMs: warmUpMs,
-            ...(warmUp?.media ? { media: { source: 'bundled', path: warmUp.media } } : {}),
+            ...(warmUp?.media ? { media: bundled(warmUp.media) } : {}),
           }),
         ]
       : []
@@ -1111,7 +1114,7 @@ export function generateRoutine(
             name: coolDown ? `Cool Down: ${coolDown.name}` : 'Cool Down',
             role: 'work',
             durationMs: coolDownMs,
-            ...(coolDown?.media ? { media: { source: 'bundled', path: coolDown.media } } : {}),
+            ...(coolDown?.media ? { media: bundled(coolDown.media) } : {}),
           }),
         ]
       : []

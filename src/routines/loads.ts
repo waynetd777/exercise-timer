@@ -61,12 +61,16 @@ export function exerciseKey(name: string): string {
  * showing the wrong machine.
  */
 export function findFor<T>(table: ReadonlyMap<string, T>, name: string): T | undefined {
-  const key = exerciseKey(name)
-  const exact = table.get(key)
-  if (exact !== undefined) return exact
+  const key = keyFor(table, name)
+  return key === undefined ? undefined : table.get(key)
+}
 
+/** The KEY of the table that answers for a written name, by the same two passes. */
+export function keyFor(table: ReadonlyMap<string, unknown>, name: string): string | undefined {
+  const key = exerciseKey(name)
+  if (table.has(key)) return key
   const hit = closestKey(key, table.keys())
-  return hit === null ? undefined : table.get(hit)
+  return hit === null ? undefined : hit
 }
 
 /**

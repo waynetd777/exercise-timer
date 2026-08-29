@@ -117,6 +117,21 @@ function table(): Map<string, string[]> {
  * page can answer for is exactly a step this can rename, and a rule that held
  * in one place and not the other would be a bug waiting to be found in the gap.
  */
+/**
+ * Only folds owned by ONE exercise are candidates; a shared fold decides
+ * nothing. Worked out once per table: `match` runs for every step of every
+ * routine, and rebuilt the list each time.
+ */
+const SINGLES = new WeakMap<Map<string, string[]>, string[]>()
+function singlesOf(byKey: Map<string, string[]>): string[] {
+  let singles = SINGLES.get(byKey)
+  if (!singles) {
+    singles = [...byKey].filter(([, names]) => names.length === 1).map(([fold]) => fold)
+    SINGLES.set(byKey, singles)
+  }
+  return singles
+}
+
 function match(core: string, byKey: Map<string, string[]>): string | null {
   const key = foldName(core)
   if (key === '') return null
@@ -127,9 +142,7 @@ function match(core: string, byKey: Map<string, string[]>): string | null {
   const alias = ALIASES[key]
   if (alias) return alias
 
-  // Only folds owned by ONE exercise are candidates; a shared fold decides nothing.
-  const singles = [...byKey].filter(([, names]) => names.length === 1).map(([fold]) => fold)
-  const hit = closestKey(key, singles)
+  const hit = closestKey(key, singlesOf(byKey))
   return hit === null ? null : byKey.get(hit)![0]!
 }
 

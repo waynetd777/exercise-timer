@@ -6,6 +6,8 @@
 
 import { newId } from '../id'
 import type { Block, Segment, Workout } from '../engine'
+import { bundled } from '../media/resolve'
+import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 
 /**
  * Forward-only fixes applied to a routine as it enters the app, from IndexedDB or
@@ -34,7 +36,7 @@ import type { Block, Segment, Workout } from '../engine'
  * button that makes one is plural, because that names the thing.
  */
 const LEGACY_REPEAT_LABELS = ['Round', 'Rep', 'Reps']
-const REPEAT_LABEL = 'Set'
+const REPEAT_LABEL = DEFAULT_REPEAT_LABEL
 
 /**
  * A ladder's iterations are RUNGS. Every ladder the editor and the generator
@@ -44,7 +46,7 @@ const REPEAT_LABEL = 'Set'
  * name someone typed themselves is left alone.
  */
 const LEGACY_LADDER_LABELS = ['Set', 'Round']
-const LADDER_LABEL = 'Rung'
+const LADDER_LABEL = DEFAULT_LADDER_LABEL
 
 /**
  * Illustrations that used to be postimages links and now ship with the app.
@@ -153,7 +155,7 @@ function migrateSegment(segment: Segment): Segment {
 
   if (next.media?.source === 'remote') {
     const path = REHOSTED[next.media.url]
-    if (path) next = { ...next, media: { source: 'bundled', path } }
+    if (path) next = { ...next, media: bundled(path) }
   }
 
   return next

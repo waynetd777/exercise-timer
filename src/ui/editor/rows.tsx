@@ -4,7 +4,7 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useId, useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { useId, useLayoutEffect, useRef, useState, useEffect, useMemo } from 'react'
 import type { Ladder, Repeat, Section, Segment, SegmentRole } from '../../engine'
 import type { MediaRef } from '../../engine'
 import type { ExerciseOption } from '../../routines/exerciseOptions'
@@ -30,6 +30,7 @@ import {
   RepsIcon,
   TrashIcon,
 } from '../icons'
+import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../../engine'
 
 export const ROLES: { role: SegmentRole; label: string }[] = [
   { role: 'prepare', label: 'Get ready' },
@@ -131,7 +132,12 @@ export function SegmentRow({
    * Faintly, and marked, because it is a hint rather than a property of this
    * routine: see `.erow__thumb[data-inherited]`.
    */
-  const inherited = segment.media === undefined ? findFor(pictures, segment.name) : undefined
+  // Memoised: `findFor` falls back to a fuzzy scan of the table, and every row
+  // rendered on every keystroke of the editor.
+  const inherited = useMemo(
+    () => (segment.media === undefined ? findFor(pictures, segment.name) : undefined),
+    [pictures, segment.media, segment.name],
+  )
   const imageUrl = useMediaUrl(segment.media ?? inherited)
 
   /*
@@ -627,7 +633,7 @@ export function RepeatRow({
         <span className="erow__kind label label--sm">Sets</span>
         <input
           className="efield efield--name"
-          value={repeat.label ?? 'Set'}
+          value={repeat.label ?? DEFAULT_REPEAT_LABEL}
           aria-label="Set label"
           onChange={(event) => onPatch(path, { label: event.target.value })}
         />
@@ -740,7 +746,7 @@ export function LadderRow({
         <span className="erow__kind label label--sm">Ladder</span>
         <input
           className="efield efield--name"
-          value={ladder.label ?? 'Rung'}
+          value={ladder.label ?? DEFAULT_LADDER_LABEL}
           aria-label="Ladder label"
           onChange={(event) => onPatch(path, { label: event.target.value })}
         />

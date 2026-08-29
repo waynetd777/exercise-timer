@@ -19,10 +19,8 @@ import { ErrorBoundary } from './ErrorBoundary'
 import { LibraryScreen } from './LibraryScreen'
 import { RunScreen } from './RunScreen'
 import { ExercisesScreen } from './ExercisesScreen'
-import { withPictures, withWeights } from '../routines/loads'
-import { currentWeights } from '../storage/weights'
-import { currentPictures } from '../storage/pictures'
 import { newId } from '../id'
+import { fromTables } from '../storage/tables'
 
 /**
  * The sound bench is a development tool and is not shipped.
@@ -213,7 +211,7 @@ function Screens() {
   const running = useMemo(
     () =>
       view.screen === 'run'
-        ? withPictures(withWeights(view.workout, currentWeights()), currentPictures())
+        ? fromTables(view.workout)
         : null,
     [view],
   )
@@ -250,6 +248,7 @@ function Screens() {
     return (
       <ExercisesScreen
         workouts={library.workouts}
+        knownImages={knownImages}
         onExit={toLibrary}
         /* One save each, in order: `add` replaces a routine by id and returns
            the stamped copy, and doing them together would race the state. */

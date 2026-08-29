@@ -8,6 +8,7 @@ import type { MediaRef } from '../engine'
 import type { Equipment, Exercise } from './exercises'
 import { EXERCISES, KIT_GROUPS } from './exercises'
 import { closestKey, foldName } from './foldName'
+import { bundled } from '../media/resolve'
 
 /**
  * The exercise table as the editor's name field needs it: a label, a picture,
@@ -106,7 +107,7 @@ export function collectExercises(
 
     const picture =
       pictures?.get(key) ??
-      (exercise.media ? { source: 'bundled' as const, path: exercise.media } : undefined)
+      (exercise.media ? bundled(exercise.media) : undefined)
 
     const option: ExerciseOption = {
       name: exercise.name,
@@ -196,7 +197,7 @@ function needleOf(query: string): string {
  * Two shapes, deliberately:
  *
  *  - NOTHING typed, i.e. browsing: every exercise, under its kit's heading. The
- *    headings are the point of this mode — you are reading a list of 147 things
+ *    headings are the point of this mode: you are reading a list of 147 things
  *    and "Multi-gym" tells you which 42 you can do without getting up.
  *  - something typed: the matches ranked, flat and headingless. A heading is
  *    noise over two results, and ranked order would make it repeat anyway. The

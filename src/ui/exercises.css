@@ -221,27 +221,4 @@
   background: none;
 }
 
-/* ── One exercise's picture, full size ───────────────────────────────────── */
-.exview {
-  width: min(100%, 34rem);
-}
-
-.exview__picture {
-  display: block;
-  /* `max-*`, so a small illustration is shown at its own size rather than
-     scaled up into a blur. Capped in `dvh` to leave the name and the button
-     room on a short window. */
-  max-width: 100%;
-  max-height: 58dvh;
-  object-fit: contain;
-  background: var(--bone);
-  border-radius: 6px;
-}
-
-/* A ref whose bytes are not on this device: a backup restored without its
-   photos. Saying so beats an empty frame. */
-.exview__missing {
-  padding: var(--step-5);
-  color: var(--bone-dim);
-  text-align: center;
-}
+/* One exercise's picture, full size: the editor's `.imgview`, in editor.css. */
