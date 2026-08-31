@@ -244,7 +244,8 @@ parallel list of names to keep in sync. The filenames are the exercise names.
 | `foldName.ts` | The ONE way to ask whether two written names are the same exercise |
 | `exerciseOptions.ts` | `EXERCISES` as the editor's name field needs it: grouped by kit, illustrated, and matched against what has been typed. Pure, and shared with nothing else |
 | `loads.ts` | Filling a step's empty weight and picture in from the exercises page, and taking a stated weight back off |
-| `rename.ts` | Putting a step's exercise back under the name the table knows it by |
+| `rename.ts` | Putting a step's exercise back under the name the table knows it by, and renaming one of your own throughout a routine |
+| `similar.ts` | The names that look like the one about to be added: a typo, or the same movement under other words. LOOSER than the name field's matcher, on purpose, and it decides nothing |
 | `estimate.ts` | Roughly how long a routine takes, including the parts that have no length |
 | `exercises.harvested.ts` | GENERATED. Movements the authored tables never named |
 | `exercises.prescription.ts` | GENERATED. How each movement is prescribed: reps, seconds, seconds-per-rep |

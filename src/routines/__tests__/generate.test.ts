@@ -931,3 +931,86 @@ describe('what it says when a chosen exercise is unknown', () => {
     expect(notes.join(' ')).toMatch(/"Levitation" for the cool-down/)
   })
 })
+
+describe('the exercises you added yourself', () => {
+  /*
+   * The point of asking for an area and a push-or-pull when one is added: a row
+   * on the exercises page that the generator cannot see is half an exercise.
+   */
+  const mine = [
+    { name: 'Sandbag Haul', area: 'lower' as const, equipment: 'kettlebell' as const },
+    { name: 'Sandbag Press', area: 'upper' as const, pattern: 'push' as const, equipment: 'kettlebell' as const },
+  ]
+
+  it('draws from them in a circuit, beside the app’s own', () => {
+    const { workout } = generateRoutine(spec({ equipment: 'mixed', areas: ['lower'] }), {
+      rng: seeded(4),
+      now: 0,
+      extra: [mine[0]!],
+    })
+    // Not "it might": with one kettlebell exercise added and the lower body
+    // asked for, the pool it joined is the one being drawn from.
+    const names = distinct(workout)
+    expect(names.length).toBeGreaterThan(0)
+    expect(
+      generateRoutine(spec({ equipment: 'mixed', areas: ['lower'] }), {
+        rng: seeded(4),
+        now: 0,
+      }).workout,
+    ).not.toEqual(workout)
+  })
+
+  it('can build a routine out of nothing but yours', () => {
+    /*
+     * The sharpest version of the question. Nothing the app ships is a
+     * kettlebell exercise for the upper body with `mixed` equipment excluded, so
+     * a routine that comes out at all came out of the added table.
+     */
+    const { workout } = generateRoutine(
+      spec({ equipment: 'mixed', areas: ['upper'], style: 'sections', totalMs: 20 * 60_000 }),
+      { rng: seeded(2), now: 0, extra: mine },
+    )
+    expect(totalDurationMs(workout)).toBeGreaterThan(0)
+  })
+
+  it('respects what you said it is for', () => {
+    /*
+     * A `cardio` exercise of yours is eligible for the between-sets minute and
+     * the bookends, exactly as a shipped one is. Asserted through the note the
+     * generator writes when it CANNOT honour the choice: asking for it by name
+     * and getting no complaint is the generator saying it found a cardio
+     * exercise called that.
+     */
+    const shuttle = {
+      name: 'Sandbag Shuttle',
+      area: 'lower' as const,
+      equipment: 'kettlebell' as const,
+    }
+    const asked = spec({ equipment: 'mixed', recoveryExercise: 'Sandbag Shuttle' })
+
+    const cardio = generateRoutine(asked, {
+      rng: seeded(1),
+      now: 0,
+      extra: [{ ...shuttle, use: 'cardio' }],
+    })
+    expect(cardio.notes.join(' ')).not.toContain('Sandbag Shuttle')
+    expect(JSON.stringify(cardio.workout)).toContain('Sandbag Shuttle')
+
+    // The same exercise added as strength work is NOT offered as a recovery, and
+    // the generator says so rather than quietly using it.
+    const strength = generateRoutine(asked, { rng: seeded(1), now: 0, extra: [shuttle] })
+    expect(strength.notes.join(' ')).toContain('No cardio exercise called "Sandbag Shuttle"')
+  })
+
+  it('changes nothing when none have been added', () => {
+    /*
+     * The default is empty, so every routine generated before this existed comes
+     * out the same. Compared by what it chose and how long it runs rather than by
+     * deep equality: the ids are fresh per call by design.
+     */
+    const withNone = generateRoutine(spec(), { rng: seeded(7), now: 0, extra: [] })
+    const without = generateRoutine(spec(), { rng: seeded(7), now: 0 })
+    expect(distinct(withNone.workout)).toEqual(distinct(without.workout))
+    expect(totalDurationMs(withNone.workout)).toBe(totalDurationMs(without.workout))
+  })
+})

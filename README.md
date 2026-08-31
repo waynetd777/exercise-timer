@@ -28,6 +28,10 @@ from across a gym, with the phone propped against a rack.
 - **One place for what you lift.** A weight and a picture per exercise. Any
   routine that does not say otherwise follows them, so moving up a plate is one
   edit rather than seven.
+- **Your own exercises, not just the app's.** Add one the app has never heard of
+  and it behaves like the rest: a weight, a picture, a place in the editor's name
+  list, and a slot in a generated routine. It warns you first if it is something
+  you already have under another spelling.
 - **Yours, on your device.** No accounts, no server, no telemetry.
 
 ## What it looks like
@@ -78,7 +82,9 @@ from across a gym, with the phone propped against a rack.
     <td width="50%">
       <img src="docs/screenshots/exercises.webp" width="420" alt="The exercises page: a search box, a count reading 21 of 68 weighed and 147 of 147 pictured, and rows grouped under Multi-Gym, Bike, Trampoline and Bodyweight, each with a thumbnail and, where there is something to weigh, a weight field." />
       <br /><b>The exercises page.</b> One picture and one weight per exercise,
-      grouped by kit. Change a weight here and every routine follows.
+      grouped by kit, with what each one works underneath its name. Change a
+      weight here and every routine follows. Exercises you add yourself sit
+      beside the app's own and can be edited or removed.
     </td>
   </tr>
 </table>

@@ -113,8 +113,8 @@
   white-space: nowrap;
 }
 
+/* `.search` around it owns the flex sizing now; see theme.css. */
 .library__search {
-  flex: 1 1 12rem;
   min-width: 0;
   padding: var(--step-3) var(--step-4);
   font: inherit;
@@ -539,12 +539,13 @@
   letter-spacing: 0;
 }
 
-/* The chosen one, on the same principle as the editor's colour swatches. */
-.generate__options .chip[aria-pressed='true'] {
-  background: var(--phase);
-  border-color: var(--phase);
-  color: var(--ink-900);
-}
+/*
+ * NO BLUE FILL ON THE CHOSEN ONE. It used to take `--phase`, which put a dozen
+ * filled blue chips beside the one blue button that actually does something, and
+ * "Open in editor" stopped reading as the action of the dialog. The theme's own
+ * pressed chip (bone on dark) is what the exercise dialog uses, so both dialogs
+ * now answer a choice the same way and blue means "this is the button".
+ */
 
 /* The exercises it picked, which is the answer most worth reading. */
 .generate__list {

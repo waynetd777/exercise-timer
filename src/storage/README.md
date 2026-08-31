@@ -100,6 +100,19 @@ The resolution rule lives in `routines/loads.ts`, not here. See that README.
 
 ## What an exercise looks like
 
+`customExercises.ts` is the fourth table keyed by folded exercise name, and the
+only one holding the exercise ITSELF rather than something about it. The shipped
+table (`routines/exercises.ts`) is a build-time constant and read-only; this is
+what makes a typed name into an exercise the app knows, with the area, the
+push-or-pull and the `use` the generator needs to programme it. Two consequences
+worth knowing:
+
+- it needs no `refold.ts` pass, unlike the other three: the record carries its own
+  name, so every read re-keys from that.
+- a name the shipped table has since acquired is DROPPED on read. Two rows under
+  one key would fight over one weight and one picture, and the app's own record
+  wins. Nothing is lost: the weight and picture were never keyed to this table.
+
 `pictures.ts` is the same idea as `weights.ts`, one `MediaRef` per exercise, keyed
 the same way, and it exists because 105 of the 147 exercises had no picture
 anywhere: the guide only draws the machine, so the only way to see a press-up was
@@ -219,3 +232,4 @@ and none of the sender's favourites or run history: it is their copy now.
 | `weights.ts` | One weight per exercise. localStorage |
 | `pictures.ts` | One picture per exercise, over the guide's illustrations. localStorage, with the bytes in IndexedDB. A second root for the blob sweep |
 | `paces.ts` | How long a rep of each exercise actually takes you. localStorage |
+| `customExercises.ts` | The exercises you added yourself: full records, keyed by folded name. localStorage, validated on every read, and merged over the shipped table wherever the app reads it |

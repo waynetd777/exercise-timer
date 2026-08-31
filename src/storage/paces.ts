@@ -148,6 +148,28 @@ export function loadPaces(): Paces {
   }
 }
 
+/**
+ * Moves an exercise's samples to a new name, for a rename on the exercises page.
+ *
+ * Keyed by folded name like the weights and the pictures, so renaming an
+ * exercise of your own without this would leave its measured pace behind under a
+ * name nothing asks about again. Nothing is merged: an exercise arriving at a
+ * name that already has samples keeps the ones already there, since those were
+ * measured against the exercise now called that.
+ */
+export function renamePace(from: string, to: string): void {
+  const fromKey = foldName(from)
+  const toKey = foldName(to)
+  if (fromKey === toKey) return
+  const paces = loadPaces()
+  const samples = paces[fromKey]
+  if (samples === undefined) return
+  const next = { ...paces }
+  delete next[fromKey]
+  next[toKey] ??= samples
+  savePaces(next)
+}
+
 export function savePaces(paces: Paces): void {
   cached = null
   try {

@@ -101,6 +101,7 @@ export function SegmentRow({
   onClearText,
   exercises,
   onPickExercise,
+  onAddExercise,
   pictures,
   onWrap,
   onPreview,
@@ -118,6 +119,8 @@ export function SegmentRow({
   /** The exercise table, built once by the screen rather than per row. */
   exercises: readonly ExerciseOption[]
   onPickExercise: (path: Path, option: ExerciseOption) => void
+  /** Makes the typed name an exercise of your own. See `ExerciseField`. */
+  onAddExercise: (path: Path, name: string) => void
   /** The pictures the exercises page supplies, for a step carrying none. */
   pictures: ReadonlyMap<string, MediaRef>
   onWrap: (path: Path) => void
@@ -289,6 +292,7 @@ export function SegmentRow({
             options={exercises}
             onType={(name) => onPatch(path, { name })}
             onPick={(option) => onPickExercise(path, option)}
+            onAdd={(name) => onAddExercise(path, name)}
           />
         ) : (
           <input

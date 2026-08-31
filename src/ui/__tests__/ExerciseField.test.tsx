@@ -39,12 +39,22 @@ const options = collectExercises([
 function Field({
   start = '',
   onPick = vi.fn(),
+  onAdd,
 }: {
   start?: string
   onPick?: (o: unknown) => void
+  onAdd?: (name: string) => void
 }) {
   const [value, setValue] = useState(start)
-  return <ExerciseField value={value} options={options} onType={setValue} onPick={onPick} />
+  return (
+    <ExerciseField
+      value={value}
+      options={options}
+      onType={setValue}
+      onPick={onPick}
+      {...(onAdd ? { onAdd } : {})}
+    />
+  )
 }
 
 const field = () => screen.getByLabelText('Step name')
@@ -299,6 +309,49 @@ describe('the exercise name field', () => {
 
     expect(screen.queryAllByRole('option').length).toBe(0)
     expect(screen.getByText(/Typing your own is fine/)).toBeTruthy()
+  })
+
+  it('offers to add the typed name where nothing matches it', () => {
+    /*
+     * The one place in the app that KNOWS you have typed a movement the table
+     * does not hold: the list has just failed to match it against everything.
+     * Typing your own is still fine and still says so: the button is an option,
+     * not a correction.
+     */
+    const onAdd = vi.fn()
+    render(<Field onAdd={onAdd} />)
+
+    type('Sandbag Lunge')
+    expect(screen.getByText(/Typing your own is fine/)).toBeTruthy()
+    fireEvent.mouseDown(screen.getByRole('button', { name: /Add “Sandbag Lunge” to my exercises/ }))
+
+    expect(onAdd).toHaveBeenCalledWith('Sandbag Lunge')
+    // The list closes with it: the dialog is what has the screen now.
+    expect(screen.queryByRole('listbox')).toBeNull()
+  })
+
+  it('offers nothing to add where the list found something', () => {
+    // A name the table holds needs no adding, and the offer would be one more
+    // thing to read past on the way to picking it.
+    render(<Field onAdd={vi.fn()} />)
+    type('Leg')
+    expect(screen.queryByRole('button', { name: /to my exercises/ })).toBeNull()
+  })
+
+  it('offers nothing to add on an empty field', () => {
+    // The caret on an empty step opens the whole table, so there is nothing
+    // typed to add and no empty state to put a button in.
+    render(<Field onAdd={vi.fn()} />)
+    fireEvent.click(screen.getByLabelText('Choose an exercise'))
+    expect(screen.queryByRole('button', { name: /to my exercises/ })).toBeNull()
+  })
+
+  it('leaves the empty state alone where nothing can be added', () => {
+    // No `onAdd`: the editor supplies one, a test of the list alone does not.
+    render(<Field />)
+    type('Sandbag Lunge')
+    expect(screen.getByText(/Typing your own is fine/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /to my exercises/ })).toBeNull()
   })
 
   it('never picks anything by itself', () => {

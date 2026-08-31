@@ -444,10 +444,11 @@ first, from `main.tsx`, so the base layer always lands before the modifiers.
 | `useDismiss.ts` | Close-on-Escape and close-on-press-outside, shared by `Menu` and the editor row's controls panel |
 | `NoticeDialog.tsx` | Outcomes reported as a modal, and a progress report while the work is still running |
 | `ConfirmDialog.tsx` | Asks before something irreversible. A modal, unlike the editor's inline confirm, because it is answered mid-workout |
+| `ExerciseDialog.tsx` | Adding an exercise of your own, or changing one. Asks for the four fields the generator needs, refuses a name the app already has, and warns with tappable alternatives where something similar does. Opens from the exercises page AND from the editor's name field, which is why its CSS is in `theme.css` |
 | `useMediaUrl.ts` | Resolves a `MediaRef` to a URL. Synchronous pass first, so a step change cannot flash blank |
 | `useRowDrag.ts` | Reordering editor rows by their grip. Pointer Events, not HTML5 drag-and-drop, which does not fire at all in iOS Safari |
-| `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, and the dialog shell both modals use |
-| `library.css`, `run-screen.css`, `preview.css`, `editor.css`, `exercises.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library |
+| `theme.css` | Tokens, the type scale, the routine tints, the shared `.label`, `.btn` and `.chip` classes, the dialog shell both modals use, the exercise dialog, and the `.search` box with its own × (WebKit only draws its native one while the field has focus) |
+| `library.css`, `run-screen.css`, `preview.css`, `editor.css`, `exercises.css`, `sounds.css` | One stylesheet per screen, imported by the screen. The paste and generate dialogs' rules live in `library.css`, since they open from the library; the exercise dialog's are in `theme.css`, since it opens from two screens whose stylesheets are separate |
 | `icons.tsx` | Inline SVG. Inherits `currentColor`, needs no font, nothing to fetch offline |
 | `format.ts` | Clock and duration formatting, and the fitting helpers the countdown needs. `estimated()` is the one place a guessed length is worded |
 | `keys.ts` | Whether a run-screen shortcut may act, given what has focus |

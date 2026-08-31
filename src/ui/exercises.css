@@ -9,6 +9,13 @@
  * them, exactly as the library does.
  */
 .weights {
+  /*
+   * The page's accent, in ONE place. Blue, not the green the phase colours give
+   * "get ready": this is a settings page, nothing on it is a timer running, and
+   * the green read as though something were about to start. Every accented thing
+   * below points at this, so the page changes hue in one line.
+   */
+  --accent: var(--role-rest);
   container-type: inline-size;
   display: grid;
   /* `minmax(0, 1fr)`, not the implicit `auto`: an auto column is at least as
@@ -29,7 +36,7 @@
   background: var(--ink-900);
   background: radial-gradient(
     140% 90% at 50% -10%,
-    color-mix(in oklab, var(--role-prepare) 14%, var(--ink-900)),
+    color-mix(in oklab, var(--accent) 14%, var(--ink-900)),
     var(--ink-900) 78%
   );
 }
@@ -56,7 +63,7 @@
   font-size: var(--size-title);
   font-weight: 700;
   letter-spacing: var(--track-display);
-  color: var(--role-prepare);
+  color: var(--accent);
 }
 
 .weights__count {
@@ -74,8 +81,8 @@
   align-items: center;
 }
 
+/* `.search` around it owns the flex sizing now; see theme.css. */
 .weights__search {
-  flex: 1 1 12rem;
   min-width: 0;
   padding: var(--step-3) var(--step-4);
   font: inherit;
@@ -97,21 +104,83 @@
   padding-bottom: var(--step-4);
 }
 
+/*
+ * Tighter than it was. With every kit closed the page is seven headings, and a
+ * 1.5rem gap between them was written when a section was always open and needed
+ * separating from a list of rows. Still wider than the 0.5rem between rows, so an
+ * open section still ends visibly.
+ */
 .weights__group + .weights__group {
-  margin-top: var(--step-5);
+  margin-top: var(--step-3);
 }
 
-/* Sticky, so you can still see which kit you are scrolling through. */
+/*
+ * The kit heading, which is also the control that opens the kit.
+ *
+ * Sticky, so you can still see which kit you are scrolling through. A `<summary>`
+ * rather than a heading with a button in it: the element is already a control,
+ * already keyboard-operable, and already announced as expanded or collapsed.
+ */
 .weights__kit {
   position: sticky;
   top: 0;
   z-index: 1;
-  margin: 0 0 var(--step-2);
+  display: flex;
+  align-items: center;
+  gap: var(--step-3);
+  margin: 0;
   padding: var(--step-2) 0;
-  color: var(--role-prepare);
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: var(--label-tracking);
   background: var(--ink-900);
+  cursor: pointer;
+  /* The default triangle, in both spellings. The chevron below is drawn instead,
+     because the native one cannot be positioned or coloured. */
+  list-style: none;
+}
+
+.weights__kit::-webkit-details-marker {
+  display: none;
+}
+
+/*
+ * The chevron, pointing down when the kit is open.
+ *
+ * Inset from the right edge rather than pinned to it: the rows below stop at
+ * their own padding, so a chevron hard against the edge sat further out than
+ * anything it belongs to and read as though it were falling off the page.
+ */
+.weights__kit::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  margin-right: var(--step-4);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 150ms var(--ease);
+}
+
+.weights__group[open] > .weights__kit::after {
+  transform: rotate(45deg);
+}
+
+/* Only where there are rows under it. A closed heading with a gap below it made
+   the collapsed page look loosely spaced for no reason. */
+.weights__group[open] > .weights__kit {
+  margin-bottom: var(--step-2);
+}
+
+/*
+ * How many are in there, and how many of those are yours: the one thing a closed
+ * section cannot show you. Grey, all of it, including the "(2 yours)": it is one
+ * fact about the section rather than two things to look at.
+ */
+.weights__kitcount {
+  color: var(--bone-faint);
+  font-variant-numeric: tabular-nums;
 }
 
 .weights__list {
@@ -143,11 +212,83 @@
   border-radius: var(--radius);
 }
 
+/*
+ * The name over its attributes, in ONE column between the picture and the
+ * number. The same stack the editor's name list uses (`.ename__text`) and for
+ * the same reason: side by side, a second line that does not wrap takes what it
+ * needs and leaves the name a column one character wide.
+ */
+.weight__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
 .weight__name {
   min-width: 0;
   color: var(--bone);
   font-size: var(--label-size-sm);
   overflow-wrap: anywhere;
+}
+
+/*
+ * What the table knows besides the name: "Upper body · push · Station 2 · lat
+ * bar". Quiet, and allowed to wrap: on a phone a machine exercise runs to two
+ * lines and truncating it would hide the station, which is the part you are
+ * standing there reading.
+ */
+.weight__attrs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--step-2);
+  min-width: 0;
+  color: var(--bone-faint);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Yours rather than the app's. A word, not an icon: it is the reason the two
+   buttons beside it are there, and an icon cannot say that. */
+.weight__pill {
+  padding: 1px var(--step-2);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  border-radius: 999px;
+}
+
+/* Edit and Remove, on your own rows only. Text beside the icon, because a bare
+   pencil on a settings row reads as decoration. */
+.weight__act {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px var(--step-2);
+  color: var(--bone-dim);
+  font: inherit;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  background: none;
+  border: var(--hairline);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 150ms var(--ease), border-color 150ms var(--ease);
+}
+
+.weight__act:hover,
+.weight__act:focus-visible {
+  color: var(--bone);
+  border-color: var(--accent);
+}
+
+.weight__act svg {
+  width: 12px;
+  height: 12px;
 }
 
 .weight__field {
@@ -188,7 +329,7 @@
 
 .exrow__thumb:hover,
 .exrow__thumb:focus-visible {
-  border-color: var(--role-prepare);
+  border-color: var(--accent);
 }
 
 .exrow__thumb img {

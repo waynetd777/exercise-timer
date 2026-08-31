@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom'
 import type { MediaRef } from '../../engine'
 import type { ExerciseOption } from '../../routines/exerciseOptions'
 import { exerciseRows, indexOfName, optionsOf } from '../../routines/exerciseOptions'
-import { CheckIcon, DownIcon } from '../icons'
+import { CheckIcon, DownIcon, PlusIcon } from '../icons'
 import { place } from '../Menu'
 import { useDismiss } from '../useDismiss'
 import { useMediaUrl } from '../useMediaUrl'
@@ -40,18 +40,30 @@ const MAX_LIST_PX = 384
  * Only on WORK steps. The other roles have no table to draw on, and
  * `retypeSegment` already fills their names in; a list offering "Rest" over a
  * field that says "Rest" would be furniture.
+ *
+ * WHERE NOTHING MATCHES, the name can become an exercise. This is the one place
+ * in the app that knows for certain you have typed a movement the table does not
+ * hold, since the list has just failed to match it against all 147. So it is
+ * where the offer belongs. Typing your own is still fine and still says so: the
+ * button is an option, not a correction.
  */
 export function ExerciseField({
   value,
   options,
   onType,
   onPick,
+  onAdd,
 }: {
   value: string
   options: readonly ExerciseOption[]
   /** A keystroke, patched straight through as the plain input always did. */
   onType: (name: string) => void
   onPick: (option: ExerciseOption) => void
+  /**
+   * Offers to make this name an exercise of your own. Absent leaves the empty
+   * state as it was, which is what a test with no dialog behind it wants.
+   */
+  onAdd?: (name: string) => void
 }) {
   const [open, setOpen] = useState(false)
   /*
@@ -276,12 +288,35 @@ export function ExerciseField({
             {shown.length === 0 ? (
               /*
                * A name of your own, which is a legitimate answer and not an
-               * error: "Warm Up" is in the library and in no table. Said plainly,
-               * with nothing to press.
+               * error: "Warm Up" is in the library and in no table.
+               *
+               * `presentation`, so neither the line nor the button is announced
+               * as an option of the listbox: there is nothing here to choose
+               * between, and the button is a way OUT of the list rather than a
+               * row in it.
                */
-              <p className="ename__empty">
-                No exercise matches “{value.trim()}”. Typing your own is fine.
-              </p>
+              <div role="presentation">
+                <p className="ename__empty">
+                  No exercise matches “{value.trim()}”. Typing your own is fine.
+                </p>
+                {onAdd && value.trim() !== '' && (
+                  <button
+                    type="button"
+                    className="ename__add"
+                    /* `mousedown` and `preventDefault`, exactly as the option rows
+                       do it: the field blurs first otherwise and the list would be
+                       gone before a tap landed. */
+                    onMouseDown={(event) => {
+                      event.preventDefault()
+                      setOpen(false)
+                      onAdd(value.trim())
+                    }}
+                  >
+                    <PlusIcon />
+                    Add “{value.trim()}” to my exercises
+                  </button>
+                )}
+              </div>
             ) : (
               (() => {
                 // Runs alongside the rows so an option knows its index into
