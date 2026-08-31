@@ -466,3 +466,39 @@ describe('the exercise pictures a backup carries', () => {
     expect(contents.pictures).toEqual({ plank: photo })
   })
 })
+
+describe('the exercises of your own a backup carries', () => {
+  const mine = { name: 'Sandbag Haul', area: 'lower' as const, equipment: 'kettlebell' as const }
+
+  it('rides along, and comes back', () => {
+    /*
+     * Sharper than the weights: those are keyed by exercise name, so a restore
+     * that brought the weight WITHOUT the exercise would put a number against a
+     * row that no longer exists. The exercise, its area and push-or-pull
+     * included, would have to be typed in again from memory.
+     */
+    const bundle = toBundle([workout('Legs')], 1000, {}, {}, {}, { 'sandbag haul': mine })
+    expect(bundle.exercises).toEqual({ 'sandbag haul': mine })
+    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).exercises).toEqual({
+      'sandbag haul': mine,
+    })
+  })
+
+  it('says nothing when there is nothing to say', () => {
+    expect(toBundle([workout('Legs')], 1000)).not.toHaveProperty('exercises')
+  })
+
+  it('reads a file that predates the field', () => {
+    expect(fromBundle({ ...toBundle([workout('Legs')], 1000) }, 2000).exercises).toEqual({})
+  })
+
+  it('does not let a damaged entry cost you the routines, or the good entries', () => {
+    const damaged = {
+      ...toBundle([workout('Legs')], 1000),
+      exercises: { a: { name: 'Junk', area: 'legs' }, b: mine },
+    }
+    const contents = fromBundle(damaged, 2000)
+    expect(contents.workouts).toHaveLength(1)
+    expect(contents.exercises).toEqual({ 'sandbag haul': mine })
+  })
+})

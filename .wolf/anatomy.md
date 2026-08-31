@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T00:36:41.659Z
-> Files: 96 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-31T18:57:28.134Z
+> Files: 102 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
 > Run `openwolf scan` to generate, or wait for the first Claude Code session.
@@ -95,6 +95,7 @@
 - `loads.ts` — Exercise Timer (~820 tok)
 - `pasteTemplate.ts` — A routine written in every part of the grammar the paste parser understands, (~569 tok)
 - `rename.ts` — Exercise Timer (~1930 tok)
+- `similar.ts` — Exercise Timer (~1834 tok)
 - `writeRoutine.ts` — Exercise Timer (~2698 tok)
 
 ## src/routines/__tests__/
@@ -104,6 +105,7 @@
 - `pasteTemplate.test.ts` — The template is shipped help: the app offers it as the example of what it can (~1177 tok)
 - `plates.test.ts` — Exercise Timer (~791 tok)
 - `rename.test.ts` — Exercise Timer (~1224 tok)
+- `similar.test.ts` — Exercise Timer (~1322 tok)
 
 ## src/state/
 
@@ -122,6 +124,7 @@
 ## src/storage/
 
 - `bundleMedia.ts` — The photos in an export file. (~890 tok)
+- `customExercises.ts` — Exercise Timer (~2588 tok)
 - `paces.ts` — Exercise Timer (~1997 tok)
 - `pictures.ts` — Exercise Timer (~2201 tok)
 - `refold.ts` — Exercise Timer (~735 tok)
@@ -132,6 +135,7 @@
 ## src/storage/__tests__/
 
 - `bundleMedia.test.ts` — Declares photo (~1635 tok)
+- `customExercises.test.ts` — Exercise Timer (~1562 tok)
 - `db.test.ts` — A hand-rolled sliver of IndexedDB: open with scripted outcomes, one-request (~1629 tok)
 - `migrate.test.ts` — Declares workout (~1336 tok)
 - `paces.test.ts` — Exercise Timer (~1540 tok)
@@ -143,6 +147,7 @@
 
 - `App.tsx` — Exercise Timer (~2991 tok)
 - `EditorScreen.tsx` — Exercise Timer (~6322 tok)
+- `ExerciseDialog.tsx` — Exercise Timer (~3927 tok)
 - `GenerateDialog.tsx` — Exercise Timer (~2855 tok)
 - `help.ts` — The help text, kept out of the screens that show it. (~1562 tok)
 - `HelpTray.tsx` — One line each. If a point needs a paragraph it belongs somewhere else. (~713 tok)
@@ -158,6 +163,7 @@
 ## src/ui/__tests__/
 
 - `EditorScreen.test.tsx` — A step that runs as its own countdown, so it gets an image button. (~2424 tok)
+- `ExerciseDialog.test.tsx` — Exercise Timer (~2595 tok)
 - `ExerciseField.test.tsx` — Exercise Timer (~1859 tok)
 - `preview.test.ts` — Exercise Timer (~1318 tok)
 - `PreviewList.test.tsx` — Exercise Timer (~1394 tok)

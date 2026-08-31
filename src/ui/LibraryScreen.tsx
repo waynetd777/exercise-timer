@@ -25,6 +25,7 @@ import { estimated } from './format'
 import { withWeights } from '../routines/loads'
 import { currentWeights, loadWeights } from '../storage/weights'
 import { loadPictures, pictureHashes, picturesFor } from '../storage/pictures'
+import { currentCustomExercises, loadCustomExercises } from '../storage/customExercises'
 import { Menu } from './Menu'
 import { HelpTray } from './HelpTray'
 import { APP_VERSION } from '../version'
@@ -353,7 +354,10 @@ export function LibraryScreen({
    * blocks already in memory, and it has to be current or the count in the menu
    * would be a promise about a library that has since changed.
    */
-  const tidy = tidyLibrary(library.workouts)
+  // Yours as well as the app's: a step naming an exercise you added is a step
+  // this can put right, and leaving them out would make your own the only names
+  // tidying refuses to touch.
+  const tidy = tidyLibrary(library.workouts, currentCustomExercises())
 
   const applyTidy = async () => {
     setTidying(false)
@@ -430,7 +434,7 @@ export function LibraryScreen({
       downloadJson(
         bundleFilename(name, new Date()),
         // The weights ride along: most routines state none of their own now.
-        toBundle(workouts, Date.now(), media, loadWeights(), pictures),
+        toBundle(workouts, Date.now(), media, loadWeights(), pictures, loadCustomExercises()),
       )
 
       const subject =
@@ -518,14 +522,29 @@ export function LibraryScreen({
         </h1>
 
         <div className="library__tools">
-          <input
-            className="library__search"
-            type="search"
-            value={query}
-            placeholder="Search"
-            aria-label="Search routines"
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <span className="search">
+            <input
+              className="library__search"
+              type="search"
+              value={query}
+              placeholder="Search"
+              aria-label="Search routines"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            {/* Ours rather than the browser's, which WebKit hides the moment the
+                field loses focus. See `.search` in theme.css. */}
+            {query !== '' && (
+              <button
+                type="button"
+                className="search__clear"
+                aria-label="Clear the search"
+                title="Clear the search"
+                onClick={() => setQuery('')}
+              >
+                <CloseIcon />
+              </button>
+            )}
+          </span>
 
           <Menu
             label="Sort"

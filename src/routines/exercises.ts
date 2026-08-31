@@ -65,7 +65,7 @@ export type Equipment =
  *
  * Absent means `strength`, which is what every machine exercise is.
  */
-type Use = 'strength' | 'cardio' | 'mobility'
+export type Use = 'strength' | 'cardio' | 'mobility'
 
 /** The five the guide lists. `ankle` is the one that costs setup time. */
 type Attachment = 'lat bar' | 'low row bar' | 'ab strap' | 'free-motion' | 'ankle'
@@ -112,6 +112,43 @@ const LOADABLE: readonly Equipment[] = ['machine', 'dumbbell', 'kettlebell', 'ba
 /** True where it makes sense to write down what you lift for it. */
 export function loadable(exercise: Exercise): boolean {
   return LOADABLE.includes(exercise.equipment)
+}
+
+/**
+ * Everything the table knows about an exercise besides its name and its kit, in
+ * reading order.
+ *
+ * The kit is left out because every list that shows these groups BY kit and puts
+ * it in the heading above. `strength` is left out because it is what `use`
+ * absent means, and printing it on 130 rows tells nobody anything; cardio and
+ * mobility are the answers worth reading, since they are why a step is in the
+ * warm-up rather than the working set.
+ *
+ * A LIST, not a sentence, so a caller can take the first two on a narrow row and
+ * all of them on a wide one.
+ *
+ * `hintFor` in `exerciseOptions.ts` answers a NARROWER version of this question
+ * for the name field's dropdown, where the row is a hundred pixels of second
+ * line: station, use and per-side, and nothing else. Kept separate rather than
+ * derived from this, because the two orders are what each place reads best in
+ * and one of them is on screen 147 times.
+ */
+export function attributesOf(exercise: Exercise): string[] {
+  const parts: string[] = [AREA_NAMES[exercise.area]]
+  if (exercise.pattern) parts.push(exercise.pattern)
+  if (exercise.use === 'cardio') parts.push('Cardio')
+  if (exercise.use === 'mobility') parts.push('Mobility')
+  if (exercise.station !== undefined) parts.push(`Station ${exercise.station}`)
+  if (exercise.attachment) parts.push(exercise.attachment)
+  if (exercise.perSide === true) parts.push('each side')
+  return parts
+}
+
+/** The guide's three areas, as a person says them. */
+export const AREA_NAMES: Readonly<Record<BodyArea, string>> = {
+  upper: 'Upper body',
+  torso: 'Torso',
+  lower: 'Lower body',
 }
 
 /**

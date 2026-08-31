@@ -6,18 +6,31 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { Block, MediaRef, Workout } from '../engine'
-import type { Equipment } from '../routines/exercises'
-import { EXERCISES, KIT_GROUPS, loadable } from '../routines/exercises'
+import type { Equipment, Exercise } from '../routines/exercises'
+import { attributesOf, KIT_GROUPS, loadable } from '../routines/exercises'
 import { exerciseKey, withoutStatedLoads } from '../routines/loads'
 import type { KnownImage } from '../editor/images'
 import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
 import { chosenPicture, loadPictures, picturesOver, savePictures, withPicture } from '../storage/pictures'
+import type { CustomExercise } from '../storage/customExercises'
+import {
+  addCustom,
+  customList,
+  isCustom,
+  loadCustomExercises,
+  removeCustom,
+  saveCustomExercises,
+  withCustom,
+} from '../storage/customExercises'
+import { renamePace } from '../storage/paces'
+import { renameInWorkout } from '../routines/rename'
 import { sweepOrphans } from '../storage/sweep'
 import { storeFile } from '../media/pin'
 import { resolveMedia, resolveMediaSync } from '../media/resolveMedia'
-import { BackIcon, CloseIcon, HelpIcon, ImageIcon, TrashIcon } from './icons'
+import { BackIcon, CloseIcon, HelpIcon, ImageIcon, PencilIcon, PlusIcon, TrashIcon } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
 import { NoticeDialog } from './NoticeDialog'
+import { ExerciseDialog } from './ExerciseDialog'
 import { HelpTray } from './HelpTray'
 import { ImagePicker, ImageSheet } from './editor/ImageDialogs'
 import { EXERCISES_HELP } from './help'
@@ -34,10 +47,18 @@ import { foldName } from '../routines/foldName'
  * photo to a step, in every routine, one at a time. Written down here, a routine
  * that says nothing of its own takes both every time it is opened.
  *
- * ALL 147 ARE LISTED, not only the ones you can put a number against: that was
- * the page's old shape, and it left the 79 bodyweight, trampoline and bike
+ * ALL OF THEM ARE LISTED, not only the ones you can put a number against: that
+ * was the page's old shape, and it left the 79 bodyweight, trampoline and bike
  * exercises with nowhere to keep a picture. The weight field simply does not
  * appear on a row that has nothing to weigh.
+ *
+ * AND IT IS NOT A FIXED LIST ANY MORE. The app's own exercises are read-only:
+ * they come off the Horizon guide and out of the instructor's routines, and this
+ * device does not get to edit them. Yours can be added, changed and removed
+ * here, and everywhere the app reads the table it reads both: the editor's name
+ * field offers them, the generator programmes them, and a rename carries the
+ * weight, the picture and the measured pace with it. See
+ * `storage/customExercises.ts`.
  *
  * Blank is a real answer for the weight. Every field starts empty, because a
  * guessed weight is worse than none: an empty field asks the question instead of
@@ -169,7 +190,12 @@ export function ExercisesScreen({
   /** The catalogue plus every image the routines use, collected once by App. */
   knownImages: readonly KnownImage[]
   onExit: () => void
-  /** Saves the routines this page rewrote. See `follow` below. */
+  /**
+   * Saves the routines this page rewrote: weights cleared so they follow this
+   * page (see `follow`), or an exercise of yours renamed in the steps that name
+   * it. Both are the same act: this page changing routines it does not own. So
+   * they go out the same way.
+   */
   onFollow: (workouts: readonly Workout[]) => Promise<void> | void
 }) {
   /*
@@ -185,6 +211,11 @@ export function ExercisesScreen({
    * did because you closed it too quickly is the one failure that would matter.
    */
   const [pictures, setPictures] = useState(loadPictures)
+  /*
+   * The exercises you added, held and written through exactly as the other two
+   * are. The app's own table is a build-time constant and is not in here.
+   */
+  const [custom, setCustom] = useState(loadCustomExercises)
   const [query, setQuery] = useState('')
   /** The exercise whose picture is open, by name. */
   const [viewing, setViewing] = useState<string | null>(null)
@@ -193,17 +224,68 @@ export function ExercisesScreen({
   const [notice, setNotice] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const [helping, setHelping] = useState(false)
+  /**
+   * The kits whose rows are showing. EMPTY to begin with: all of them open at
+   * once is 147 rows, and the page opened three screens deep in the multi-gym
+   * with the kettlebell and the bands nowhere in sight. Seven headings is the
+   * whole page, and you open the one you are standing at.
+   *
+   * ONE AT A TIME, EXCEPT IN A SEARCH. Opening a kit closes whichever was open, so
+   * the page is always seven headings plus one kit's rows and the heading you want
+   * is never a scroll away. Results are the exception: a search opens every kit
+   * that matched, because the answer to "where is this exercise" is the whole list
+   * of them at once. A heading pressed during a search folds just that kit away
+   * and leaves the rest of the results showing.
+   */
+  const [opened, setOpened] = useState<ReadonlySet<Equipment>>(new Set())
+  /** Adding one, or changing one of yours: the dialog is the same one. */
+  const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<CustomExercise | null>(null)
+  /** The exercise of yours a removal is being confirmed for, by name. */
+  const [removing, setRemoving] = useState<CustomExercise | null>(null)
+  /**
+   * A rename that has been saved, and the steps in the library still calling the
+   * exercise by its old name.
+   *
+   * The exercise is renamed the moment Save is pressed; this is the SECOND
+   * question, about routines already written, and it is asked separately because
+   * the answer is genuinely either: a step that says "Bugarian Split Squat"
+   * should be put right, and one deliberately named something else should not.
+   */
+  const [renamed, setRenamed] = useState<{ from: string; to: string } | null>(null)
+
+  /*
+   * A SEARCH OPENS EVERYTHING, and clearing it puts the page back as it was.
+   *
+   * Typing "press" and getting seven collapsed headings would be a search that
+   * hides its own results. The effect runs on the flip rather than per keystroke,
+   * and one set of state means the headings still toggle while a query is up.
+   */
+  const searching = query.trim() !== ''
+  useEffect(() => {
+    setOpened(searching ? new Set(KIT_GROUPS.map((group) => group.kit)) : new Set())
+  }, [searching])
 
   const fromLibrary = useMemo(() => observed(workouts), [workouts])
 
+  /**
+   * The whole vocabulary: the app's, then yours.
+   *
+   * ONE list from here on, so nothing on this page has to ask which half an
+   * exercise came from except the two controls only yours have. Shipped first,
+   * which is also what makes the app's record win if a harvest ever adds a name
+   * you had already typed; see `readCustomExercises`.
+   */
+  const table = useMemo(() => withCustom(customList(custom)), [custom])
+
   const rows = useMemo(() => {
     const wanted = query.trim().toLowerCase()
-    const groups: { kit: Equipment; label: string; items: typeof EXERCISES }[] = []
+    const groups: { kit: Equipment; label: string; items: Exercise[] }[] = []
     // EVERY kit, not only the ones you can weigh: a press-up has no number and
     // still has a picture. `KIT_GROUPS` is the same ordering the editor's name
     // field uses.
     for (const { kit, label } of KIT_GROUPS) {
-      const items = EXERCISES.filter(
+      const items = table.filter(
         (exercise) =>
           exercise.equipment === kit &&
           (wanted === '' || exercise.name.toLowerCase().includes(wanted)),
@@ -211,7 +293,120 @@ export function ExercisesScreen({
       if (items.length > 0) groups.push({ kit, label, items })
     }
     return groups
-  }, [query])
+  }, [query, table])
+
+  /** True where the exercise is one of yours: the two controls no other row has. */
+  const mine = (name: string): boolean => isCustom(custom, name)
+
+  /** How many of a kit's exercises you added. Counted per heading, on 7 groups. */
+  const yoursIn = (items: readonly Exercise[]): number =>
+    items.reduce((count, exercise) => (mine(exercise.name) ? count + 1 : count), 0)
+
+  /**
+   * Moves whatever a per-device table keys by name, for a rename.
+   *
+   * The weights and the pictures are held here, so they move here; the measured
+   * pace is nobody's state and moves through `renamePace`. Without all three, a
+   * renamed exercise would keep its row and lose its number, its photo and its
+   * pace to a key nothing asks about again.
+   */
+  const carryOver = (from: string, to: string) => {
+    const fromKey = foldName(from)
+    const toKey = foldName(to)
+    if (fromKey === toKey) return
+    const load = weights[fromKey]
+    if (load !== undefined) {
+      const next = { ...weights }
+      delete next[fromKey]
+      next[toKey] = load
+      setWeights(next)
+      saveWeights(next)
+    }
+    const picture = pictures[fromKey]
+    if (picture !== undefined) {
+      const next = { ...pictures }
+      delete next[fromKey]
+      next[toKey] = picture
+      setPictures(next)
+      savePictures(next)
+    }
+    renamePace(from, to)
+  }
+
+  /**
+   * One of yours, added or changed.
+   *
+   * A rename is a REPLACE, not an edit in place: the table is keyed by folded
+   * name, so the old key has to go or the exercise would be listed twice. What
+   * the old name owned follows it over, and the steps already written are the
+   * second question, asked separately below.
+   */
+  const saveExercise = (exercise: CustomExercise, from: string | null) => {
+    const next = addCustom(from === null ? custom : removeCustom(custom, from), exercise)
+    setCustom(next)
+    saveCustomExercises(next)
+    setAdding(false)
+    setEditing(null)
+    // Its kit opens, or the exercise you just added would land inside a closed
+    // section and look as though nothing had happened.
+    setOpened(new Set([exercise.equipment]))
+    if (from !== null) {
+      carryOver(from, exercise.name)
+      setRenamed({ from, to: exercise.name })
+    }
+  }
+
+  /**
+   * One of yours, removed.
+   *
+   * Its weight and its picture go with it: they are keyed by a name the app no
+   * longer knows, and leaving them would be invisible clutter that a re-add would
+   * silently inherit. Its photo is swept, as clearing a picture sweeps one.
+   *
+   * STEPS ALREADY WRITTEN KEEP THE NAME. They are just text again, exactly as a
+   * typed name was before this page could hold it, so nothing in the library
+   * breaks and nothing is silently rewritten by a removal.
+   */
+  const removeExercise = (exercise: CustomExercise) => {
+    const key = foldName(exercise.name)
+    const table_ = removeCustom(custom, exercise.name)
+    setCustom(table_)
+    saveCustomExercises(table_)
+    setRemoving(null)
+
+    if (weights[key] !== undefined) {
+      const next = { ...weights }
+      delete next[key]
+      setWeights(next)
+      saveWeights(next)
+    }
+    const picture = pictures[key]
+    if (picture !== undefined) {
+      const next = { ...pictures }
+      delete next[key]
+      setPictures(next)
+      savePictures(next)
+      if (picture.source !== 'bundled') void sweepOrphans(next).catch(() => {})
+    }
+  }
+
+  /**
+   * The steps still calling a renamed exercise by its old name, and the routines
+   * they are in. Counted only while the question is on screen.
+   */
+  const stale = useMemo(() => {
+    if (renamed === null) return { rewritten: [] as Workout[], steps: 0 }
+    const rewritten: Workout[] = []
+    let steps = 0
+    for (const workout of workouts) {
+      const { workout: next, renamed: count } = renameInWorkout(workout, renamed.from, renamed.to)
+      if (count > 0) {
+        rewritten.push(next)
+        steps += count
+      }
+    }
+    return { rewritten, steps }
+  }, [renamed, workouts])
 
   const set = (name: string, value: string) => {
     const next = withWeight(weights, name, value)
@@ -342,7 +537,7 @@ export function ExercisesScreen({
     return key in weights ? weights[key]! : weightFor(name)
   }
 
-  const missing = EXERCISES.filter(
+  const missing = table.filter(
     (exercise) => loadable(exercise) && !shown(exercise.name) && fromLibrary.has(exerciseKey(exercise.name)),
   )
 
@@ -394,12 +589,14 @@ export function ExercisesScreen({
     })
   }
 
-  const total = EXERCISES.filter((e) => loadable(e)).length
-  const filled = EXERCISES.filter((e) => loadable(e) && shown(e.name)).length
-  /* Counted over ALL of them, and the guide's own illustrations count: the
-     question the number answers is "how many exercises can I see", not "how many
-     have I photographed". */
-  const pictured = EXERCISES.filter((e) => pictureOf(e.name) !== undefined).length
+/*
+ * NO "n of n weighed, n of n pictured" HERE ANY MORE. It read as a completeness
+ * score for a page nobody is meant to complete: most of these exercises you will
+ * never do, blank is a real answer for a weight, and the number quietly asked
+ * you to fill in 68 of them. Each kit's heading carries its own count, which
+ * answers the only question the total was really being asked: how much is in
+ * here. "Fill n from my routines" still says when there is something to do.
+ */
 
   return (
     <main className="weights">
@@ -427,17 +624,43 @@ export function ExercisesScreen({
       </header>
 
       <div className="weights__tools">
-        <input
-          className="weights__search"
-          type="search"
-          value={query}
-          placeholder="Search"
-          aria-label="Search exercises"
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        <span className="weights__count label label--sm">
-          {filled} of {total} weighed · {pictured} of {EXERCISES.length} pictured
+        <span className="search">
+          <input
+            className="weights__search"
+            type="search"
+            value={query}
+            placeholder="Search"
+            aria-label="Search exercises"
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          {/* Ours rather than the browser's, which WebKit hides the moment the
+              field loses focus. See `.search` in theme.css. */}
+          {query !== '' && (
+            <button
+              type="button"
+              className="search__clear"
+              aria-label="Clear the search"
+              title="Clear the search"
+              onClick={() => setQuery('')}
+            >
+              <CloseIcon />
+            </button>
+          )}
         </span>
+        {/* First of the actions: it is the one that is always available, and the
+            other two appear only when there is something for them to do. */}
+        <button
+          className="chip chip--action"
+          onClick={() => setAdding(true)}
+          /* "New", with a plus, as the library's own New is: this page adds
+             exercises the way that one adds routines, and one word for one act
+             beats two names for it. The title says what is new. */
+          aria-label="New exercise"
+          title="An exercise the app does not have"
+        >
+          <PlusIcon />
+          New
+        </button>
         {missing.length > 0 && (
           <button className="chip chip--action" onClick={fillFromRoutines}>
             Fill {missing.length} from my routines
@@ -460,8 +683,52 @@ export function ExercisesScreen({
           <p className="weights__empty label label--sm">Nothing matches “{query.trim()}”.</p>
         ) : (
           rows.map(({ kit, label, items }) => (
-            <section key={kit} className="weights__group">
-              <h2 className="weights__kit label label--sm">{label}</h2>
+            /*
+             * A native `<details>`, like every dialog here is a native
+             * `<dialog>`: the open state, the keyboard and what a screen reader
+             * announces come free. `open` is driven from state and the summary's
+             * default action is prevented, which is the way a controlled
+             * `<details>` is written.
+             */
+            <details key={kit} className="weights__group" open={opened.has(kit)}>
+              <summary
+                className="weights__kit label label--sm"
+                onClick={(event) => {
+                  event.preventDefault()
+                  setOpened((current) => {
+                    /*
+                     * In RESULTS, each heading is its own: everything that matched
+                     * is open, and folding one away must not take the other six
+                     * with it.
+                     */
+                    if (searching) {
+                      const next = new Set(current)
+                      if (!next.delete(kit)) next.add(kit)
+                      return next
+                    }
+                    /*
+                     * Otherwise opening REPLACES rather than adds: closing what
+                     * was open is the whole point. Pressing the open one closes it
+                     * and leaves the page on its headings.
+                     */
+                    return current.has(kit) ? new Set() : new Set([kit])
+                  })
+                }}
+              >
+                {label}
+                {/*
+                  How many are in there, which is the one thing a closed section
+                  cannot show you, and how many of those are yours.
+
+                  "(2 yours)" only where there are some. On the four kits you have
+                  never added to it would be "(0 yours)" seven times over, which is
+                  noise standing in for information.
+                */}
+                <span className="weights__kitcount">
+                  {items.length}
+                  {yoursIn(items) > 0 && ` (${yoursIn(items)} yours)`}
+                </span>
+              </summary>
               <ul className="weights__list">
                 {items.map((exercise) => {
                   const key = exerciseKey(exercise.name)
@@ -485,19 +752,70 @@ export function ExercisesScreen({
                             : setChoosing(exercise.name)
                         }
                       />
-                      {/*
-                        A `<label>` only where there is a field for it to point
-                        at. On a row with nothing to weigh it would be a label
-                        for an element that does not exist: invalid, and slow, since
-                        resolving one walks the document.
-                      */}
-                      {loadable(exercise) ? (
-                        <label className="weight__name" htmlFor={id}>
-                          {exercise.name}
-                        </label>
-                      ) : (
-                        <span className="weight__name">{exercise.name}</span>
-                      )}
+                      <span className="weight__text">
+                        {/*
+                          A `<label>` only where there is a field for it to point
+                          at. On a row with nothing to weigh it would be a label
+                          for an element that does not exist: invalid, and slow, since
+                          resolving one walks the document.
+                        */}
+                        {loadable(exercise) ? (
+                          <label className="weight__name" htmlFor={id}>
+                            {exercise.name}
+                          </label>
+                        ) : (
+                          <span className="weight__name">{exercise.name}</span>
+                        )}
+                        {/*
+                          What the table knows besides the name: the area, the
+                          push or pull, the station, the attachment, whether it is
+                          worked a side at a time. It was all invisible here, and
+                          it is what a person is actually asking when they
+                          cannot tell two rows apart. On a row of yours it is
+                          also the only proof that your answers went in.
+                        */}
+                        <span className="weight__attrs label label--sm">
+                          {mine(exercise.name) && (
+                            <>
+                              {/*
+                                Yours, said in a word rather than an icon: the two
+                                controls beside it exist on no other row, so the
+                                marker has to explain them, and an icon would need
+                                a legend to do that.
+                              */}
+                              <span className="weight__pill">Yours</span>
+                              {/*
+                                NAMED, both of them. The visible word is "Edit"
+                                on every row that has one, and a screen reader
+                                reading a page of buttons all called Edit cannot
+                                say which exercise it is on. The label STARTS with
+                                the visible word, so the two still agree.
+                              */}
+                              <button
+                                type="button"
+                                className="weight__act"
+                                onClick={() => setEditing(custom[foldName(exercise.name)] ?? null)}
+                                aria-label={`Edit ${exercise.name}`}
+                                title={`Edit ${exercise.name}`}
+                              >
+                                <PencilIcon />
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="weight__act"
+                                onClick={() => setRemoving(custom[foldName(exercise.name)] ?? null)}
+                                aria-label={`Remove ${exercise.name}`}
+                                title={`Remove ${exercise.name}`}
+                              >
+                                <TrashIcon />
+                                Remove
+                              </button>
+                            </>
+                          )}
+                          {attributesOf(exercise).join(' · ')}
+                        </span>
+                      </span>
                       {/*
                         Only where there is something to weigh. A press-up is
                         loaded to your own bodyweight and the trampoline to
@@ -528,7 +846,7 @@ export function ExercisesScreen({
                   )
                 })}
               </ul>
-            </section>
+            </details>
           ))
         )}
       </div>
@@ -556,7 +874,7 @@ export function ExercisesScreen({
           src={srcOf(viewing)}
           name={viewing}
           chosen={chosenPicture(pictures, viewing) !== undefined}
-          guide={EXERCISES.find((e) => e.name === viewing)?.media !== undefined}
+          guide={table.find((e) => e.name === viewing)?.media !== undefined}
           onChange={() => {
             setChoosing(viewing)
             setViewing(null)
@@ -585,6 +903,67 @@ export function ExercisesScreen({
           onUpload={(file) => void upload(choosing, file)}
           onError={setNotice}
           onClose={() => setChoosing(null)}
+        />
+      )}
+
+      {(adding || editing !== null) && (
+        <ExerciseDialog
+          name=""
+          editing={editing}
+          table={table}
+          onSave={saveExercise}
+          /*
+             There is no step to write a name onto from this page, so taking the
+             exercise that already exists means showing it: the search box is what
+             puts one row on the screen out of 147.
+          */
+          onUse={(name) => {
+            setQuery(name)
+            setAdding(false)
+            setEditing(null)
+          }}
+          onClose={() => {
+            setAdding(false)
+            setEditing(null)
+          }}
+        />
+      )}
+
+      {removing !== null && (
+        <ConfirmDialog
+          question={`Remove “${removing.name}”?`}
+          detail={
+            'It goes from this page and from the editor’s name list, and a generated routine will not use it again. Its weight and picture are dropped with it. Steps in your routines keep the name, as plain text.'
+          }
+          confirmLabel="Remove"
+          onConfirm={() => removeExercise(removing)}
+          onCancel={() => setRemoving(null)}
+        />
+      )}
+
+      {/*
+        The second question after a rename, and only where the library has
+        something to say: the exercise is already renamed, so cancelling here
+        costs nothing but leaves the old wording written where it was written.
+      */}
+      {renamed !== null && stale.steps > 0 && (
+        <ConfirmDialog
+          question="Rename it in your routines too?"
+          detail={`${stale.steps} ${stale.steps === 1 ? 'step' : 'steps'} in ${
+            stale.rewritten.length
+          } ${stale.rewritten.length === 1 ? 'routine' : 'routines'} still say “${
+            renamed.from
+          }”. Renaming those changes only the exercise. The count, the weight and the note stay exactly as written.`}
+          confirmLabel={`Rename ${stale.steps}`}
+          onConfirm={() => {
+            const rewritten = stale.rewritten
+            setRenamed(null)
+            void Promise.resolve(onFollow(rewritten)).catch((cause: unknown) => {
+              const reason = cause instanceof Error ? cause.message : 'Could not save'
+              setNotice(`${reason}. The exercise is renamed; the routines still say the old name.`)
+            })
+          }}
+          onCancel={() => setRenamed(null)}
         />
       )}
 

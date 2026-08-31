@@ -6,6 +6,8 @@
 
 import type { Block, MediaRef, SegmentRole, Workout } from '../engine'
 import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, SCHEMA_VERSION, stepCount } from '../engine'
+import type { CustomExercises } from './customExercises'
+import { readCustomExercises } from './customExercises'
 import { migrateWorkout } from './migrate'
 
 /**
@@ -48,6 +50,17 @@ export type Bundle = {
    * content hash, so a photo used both by the page and by a step travels once.
    */
   pictures?: Record<string, MediaRef>
+  /**
+   * The exercises you added yourself, keyed by folded exercise name.
+   *
+   * OPTIONAL like the two above. It rides along for a sharper reason than
+   * either: the weights and the pictures are keyed by exercise name, so a
+   * restore that brought them WITHOUT the exercises they belong to would put
+   * back a weight for a row that no longer exists on the page. The exercise
+   * would have to be typed in again from memory, its area and its push-or-pull
+   * included, before the number reappeared.
+   */
+  exercises?: CustomExercises
 }
 
 export class BundleError extends Error {
@@ -63,6 +76,7 @@ export function toBundle(
   media: Record<string, string> = {},
   weights: Record<string, string> = {},
   pictures: Record<string, MediaRef> = {},
+  exercises: CustomExercises = {},
 ): Bundle {
   return {
     kind: 'davshack-timer-bundle',
@@ -75,6 +89,7 @@ export function toBundle(
     // the pictures.
     ...(Object.keys(weights).length > 0 ? { weights } : {}),
     ...(Object.keys(pictures).length > 0 ? { pictures } : {}),
+    ...(Object.keys(exercises).length > 0 ? { exercises } : {}),
   }
 }
 
@@ -237,6 +252,8 @@ type BundleContents = {
   weights: Record<string, string>
   /** The exercise pictures the file carried, if any. See `Bundle.pictures`. */
   pictures: Record<string, MediaRef>
+  /** The exercises of your own the file carried, if any. See `Bundle.exercises`. */
+  exercises: CustomExercises
 }
 
 /**
@@ -303,6 +320,10 @@ export function fromBundle(json: unknown, now: number): BundleContents {
     rejected,
     weights: readWeights(bundle.weights),
     pictures: readPictures(bundle.pictures),
+    /* Validated by the store's own reader rather than by a second copy here: a
+       backup must not be able to put anything in that table the app would not
+       have written itself. Never throws; see `readCustomExercises`. */
+    exercises: readCustomExercises(bundle.exercises),
   }
 }
 

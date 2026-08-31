@@ -9,6 +9,14 @@ import type { SegmentRole, Workout } from '../engine'
 import { compile, MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
 import { collectExercises } from '../routines/exerciseOptions'
+import type { CustomExercise } from '../storage/customExercises'
+import {
+  addCustom,
+  customList,
+  loadCustomExercises,
+  saveCustomExercises,
+  withCustom,
+} from '../storage/customExercises'
 import { currentRates } from '../storage/paces'
 import { currentPictures } from '../storage/pictures'
 import { fromTables } from '../storage/tables'
@@ -39,6 +47,7 @@ import { canRedo, canUndo, redo, undo } from '../editor/history'
 import { HelpTray } from './HelpTray'
 import { PreviewList } from './PreviewList'
 import { NoticeDialog } from './NoticeDialog'
+import { ExerciseDialog } from './ExerciseDialog'
 import { EDITOR_HELP } from './help'
 import { pinDraft, storeFile, unpinDraft } from '../media/pin'
 import { estimated } from './format'
@@ -134,7 +143,17 @@ export function EditorScreen({
    * row would be nine thousand objects per keystroke. Same reason `knownImages`
    * is collected by the library and handed down rather than gathered per picker.
    */
-  const exercises = useMemo(() => collectExercises(undefined, pictures), [pictures])
+  /*
+   * The exercises you have added yourself, which the name field offers beside the
+   * app's own. State rather than a read, because one can be added from in here:
+   * the list has to grow the moment the dialog closes.
+   */
+  const [custom, setCustom] = useState(loadCustomExercises)
+  /** The step an exercise is being added FROM, and the name it was typed with. */
+  const [naming, setNaming] = useState<{ path: Path; name: string } | null>(null)
+
+  const table = useMemo(() => withCustom(customList(custom)), [custom])
+  const exercises = useMemo(() => collectExercises(table, pictures), [table, pictures])
 
   /*
    * Reading the draft, as the run screen reads a saved routine.
@@ -466,6 +485,7 @@ export function EditorScreen({
                       }),
                     )
                   }
+                  onAddExercise={(p, typed) => setNaming({ path: p, name: typed })}
                   onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
                   onPreview={setImagePreview}
                   onChoose={setChoosingFor}
@@ -502,6 +522,47 @@ export function EditorScreen({
           onUpload={(file) => void upload(choosingFor, file)}
           onError={setNotice}
           onClose={() => setChoosingFor(null)}
+        />
+      )}
+
+      {/*
+        Making a typed name an exercise, from the step that names it.
+
+        Two things happen on Add, and one press of undo has to take both: the
+        exercise is written to your table, and the step is put onto it. The name
+        is EDITABLE in the dialog, which is the point. A typo caught here is
+        corrected on the step as well, and the dialog's warning is what catches
+        it.
+      */}
+      {naming !== null && (
+        <ExerciseDialog
+          name={naming.name}
+          table={table}
+          onSave={(exercise: CustomExercise) => {
+            const next = addCustom(custom, exercise)
+            setCustom(next)
+            saveCustomExercises(next)
+            editBlocks((c) =>
+              applyExercise(c, naming.path, {
+                name: exercise.name,
+                ...(exercise.perSide === true ? { perSide: true } : {}),
+              }),
+            )
+            setNaming(null)
+          }}
+          /* The exercise already exists, so nothing is added: the step simply
+             goes onto it, which is what picking it from the list would have done. */
+          onUse={(name) => {
+            const option = exercises.find((entry) => entry.name === name)
+            editBlocks((c) =>
+              applyExercise(c, naming.path, {
+                name,
+                ...(option?.perSide === true ? { perSide: true } : {}),
+              }),
+            )
+            setNaming(null)
+          }}
+          onClose={() => setNaming(null)}
         />
       )}
 

@@ -340,3 +340,20 @@
 | 12:45 | Rewrote README and in-app help shorter and friendlier, bumped to v8.9, pushed | README.md, src/ui/help.ts, src/version.ts | 3033c01 pushed; typecheck, lint, 1184 tests, build all clean | ~35k |
 | 16:35 | Converted 8 new screenshots to webp and rebuilt the README screenshot section (2x2 to 2x4) | docs/screenshots/*.webp, README.md, .gitignore | pushed as 4741837 | ~30k |
 | 16:46 | Preview thumbnails open full size; fixed M muting from behind the dialog (bug-153); v9.0 | PreviewList.tsx, preview.css, RunScreen.tsx, help.ts, PreviewList.test.tsx | 1189 tests green; pushed as d4a6619 | ~55k |
+
+## Session: 2026-08-29 17:05
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 19:31
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:43 | Created src/storage/customExercises.ts | — | ~2588 |
+| 20:44 | Created src/routines/similar.ts | — | ~1834 |
+| 20:47 | Created src/ui/ExerciseDialog.tsx | — | ~3927 |
+| 20:55 | Created src/routines/__tests__/similar.test.ts | — | ~1322 |
+| 20:56 | Created src/storage/__tests__/customExercises.test.ts | — | ~1562 |
+| 20:57 | Created src/ui/__tests__/ExerciseDialog.test.tsx | — | ~2595 |
+| 21:18 | Exercises of your own: full CRUD store, similarity warning, generator + editor + backup reach, collapsible kit sections | src/storage/customExercises.ts, src/routines/similar.ts, src/ui/ExerciseDialog.tsx, +12 | 1261 tests pass, built, uncommitted | ~180k |

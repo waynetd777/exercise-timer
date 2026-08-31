@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-08-29T00:36:41.659Z",
-    "fileCount": 96,
+    "lastScanned": "2026-08-31T18:57:28.134Z",
+    "fileCount": 102,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "3ed0a1926c9399e8fc259ea9c4b34e749566e71964b761e3a6ea1b85d540cde3",
-    "storeUpdatedAt": "2026-08-29T00:36:41.666Z"
+    "renderedHash": "9e480107054dc9c8f761fa999649e90dfe18cc42d17e8edf40dd424503219ba3",
+    "storeUpdatedAt": "2026-08-31T18:57:28.144Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -2468,6 +2468,208 @@
           "startLine": 29,
           "endLine": 62,
           "tokens": 378
+        }
+      ]
+    },
+    "src/storage/customExercises.ts": {
+      "description": "Exercise Timer",
+      "tokens": 2588,
+      "hash": "584d34365b398535",
+      "size": 9068,
+      "mtimeMs": 1788201837001.2432,
+      "updatedAt": "2026-08-31T18:43:57.089Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "shippedKeys",
+          "kind": "fn",
+          "startLine": 74,
+          "endLine": 78,
+          "tokens": 41
+        },
+        {
+          "name": "has",
+          "kind": "fn",
+          "startLine": 79,
+          "endLine": 92,
+          "tokens": 176
+        },
+        {
+          "name": "readOne",
+          "kind": "fn",
+          "startLine": 93,
+          "endLine": 126,
+          "tokens": 481
+        },
+        {
+          "name": "readCustomExercises",
+          "kind": "fn",
+          "startLine": 127,
+          "endLine": 152,
+          "tokens": 252
+        },
+        {
+          "name": "loadCustomExercises",
+          "kind": "fn",
+          "startLine": 153,
+          "endLine": 162,
+          "tokens": 64
+        },
+        {
+          "name": "saveCustomExercises",
+          "kind": "fn",
+          "startLine": 163,
+          "endLine": 184,
+          "tokens": 257
+        },
+        {
+          "name": "currentCustomExercises",
+          "kind": "fn",
+          "startLine": 185,
+          "endLine": 190,
+          "tokens": 62
+        },
+        {
+          "name": "customList",
+          "kind": "fn",
+          "startLine": 191,
+          "endLine": 201,
+          "tokens": 125
+        },
+        {
+          "name": "withCustom",
+          "kind": "fn",
+          "startLine": 202,
+          "endLine": 206,
+          "tokens": 68
+        },
+        {
+          "name": "addCustom",
+          "kind": "fn",
+          "startLine": 207,
+          "endLine": 211,
+          "tokens": 56
+        },
+        {
+          "name": "removeCustom",
+          "kind": "fn",
+          "startLine": 212,
+          "endLine": 218,
+          "tokens": 67
+        },
+        {
+          "name": "isCustom",
+          "kind": "fn",
+          "startLine": 219,
+          "endLine": 222,
+          "tokens": 32
+        }
+      ]
+    },
+    "src/routines/similar.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1834,
+      "hash": "b720c280dd90c750",
+      "size": 6423,
+      "mtimeMs": 1788201871536.7903,
+      "updatedAt": "2026-08-31T18:44:31.615Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "editDistance",
+          "kind": "fn",
+          "startLine": 57,
+          "endLine": 89,
+          "tokens": 384
+        },
+        {
+          "name": "budget",
+          "kind": "fn",
+          "startLine": 90,
+          "endLine": 95,
+          "tokens": 58
+        },
+        {
+          "name": "words",
+          "kind": "fn",
+          "startLine": 96,
+          "endLine": 107,
+          "tokens": 143
+        },
+        {
+          "name": "sameExercise",
+          "kind": "fn",
+          "startLine": 108,
+          "endLine": 123,
+          "tokens": 158
+        },
+        {
+          "name": "similarExercises",
+          "kind": "fn",
+          "startLine": 124,
+          "endLine": 163,
+          "tokens": 398
+        }
+      ]
+    },
+    "src/ui/ExerciseDialog.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 3927,
+      "hash": "f47837d4df8c1c77",
+      "size": 13756,
+      "mtimeMs": 1788202061759.8352,
+      "updatedAt": "2026-08-31T18:47:41.853Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "Choice",
+          "kind": "fn",
+          "startLine": 67,
+          "endLine": 98,
+          "tokens": 221
+        },
+        {
+          "name": "ExerciseDialog",
+          "kind": "fn",
+          "startLine": 99,
+          "endLine": 341,
+          "tokens": 2771
+        }
+      ]
+    },
+    "src/routines/__tests__/similar.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1322,
+      "hash": "f8b68a69cd088bbd",
+      "size": 4630,
+      "mtimeMs": 1788202500095.5042,
+      "updatedAt": "2026-08-31T18:55:00.170Z",
+      "source": "hook"
+    },
+    "src/storage/__tests__/customExercises.test.ts": {
+      "description": "Exercise Timer",
+      "tokens": 1562,
+      "hash": "9b42959ef0cdd925",
+      "size": 5471,
+      "mtimeMs": 1788202561852.6804,
+      "updatedAt": "2026-08-31T18:56:01.915Z",
+      "source": "hook"
+    },
+    "src/ui/__tests__/ExerciseDialog.test.tsx": {
+      "description": "Exercise Timer",
+      "tokens": 2595,
+      "hash": "5387bee8190805ae",
+      "size": 9089,
+      "mtimeMs": 1788202648060.8223,
+      "updatedAt": "2026-08-31T18:57:28.134Z",
+      "source": "hook",
+      "symbols": [
+        {
+          "name": "name",
+          "kind": "fn",
+          "startLine": 30,
+          "endLine": 247,
+          "tokens": 2326
         }
       ]
     }

@@ -26,6 +26,7 @@
  */
 
 import type { Block, Workout } from '../engine/types'
+import type { Exercise } from './exercises'
 import { EXERCISES } from './exercises'
 import { closestKey, foldName } from './foldName'
 
@@ -100,10 +101,17 @@ function split(name: string): { lead: string; core: string; trail: string } {
  */
 const QUALIFIED = /\b(?:left|right)\b|\d/i
 
-/** Every exercise, by folded name. A fold shared by two is a fold that decides nothing. */
-function table(): Map<string, string[]> {
+/**
+ * Every exercise, by folded name. A fold shared by two is a fold that decides nothing.
+ *
+ * `extra` is the exercises you added yourself, which the callers read from
+ * storage and pass in: a name of your own is a name this should recognise, or
+ * tidying a routine would leave your own exercises as the only steps it will not
+ * put right. Empty by default, so nothing pure has to reach for storage.
+ */
+function table(extra: readonly Exercise[] = []): Map<string, string[]> {
   const out = new Map<string, string[]>()
-  for (const exercise of EXERCISES) {
+  for (const exercise of [...EXERCISES, ...extra]) {
     const key = foldName(exercise.name)
     out.set(key, [...(out.get(key) ?? []), exercise.name])
   }
@@ -197,11 +205,14 @@ function tidyWorkout(
 }
 
 /** What a whole library would become. Routines that need nothing are left out. */
-export function tidyLibrary(workouts: readonly Workout[]): {
+export function tidyLibrary(
+  workouts: readonly Workout[],
+  extra: readonly Exercise[] = [],
+): {
   workouts: Workout[]
   renamed: Rename[]
 } {
-  const byKey = table()
+  const byKey = table(extra)
   const out: Workout[] = []
   const renamed: Rename[] = []
   for (const workout of workouts) {
@@ -211,4 +222,55 @@ export function tidyLibrary(workouts: readonly Workout[]): {
     renamed.push(...tidied.renamed)
   }
   return { workouts: out, renamed }
+}
+
+/**
+ * One step's name with a renamed exercise swapped in, or null where this step is
+ * not that exercise.
+ *
+ * Renaming an exercise you added is the one rename where the app knows exactly
+ * which movement it means, so unlike `canonicalName` there is nothing to match
+ * and nothing to refuse: a step whose core folds to the old name is that
+ * exercise. Everything else the name carries is put back exactly as written, by
+ * the same `split`: "12 × Bugarian Split Squat 12kg (each side)" becomes
+ * "12 × Bulgarian Split Squat 12kg (each side)" and not a bare name.
+ */
+export function renamedName(name: string, from: string, to: string): string | null {
+  const { lead, core, trail } = split(name)
+  // A qualifier the peeling did not recognise, as in `canonicalName`: better a
+  // step left as written than one shortened by a rename.
+  if (QUALIFIED.test(core)) return null
+  const key = foldName(from)
+  if (key === '' || foldName(core) !== key) return null
+  const next = `${lead}${to}${trail}`
+  return next === name ? null : next
+}
+
+/**
+ * A routine with one exercise renamed throughout, and how many steps changed.
+ *
+ * The shape `withoutStatedLoads` returns, and for the same caller: the exercises
+ * page counts before it asks and rewrites after, and a routine that needs
+ * nothing comes back as the object it was so React sees no change.
+ */
+export function renameInWorkout(
+  workout: Workout,
+  from: string,
+  to: string,
+): { workout: Workout; renamed: number } {
+  let renamed = 0
+  const walk = (list: readonly Block[]): Block[] =>
+    list.map((block) => {
+      if (block.kind === 'segment') {
+        const next = renamedName(block.name, from, to)
+        if (next === null) return block
+        renamed += 1
+        return { ...block, name: next }
+      }
+      const children = walk(block.children)
+      if (children.every((child, at) => child === block.children[at])) return block
+      return { ...block, children } as Block
+    })
+  const blocks = walk(workout.blocks)
+  return renamed === 0 ? { workout, renamed } : { workout: { ...workout, blocks }, renamed }
 }

@@ -964,6 +964,34 @@
   color: var(--bone-dim);
 }
 
+/*
+ * Making the typed name an exercise. Full width at the bottom of the empty list,
+ * where the first option row would have been: it is the only thing in the list,
+ * so it may as well be where the eye already is.
+ */
+.ename__add {
+  display: flex;
+  align-items: center;
+  gap: var(--step-2);
+  width: 100%;
+  padding: var(--step-3);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  /* The exercises page's blue, because this is that page's act done from here.
+     Green would promise the dialog it opens is a different colour. */
+  color: var(--role-rest);
+  background: none;
+  border: 0;
+  border-top: var(--hairline);
+  cursor: pointer;
+}
+
+.ename__add:hover,
+.ename__add:focus-visible {
+  background: var(--ink-700);
+}
+
 /* ── Routine colour ────────────────────────────────────────────────────────
  *
  * The editor surface carries the same wash as the library row, so the choice is

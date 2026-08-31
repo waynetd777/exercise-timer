@@ -11,6 +11,7 @@ import { restoreMedia } from '../storage/bundleMedia'
 import { migrateWorkout } from '../storage/migrate'
 import { loadWeights, saveWeights } from '../storage/weights'
 import { loadPictures, savePictures } from '../storage/pictures'
+import { loadCustomExercises, saveCustomExercises } from '../storage/customExercises'
 import { hasBlob, putBlob } from '../media/store'
 import { pinDraft } from '../media/pin'
 import { parseRoutine } from './pasteFormat'
@@ -147,6 +148,17 @@ export async function importRoutineFiles(
         }
         if (Object.keys(pictures).length > 0) {
           savePictures({ ...loadPictures(), ...pictures })
+        }
+
+        /*
+         * The exercises of your own, merged the same way: the file wins where
+         * both know a name, and one this device has never heard of is added
+         * rather than dropped. It matters that this runs beside the two above:
+         * a weight or a picture restored without the exercise it belongs to
+         * would sit under a name the page no longer lists.
+         */
+        if (Object.keys(contents.exercises).length > 0) {
+          saveCustomExercises({ ...loadCustomExercises(), ...contents.exercises })
         }
         continue
       }

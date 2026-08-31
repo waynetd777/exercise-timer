@@ -2,7 +2,82 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-29 (Preview thumbnails open full size, v9.0, d4a6619 pushed)
+> Last updated: 2026-08-31 (Exercises of your own: full CRUD, in the generator, v9.1, pushed)
+
+---
+
+## 🏋️ Exercises of your own: full CRUD (2026-08-31, done, v9.1, pushed)
+
+Wayne asked whether a typed name reaches the exercises page (it did not), then chose the fullest option:
+"full CRUD on user captured exercises with system exercises read-only, and the full set available
+throughout the system." Plus: show every exercise's attributes on the page, mark yours with a pill, warn
+about similar names before saving, and use yours in generated routines.
+
+**`storage/customExercises.ts`** is the fourth per-device table, keyed by folded name like weights, paces
+and pictures, so one exercise's name, weight, picture and pace are all found by the same string. It holds
+FULL records (name, kit, area, pattern, use, perSide), because the area and the push/pull are what let
+`generate.ts` programme the exercise. Two decisions worth keeping: it needs no `refold.ts` pass, since the
+record carries its own name and every read re-keys from it; and a name the shipped table has since
+acquired is DROPPED on read (a harvest adding "Sit Ups" a month later would otherwise put two rows on one
+storage key). The weight and picture survive that, because they were never keyed to this table.
+
+**`routines/similar.ts`** is the warning: a bounded Levenshtein for typos plus a shared-movement rule for
+families. Deliberately LOOSER than the name field's matcher, because the button that offers to add an
+exercise only appears where that matcher found nothing across all 147, so a warning built on the same
+rules could never fire. A fold-exact match is a different answer: refused, not warned, with the existing
+exercise offered instead.
+
+**`ui/ExerciseDialog.tsx`** does add and edit, from two screens (hence its CSS in theme.css). Candidates in
+the warning are BUTTONS: from a step, tapping one renames the step and adds nothing; from the page it
+searches for the row.
+
+**Reach:** the editor's name field (empty state offers "Add"), the generator (`generateRoutine`'s new
+`extra` option, defaulting to empty so every existing test is untouched), `tidyLibrary`, backups
+(`Bundle.exercises`, merged on import like weights), and the exercises page. Share links carry nothing,
+which matches weights and pictures. Renaming carries weight, picture and pace over, then OFFERS to rename
+the steps in the library that still say the old name (reusing `onFollow`). Removing drops the weight and
+picture and leaves routines alone: the step is plain text again, as it was before.
+
+**Also, on the page:** every row prints its attributes ("Upper body · push · Station 2 · lat bar") via a
+new `attributesOf()`; yours carry a "Yours" pill plus Edit and Remove, which no shipped row has; the add
+button is "+ New", matching the library's; the kit groups are native `<details>`, CLOSED by default (a
+search opens them all, clearing it closes them again, and adding an exercise opens its kit), each heading
+carrying its count and "(n yours)" where any are, all of it grey as one fact. One kit open at a time,
+EXCEPT in results: a search opens every kit that matched, and a heading pressed then folds just that one.
+
+**Colour:** the page and the dialog are BLUE (`--accent: var(--role-rest)`), not the phase green for "get
+ready". Nothing on a settings page is a timer about to start. The accent is one custom property on
+`.weights` and one on `.exdlg`, so the hue changes in two lines; the editor's "Add ... to my exercises"
+button matches, since it opens the same dialog. The dialog's Add, Save and Add anyway are `chip--primary`,
+the filled blue the generator's own action uses.
+
+**And the generate dialog lost its blue selected chips** (`.generate__options .chip[aria-pressed]` took
+`--phase`). A dozen filled blue chips beside the one blue button meant "Open in editor" no longer read as
+the action of the dialog. Both dialogs now answer a choice with the theme's own pressed chip, and blue
+means "this is the button".
+
+**Removed on Wayne's call:** the "n of n weighed · n of n pictured" line. It read as a completeness score
+for a page nobody is meant to complete, against the page's own rule that blank is a real answer. Each kit
+heading now carries its own count instead.
+
+**Dialog:** the per-side control is a two-button "Side" choice (One at a time / Both), not a toggle whose
+label changed, which could not say whether it stated the value or the action.
+
+**Two defects found by the new tests (bug-154, bug-155):** the row buttons were named only by `title`, so
+every Edit button was called "Edit"; and the family rule compared last words for equality, missing a
+mistyped movement.
+
+**Search boxes** (this page and the library) now carry their OWN × in shared `.search` classes: WebKit only
+draws `::-webkit-search-cancel-button` while the field has focus, so the × vanished as soon as anything else
+was tapped and a search could only be cleared by selecting the text.
+
+**Docs:** README ("What it does best" plus the exercises caption), the three module READMEs, and the in-app
+help for the library, the editor and the exercises page.
+
+**Verified:** typecheck, oxlint, 1264 tests in 65 files (+75), production build.
+
+**Next:** the README's `docs/screenshots/exercises.webp` is now out of date. It shows the green styling, the
+removed "n of n weighed" line and open sections. Needs retaking on a dev server (Wayne drives the browser).
 
 ---
 

@@ -558,6 +558,8 @@ function sectionsRoutine(
   rates: ReadonlyMap<string, number>,
   rng: Rng,
   notes: string[],
+  /** The whole vocabulary: the shipped table plus the exercises you added. */
+  table: readonly Exercise[],
 ): Block[] {
   // Nothing to work is the same answer the circuit gives, not a routine of one warm-up.
   if (spec.areas.length === 0) throw new Error('No exercises match that combination of areas and equipment.')
@@ -572,7 +574,7 @@ function sectionsRoutine(
    */
   const pool = (area: BodyArea, use: 'strength' | 'cardio' | 'mobility'): Exercise[] =>
     shuffled(
-      EXERCISES.filter(
+      table.filter(
         (e) =>
           e.area === area &&
           (e.use ?? 'strength') === use &&
@@ -974,9 +976,25 @@ export function generateRoutine(
      * rates, so a test gets the same answer whatever the browser has stored.
      */
     rates?: ReadonlyMap<string, number>
+    /**
+     * The exercises you added yourself, from `storage/customExercises.ts`.
+     *
+     * Drawn from exactly as the shipped ones are: they carry an area, a
+     * push-or-pull and a `use` for that reason, so a routine generated for the
+     * lower body can put your own squat variation in a working set. Empty by
+     * default, so a test sees the shipped table alone and this function still
+     * reads nothing from storage.
+     */
+    extra?: readonly Exercise[]
   } = {},
 ): GeneratedRoutine {
   const rng = options.rng ?? Math.random
+  /*
+   * Shipped first, so a name in both halves resolves to the app's own record.
+   * The same order, and the same reason, as `withCustom`.
+   */
+  const table: readonly Exercise[] =
+    options.extra && options.extra.length > 0 ? [...EXERCISES, ...options.extra] : EXERCISES
   const now = options.now ?? 0
   const notes: string[] = []
   const weights = options.weights ?? new Map<string, string>()
@@ -995,7 +1013,7 @@ export function generateRoutine(
    * through, because a function that did both would be mostly `if (style)`.
    */
   if (spec.style === 'sections') {
-    const sections = sectionsRoutine(spec, loads, options.rates ?? new Map(), rng, notes)
+    const sections = sectionsRoutine(spec, loads, options.rates ?? new Map(), rng, notes, table)
     if (sections.length === 0) {
       throw new Error('No exercises match that combination of areas and equipment.')
     }
@@ -1028,7 +1046,7 @@ export function generateRoutine(
     }
   }
 
-  const cardio = EXERCISES.filter((e) => e.use === 'cardio')
+  const cardio = table.filter((e) => e.use === 'cardio')
   const recovery =
     cardio.find((e) => e.name === spec.recoveryExercise) ??
     cardio.find((e) => e.name === 'Cycling') ??
@@ -1081,7 +1099,7 @@ export function generateRoutine(
 
   const pools = new Map<BodyArea, Exercise[]>()
   for (const area of spec.areas) {
-    const pool = EXERCISES.filter(
+    const pool = table.filter(
       (e) => (e.use ?? 'strength') === 'strength' && e.area === area && eligible(spec.equipment, e),
     )
     pools.set(area, shuffled(pool, rng))
@@ -1159,7 +1177,7 @@ export function generateRoutine(
       .reverse()
       .flatMap((b) => (b.kind === 'repeat' ? b.children : []))
       .find((b): b is Segment => b.kind === 'segment' && b.role === 'work')
-    const station = EXERCISES.find((e) => e.name === previousStation?.name)?.station
+    const station = table.find((e) => e.name === previousStation?.name)?.station
     // Among equally good candidates, one already rigged on this station.
     const pick =
       candidates.find((e) => station !== undefined && e.station === station) ?? candidates[0]!

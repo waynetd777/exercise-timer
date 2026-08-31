@@ -6,8 +6,8 @@
 
 import { useMemo, useState } from 'react'
 import type { Block, Workout } from '../engine/types'
-import { EXERCISES } from '../routines/exercises'
 import type { BodyArea } from '../routines/exercises'
+import { currentCustomExercises, withCustom } from '../storage/customExercises'
 import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
 import { currentWeights } from '../storage/weights'
@@ -217,9 +217,20 @@ export function GenerateDialog({
   const [warmUpSecs, setWarmUpSecs] = useState(600)
   const [recoverSecs, setRecoverSecs] = useState(60)
   const [coolDownSecs, setCoolDownSecs] = useState(120)
+  /*
+   * The whole vocabulary: the app's exercises and yours.
+   *
+   * Read ONCE for the dialog, and everything below draws from it: the cardio
+   * pickers, the list of what was chosen, and the generator itself. An exercise
+   * you added carries an area and a push-or-pull for exactly this reason, so
+   * leaving it out here would be the one place your own exercises did not count.
+   */
+  const table = useMemo(() => withCustom(currentCustomExercises()), [])
   /** What Random may draw from. Everything, until it is narrowed. */
   const [pool, setPool] = useState<string[]>(() =>
-    EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name),
+    withCustom(currentCustomExercises())
+      .filter((e) => e.use === 'cardio')
+      .map((e) => e.name),
   )
   const [sets, setSets] = useState(3)
   const [name, setName] = useState('')
@@ -249,7 +260,7 @@ export function GenerateDialog({
     recovery,
     equipment,
   })
-  const cardioOptions = useMemo(() => EXERCISES.filter((e) => e.use === 'cardio'), [])
+  const cardioOptions = useMemo(() => table.filter((e) => e.use === 'cardio'), [table])
 
   /*
    * Regenerated on every answer, and cheap enough to do so: the generator is
@@ -280,7 +291,13 @@ export function GenerateDialog({
           equipment,
           sets,
         },
-        { library, rng: seeded(seed), now: Date.now(), weights: currentWeights() },
+        {
+          library,
+          rng: seeded(seed),
+          now: Date.now(),
+          weights: currentWeights(),
+          extra: currentCustomExercises(),
+        },
       )
     } catch {
       return null
@@ -318,14 +335,14 @@ export function GenerateDialog({
     const walk = (blocks: readonly Block[]): void => {
       for (const block of blocks) {
         if (block.kind !== 'segment') walk(block.children)
-        else if (block.role === 'work' && EXERCISES.some((e) => e.name === block.name && e.use !== 'cardio')) {
+        else if (block.role === 'work' && table.some((e) => e.name === block.name && e.use !== 'cardio')) {
           if (!names.includes(block.name)) names.push(block.name)
         }
       }
     }
     walk(result.workout.blocks)
     return names
-  }, [result])
+  }, [result, table])
 
   const circuit = style === 'circuit'
   const emptyPool = circuit && recovery === 'active' && cardio === VARY && pool.length === 0

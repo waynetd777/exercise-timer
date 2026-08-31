@@ -11,6 +11,7 @@ import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { EditorScreen } from '../EditorScreen'
 import { savePictures, withPicture } from '../../storage/pictures'
+import { loadCustomExercises, saveCustomExercises } from '../../storage/customExercises'
 
 const sectioned = (): Workout => ({
   id: 'w1',
@@ -874,5 +875,65 @@ describe('EditorScreen: dragging a row by its grip', () => {
 
     expect(order()).toEqual(['B', 'A', 'C'])
     expect(document.activeElement).toBe(grip)
+  })
+})
+
+describe('capturing an exercise from a step', () => {
+  beforeAll(() => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '')
+    }
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    }
+  })
+  beforeEach(() => saveCustomExercises({}))
+  afterEach(cleanup)
+
+  const nameField = () => screen.getAllByLabelText('Step name')[0]!
+
+  it('adds the exercise and puts the step on it, in one press of undo', () => {
+    render(<EditorScreen {...props(untouched())} />)
+
+    fireEvent.change(nameField(), { target: { value: 'Sandbag Haul' } })
+    fireEvent.mouseDown(screen.getByRole('button', { name: /Add “Sandbag Haul” to my exercises/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Kettlebell' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    expect(loadCustomExercises()).toHaveProperty('sandbag haul')
+    expect((nameField() as HTMLInputElement).value).toBe('Sandbag Haul')
+  })
+
+  it('offers it to the next step, without the screen being reopened', () => {
+    // The table the name field reads is state, not a read: an exercise added
+    // from one step has to be on offer to the next one immediately.
+    render(<EditorScreen {...props(untouched())} />)
+
+    fireEvent.change(nameField(), { target: { value: 'Sandbag Haul' } })
+    fireEvent.mouseDown(screen.getByRole('button', { name: /Add “Sandbag Haul”/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Kettlebell' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    fireEvent.change(nameField(), { target: { value: 'Sandbag' } })
+    expect(screen.getByRole('option', { name: /Sandbag Haul/ })).toBeTruthy()
+  })
+
+  it('corrects the step where the name was typed wrong', () => {
+    /*
+     * The reason the name is editable in the dialog and the warning is worth
+     * having: "Bugarian" is one of the instructor's real spellings, and taking
+     * the exercise that exists renames the step instead of adding a second row.
+     */
+    render(<EditorScreen {...props(untouched())} />)
+
+    fireEvent.change(nameField(), { target: { value: 'Bugarian Split Squat' } })
+    fireEvent.mouseDown(screen.getByRole('button', { name: /Add “Bugarian Split Squat”/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    fireEvent.click(screen.getByRole('button', { name: /Bulgarian Split Squats/ }))
+
+    expect((nameField() as HTMLInputElement).value).toBe('Bulgarian Split Squats')
+    // Nothing was added: the exercise was already there under its own spelling.
+    expect(loadCustomExercises()).toEqual({})
   })
 })

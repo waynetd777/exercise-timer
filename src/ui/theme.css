@@ -441,6 +441,203 @@ button {
   gap: var(--step-3);
 }
 
+/* ── Search field ──────────────────────────────────────────────────────────
+ * A search box with an × in its right-hand end, shared by the library and the
+ * exercises page.
+ *
+ * OUR OWN BUTTON, not the browser's. WebKit only draws
+ * `::-webkit-search-cancel-button` while the field has focus, so the × vanished
+ * the moment anything else on the page was tapped and the only way to clear a
+ * search was to select the text and delete it. This one is there whenever there
+ * is something to clear.
+ *
+ * The button overlays the input rather than sitting beside it, so the field keeps
+ * the full width of its row. Same arrangement as the editor's `.efield-clear`.
+ */
+.search {
+  position: relative;
+  display: flex;
+  /* Takes the sizing the input used to carry as a flex item of the tools row. */
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.search input {
+  width: 100%;
+  /* Room for the button, so a long query does not run under it. */
+  padding-right: 2.5rem;
+}
+
+/* The browser's, in both spellings: ours is the one that stays. */
+.search input::-webkit-search-cancel-button {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.search input::-ms-clear {
+  display: none;
+}
+
+/*
+ * ABSOLUTE, and that is what lets it be as big as it needs to be: it is out of
+ * flow, so neither the button nor its × has any say in the height of the field.
+ * Kept under the field's own height so it still sits inside the box.
+ */
+.search__clear {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--bone-faint);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.search__clear:hover,
+.search__clear:focus-visible {
+  color: var(--bone);
+  background: var(--ink-700);
+}
+
+.search__clear .icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* ── Exercise dialog ───────────────────────────────────────────────────────
+ * Adding or changing an exercise of your own. `.notice`'s panel, but left
+ * aligned and stretched: that one is a centred question and this is a form, and
+ * centred fields with centred legends are unreadable as a column.
+ *
+ * In theme.css rather than beside a screen's styles because it opens from TWO
+ * screens, the exercises page and the editor, whose stylesheets are separate.
+ */
+.exdlg {
+  /* Its own accent, matching the exercises page's blue. Declared here rather than
+     inherited, because the dialog also opens from the editor, whose screen sets
+     no accent of its own. */
+  --accent: var(--role-rest);
+  width: min(100%, 30rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--step-5);
+  display: grid;
+  align-content: start;
+  gap: var(--step-4);
+  text-align: left;
+  color: var(--bone);
+  background: var(--ink-800);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.exdlg__title {
+  margin: 0;
+  font-size: max(1.05rem, min(1.9cqi, 1.4rem));
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+/* A label over its control, as the generator's fields are. */
+.exdlg__field {
+  display: grid;
+  gap: var(--step-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.exdlg__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--step-2);
+}
+
+.exdlg__name {
+  width: 100%;
+  padding: var(--step-3) var(--step-4);
+  font: inherit;
+  color: var(--bone);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.exdlg__why {
+  margin: 0;
+  color: var(--bone-dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* The name is already taken. The page's own accent rather than red: nothing is
+   broken, and the way forward is the button inside this line. */
+.exdlg__clash {
+  display: grid;
+  gap: var(--step-2);
+  margin: 0;
+  padding: var(--step-3);
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: 0;
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  border-radius: var(--radius);
+}
+
+.exdlg__cands {
+  display: grid;
+  gap: var(--step-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One exercise you could take instead: a full-width row, so it reads as a
+   choice rather than as a word in a sentence. */
+.exdlg__cand {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: var(--step-3) var(--step-4);
+  text-align: left;
+  color: var(--bone);
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 150ms var(--ease);
+}
+
+.exdlg__cand:hover,
+.exdlg__cand:focus-visible {
+  border-color: var(--accent);
+}
+
+.exdlg__candname {
+  font-weight: 650;
+}
+
+.exdlg__candwhy {
+  color: var(--bone-faint);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.exdlg__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--step-3);
+  margin-top: var(--step-2);
+}
+
 /* ── Help tray ─────────────────────────────────────────────────────────────
  * A modal dialog pinned to the right edge rather than centred: help is read
  * alongside the thing it describes, and a centred box covers exactly what is
