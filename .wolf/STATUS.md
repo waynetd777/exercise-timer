@@ -2,11 +2,11 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (Generator now builds her EMOM, 30/30 and AMRAP sections, weighted by the harvest)
+> Last updated: 2026-09-01 (EMOM/30/30/AMRAP generator, parser fix, and a history rewrite that redacted the emails)
 
 ---
 
-## 🏁 Declared formats in the generator: EMOM, 30/30, AMRAP (2026-09-01, done, NOT pushed)
+## 🏁 Declared formats in the generator: EMOM, 30/30, AMRAP (2026-09-01, done, pushed 04f4af6)
 
 Wayne asked whether the generator could build the formats she writes, then chose "harvest the formats she
 uses and pick weighted by frequency". It could not before: `THEME_SHAPE` hardcoded one shape per theme, and
@@ -44,13 +44,36 @@ not match that heading; changing it would move the existing SECTION_THEMES count
 **Also done:** `/Users/wayned/Downloads/instructor-routines-2026.timer.json`, all 16 instructor routines as an
 import bundle named the way PasteDialog names a paste ("Trampoline - 2026-04-16"). Built by a subagent.
 
-**Open, for Wayne:** the 16 instructor emails ARE tracked and pushed to the PUBLIC repo. The routine text
-carries no identifiers, but a forwarder's first name appeared in 7 tracked files (emails/README.md, pasteFormat.ts:12,
-generate.ts:173, samples.ts:51, STATUS.md, cerebrum.md), and all of `.wolf/` is public too. Options put to
-him: redact the name, untrack `.wolf/`, or purge from history. Deleting the emails is not cheap: ten files
-read them, including three harvest scripts and the "understands every line" test.
+## 🧹 Parser fix and a history rewrite (2026-09-01, done, pushed)
 
-**Next:** Wayne's call on the privacy question, then commit and push.
+**Parser (a91e3ae).** "🔥 Challenge: Finish with a 60-second wall sit to empty the tank!" closes the 13 July
+trampoline routine and was the ONE line in sixteen the parser could not place: `FLAME_SECTION` took the whole
+sentence as a heading name, so it opened a section that held nothing and got reported instead of run. Narrowed
+that regex to a real heading (no sentence punctuation, no interior colon), and added `FINISH_WITH`, which reads
+the line the way `REPLACE_WITH` reads "Replace rest with 30-second Squat Hold": the sentence becomes the note
+and the stated step is added. It declines where no duration is stated. The step also CLOSES the block above it,
+or the wall sit runs after every one of the ladder's nine rungs. `KNOWN_UNPLACED` is now empty; keep it so.
+
+**Redaction (history rewritten, force-pushed).** The repo is public, and 250 commits carried two real email
+addresses in their author/committer fields: `waynetd@gmail.com` (192) and the Sanlam work address (56). A
+forwarder's first name was in 6 files. `git filter-repo` with a mailmap and a replace-text list rewrote all
+250 commits; every author is now `waynetd777 <waynetd777@users.noreply.github.com>` and the name is gone from
+every blob. The redaction commit itself was pruned as empty, which is correct. Backup of the pre-rewrite
+history: `~/Downloads/exercise-timer-prerewrite-20260901-0456.bundle`.
+
+**KEPT deliberately:** "Wayne Davies" (the MIT copyright line on every file and in LICENSE; removing it breaks
+the attribution the licence asks for) and `i@izs.me` (third-party npm metadata in package-lock.json). The
+routine .txt fixtures carry no identifiers at all and stay tracked: ten files read them, including three
+harvest scripts and the "understands every line" test.
+
+**STILL OPEN, and it matters:** GitHub did NOT delete the old objects. `gh api .../commits/2d727ed` still
+returns the pre-rewrite commit with the gmail address in it. A force-push only makes them unreachable. The
+repo has 0 forks, 0 stars, 0 issues, so the cheap fix is to delete and recreate it (Pages needs re-enabling);
+the alternative is asking GitHub Support to purge unreachable objects.
+
+---
+
+**Next:** Wayne's call on purging the old objects from GitHub.
 
 ---
 
