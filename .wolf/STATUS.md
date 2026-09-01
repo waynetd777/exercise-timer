@@ -2,7 +2,106 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (v9.7: generate dialog — 55/60 min, panel owns its container, notes first)
+> Last updated: 2026-09-01 (v9.8: weight and picture offered to the exercises page; one × for every clearable field; every dialog panel owns its container)
+
+---
+
+## 🏋️ A step's weight and picture, offered to the exercises page (2026-09-01, done, v9.8)
+
+Wayne: "when a weight is captured for an exercise in the editor and the exercise does not yet have
+a weight captured on the exercises page, ask the user if they want to add the weight to the exercise
+rather than just for this routine" — then "likewise for an image", then "likewise for a new exercise
+added to a routine including image and weight — open the same dialog used to add an exercise".
+
+**Three routes, one idea.** A weight and a picture belong to your gym, not to one routine
+(`weights.ts`, `pictures.ts`). A step stating either is a deliberate override. The app now notices
+when you have written one down for an exercise the page holds nothing for, and asks.
+
+1. **A weight typed on a work step.** `SegmentRow.commitText` reports any non-empty load commit to
+   `EditorScreen.offerWeight`, which decides. A `ConfirmDialog` asks "Is 30kg your weight for
+   Squats?" — *Add to my exercises* / *Just this routine*.
+2. **A picture chosen for a work step.** Both routes in (catalogue and upload) funnel through
+   `EditorScreen.chosePicture`, which asks the same question.
+3. **An exercise added from a step.** `ExerciseDialog` gained a Weight field and a Picture field
+   (the editor's own `ImagePicker`, rendered as a SIBLING dialog, never a child). It opens on
+   whatever the step is already carrying, and hands both back through a third `onSave` argument,
+   `ExerciseTables`. The exercises page passes its own tables in and writes them back.
+
+**Accepting CLEARS the step's own copy** — the load through `clearText`, the picture through
+`clearMedia`, in the same `editBlocks` call as the rest, so one undo takes the lot. This is the
+point rather than a side effect: you have just said the number is the exercise's, and a second copy
+on the step is the one that goes stale next time you move up a plate.
+
+**The gate Wayne caught: the name must be a known exercise.** "surely if a new exercise is not added
+to the exercise list, there's no point in asking whether its weight should be added?" Right — the
+tables are keyed by folded exercise name, so a weight filed under "Warm Up" is an entry nothing ever
+reads. `EditorScreen.knownExercise` runs `sameExercise` over the table and returns the TABLE's
+spelling, so a step reading "leg presses" files under Leg Press or not at all. A name off the table
+already has the better offer: the name field's *Add to my exercises*, which now collects both.
+
+Each exercise is asked about once per visit (`declinedWeight` / `declinedPicture` refs), so
+correcting a number is not nagged at.
+
+**Also on the dialog, at Wayne's ask:** the bottom explainer paragraph is gone; Cancel takes focus
+with `preventScroll` (`autoFocus` was scrolling the panel to its own bottom, with the name field off
+the top); actions right-aligned like `.paste__actions`; panel widened to 44rem.
+
+### The container bug, swept
+
+Wayne: "check all the other dialogs in the system and make a note to stop this happening
+repeatedly." Third sighting of bug-181. Four panels were still missing `container: <name> /
+inline-size`: `.exdlg`, `.notice` (every confirm/notice dialog and `ImageSheet`), `.tray`, `.picker`.
+All six now declare one. The rule is written up beside `--label-size-sm` in `theme.css` and in
+cerebrum's Do-Not-Repeat. `.exdlg__title` now uses `var(--size-name)` rather than a third bespoke
+`cqi` expression.
+
+### One × for every field that has one
+
+Wayne: "add an x to the weight fields in both the editor and the exercises page like the one in the
+exercise page searchbox". The editor's weight field had one at 1.5rem in `editor.css`; the search
+box has one at 2rem in `theme.css`; the exercises page's rows and the exercise dialog had none.
+Consolidated into `.clearable` / `.clearable__x` in theme.css, sharing every rule with `.search` /
+`.search__clear`, and the `editor.css` copy deleted. All four fields wear it now.
+
+The exercises page's weight column went 7.5rem → 9rem to pay for the 2.5rem the button reserves —
+reserved ALWAYS, because the field is right-aligned and a padding that came and went would shift
+the number sideways on the first character typed. Its × shows only where THIS table holds the key,
+not merely where the field displays a number: a row showing a weight `findLoad` reached from a
+neighbouring spelling has nothing here to clear, and an × that did nothing would be worse than none.
+
+**Files:** `ExerciseDialog.tsx`, `EditorScreen.tsx`, `editor/rows.tsx`, `editor/ExerciseField.tsx`,
+`ExercisesScreen.tsx`, `ConfirmDialog.tsx` (+`cancelLabel`, `tone`), `theme.css`, `editor.css`,
+`exercises.css`, `help.ts`.
+**Tests:** 1314 pass. New: 10 in `EditorScreen.test.tsx`, 5 in `ExerciseDialog.test.tsx`, 2 in
+`ExercisesScreen.test.tsx`.
+**Not done:** nothing outstanding on this quest.
+
+### "No room for General Body" now says which axis it means (done)
+
+Wayne: "why does it say no room for general body when the only selectable options are upper, lower
+and torso?" Because they are two different axes — General Body is a SECTION THEME (`generate.ts`,
+modelled on her routines: General Body, Arms & Shoulders, Legs, Core, Finisher), and the area chips
+filter which exercises the pools may draw on. The note named a theme in a report whose only named
+choices are areas, so it read as a fourth area that was never on offer.
+
+The note says "section" now, and lists as a person does (`listOf`: "A, B and C", no Oxford comma —
+`join(', ')` was leaving a fragment). Both branches:
+
+- *"No room for the General Body, Arms & Shoulders and Legs sections in 30 minutes."*
+- *"No room for the Legs and Core sections: what fits already comes to about 34 minutes."*
+
+The CIRCUIT path had its own version of the same note, interpolating the raw `BodyArea` key: "the
+upper body" and "the lower body" read fine, **"the torso body"** did not. It uses `AREA_NAMES` from
+`exercises.ts` now, lowercased — these are not proper names in that sentence, unlike the section
+themes. While in there, `describeRoutine`'s local `AREA_NAMES` (Title Case, and torso → "Core")
+became `TITLE_WORDS`: it was about to shadow the import, and the two really are different
+vocabularies — one names a routine, the other writes a sentence.
+
+Collapsed into ONE note too, matching the sections report: "No room for the torso and lower body in
+12 minutes." Two near-identical stacked lines was the same complaint that report already answered.
+Listed in the guide's order (`upper, torso, lower`), not the order the chips were pressed — the spec
+carries whatever sequence the dialog's toggles left behind, and "the torso and upper body" one time
+and "the upper body and torso" the next looks like two different statements.
 
 ---
 

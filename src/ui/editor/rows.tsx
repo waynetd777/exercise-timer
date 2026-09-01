@@ -99,6 +99,7 @@ export function SegmentRow({
   onPatch,
   onTiming,
   onClearText,
+  onWeightTyped,
   exercises,
   onPickExercise,
   onAddExercise,
@@ -116,6 +117,14 @@ export function SegmentRow({
   onPatch: (path: Path, patch: Partial<Omit<Segment, 'kind' | 'id'>>) => void
   onTiming: (path: Path, timing: Timing, typed?: boolean) => void
   onClearText: (path: Path, field: 'note' | 'alternative' | 'load') => void
+  /**
+   * A weight was just typed onto a work step. Whether that is worth asking about
+   * is the SCREEN's question, not the row's: it turns on whether the name is an
+   * exercise at all, which needs the table. See `EditorScreen`'s `offerWeight`.
+   * Absent leaves the field as it was, which is what a test with no dialog
+   * behind it wants.
+   */
+  onWeightTyped?: (path: Path, name: string, load: string) => void
   /** The exercise table, built once by the screen rather than per row. */
   exercises: readonly ExerciseOption[]
   onPickExercise: (path: Path, option: ExerciseOption) => void
@@ -244,6 +253,15 @@ export function SegmentRow({
     if (next === (segment[field] ?? '')) return
     if (next === '') onClearText(path, field)
     else onPatch(path, { [field]: next })
+
+    /*
+     * A weight typed onto a work step, reported upward. Whether it is your
+     * weight for the exercise or this routine's deliberate one-off is a real
+     * question with two real answers, and the screen is where it gets asked.
+     */
+    if (field === 'load' && next !== '' && segment.role === 'work' && segment.name.trim() !== '') {
+      onWeightTyped?.(path, segment.name.trim(), next)
+    }
   }
 
   return (
@@ -540,7 +558,8 @@ export function SegmentRow({
 }
 
 /**
- * The weight field, with a way to empty it.
+ * The weight field, with a way to empty it: `.clearable`, the same × the search
+ * box and the exercises page's own weight fields wear.
  *
  * Emptying it is a REAL ACTION here, not a lack of one: an empty load means
  * "whatever I lift for this", so clearing the field is how a step stops
@@ -566,7 +585,7 @@ function LoadField({
   const [text, setText] = useState(value)
 
   return (
-    <span className="efield-clearable">
+    <span className="clearable">
       <input
         className="efield"
         value={text}
@@ -587,7 +606,7 @@ function LoadField({
       {text !== '' && (
         <button
           type="button"
-          className="efield-clear"
+          className="clearable__x"
           aria-label={`Clear the weight for ${name}`}
           title={hint ? `Clear, and use ${hint} from the weights page` : 'Clear'}
           /* Blur would otherwise fire first and commit the old text, and on a

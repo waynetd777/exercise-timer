@@ -453,3 +453,9 @@
 | 13:43 | Edited src/routines/generate.ts | 4→5 lines | ~106 |
 | 13:44 | Edited src/ui/library.css | CSS: max-width, answer, container | ~301 |
 | 13:48 | Generate dialog v9.7: added 55/60 min lengths; `.generate` now owns `container: paste / inline-size` so cqi measures the 44rem panel, not the library behind it — report text pinned to the 1rem floor at every width and the action chips stop wrapping on desktop, while the dead `@container paste (max-width: 26rem)` phone stack finally resolves; notes moved above the count/list; removed the standing "rep-based routine has no length" note (help.ts:79 covers it) | GenerateDialog.tsx, library.css, generate.ts, 2 test files, version.ts, STATUS/cerebrum/buglog | 1294 tests, lint, typecheck, build all pass; buglog bug-181 | ~48k |
+| 13:57 | Session end: 5 writes across 3 files (GenerateDialog.tsx, generate.ts, library.css) | 0 reads | ~1056 tok |
+
+## Session: 2026-09-01 13:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

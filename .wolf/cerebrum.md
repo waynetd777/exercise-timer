@@ -33,6 +33,10 @@
   matches — no error, no fallback. `@container paste (max-width: 26rem)` had
   been dead in the generate dialog the whole time, so its narrow-phone
   full-width button stack never fired.
+- **[Audited 2026-09-01, later the same day.]** Wayne asked for the sweep after
+  hitting it a third time. Four more panels were missing it: `.exdlg`,
+  `.notice` (every confirm and notice dialog in the app, plus `ImageSheet`),
+  `.tray` and `.picker`. All six now declare one. See Do-Not-Repeat.
 - **A note shown on every run is not a note.** The sections generator pushed
   "A rep-based routine has no length…" unconditionally, which buried the one
   green line that varied ("No room for Core in 35 minutes") below the exercise
@@ -513,6 +517,20 @@ other sourcing job.
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+
+- [2026-09-01] **A new dialog panel MUST declare `container: <name> / inline-size`, on the
+  same line block as its `width`.** Found three times in one day, one panel at a time
+  (`.generate`, then `.exdlg`, then `.notice`/`.tray`/`.picker` in the audit Wayne asked
+  for). `cqi` resolves against the nearest ANCESTOR container; a `<dialog>` sits in the top
+  layer but is still a child of the screen that opened it, and every screen declares
+  `container-type: inline-size`. So a panel with no container measures the whole screen
+  behind it: its text grows with the window while the panel stays pinned at its
+  `max-width`, and any `@container <name> (...)` rule written for it silently never
+  matches. It is invisible at the width a dialog gets built and reviewed at, which is why
+  it keeps coming back. The rule is written up beside `--label-size-sm` in `theme.css`.
+  **All six panels now carry it: `.paste`, `.generate`, `.notice`, `.exdlg`, `.tray`,
+  `.picker`. Check any seventh before shipping it, and prefer an existing token
+  (`--size-name`, `--label-size-sm`) over a bespoke `cqi` expression.**
 
 ## Decision Log
 

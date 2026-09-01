@@ -49,6 +49,8 @@ describe('adding an exercise of your own', () => {
     expect(onSave).toHaveBeenCalledWith(
       { name: 'Sandbag Lunge', area: 'lower', equipment: 'kettlebell' },
       null,
+      // The weight and the picture the dialog also asks for, both left empty.
+      { weight: '', picture: null },
     )
   })
 
@@ -223,7 +225,11 @@ describe('changing one of yours', () => {
     fireEvent.change(name(), { target: { value: 'Sandbag Step-up' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Sandbag Step-up' }), 'Sandbag Lunge')
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Sandbag Step-up' }),
+      'Sandbag Lunge',
+      { weight: '', picture: null },
+    )
   })
 
   it('says the warning is about a rename, not a second row', () => {
@@ -248,6 +254,7 @@ describe('changing one of yours', () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Bugarian Split Squats' }),
       'Sandbag Squat',
+      { weight: '', picture: null },
     )
   })
 
@@ -267,5 +274,99 @@ describe('changing one of yours', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(onSave).toHaveBeenCalled()
+  })
+})
+
+/**
+ * The weight and the picture are not part of the exercise — they live in their
+ * own per-device tables — so the dialog hands them back rather than folding them
+ * into the record. See `ExerciseTables`.
+ */
+describe('the weight and the picture', () => {
+  it('hands back what was typed, separately from the exercise', () => {
+    const onSave = vi.fn()
+    render(
+      <ExerciseDialog name="Sandbag Lunge" table={table} onSave={onSave} onClose={vi.fn()} />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Weight'), { target: { value: ' 30kg ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    // Trimmed, as every other load in the app is, and NOT on the record: a
+    // `CustomExercise` with a weight on it would be a second place to keep one.
+    expect(onSave.mock.calls[0]![2]).toEqual({ weight: '30kg', picture: null })
+    expect(onSave.mock.calls[0]![0]).not.toHaveProperty('weight')
+  })
+
+  it('clears the weight with the × in the field', () => {
+    const onSave = vi.fn()
+    render(
+      <ExerciseDialog
+        name="Sandbag Lunge"
+        table={table}
+        tables={{ weight: '30kg', picture: null }}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByLabelText('Clear the weight'))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    expect((screen.queryByLabelText('Weight') as HTMLInputElement).value).toBe('')
+    expect(onSave.mock.calls[0]![2]).toEqual({ weight: '', picture: null })
+  })
+
+  it('opens on what the tables already hold', () => {
+    render(
+      <ExerciseDialog
+        name="Sandbag Lunge"
+        table={table}
+        tables={{ weight: '30kg', picture: { source: 'bundled', path: 'sandbag.jpg' } }}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect((screen.getByLabelText('Weight') as HTMLInputElement).value).toBe('30kg')
+  })
+
+  it('leaves the picture out where there is no catalogue to choose from', () => {
+    // The weight is free text and needs nothing behind it; the picture needs the
+    // library's images, so without them the field would be a button to nowhere.
+    render(<ExerciseDialog name="Sandbag Lunge" table={table} onSave={vi.fn()} onClose={vi.fn()} />)
+
+    expect(screen.getByLabelText('Weight')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Choose' })).toBeNull()
+  })
+
+  it('takes a picture off the catalogue and hands that back too', () => {
+    const onSave = vi.fn()
+    render(
+      <ExerciseDialog
+        name="Sandbag Lunge"
+        table={table}
+        knownImages={[
+          {
+            id: 'sandbag.jpg',
+            ref: { source: 'bundled', path: 'sandbag.jpg' },
+            src: 'sandbag.jpg',
+            label: 'Sandbag',
+            uses: 0,
+          },
+        ]}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Choose' }))
+    fireEvent.click(screen.getByRole('button', { name: /Sandbag/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    expect(onSave.mock.calls[0]![2]).toEqual({
+      weight: '',
+      picture: { source: 'bundled', path: 'sandbag.jpg' },
+    })
   })
 })

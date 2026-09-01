@@ -3037,6 +3037,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-01T11:46:44.036755Z"
+    },
+    {
+      "id": "bug-182",
+      "timestamp": "2026-09-01T18:37:06.218513Z",
+      "error_message": "USER REPORTED: the exercise dialog's text sizes did not match the generate dialog. Audit found the same missing-container bug in `.exdlg`, `.notice`, `.tray` and `.picker` \u2014 every dialog panel in the app except `.paste` and `.generate`.",
+      "file": "src/ui/theme.css",
+      "root_cause": "The THIRD sighting of bug-181's cause. `cqi` resolves against the nearest ancestor container; a `<dialog>` is in the top layer but still a child of the screen that opened it, and every screen declares `container-type: inline-size`. So a panel that declares none measures the whole screen behind it. `--label-size-sm: clamp(1rem, 1.6cqi, 1.4rem)`, `--size-name`, `--size-title` and `--size-display` are all cqi, so the panel's legends, chips and titles grew with the window while the panel stayed pinned at its max-width. Invisible at the width a dialog is built at; only shows up on a wide screen, which is why it kept coming back one panel at a time.",
+      "fix": "Audited every `<dialog>` in the app \u2014 six panels: `.paste`, `.generate`, `.notice`, `.exdlg`, `.tray`, `.picker`. Added `container: <name> / inline-size` to the four that lacked one. Wrote the rule as a block comment beside the `--label-size-sm` token in theme.css (the one place a reader of these units lands) and as a Do-Not-Repeat entry. Also gave `.exdlg__title` `var(--size-name)`, so it matches `.paste__title` rather than carrying a third bespoke size.",
+      "tags": [
+        "css",
+        "container-queries",
+        "dialog",
+        "recurring",
+        "theme"
+      ],
+      "occurrences": 3,
+      "last_seen": "2026-09-01T18:37:06.218699Z"
     }
   ]
 }

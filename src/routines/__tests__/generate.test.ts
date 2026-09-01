@@ -65,7 +65,16 @@ describe('the length it asks for', () => {
     // Twelve minutes is a ten-minute warm-up, a cool down and room for one
     // exercise, so two of the three areas asked for cannot appear at all.
     const { notes } = make({ totalMs: 12 * 60_000 })
-    expect(notes.filter((n) => /No room for the \w+ body/.test(n))).toHaveLength(2)
+    const room = notes.filter((n) => n.startsWith('No room for the '))
+    /*
+     * ONE note naming both, not one note each: two near-identical lines is the
+     * same complaint the sections report already answered.
+     *
+     * And named as a person says them, in the guide's order. Interpolating the
+     * raw `BodyArea` key gave "the upper body" and "the lower body", which read
+     * fine, and "the torso body", which does not.
+     */
+    expect(room).toEqual(['No room for the torso and lower body in 12 minutes.'])
   })
 
   it('says how far off it came when it is more than a minute or two', () => {
@@ -586,6 +595,27 @@ describe('the instructor’s shape', () => {
     expect(sections({ totalMs: 35 * 60_000 }, 11).notes.join(' ')).toMatch(
       /No room for .* in 35 minutes/,
     )
+  })
+
+  it('calls a dropped theme a SECTION, and lists them as a person would', () => {
+    /*
+     * Wayne, on seeing the note: "why does it say no room for general body when
+     * the only selectable options are upper, lower and torso?" Because those are
+     * two different axes — an area filters the pools, a theme is one of the named
+     * sections her routines come in — and the note named a theme in a report
+     * whose only named choices are areas. The word "section" is what says which.
+     *
+     * And "General Body, Core" reads as a fragment; the last comma is an "and".
+     */
+    const notes = sections({ totalMs: 35 * 60_000 }, 11).notes.join(' ')
+    expect(notes).toMatch(/No room for the .*sections? in 35 minutes/)
+    expect(notes).not.toMatch(/No room for [A-Z]/)
+    const listed = /No room for the (.*?) sections? in/.exec(notes)?.[1] ?? ''
+    if (listed.includes(',') || listed.includes(' and ')) {
+      expect(listed).toContain(' and ')
+      // The Oxford comma is not this app's house style: "A, B and C".
+      expect(listed).not.toMatch(/, and /)
+    }
   })
 
   it('explains a dropped theme without blaming minutes the routine overran anyway', () => {

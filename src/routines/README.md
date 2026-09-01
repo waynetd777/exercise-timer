@@ -315,9 +315,16 @@ finisher are built first and bookend the routine, then body sections are added
 until the next would overshoot by more than half of itself. A section that
 overshoots is rebuilt at the smallest she has written its shape — three rounds,
 five EMOM moves — before its theme is given up (not a 30/30 or an AMRAP, whose
-cost is the clock), and what still did not fit is named in `notes`: "No room
-for X in 45 minutes" where the routine ran short, "what fits already comes to
-about M minutes" where whole sections overran the ask. WHICH themes get the
+cost is the clock), and what still did not fit is named in `notes`: "No room for
+the General Body and Core **sections** in 45 minutes" where the routine ran
+short, "what fits already comes to about M minutes" where whole sections overran
+the ask. The word *section* is load-bearing. These are THEMES, and the only
+things the dialog names are the body areas, so "No room for General Body" read
+as a fourth area alongside Upper body, Torso and Lower body — one that was never
+on offer. The two are different axes: an area decides which exercises the pools
+may draw on, a theme is one of the named sections she writes, and a General Body
+section is built from whichever areas were asked for. The list is joined by
+`listOf`, so the last comma is an "and". WHICH themes get the
 room follows how often she LEAVES EACH OUT: the harvest counts, per routine
 that names its sections, which themes are absent (General Body 2 of 14, Arms &
 Shoulders 1, Core 1, Legs 0), and the drop order is drawn with those plus one
@@ -376,6 +383,11 @@ Three rules worth knowing, all pinned by tests:
 - **Areas alternate**, which is what makes the output read like the routines it
   learned from. "Never the same area twice" applies only where there is another
   area to alternate with, or asking for the torso alone stops after one exercise.
+  An area the minutes could not reach at all is named in `notes`, all of them in
+  ONE line and in the guide's order: "No room for the torso and lower body in 12
+  minutes." Through `AREA_NAMES`, not the raw `BodyArea` key, which read "the
+  torso body"; lowercased, because unlike a section theme these are not proper
+  names in that sentence.
 - **The first exercise gets no announcement.** The announcement is what you read
   while the cardio minute runs, and the first comes straight off the warm-up.
 - **A filter the user set is never widened quietly.** Multi-gym only reports a

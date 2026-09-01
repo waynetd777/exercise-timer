@@ -30,7 +30,7 @@ import { resolveMedia, resolveMediaSync } from '../media/resolveMedia'
 import { BackIcon, CloseIcon, HelpIcon, ImageIcon, PencilIcon, PlusIcon, TrashIcon } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
 import { NoticeDialog } from './NoticeDialog'
-import { ExerciseDialog } from './ExerciseDialog'
+import { ExerciseDialog, type ExerciseTables } from './ExerciseDialog'
 import { HelpTray } from './HelpTray'
 import { ImagePicker, ImageSheet } from './editor/ImageDialogs'
 import { EXERCISES_HELP } from './help'
@@ -303,34 +303,23 @@ export function ExercisesScreen({
     items.reduce((count, exercise) => (mine(exercise.name) ? count + 1 : count), 0)
 
   /**
-   * Moves whatever a per-device table keys by name, for a rename.
+   * One entry moved from one folded name to another, for a rename.
    *
-   * The weights and the pictures are held here, so they move here; the measured
-   * pace is nobody's state and moves through `renamePace`. Without all three, a
-   * renamed exercise would keep its row and lose its number, its photo and its
-   * pace to a key nothing asks about again.
+   * PURE, and the caller writes. A save can move an exercise's weight AND set a
+   * new one in the same breath, and two `setWeights` calls out of one handler
+   * would each have started from the same stale table: the second would have
+   * undone the first.
    */
-  const carryOver = (from: string, to: string) => {
+  const moved = <T,>(table: Record<string, T>, from: string, to: string): Record<string, T> => {
     const fromKey = foldName(from)
     const toKey = foldName(to)
-    if (fromKey === toKey) return
-    const load = weights[fromKey]
-    if (load !== undefined) {
-      const next = { ...weights }
-      delete next[fromKey]
-      next[toKey] = load
-      setWeights(next)
-      saveWeights(next)
-    }
-    const picture = pictures[fromKey]
-    if (picture !== undefined) {
-      const next = { ...pictures }
-      delete next[fromKey]
-      next[toKey] = picture
-      setPictures(next)
-      savePictures(next)
-    }
-    renamePace(from, to)
+    if (fromKey === toKey) return table
+    const value = table[fromKey]
+    if (value === undefined) return table
+    const next = { ...table }
+    delete next[fromKey]
+    next[toKey] = value
+    return next
   }
 
   /**
@@ -341,7 +330,7 @@ export function ExercisesScreen({
    * the old name owned follows it over, and the steps already written are the
    * second question, asked separately below.
    */
-  const saveExercise = (exercise: CustomExercise, from: string | null) => {
+  const saveExercise = (exercise: CustomExercise, from: string | null, tables: ExerciseTables) => {
     const next = addCustom(from === null ? custom : removeCustom(custom, from), exercise)
     setCustom(next)
     saveCustomExercises(next)
@@ -350,8 +339,38 @@ export function ExercisesScreen({
     // Its kit opens, or the exercise you just added would land inside a closed
     // section and look as though nothing had happened.
     setOpened(new Set([exercise.equipment]))
+
+    /*
+     * The weight and the picture the dialog asked for, written under the name it
+     * saved. A rename moves the OLD entries first, so anything the dialog left
+     * alone follows the exercise across; what it did change is written over the
+     * top of that. The measured pace is nobody's state here and moves through
+     * `renamePace`. Without all three, a renamed exercise would keep its row and
+     * lose its number, its photo and its pace to a key nothing asks about again.
+     */
+    const before = chosenPicture(pictures, from ?? exercise.name)
+    const nextWeights = withWeight(
+      from === null ? weights : moved(weights, from, exercise.name),
+      exercise.name,
+      tables.weight,
+    )
+    const nextPictures = withPicture(
+      from === null ? pictures : moved(pictures, from, exercise.name),
+      exercise.name,
+      tables.picture,
+    )
+    setWeights(nextWeights)
+    saveWeights(nextWeights)
+    setPictures(nextPictures)
+    savePictures(nextPictures)
+    // A photo replaced or taken off has no owner left unless a routine states
+    // it. Swept here for the same reason `setPicture` sweeps.
+    if (before !== undefined && before.source !== 'bundled' && before !== tables.picture) {
+      void sweepOrphans(nextPictures).catch(() => {})
+    }
+
     if (from !== null) {
-      carryOver(from, exercise.name)
+      renamePace(from, exercise.name)
       setRenamed({ from, to: exercise.name })
     }
   }
@@ -824,21 +843,48 @@ export function ExercisesScreen({
                         up down the page.
                       */}
                       {loadable(exercise) ? (
-                        <input
-                          id={id}
-                          className="weight__field"
-                          type="text"
-                          inputMode="text"
-                          value={shown(exercise.name)}
-                          /*
-                           * The placeholder is what your own routines have been
-                           * using, where they say. Better than "e.g. 60kg": it is
-                           * the actual answer, and one tap of Fill takes it.
-                           */
-                          placeholder={hint ?? 'not set'}
-                          aria-label={`Weight for ${exercise.name}`}
-                          onChange={(event) => set(exercise.name, event.target.value)}
-                        />
+                        <span className="clearable">
+                          <input
+                            id={id}
+                            className="weight__field"
+                            type="text"
+                            inputMode="text"
+                            value={shown(exercise.name)}
+                            /*
+                             * The placeholder is what your own routines have been
+                             * using, where they say. Better than "e.g. 60kg": it is
+                             * the actual answer, and one tap of Fill takes it.
+                             */
+                            placeholder={hint ?? 'not set'}
+                            aria-label={`Weight for ${exercise.name}`}
+                            onChange={(event) => set(exercise.name, event.target.value)}
+                          />
+                          {/*
+                            Only where THIS TABLE holds the number, which is not
+                            the same as the field showing one: a row can be
+                            displaying a weight `findLoad` reached from a
+                            neighbouring spelling, and there is nothing here to
+                            clear. An × that did nothing would be worse than none.
+
+                            The search box's ×, at the search box's size. See
+                            `.clearable` in theme.css.
+                          */}
+                          {weights[key] ? (
+                            <button
+                              type="button"
+                              className="clearable__x"
+                              aria-label={`Clear the weight for ${exercise.name}`}
+                              title={
+                                hint
+                                  ? `Clear, and show what your routines use: ${hint}`
+                                  : 'Clear'
+                              }
+                              onClick={() => set(exercise.name, '')}
+                            >
+                              <CloseIcon />
+                            </button>
+                          ) : null}
+                        </span>
                       ) : (
                         <span className="weight__field weight__field--none" aria-hidden="true" />
                       )}
@@ -911,6 +957,19 @@ export function ExercisesScreen({
           name=""
           editing={editing}
           table={table}
+          /*
+            What this page's OWN tables hold for it, so the dialog opens on the
+            number and the photo the row is showing rather than on blanks.
+            Neither reader is the fuzzy one the rows fall back to: a guide
+            illustration is not this table's to save back as an override, and a
+            weight `findLoad` reached from a neighbouring spelling would be
+            written down under this name the moment anything else was edited.
+          */
+          tables={{
+            weight: (editing && weights[foldName(editing.name)]) ?? '',
+            picture: (editing && chosenPicture(pictures, editing.name)) ?? null,
+          }}
+          knownImages={knownImages}
           onSave={saveExercise}
           /*
              There is no step to write a name onto from this page, so taking the

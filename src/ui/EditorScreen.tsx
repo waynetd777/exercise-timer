@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { SegmentRole, Workout } from '../engine'
+import type { MediaRef, SegmentRole, Workout } from '../engine'
 import { compile, MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
 import { estimate } from '../routines/estimate'
 import { collectExercises } from '../routines/exerciseOptions'
@@ -18,11 +18,15 @@ import {
   withCustom,
 } from '../storage/customExercises'
 import { currentRates } from '../storage/paces'
-import { currentPictures } from '../storage/pictures'
+import { currentPictures, loadPictures, pictureFor, savePictures, withPicture } from '../storage/pictures'
+import { loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
+import { foldName } from '../routines/foldName'
+import { sameExercise } from '../routines/similar'
 import { fromTables } from '../storage/tables'
 import {
   appendTo,
   applyExercise,
+  blockAt,
   clearMedia,
   clearText,
   duplicateAt,
@@ -47,7 +51,8 @@ import { canRedo, canUndo, redo, undo } from '../editor/history'
 import { HelpTray } from './HelpTray'
 import { PreviewList } from './PreviewList'
 import { NoticeDialog } from './NoticeDialog'
-import { ExerciseDialog } from './ExerciseDialog'
+import { ConfirmDialog } from './ConfirmDialog'
+import { ExerciseDialog, type ExerciseTables } from './ExerciseDialog'
 import { EDITOR_HELP } from './help'
 import { pinDraft, storeFile, unpinDraft } from '../media/pin'
 import { estimated } from './format'
@@ -130,10 +135,16 @@ export function EditorScreen({
 
   /*
    * What the exercises page supplies for a step that carries no picture of its
-   * own. Read once for the screen: every row asks, and the identity has to be
+   * own. Read ONCE for the screen: every row asks, and the identity has to be
    * stable or each row's media effect would re-arm on every keystroke.
+   *
+   * State rather than a memo, because this screen can now write to that page:
+   * accepting "show this picture everywhere" has to move the whole editor onto
+   * the new table in the same breath, or the step it was just cleared from
+   * would go blank until the editor was reopened. Nothing else sets it, so the
+   * identity is as stable as the memo's was.
    */
-  const pictures = useMemo(() => currentPictures(), [])
+  const [pictures, setPictures] = useState(currentPictures)
 
   /*
    * The exercise table the name field offers, built ONCE for the screen, with
@@ -151,6 +162,28 @@ export function EditorScreen({
   const [custom, setCustom] = useState(loadCustomExercises)
   /** The step an exercise is being added FROM, and the name it was typed with. */
   const [naming, setNaming] = useState<{ path: Path; name: string } | null>(null)
+
+  /*
+   * A weight or a picture just put on a step for an exercise the exercises page
+   * holds none for, waiting to be asked about. See `offer` below for why.
+   */
+  const [offeredWeight, setOfferedWeight] = useState<
+    { path: Path; name: string; load: string } | null
+  >(null)
+  const [offeredPicture, setOfferedPicture] = useState<
+    { path: Path; name: string; media: MediaRef } | null
+  >(null)
+  /*
+   * The exercises already asked about and turned down, so each is asked once per
+   * visit to the editor. Without it, correcting a typo in a weight you have just
+   * said is one-off asks the same question again on every blur.
+   *
+   * A ref, not state: nothing renders from it, and it must not be a dependency
+   * of anything. Accepted names need no entry — the page holds a weight for them
+   * afterwards, which is the condition the offer already tests.
+   */
+  const declinedWeight = useRef(new Set<string>())
+  const declinedPicture = useRef(new Set<string>())
 
   const table = useMemo(() => withCustom(customList(custom)), [custom])
   const exercises = useMemo(() => collectExercises(table, pictures), [table, pictures])
@@ -257,11 +290,95 @@ export function EditorScreen({
         pinDraft(media.hash)
         pinnedUploads.current.push(media.hash)
       }
-      patchSegment(path, { media })
+      chosePicture(path, media)
       setChoosingFor(null)
     } catch {
       setNotice('That image could not be read. Try a JPEG, PNG or WebP.')
     }
+  }
+
+  /**
+   * The exercise a step's name IS, spelled as the table spells it, or null.
+   *
+   * THE GATE ON BOTH OFFERS. The exercises page keeps a weight and a picture
+   * against an exercise, keyed by its folded name; a step called "Warm Up" or
+   * "Course leg 2" is not an exercise, and an entry filed under that name would
+   * be one nothing on that page ever shows and nothing else ever reads. There is
+   * nothing to add it TO, so there is nothing to ask.
+   *
+   * The step whose name is not on the table has its own offer already, and a
+   * better one: `ExerciseField` will make the name an exercise, and the dialog
+   * that does it collects the weight and the picture on the way past.
+   *
+   * The TABLE's spelling is what comes back, because that is the key the tables
+   * use: a step reading "leg presses" is Leg Press, and its weight belongs under
+   * Leg Press or under nothing.
+   */
+  const tableNames = useMemo(() => table.map((exercise) => exercise.name), [table])
+  const knownExercise = (name: string): string | null => sameExercise(name, tableNames)
+
+  /**
+   * A picture put on a step, and the question it raises.
+   *
+   * BOTH ways of choosing one come through here — the catalogue and an upload —
+   * so the offer is made wherever the picture came from.
+   *
+   * The question is worth asking for the same reason the weight's is: a picture
+   * belongs to your gym rather than to one routine, and an exercise the page has
+   * no picture for is one where saying so costs nothing and gains every other
+   * routine that names it. Where the page ALREADY has one, the step is doing the
+   * deliberate thing `pictures.ts` exists to allow, and there is nothing to ask.
+   */
+  const chosePicture = (path: Path, media: MediaRef) => {
+    patchSegment(path, { media })
+    const block = blockAt(blocks, path)
+    if (block?.kind !== 'segment' || block.role !== 'work') return
+    const name = knownExercise(block.name)
+    if (name === null || declinedPicture.current.has(foldName(name))) return
+    if (pictureFor(name) !== undefined) return
+    setOfferedPicture({ path, name, media })
+  }
+
+  /**
+   * A weight typed onto a step, and the same question about it.
+   *
+   * Only where the page holds NOTHING for the exercise. A step overriding a
+   * weight already written down is the deliberate case the table exists to
+   * allow, and asking about it every time would be nagging. Read fresh rather
+   * than off the row's hint: this runs on a blur, and the answer has to be the
+   * current one after an earlier offer was accepted.
+   */
+  const offerWeight = (path: Path, typed: string, load: string) => {
+    const name = knownExercise(typed)
+    if (name === null || declinedWeight.current.has(foldName(name))) return
+    if (weightFor(name) !== '') return
+    setOfferedWeight({ path, name, load })
+  }
+
+  /**
+   * What the tables should now hold for one exercise, written.
+   *
+   * The tables are read back off storage rather than held here: this screen is
+   * not their owner, the exercises page is, and a copy kept across an editing
+   * session is a copy that goes stale the moment another tab saves. They are
+   * two short objects in `localStorage`; reading one on a button press is free.
+   */
+  /**
+   * What a step is already carrying, as the exercise dialog's opening values.
+   * `load` is free text and `media` is the step's OWN picture, never the one it
+   * is borrowing from the page: an inherited illustration is not this step's to
+   * hand over, and the exercise being added does not have one yet by definition.
+   */
+  const stepTables = (path: Path): ExerciseTables => {
+    const block = blockAt(blocks, path)
+    if (block?.kind !== 'segment') return { weight: '', picture: null }
+    return { weight: block.load ?? '', picture: block.media ?? null }
+  }
+
+  const writeTables = (name: string, tables: ExerciseTables) => {
+    saveWeights(withWeight(loadWeights(), name, tables.weight))
+    savePictures(withPicture(loadPictures(), name, tables.picture))
+    setPictures(currentPictures())
   }
 
   const goBack = () => {
@@ -472,6 +589,7 @@ export function EditorScreen({
                   onPatch={patchSegment}
                   onTiming={patchTiming}
                   onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
+                  onWeightTyped={offerWeight}
                   exercises={exercises}
                   pictures={pictures}
                   /* One tree operation, so one press of undo takes the whole
@@ -516,7 +634,7 @@ export function EditorScreen({
         <ImagePicker
           images={knownImages}
           onPick={(ref) => {
-            patchSegment(choosingFor, { media: ref })
+            chosePicture(choosingFor, ref)
             setChoosingFor(null)
           }}
           onUpload={(file) => void upload(choosingFor, file)}
@@ -533,21 +651,46 @@ export function EditorScreen({
         is EDITABLE in the dialog, which is the point. A typo caught here is
         corrected on the step as well, and the dialog's warning is what catches
         it.
+
+        IT ARRIVES CARRYING THE STEP'S WEIGHT AND PICTURE. A step being turned
+        into an exercise usually already says what you lift and shows what it
+        looks like, and asking for both again in the next breath is the app not
+        listening. Whatever the dialog saves goes to the exercises page, and the
+        step stops stating its own: see `onSave` for why that is the point
+        rather than a side effect.
       */}
       {naming !== null && (
         <ExerciseDialog
           name={naming.name}
           table={table}
-          onSave={(exercise: CustomExercise) => {
+          tables={stepTables(naming.path)}
+          knownImages={knownImages}
+          onSave={(exercise: CustomExercise, _from, tables) => {
             const next = addCustom(custom, exercise)
             setCustom(next)
             saveCustomExercises(next)
-            editBlocks((c) =>
-              applyExercise(c, naming.path, {
+            writeTables(exercise.name, tables)
+            /*
+             * ONE tree operation, so one press of undo takes the whole add back:
+             * the name, the per-side flag, and the step's own weight and picture
+             * where the exercise has just taken them over.
+             *
+             * Cleared rather than left in place, because they now say the same
+             * thing twice and only one of them is the truth. A step stating a
+             * weight is saying "this routine, deliberately, is not my usual" —
+             * which is exactly what you have just told it is not the case. Left
+             * alone, the step would go on showing 30kg after the exercise moved
+             * up a plate. See `weights.ts` and `pictures.ts`.
+             */
+            editBlocks((c) => {
+              let out = applyExercise(c, naming.path, {
                 name: exercise.name,
                 ...(exercise.perSide === true ? { perSide: true } : {}),
-              }),
-            )
+              })
+              if (tables.weight !== '') out = clearText(out, naming.path, 'load')
+              if (tables.picture) out = clearMedia(out, naming.path)
+              return out
+            })
             setNaming(null)
           }}
           /* The exercise already exists, so nothing is added: the step simply
@@ -574,6 +717,62 @@ export function EditorScreen({
       */}
       {notice !== null && (
         <NoticeDialog text={notice} busy={false} onClose={() => setNotice(null)} />
+      )}
+
+      {/*
+        The weight just typed, offered to the exercises page.
+
+        Asked, never assumed. Both answers are real: the page's number is what
+        every routine naming the exercise follows, and a step's own load is how
+        one routine says "not my usual weight" on purpose. Only you know which
+        this is, and the app has no evidence either way — which is precisely when
+        it should ask rather than guess.
+
+        Only where the page holds NOTHING for the exercise, so the question is
+        "shall I write this down" rather than "shall I overwrite what you had".
+        `chip--primary`, not the red: nothing is lost either way.
+      */}
+      {offeredWeight !== null && (
+        <ConfirmDialog
+          question={`Is ${offeredWeight.load} your weight for ${offeredWeight.name}?`}
+          detail={`Your exercises page has no weight for it yet. Adding it there means every routine naming ${offeredWeight.name} uses it, and this step follows the page instead of stating a weight of its own.`}
+          confirmLabel="Add to my exercises"
+          cancelLabel="Just this routine"
+          tone="primary"
+          onConfirm={() => {
+            saveWeights(withWeight(loadWeights(), offeredWeight.name, offeredWeight.load))
+            // The step stops overriding: the number it was stating is now the
+            // page's, and two copies of one weight is one of them going stale.
+            editBlocks((c) => clearText(c, offeredWeight.path, 'load'))
+            setOfferedWeight(null)
+          }}
+          onCancel={() => {
+            declinedWeight.current.add(foldName(offeredWeight.name))
+            setOfferedWeight(null)
+          }}
+        />
+      )}
+
+      {/* The picture just chosen, offered to the exercises page. The weight's
+          question, about the other thing a step can say twice. */}
+      {offeredPicture !== null && (
+        <ConfirmDialog
+          question={`Show this picture for ${offeredPicture.name} everywhere?`}
+          detail={`Your exercises page has no picture for it yet. Adding it there means every routine naming ${offeredPicture.name} shows it, and this step follows the page instead of carrying a picture of its own.`}
+          confirmLabel="Add to my exercises"
+          cancelLabel="Just this routine"
+          tone="primary"
+          onConfirm={() => {
+            savePictures(withPicture(loadPictures(), offeredPicture.name, offeredPicture.media))
+            setPictures(currentPictures())
+            editBlocks((c) => clearMedia(c, offeredPicture.path))
+            setOfferedPicture(null)
+          }}
+          onCancel={() => {
+            declinedPicture.current.add(foldName(offeredPicture.name))
+            setOfferedPicture(null)
+          }}
+        />
       )}
 
       {imagePreview && (
