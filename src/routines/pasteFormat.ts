@@ -74,8 +74,17 @@ const NUMBERED_SECTION = /^#\s*\d+\s*(.*)$/
 const TRAILING_HASH_SECTION = /^(\d+)\s*#\s*(.*)$/
 const WORD_HASH_SECTION = /^#\s*(\p{L}.*)$/u
 
-/** "🔥 Final Burnout", "🔥 After Round 5:". */
-const FLAME_SECTION = /^\p{Extended_Pictographic}\s*(.+?):?$/u
+/**
+ * "🔥 Final Burnout", "🔥 After Round 5:".
+ *
+ * A HEADING behind the emoji, and nothing longer. This used to take everything
+ * to the end of the line, so "🔥 Challenge: Finish with a 60-second wall sit to
+ * empty the tank!" opened a section named the whole sentence, which then held
+ * nothing and was dropped: the one line in sixteen routines that went missing
+ * without being reported. A heading has no sentence punctuation and no colon
+ * except the one that closes it. See `FINISH_WITH` for the line itself.
+ */
+const FLAME_SECTION = /^\p{Extended_Pictographic}\s*([^.!?:]{2,30}):?$/u
 
 /** "After Round 4", the same idea without the emoji. */
 const AFTER_ROUND_SECTION = /^after round\s+\d+:?\s*$/i
@@ -190,7 +199,7 @@ const ROUND_REST = new RegExp(
  * That is an ordinary timed step whose label happens to be a rep target, so an
  * EMOM needs no primitive of its own.
  */
-const MINUTE_MS = 60_000
+export const MINUTE_MS = 60_000
 
 /** "Minute 1: 12 × Bicep Curls", the whole minute on one line. */
 const MINUTE_ITEM = new RegExp(`^minute\\s+\\d+\\s*[:.${DASH_CHARS}]?\\s*(.+)$`, 'i')
@@ -260,6 +269,24 @@ const THEN = /^then:?\s*$/i
 
 /** "Replace rest with 30-second Squat Hold", under a "Final round" heading. */
 const REPLACE_WITH = /^replace\b.*?\bwith\s+(.+)$/i
+
+/**
+ * "Finish with a 60-second wall sit to empty the tank!": a closing challenge
+ * written as a sentence instead of as a step.
+ *
+ * Both halves of a step are STATED here, the minute and the movement, so there
+ * is nothing to invent and the step is real. Same treatment as `REPLACE_WITH`:
+ * the line is kept as a note, because why the step is there is worth reading,
+ * and the step is added as well.
+ */
+const FINISH_WITH = /\bfinish\s+with\s+(?:an?\s+)?(.+)$/i
+
+/**
+ * What follows the movement in a sentence like that: "to empty the tank!", and
+ * the emoji cheering it on. Encouragement, not part of what the exercise is
+ * called, so it is cut before the step is read.
+ */
+const PURPOSE_TAIL = /\s+(?:to|so|and)\s+.*$|[.!?].*$/
 
 /** "(Optional) FINAL BURNOUT": a marker sitting in front of a known heading. */
 const LEADING_PAREN = /^\([^)]*\)\s*/
@@ -1234,6 +1261,28 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       addNote(line)
       addItem(parseItem(replace[1]!))
       return
+    }
+
+    // "🔥 Challenge: Finish with a 60-second wall sit to empty the tank!". The
+    // same idea as `REPLACE_WITH`: the sentence is the note, the stated step is
+    // the step. Only where the tail really does state a duration, so "finish
+    // with the last two on your knees" stays prose and is reported.
+    const finish = FINISH_WITH.exec(line)
+    if (finish) {
+      const said = finish[1]!.replace(PURPOSE_TAIL, '').trim()
+      if (LEADING_DURATION.test(said)) {
+        addNote(line)
+        /*
+         * It CLOSES the routine, so it closes the block above it as well, the
+         * way "Then:" does. Left inside the ladder it was written under, a
+         * sixty-second wall sit runs after every one of the nine rungs.
+         */
+        flushAmrap()
+        target = { kind: 'section' }
+        eachMs = null
+        addItem(parseItem(said))
+        return
+      }
     }
 
     // "Rest 30 seconds" on its own line is a rest STEP, not an instruction about
