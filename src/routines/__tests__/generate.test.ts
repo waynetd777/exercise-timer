@@ -500,10 +500,18 @@ describe('the instructor’s shape', () => {
     expect(sectionsOf(sections()).every((b) => b.kind === 'section')).toBe(true)
   })
 
+  /**
+   * A section's theme, without the format she sometimes declares on it.
+   *
+   * "Arms & Shoulders EMOM" is still the Arms & Shoulders section: the format is
+   * drawn separately and rarely, and these tests are about which themes get
+   * built and in what order. `SECTION_FORMATS` has its own tests below.
+   */
+  const themeOf = (name: string) => name.replace(/ (?:EMOM|30\/30|AMRAP)$/, '')
   const namesOf = (result: ReturnType<typeof sections>) =>
-    sectionsOf(result).map((b) => (b.kind === 'section' ? b.name : ''))
+    sectionsOf(result).map((b) => (b.kind === 'section' ? themeOf(b.name) : ''))
   const sectionNamed = (result: ReturnType<typeof sections>, name: string) => {
-    const found = sectionsOf(result).find((b) => b.kind === 'section' && b.name === name)
+    const found = sectionsOf(result).find((b) => b.kind === 'section' && themeOf(b.name) === name)
     if (found?.kind !== 'section') throw new Error(`no ${name} section`)
     return found
   }
@@ -628,7 +636,11 @@ describe('the instructor’s shape', () => {
 
   it('sizes Arms & Shoulders as she does', () => {
     for (let seed = 1; seed <= 10; seed++) {
-      const rounds = sectionNamed(sections({ sections: 6 }, seed), 'Arms & Shoulders').children[0]
+      const built = sectionNamed(sections({ sections: 6 }, seed), 'Arms & Shoulders')
+      // The rounds shape, which is what this is about. An EMOM seed is sized by
+      // its own test: two rounds of minutes, not four or five of counted sets.
+      if (built.name.endsWith('EMOM')) continue
+      const rounds = built.children[0]
       if (rounds?.kind !== 'repeat') throw new Error('not rounds')
       expect(rounds.times).toBeGreaterThanOrEqual(4)
       expect(rounds.times).toBeLessThanOrEqual(5)
@@ -636,6 +648,106 @@ describe('the instructor’s shape', () => {
       expect(work).toBeGreaterThanOrEqual(5)
       expect(work).toBeLessThanOrEqual(6)
     }
+  })
+
+  /**
+   * The first seed whose routine contains a section built in `format`.
+   *
+   * Searched rather than pinned to a seed, because these are drawn by how often
+   * she writes them and that is rarely: one Legs in fifteen is a 30/30. A pinned
+   * seed would be a number nobody could re-derive after a harvest.
+   */
+  const firstWith = (suffix: string) => {
+    for (let seed = 1; seed <= 400; seed++) {
+      const built = sectionsOf(sections({ sections: 6 }, seed)).find(
+        (b) => b.kind === 'section' && b.name.endsWith(` ${suffix}`),
+      )
+      if (built?.kind === 'section') return built
+    }
+    throw new Error(`no ${suffix} section in 400 seeds`)
+  }
+
+  it('writes an EMOM as a minute an exercise, twice round', () => {
+    // Hers: "5-Minute EMOM", "Repeat 2 rounds", then "Minute 1: 12 × Bicep Curls".
+    // Every minute is timed AND counted, which is the whole point of the form.
+    const emom = firstWith('EMOM')
+    expect(emom.display).toBe('timer')
+    expect(emom.note).toMatch(/every minute/i)
+    const rounds = emom.children[0]
+    if (rounds?.kind !== 'repeat') throw new Error('not rounds')
+    expect(emom.children).toHaveLength(1)
+    expect(rounds.times).toBe(2)
+    expect(rounds.children.length).toBeGreaterThanOrEqual(5)
+    expect(rounds.children.length).toBeLessThanOrEqual(6)
+    for (const minute of rounds.children) {
+      expect(minute).toMatchObject({ kind: 'segment', role: 'work', durationMs: 60_000 })
+      if (minute.kind === 'segment') expect(minute.reps?.kind).toBe('fixed')
+    }
+  })
+
+  it('writes a 30/30 as thirty on, thirty off, four rounds', () => {
+    const interval = firstWith('30/30')
+    expect(interval.display).toBe('timer')
+    const rounds = interval.children[0]
+    if (rounds?.kind !== 'repeat') throw new Error('not rounds')
+    expect(rounds.times).toBe(4)
+    // The clock is the work here, so nothing carries a count.
+    for (const step of rounds.children) {
+      expect(step).toMatchObject({ kind: 'segment', durationMs: 30_000 })
+      if (step.kind === 'segment') expect(step.reps).toBeUndefined()
+    }
+    expect(rounds.children.at(-1)).toMatchObject({ role: 'rest' })
+    expect(rounds.children.filter((c) => c.kind === 'segment' && c.role === 'work')).toHaveLength(5)
+  })
+
+  it('writes an AMRAP as one clock with the round as its note', () => {
+    // HOW MANY rounds is the person's to count, so the step is the ten minutes
+    // and the round is written under it. Same shape the parser reads hers into.
+    const amrap = firstWith('AMRAP')
+    expect(amrap.display).toBe('timer')
+    expect(amrap.children).toHaveLength(1)
+    const clock = amrap.children[0]
+    expect(clock).toMatchObject({
+      kind: 'segment',
+      role: 'work',
+      name: 'As many rounds as possible',
+      durationMs: 10 * 60_000,
+    })
+    if (clock?.kind !== 'segment') throw new Error('not a step')
+    expect(clock.reps).toBeUndefined()
+    expect(clock.note?.split('\n')).toHaveLength(5)
+    for (const line of clock.note?.split('\n') ?? []) expect(line).toMatch(/^\d+ × ./)
+  })
+
+  it('only gives a theme a format she has written for it', () => {
+    /*
+     * The draw is weighted by `SECTION_FORMATS`, so a theme she has only ever
+     * written as a list stays one. Core is that theme, and a warm-up is never
+     * anything but the list it has been in every routine of hers.
+     */
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const block of sectionsOf(sections({ sections: 6 }, seed))) {
+        if (block.kind !== 'section') continue
+        const theme = themeOf(block.name)
+        if (theme === 'Core' || theme === 'Warm-up') expect(block.name).toBe(theme)
+      }
+    }
+  })
+
+  it('keeps the declared formats as rare as she writes them', () => {
+    // One Legs in fifteen is a 30/30, one Arms in seventeen an EMOM. A generator
+    // that reached for them every other routine would not read like hers.
+    let declared = 0
+    let all = 0
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const block of sectionsOf(sections({ sections: 6 }, seed))) {
+        if (block.kind !== 'section') continue
+        all += 1
+        if (themeOf(block.name) !== block.name) declared += 1
+      }
+    }
+    expect(declared).toBeGreaterThan(0)
+    expect(declared / all).toBeLessThan(0.15)
   })
 
   it('warms up with what she warms up with', () => {

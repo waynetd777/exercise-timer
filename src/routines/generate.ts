@@ -45,6 +45,7 @@ import type { Prescription } from './exercises.prescription'
 import { PRESCRIPTIONS } from './exercises.prescription'
 import {
   LADDER_COUNTS,
+  SECTION_FORMATS,
   SECTION_THEMES,
   SECTIONS_MAX,
   SECTIONS_TYPICAL,
@@ -461,6 +462,26 @@ const THEME_SHAPE: Readonly<Record<string, ThemeShape>> = {
   Finisher: 'finisher',
 }
 
+/**
+ * How big each declared format is, read off the routines that use them.
+ *
+ * `SECTION_FORMATS` says how OFTEN she writes an EMOM, a 30/30 or an AMRAP.
+ * These are the shapes those take: her EMOMs run five or six minutes and go
+ * round twice, her 30/30 is five moves and four rounds, and the one AMRAP she
+ * put a clock on is ten minutes. None of it is chosen.
+ */
+const MINUTE_MS = 60_000
+const EMOM_MIN_MOVES = 5
+const EMOM_MAX_MOVES = 6
+const EMOM_ROUNDS = 2
+const INTERVAL_MS = 30_000
+const INTERVAL_MOVES = 5
+const INTERVAL_ROUNDS = 4
+const AMRAP_MS = 600_000
+const AMRAP_MOVES = 5
+/** The step an AMRAP becomes, spelled the way `pasteFormat` spells it. */
+const AMRAP_STEP = 'As many rounds as possible'
+
 /** Cardio moves in a warm-up, at `WARM_UP_EACH_MS`, before the stretches. */
 const WARM_UP_CARDIO = 4
 /** Stretches after them, which she writes as "Then finish with 30 sec each". */
@@ -692,6 +713,92 @@ function sectionsRoutine(
     ...over,
   })
 
+  /** The load and the picture, which a step in any shape carries. */
+  const dressed = (exercise: Exercise) => ({
+    ...(loads(exercise.name) ? { load: loads(exercise.name)! } : {}),
+    ...(exercise.media ? { media: bundled(exercise.media) } : {}),
+  })
+  /**
+   * One minute of an EMOM: a rep target and a clock together, so you do the reps
+   * and rest out whatever is left of the minute. The parser reads her minutes
+   * into exactly this, which is why an EMOM needs no primitive of its own.
+   */
+  const minute = (exercise: Exercise): Segment =>
+    segment({
+      name: exercise.name,
+      role: 'work',
+      durationMs: MINUTE_MS,
+      reps: {
+        kind: 'fixed',
+        count: prescribed(exercise)?.reps ?? DEFAULT_REPS,
+        ...(exercise.perSide ? { perSide: true } : {}),
+      },
+      ...dressed(exercise),
+    })
+  /** Thirty seconds of a 30/30. The clock is the work, so no count rides along. */
+  const interval = (exercise: Exercise): Segment =>
+    segment({ name: exercise.name, role: 'work', durationMs: INTERVAL_MS, ...dressed(exercise) })
+
+  /**
+   * An EMOM: a new exercise every minute, then round again, which is how she
+   * writes both of hers. Timed all through, so it is a countdown section.
+   */
+  const emomOf = (name: string, moves: readonly Exercise[]): Section =>
+    section(
+      name,
+      [
+        {
+          kind: 'repeat',
+          id: newId(),
+          times: EMOM_ROUNDS,
+          label: DEFAULT_REPEAT_LABEL,
+          children: moves.map(minute),
+        },
+      ],
+      {
+        display: 'timer',
+        note: 'Start a new exercise every minute. Work, then rest for the remainder of the minute.',
+      },
+    )
+  /** A 30/30: five moves at thirty seconds, thirty seconds off, four rounds. */
+  const intervalOf = (name: string, moves: readonly Exercise[]): Section =>
+    section(
+      name,
+      [
+        {
+          kind: 'repeat',
+          id: newId(),
+          times: INTERVAL_ROUNDS,
+          label: DEFAULT_REPEAT_LABEL,
+          children: [
+            ...moves.map(interval),
+            segment({ name: 'Rest', role: 'rest', durationMs: INTERVAL_MS }),
+          ],
+        },
+      ],
+      { display: 'timer' },
+    )
+  /**
+   * An AMRAP: one clock, with the round in the step's note the way the parser
+   * writes hers. HOW MANY rounds you get is yours to count, so nothing here
+   * invents a number for it.
+   */
+  const amrapOf = (name: string, moves: readonly Exercise[]): Section =>
+    section(
+      name,
+      [
+        segment({
+          name: AMRAP_STEP,
+          role: 'work',
+          durationMs: AMRAP_MS,
+          note: moves
+            .map((e) => `${prescribed(e)?.reps ?? DEFAULT_REPS} × ${e.name}${e.perSide ? ' each side' : ''}`)
+            .join('\n'),
+        }),
+      ],
+      { display: 'timer' },
+    )
+
   /*
    * Every theme narrowed to what was asked for, and a theme left with nothing
    * dropped entirely.
@@ -743,6 +850,37 @@ function sectionsRoutine(
         ],
         { display: 'timer', note: `${WARM_UP_EACH_MS / 1000} seconds each, continuous movement` },
       )
+    }
+
+    /*
+     * The format she declares in a heading, drawn by how often she declares it.
+     * Most sections declare none and are the counted list the shapes below build.
+     *
+     * Picked AFTER the warm-up, for two reasons: she has never written one as
+     * anything but a list, and these three draw strength moves from the themed
+     * pool while a warm-up draws cardio and stretches from its own.
+     */
+    const declared = SECTION_FORMATS.filter((entry) => entry.theme === theme)
+    const format = declared.length > 0 ? weightedPick(declared, (entry) => entry.seen, rng).format : 'standard'
+
+    if (format === 'emom') {
+      const moves = draw(areas, 'strength', between(EMOM_MIN_MOVES, EMOM_MAX_MOVES, rng), (e) => !isHold(e))
+      if (moves.length < 2) return short()
+      return emomOf(`${name} EMOM`, moves)
+    }
+
+    if (format === 'interval30') {
+      // No filter: a thirty-second hold is as much a thirty-second interval as
+      // a set of squats is, and every step here is timed either way.
+      const moves = draw(areas, 'strength', INTERVAL_MOVES)
+      if (moves.length < 2) return short()
+      return intervalOf(`${name} 30/30`, moves)
+    }
+
+    if (format === 'amrap') {
+      const moves = draw(areas, 'strength', AMRAP_MOVES, (e) => !isHold(e))
+      if (moves.length < 2) return short()
+      return amrapOf(`${name} AMRAP`, moves)
     }
 
     if (shape === 'climb') {

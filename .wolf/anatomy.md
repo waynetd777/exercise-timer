@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T01:53:00.884Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T02:43:09.657Z
 > Files: 249 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
@@ -18,7 +18,7 @@
 - `LICENSE` — Project license (~478 tok)
 - `package-lock.json` — npm lock file (~80652 tok)
 - `package.json` — Node.js package manifest (~248 tok)
-- `README.md` — Project documentation (~2803 tok)
+- `README.md` — Project documentation (~2764 tok)
 - `tsconfig.app.json` (~201 tok)
 - `tsconfig.json` — TypeScript configuration (~47 tok)
 - `tsconfig.node.json` (~111 tok)
@@ -52,7 +52,7 @@
 ## docs/screenshots/
 
 - `editor.webp` (~13353 tok)
-- `exercises.webp` (~9726 tok)
+- `exercises.webp` (~10635 tok)
 - `generator.webp` (~14438 tok)
 - `library.webp` (~16917 tok)
 - `paste.webp` (~15736 tok)
@@ -71,7 +71,7 @@
 - `fold.ts` — Exercise Timer (~72 tok)
 - `harvest-exercises.test.ts` — Exercise Timer (~3220 tok)
 - `harvest-prescription.test.ts` — Exercise Timer (~2158 tok)
-- `harvest-shapes.test.ts` — Exercise Timer (~2164 tok)
+- `harvest-shapes.test.ts` — Exercise Timer (~3050 tok)
 
 ## src/
 
@@ -172,14 +172,14 @@
 - `exercises.machine.ts` — Exercise Timer (~2117 tok)
 - `exercises.other.ts` — Exercise Timer (~3130 tok)
 - `exercises.prescription.ts` — Exercise Timer (~4048 tok)
-- `exercises.shapes.ts` — Exercise Timer (~1188 tok)
+- `exercises.shapes.ts` — Exercise Timer (~1548 tok)
 - `exercises.ts` — Exercise Timer (~2047 tok)
 - `foldName.ts` — Exercise Timer (~886 tok)
-- `generate.ts` — Exercise Timer (~14499 tok)
+- `generate.ts` — Exercise Timer (~15912 tok)
 - `imageCatalogue.ts` — Exercise Timer (~1055 tok)
 - `importFiles.ts` — Exercise Timer (~2606 tok)
 - `loads.ts` — Exercise Timer (~2417 tok)
-- `pasteFormat.ts` — Exercise Timer (~15312 tok)
+- `pasteFormat.ts` — Exercise Timer (~15314 tok)
 - `pasteTemplate.ts` — Exercise Timer (~997 tok)
 - `README.md` — Project documentation (~7542 tok)
 - `rename.ts` — Exercise Timer (~3062 tok)
@@ -187,7 +187,7 @@
 - `similar.ts` — Exercise Timer (~2040 tok)
 - `strength-training.routine.json` (~3524 tok)
 - `tabataFormat.ts` — Exercise Timer (~1187 tok)
-- `writeRoutine.ts` — Exercise Timer (~5118 tok)
+- `writeRoutine.ts` — Exercise Timer (~5959 tok)
 
 ## src/routines/__tests__/
 
@@ -196,7 +196,7 @@
 - `exerciseOptions.test.ts` — Exercise Timer (~2764 tok)
 - `exercises.test.ts` — Exercise Timer (~2630 tok)
 - `fixtures.ts` — Exercise Timer (~368 tok)
-- `generate.test.ts` — Exercise Timer (~13172 tok)
+- `generate.test.ts` — Exercise Timer (~14585 tok)
 - `imageCatalogue.test.ts` — Exercise Timer (~876 tok)
 - `importFiles.test.ts` — Exercise Timer (~1618 tok)
 - `importPictures.test.ts` — Exercise Timer (~664 tok)
@@ -205,7 +205,7 @@
 - `rename.test.ts` — Exercise Timer (~2258 tok)
 - `similar.test.ts` — Exercise Timer (~1322 tok)
 - `tabataFormat.test.ts` — Exercise Timer (~2248 tok)
-- `writeRoutine.test.ts` — Exercise Timer (~4204 tok)
+- `writeRoutine.test.ts` — Exercise Timer (~5018 tok)
 
 ## src/routines/__tests__/emails/
 

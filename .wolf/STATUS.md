@@ -2,7 +2,55 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (Review round pushed as v9.3; exercises screenshot retaken and README caption trimmed)
+> Last updated: 2026-09-01 (Generator now builds her EMOM, 30/30 and AMRAP sections, weighted by the harvest)
+
+---
+
+## 🏁 Declared formats in the generator: EMOM, 30/30, AMRAP (2026-09-01, done, NOT pushed)
+
+Wayne asked whether the generator could build the formats she writes, then chose "harvest the formats she
+uses and pick weighted by frequency". It could not before: `THEME_SHAPE` hardcoded one shape per theme, and
+the harvest recorded only the theme NAME, throwing the declared format away.
+
+**`scripts/harvest-shapes.test.ts`** now also reads the format off each section's heading and the line under
+it (`FORMATS`), and emits `SECTION_FORMATS` in `exercises.shapes.ts`: a theme/format/seen row per pair. Read
+off the DECLARATION, not the parsed steps, because the shapes collide once parsed: her Core planks are also
+a repeat of 30-second steps, and only the heading separates them from a 30/30. What the corpus holds:
+General Body amrap 1 of 13, Arms & Shoulders emom 1 of 17, Legs interval30 1 of 15, Finisher amrap 1 of 14.
+Core and Warm-up have never been anything but a list.
+
+**`generate.ts`** picks a format per section with `weightedPick` over those rows, AFTER the warm-up branch
+(she has never written one as anything else, and the format builders draw strength moves from the themed
+pool while a warm-up draws cardio and stretches from its own). No data-model change was needed: an EMOM is a
+repeat of 60s steps that are timed AND counted, a 30/30 is a repeat of 30s steps plus a 30s rest, an AMRAP is
+ONE timed step named "As many rounds as possible" with the round as its note. Sizes read off the two routines
+that use them: EMOM 5 or 6 minutes x 2 rounds, 30/30 five moves x 4 rounds, AMRAP 10 minutes. Sections are
+named "Legs 30/30", "Arms & Shoulders EMOM".
+
+**`writeRoutine.ts` gained `emomLines`,** which is a REAL BUG FIX and not scope creep: `stepLines` drops the
+count from any step that is also timed (a trailing duration ends the name, so "12 x Bicep Curls - 60 seconds"
+reads back as a step CALLED that), so every generated EMOM lost all its rep targets on Send as text. The EMOM
+form is the one place the grammar says both, because the minute belongs to the block. Each minute is read
+back with `parseItem` before it is kept, and the form is declined where no minute states a count.
+
+**Left deliberately:** the EMOM's section note ("Start a new exercise every minute...") is still reported as
+lost on export, which is the writer working as designed; her instruction lines DO parse back into a section
+note, but sectionLines would have to know its child is an EMOM to write them. The corpus's second EMOM,
+"FULL-LEG BURN - EVERY MINUTE ON THE MINUTE", is invisible to the harvest because the theme classifier does
+not match that heading; changing it would move the existing SECTION_THEMES counts.
+
+**Verified:** typecheck, oxlint, 1280 tests in 65 files (+8). Round-trip checked by hand on all three formats.
+
+**Also done:** `/Users/wayned/Downloads/instructor-routines-2026.timer.json`, all 16 instructor routines as an
+import bundle named the way PasteDialog names a paste ("Trampoline - 2026-04-16"). Built by a subagent.
+
+**Open, for Wayne:** the 16 instructor emails ARE tracked and pushed to the PUBLIC repo. The routine text
+carries no identifiers, but a forwarder's first name appeared in 7 tracked files (emails/README.md, pasteFormat.ts:12,
+generate.ts:173, samples.ts:51, STATUS.md, cerebrum.md), and all of `.wolf/` is public too. Options put to
+him: redact the name, untrack `.wolf/`, or purge from history. Deleting the emails is not cheap: ten files
+read them, including three harvest scripts and the "understands every line" test.
+
+**Next:** Wayne's call on the privacy question, then commit and push.
 
 ---
 
@@ -1962,7 +2010,7 @@ while iterating; the live site is therefore several days behind the repo.
   first step is index 0, so each would have suppressed the next one's
   announcement. It keys on `entry.step` now.
 
-Source material: three emails forwarded (20 Jul, 3 Aug, 17 Aug 2026),
+Source material: three forwarded emails (20 Jul, 3 Aug, 17 Aug 2026),
 in `~/Downloads/*.eml`. **Written by her gym instructor, not by her** — so the
 wording is a class handout's shorthand, and neither the sender nor Wayne is the
 authority on an ambiguous line. They arrive on one template every week or two,

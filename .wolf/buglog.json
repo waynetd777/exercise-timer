@@ -2636,6 +2636,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-01T04:00:00Z"
+    },
+    {
+      "id": "bug-158",
+      "timestamp": "2026-09-01T04:43:57+02:00",
+      "error_message": "USER-INVISIBLE UNTIL SHARED: writeRoutine dropped the rep count from every step that is also timed, so an EMOM section exported as text lost all its targets",
+      "file": "src/routines/writeRoutine.ts",
+      "root_cause": "stepLines writes one bulleted line per step, and a trailing duration ends the name there: '12 x Bicep Curls - 60 seconds' reads back as a step CALLED '12 x Bicep Curls'. So a step with both reps and a duration had its count dropped and reported in `lost`. Correct for a loose step, but her EMOMs are entirely made of timed AND counted minutes, and the generator now builds them, so a whole section exported as six unlabelled minutes.",
+      "fix": "emomLines(): a repeat whose children are all 60s work segments, at least one stating a fixed count, is written as '6-Minute EMOM' / 'N Rounds' / 'Minute 1: 12 x Bicep Curls'. The minute belongs to the block, so the line carries only the reps and both survive. Each minute is verified with parseItem before it is kept, and the form is declined where no minute states a count (the plain rounds form reads better) or where a step carries a note or an alternative.",
+      "fix_rule": "The paste grammar can only say a count and a time together under an EMOM heading. Before writing any step that has both, check it is inside a group of whole minutes; anywhere else the count cannot survive and must be reported.",
+      "tags": [
+        "writeRoutine",
+        "round-trip",
+        "emom",
+        "paste-format",
+        "silent-data-loss"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T04:43:57+02:00"
     }
   ]
 }

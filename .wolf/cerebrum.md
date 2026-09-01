@@ -19,7 +19,12 @@
 
 ## Key Learnings
 
-- [2026-08-28] **a gym instructor is a woman: she/her.** Wayne's correction after a day of "he" in comments, docs and
+- [2026-09-01] **The paste grammar says a count AND a time in exactly one place: an EMOM minute.** Everywhere else a trailing duration ends the name, so "12 × Bicep Curls - 60 seconds" reads back as a step CALLED that, and `stepLines` drops the count. `emomLines` in `writeRoutine.ts` is the exception, and it works only because the minute belongs to the block rather than the line. Before adding any generator shape whose steps are both timed and counted, check it writes back.
+- [2026-09-01] **Harvest a section's FORMAT from what she declares in the heading, never from the parsed steps.** The shapes collide once parsed: her Core planks are a repeat of 30-second steps and so is a 30/30, and only "#3 LEGS - 30/30 INTERVAL" tells them apart. Same reason `THEMES` matches on heading text.
+- [2026-09-01] **`console.log` is swallowed under `vitest.harvest.config.ts`.** To see anything from a script there, write it to a file. And never run that config without a filter: `scripts/*.test.ts` REWRITE source files when they run.
+
+
+- [2026-08-28] **The gym instructor is a woman: she/her.** Wayne's correction after a day of "he" in comments, docs and
   test names, all fixed. Nothing in the emails names her; do not guess a pronoun from a role.
 
 - [2026-08-31] **The exercise table is now two halves: shipped (read-only) and yours (`storage/customExercises.ts`).** Anything that reads `EXERCISES` has to ask whether it should be reading the merge instead: the exercises page, `collectExercises` for the editor's name field, `generateRoutine`'s `extra` option, `tidyLibrary`, and backups all do. `refold.ts` and `picturesOver` correctly do not (one is a key migration, the other only seeds guide illustrations).

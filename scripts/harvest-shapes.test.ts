@@ -25,6 +25,12 @@
  *                   Body, Arms & Shoulders, Legs, Core, Finisher. Every routine
  *                   is a subset of that in that order.
  *
+ *   SECTION_FORMATS which formats she writes each theme in, with counts. Most
+ *                   sections are a plain list of counted exercises, but she also
+ *                   writes an EMOM, a 30/30 interval and an AMRAP. The generator
+ *                   picks a format weighted by these, so a 30/30 Legs turns up
+ *                   about as often as she sends one.
+ *
  *   SECTION_SIZE    how many exercises a themed section holds.
  *
  *   WARM_UP_MOVES   every movement that has opened a session, by folded name.
@@ -59,10 +65,27 @@ const THEMES: { theme: string; test: RegExp; areas: string[] }[] = [
   { theme: 'Finisher', test: /finisher|burnout|burner/i, areas: ['lower', 'torso'] },
 ]
 
+/**
+ * How a section is run, when she says so in its heading or the line under it.
+ *
+ * She declares these: "#3 LEGS - 30/30 INTERVAL", "5-Minute EMOM", "10-MINUTE
+ * AMRAP". A section that declares nothing is `standard`, which is the counted
+ * list most of them are. Read off the DECLARATION rather than the parsed steps,
+ * because the shapes collide once parsed: her Core planks are also a repeat of
+ * 30-second steps, and only the heading separates them from a 30/30.
+ */
+const FORMATS: { format: string; test: RegExp }[] = [
+  { format: 'amrap', test: /\bamrap\b|as many rounds as possible/i },
+  { format: 'emom', test: /\bemom\b|every minute on the minute/i },
+  { format: 'interval30', test: /\b30\s*\/\s*30\b/i },
+]
+
 describe('harvest shapes', () => {
   it('writes the ladders and the section skeleton', () => {
     const ladders = new Map<string, number>()
     const themeCounts = new Map<string, number>()
+    /** Keyed `theme|format`. */
+    const formatCounts = new Map<string, number>()
     const sizes: number[] = []
     const warmUpMoves = new Set<string>()
     let routines = 0
@@ -81,6 +104,14 @@ describe('harvest shapes', () => {
             sections += 1
             const theme = THEMES.find((t) => t.test.test(block.name))?.theme
             if (theme) themeCounts.set(theme, (themeCounts.get(theme) ?? 0) + 1)
+            if (theme) {
+              // The heading AND the note under it: "GENERAL BODY" says nothing,
+              // and the "10-MINUTE AMRAP" below it says all of it.
+              const said = `${block.name} ${block.note ?? ''}`
+              const format = FORMATS.find((f) => f.test.test(said))?.format ?? 'standard'
+              const key = `${theme}|${format}`
+              formatCounts.set(key, (formatCounts.get(key) ?? 0) + 1)
+            }
             if (theme === 'Warm-up') {
               const steps = (blocks: readonly Block[]): void => {
                 for (const b of blocks) {
@@ -109,7 +140,14 @@ describe('harvest shapes', () => {
     console.log(`  ladder shapes    : ${ordered.length}`)
     console.log(`  sections each    : ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}`)
     console.log(`  exercises a piece: ${median(sizes)} typical`)
-    for (const { theme } of THEMES) console.log(`      ${theme}: ${themeCounts.get(theme) ?? 0}`)
+    for (const { theme } of THEMES) {
+      const declared = [...formatCounts.entries()]
+        .filter(([key, seen]) => key.startsWith(`${theme}|`) && !key.endsWith('|standard') && seen > 0)
+        .map(([key, seen]) => `${key.split('|')[1]} ${seen}`)
+      console.log(
+        `      ${theme}: ${themeCounts.get(theme) ?? 0}${declared.length > 0 ? ` (${declared.join(', ')})` : ''}`,
+      )
+    }
     console.log(`  warm-up moves    : ${warmUpMoves.size}`)
 
     const rungs = ordered
@@ -118,6 +156,14 @@ describe('harvest shapes', () => {
     const themes = THEMES.map(
       ({ theme, areas }) =>
         `  { theme: '${theme}', areas: [${areas.map((a) => `'${a}'`).join(', ')}], seen: ${themeCounts.get(theme) ?? 0} },`,
+    ).join('\n')
+
+    /** Every theme and format pair seen, in theme order, commonest format first. */
+    const formats = THEMES.flatMap(({ theme }) =>
+      [...formatCounts.entries()]
+        .filter(([key]) => key.startsWith(`${theme}|`))
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([key, seen]) => `  { theme: '${theme}', format: '${key.split('|')[1]}', seen: ${seen} },`),
     ).join('\n')
 
     writeFileSync(
@@ -169,6 +215,28 @@ export type SectionTheme = {
  */
 export const SECTION_THEMES: readonly SectionTheme[] = [
 ${themes}
+]
+
+export type SectionFormat = 'standard' | 'emom' | 'interval30' | 'amrap'
+
+export type ThemeFormat = {
+  theme: string
+  format: SectionFormat
+  /** How many of the ${routines} routines write that theme that way. */
+  seen: number
+}
+
+/**
+ * How she runs each theme, and how often.
+ *
+ * \`standard\` is the counted list most sections are. The other three are formats
+ * she declares in the heading: an EMOM (a minute an exercise, work then rest out
+ * the minute), a 30/30 interval, and an AMRAP (one clock, rounds until it stops).
+ * The generator picks from this weighted by \`seen\`, so they come up about as
+ * often as she writes them, which is rarely.
+ */
+export const SECTION_FORMATS: readonly ThemeFormat[] = [
+${formats}
 ]
 
 /** Sections in a routine: ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}. */

@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-09-01T01:53:00.884Z",
+    "lastScanned": "2026-09-01T02:43:09.657Z",
     "fileCount": 249,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "ea14d247c4a8714da59ec7621dc1c60c292433b57d835b09edc9d94fe387211f",
-    "storeUpdatedAt": "2026-09-01T01:53:00.885Z"
+    "renderedHash": "57b28852eabf9cb4192b09a55dfac4a16248403601de2dff6d89b8c947397465",
+    "storeUpdatedAt": "2026-09-01T02:43:09.658Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -15,7 +15,7 @@
       "hash": "fb5066aac6fd7e5a",
       "size": 1369,
       "mtimeMs": 1787258524288.4253,
-      "updatedAt": "2026-09-01T01:53:00.782Z",
+      "updatedAt": "2026-09-01T02:43:09.579Z",
       "source": "scan"
     },
     ".claude/commands/reframe.md": {
@@ -24,7 +24,7 @@
       "hash": "fd1dbd05a9ccb160",
       "size": 2208,
       "mtimeMs": 1787415144619.7979,
-      "updatedAt": "2026-09-01T01:53:00.782Z",
+      "updatedAt": "2026-09-01T02:43:09.579Z",
       "source": "scan"
     },
     ".claude/commands/security-audit.md": {
@@ -33,7 +33,7 @@
       "hash": "a18c3bfa0670d98e",
       "size": 2042,
       "mtimeMs": 1787415137216.6228,
-      "updatedAt": "2026-09-01T01:53:00.782Z",
+      "updatedAt": "2026-09-01T02:43:09.580Z",
       "source": "scan"
     },
     ".claude/rules/openwolf.md": {
@@ -42,7 +42,7 @@
       "hash": "69b10b7160c3063a",
       "size": 1000,
       "mtimeMs": 1787415137216.4563,
-      "updatedAt": "2026-09-01T01:53:00.782Z",
+      "updatedAt": "2026-09-01T02:43:09.580Z",
       "source": "scan"
     },
     ".claude/settings.json": {
@@ -51,7 +51,7 @@
       "hash": "c04e0c5229dda78d",
       "size": 2327,
       "mtimeMs": 1787258524256.9258,
-      "updatedAt": "2026-09-01T01:53:00.783Z",
+      "updatedAt": "2026-09-01T02:43:09.580Z",
       "source": "scan"
     },
     ".DS_Store": {
@@ -60,7 +60,7 @@
       "hash": "abc261b17164ffae",
       "size": 8196,
       "mtimeMs": 1788201649285.9219,
-      "updatedAt": "2026-09-01T01:53:00.783Z",
+      "updatedAt": "2026-09-01T02:43:09.581Z",
       "source": "scan"
     },
     ".gastown-ignore": {
@@ -69,7 +69,7 @@
       "hash": "e3b0c44298fc1c14",
       "size": 0,
       "mtimeMs": 1787327510692.0115,
-      "updatedAt": "2026-09-01T01:53:00.784Z",
+      "updatedAt": "2026-09-01T02:43:09.581Z",
       "source": "scan"
     },
     ".github/workflows/deploy.yml": {
@@ -78,7 +78,7 @@
       "hash": "ca4b7af9bdf7bbbe",
       "size": 1177,
       "mtimeMs": 1787877170060.2727,
-      "updatedAt": "2026-09-01T01:53:00.784Z",
+      "updatedAt": "2026-09-01T02:43:09.581Z",
       "source": "scan"
     },
     ".gitignore": {
@@ -87,7 +87,7 @@
       "hash": "9e1c0510fef81bfb",
       "size": 663,
       "mtimeMs": 1788014030234.5535,
-      "updatedAt": "2026-09-01T01:53:00.785Z",
+      "updatedAt": "2026-09-01T02:43:09.581Z",
       "source": "scan"
     },
     ".oxlintrc.json": {
@@ -96,7 +96,7 @@
       "hash": "727e0006122977a9",
       "size": 1047,
       "mtimeMs": 1787877183307.2424,
-      "updatedAt": "2026-09-01T01:53:00.785Z",
+      "updatedAt": "2026-09-01T02:43:09.581Z",
       "source": "scan"
     },
     "CLAUDE.md": {
@@ -105,7 +105,7 @@
       "hash": "3d9051d26bf6d530",
       "size": 134,
       "mtimeMs": 1787258524257.3098,
-      "updatedAt": "2026-09-01T01:53:00.785Z",
+      "updatedAt": "2026-09-01T02:43:09.582Z",
       "source": "scan"
     },
     "docs/.DS_Store": {
@@ -114,7 +114,7 @@
       "hash": "8adca4e2e66aeb5d",
       "size": 6148,
       "mtimeMs": 1788013082185.0117,
-      "updatedAt": "2026-09-01T01:53:00.786Z",
+      "updatedAt": "2026-09-01T02:43:09.582Z",
       "source": "scan"
     },
     "docs/paste-format.md": {
@@ -123,7 +123,7 @@
       "hash": "6b623717508bf6f0",
       "size": 10864,
       "mtimeMs": 1787873638348.2605,
-      "updatedAt": "2026-09-01T01:53:00.786Z",
+      "updatedAt": "2026-09-01T02:43:09.582Z",
       "source": "scan"
     },
     "docs/screenshots/editor.webp": {
@@ -132,16 +132,16 @@
       "hash": "8a49c382bf298e58",
       "size": 52826,
       "mtimeMs": 1788013930477.104,
-      "updatedAt": "2026-09-01T01:53:00.788Z",
+      "updatedAt": "2026-09-01T02:43:09.584Z",
       "source": "scan"
     },
     "docs/screenshots/exercises.webp": {
       "description": "",
-      "tokens": 9726,
-      "hash": "b712a0b7febba029",
-      "size": 38552,
-      "mtimeMs": 1788013933522.5356,
-      "updatedAt": "2026-09-01T01:53:00.789Z",
+      "tokens": 10635,
+      "hash": "2f03e3edcb5d139d",
+      "size": 42078,
+      "mtimeMs": 1788228577811.9583,
+      "updatedAt": "2026-09-01T02:43:09.585Z",
       "source": "scan"
     },
     "docs/screenshots/generator.webp": {
@@ -150,7 +150,7 @@
       "hash": "8f84284a6c57fb69",
       "size": 56984,
       "mtimeMs": 1788013936625.471,
-      "updatedAt": "2026-09-01T01:53:00.790Z",
+      "updatedAt": "2026-09-01T02:43:09.587Z",
       "source": "scan"
     },
     "docs/screenshots/library.webp": {
@@ -159,7 +159,7 @@
       "hash": "3f7525ab8801becf",
       "size": 66900,
       "mtimeMs": 1788013939750.9275,
-      "updatedAt": "2026-09-01T01:53:00.792Z",
+      "updatedAt": "2026-09-01T02:43:09.588Z",
       "source": "scan"
     },
     "docs/screenshots/paste.webp": {
@@ -168,7 +168,7 @@
       "hash": "ee3d803791b03599",
       "size": 62310,
       "mtimeMs": 1788013942808.9229,
-      "updatedAt": "2026-09-01T01:53:00.794Z",
+      "updatedAt": "2026-09-01T02:43:09.590Z",
       "source": "scan"
     },
     "docs/screenshots/preview.webp": {
@@ -177,7 +177,7 @@
       "hash": "f0844f6dbea5c8fe",
       "size": 42320,
       "mtimeMs": 1788013945858.9778,
-      "updatedAt": "2026-09-01T01:53:00.795Z",
+      "updatedAt": "2026-09-01T02:43:09.591Z",
       "source": "scan"
     },
     "docs/screenshots/run-list.webp": {
@@ -186,7 +186,7 @@
       "hash": "64987df6963046cb",
       "size": 44820,
       "mtimeMs": 1788013948927.8936,
-      "updatedAt": "2026-09-01T01:53:00.797Z",
+      "updatedAt": "2026-09-01T02:43:09.593Z",
       "source": "scan"
     },
     "docs/screenshots/run-timed.webp": {
@@ -195,7 +195,7 @@
       "hash": "cf5671e5a2710661",
       "size": 42560,
       "mtimeMs": 1788013952025.772,
-      "updatedAt": "2026-09-01T01:53:00.798Z",
+      "updatedAt": "2026-09-01T02:43:09.594Z",
       "source": "scan"
     },
     "index.html": {
@@ -204,7 +204,7 @@
       "hash": "5def2f10b001be25",
       "size": 1647,
       "mtimeMs": 1787520560380.9243,
-      "updatedAt": "2026-09-01T01:53:00.799Z",
+      "updatedAt": "2026-09-01T02:43:09.594Z",
       "source": "scan"
     },
     "LICENSE": {
@@ -213,7 +213,7 @@
       "hash": "157d56482cadc587",
       "size": 1789,
       "mtimeMs": 1787520567332.8818,
-      "updatedAt": "2026-09-01T01:53:00.799Z",
+      "updatedAt": "2026-09-01T02:43:09.594Z",
       "source": "scan"
     },
     "package-lock.json": {
@@ -222,7 +222,7 @@
       "hash": "d8574f613fbce15f",
       "size": 282280,
       "mtimeMs": 1787877062543.5637,
-      "updatedAt": "2026-09-01T01:53:00.800Z",
+      "updatedAt": "2026-09-01T02:43:09.595Z",
       "source": "scan"
     },
     "package.json": {
@@ -231,7 +231,7 @@
       "hash": "043675e2d1d8fdbf",
       "size": 868,
       "mtimeMs": 1787877170059.5388,
-      "updatedAt": "2026-09-01T01:53:00.801Z",
+      "updatedAt": "2026-09-01T02:43:09.595Z",
       "source": "scan"
     },
     "public/.DS_Store": {
@@ -240,16 +240,16 @@
       "hash": "5dae787a335ed364",
       "size": 6148,
       "mtimeMs": 1788201649287.018,
-      "updatedAt": "2026-09-01T01:53:00.801Z",
+      "updatedAt": "2026-09-01T02:43:09.596Z",
       "source": "scan"
     },
     "README.md": {
       "description": "Project documentation",
-      "tokens": 2803,
-      "hash": "53e7eebbf6d9983c",
-      "size": 11209,
-      "mtimeMs": 1788205349055.0623,
-      "updatedAt": "2026-09-01T01:53:00.802Z",
+      "tokens": 2764,
+      "hash": "e8d112cac2fa1dee",
+      "size": 11055,
+      "mtimeMs": 1788228608244.5671,
+      "updatedAt": "2026-09-01T02:43:09.596Z",
       "source": "scan"
     },
     "scripts/exercise_metadata.py": {
@@ -258,7 +258,7 @@
       "hash": "43c2b165c90c5375",
       "size": 9270,
       "mtimeMs": 1787854415027.0886,
-      "updatedAt": "2026-09-01T01:53:00.803Z",
+      "updatedAt": "2026-09-01T02:43:09.597Z",
       "source": "scan",
       "symbols": [
         {
@@ -318,7 +318,7 @@
       "hash": "ea9d79d7b680b27c",
       "size": 5958,
       "mtimeMs": 1787854434494.7915,
-      "updatedAt": "2026-09-01T01:53:00.804Z",
+      "updatedAt": "2026-09-01T02:43:09.597Z",
       "source": "scan",
       "symbols": [
         {
@@ -371,7 +371,7 @@
       "hash": "7bb7dfa99fbd8f85",
       "size": 249,
       "mtimeMs": 1787863641201.654,
-      "updatedAt": "2026-09-01T01:53:00.804Z",
+      "updatedAt": "2026-09-01T02:43:09.598Z",
       "source": "scan"
     },
     "scripts/harvest-exercises.test.ts": {
@@ -380,7 +380,7 @@
       "hash": "3959a5fc1425ec21",
       "size": 11272,
       "mtimeMs": 1787877437974.07,
-      "updatedAt": "2026-09-01T01:53:00.805Z",
+      "updatedAt": "2026-09-01T02:43:09.598Z",
       "source": "scan",
       "symbols": [
         {
@@ -405,16 +405,16 @@
       "hash": "449acddfb5b75299",
       "size": 7553,
       "mtimeMs": 1787943799319.1038,
-      "updatedAt": "2026-09-01T01:53:00.805Z",
+      "updatedAt": "2026-09-01T02:43:09.599Z",
       "source": "scan"
     },
     "scripts/harvest-shapes.test.ts": {
       "description": "Exercise Timer",
-      "tokens": 2164,
-      "hash": "e348b2437bcbed67",
-      "size": 7571,
-      "mtimeMs": 1787943799318.4087,
-      "updatedAt": "2026-09-01T01:53:00.805Z",
+      "tokens": 3050,
+      "hash": "017dbe24431962fc",
+      "size": 10673,
+      "mtimeMs": 1788229946229.4827,
+      "updatedAt": "2026-09-01T02:43:09.599Z",
       "source": "scan"
     },
     "src/__tests__/id.test.ts": {
@@ -423,7 +423,7 @@
       "hash": "6642d349fa525803",
       "size": 1199,
       "mtimeMs": 1787520544589.4407,
-      "updatedAt": "2026-09-01T01:53:00.806Z",
+      "updatedAt": "2026-09-01T02:43:09.599Z",
       "source": "scan"
     },
     "src/audio/__tests__/engine.test.ts": {
@@ -432,7 +432,7 @@
       "hash": "7ae494159977f600",
       "size": 3939,
       "mtimeMs": 1787877365365.322,
-      "updatedAt": "2026-09-01T01:53:00.807Z",
+      "updatedAt": "2026-09-01T02:43:09.599Z",
       "source": "scan",
       "symbols": [
         {
@@ -492,7 +492,7 @@
       "hash": "24aee73479c57d63",
       "size": 9502,
       "mtimeMs": 1787520544589.7961,
-      "updatedAt": "2026-09-01T01:53:00.807Z",
+      "updatedAt": "2026-09-01T02:43:09.600Z",
       "source": "scan",
       "symbols": [
         {
@@ -510,7 +510,7 @@
       "hash": "9d2ada7cb18d803a",
       "size": 2057,
       "mtimeMs": 1787520544590.044,
-      "updatedAt": "2026-09-01T01:53:00.807Z",
+      "updatedAt": "2026-09-01T02:43:09.600Z",
       "source": "scan",
       "symbols": [
         {
@@ -528,7 +528,7 @@
       "hash": "1a03044c1d6261c4",
       "size": 6376,
       "mtimeMs": 1787877183306.9546,
-      "updatedAt": "2026-09-01T01:53:00.807Z",
+      "updatedAt": "2026-09-01T02:43:09.600Z",
       "source": "scan"
     },
     "src/audio/__tests__/useCueScheduler.test.ts": {
@@ -537,7 +537,7 @@
       "hash": "8719ba48c19ca46b",
       "size": 8705,
       "mtimeMs": 1787993803061.9856,
-      "updatedAt": "2026-09-01T01:53:00.808Z",
+      "updatedAt": "2026-09-01T02:43:09.600Z",
       "source": "scan",
       "symbols": [
         {
@@ -562,7 +562,7 @@
       "hash": "85b8867b8dc6c930",
       "size": 4506,
       "mtimeMs": 1787520544591.1453,
-      "updatedAt": "2026-09-01T01:53:00.808Z",
+      "updatedAt": "2026-09-01T02:43:09.601Z",
       "source": "scan",
       "symbols": [
         {
@@ -601,7 +601,7 @@
       "hash": "c070bae869d16df3",
       "size": 11075,
       "mtimeMs": 1787875315809.0444,
-      "updatedAt": "2026-09-01T01:53:00.809Z",
+      "updatedAt": "2026-09-01T02:43:09.601Z",
       "source": "scan",
       "symbols": [
         {
@@ -619,7 +619,7 @@
       "hash": "373677cdfbdd88c8",
       "size": 8873,
       "mtimeMs": 1787993902939.5522,
-      "updatedAt": "2026-09-01T01:53:00.809Z",
+      "updatedAt": "2026-09-01T02:43:09.601Z",
       "source": "scan"
     },
     "src/audio/referee-whistle-cc0.wav": {
@@ -628,7 +628,7 @@
       "hash": "74c271ae13fe743d",
       "size": 43744,
       "mtimeMs": 1787302344461.321,
-      "updatedAt": "2026-09-01T01:53:00.810Z",
+      "updatedAt": "2026-09-01T02:43:09.602Z",
       "source": "scan"
     },
     "src/audio/samples.ts": {
@@ -637,7 +637,7 @@
       "hash": "b0788e74725c3f46",
       "size": 4868,
       "mtimeMs": 1787873430293.9453,
-      "updatedAt": "2026-09-01T01:53:00.810Z",
+      "updatedAt": "2026-09-01T02:43:09.603Z",
       "source": "scan",
       "symbols": [
         {
@@ -662,7 +662,7 @@
       "hash": "a37fb49325eda48f",
       "size": 2803,
       "mtimeMs": 1787872109370.818,
-      "updatedAt": "2026-09-01T01:53:00.810Z",
+      "updatedAt": "2026-09-01T02:43:09.603Z",
       "source": "scan",
       "symbols": [
         {
@@ -694,7 +694,7 @@
       "hash": "9ac8f3ab37e38340",
       "size": 2489,
       "mtimeMs": 1787520544592.7874,
-      "updatedAt": "2026-09-01T01:53:00.811Z",
+      "updatedAt": "2026-09-01T02:43:09.603Z",
       "source": "scan",
       "symbols": [
         {
@@ -726,7 +726,7 @@
       "hash": "e6d141a1869af825",
       "size": 5413,
       "mtimeMs": 1787873406751.6458,
-      "updatedAt": "2026-09-01T01:53:00.811Z",
+      "updatedAt": "2026-09-01T02:43:09.603Z",
       "source": "scan",
       "symbols": [
         {
@@ -765,7 +765,7 @@
       "hash": "cb98e4f4a23f057a",
       "size": 7334,
       "mtimeMs": 1787993803061.464,
-      "updatedAt": "2026-09-01T01:53:00.811Z",
+      "updatedAt": "2026-09-01T02:43:09.604Z",
       "source": "scan",
       "symbols": [
         {
@@ -783,7 +783,7 @@
       "hash": "97e077487e48231f",
       "size": 868,
       "mtimeMs": 1787520544593.5955,
-      "updatedAt": "2026-09-01T01:53:00.812Z",
+      "updatedAt": "2026-09-01T02:43:09.604Z",
       "source": "scan"
     },
     "src/audio/useSpokenCues.ts": {
@@ -792,7 +792,7 @@
       "hash": "5639933dac2f1908",
       "size": 5090,
       "mtimeMs": 1787875315810.8296,
-      "updatedAt": "2026-09-01T01:53:00.812Z",
+      "updatedAt": "2026-09-01T02:43:09.604Z",
       "source": "scan",
       "symbols": [
         {
@@ -810,7 +810,7 @@
       "hash": "df75e382d7d456ac",
       "size": 220,
       "mtimeMs": 1787520544594.1382,
-      "updatedAt": "2026-09-01T01:53:00.812Z",
+      "updatedAt": "2026-09-01T02:43:09.604Z",
       "source": "scan"
     },
     "src/editor/__tests__/blocks.test.ts": {
@@ -819,7 +819,7 @@
       "hash": "4d6e2286ce252759",
       "size": 39176,
       "mtimeMs": 1787963780338.4893,
-      "updatedAt": "2026-09-01T01:53:00.813Z",
+      "updatedAt": "2026-09-01T02:43:09.605Z",
       "source": "scan"
     },
     "src/editor/__tests__/dirty.test.ts": {
@@ -828,7 +828,7 @@
       "hash": "cd6616f2376ff958",
       "size": 8155,
       "mtimeMs": 1787876170360.9966,
-      "updatedAt": "2026-09-01T01:53:00.814Z",
+      "updatedAt": "2026-09-01T02:43:09.606Z",
       "source": "scan"
     },
     "src/editor/__tests__/history.test.ts": {
@@ -837,7 +837,7 @@
       "hash": "4817a3d1b334892f",
       "size": 5154,
       "mtimeMs": 1787872631215.035,
-      "updatedAt": "2026-09-01T01:53:00.814Z",
+      "updatedAt": "2026-09-01T02:43:09.606Z",
       "source": "scan",
       "symbols": [
         {
@@ -855,7 +855,7 @@
       "hash": "fa145ab89ece03b0",
       "size": 9922,
       "mtimeMs": 1787520544595.387,
-      "updatedAt": "2026-09-01T01:53:00.815Z",
+      "updatedAt": "2026-09-01T02:43:09.606Z",
       "source": "scan"
     },
     "src/editor/blocks.ts": {
@@ -864,7 +864,7 @@
       "hash": "22d1199292fc1099",
       "size": 24123,
       "mtimeMs": 1787995109352.383,
-      "updatedAt": "2026-09-01T01:53:00.815Z",
+      "updatedAt": "2026-09-01T02:43:09.607Z",
       "source": "scan",
       "symbols": [
         {
@@ -1085,7 +1085,7 @@
       "hash": "687269a10de4ad13",
       "size": 3792,
       "mtimeMs": 1787873430294.7173,
-      "updatedAt": "2026-09-01T01:53:00.816Z",
+      "updatedAt": "2026-09-01T02:43:09.607Z",
       "source": "scan",
       "symbols": [
         {
@@ -1131,7 +1131,7 @@
       "hash": "741f719e3dd563b4",
       "size": 3815,
       "mtimeMs": 1787872711129.7134,
-      "updatedAt": "2026-09-01T01:53:00.816Z",
+      "updatedAt": "2026-09-01T02:43:09.607Z",
       "source": "scan",
       "symbols": [
         {
@@ -1198,7 +1198,7 @@
       "hash": "169600c11e872788",
       "size": 5055,
       "mtimeMs": 1787994435932.225,
-      "updatedAt": "2026-09-01T01:53:00.817Z",
+      "updatedAt": "2026-09-01T02:43:09.607Z",
       "source": "scan",
       "symbols": [
         {
@@ -1244,7 +1244,7 @@
       "hash": "dea45b64e00a50aa",
       "size": 21475,
       "mtimeMs": 1787995109365.497,
-      "updatedAt": "2026-09-01T01:53:00.817Z",
+      "updatedAt": "2026-09-01T02:43:09.607Z",
       "source": "scan"
     },
     "src/engine/__tests__/compile.test.ts": {
@@ -1253,7 +1253,7 @@
       "hash": "5be18b4d8b6cbb29",
       "size": 6439,
       "mtimeMs": 1787520544597.0862,
-      "updatedAt": "2026-09-01T01:53:00.817Z",
+      "updatedAt": "2026-09-01T02:43:09.608Z",
       "source": "scan"
     },
     "src/engine/__tests__/cues.test.ts": {
@@ -1262,7 +1262,7 @@
       "hash": "47cde30408a620ff",
       "size": 5440,
       "mtimeMs": 1787520544597.4758,
-      "updatedAt": "2026-09-01T01:53:00.818Z",
+      "updatedAt": "2026-09-01T02:43:09.608Z",
       "source": "scan",
       "symbols": [
         {
@@ -1280,7 +1280,7 @@
       "hash": "2eab39819b4977f5",
       "size": 4322,
       "mtimeMs": 1787520544597.7239,
-      "updatedAt": "2026-09-01T01:53:00.818Z",
+      "updatedAt": "2026-09-01T02:43:09.608Z",
       "source": "scan",
       "symbols": [
         {
@@ -1375,7 +1375,7 @@
       "hash": "c043b2ac90b895ad",
       "size": 15852,
       "mtimeMs": 1787875919911.6113,
-      "updatedAt": "2026-09-01T01:53:00.818Z",
+      "updatedAt": "2026-09-01T02:43:09.609Z",
       "source": "scan"
     },
     "src/engine/__tests__/navigate.test.ts": {
@@ -1384,7 +1384,7 @@
       "hash": "542473ef0cdd3125",
       "size": 9422,
       "mtimeMs": 1787872899725.3286,
-      "updatedAt": "2026-09-01T01:53:00.818Z",
+      "updatedAt": "2026-09-01T02:43:09.609Z",
       "source": "scan",
       "symbols": [
         {
@@ -1402,7 +1402,7 @@
       "hash": "c7c728f37c5c99cc",
       "size": 5733,
       "mtimeMs": 1787520544598.7642,
-      "updatedAt": "2026-09-01T01:53:00.819Z",
+      "updatedAt": "2026-09-01T02:43:09.609Z",
       "source": "scan"
     },
     "src/engine/compile.ts": {
@@ -1411,7 +1411,7 @@
       "hash": "d2869edfee8ed406",
       "size": 14772,
       "mtimeMs": 1787995109350.3052,
-      "updatedAt": "2026-09-01T01:53:00.819Z",
+      "updatedAt": "2026-09-01T02:43:09.609Z",
       "source": "scan",
       "symbols": [
         {
@@ -1534,7 +1534,7 @@
       "hash": "e63a4192d2e269ad",
       "size": 4027,
       "mtimeMs": 1787873406752.2327,
-      "updatedAt": "2026-09-01T01:53:00.820Z",
+      "updatedAt": "2026-09-01T02:43:09.610Z",
       "source": "scan",
       "symbols": [
         {
@@ -1573,7 +1573,7 @@
       "hash": "4f93114e68721c17",
       "size": 585,
       "mtimeMs": 1787994964129.7583,
-      "updatedAt": "2026-09-01T01:53:00.820Z",
+      "updatedAt": "2026-09-01T02:43:09.610Z",
       "source": "scan"
     },
     "src/engine/navigate.ts": {
@@ -1582,7 +1582,7 @@
       "hash": "f6080f0bec9e6679",
       "size": 10922,
       "mtimeMs": 1787940820080.531,
-      "updatedAt": "2026-09-01T01:53:00.820Z",
+      "updatedAt": "2026-09-01T02:43:09.610Z",
       "source": "scan",
       "symbols": [
         {
@@ -1698,7 +1698,7 @@
       "hash": "f55d09f185a8464f",
       "size": 8263,
       "mtimeMs": 1787941438666.8662,
-      "updatedAt": "2026-09-01T01:53:00.821Z",
+      "updatedAt": "2026-09-01T02:43:09.610Z",
       "source": "scan"
     },
     "src/engine/runtime.ts": {
@@ -1707,7 +1707,7 @@
       "hash": "82d2ca385cf26431",
       "size": 3323,
       "mtimeMs": 1787873406752.5645,
-      "updatedAt": "2026-09-01T01:53:00.822Z",
+      "updatedAt": "2026-09-01T02:43:09.610Z",
       "source": "scan",
       "symbols": [
         {
@@ -1760,7 +1760,7 @@
       "hash": "58aef25d3a51333c",
       "size": 15670,
       "mtimeMs": 1787875540899.0957,
-      "updatedAt": "2026-09-01T01:53:00.822Z",
+      "updatedAt": "2026-09-01T02:43:09.611Z",
       "source": "scan",
       "symbols": [
         {
@@ -1778,7 +1778,7 @@
       "hash": "994eea1efe31ddfd",
       "size": 1560,
       "mtimeMs": 1787520544601.4841,
-      "updatedAt": "2026-09-01T01:53:00.823Z",
+      "updatedAt": "2026-09-01T02:43:09.611Z",
       "source": "scan"
     },
     "src/main.tsx": {
@@ -1787,7 +1787,7 @@
       "hash": "5a47b482a887cfde",
       "size": 735,
       "mtimeMs": 1787520544624.8823,
-      "updatedAt": "2026-09-01T01:53:00.823Z",
+      "updatedAt": "2026-09-01T02:43:09.611Z",
       "source": "scan"
     },
     "src/media/__tests__/clipboard.test.ts": {
@@ -1796,7 +1796,7 @@
       "hash": "d0690e0bcd492067",
       "size": 4462,
       "mtimeMs": 1787873638348.025,
-      "updatedAt": "2026-09-01T01:53:00.824Z",
+      "updatedAt": "2026-09-01T02:43:09.611Z",
       "source": "scan",
       "symbols": [
         {
@@ -1814,7 +1814,7 @@
       "hash": "f874e883fa8f74c5",
       "size": 5642,
       "mtimeMs": 1787520544602.0896,
-      "updatedAt": "2026-09-01T01:53:00.824Z",
+      "updatedAt": "2026-09-01T02:43:09.612Z",
       "source": "scan"
     },
     "src/media/__tests__/pin.test.ts": {
@@ -1823,7 +1823,7 @@
       "hash": "c49d70eaeceedb65",
       "size": 1900,
       "mtimeMs": 1787951083110.1401,
-      "updatedAt": "2026-09-01T01:53:00.825Z",
+      "updatedAt": "2026-09-01T02:43:09.612Z",
       "source": "scan"
     },
     "src/media/__tests__/resolveMedia.test.ts": {
@@ -1832,7 +1832,7 @@
       "hash": "c439ea1fbfa41404",
       "size": 4455,
       "mtimeMs": 1787993721380.448,
-      "updatedAt": "2026-09-01T01:53:00.825Z",
+      "updatedAt": "2026-09-01T02:43:09.612Z",
       "source": "scan",
       "symbols": [
         {
@@ -1850,7 +1850,7 @@
       "hash": "76d22d5ff08bf7d5",
       "size": 4098,
       "mtimeMs": 1787873638347.6545,
-      "updatedAt": "2026-09-01T01:53:00.826Z",
+      "updatedAt": "2026-09-01T02:43:09.612Z",
       "source": "scan",
       "symbols": [
         {
@@ -1896,7 +1896,7 @@
       "hash": "95b4773bf0960095",
       "size": 2540,
       "mtimeMs": 1787875315808.591,
-      "updatedAt": "2026-09-01T01:53:00.826Z",
+      "updatedAt": "2026-09-01T02:43:09.612Z",
       "source": "scan",
       "symbols": [
         {
@@ -1921,7 +1921,7 @@
       "hash": "707608f79b5e52ed",
       "size": 2132,
       "mtimeMs": 1787520544603.7917,
-      "updatedAt": "2026-09-01T01:53:00.826Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan",
       "symbols": [
         {
@@ -1939,7 +1939,7 @@
       "hash": "34f3f2b5d6152bed",
       "size": 4666,
       "mtimeMs": 1787995109350.5288,
-      "updatedAt": "2026-09-01T01:53:00.827Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan",
       "symbols": [
         {
@@ -1992,7 +1992,7 @@
       "hash": "d2bd654b6887cf52",
       "size": 580,
       "mtimeMs": 1787520544604.333,
-      "updatedAt": "2026-09-01T01:53:00.827Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan"
     },
     "src/media/pin.ts": {
@@ -2001,7 +2001,7 @@
       "hash": "e63e0ac00dc55d5d",
       "size": 2547,
       "mtimeMs": 1787874817018.9543,
-      "updatedAt": "2026-09-01T01:53:00.827Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan",
       "symbols": [
         {
@@ -2040,7 +2040,7 @@
       "hash": "d6504000ef2376f7",
       "size": 4356,
       "mtimeMs": 1787963901403.3005,
-      "updatedAt": "2026-09-01T01:53:00.827Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan"
     },
     "src/media/resolve.ts": {
@@ -2049,7 +2049,7 @@
       "hash": "aa596fdafdb39ccd",
       "size": 1274,
       "mtimeMs": 1787994435931.6694,
-      "updatedAt": "2026-09-01T01:53:00.827Z",
+      "updatedAt": "2026-09-01T02:43:09.613Z",
       "source": "scan"
     },
     "src/media/resolveMedia.ts": {
@@ -2058,7 +2058,7 @@
       "hash": "d7c48e750105b13b",
       "size": 3258,
       "mtimeMs": 1787993628273.015,
-      "updatedAt": "2026-09-01T01:53:00.828Z",
+      "updatedAt": "2026-09-01T02:43:09.614Z",
       "source": "scan",
       "symbols": [
         {
@@ -2090,7 +2090,7 @@
       "hash": "705b6df1e776beec",
       "size": 1466,
       "mtimeMs": 1787520544605.0837,
-      "updatedAt": "2026-09-01T01:53:00.828Z",
+      "updatedAt": "2026-09-01T02:43:09.614Z",
       "source": "scan"
     },
     "src/routines/__tests__/burnout.test.ts": {
@@ -2099,7 +2099,7 @@
       "hash": "50b369ffeb777ab5",
       "size": 2489,
       "mtimeMs": 1787520544605.578,
-      "updatedAt": "2026-09-01T01:53:00.829Z",
+      "updatedAt": "2026-09-01T02:43:09.614Z",
       "source": "scan",
       "symbols": [
         {
@@ -2124,7 +2124,7 @@
       "hash": "12543ab6b854c420",
       "size": 1146,
       "mtimeMs": 1787858665774.316,
-      "updatedAt": "2026-09-01T01:53:00.829Z",
+      "updatedAt": "2026-09-01T02:43:09.614Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-04-23-trampoline.txt": {
@@ -2133,7 +2133,7 @@
       "hash": "37e54d1a4ea85e15",
       "size": 588,
       "mtimeMs": 1787858665774.654,
-      "updatedAt": "2026-09-01T01:53:00.830Z",
+      "updatedAt": "2026-09-01T02:43:09.614Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-05-04-trampoline.txt": {
@@ -2142,7 +2142,7 @@
       "hash": "ad152442490ad4ba",
       "size": 612,
       "mtimeMs": 1787858665775.037,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.615Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-05-11-tabata.txt": {
@@ -2151,7 +2151,7 @@
       "hash": "73c4044a9bdd85c2",
       "size": 902,
       "mtimeMs": 1787858665775.6946,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.615Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-05-18-trampoline.txt": {
@@ -2160,7 +2160,7 @@
       "hash": "b8c6cc7ebe650d6f",
       "size": 826,
       "mtimeMs": 1787858665775.8672,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.615Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-05-26-trampoline.txt": {
@@ -2169,7 +2169,7 @@
       "hash": "4c0215048a845883",
       "size": 1147,
       "mtimeMs": 1787858665776.0273,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.615Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-06-01-tabata.txt": {
@@ -2178,7 +2178,7 @@
       "hash": "471df0e22f3a7829",
       "size": 933,
       "mtimeMs": 1787858665776.242,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.616Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-06-22-trampoline.txt": {
@@ -2187,7 +2187,7 @@
       "hash": "dbbdd58935d0353b",
       "size": 769,
       "mtimeMs": 1787858665776.504,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.616Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-06-29-tabata.txt": {
@@ -2196,7 +2196,7 @@
       "hash": "5c35631d4c23dd83",
       "size": 810,
       "mtimeMs": 1787858665776.7478,
-      "updatedAt": "2026-09-01T01:53:00.831Z",
+      "updatedAt": "2026-09-01T02:43:09.616Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-07-06-tabata.txt": {
@@ -2205,7 +2205,7 @@
       "hash": "31b8c17a05d54b7f",
       "size": 1016,
       "mtimeMs": 1787858665776.921,
-      "updatedAt": "2026-09-01T01:53:00.832Z",
+      "updatedAt": "2026-09-01T02:43:09.616Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-07-13-trampoline.txt": {
@@ -2214,7 +2214,7 @@
       "hash": "1609a9af6698aafa",
       "size": 1548,
       "mtimeMs": 1787858665777.1526,
-      "updatedAt": "2026-09-01T01:53:00.832Z",
+      "updatedAt": "2026-09-01T02:43:09.616Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-07-20-general.txt": {
@@ -2223,7 +2223,7 @@
       "hash": "56f87f740c1c2301",
       "size": 1879,
       "mtimeMs": 1787309612143.8677,
-      "updatedAt": "2026-09-01T01:53:00.833Z",
+      "updatedAt": "2026-09-01T02:43:09.617Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-07-27-trampoline.txt": {
@@ -2232,7 +2232,7 @@
       "hash": "ef595b06eaf04e20",
       "size": 2333,
       "mtimeMs": 1787858665777.5076,
-      "updatedAt": "2026-09-01T01:53:00.833Z",
+      "updatedAt": "2026-09-01T02:43:09.617Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-08-03-trampoline.txt": {
@@ -2241,7 +2241,7 @@
       "hash": "d18733540e61d02d",
       "size": 1517,
       "mtimeMs": 1787309612144.2014,
-      "updatedAt": "2026-09-01T01:53:00.833Z",
+      "updatedAt": "2026-09-01T02:43:09.617Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-08-17-bands.txt": {
@@ -2250,7 +2250,7 @@
       "hash": "fd9289a831922de1",
       "size": 2062,
       "mtimeMs": 1787309612145.0125,
-      "updatedAt": "2026-09-01T01:53:00.833Z",
+      "updatedAt": "2026-09-01T02:43:09.618Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/2026-08-25-emom.txt": {
@@ -2259,7 +2259,7 @@
       "hash": "0737c476d5e95e96",
       "size": 1812,
       "mtimeMs": 1787642483643.6143,
-      "updatedAt": "2026-09-01T01:53:00.834Z",
+      "updatedAt": "2026-09-01T02:43:09.618Z",
       "source": "scan"
     },
     "src/routines/__tests__/emails/README.md": {
@@ -2268,7 +2268,7 @@
       "hash": "85e642b9859088dc",
       "size": 3119,
       "mtimeMs": 1787862384346.2107,
-      "updatedAt": "2026-09-01T01:53:00.834Z",
+      "updatedAt": "2026-09-01T02:43:09.618Z",
       "source": "scan"
     },
     "src/routines/__tests__/estimate.test.ts": {
@@ -2277,7 +2277,7 @@
       "hash": "6a1690334701a248",
       "size": 4111,
       "mtimeMs": 1787865359661.0308,
-      "updatedAt": "2026-09-01T01:53:00.834Z",
+      "updatedAt": "2026-09-01T02:43:09.618Z",
       "source": "scan"
     },
     "src/routines/__tests__/exerciseOptions.test.ts": {
@@ -2286,7 +2286,7 @@
       "hash": "81cf57357504a79d",
       "size": 9678,
       "mtimeMs": 1787963780339.094,
-      "updatedAt": "2026-09-01T01:53:00.835Z",
+      "updatedAt": "2026-09-01T02:43:09.618Z",
       "source": "scan"
     },
     "src/routines/__tests__/exercises.test.ts": {
@@ -2295,7 +2295,7 @@
       "hash": "69f535b7e7b10eab",
       "size": 9211,
       "mtimeMs": 1787958852023.7402,
-      "updatedAt": "2026-09-01T01:53:00.835Z",
+      "updatedAt": "2026-09-01T02:43:09.619Z",
       "source": "scan"
     },
     "src/routines/__tests__/fixtures.ts": {
@@ -2304,16 +2304,16 @@
       "hash": "90b906987e9bc37e",
       "size": 1285,
       "mtimeMs": 1787873430295.4785,
-      "updatedAt": "2026-09-01T01:53:00.835Z",
+      "updatedAt": "2026-09-01T02:43:09.619Z",
       "source": "scan"
     },
     "src/routines/__tests__/generate.test.ts": {
       "description": "Exercise Timer",
-      "tokens": 13172,
-      "hash": "7b30cd5e88222fef",
-      "size": 46111,
-      "mtimeMs": 1788203012642.4514,
-      "updatedAt": "2026-09-01T01:53:00.836Z",
+      "tokens": 14585,
+      "hash": "8ddc0bdecae7823b",
+      "size": 51060,
+      "mtimeMs": 1788230403520.2542,
+      "updatedAt": "2026-09-01T02:43:09.619Z",
       "source": "scan",
       "symbols": [
         {
@@ -2341,8 +2341,8 @@
           "name": "areaOf",
           "kind": "fn",
           "startLine": 52,
-          "endLine": 1017,
-          "tokens": 12615
+          "endLine": 1129,
+          "tokens": 14028
         }
       ]
     },
@@ -2352,7 +2352,7 @@
       "hash": "eb03c733570cfb05",
       "size": 3064,
       "mtimeMs": 1787958852024.2607,
-      "updatedAt": "2026-09-01T01:53:00.836Z",
+      "updatedAt": "2026-09-01T02:43:09.620Z",
       "source": "scan"
     },
     "src/routines/__tests__/importFiles.test.ts": {
@@ -2361,7 +2361,7 @@
       "hash": "acc4ff5b229c1d43",
       "size": 5663,
       "mtimeMs": 1787520544606.5725,
-      "updatedAt": "2026-09-01T01:53:00.837Z",
+      "updatedAt": "2026-09-01T02:43:09.620Z",
       "source": "scan",
       "symbols": [
         {
@@ -2386,7 +2386,7 @@
       "hash": "5e2c6973e9da0c52",
       "size": 2322,
       "mtimeMs": 1787963801601.6992,
-      "updatedAt": "2026-09-01T01:53:00.837Z",
+      "updatedAt": "2026-09-01T02:43:09.620Z",
       "source": "scan",
       "symbols": [
         {
@@ -2404,7 +2404,7 @@
       "hash": "ece7e97b1422b7b2",
       "size": 42442,
       "mtimeMs": 1787993628280.5361,
-      "updatedAt": "2026-09-01T01:53:00.838Z",
+      "updatedAt": "2026-09-01T02:43:09.621Z",
       "source": "scan",
       "symbols": [
         {
@@ -2450,7 +2450,7 @@
       "hash": "aec5c392146f6acf",
       "size": 5475,
       "mtimeMs": 1787642673189.5781,
-      "updatedAt": "2026-09-01T01:53:00.838Z",
+      "updatedAt": "2026-09-01T02:43:09.621Z",
       "source": "scan",
       "symbols": [
         {
@@ -2475,7 +2475,7 @@
       "hash": "d48d607503f6dfba",
       "size": 7927,
       "mtimeMs": 1788227386066.754,
-      "updatedAt": "2026-09-01T01:53:00.839Z",
+      "updatedAt": "2026-09-01T02:43:09.621Z",
       "source": "scan"
     },
     "src/routines/__tests__/similar.test.ts": {
@@ -2484,7 +2484,7 @@
       "hash": "f8b68a69cd088bbd",
       "size": 4630,
       "mtimeMs": 1788202500095.5042,
-      "updatedAt": "2026-09-01T01:53:00.839Z",
+      "updatedAt": "2026-09-01T02:43:09.621Z",
       "source": "scan"
     },
     "src/routines/__tests__/tabataFormat.test.ts": {
@@ -2493,16 +2493,16 @@
       "hash": "418ceb310a3cdd13",
       "size": 7867,
       "mtimeMs": 1787520544607.931,
-      "updatedAt": "2026-09-01T01:53:00.840Z",
+      "updatedAt": "2026-09-01T02:43:09.622Z",
       "source": "scan"
     },
     "src/routines/__tests__/writeRoutine.test.ts": {
       "description": "Exercise Timer",
-      "tokens": 4204,
-      "hash": "e2ba86d66cf1b43d",
-      "size": 14727,
-      "mtimeMs": 1787873054039.2468,
-      "updatedAt": "2026-09-01T01:53:00.840Z",
+      "tokens": 5018,
+      "hash": "78d248cd4cc3f0a6",
+      "size": 17580,
+      "mtimeMs": 1788230478097.0974,
+      "updatedAt": "2026-09-01T02:43:09.622Z",
       "source": "scan",
       "symbols": [
         {
@@ -2544,8 +2544,8 @@
           "name": "findOrNull",
           "kind": "fn",
           "startLine": 66,
-          "endLine": 387,
-          "tokens": 3545
+          "endLine": 462,
+          "tokens": 4359
         }
       ]
     },
@@ -2555,7 +2555,7 @@
       "hash": "485af058e1e29571",
       "size": 8914,
       "mtimeMs": 1787337084410.54,
-      "updatedAt": "2026-09-01T01:53:00.840Z",
+      "updatedAt": "2026-09-01T02:43:09.622Z",
       "source": "scan"
     },
     "src/routines/beginner-full-body.tabata.json": {
@@ -2564,7 +2564,7 @@
       "hash": "4bd2b0aa53466556",
       "size": 21927,
       "mtimeMs": 1787303775373.3909,
-      "updatedAt": "2026-09-01T01:53:00.841Z",
+      "updatedAt": "2026-09-01T02:43:09.622Z",
       "source": "scan"
     },
     "src/routines/beginner-mixed-cardio-1.tabata.json": {
@@ -2573,7 +2573,7 @@
       "hash": "15d9e47642b7d352",
       "size": 26357,
       "mtimeMs": 1787303775373.7773,
-      "updatedAt": "2026-09-01T01:53:00.841Z",
+      "updatedAt": "2026-09-01T02:43:09.623Z",
       "source": "scan"
     },
     "src/routines/beginner-mixed-cardio-2.tabata.json": {
@@ -2582,7 +2582,7 @@
       "hash": "19ed04bc09ffa21a",
       "size": 27490,
       "mtimeMs": 1787261536999.5833,
-      "updatedAt": "2026-09-01T01:53:00.842Z",
+      "updatedAt": "2026-09-01T02:43:09.623Z",
       "source": "scan"
     },
     "src/routines/estimate.ts": {
@@ -2591,7 +2591,7 @@
       "hash": "a3c1d655261de9ba",
       "size": 5161,
       "mtimeMs": 1787865792303.4949,
-      "updatedAt": "2026-09-01T01:53:00.842Z",
+      "updatedAt": "2026-09-01T02:43:09.623Z",
       "source": "scan",
       "symbols": [
         {
@@ -2623,7 +2623,7 @@
       "hash": "67a1420e32768546",
       "size": 11688,
       "mtimeMs": 1787995109363.6714,
-      "updatedAt": "2026-09-01T01:53:00.842Z",
+      "updatedAt": "2026-09-01T02:43:09.623Z",
       "source": "scan",
       "symbols": [
         {
@@ -2682,8 +2682,8 @@
       "tokens": 592,
       "hash": "fb4a4ab830cacb5e",
       "size": 2072,
-      "mtimeMs": 1787943800097.639,
-      "updatedAt": "2026-09-01T01:53:00.842Z",
+      "mtimeMs": 1788229950261.6904,
+      "updatedAt": "2026-09-01T02:43:09.624Z",
       "source": "scan"
     },
     "src/routines/exercises.machine.ts": {
@@ -2692,7 +2692,7 @@
       "hash": "6a332cb9e0314552",
       "size": 7408,
       "mtimeMs": 1787854445039.4243,
-      "updatedAt": "2026-09-01T01:53:00.843Z",
+      "updatedAt": "2026-09-01T02:43:09.624Z",
       "source": "scan"
     },
     "src/routines/exercises.other.ts": {
@@ -2701,7 +2701,7 @@
       "hash": "996c9f8ebf4c3ef0",
       "size": 11522,
       "mtimeMs": 1787943799310.2249,
-      "updatedAt": "2026-09-01T01:53:00.843Z",
+      "updatedAt": "2026-09-01T02:43:09.624Z",
       "source": "scan"
     },
     "src/routines/exercises.prescription.ts": {
@@ -2709,17 +2709,17 @@
       "tokens": 4048,
       "hash": "f4abaff9324fbb22",
       "size": 14168,
-      "mtimeMs": 1787943800078.6514,
-      "updatedAt": "2026-09-01T01:53:00.844Z",
+      "mtimeMs": 1788229950247.7727,
+      "updatedAt": "2026-09-01T02:43:09.624Z",
       "source": "scan"
     },
     "src/routines/exercises.shapes.ts": {
       "description": "Exercise Timer",
-      "tokens": 1188,
-      "hash": "46cc266bebe96e55",
-      "size": 4158,
-      "mtimeMs": 1787943800085.5,
-      "updatedAt": "2026-09-01T01:53:00.844Z",
+      "tokens": 1548,
+      "hash": "ac67ca1c1cd2e50a",
+      "size": 5415,
+      "mtimeMs": 1788229950246.3098,
+      "updatedAt": "2026-09-01T02:43:09.625Z",
       "source": "scan"
     },
     "src/routines/exercises.ts": {
@@ -2728,7 +2728,7 @@
       "hash": "80cdefec486a066d",
       "size": 7164,
       "mtimeMs": 1788227334600.7075,
-      "updatedAt": "2026-09-01T01:53:00.844Z",
+      "updatedAt": "2026-09-01T02:43:09.625Z",
       "source": "scan",
       "symbols": [
         {
@@ -2760,7 +2760,7 @@
       "hash": "7b5ca678a886c481",
       "size": 3101,
       "mtimeMs": 1787875519074.7905,
-      "updatedAt": "2026-09-01T01:53:00.844Z",
+      "updatedAt": "2026-09-01T02:43:09.625Z",
       "source": "scan",
       "symbols": [
         {
@@ -2781,130 +2781,130 @@
     },
     "src/routines/generate.ts": {
       "description": "Exercise Timer",
-      "tokens": 14499,
-      "hash": "bcd9cbeb57504acb",
-      "size": 50750,
-      "mtimeMs": 1788203218305.023,
-      "updatedAt": "2026-09-01T01:53:00.845Z",
+      "tokens": 15912,
+      "hash": "e8d7c8a2fcdb1025",
+      "size": 55697,
+      "mtimeMs": 1788230087990.596,
+      "updatedAt": "2026-09-01T02:43:09.626Z",
       "source": "scan",
       "symbols": [
         {
           "name": "hasSectionCount",
           "kind": "fn",
-          "startLine": 179,
-          "endLine": 183,
+          "startLine": 180,
+          "endLine": 184,
           "tokens": 67
         },
         {
           "name": "clampSections",
           "kind": "fn",
-          "startLine": 184,
-          "endLine": 188,
+          "startLine": 185,
+          "endLine": 189,
           "tokens": 64
         },
         {
           "name": "sectionsAsked",
           "kind": "fn",
-          "startLine": 189,
-          "endLine": 204,
+          "startLine": 190,
+          "endLine": 205,
           "tokens": 192
         },
         {
           "name": "asks",
           "kind": "fn",
-          "startLine": 205,
-          "endLine": 228,
+          "startLine": 206,
+          "endLine": 229,
           "tokens": 280
         },
         {
           "name": "seeded",
           "kind": "fn",
-          "startLine": 229,
-          "endLine": 244,
+          "startLine": 230,
+          "endLine": 245,
           "tokens": 148
         },
         {
           "name": "weightedPick",
           "kind": "fn",
-          "startLine": 245,
-          "endLine": 254,
+          "startLine": 246,
+          "endLine": 255,
           "tokens": 87
         },
         {
           "name": "shuffled",
           "kind": "fn",
-          "startLine": 255,
-          "endLine": 273,
+          "startLine": 256,
+          "endLine": 274,
           "tokens": 203
         },
         {
           "name": "loadFrom",
           "kind": "fn",
-          "startLine": 274,
-          "endLine": 294,
+          "startLine": 275,
+          "endLine": 295,
           "tokens": 210
         },
         {
           "name": "eligible",
           "kind": "fn",
-          "startLine": 295,
-          "endLine": 306,
+          "startLine": 296,
+          "endLine": 307,
           "tokens": 151
         },
         {
           "name": "share",
           "kind": "fn",
-          "startLine": 307,
-          "endLine": 324,
+          "startLine": 308,
+          "endLine": 325,
           "tokens": 208
         },
         {
           "name": "nextArea",
           "kind": "fn",
-          "startLine": 325,
-          "endLine": 359,
+          "startLine": 326,
+          "endLine": 360,
           "tokens": 365
         },
         {
           "name": "exerciseBlocks",
           "kind": "fn",
-          "startLine": 360,
-          "endLine": 516,
-          "tokens": 1816
+          "startLine": 361,
+          "endLine": 537,
+          "tokens": 2021
         },
         {
           "name": "between",
           "kind": "fn",
-          "startLine": 517,
-          "endLine": 526,
+          "startLine": 538,
+          "endLine": 547,
           "tokens": 143
         },
         {
           "name": "themeName",
           "kind": "fn",
-          "startLine": 527,
-          "endLine": 554,
+          "startLine": 548,
+          "endLine": 575,
           "tokens": 384
         },
         {
           "name": "sectionsRoutine",
           "kind": "fn",
-          "startLine": 555,
-          "endLine": 918,
-          "tokens": 4504
+          "startLine": 576,
+          "endLine": 1056,
+          "tokens": 5706
         },
         {
           "name": "describeRoutine",
           "kind": "fn",
-          "startLine": 919,
-          "endLine": 953,
+          "startLine": 1057,
+          "endLine": 1091,
           "tokens": 319
         },
         {
           "name": "generateRoutine",
           "kind": "fn",
-          "startLine": 954,
-          "endLine": 1242,
+          "startLine": 1092,
+          "endLine": 1380,
           "tokens": 3245
         }
       ]
@@ -2915,7 +2915,7 @@
       "hash": "34b5ba3286ab21b0",
       "size": 3691,
       "mtimeMs": 1787958852025.2502,
-      "updatedAt": "2026-09-01T01:53:00.845Z",
+      "updatedAt": "2026-09-01T02:43:09.626Z",
       "source": "scan"
     },
     "src/routines/importFiles.ts": {
@@ -2924,7 +2924,7 @@
       "hash": "818b5c7c936b317e",
       "size": 9119,
       "mtimeMs": 1788203218306.726,
-      "updatedAt": "2026-09-01T01:53:00.846Z",
+      "updatedAt": "2026-09-01T02:43:09.626Z",
       "source": "scan",
       "symbols": [
         {
@@ -2956,7 +2956,7 @@
       "hash": "e5c210e2a6dfda94",
       "size": 8459,
       "mtimeMs": 1787994964127.0903,
-      "updatedAt": "2026-09-01T01:53:00.846Z",
+      "updatedAt": "2026-09-01T02:43:09.626Z",
       "source": "scan",
       "symbols": [
         {
@@ -3033,11 +3033,11 @@
     },
     "src/routines/pasteFormat.ts": {
       "description": "Exercise Timer",
-      "tokens": 15312,
-      "hash": "2c729c0d216f52e2",
-      "size": 54076,
-      "mtimeMs": 1787993628280.1208,
-      "updatedAt": "2026-09-01T01:53:00.848Z",
+      "tokens": 15314,
+      "hash": "66c5cdf8ce04c39d",
+      "size": 54083,
+      "mtimeMs": 1788230271254.616,
+      "updatedAt": "2026-09-01T02:43:09.627Z",
       "source": "scan",
       "symbols": [
         {
@@ -3045,7 +3045,7 @@
           "kind": "fn",
           "startLine": 50,
           "endLine": 447,
-          "tokens": 4835
+          "tokens": 4837
         },
         {
           "name": "splitDescription",
@@ -3111,7 +3111,7 @@
       "hash": "ffd60bc70b6e11ff",
       "size": 3505,
       "mtimeMs": 1787643876180.467,
-      "updatedAt": "2026-09-01T01:53:00.848Z",
+      "updatedAt": "2026-09-01T02:43:09.628Z",
       "source": "scan"
     },
     "src/routines/README.md": {
@@ -3120,7 +3120,7 @@
       "hash": "75e587d36785d3c1",
       "size": 30183,
       "mtimeMs": 1788203141980.7988,
-      "updatedAt": "2026-09-01T01:53:00.848Z",
+      "updatedAt": "2026-09-01T02:43:09.628Z",
       "source": "scan"
     },
     "src/routines/rename.ts": {
@@ -3129,7 +3129,7 @@
       "hash": "618b07877edcc928",
       "size": 10728,
       "mtimeMs": 1788203218303.2625,
-      "updatedAt": "2026-09-01T01:53:00.849Z",
+      "updatedAt": "2026-09-01T02:43:09.628Z",
       "source": "scan",
       "symbols": [
         {
@@ -3210,7 +3210,7 @@
       "hash": "a052b46aceab43b8",
       "size": 3426,
       "mtimeMs": 1787873430295.3518,
-      "updatedAt": "2026-09-01T01:53:00.849Z",
+      "updatedAt": "2026-09-01T02:43:09.628Z",
       "source": "scan"
     },
     "src/routines/similar.ts": {
@@ -3219,7 +3219,7 @@
       "hash": "3d79fbc302d8aedb",
       "size": 7139,
       "mtimeMs": 1788203218300.677,
-      "updatedAt": "2026-09-01T01:53:00.849Z",
+      "updatedAt": "2026-09-01T02:43:09.629Z",
       "source": "scan",
       "symbols": [
         {
@@ -3272,7 +3272,7 @@
       "hash": "6f38da0c9a0c71ac",
       "size": 12340,
       "mtimeMs": 1787326914320.1543,
-      "updatedAt": "2026-09-01T01:53:00.850Z",
+      "updatedAt": "2026-09-01T02:43:09.629Z",
       "source": "scan"
     },
     "src/routines/tabataFormat.ts": {
@@ -3281,7 +3281,7 @@
       "hash": "e7d82eee1eeb325d",
       "size": 4155,
       "mtimeMs": 1787520544611.962,
-      "updatedAt": "2026-09-01T01:53:00.850Z",
+      "updatedAt": "2026-09-01T02:43:09.629Z",
       "source": "scan",
       "symbols": [
         {
@@ -3316,11 +3316,11 @@
     },
     "src/routines/writeRoutine.ts": {
       "description": "Exercise Timer",
-      "tokens": 5118,
-      "hash": "cceea273ad7ade3a",
-      "size": 17919,
-      "mtimeMs": 1787995109353.8245,
-      "updatedAt": "2026-09-01T01:53:00.850Z",
+      "tokens": 5959,
+      "hash": "fbd6143635796ecf",
+      "size": 20863,
+      "mtimeMs": 1788230271254.9126,
+      "updatedAt": "2026-09-01T02:43:09.629Z",
       "source": "scan",
       "symbols": [
         {
@@ -3341,70 +3341,77 @@
           "name": "stepLines",
           "kind": "fn",
           "startLine": 89,
-          "endLine": 211,
-          "tokens": 1526
+          "endLine": 214,
+          "tokens": 1572
         },
         {
           "name": "ladderLines",
           "kind": "fn",
-          "startLine": 212,
-          "endLine": 238,
+          "startLine": 215,
+          "endLine": 241,
           "tokens": 319
         },
         {
           "name": "repeatLines",
           "kind": "fn",
-          "startLine": 239,
-          "endLine": 253,
+          "startLine": 242,
+          "endLine": 256,
           "tokens": 214
         },
         {
           "name": "sectionLines",
           "kind": "fn",
-          "startLine": 254,
-          "endLine": 281,
+          "startLine": 257,
+          "endLine": 284,
           "tokens": 283
         },
         {
           "name": "siblingLines",
           "kind": "fn",
-          "startLine": 282,
-          "endLine": 307,
+          "startLine": 285,
+          "endLine": 310,
           "tokens": 287
         },
         {
           "name": "claimsWhatFollows",
           "kind": "fn",
-          "startLine": 308,
-          "endLine": 321,
+          "startLine": 311,
+          "endLine": 324,
           "tokens": 150
         },
         {
           "name": "amrapLines",
           "kind": "fn",
-          "startLine": 322,
-          "endLine": 334,
-          "tokens": 153
+          "startLine": 325,
+          "endLine": 349,
+          "tokens": 337
+        },
+        {
+          "name": "emomLines",
+          "kind": "fn",
+          "startLine": 350,
+          "endLine": 400,
+          "tokens": 601
         },
         {
           "name": "blockLines",
           "kind": "fn",
-          "startLine": 335,
-          "endLine": 365,
-          "tokens": 340
+          "startLine": 401,
+          "endLine": 431,
+          "tokens": 347
         },
         {
           "name": "writeRoutine",
           "kind": "fn",
-          "startLine": 366,
-          "endLine": 423,
+          "startLine": 432,
+          "endLine": 489,
           "tokens": 686
         },
         {
           "name": "textFilename",
           "kind": "fn",
-          "startLine": 424,
-          "endLine": 433,
+          "startLine": 490,
+          "endLine": 499,
           "tokens": 80
         }
       ]
@@ -3415,7 +3422,7 @@
       "hash": "5b74a0d1bf6de8fb",
       "size": 4276,
       "mtimeMs": 1787520544612.2632,
-      "updatedAt": "2026-09-01T01:53:00.851Z",
+      "updatedAt": "2026-09-01T02:43:09.630Z",
       "source": "scan"
     },
     "src/state/__tests__/tick.test.ts": {
@@ -3424,7 +3431,7 @@
       "hash": "7827383923be0456",
       "size": 4039,
       "mtimeMs": 1787520544612.7236,
-      "updatedAt": "2026-09-01T01:53:00.851Z",
+      "updatedAt": "2026-09-01T02:43:09.630Z",
       "source": "scan",
       "symbols": [
         {
@@ -3449,7 +3456,7 @@
       "hash": "5e891908fa63d3cc",
       "size": 3849,
       "mtimeMs": 1787877170057.9163,
-      "updatedAt": "2026-09-01T01:53:00.851Z",
+      "updatedAt": "2026-09-01T02:43:09.630Z",
       "source": "scan",
       "symbols": [
         {
@@ -3481,7 +3488,7 @@
       "hash": "9a22bcc08bb298a3",
       "size": 3133,
       "mtimeMs": 1787520544625.236,
-      "updatedAt": "2026-09-01T01:53:00.852Z",
+      "updatedAt": "2026-09-01T02:43:09.630Z",
       "source": "scan",
       "symbols": [
         {
@@ -3513,7 +3520,7 @@
       "hash": "6ea8cac6a82e585a",
       "size": 6368,
       "mtimeMs": 1787520544626.2847,
-      "updatedAt": "2026-09-01T01:53:00.852Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan",
       "symbols": [
         {
@@ -3538,7 +3545,7 @@
       "hash": "f91b0b33c24d3895",
       "size": 3215,
       "mtimeMs": 1787520544626.648,
-      "updatedAt": "2026-09-01T01:53:00.852Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan",
       "symbols": [
         {
@@ -3556,7 +3563,7 @@
       "hash": "c2460c7f875b49f0",
       "size": 3611,
       "mtimeMs": 1787520544613.4087,
-      "updatedAt": "2026-09-01T01:53:00.852Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan",
       "symbols": [
         {
@@ -3616,7 +3623,7 @@
       "hash": "9cbaa136985c362a",
       "size": 5181,
       "mtimeMs": 1787869805301.6074,
-      "updatedAt": "2026-09-01T01:53:00.853Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan"
     },
     "src/state/tick.ts": {
@@ -3625,7 +3632,7 @@
       "hash": "b25bed62b141a5fc",
       "size": 2370,
       "mtimeMs": 1787873406753.3892,
-      "updatedAt": "2026-09-01T01:53:00.853Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan",
       "symbols": [
         {
@@ -3643,7 +3650,7 @@
       "hash": "aaf093e7dacd6647",
       "size": 2601,
       "mtimeMs": 1787520544614.0576,
-      "updatedAt": "2026-09-01T01:53:00.853Z",
+      "updatedAt": "2026-09-01T02:43:09.631Z",
       "source": "scan",
       "symbols": [
         {
@@ -3675,7 +3682,7 @@
       "hash": "780f100d6d747df4",
       "size": 3761,
       "mtimeMs": 1787875315808.0854,
-      "updatedAt": "2026-09-01T01:53:00.853Z",
+      "updatedAt": "2026-09-01T02:43:09.632Z",
       "source": "scan",
       "symbols": [
         {
@@ -3693,7 +3700,7 @@
       "hash": "07d6ef5a1d466396",
       "size": 13266,
       "mtimeMs": 1787993759855.4932,
-      "updatedAt": "2026-09-01T01:53:00.853Z",
+      "updatedAt": "2026-09-01T02:43:09.632Z",
       "source": "scan",
       "symbols": [
         {
@@ -3718,7 +3725,7 @@
       "hash": "80ca4fecb67fc169",
       "size": 2160,
       "mtimeMs": 1787873838478.1812,
-      "updatedAt": "2026-09-01T01:53:00.854Z",
+      "updatedAt": "2026-09-01T02:43:09.632Z",
       "source": "scan",
       "symbols": [
         {
@@ -3736,7 +3743,7 @@
       "hash": "a1ced62cbf4b5c15",
       "size": 20844,
       "mtimeMs": 1788203237168.7659,
-      "updatedAt": "2026-09-01T01:53:00.855Z",
+      "updatedAt": "2026-09-01T02:43:09.633Z",
       "source": "scan"
     },
     "src/storage/__tests__/bundleMedia.test.ts": {
@@ -3745,7 +3752,7 @@
       "hash": "19573f60e47d9cd7",
       "size": 6785,
       "mtimeMs": 1787951114403.4597,
-      "updatedAt": "2026-09-01T01:53:00.855Z",
+      "updatedAt": "2026-09-01T02:43:09.633Z",
       "source": "scan"
     },
     "src/storage/__tests__/customExercises.test.ts": {
@@ -3754,7 +3761,7 @@
       "hash": "44f94474f1643ee8",
       "size": 5827,
       "mtimeMs": 1788203237167.4421,
-      "updatedAt": "2026-09-01T01:53:00.855Z",
+      "updatedAt": "2026-09-01T02:43:09.633Z",
       "source": "scan"
     },
     "src/storage/__tests__/db.test.ts": {
@@ -3763,7 +3770,7 @@
       "hash": "b2c022508a9ff2cd",
       "size": 8306,
       "mtimeMs": 1787963780340.284,
-      "updatedAt": "2026-09-01T01:53:00.855Z",
+      "updatedAt": "2026-09-01T02:43:09.633Z",
       "source": "scan",
       "symbols": [
         {
@@ -3802,7 +3809,7 @@
       "hash": "83c327447fb6a8cb",
       "size": 7029,
       "mtimeMs": 1787872346775.501,
-      "updatedAt": "2026-09-01T01:53:00.856Z",
+      "updatedAt": "2026-09-01T02:43:09.633Z",
       "source": "scan",
       "symbols": [
         {
@@ -3820,7 +3827,7 @@
       "hash": "a2be5adf9ebbced2",
       "size": 8685,
       "mtimeMs": 1787876187587.9692,
-      "updatedAt": "2026-09-01T01:53:00.856Z",
+      "updatedAt": "2026-09-01T02:43:09.634Z",
       "source": "scan"
     },
     "src/storage/__tests__/paces.test.ts": {
@@ -3829,7 +3836,7 @@
       "hash": "9642db79dab30bb4",
       "size": 6333,
       "mtimeMs": 1787866238608.493,
-      "updatedAt": "2026-09-01T01:53:00.856Z",
+      "updatedAt": "2026-09-01T02:43:09.634Z",
       "source": "scan",
       "symbols": [
         {
@@ -3861,7 +3868,7 @@
       "hash": "24cd29e4f67152af",
       "size": 4850,
       "mtimeMs": 1787958852025.8276,
-      "updatedAt": "2026-09-01T01:53:00.856Z",
+      "updatedAt": "2026-09-01T02:43:09.634Z",
       "source": "scan"
     },
     "src/storage/__tests__/refold.test.ts": {
@@ -3870,7 +3877,7 @@
       "hash": "b8f99eb2289d57ad",
       "size": 3035,
       "mtimeMs": 1787963793089.952,
-      "updatedAt": "2026-09-01T01:53:00.856Z",
+      "updatedAt": "2026-09-01T02:43:09.634Z",
       "source": "scan"
     },
     "src/storage/__tests__/shareLink.test.ts": {
@@ -3879,7 +3886,7 @@
       "hash": "649af07c6f7417d5",
       "size": 6446,
       "mtimeMs": 1787798326278.4885,
-      "updatedAt": "2026-09-01T01:53:00.857Z",
+      "updatedAt": "2026-09-01T02:43:09.634Z",
       "source": "scan"
     },
     "src/storage/__tests__/weights.test.ts": {
@@ -3888,7 +3895,7 @@
       "hash": "44d2d2eceb932232",
       "size": 11156,
       "mtimeMs": 1787951182640.7776,
-      "updatedAt": "2026-09-01T01:53:00.857Z",
+      "updatedAt": "2026-09-01T02:43:09.635Z",
       "source": "scan"
     },
     "src/storage/bundle.ts": {
@@ -3897,7 +3904,7 @@
       "hash": "bb6f451bde2de898",
       "size": 14571,
       "mtimeMs": 1788227334601.966,
-      "updatedAt": "2026-09-01T01:53:00.857Z",
+      "updatedAt": "2026-09-01T02:43:09.635Z",
       "source": "scan",
       "symbols": [
         {
@@ -4034,7 +4041,7 @@
       "hash": "80869771c8f16d99",
       "size": 3613,
       "mtimeMs": 1787950167678.42,
-      "updatedAt": "2026-09-01T01:53:00.857Z",
+      "updatedAt": "2026-09-01T02:43:09.635Z",
       "source": "scan",
       "symbols": [
         {
@@ -4059,7 +4066,7 @@
       "hash": "5e7ff555527643d6",
       "size": 9058,
       "mtimeMs": 1788203227257.2937,
-      "updatedAt": "2026-09-01T01:53:00.858Z",
+      "updatedAt": "2026-09-01T02:43:09.635Z",
       "source": "scan",
       "symbols": [
         {
@@ -4154,7 +4161,7 @@
       "hash": "296f1e6f3d3bb802",
       "size": 4888,
       "mtimeMs": 1787874817019.4194,
-      "updatedAt": "2026-09-01T01:53:00.858Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan",
       "symbols": [
         {
@@ -4207,7 +4214,7 @@
       "hash": "fc2b8699236430bb",
       "size": 1581,
       "mtimeMs": 1787875315805.3252,
-      "updatedAt": "2026-09-01T01:53:00.858Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan"
     },
     "src/storage/library.ts": {
@@ -4216,7 +4223,7 @@
       "hash": "017db9e423efec41",
       "size": 4604,
       "mtimeMs": 1787872346774.7495,
-      "updatedAt": "2026-09-01T01:53:00.858Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan",
       "symbols": [
         {
@@ -4283,7 +4290,7 @@
       "hash": "7e291715c647f01a",
       "size": 10108,
       "mtimeMs": 1787995109353.0667,
-      "updatedAt": "2026-09-01T01:53:00.858Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan",
       "symbols": [
         {
@@ -4322,7 +4329,7 @@
       "hash": "83eae5c8eadb7019",
       "size": 7797,
       "mtimeMs": 1788202119302.3335,
-      "updatedAt": "2026-09-01T01:53:00.859Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan",
       "symbols": [
         {
@@ -4389,7 +4396,7 @@
       "hash": "c3cb0a1c69231b50",
       "size": 7173,
       "mtimeMs": 1787994964126.0662,
-      "updatedAt": "2026-09-01T01:53:00.859Z",
+      "updatedAt": "2026-09-01T02:43:09.636Z",
       "source": "scan",
       "symbols": [
         {
@@ -4463,7 +4470,7 @@
       "hash": "af8982d42a46a03b",
       "size": 13538,
       "mtimeMs": 1788227358048.8281,
-      "updatedAt": "2026-09-01T01:53:00.859Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan"
     },
     "src/storage/refold.ts": {
@@ -4472,7 +4479,7 @@
       "hash": "2c31b0c13becf5dc",
       "size": 2570,
       "mtimeMs": 1787963515546.668,
-      "updatedAt": "2026-09-01T01:53:00.859Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan",
       "symbols": [
         {
@@ -4504,7 +4511,7 @@
       "hash": "ae70f9d0a0a2e0ba",
       "size": 969,
       "mtimeMs": 1787520544620.1497,
-      "updatedAt": "2026-09-01T01:53:00.859Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan"
     },
     "src/storage/shareLink.ts": {
@@ -4513,7 +4520,7 @@
       "hash": "f077d5136aa8781e",
       "size": 4507,
       "mtimeMs": 1787872346776.9524,
-      "updatedAt": "2026-09-01T01:53:00.860Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan",
       "symbols": [
         {
@@ -4587,7 +4594,7 @@
       "hash": "ed17014e0838c955",
       "size": 1691,
       "mtimeMs": 1787993628283.5103,
-      "updatedAt": "2026-09-01T01:53:00.860Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan"
     },
     "src/storage/tables.ts": {
@@ -4596,7 +4603,7 @@
       "hash": "34a20804772c2162",
       "size": 890,
       "mtimeMs": 1787995109360.8723,
-      "updatedAt": "2026-09-01T01:53:00.860Z",
+      "updatedAt": "2026-09-01T02:43:09.637Z",
       "source": "scan"
     },
     "src/storage/useLibrary.ts": {
@@ -4605,7 +4612,7 @@
       "hash": "ce6ddfc30a1927dc",
       "size": 6212,
       "mtimeMs": 1787993628283.5999,
-      "updatedAt": "2026-09-01T01:53:00.860Z",
+      "updatedAt": "2026-09-01T02:43:09.638Z",
       "source": "scan",
       "symbols": [
         {
@@ -4630,7 +4637,7 @@
       "hash": "3d3bcf1a0b6fdad3",
       "size": 4984,
       "mtimeMs": 1787963520292.015,
-      "updatedAt": "2026-09-01T01:53:00.861Z",
+      "updatedAt": "2026-09-01T02:43:09.638Z",
       "source": "scan",
       "symbols": [
         {
@@ -4676,7 +4683,7 @@
       "hash": "a0ac55d633e42982",
       "size": 3634,
       "mtimeMs": 1787963599284.2573,
-      "updatedAt": "2026-09-01T01:53:00.861Z",
+      "updatedAt": "2026-09-01T02:43:09.638Z",
       "source": "scan",
       "symbols": [
         {
@@ -4729,7 +4736,7 @@
       "hash": "b079e747dbe4d63a",
       "size": 3024,
       "mtimeMs": 1787993628276.9656,
-      "updatedAt": "2026-09-01T01:53:00.861Z",
+      "updatedAt": "2026-09-01T02:43:09.638Z",
       "source": "scan"
     },
     "src/ui/__tests__/EditorScreen.test.tsx": {
@@ -4738,7 +4745,7 @@
       "hash": "623bda7c2fffebbb",
       "size": 35740,
       "mtimeMs": 1788203055190.9307,
-      "updatedAt": "2026-09-01T01:53:00.862Z",
+      "updatedAt": "2026-09-01T02:43:09.639Z",
       "source": "scan",
       "symbols": [
         {
@@ -4791,7 +4798,7 @@
       "hash": "1f01e7c89cca42c5",
       "size": 1322,
       "mtimeMs": 1787872871519.241,
-      "updatedAt": "2026-09-01T01:53:00.862Z",
+      "updatedAt": "2026-09-01T02:43:09.639Z",
       "source": "scan"
     },
     "src/ui/__tests__/ExerciseDialog.test.tsx": {
@@ -4800,7 +4807,7 @@
       "hash": "e6f5be5618fa6a18",
       "size": 10078,
       "mtimeMs": 1788227422060.3867,
-      "updatedAt": "2026-09-01T01:53:00.862Z",
+      "updatedAt": "2026-09-01T02:43:09.640Z",
       "source": "scan",
       "symbols": [
         {
@@ -4818,7 +4825,7 @@
       "hash": "d1a01048c70ab84a",
       "size": 13669,
       "mtimeMs": 1788203237168.236,
-      "updatedAt": "2026-09-01T01:53:00.863Z",
+      "updatedAt": "2026-09-01T02:43:09.640Z",
       "source": "scan",
       "symbols": [
         {
@@ -4857,7 +4864,7 @@
       "hash": "079c36c1014fc5cf",
       "size": 28483,
       "mtimeMs": 1788205125703.4968,
-      "updatedAt": "2026-09-01T01:53:00.863Z",
+      "updatedAt": "2026-09-01T02:43:09.640Z",
       "source": "scan",
       "symbols": [
         {
@@ -4889,7 +4896,7 @@
       "hash": "d848e895c1572510",
       "size": 18898,
       "mtimeMs": 1787873430298.3171,
-      "updatedAt": "2026-09-01T01:53:00.864Z",
+      "updatedAt": "2026-09-01T02:43:09.641Z",
       "source": "scan",
       "symbols": [
         {
@@ -4907,7 +4914,7 @@
       "hash": "fe5680c26ed03ddb",
       "size": 12580,
       "mtimeMs": 1787943799306.4924,
-      "updatedAt": "2026-09-01T01:53:00.864Z",
+      "updatedAt": "2026-09-01T02:43:09.641Z",
       "source": "scan",
       "symbols": [
         {
@@ -4925,7 +4932,7 @@
       "hash": "1b9399e4c624e447",
       "size": 1710,
       "mtimeMs": 1787520544622.0796,
-      "updatedAt": "2026-09-01T01:53:00.864Z",
+      "updatedAt": "2026-09-01T02:43:09.641Z",
       "source": "scan"
     },
     "src/ui/__tests__/LibraryScreen.test.tsx": {
@@ -4934,7 +4941,7 @@
       "hash": "0e50416981b87aa6",
       "size": 5020,
       "mtimeMs": 1787993628278.0334,
-      "updatedAt": "2026-09-01T01:53:00.864Z",
+      "updatedAt": "2026-09-01T02:43:09.641Z",
       "source": "scan",
       "symbols": [
         {
@@ -4959,7 +4966,7 @@
       "hash": "089eb5c3fd23b528",
       "size": 5221,
       "mtimeMs": 1787850513256.367,
-      "updatedAt": "2026-09-01T01:53:00.865Z",
+      "updatedAt": "2026-09-01T02:43:09.642Z",
       "source": "scan"
     },
     "src/ui/__tests__/preview.test.ts": {
@@ -4968,7 +4975,7 @@
       "hash": "5da5e5912859c69a",
       "size": 4613,
       "mtimeMs": 1787940979786.5833,
-      "updatedAt": "2026-09-01T01:53:00.865Z",
+      "updatedAt": "2026-09-01T02:43:09.642Z",
       "source": "scan",
       "symbols": [
         {
@@ -4993,7 +5000,7 @@
       "hash": "217c38eff12b847a",
       "size": 9100,
       "mtimeMs": 1788014686137.2854,
-      "updatedAt": "2026-09-01T01:53:00.865Z",
+      "updatedAt": "2026-09-01T02:43:09.642Z",
       "source": "scan"
     },
     "src/ui/__tests__/RunScreen.test.tsx": {
@@ -5002,7 +5009,7 @@
       "hash": "fc600b3c38852a1c",
       "size": 12841,
       "mtimeMs": 1787947895749.2742,
-      "updatedAt": "2026-09-01T01:53:00.866Z",
+      "updatedAt": "2026-09-01T02:43:09.642Z",
       "source": "scan"
     },
     "src/ui/App.tsx": {
@@ -5011,7 +5018,7 @@
       "hash": "ce88d17c196eee7a",
       "size": 10781,
       "mtimeMs": 1787995109361.7126,
-      "updatedAt": "2026-09-01T01:53:00.866Z",
+      "updatedAt": "2026-09-01T02:43:09.643Z",
       "source": "scan",
       "symbols": [
         {
@@ -5043,7 +5050,7 @@
       "hash": "427512ba6f421ea5",
       "size": 1777,
       "mtimeMs": 1787876493485.0266,
-      "updatedAt": "2026-09-01T01:53:00.866Z",
+      "updatedAt": "2026-09-01T02:43:09.643Z",
       "source": "scan",
       "symbols": [
         {
@@ -5061,7 +5068,7 @@
       "hash": "ef119789e16ac496",
       "size": 1828,
       "mtimeMs": 1787876683449.0378,
-      "updatedAt": "2026-09-01T01:53:00.867Z",
+      "updatedAt": "2026-09-01T02:43:09.643Z",
       "source": "scan",
       "symbols": [
         {
@@ -5079,7 +5086,7 @@
       "hash": "5f47aab00000f685",
       "size": 18482,
       "mtimeMs": 1788203218303.8594,
-      "updatedAt": "2026-09-01T01:53:00.867Z",
+      "updatedAt": "2026-09-01T02:43:09.643Z",
       "source": "scan",
       "symbols": [
         {
@@ -5111,7 +5118,7 @@
       "hash": "123eb17c2187cac6",
       "size": 11887,
       "mtimeMs": 1787995109359.3706,
-      "updatedAt": "2026-09-01T01:53:00.867Z",
+      "updatedAt": "2026-09-01T02:43:09.643Z",
       "source": "scan",
       "symbols": [
         {
@@ -5143,7 +5150,7 @@
       "hash": "e930666d02337e60",
       "size": 32016,
       "mtimeMs": 1788202300465.4087,
-      "updatedAt": "2026-09-01T01:53:00.868Z",
+      "updatedAt": "2026-09-01T02:43:09.644Z",
       "source": "scan",
       "symbols": [
         {
@@ -5196,7 +5203,7 @@
       "hash": "19ef6134ca16ac17",
       "size": 6547,
       "mtimeMs": 1787993628285.2427,
-      "updatedAt": "2026-09-01T01:53:00.868Z",
+      "updatedAt": "2026-09-01T02:43:09.644Z",
       "source": "scan",
       "symbols": [
         {
@@ -5221,7 +5228,7 @@
       "hash": "773f68432774dcf1",
       "size": 3388,
       "mtimeMs": 1787993628286.2397,
-      "updatedAt": "2026-09-01T01:53:00.869Z",
+      "updatedAt": "2026-09-01T02:43:09.645Z",
       "source": "scan",
       "symbols": [
         {
@@ -5239,7 +5246,7 @@
       "hash": "872063816086b501",
       "size": 6531,
       "mtimeMs": 1787993721379.506,
-      "updatedAt": "2026-09-01T01:53:00.869Z",
+      "updatedAt": "2026-09-01T02:43:09.645Z",
       "source": "scan",
       "symbols": [
         {
@@ -5264,7 +5271,7 @@
       "hash": "83bb3007c2a7199b",
       "size": 35593,
       "mtimeMs": 1788204384739.963,
-      "updatedAt": "2026-09-01T01:53:00.869Z",
+      "updatedAt": "2026-09-01T02:43:09.645Z",
       "source": "scan"
     },
     "src/ui/EditorScreen.tsx": {
@@ -5273,7 +5280,7 @@
       "hash": "cf5e405bcc4cd03d",
       "size": 24672,
       "mtimeMs": 1788203218306.3801,
-      "updatedAt": "2026-09-01T01:53:00.870Z",
+      "updatedAt": "2026-09-01T02:43:09.646Z",
       "source": "scan",
       "symbols": [
         {
@@ -5291,7 +5298,7 @@
       "hash": "523067429db73307",
       "size": 1908,
       "mtimeMs": 1787872817105.224,
-      "updatedAt": "2026-09-01T01:53:00.870Z",
+      "updatedAt": "2026-09-01T02:43:09.646Z",
       "source": "scan",
       "symbols": [
         {
@@ -5309,7 +5316,7 @@
       "hash": "c69c62c141306ec8",
       "size": 14344,
       "mtimeMs": 1788227322139.9407,
-      "updatedAt": "2026-09-01T01:53:00.870Z",
+      "updatedAt": "2026-09-01T02:43:09.646Z",
       "source": "scan",
       "symbols": [
         {
@@ -5334,7 +5341,7 @@
       "hash": "2b0ffe1d5d972f06",
       "size": 10059,
       "mtimeMs": 1788205074929.9905,
-      "updatedAt": "2026-09-01T01:53:00.871Z",
+      "updatedAt": "2026-09-01T02:43:09.646Z",
       "source": "scan"
     },
     "src/ui/ExercisesScreen.tsx": {
@@ -5343,7 +5350,7 @@
       "hash": "a1a4449b1dcb66ae",
       "size": 40457,
       "mtimeMs": 1788205067744.0134,
-      "updatedAt": "2026-09-01T01:53:00.871Z",
+      "updatedAt": "2026-09-01T02:43:09.647Z",
       "source": "scan",
       "symbols": [
         {
@@ -5382,7 +5389,7 @@
       "hash": "4350a3f9fefe0d8b",
       "size": 17702,
       "mtimeMs": 1787995159834.6177,
-      "updatedAt": "2026-09-01T01:53:00.872Z",
+      "updatedAt": "2026-09-01T02:43:09.647Z",
       "source": "scan",
       "symbols": [
         {
@@ -5526,7 +5533,7 @@
       "hash": "3060fa1c80ab3580",
       "size": 20124,
       "mtimeMs": 1788227334602.7244,
-      "updatedAt": "2026-09-01T01:53:00.872Z",
+      "updatedAt": "2026-09-01T02:43:09.648Z",
       "source": "scan",
       "symbols": [
         {
@@ -5565,7 +5572,7 @@
       "hash": "1922f83534be0f5a",
       "size": 15361,
       "mtimeMs": 1788227358050.1191,
-      "updatedAt": "2026-09-01T01:53:00.872Z",
+      "updatedAt": "2026-09-01T02:43:09.648Z",
       "source": "scan"
     },
     "src/ui/HelpTray.tsx": {
@@ -5574,7 +5581,7 @@
       "hash": "896e8eececa77bc5",
       "size": 2779,
       "mtimeMs": 1787876493486.5818,
-      "updatedAt": "2026-09-01T01:53:00.873Z",
+      "updatedAt": "2026-09-01T02:43:09.648Z",
       "source": "scan",
       "symbols": [
         {
@@ -5592,7 +5599,7 @@
       "hash": "71622ab76ab102af",
       "size": 8766,
       "mtimeMs": 1787940920923.2004,
-      "updatedAt": "2026-09-01T01:53:00.873Z",
+      "updatedAt": "2026-09-01T02:43:09.648Z",
       "source": "scan",
       "symbols": [
         {
@@ -5813,7 +5820,7 @@
       "hash": "1f5e4b8933800662",
       "size": 1587,
       "mtimeMs": 1787520544623.2246,
-      "updatedAt": "2026-09-01T01:53:00.873Z",
+      "updatedAt": "2026-09-01T02:43:09.649Z",
       "source": "scan"
     },
     "src/ui/library.css": {
@@ -5822,7 +5829,7 @@
       "hash": "3bbe8944d34f57f9",
       "size": 19155,
       "mtimeMs": 1788205074929.6113,
-      "updatedAt": "2026-09-01T01:53:00.874Z",
+      "updatedAt": "2026-09-01T02:43:09.649Z",
       "source": "scan"
     },
     "src/ui/LibraryScreen.tsx": {
@@ -5831,7 +5838,7 @@
       "hash": "328ed842476a8014",
       "size": 29326,
       "mtimeMs": 1788205067744.93,
-      "updatedAt": "2026-09-01T01:53:00.874Z",
+      "updatedAt": "2026-09-01T02:43:09.649Z",
       "source": "scan",
       "symbols": [
         {
@@ -5863,7 +5870,7 @@
       "hash": "a60dac20d8851e23",
       "size": 8390,
       "mtimeMs": 1787875198848.8572,
-      "updatedAt": "2026-09-01T01:53:00.875Z",
+      "updatedAt": "2026-09-01T02:43:09.650Z",
       "source": "scan",
       "symbols": [
         {
@@ -5888,7 +5895,7 @@
       "hash": "06aa3478c410c5d1",
       "size": 1713,
       "mtimeMs": 1787876493486.0432,
-      "updatedAt": "2026-09-01T01:53:00.875Z",
+      "updatedAt": "2026-09-01T02:43:09.650Z",
       "source": "scan"
     },
     "src/ui/PasteDialog.tsx": {
@@ -5897,7 +5904,7 @@
       "hash": "6a64e325fcb99001",
       "size": 6642,
       "mtimeMs": 1787876493487.0828,
-      "updatedAt": "2026-09-01T01:53:00.876Z",
+      "updatedAt": "2026-09-01T02:43:09.650Z",
       "source": "scan",
       "symbols": [
         {
@@ -5922,7 +5929,7 @@
       "hash": "f1646695c6246268",
       "size": 6146,
       "mtimeMs": 1788014466032.4832,
-      "updatedAt": "2026-09-01T01:53:00.876Z",
+      "updatedAt": "2026-09-01T02:43:09.650Z",
       "source": "scan"
     },
     "src/ui/preview.ts": {
@@ -5931,7 +5938,7 @@
       "hash": "edfd479f8a882cb7",
       "size": 2337,
       "mtimeMs": 1787995109356.918,
-      "updatedAt": "2026-09-01T01:53:00.876Z",
+      "updatedAt": "2026-09-01T02:43:09.650Z",
       "source": "scan",
       "symbols": [
         {
@@ -5949,7 +5956,7 @@
       "hash": "11860b22ae46ba7b",
       "size": 6412,
       "mtimeMs": 1788014455937.517,
-      "updatedAt": "2026-09-01T01:53:00.877Z",
+      "updatedAt": "2026-09-01T02:43:09.651Z",
       "source": "scan",
       "symbols": [
         {
@@ -5988,7 +5995,7 @@
       "hash": "bd4ab39404e0a807",
       "size": 28659,
       "mtimeMs": 1788227358049.4058,
-      "updatedAt": "2026-09-01T01:53:00.877Z",
+      "updatedAt": "2026-09-01T02:43:09.651Z",
       "source": "scan"
     },
     "src/ui/run-screen.css": {
@@ -5997,7 +6004,7 @@
       "hash": "7e7c705838f6b42b",
       "size": 30649,
       "mtimeMs": 1787995109363.3503,
-      "updatedAt": "2026-09-01T01:53:00.878Z",
+      "updatedAt": "2026-09-01T02:43:09.651Z",
       "source": "scan"
     },
     "src/ui/RunScreen.tsx": {
@@ -6006,7 +6013,7 @@
       "hash": "c3c1322b31b89230",
       "size": 29123,
       "mtimeMs": 1788014695298.464,
-      "updatedAt": "2026-09-01T01:53:00.878Z",
+      "updatedAt": "2026-09-01T02:43:09.652Z",
       "source": "scan",
       "symbols": [
         {
@@ -6045,7 +6052,7 @@
       "hash": "5e2eeed2a8925c24",
       "size": 2084,
       "mtimeMs": 1787520544633.7644,
-      "updatedAt": "2026-09-01T01:53:00.878Z",
+      "updatedAt": "2026-09-01T02:43:09.652Z",
       "source": "scan"
     },
     "src/ui/SoundsScreen.tsx": {
@@ -6054,7 +6061,7 @@
       "hash": "829c9e0ae67a8898",
       "size": 6802,
       "mtimeMs": 1787875315811.651,
-      "updatedAt": "2026-09-01T01:53:00.879Z",
+      "updatedAt": "2026-09-01T02:43:09.652Z",
       "source": "scan",
       "symbols": [
         {
@@ -6093,7 +6100,7 @@
       "hash": "552dbb5f9d4863ea",
       "size": 34136,
       "mtimeMs": 1788205189205.9539,
-      "updatedAt": "2026-09-01T01:53:00.879Z",
+      "updatedAt": "2026-09-01T02:43:09.653Z",
       "source": "scan"
     },
     "src/ui/useDismiss.ts": {
@@ -6102,7 +6109,7 @@
       "hash": "cc4dc3405eb0d432",
       "size": 1734,
       "mtimeMs": 1787877170054.65,
-      "updatedAt": "2026-09-01T01:53:00.879Z",
+      "updatedAt": "2026-09-01T02:43:09.653Z",
       "source": "scan"
     },
     "src/ui/useMediaUrl.ts": {
@@ -6111,7 +6118,7 @@
       "hash": "d6e5e8ac51109239",
       "size": 1165,
       "mtimeMs": 1787993628273.3765,
-      "updatedAt": "2026-09-01T01:53:00.880Z",
+      "updatedAt": "2026-09-01T02:43:09.653Z",
       "source": "scan"
     },
     "src/ui/useModal.ts": {
@@ -6120,7 +6127,7 @@
       "hash": "cec06da098ad1f9e",
       "size": 1236,
       "mtimeMs": 1787876493440.2566,
-      "updatedAt": "2026-09-01T01:53:00.880Z",
+      "updatedAt": "2026-09-01T02:43:09.653Z",
       "source": "scan"
     },
     "src/ui/useRowDrag.ts": {
@@ -6129,7 +6136,7 @@
       "hash": "93e97d766fa36477",
       "size": 8479,
       "mtimeMs": 1787873638343.856,
-      "updatedAt": "2026-09-01T01:53:00.880Z",
+      "updatedAt": "2026-09-01T02:43:09.653Z",
       "source": "scan",
       "symbols": [
         {
@@ -6151,10 +6158,10 @@
     "src/version.ts": {
       "description": "Exercise Timer",
       "tokens": 193,
-      "hash": "2a2576c29ac4b5fa",
+      "hash": "f81df8cdd8678330",
       "size": 673,
-      "mtimeMs": 1788227439482.2056,
-      "updatedAt": "2026-09-01T01:53:00.881Z",
+      "mtimeMs": 1788228125620.3833,
+      "updatedAt": "2026-09-01T02:43:09.654Z",
       "source": "scan"
     },
     "tsconfig.app.json": {
@@ -6163,7 +6170,7 @@
       "hash": "6c80c97809e1c941",
       "size": 701,
       "mtimeMs": 1787261537043.5417,
-      "updatedAt": "2026-09-01T01:53:00.881Z",
+      "updatedAt": "2026-09-01T02:43:09.654Z",
       "source": "scan"
     },
     "tsconfig.json": {
@@ -6172,7 +6179,7 @@
       "hash": "176df73167046cc0",
       "size": 162,
       "mtimeMs": 1787873863467.061,
-      "updatedAt": "2026-09-01T01:53:00.881Z",
+      "updatedAt": "2026-09-01T02:43:09.654Z",
       "source": "scan"
     },
     "tsconfig.node.json": {
@@ -6181,7 +6188,7 @@
       "hash": "1924c05a38628bf6",
       "size": 387,
       "mtimeMs": 1787260059139.992,
-      "updatedAt": "2026-09-01T01:53:00.881Z",
+      "updatedAt": "2026-09-01T02:43:09.654Z",
       "source": "scan"
     },
     "tsconfig.scripts.json": {
@@ -6190,7 +6197,7 @@
       "hash": "d17e1d3d381dc5e0",
       "size": 394,
       "mtimeMs": 1787873894502.9712,
-      "updatedAt": "2026-09-01T01:53:00.881Z",
+      "updatedAt": "2026-09-01T02:43:09.654Z",
       "source": "scan"
     },
     "vite.config.ts": {
@@ -6199,7 +6206,7 @@
       "hash": "22cd299003b31262",
       "size": 5722,
       "mtimeMs": 1787958852030.0352,
-      "updatedAt": "2026-09-01T01:53:00.882Z",
+      "updatedAt": "2026-09-01T02:43:09.655Z",
       "source": "scan",
       "symbols": [
         {
@@ -6217,7 +6224,7 @@
       "hash": "79753583fc6b40d1",
       "size": 583,
       "mtimeMs": 1787860603215.4958,
-      "updatedAt": "2026-09-01T01:53:00.882Z",
+      "updatedAt": "2026-09-01T02:43:09.655Z",
       "source": "scan"
     }
   },
