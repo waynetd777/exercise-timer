@@ -226,6 +226,31 @@ describe('changing one of yours', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Sandbag Step-up' }), 'Sandbag Lunge')
   })
 
+  it('says the warning is about a rename, not a second row', () => {
+    // The confirm screen is shared with adding, where it says "Add anyway".
+    // Here Save performs a rename, so "Add" would promise a row it will not make.
+    const onSave = vi.fn()
+    const squat = { name: 'Sandbag Squat', area: 'lower' as const, equipment: 'kettlebell' as const }
+    render(
+      <ExerciseDialog
+        name=""
+        editing={squat}
+        table={[...table, squat]}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    )
+    fireEvent.change(name(), { target: { value: 'Bugarian Split Squats' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(screen.getByText(/Rename to “Bugarian Split Squats” anyway\?/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Rename anyway' }))
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Bugarian Split Squats' }),
+      'Sandbag Squat',
+    )
+  })
+
   it('saves an unchanged name without asking about the family it is in', () => {
     // Nothing new is being introduced, so there is nothing to warn about: the
     // exercise has been on the page since the day it was added.

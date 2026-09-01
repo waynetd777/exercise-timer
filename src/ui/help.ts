@@ -40,7 +40,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'Paste: paste or type a routine as plain text. It reads sections, rounds, ladders, EMOM minutes, 30/30 intervals and AMRAPs, and lists any line it could not place.',
       'Copy template, in the paste box, puts an example on your clipboard using every shape it understands. Easier than reading the rules.',
       'Generate: answer a few questions and it builds one for you.',
-      'Import: a .tabata file, a backup .json, or a .txt written as text. Dropping a file on this screen does the same.',
+      'Import: a .tabata file, a backup .json, or a .txt or .md written as text. Dropping a file on this screen does the same.',
       'Paste, Generate and Import all open in the editor. Nothing joins your library until you tap Save there.',
       'Tidy exercise names, in the ⋯ menu, puts step names back to the ones the app knows, so weights and pictures can find them. Counts, weights and brackets are left alone. It only appears when there is something to fix.',
     ],
@@ -107,7 +107,7 @@ export const EDITOR_HELP: readonly HelpSection[] = [
       'A Work step’s name suggests exercises the app knows. Type to search, or tap the arrow for the full list.',
       'Picking one off the list spells the name the app’s way, so the step gets that exercise’s picture and weight. One undo takes the whole thing back.',
       'Typing your own name is always fine. Warm Up is not an exercise and never will be.',
-      'Where nothing in the list matches what you typed, it offers to add it as an exercise of your own. Answer the four questions and the step goes onto it, ready for a weight, a picture and a generated routine.',
+      'Where nothing in the list matches what you typed, it offers to add it as an exercise of your own. Answer its questions and the step goes onto it, ready for a weight, a picture and a generated routine.',
       'It warns you first if something similar is already there, and offers that one instead. Tapping it just renames the step.',
       'Drag a row by its grip to move it, or focus it and use the arrow keys.',
       'Each row can also duplicate itself, add a step below, or delete.',
@@ -209,7 +209,7 @@ export const EXERCISES_HELP: readonly HelpSection[] = [
   {
     heading: 'Exercises of your own',
     points: [
-      'New adds an exercise the app does not have. It asks for the kit, the body area, push or pull, and what it is for.',
+      'New adds an exercise the app does not have. It asks for the kit, the body area, push or pull, what it is for, and whether it works one side at a time.',
       'It asks all that because a generated routine uses the answers: the area picks which slot it can fill, push or pull sets the alternation, and what it is for decides whether it lands in a warm-up or a working set.',
       'Yours are marked “Yours” and are the only rows with Edit and Remove. The app’s own exercises come from the machine’s guide and your instructor’s routines, and cannot be changed here.',
       'They show up everywhere the app’s own do: the editor’s name list, generated routines, weights, pictures and measured paces.',

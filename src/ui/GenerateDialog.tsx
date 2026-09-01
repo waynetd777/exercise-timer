@@ -228,9 +228,7 @@ export function GenerateDialog({
   const table = useMemo(() => withCustom(currentCustomExercises()), [])
   /** What Random may draw from. Everything, until it is narrowed. */
   const [pool, setPool] = useState<string[]>(() =>
-    withCustom(currentCustomExercises())
-      .filter((e) => e.use === 'cardio')
-      .map((e) => e.name),
+    table.filter((e) => e.use === 'cardio').map((e) => e.name),
   )
   const [sets, setSets] = useState(3)
   const [name, setName] = useState('')

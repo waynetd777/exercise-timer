@@ -170,16 +170,6 @@ export const KIT_GROUPS: readonly { kit: Equipment; label: string }[] = [
 ]
 
 /**
- * The subset you can put a weight against.
- *
- * Derived from `KIT_GROUPS` rather than listed again, so adding a kit in one
- * place cannot leave the other behind. A press-up and the trampoline are not
- * here: neither has a number to keep.
- */
-export const LOADABLE_GROUPS: readonly { kit: Equipment; label: string }[] =
-  KIT_GROUPS.filter((group) => LOADABLE.includes(group.kit))
-
-/**
  * The longer get-ready, for anything you have to put ON.
  *
  * An ankle cuff has to be buckled and a band has to be stepped into and gripped;
