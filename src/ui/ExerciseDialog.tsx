@@ -4,23 +4,30 @@
  * MIT License. See LICENSE in the project root.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { MediaRef } from '../engine'
+import type { KnownImage } from '../editor/images'
+import { storeFile } from '../media/pin'
 import type { BodyArea, Equipment, Exercise, Pattern, Use } from '../routines/exercises'
 import { AREA_NAMES, attributesOf, KIT_GROUPS } from '../routines/exercises'
 import type { CustomExercise } from '../storage/customExercises'
 import { sameExercise, similarExercises } from '../routines/similar'
-import { CheckIcon, CloseIcon, PlusIcon } from './icons'
+import { ImagePicker } from './editor/ImageDialogs'
+import { CheckIcon, CloseIcon, ImageIcon, PlusIcon, TrashIcon } from './icons'
+import { useMediaUrl } from './useMediaUrl'
 import { useModal } from './useModal'
 
 /**
  * Adding an exercise of your own, or changing one.
  *
- * ASKS FOR FOUR THINGS, not one. A name and a kit would be enough to put a row
- * on the exercises page and keep a weight and a picture against it, and it would
+ * ASKS FOR MORE THAN A NAME. A name and a kit would be enough to put a row on
+ * the exercises page and keep a weight and a picture against it, and it would
  * NOT be enough to generate a routine with: `generate.ts` builds its pools by
  * area, alternates push against pull, and draws warm-ups from `use`. An exercise
  * the generator cannot see is half an exercise, so the dialog asks for what the
- * generator needs and says why.
+ * generator needs. Each field's own `title` says why it is being asked; a
+ * paragraph at the bottom saying it again was one more thing between the form
+ * and the button.
  *
  * WARNS BEFORE IT SAVES. The exercise table is 147 movements written by three
  * hands and the instructor spells Bulgarian Split Squat four ways. So the
@@ -35,6 +42,14 @@ import { useModal } from './useModal'
  * that folded name, so two rows under one key would fight over one weight and
  * one picture; there is nothing to add, so nothing is offered but the exercise
  * that is already there.
+ *
+ * IT ASKS FOR THE WEIGHT AND THE PICTURE TOO, which are not part of the exercise
+ * and are the two things you have in hand the moment you add one. They live in
+ * their own per-device tables (`weights.ts`, `pictures.ts`) rather than on the
+ * exercise, so they come in and go out through `tables` and `onSave`'s third
+ * argument rather than through `CustomExercise`. Added from a STEP, they arrive
+ * pre-filled with what that step was carrying: the step already says you press
+ * 30kg, and asking again in the next breath is the app not listening.
  */
 
 const AREAS: readonly { value: BodyArea; label: string }[] = [
@@ -113,10 +128,23 @@ function Choice<T extends string>({
   )
 }
 
+/**
+ * What the per-device tables hold against an exercise, asked for alongside it.
+ * Not part of a `CustomExercise`: a weight is a measurement of your gym and the
+ * exercise is the same movement without one.
+ */
+export type ExerciseTables = {
+  /** Free text, as everywhere else a load is written: `65kg`, `red band`. */
+  weight: string
+  picture: MediaRef | null
+}
+
 export function ExerciseDialog({
   name: typed,
   editing = null,
   table,
+  tables,
+  knownImages,
   onSave,
   onUse,
   onClose,
@@ -128,10 +156,22 @@ export function ExerciseDialog({
   /** Every exercise the app knows, yours included: what a clash or a warning is measured against. */
   table: readonly Exercise[]
   /**
-   * Saves it. `from` is the name it had before, when a rename is what happened,
-   * so the caller can move the weight and the picture with it.
+   * The weight and picture to start from: what the tables already hold, or what
+   * the step this was opened from is carrying. Absent means neither.
    */
-  onSave: (exercise: CustomExercise, from: string | null) => void
+  tables?: ExerciseTables
+  /**
+   * The catalogue the picture chooser offers. Absent leaves the picture field
+   * out altogether, which is what a test with no image store behind it wants.
+   */
+  knownImages?: readonly KnownImage[]
+  /**
+   * Saves it. `from` is the name it had before, when a rename is what happened,
+   * so the caller can move the weight and the picture with it. The third
+   * argument is what the tables should now hold, which the caller writes: this
+   * dialog reads no store and saves to none.
+   */
+  onSave: (exercise: CustomExercise, from: string | null, tables: ExerciseTables) => void
   /**
    * Takes the exercise that is already here instead of adding a new one. Absent
    * where there is nothing to take it onto: the page's own Add button has no step
@@ -148,6 +188,13 @@ export function ExerciseDialog({
   const [pattern, setPattern] = useState<Pattern | 'none'>(editing?.pattern ?? 'none')
   const [use, setUse] = useState<Use>(editing?.use ?? 'strength')
   const [side, setSide] = useState<'one' | 'both'>(editing?.perSide === true ? 'one' : 'both')
+  const [weight, setWeight] = useState(tables?.weight ?? '')
+  const [picture, setPicture] = useState<MediaRef | null>(tables?.picture ?? null)
+  /** True while the image catalogue is open over this dialog. */
+  const [picking, setPicking] = useState(false)
+  /** Said in the field rather than in a dialog: a third stacked modal to report
+      an unreadable JPEG is more machinery than the message is worth. */
+  const [pictureError, setPictureError] = useState<string | null>(null)
   /** True once Add has been pressed and there is something to warn about. */
   const [confirming, setConfirming] = useState(false)
 
@@ -176,6 +223,24 @@ export function ExerciseDialog({
     }
   }, [table])
 
+  /** The chosen picture, resolved as a row and a run resolve one. */
+  const pictureUrl = useMediaUrl(picture ?? undefined)
+
+  /*
+   * Cancel takes focus, and the panel stays at the top.
+   *
+   * `autoFocus` did the first and broke the second: the button is the last
+   * thing in a form six fields long, and scrolling it into view opened the
+   * dialog on its own actions with the name field off the top. `preventScroll`
+   * is the whole fix — the panel is already at scroll zero, and nothing but the
+   * focus was moving it. `showModal()` has run by now: `useModal`'s effect is
+   * declared first, and effects run in order.
+   */
+  const cancel = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    cancel.current?.focus({ preventScroll: true })
+  }, [])
+
   const built = (): CustomExercise => ({
     name: trimmed,
     area,
@@ -190,7 +255,26 @@ export function ExerciseDialog({
   })
 
   const save = () => {
-    onSave(built(), editing && editing.name !== trimmed ? editing.name : null)
+    onSave(built(), editing && editing.name !== trimmed ? editing.name : null, {
+      weight: weight.trim(),
+      picture,
+    })
+  }
+
+  /*
+   * The bytes land in IndexedDB now and the table only on Add, so a dialog
+   * cancelled after an upload leaves an unreferenced blob for the next sweep to
+   * reclaim — which is the right answer, since nothing is referencing it. The
+   * exercises page's own chooser has the same shape; see its `setPicture`.
+   */
+  const upload = async (file: Blob) => {
+    try {
+      setPicture(await storeFile(file))
+      setPictureError(null)
+      setPicking(false)
+    } catch {
+      setPictureError('That image could not be read. Try a JPEG, PNG or WebP.')
+    }
   }
 
   const submit = () => {
@@ -201,6 +285,7 @@ export function ExerciseDialog({
   }
 
   return (
+    <>
     <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
       {/* The panel is its own element: a <dialog> styled as the box does not hug
           its content on iOS. See `.modal` in theme.css. */}
@@ -295,6 +380,85 @@ export function ExerciseDialog({
               </p>
             )}
 
+            {/*
+              Free text, like the load on a step and for the same reason: half
+              of what an exercise loads is not a number. Empty is a real answer
+              and the common one — a press-up has your own weight — so nothing
+              here is required.
+            */}
+            <div className="exdlg__field">
+              <span className="label label--sm">Weight</span>
+              {/* A `div` and a plain span, not a `label`: the × lives inside the
+                  field and a button inside a label is a press that also lands on
+                  the input. The input names itself, as the picture field's
+                  controls do. */}
+              <span className="clearable">
+                <input
+                  className="exdlg__name"
+                  value={weight}
+                  aria-label="Weight"
+                  autoComplete="off"
+                  placeholder="65kg, red band"
+                  onChange={(event) => setWeight(event.target.value)}
+                />
+                {weight !== '' && (
+                  <button
+                    type="button"
+                    className="clearable__x"
+                    aria-label="Clear the weight"
+                    title="Clear"
+                    onClick={() => setWeight('')}
+                  >
+                    <CloseIcon />
+                  </button>
+                )}
+              </span>
+            </div>
+
+            {/*
+              The picture, chosen through the editor's own catalogue rather than
+              a second one: "which picture" is one question, and this dialog
+              opens over both screens that ask it.
+            */}
+            {knownImages && (
+              <div className="exdlg__field">
+                <span className="label label--sm">Picture</span>
+                <div className="exdlg__pic">
+                  {pictureUrl ? (
+                    <img className="exdlg__picimg" src={pictureUrl} alt="" />
+                  ) : (
+                    /* An empty frame rather than nothing, so the row keeps its
+                       height and the buttons do not jump when one is chosen. */
+                    <span className="exdlg__picimg exdlg__picimg--none" aria-hidden="true" />
+                  )}
+                  <button
+                    type="button"
+                    className="chip chip--action"
+                    onClick={() => setPicking(true)}
+                  >
+                    <ImageIcon />
+                    {picture ? 'Change' : 'Choose'}
+                  </button>
+                  {picture && (
+                    <button
+                      type="button"
+                      className="chip chip--danger"
+                      onClick={() => {
+                        setPicture(null)
+                        setPictureError(null)
+                      }}
+                    >
+                      <TrashIcon />
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {pictureError !== null && (
+                  <p className="exdlg__clash label label--sm">{pictureError}</p>
+                )}
+              </div>
+            )}
+
             <Choice
               legend="Kit"
               options={KIT_GROUPS.map((group) => ({ value: group.kit, label: group.label }))}
@@ -318,18 +482,14 @@ export function ExerciseDialog({
 
             <Choice legend="Side" options={SIDES} value={side} onChange={setSide} />
 
-            {/*
-              Said once, at the bottom, because it is the answer to "why is it
-              asking me all this".
-            */}
-            <p className="exdlg__why label label--sm">
-              The area, the direction and what it is for are what let a generated routine use this
-              exercise. Everything here can be changed afterwards.
-            </p>
-
             <div className="exdlg__actions">
-              {/* Cancel focused, as everywhere else: the safe answer is the easy one. */}
-              <button type="button" className="chip" onClick={onClose} autoFocus>
+              {/*
+                Cancel focused, as everywhere else: the safe answer is the easy
+                one. NOT by `autoFocus`, which scrolls the button into view and
+                so opened this dialog at its own bottom, with the name field
+                out of sight above. See `focusCancel`.
+              */}
+              <button type="button" className="chip" ref={cancel} onClick={onClose}>
                 <CloseIcon />
                 Cancel
               </button>
@@ -347,5 +507,26 @@ export function ExerciseDialog({
         )}
       </div>
     </dialog>
+
+    {/*
+      A SIBLING of this dialog, never a child: `close` reaches React's handlers
+      on the way up, so a picker nested inside would fire this dialog's own
+      onClose and shut the form behind it. Rendered after it, so it sits above
+      it in the top layer. Same rule as the editor's notice over its chooser.
+    */}
+    {picking && knownImages && (
+      <ImagePicker
+        images={knownImages}
+        onPick={(ref) => {
+          setPicture(ref)
+          setPictureError(null)
+          setPicking(false)
+        }}
+        onUpload={(file) => void upload(file)}
+        onError={setPictureError}
+        onClose={() => setPicking(false)}
+      />
+    )}
+    </>
   )
 }

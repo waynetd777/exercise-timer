@@ -582,6 +582,10 @@
 /* The panel inside `.modal`. See theme.css for why that is two elements. */
 .picker {
   width: min(100%, 60rem);
+  /* Its own container, as every other dialog panel declares one. Without it the
+     head's label and the chips measured the editor behind the dialog and read a
+     third larger on a desktop than on a phone. See `--label-size-sm`. */
+  container: picker / inline-size;
   max-height: 100%;
   padding: var(--step-4);
   display: grid;
@@ -783,7 +787,7 @@
  * A text field with the exercise table behind it. The wrapper takes the flex
  * sizing `.efield--name` used to carry, so the row's layout is unchanged; the
  * caret is overlaid on the field's right-hand end rather than placed beside it,
- * the same trick as `.efield-clear`, so the name still gets the full width.
+ * the same trick as `.clearable__x`, so the name still gets the full width.
  */
 .ename {
   position: relative;
@@ -1225,47 +1229,6 @@
   min-width: 0;
 }
 
-/*
- * A field with an × in its right-hand end. The button overlays the input rather
- * than sitting beside it, so the field keeps the full width of the row and the
- * three extras still line up.
- */
-.efield-clearable {
-  position: relative;
-  flex: 1 1 auto;
-  display: flex;
-  min-width: 0;
-}
-
-.efield-clearable .efield {
-  /* Room for the button, so a long weight does not run under it. */
-  padding-right: 2rem;
-}
-
-.efield-clear {
-  position: absolute;
-  top: 50%;
-  right: 0.25rem;
-  translate: 0 -50%;
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  color: var(--bone-faint);
-  background: none;
-  border: 0;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.efield-clear:hover,
-.efield-clear:focus-visible {
-  color: var(--bone);
-  background: var(--ink-700);
-}
-
-.efield-clear .icon {
-  width: 0.9rem;
-  height: 0.9rem;
-}
+/* The weight field's × is `.clearable` in theme.css now — one look for every
+   field in the app that has one, the search box included. This used to be a
+   smaller copy of it. */

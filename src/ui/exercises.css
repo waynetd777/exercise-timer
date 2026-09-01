@@ -203,7 +203,12 @@
  */
 .weight {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 7.5rem;
+  /* The weight column is 9rem, not the 7.5rem it was: the field wears the search
+     box's × now (`.clearable`), which reserves 2.5rem of its right-hand end
+     whether or not the button is showing. Reserved always, deliberately — the
+     field is right aligned, so a padding that came and went would shift the
+     number sideways on the first character typed. */
+  grid-template-columns: 44px minmax(0, 1fr) 9rem;
   align-items: center;
   gap: var(--step-3);
   padding: var(--step-2) var(--step-3);

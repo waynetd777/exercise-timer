@@ -250,7 +250,7 @@ export function ExerciseField({
       />
 
       {/* Overlaid on the field's right-hand end rather than beside it, so the
-          name keeps the full width of the row. Same trick as `.efield-clear`. */}
+          name keeps the full width of the row. Same trick as `.clearable__x`. */}
       <button
         type="button"
         className="ename__caret"

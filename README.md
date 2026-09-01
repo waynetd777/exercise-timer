@@ -27,10 +27,13 @@ from across a gym, with the phone propped against a rack.
   the shape of the ones it has been given.
 - **One place for what you lift.** A weight and a picture per exercise. Any
   routine that does not say otherwise follows them, so moving up a plate is one
-  edit rather than seven.
+  edit rather than seven. Put a weight or a picture on a step for an exercise
+  that has none, and the editor asks whether it is yours for that exercise or
+  just this routine's — either answer is a real one, and it only asks once.
 - **Your own exercises, not just the app's.** Add one the app has never heard of
   and it behaves like the rest: a weight, a picture, a place in the editor's name
-  list, and a slot in a generated routine. It warns you first if it is something
+  list, and a slot in a generated routine. Added from a step, it arrives carrying
+  whatever that step already said you lift. It warns you first if it is something
   you already have under another spelling.
 - **Yours, on your device.** No accounts, no server, no telemetry.
 

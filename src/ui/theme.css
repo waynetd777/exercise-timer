@@ -110,6 +110,26 @@
    */
   --label-size: clamp(1.6rem, min(3.2cqi, 6.5cqh), 3.4rem);
   --label-size-sm: clamp(1rem, 1.6cqi, 1.4rem);
+  /*
+   * EVERY DIALOG PANEL MUST DECLARE `container: <name> / inline-size`.
+   *
+   * The two sizes above, `--size-name`, `--size-title` and `--size-display` are
+   * all `cqi`, and `cqi` resolves against the nearest ANCESTOR container. A
+   * `<dialog>` is in the top layer but still a child of the screen that opened
+   * it, and the screens are containers — so a panel that declares none measures
+   * the whole screen behind it. Its text then grows with the window while the
+   * panel stays pinned at its `max-width`, which is backwards: the wider the
+   * display, the larger a fixed-width box reads.
+   *
+   * This has now been found three times — in `.generate` (where it wrapped the
+   * action chips onto two lines on a desktop and not on a phone), then in
+   * `.exdlg` and `.notice`. It is invisible at the width a dialog is usually
+   * built at and only shows up on a wide screen, which is why it keeps coming
+   * back. The fix is one line, and it belongs beside the panel's `width`:
+   * `.paste`, `.generate`, `.notice`, `.exdlg`, `.tray` and `.picker` all carry
+   * it. A container also gives `@container <name> (max-width: …)` something to
+   * name, which is how a panel gets its own narrow-screen layout.
+   */
 
   /*
    * The current phase colour. The run screen overrides this per step; everywhere
@@ -400,6 +420,11 @@ button {
 
 .notice {
   width: min(100%, 26rem);
+  /* Its own container, as `.exdlg` and `.generate` declare one and for the same
+     reason: the question, the detail line and the chips are all sized in `cqi`,
+     and with nothing to measure they grew with the window while the panel stayed
+     at 26rem. Against the panel they are the compact size at every width. */
+  container: notice / inline-size;
   /* Whatever is left of the sheet after its padding; taller content scrolls. */
   max-height: 100%;
   overflow-y: auto;
@@ -441,9 +466,11 @@ button {
   gap: var(--step-3);
 }
 
-/* ── Search field ──────────────────────────────────────────────────────────
- * A search box with an × in its right-hand end, shared by the library and the
- * exercises page.
+/* ── A field with an × in its right-hand end ───────────────────────────────
+ * `.search` is one — the library's and the exercises page's search boxes — and
+ * `.clearable` is the same thing under a general name, worn by every weight
+ * field in the app: the editor's, the exercises page's rows, and the exercise
+ * dialog's.
  *
  * OUR OWN BUTTON, not the browser's. WebKit only draws
  * `::-webkit-search-cancel-button` while the field has focus, so the × vanished
@@ -452,29 +479,49 @@ button {
  * is something to clear.
  *
  * The button overlays the input rather than sitting beside it, so the field keeps
- * the full width of its row. Same arrangement as the editor's `.efield-clear`.
+ * the full width of its row.
+ *
+ * ONE LOOK, everywhere. The search box and a weight field sit on the same screen,
+ * and two clear buttons of different sizes read as two different controls. The
+ * editor's weight field used to carry its own smaller copy of this in
+ * `editor.css`; it is this now.
+ *
+ * A CLEARED WEIGHT IS A REAL ANSWER, which is why the button is worth the room.
+ * An empty weight does not mean unloaded — it means "whatever I lift for this",
+ * so on a step it stops overriding the exercises page, and on the page it stops
+ * answering for every routine that does not disagree. Selecting five characters
+ * and pressing delete is a poor way to say that.
  */
-.search {
+.search,
+.clearable {
   position: relative;
   display: flex;
-  /* Takes the sizing the input used to carry as a flex item of the tools row. */
-  flex: 1 1 12rem;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
-.search input {
+/* The search box takes the sizing its input used to carry as a flex item of the
+   tools row. */
+.search {
+  flex: 1 1 12rem;
+}
+
+.search input,
+.clearable input {
   width: 100%;
-  /* Room for the button, so a long query does not run under it. */
+  /* Room for the button, so a long value does not run under it. */
   padding-right: 2.5rem;
 }
 
 /* The browser's, in both spellings: ours is the one that stays. */
-.search input::-webkit-search-cancel-button {
+.search input::-webkit-search-cancel-button,
+.clearable input::-webkit-search-cancel-button {
   appearance: none;
   -webkit-appearance: none;
 }
 
-.search input::-ms-clear {
+.search input::-ms-clear,
+.clearable input::-ms-clear {
   display: none;
 }
 
@@ -483,7 +530,8 @@ button {
  * flow, so neither the button nor its × has any say in the height of the field.
  * Kept under the field's own height so it still sits inside the box.
  */
-.search__clear {
+.search__clear,
+.clearable__x {
   position: absolute;
   top: 50%;
   right: 0.35rem;
@@ -501,12 +549,15 @@ button {
 }
 
 .search__clear:hover,
-.search__clear:focus-visible {
+.search__clear:focus-visible,
+.clearable__x:hover,
+.clearable__x:focus-visible {
   color: var(--bone);
   background: var(--ink-700);
 }
 
-.search__clear .icon {
+.search__clear .icon,
+.clearable__x .icon {
   width: 1.15rem;
   height: 1.15rem;
 }
@@ -524,7 +575,22 @@ button {
      inherited, because the dialog also opens from the editor, whose screen sets
      no accent of its own. */
   --accent: var(--role-rest);
-  width: min(100%, 30rem);
+  /* 44rem, the paste and generate dialogs' width. It asks for six things now,
+     and at 30rem the chip rows wrapped to two and three lines each, which made
+     a short form read as a long one. */
+  width: min(100%, 44rem);
+  /*
+   * A CONTAINER OF ITS OWN, for the same reason `.generate` declares one.
+   *
+   * Everything in here is sized in `cqi` — the title, every `.label--sm` legend,
+   * every chip — and with no container to measure, `cqi` resolved against the
+   * SCREEN behind the dialog. So the form's text grew with the window while the
+   * panel stayed pinned at 44rem: the legends and chips read a third larger on a
+   * desktop than on a phone, which is backwards. Measured against the panel,
+   * `--label-size-sm` sits at its 1rem floor at every width (1.6% of 44rem is
+   * 11px), which is the compact size the generate dialog settled on.
+   */
+  container: exdlg / inline-size;
   max-height: 100%;
   overflow-y: auto;
   padding: var(--step-5);
@@ -538,10 +604,14 @@ button {
   border-radius: var(--radius);
 }
 
+/* `.paste__title`'s size and tracking, not a third one: this dialog is now the
+   same width as the paste and generate panels and sits beside them in the same
+   flow, and two dialog titles differing by 7px reads as a mistake. */
 .exdlg__title {
   margin: 0;
-  font-size: max(1.05rem, min(1.9cqi, 1.4rem));
+  font-size: var(--size-name);
   font-weight: 650;
+  letter-spacing: var(--track-name);
   line-height: 1.35;
 }
 
@@ -568,6 +638,30 @@ button {
   background: var(--ink-900);
   border: var(--hairline);
   border-radius: var(--radius);
+}
+
+/* The picture, its thumbnail and the two buttons on one line. Wraps on a phone
+   rather than squeezing the buttons, which is what `flex-wrap` is here for. */
+.exdlg__pic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--step-3);
+}
+
+.exdlg__picimg {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  background: var(--ink-900);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+/* An empty frame, so choosing a picture does not move the buttons. */
+.exdlg__picimg--none {
+  display: block;
+  border-style: dashed;
 }
 
 .exdlg__why {
@@ -630,10 +724,15 @@ button {
   letter-spacing: 0;
 }
 
+/* Right aligned, as `.paste__actions` is in the paste and generate dialogs:
+   the affirmative ends up under the right-hand edge of the fields above it,
+   which is where the eye leaves a form. Cancel first in the DOM, so it is still
+   the first thing a Tab from the last field reaches. */
 .exdlg__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--step-3);
   margin-top: var(--step-2);
 }
@@ -654,6 +753,9 @@ button {
   position: fixed;
   inset: 0 0 0 auto;
   width: min(100vw, 24rem);
+  /* Its own container, as every other dialog panel declares one. See
+     `--label-size-sm`. */
+  container: tray / inline-size;
   max-width: none;
   max-height: none;
   /*

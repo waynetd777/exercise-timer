@@ -40,7 +40,7 @@ import { SCHEMA_VERSION } from '../engine/types'
 import { blocksDurationMs, DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 import { newId } from '../id'
 import type { BodyArea, Exercise, Pattern } from './exercises'
-import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
+import { AREA_NAMES, EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
 import type { Prescription } from './exercises.prescription'
 import { PRESCRIPTIONS } from './exercises.prescription'
 import type { SectionFormat, ThemeFormat } from './exercises.shapes'
@@ -1223,12 +1223,22 @@ function sectionsRoutine(
    * with no explanation at all, since the length note only speaks from five
    * minutes off. So an overrun explains itself instead — what fit is already
    * past the ask — and only a routine that ran SHORT blames the minutes.
+   *
+   * IT SAYS "SECTION", because otherwise it does not say what it is talking
+   * about. These are THEMES — General Body, Arms, Core, Finisher — and the only
+   * thing the dialog asks about by name is the body areas, so "No room for
+   * General Body" read as a fourth area alongside Upper body, Torso and Lower
+   * body, and one that was never on offer. Wayne asked exactly that question.
+   * The two are different axes: an area decides which exercises the pools may
+   * draw on, a theme is one of the named sections her routines come in, and a
+   * General Body section is built from whichever areas were asked for.
    */
   if (left.length > 0) {
+    const dropped = `${listOf(left)} ${left.length === 1 ? 'section' : 'sections'}`
     notes.push(
       came < spec.totalMs
-        ? `No room for ${left.join(', ')} in ${Math.round(spec.totalMs / 60_000)} minutes.`
-        : `No room for ${left.join(', ')}: what fits already comes to about ${Math.round(came / 60_000)} minutes.`,
+        ? `No room for the ${dropped} in ${Math.round(spec.totalMs / 60_000)} minutes.`
+        : `No room for the ${dropped}: what fits already comes to about ${Math.round(came / 60_000)} minutes.`,
     )
   }
   // The same test as the builder's: a count of NaN took the fitted path above
@@ -1246,6 +1256,17 @@ function sectionsRoutine(
    * time. The help tray covers it, and the report already says "about".
    */
   return blocks
+}
+
+/**
+ * A list as a person reads one: "Core", "Core and Arms", "Core, Arms and Legs".
+ *
+ * A plain `join(', ')` is how "No room for General Body, Core" got written, and
+ * a comma between the last two reads as a fragment rather than a sentence.
+ */
+function listOf(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? ''
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]!}`
 }
 
 /**
@@ -1272,7 +1293,13 @@ export function describeRoutine(
    */
   built?: number,
 ): string {
-  const AREA_NAMES: Record<BodyArea, string> = {
+  /*
+   * Its own words, deliberately, which is why this is not `exercises.ts`'s
+   * `AREA_NAMES`: a routine title is Title Case, and the torso is what she calls
+   * "Core" when she names a routine after it. That table is the plain-prose
+   * version, used in the notes.
+   */
+  const TITLE_WORDS: Record<BodyArea, string> = {
     upper: 'Upper Body',
     torso: 'Core',
     lower: 'Lower Body',
@@ -1285,7 +1312,7 @@ export function describeRoutine(
       ? 'Routine'
       : areas.length === order.length
         ? 'Full-Body'
-        : areas.map((area) => AREA_NAMES[area]).join(' & ')
+        : areas.map((area) => TITLE_WORDS[area]).join(' & ')
 
   const kit =
     spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
@@ -1556,10 +1583,32 @@ export function generateRoutine(
     exhausted = taken.size >= [...pools.values()].flat().length
   }
 
-  for (const area of spec.areas) {
-    if ((used.get(area) ?? 0) === 0 && pools.has(area)) {
-      notes.push(`No room for the ${area} body in ${Math.round(spec.totalMs / 60_000)} minutes.`)
-    }
+  /*
+   * The areas the minutes could not reach at all, in ONE note.
+   *
+   * One note per area stacked two near-identical lines on a short routine, which
+   * is the same complaint the sections report already answered: what a person
+   * reads is "what did I not get", and that is one answer however many areas it
+   * names. `listOf`, so the last comma is an "and".
+   *
+   * `AREA_NAMES`, not the key. Interpolating the raw `BodyArea` gave "the upper
+   * body" and "the lower body", which read fine, and "the torso body", which
+   * does not. Lowercased because these are not proper names in this sentence —
+   * unlike the SECTION themes, which are.
+   *
+   * In the guide's own order rather than the order the chips were pressed: the
+   * spec carries whatever sequence the dialog's toggles left behind, and a note
+   * that reads "the torso and upper body" one time and "the upper body and
+   * torso" the next looks like it is describing two different things.
+   */
+  const order: BodyArea[] = ['upper', 'torso', 'lower']
+  const missed = order.filter(
+    (area) => spec.areas.includes(area) && (used.get(area) ?? 0) === 0 && pools.has(area),
+  )
+  if (missed.length > 0) {
+    notes.push(
+      `No room for the ${listOf(missed.map((area) => AREA_NAMES[area].toLowerCase()))} in ${Math.round(spec.totalMs / 60_000)} minutes.`,
+    )
   }
   if (exhausted) {
     notes.push(

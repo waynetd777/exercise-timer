@@ -96,6 +96,27 @@ describe('ExercisesScreen', () => {
     expect(weightFor('Leg Press')).toBe('')
   })
 
+  it('clears a weight with the × in the field', () => {
+    // The same × the search box has. Emptying a weight is a real answer — the
+    // exercise goes back to "whatever I lift for this" — and selecting five
+    // characters to say it is a poor way to.
+    saveWeights(withWeight({}, 'Leg Press', '65kg'))
+    render(<ExercisesScreen knownImages={images} workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Clear the weight for Leg Press'))
+
+    expect(field('Leg Press').value).toBe('')
+    expect(loadWeights()).toEqual({})
+  })
+
+  it('shows no × on a row with nothing of its own to clear', () => {
+    // A button that did nothing would be worse than none: the field can be
+    // showing a weight this table does not hold under this key.
+    render(<ExercisesScreen knownImages={images} workouts={[]} onExit={vi.fn()} onFollow={vi.fn()} />)
+
+    expect(screen.queryByLabelText('Clear the weight for Leg Press')).toBeNull()
+  })
+
   it('offers what the saved routines already use, and fills it in', () => {
     /*
      * The Toe Raise has no looked-up weight, but a routine has been using

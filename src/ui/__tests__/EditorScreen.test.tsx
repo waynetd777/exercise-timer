@@ -6,11 +6,13 @@
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { Workout } from '../../engine'
 import { SCHEMA_VERSION } from '../../engine'
 import { EditorScreen } from '../EditorScreen'
-import { savePictures, withPicture } from '../../storage/pictures'
+import { loadPictures, savePictures, withPicture } from '../../storage/pictures'
+import { loadWeights, saveWeights } from '../../storage/weights'
+import { foldName } from '../../routines/foldName'
 import { loadCustomExercises, saveCustomExercises } from '../../storage/customExercises'
 
 const sectioned = (): Workout => ({
@@ -935,5 +937,299 @@ describe('capturing an exercise from a step', () => {
     expect((nameField() as HTMLInputElement).value).toBe('Bulgarian Split Squats')
     // Nothing was added: the exercise was already there under its own spelling.
     expect(loadCustomExercises()).toEqual({})
+  })
+})
+
+/**
+ * A weight or a picture put on a step is usually a fact about the exercise, not
+ * about the routine. These cover the offer that makes it one, and the two
+ * answers: `weights.ts` and `pictures.ts` explain why both are real.
+ */
+describe('offering a step\u2019s weight and picture to the exercises page', () => {
+  beforeAll(() => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '')
+    }
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    }
+  })
+  beforeEach(() => {
+    saveWeights({})
+    savePictures({})
+  })
+  afterEach(cleanup)
+
+  /** One entry in the image catalogue the picker offers. */
+  const catalogue = {
+    id: 'squat.jpg',
+    ref: { source: 'bundled', path: 'squat.jpg' } as const,
+    src: 'squat.jpg',
+    label: 'Squat rack',
+    uses: 0,
+  }
+
+  /** Opens the note/weight line under the only step, and returns its weight field. */
+  const weightField = () => {
+    fireEvent.click(screen.getByLabelText('Add a note or an alternative'))
+    return screen.getByLabelText('Weight')
+  }
+
+  it('asks before writing a typed weight down as the exercise\u2019s', () => {
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+
+    expect(screen.getByText('Is 30kg your weight for Squats?')).toBeTruthy()
+    // Nothing written until it is answered.
+    expect(loadWeights()).toEqual({})
+  })
+
+  it('writes it to the page and stops the step stating its own', () => {
+    /*
+     * Both halves matter. Written down, every routine naming Squats follows it;
+     * cleared from the step, this routine follows it too, rather than keeping a
+     * second copy that goes stale the next time the number moves.
+     */
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add to my exercises' }))
+
+    // Keyed as every per-exercise table is keyed: by folded name.
+    expect(loadWeights()).toEqual({ [foldName('Squats')]: '30kg' })
+    // Empty, and showing the page's number as the placeholder it now inherits.
+    const after = screen.getByLabelText('Weight') as HTMLInputElement
+    expect(after.value).toBe('')
+    expect(after.placeholder).toBe('30kg')
+  })
+
+  it('leaves the weight on the step alone when it is this routine\u2019s own', () => {
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Just this routine' }))
+
+    expect(loadWeights()).toEqual({})
+    expect((screen.getByLabelText('Weight') as HTMLInputElement).value).toBe('30kg')
+  })
+
+  it('asks once, so correcting the number is not nagged at', () => {
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Just this routine' }))
+
+    fireEvent.change(field, { target: { value: '32.5kg' } })
+    fireEvent.blur(field, { target: { value: '32.5kg' } })
+
+    expect(screen.queryByText(/your weight for Squats/)).toBeNull()
+  })
+
+  it('says nothing where the page already has a weight for it', () => {
+    // The deliberate case the override exists for: this routine, on purpose, is
+    // not the usual weight. Asking about it every time would be nagging.
+    saveWeights({ [foldName('Squats')]: '25kg' })
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+
+    expect(screen.queryByText(/your weight for Squats/)).toBeNull()
+  })
+
+  it('clears a step’s weight with the × in the field', () => {
+    // Emptying it is a real action, not a lack of one: an empty load is how a
+    // step stops overriding the page and starts following it.
+    saveWeights({ [foldName('Squats')]: '25kg' })
+    render(<EditorScreen {...props(timed())} />)
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+    fireEvent.click(screen.getByLabelText('Clear the weight for Squats'))
+
+    // Back to the page's number, shown as the placeholder it inherits.
+    const after = screen.getByLabelText('Weight') as HTMLInputElement
+    expect(after.value).toBe('')
+    expect(after.placeholder).toBe('25kg')
+  })
+
+  it('says nothing for a step whose name is not an exercise', () => {
+    /*
+     * "Warm Up" is in the library and in no table, and the tables are keyed by
+     * exercise. A weight filed under a name the exercises page never shows is an
+     * entry nothing reads, so there is nothing to offer. The step that SHOULD
+     * become an exercise has its own offer, in the name field.
+     */
+    render(<EditorScreen {...props(timed())} />)
+    fireEvent.change(screen.getAllByLabelText('Step name')[0]!, { target: { value: 'Warm Up' } })
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '30kg' } })
+    fireEvent.blur(field, { target: { value: '30kg' } })
+
+    expect(screen.queryByText(/your weight for/)).toBeNull()
+    expect(loadWeights()).toEqual({})
+  })
+
+  it('files it under the table’s spelling, not the step’s', () => {
+    // The tables are keyed by folded name, so "leg presses" belongs under Leg
+    // Press or under nothing: two spellings would keep two weights.
+    render(<EditorScreen {...props(timed())} />)
+    fireEvent.change(screen.getAllByLabelText('Step name')[0]!, { target: { value: 'leg presses' } })
+
+    const field = weightField()
+    fireEvent.change(field, { target: { value: '65kg' } })
+    fireEvent.blur(field, { target: { value: '65kg' } })
+
+    expect(screen.getByText('Is 65kg your weight for Leg Press?')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Add to my exercises' }))
+    expect(loadWeights()).toEqual({ [foldName('Leg Press')]: '65kg' })
+  })
+
+  it('asks the same about a picture, and writes it to the page', async () => {
+    render(
+      <EditorScreen
+        {...props(timed())}
+        knownImages={[catalogue]}
+      />,
+    )
+
+    fireEvent.click(screen.getByLabelText('Add an image to Squats'))
+    fireEvent.click(await screen.findByRole('button', { name: /Squat rack/ }))
+
+    expect(screen.getByText('Show this picture for Squats everywhere?')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Add to my exercises' }))
+
+    expect(loadPictures()).toEqual({
+      [foldName('Squats')]: { source: 'bundled', path: 'squat.jpg' },
+    })
+  })
+
+  it('leaves a picture on the step where the page already illustrates it', async () => {
+    savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'other.jpg' }))
+    render(
+      <EditorScreen
+        {...props(timed())}
+        knownImages={[catalogue]}
+      />,
+    )
+
+    /* The step shows the page's illustration already, so there is no "add an
+       image" button: overriding it goes through the preview. */
+    fireEvent.click(screen.getByLabelText(/Image for Squats, from the Exercises page/))
+    fireEvent.click(screen.getByRole('button', { name: 'Use my own' }))
+    fireEvent.click(await screen.findByRole('button', { name: /Squat rack/ }))
+
+    expect(screen.queryByText(/Show this picture for Squats/)).toBeNull()
+    expect(loadPictures()).toEqual({
+      [foldName('Squats')]: { source: 'bundled', path: 'other.jpg' },
+    })
+  })
+})
+
+/**
+ * A step turned into an exercise brings what it was carrying with it. The
+ * dialog is the one place that asks, so it asks for all four things at once
+ * rather than putting a second question behind the first.
+ */
+describe('an exercise added from a step that already says what it lifts', () => {
+  beforeAll(() => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute('open', '')
+    }
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    }
+  })
+  beforeEach(() => {
+    saveCustomExercises({})
+    saveWeights({})
+    savePictures({})
+  })
+  afterEach(cleanup)
+
+  /** A step with a weight and a picture of its own, and a name off the table. */
+  const carrying = (): Workout => ({
+    id: 'w4',
+    name: 'Tabata',
+    blocks: [
+      {
+        kind: 'segment',
+        id: 's1',
+        name: 'Exercise',
+        role: 'work',
+        durationMs: 20_000,
+        load: '20kg',
+        media: { source: 'bundled', path: 'squat.jpg' },
+      },
+    ],
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: 1,
+    updatedAt: 1,
+  })
+
+  const open = () => {
+    render(<EditorScreen {...props(carrying())} />)
+    fireEvent.change(screen.getAllByLabelText('Step name')[0]!, {
+      target: { value: 'Sandbag Haul' },
+    })
+    fireEvent.mouseDown(screen.getByRole('button', { name: /Add “Sandbag Haul” to my exercises/ }))
+  }
+
+  /* The step's own weight field is on the page behind, under the same label, so
+     the dialog's is asked for by way of the dialog. */
+  const dialogWeight = () =>
+    within(screen.getByRole('dialog')).getByLabelText('Weight') as HTMLInputElement
+
+  it('opens on the weight the step already states', () => {
+    open()
+
+    expect(dialogWeight().value).toBe('20kg')
+  })
+
+  it('writes the weight and the picture to the page, and stops the step stating them', () => {
+    open()
+    fireEvent.click(screen.getByRole('button', { name: 'Kettlebell' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    const key = foldName('Sandbag Haul')
+    expect(loadCustomExercises()).toHaveProperty(key)
+    expect(loadWeights()).toEqual({ [key]: '20kg' })
+    expect(loadPictures()).toEqual({ [key]: { source: 'bundled', path: 'squat.jpg' } })
+
+    /*
+     * Both cleared off the step, which is the point rather than a side effect:
+     * the exercise owns them now, and a second copy on the step would go stale
+     * the next time the number moves. The note line is gone with the weight, and
+     * the picture the step shows is the page's.
+     */
+    expect(screen.queryByLabelText('Weight')).toBeNull()
+    expect(
+      screen.getByLabelText(/Image for Sandbag Haul, from the Exercises page/),
+    ).toBeTruthy()
+  })
+
+  it('leaves the step alone where the dialog was emptied', () => {
+    // Cleared in the dialog means "this is not my weight for it", so the
+    // routine keeps saying what it said.
+    open()
+    fireEvent.change(dialogWeight(), { target: { value: '' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+    expect(loadWeights()).toEqual({})
+    expect((screen.getByLabelText('Weight') as HTMLInputElement).value).toBe('20kg')
   })
 })
