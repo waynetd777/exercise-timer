@@ -59,12 +59,22 @@ const OUT = 'src/routines/exercises.shapes.ts'
 const THEMES: { theme: string; test: RegExp; areas: string[] }[] = [
   { theme: 'Warm-up', test: /warm[\s-]?up/i, areas: ['lower', 'upper'] },
   { theme: 'General Body', test: /general body/i, areas: ['lower', 'torso', 'upper'] },
-  { theme: 'Arms & Shoulders', test: /arms?(\s*&\s*shoulders)?\b|shoulders/i, areas: ['upper'] },
-  { theme: 'Legs', test: /^legs?\b/i, areas: ['lower'] },
+  // `\b` in front, or "arm" matches inside "Warm up" — harmless for the
+  // first-match classification (the Warm-up row wins) but it counted an arms
+  // section into every routine's presence tally.
+  { theme: 'Arms & Shoulders', test: /\barms?(\s*&\s*shoulders)?\b|shoulders/i, areas: ['upper'] },
+  // `^\W*` for the asterisk-wrapped "*Legs*" headings four of the emails use,
+  // which an anchor alone left unclassified; the lookahead sends "Legs Finisher"
+  // (five emails) to the Finisher row below instead of counting it as a second
+  // Legs, which had inverted the per-routine tallies.
+  { theme: 'Legs', test: /^\W*legs?\b(?!.*\b(?:finisher|burn(?:out|er)?)\b)/i, areas: ['lower'] },
   { theme: 'Core', test: /core|abs?\b/i, areas: ['torso'] },
   // `\bburn\b` for "#5 FULL-LEG BURN – EVERY MINUTE ON THE MINUTE" (2026-08-25),
   // her finisher-slot EMOM, which "burnout|burner" left unread: the harvest saw
-  // her declare an AMRAP finisher but never this one.
+  // her declare an AMRAP finisher but never this one. CAUTION: this row is the
+  // last resort of a first-match walk, so any future heading with a bare "burn"
+  // that no row above claims ("TOTAL BODY BURN") lands here — review the
+  // regenerated exercises.shapes.ts diff whenever a new email is added.
   { theme: 'Finisher', test: /finisher|burnout|burner|\bburn\b/i, areas: ['lower', 'torso'] },
 ]
 
@@ -92,11 +102,24 @@ describe('harvest shapes', () => {
     const sizes: number[] = []
     const warmUpMoves = new Set<string>()
     let routines = 0
+    /** Routines that name at least three distinct themes; see below. */
+    let themedRoutines = 0
+    /** Per theme, how many of the themed routines carry it at least once. */
+    const themeInRoutines = new Map<string, number>()
     const sectionsPer: number[] = []
 
     for (const file of readdirSync(EMAILS).filter((f) => f.endsWith('.txt')).sort()) {
       routines += 1
       let sections = 0
+      /*
+       * Which themes THIS routine names, matched against every row rather than
+       * the first: "Abs & arms" is evidence of an arms section AND a core one,
+       * whatever single bucket the section itself is counted into. Feeds the
+       * per-routine absence tallies below, which the generator uses to decide
+       * what to drop when the minutes run out — a per-SECTION count cannot say
+       * that ("Arms & Shoulders" reaches seventeen sections in sixteen routines).
+       */
+      const present = new Set<string>()
       const walk = (blocks: readonly Block[]) => {
         for (const block of blocks) {
           if (block.kind === 'ladder') {
@@ -105,6 +128,7 @@ describe('harvest shapes', () => {
           }
           if (block.kind === 'section') {
             sections += 1
+            for (const t of THEMES) if (t.test.test(block.name)) present.add(t.theme)
             const theme = THEMES.find((t) => t.test.test(block.name))?.theme
             if (theme) themeCounts.set(theme, (themeCounts.get(theme) ?? 0) + 1)
             if (theme) {
@@ -133,6 +157,16 @@ describe('harvest shapes', () => {
       }
       walk(parseRoutine(readFileSync(`${EMAILS}/${file}`, 'utf8'), file).blocks)
       sectionsPer.push(sections)
+      /*
+       * Only a routine that NAMES its sections can show a theme being left out:
+       * the two terse April emails head their sections "#1", "#2" and would
+       * otherwise count as omitting everything at once. Three distinct themes is
+       * the line between "she names her sections" and "bare markers".
+       */
+      if (present.size >= 3) {
+        themedRoutines += 1
+        for (const theme of present) themeInRoutines.set(theme, (themeInRoutines.get(theme) ?? 0) + 1)
+      }
     }
 
     const ordered = [...ladders.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -158,7 +192,7 @@ describe('harvest shapes', () => {
       .join('\n')
     const themes = THEMES.map(
       ({ theme, areas }) =>
-        `  { theme: '${theme}', areas: [${areas.map((a) => `'${a}'`).join(', ')}], seen: ${themeCounts.get(theme) ?? 0} },`,
+        `  { theme: '${theme}', areas: [${areas.map((a) => `'${a}'`).join(', ')}], seen: ${themeCounts.get(theme) ?? 0}, absent: ${themedRoutines - (themeInRoutines.get(theme) ?? 0)} },`,
     ).join('\n')
 
     /** Every theme and format pair seen, in theme order, commonest format first. */
@@ -208,7 +242,16 @@ export type SectionTheme = {
   theme: string
   /** Which body areas belong in it. */
   areas: readonly string[]
+  /** Sections carrying the theme, across all ${routines} routines. More than one can share a routine. */
   seen: number
+  /**
+   * Of the ${themedRoutines} routines that name at least three distinct themes,
+   * how many have NO section of this one. The two terse April emails head their
+   * sections "#1", "#2" and can show nothing about what she leaves out, so they
+   * are not counted. A heading naming two themes ("Abs & arms") is presence for
+   * both. What the generator drops first when the minutes run out.
+   */
+  absent: number
 }
 
 /**

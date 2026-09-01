@@ -53,7 +53,16 @@ export type SectionTheme = {
   theme: string
   /** Which body areas belong in it. */
   areas: readonly string[]
+  /** Sections carrying the theme, across all 16 routines. More than one can share a routine. */
   seen: number
+  /**
+   * Of the 14 routines that name at least three distinct themes,
+   * how many have NO section of this one. The two terse April emails head their
+   * sections "#1", "#2" and can show nothing about what she leaves out, so they
+   * are not counted. A heading naming two themes ("Abs & arms") is presence for
+   * both. What the generator drops first when the minutes run out.
+   */
+  absent: number
 }
 
 /**
@@ -62,12 +71,12 @@ export type SectionTheme = {
  * in this order.
  */
 export const SECTION_THEMES: readonly SectionTheme[] = [
-  { theme: 'Warm-up', areas: ['lower', 'upper'], seen: 15 },
-  { theme: 'General Body', areas: ['lower', 'torso', 'upper'], seen: 13 },
-  { theme: 'Arms & Shoulders', areas: ['upper'], seen: 17 },
-  { theme: 'Legs', areas: ['lower'], seen: 15 },
-  { theme: 'Core', areas: ['torso'], seen: 14 },
-  { theme: 'Finisher', areas: ['lower', 'torso'], seen: 15 },
+  { theme: 'Warm-up', areas: ['lower', 'upper'], seen: 15, absent: 1 },
+  { theme: 'General Body', areas: ['lower', 'torso', 'upper'], seen: 13, absent: 2 },
+  { theme: 'Arms & Shoulders', areas: ['upper'], seen: 17, absent: 1 },
+  { theme: 'Legs', areas: ['lower'], seen: 14, absent: 0 },
+  { theme: 'Core', areas: ['torso'], seen: 14, absent: 1 },
+  { theme: 'Finisher', areas: ['lower', 'torso'], seen: 20, absent: 1 },
 ]
 
 export type SectionFormat = 'standard' | 'emom' | 'interval30' | 'amrap'
@@ -94,10 +103,10 @@ export const SECTION_FORMATS: readonly ThemeFormat[] = [
   { theme: 'General Body', format: 'amrap', seen: 1 },
   { theme: 'Arms & Shoulders', format: 'standard', seen: 16 },
   { theme: 'Arms & Shoulders', format: 'emom', seen: 1 },
-  { theme: 'Legs', format: 'standard', seen: 14 },
+  { theme: 'Legs', format: 'standard', seen: 13 },
   { theme: 'Legs', format: 'interval30', seen: 1 },
   { theme: 'Core', format: 'standard', seen: 14 },
-  { theme: 'Finisher', format: 'standard', seen: 13 },
+  { theme: 'Finisher', format: 'standard', seen: 18 },
   { theme: 'Finisher', format: 'amrap', seen: 1 },
   { theme: 'Finisher', format: 'emom', seen: 1 },
 ]

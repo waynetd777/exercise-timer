@@ -528,22 +528,28 @@ describe('the instructor’s shape', () => {
     expect(namesOf(sections({ sections: 6 }))).toEqual(['Warm-up', ...order, 'Finisher'])
   })
 
-  it('drops the themes she most often leaves out, and keeps Arms & Shoulders', () => {
+  it('drops most often what she most often leaves out', () => {
     /*
-     * The fitting priority is the harvest's `seen`: Arms & Shoulders is in every
-     * one of the sixteen (seventeen sections of it), Legs in fifteen, Core in
-     * fourteen, and General Body — the old rule's protected theme — is the one
-     * she most often omits, thirteen of sixteen. So when the minutes run out it
-     * is General Body or Core that goes, never Arms: a routine without an arms
-     * section is not a mix she has sent.
+     * The drop order is drawn with the harvest's per-routine absences as the
+     * weights, smoothed by one: of her fourteen routines with named sections,
+     * two lack a General Body, one an Arms, one a Core and none a Legs. So over
+     * a run of squeezed seeds General Body goes missing the most and Legs the
+     * least — but every theme still gets its turn both ways, because a fixed
+     * order made every 40-minute routine the same four sections.
      */
-    let withoutGeneralBody = 0
-    for (let seed = 1; seed <= 20; seed++) {
+    const absent = new Map<string, number>()
+    const themes = ['General Body', 'Arms & Shoulders', 'Legs', 'Core']
+    for (let seed = 1; seed <= 40; seed++) {
       const names = namesOf(sections({ totalMs: 40 * 60_000 }, seed))
-      expect(names, `seed ${seed}`).toContain('Arms & Shoulders')
-      if (!names.includes('General Body')) withoutGeneralBody += 1
+      for (const theme of themes) {
+        if (!names.includes(theme)) absent.set(theme, (absent.get(theme) ?? 0) + 1)
+      }
     }
-    expect(withoutGeneralBody).toBeGreaterThan(0)
+    for (const theme of themes) {
+      expect(absent.get(theme) ?? 0, `${theme} never dropped`).toBeGreaterThan(0)
+      expect(absent.get(theme) ?? 0, `${theme} never kept`).toBeLessThan(40)
+    }
+    expect(absent.get('General Body')!).toBeGreaterThan(absent.get('Legs')!)
   })
 
   it('keeps the finisher last whatever the count', () => {
@@ -575,25 +581,28 @@ describe('the instructor’s shape', () => {
   })
 
   it('names the sections that did not fit, rather than dropping them quietly', () => {
-    // Seed 7 at 35 minutes runs SHORT of the ask, so the minutes really did run
+    // Seed 11 at 35 minutes runs SHORT of the ask, so the minutes really did run
     // out and what they could not pay for is worth naming.
-    expect(sections({ totalMs: 35 * 60_000 }, 7).notes.join(' ')).toMatch(
+    expect(sections({ totalMs: 35 * 60_000 }, 11).notes.join(' ')).toMatch(
       /No room for .* in 35 minutes/,
     )
   })
 
-  it('says nothing about room on a routine that overran the ask anyway', () => {
+  it('explains a dropped theme without blaming minutes the routine overran anyway', () => {
     /*
      * Sections come whole, so what fits can still overshoot: seed 1 at 35 minutes
-     * drops two themes and STILL comes to thirty-seven. "No room for General Body
-     * in 35 minutes" above "about 2 minutes longer than asked" reads as the
-     * generator arguing with itself, and the length note already says what happened.
+     * drops two themes and STILL comes to forty-one. "No room for General Body in
+     * 35 minutes" above "longer than asked" read as the generator arguing with
+     * itself — but SAYING NOTHING left a routine two minutes over the ask (below
+     * the length note's five) with themes missing and no note at all. So the
+     * overrun wording blames what fit, not the minutes.
      */
     const { workout, notes } = sections({ totalMs: 35 * 60_000 }, 1)
     const guess = estimate(workout.blocks)
     expect(guess.knownMs + guess.estimatedMs).toBeGreaterThan(35 * 60_000)
     expect(namesOf({ workout, notes })).not.toContain('General Body')
-    expect(notes.join(' ')).not.toMatch(/No room/)
+    expect(notes.join(' ')).toMatch(/No room for .*: what fits already comes to about \d+ minutes\./)
+    expect(notes.join(' ')).not.toMatch(/No room for .* in 35 minutes/)
   })
 
   it('passes over a section too big for what is left instead of stopping there', () => {
@@ -704,25 +713,18 @@ describe('the instructor’s shape', () => {
    * she writes them and that is rarely: one Legs in fifteen is a 30/30. A pinned
    * seed would be a number nobody could re-derive after a harvest.
    */
-  const firstWith = (suffix: string) => {
+  const firstSection = (wanted: string, matches: (name: string) => boolean) => {
     for (let seed = 1; seed <= 400; seed++) {
       const built = sectionsOf(sections({ sections: 6 }, seed)).find(
-        (b) => b.kind === 'section' && b.name.endsWith(` ${suffix}`),
+        (b) => b.kind === 'section' && matches(b.name),
       )
       if (built?.kind === 'section') return built
     }
-    throw new Error(`no ${suffix} section in 400 seeds`)
+    throw new Error(`no ${wanted} section in 400 seeds`)
   }
+  const firstWith = (suffix: string) => firstSection(suffix, (name) => name.endsWith(` ${suffix}`))
   /** The same, for one exact section name: a theme in one particular format. */
-  const firstNamed = (name: string) => {
-    for (let seed = 1; seed <= 400; seed++) {
-      const built = sectionsOf(sections({ sections: 6 }, seed)).find(
-        (b) => b.kind === 'section' && b.name === name,
-      )
-      if (built?.kind === 'section') return built
-    }
-    throw new Error(`no ${name} section in 400 seeds`)
-  }
+  const firstNamed = (name: string) => firstSection(name, (built) => built === name)
 
   it('writes an EMOM as a minute an exercise, twice round', () => {
     // Hers: "5-Minute EMOM", "Repeat 2 rounds", then "Minute 1: 12 × Bicep Curls".
@@ -858,6 +860,29 @@ describe('the instructor’s shape', () => {
         'Finisher EMOM',
       ])
     }
+  })
+
+  it('hands the AMRAP to the finisher when its theme did not fit', () => {
+    /*
+     * Under `always` the AMRAP is assigned to General Body, the theme the drop
+     * weights give up first, so a squeezed routine could ship with no AMRAP
+     * while the dialog promised one. The finisher — built whatever fits — takes
+     * it instead, at her burner's size: "AMRAP 3–5 mins" of three moves.
+     */
+    let handed = 0
+    for (let seed = 1; seed <= 30; seed++) {
+      const built = sectionsOf(sections({ totalMs: 38 * 60_000, formats: 'always' }, seed))
+      const names = built.map((b) => (b.kind === 'section' ? b.name : ''))
+      const amraps = names.filter((n) => n.endsWith(' AMRAP'))
+      expect(amraps.length, `seed ${seed}`).toBe(1)
+      if (names.some((n) => n.startsWith('General Body'))) continue
+      handed += 1
+      expect(names.at(-1)).toBe('Finisher AMRAP')
+      const finisher = built.at(-1)
+      if (finisher?.kind !== 'section') throw new Error('no finisher')
+      expect(finisher.children[0]).toMatchObject({ kind: 'segment', durationMs: 4 * 60_000 })
+    }
+    expect(handed).toBeGreaterThan(0)
   })
 
   it('trims a section to her smallest before dropping its theme', () => {
