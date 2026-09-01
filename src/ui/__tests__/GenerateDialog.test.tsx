@@ -316,10 +316,25 @@ describe('the shape question', () => {
     expect(screen.queryByText(/exercises · \d+:\d+/)).toBeNull()
   })
 
-  it('warns that the length is unknowable', () => {
+  it('hedges the length in the count rather than in a standing paragraph', () => {
     open()
     pick('Sections')
-    expect(screen.getByText(/no length/)).toBeTruthy()
+    // The report already says "about", and the help tray explains why. A green
+    // note on every single sections routine buried the one that mattered.
+    expect(screen.getByText(/exercises · \d+ sections · about \d+ min/)).toBeTruthy()
+    expect(screen.queryByText(/no length/)).toBeNull()
+  })
+
+  it('puts a note above the count, not below the exercise list', () => {
+    open()
+    pick('Sections')
+    pick('Always')
+    pick('35 min')
+    const report = document.querySelector('.paste__report')!
+    // A theme the minutes could not pay for is the one thing here you did not
+    // ask for, and the report scrolls at 9rem: below the list it goes unread.
+    expect(report.children[0]!.className).toContain('generate__note')
+    expect(report.children[0]!.textContent).toMatch(/No room for/)
   })
 
   it('hands over a routine of sections', () => {

@@ -609,9 +609,10 @@ function themeName(theme: string, areas: readonly BodyArea[], all: readonly stri
  * A routine in the instructor's shape: named sections, ladders, counted steps.
  *
  * SELF-PACED, which is the whole difference. A rep-based step has no duration
- * and ends when you tap Next, so this routine has no length: `notes` says so
- * rather than the app pretending to a number. That is why the spec asks for
- * sections instead of minutes here.
+ * and ends when you tap Next, so this routine has no length: everything that
+ * reports one says "about" and works it out from a rate rather than the app
+ * pretending to a number. That is why whole sections are FITTED to an estimate
+ * of the minutes asked for instead of adding up to them.
  *
  * The skeleton, the ladders and the shape of each section are not invented.
  * `exercises.shapes.ts` is read out of the instructor's routines: warm-up
@@ -1238,9 +1239,12 @@ function sectionsRoutine(
     )
   }
 
-  notes.push(
-    'A rep-based routine has no length: its steps end when you tap Next, so the app cannot say how long it will take.',
-  )
+  /*
+   * NO note that a rep-based routine has no length. It was pushed on every
+   * sections routine, so the one green line that mattered — a theme the minutes
+   * could not pay for — sat under a paragraph that said the same thing every
+   * time. The help tray covers it, and the report already says "about".
+   */
   return blocks
 }
 
