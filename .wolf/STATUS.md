@@ -2,7 +2,7 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (Review round over v8.8..v9.1: copy fix, dead code, tests, docs; v9.2, committed)
+> Last updated: 2026-09-01 (Review round pushed as v9.3; exercises screenshot retaken and README caption trimmed)
 
 ---
 
@@ -23,8 +23,12 @@ all fixes applied without stopping. Full report: scratchpad `review-2026-09-01.m
   custom table like the weights.
 - **Verified:** typecheck, oxlint, 1272 tests in 65 files (+8), production build.
 
-**Next:** `docs/screenshots/exercises.webp` still shows the pre-CRUD page (green, "n of n weighed", open
-sections). Needs retaking on a dev server (Wayne drives the browser). Wayne to check the badge 9.2 build.
+**Screenshot retaken (2026-09-01, pushed as a7d7e25):** Wayne dropped a new `exercises.png` (the blue page
+mid-search: custom clear ×, New button, kit counts, attribute lines); converted with the recorded cwebp line.
+The README caption under it was twice its neighbours' length and pushed the image up; now two lines like the
+rest, with the exercises of your own folded into "yours included". Pushed as v9.3 (1636b3e).
+
+**Next:** Wayne to check the badge 9.3 build on the phone.
 
 ---
 
