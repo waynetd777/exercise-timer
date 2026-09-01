@@ -66,14 +66,24 @@ the attribution the licence asks for) and `i@izs.me` (third-party npm metadata i
 routine .txt fixtures carry no identifiers at all and stay tracked: ten files read them, including three
 harvest scripts and the "understands every line" test.
 
-**STILL OPEN, and it matters:** GitHub did NOT delete the old objects. `gh api .../commits/2d727ed` still
-returns the pre-rewrite commit with the gmail address in it. A force-push only makes them unreachable. The
-repo has 0 forks, 0 stars, 0 issues, so the cheap fix is to delete and recreate it (Pages needs re-enabling);
-the alternative is asking GitHub Support to purge unreachable objects.
+**Repo deleted and recreated (2026-09-01), because a force-push does not delete anything.** GitHub kept the
+pre-rewrite objects: `gh api .../commits/2d727ed` still returned the gmail address afterwards. With 0 forks,
+0 stars and 0 issues the clean fix was to delete the repo and push the rewritten history into a fresh one.
+Settings restored: public, same description and homepage, wiki off, Pages on `build_type: workflow` (so the
+URL and therefore every installed PWA is unchanged). Deploy re-ran green and the site is serving.
+
+It took TWO cycles. The first recreate still leaked, because the STATUS commit made AFTER `filter-repo` used
+the global git config and carried the gmail address again. `user.email` is now set REPO-LOCAL to
+`waynetd777@users.noreply.github.com` (the global config is untouched, so other projects are unaffected).
+Verified after: all 251 commits on GitHub use the noreply address, and 2d727ed, 7171073 and a7d7e25 all
+return "No commit found".
+
+**Backups in ~/Downloads:** `exercise-timer-prerewrite-20260901-0456.bundle` CONTAINS the unredacted history
+and should be deleted once Wayne is satisfied. `exercise-timer-redacted-20260901-0501.bundle` is the safe one.
 
 ---
 
-**Next:** Wayne's call on purging the old objects from GitHub.
+**Next:** nothing outstanding. Delete the pre-rewrite bundle from ~/Downloads when ready.
 
 ---
 
