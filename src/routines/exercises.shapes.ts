@@ -70,6 +70,37 @@ export const SECTION_THEMES: readonly SectionTheme[] = [
   { theme: 'Finisher', areas: ['lower', 'torso'], seen: 14 },
 ]
 
+export type SectionFormat = 'standard' | 'emom' | 'interval30' | 'amrap'
+
+export type ThemeFormat = {
+  theme: string
+  format: SectionFormat
+  /** How many of the 16 routines write that theme that way. */
+  seen: number
+}
+
+/**
+ * How she runs each theme, and how often.
+ *
+ * `standard` is the counted list most sections are. The other three are formats
+ * she declares in the heading: an EMOM (a minute an exercise, work then rest out
+ * the minute), a 30/30 interval, and an AMRAP (one clock, rounds until it stops).
+ * The generator picks from this weighted by `seen`, so they come up about as
+ * often as she writes them, which is rarely.
+ */
+export const SECTION_FORMATS: readonly ThemeFormat[] = [
+  { theme: 'Warm-up', format: 'standard', seen: 15 },
+  { theme: 'General Body', format: 'standard', seen: 12 },
+  { theme: 'General Body', format: 'amrap', seen: 1 },
+  { theme: 'Arms & Shoulders', format: 'standard', seen: 16 },
+  { theme: 'Arms & Shoulders', format: 'emom', seen: 1 },
+  { theme: 'Legs', format: 'standard', seen: 14 },
+  { theme: 'Legs', format: 'interval30', seen: 1 },
+  { theme: 'Core', format: 'standard', seen: 14 },
+  { theme: 'Finisher', format: 'standard', seen: 13 },
+  { theme: 'Finisher', format: 'amrap', seen: 1 },
+]
+
 /** Sections in a routine: 6 typical, 5 to 8. */
 export const SECTIONS_TYPICAL = 6
 export const SECTIONS_MIN = 5

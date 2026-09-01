@@ -292,6 +292,79 @@ describe('writing is a fixed point after one pass', () => {
     settles(blocks)
   })
 
+  it('writes a group of minutes as an EMOM, so the counts survive', () => {
+    /*
+     * The only form in the grammar that says a count AND a time. Written any
+     * other way, "12 × Bicep Curls - 60 seconds" reads back as a step CALLED
+     * "12 × Bicep Curls", so `stepLines` drops the count and reports it. Under
+     * an EMOM heading the minute belongs to the block and the line carries only
+     * the reps, which is how her own routines write one.
+     */
+    const minute = (name: string, count: number): Segment =>
+      step({ name, durationMs: 60_000, reps: { kind: 'fixed', count } })
+    const blocks: Block[] = [
+      {
+        kind: 'repeat',
+        id: 'e',
+        times: 2,
+        label: 'Set',
+        children: [minute('Bicep Curls', 12), minute('Arnold Press', 10), minute('Bent-Over Rows', 12)],
+      },
+    ]
+
+    const written = writeRoutine(workout(blocks))
+    expect(written.text).toContain('3-Minute EMOM')
+    expect(written.text).toContain('2 Rounds')
+    expect(written.text).toContain('Minute 1: 12 × Bicep Curls')
+    expect(written.lost.join(' ')).not.toContain('which is also timed')
+
+    const back = find(pass(blocks), 'Bicep Curls')
+    expect(back).toMatchObject({ durationMs: 60_000, reps: { kind: 'fixed', count: 12 } })
+    settles(blocks)
+  })
+
+  it('writes a per-side count in a minute the way the parser reads one back', () => {
+    const blocks: Block[] = [
+      {
+        kind: 'repeat',
+        id: 'e',
+        times: 2,
+        label: 'Set',
+        children: [
+          step({ name: 'Split Squats', durationMs: 60_000, reps: { kind: 'fixed', count: 5, perSide: true } }),
+          step({ name: 'Calf Raises', durationMs: 60_000, reps: { kind: 'fixed', count: 15 } }),
+        ],
+      },
+    ]
+    expect(writeRoutine(workout(blocks)).text).toContain('Minute 1: 10 × Split Squats (5 each side)')
+    expect(find(pass(blocks), 'Split Squats')).toMatchObject({
+      durationMs: 60_000,
+      reps: { kind: 'fixed', count: 5, perSide: true },
+    })
+    settles(blocks)
+  })
+
+  it('leaves a group of minutes alone where no minute states a count', () => {
+    // The bulleted rounds form carries a minute of pure clock just as well, and
+    // reads plainer. The EMOM form is for what it alone can say.
+    const blocks: Block[] = [
+      {
+        kind: 'repeat',
+        id: 'e',
+        times: 3,
+        label: 'Set',
+        children: [
+          step({ name: 'Wall Sit', durationMs: 60_000 }),
+          step({ name: 'Plank', durationMs: 60_000 }),
+        ],
+      },
+    ]
+    const text = writeRoutine(workout(blocks)).text
+    expect(text).not.toContain('EMOM')
+    expect(text).toContain('3 Rounds')
+    settles(blocks)
+  })
+
   it('writes a plain countdown where the round could not follow it', () => {
     // A step after the AMRAP would be eaten by its round, so the round goes
     // instead of the step. The loss is reported rather than taken quietly.
@@ -341,6 +414,8 @@ describe('writeRoutine says what it could not say', () => {
   })
 
   it('warns that a count on a timed step cannot be written', () => {
+    // Loose, so there is no EMOM for it to sit in. A whole group of minutes
+    // keeps its counts instead: see "writes a group of minutes as an EMOM".
     expect(
       lostFor([step({ name: 'Bicep Curls', durationMs: 60_000, reps: { kind: 'fixed', count: 12 } })]),
     ).toContain('The count on "Bicep Curls" (12 ×), which is also timed')

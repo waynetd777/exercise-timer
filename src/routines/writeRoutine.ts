@@ -39,7 +39,7 @@
 
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../engine/types'
 import { isGroup } from '../engine/types'
-import { DESCRIPTION_CHARS, GET_READY_MS, parseItem, PREPARE_NAME, REST_NAME } from './pasteFormat'
+import { DESCRIPTION_CHARS, GET_READY_MS, MINUTE_MS, parseItem, PREPARE_NAME, REST_NAME } from './pasteFormat'
 import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 
 /**
@@ -99,6 +99,9 @@ function stepLines(segment: Segment, lost: string[]): string[] {
    *
    * So the time wins and the count is reported. The time is the part the app
    * actually runs; a count it cannot count is a label.
+   *
+   * A whole group of MINUTES is the exception, and `emomLines` writes it: there
+   * the minute is stated by the block, so each line carries only its reps.
    */
   const countable = reps?.kind === 'fixed' && segment.durationMs === undefined
 
@@ -332,6 +335,69 @@ function amrapLines(segment: Segment): string[] | null {
   ]
 }
 
+/**
+ * A rounds group of whole minutes, written back as the EMOM it is.
+ *
+ * This is the only form in the grammar that says a count AND a time. Every other
+ * step has to choose: "12 x Bicep Curls - 60 seconds" reads back as a step CALLED
+ * "12 x Bicep Curls", because the trailing duration ends the name. Under an EMOM
+ * heading the minute is the block's, so the line carries the reps alone and both
+ * survive. See `stepLines`, which drops the count everywhere else.
+ *
+ * Returns null where the group is not that shape, and the plain rounds form is
+ * written instead. Each minute is read back before it is kept, the way a step is.
+ */
+function emomLines(repeat: Repeat, lost: string[]): string[] | null {
+  const minutes = repeat.children
+  if (minutes.length < 2) return null
+  const everyMinute = minutes.every(
+    (block): block is Segment =>
+      block.kind === 'segment' && block.role === 'work' && block.durationMs === MINUTE_MS,
+  )
+  if (!everyMinute) return null
+  const steps = minutes as readonly Segment[]
+  /*
+   * Nothing to save unless a minute states a count. The bulleted rounds form
+   * carries a minute of pure clock just as well, and reads plainer.
+   */
+  if (!steps.some((step) => step.reps?.kind === 'fixed')) return null
+  // Both belong to the line, not to the minute, and neither has a place in this form.
+  if (steps.some((step) => (step.note ?? '').trim() !== '' || (step.alternative ?? '').trim() !== '')) {
+    return null
+  }
+
+  const said: string[] = []
+  for (const step of steps) {
+    const load = step.load?.trim()
+    const named = load ? `${step.name} ${load}` : step.name
+    const reps = step.reps
+    const count = reps?.kind === 'fixed' ? reps.count : undefined
+    /*
+     * The parser's own per-side form, as `stepLines` writes it: the doubled
+     * total in front, the true per-side number in the parenthesis.
+     */
+    const line =
+      reps?.kind === 'fixed'
+        ? `${reps.perSide ? reps.count * 2 : reps.count} × ${named}${reps.perSide ? ` (${reps.count} each side)` : ''}`
+        : named
+    const back = parseItem(line)
+    // A time in the line would fight the minute the block already states.
+    if (back.durationMs !== undefined || back.name !== named || back.count !== count) return null
+    said.push(line)
+  }
+
+  if (repeat.label && repeat.label !== DEFAULT_REPEAT_LABEL && repeat.label !== 'Round') {
+    lost.push(`The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`)
+  }
+  for (const step of steps) if (step.media) lost.push(`The picture on "${step.name}"`)
+
+  return [
+    `${steps.length}-Minute EMOM`,
+    ...(repeat.times > 1 ? [`${repeat.times} Rounds`] : []),
+    ...said.map((line, i) => `Minute ${i + 1}: ${line}`),
+  ]
+}
+
 function blockLines(
   block: Block,
   counter: { n: number },
@@ -351,7 +417,7 @@ function blockLines(
   if (block.kind === 'segment') {
     return (headingAfter ? amrapLines(block) : null) ?? stepLines(block, lost)
   }
-  if (block.kind === 'repeat') return repeatLines(block, counter, lost)
+  if (block.kind === 'repeat') return emomLines(block, lost) ?? repeatLines(block, counter, lost)
   if (block.kind === 'ladder') return ladderLines(block, counter, lost)
   return sectionLines(block, counter, lost, headingAfter)
 }
