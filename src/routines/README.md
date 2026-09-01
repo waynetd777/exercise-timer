@@ -312,15 +312,32 @@ shape the instructor's routines arrive in (named sections, ladders, counted reps
 and it has no exact length, because a self-paced step ends when you tap Next.
 It is asked the same minutes and FITTED by `estimate.ts`: the warm-up and the
 finisher are built first and bookend the routine, then body sections are added
-until the next would overshoot by more than half of itself, and the ones that
-did not fit are named in `notes`. WHICH body themes get the room rotates with the
-seed, General Body always first (it opens 13 of 16), the other three in a
-shuffled priority; the sections are then assembled in her order regardless, so
-the routine still reads like hers. Taking them in her order made Core the
-casualty of every short routine, and dropping the largest would have made it
-Legs, her signature ladder. Her own template routines estimate at 56 to 91
-minutes, so 45 minutes is four sections or so rather than her six.
+until the next would overshoot by more than half of itself. A section that
+overshoots is rebuilt at the smallest she has written its shape — three rounds,
+five EMOM moves — before its theme is given up (not a 30/30 or an AMRAP, whose
+cost is the clock), and what still did not fit is named in `notes`: "No room
+for X in 45 minutes" where the routine ran short, "what fits already comes to
+about M minutes" where whole sections overran the ask. WHICH themes get the
+room follows how often she LEAVES EACH OUT: the harvest counts, per routine
+that names its sections, which themes are absent (General Body 2 of 14, Arms &
+Shoulders 1, Core 1, Legs 0), and the drop order is drawn with those plus one
+as the weights — smoothed, so nothing is undroppable and short routines still
+vary. The sections are then assembled in her order regardless, so the routine
+still reads like hers. Her own template routines estimate at 56 to 91 minutes,
+so 45 minutes is four or five sections rather than her six.
 Both shapes open on a get-ready.
+
+A section can also be built in a format she DECLARES in a heading — an EMOM, a
+30/30 interval, an AMRAP — drawn from `SECTION_FORMATS` as often as she writes
+them (`sometimes`, the default), for every theme she has ever declared one on
+(`always`), or not at all (`never`). The formats are assigned up front in her
+section order with the AMRAP given at most once: her one all-format day
+(2026-08-25) runs the one-clock section once, and two EMOMs in a day is hers
+where two AMRAPs is not. The AMRAP comes in her two sizes (`AMRAP_SIZE`): the
+ten-minute General Body clock and the four-minute, three-move burner she
+closes with. Under `always`, a fitter that drops the AMRAP's theme hands it to
+the finisher, which is built whatever fits, so the promise of the dialog
+holds.
 
 Each theme has a SHAPE, `THEME_SHAPE` in `generate.ts`, read off the sixteen
 routines rather than dealt out by position (a ladder every third section put the
