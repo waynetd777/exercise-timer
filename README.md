@@ -80,11 +80,9 @@ from across a gym, with the phone propped against a rack.
       coloured edge on a row is its step type, and the add buttons match.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/exercises.webp" width="420" alt="The exercises page: a search box, a count reading 21 of 68 weighed and 147 of 147 pictured, and rows grouped under Multi-Gym, Bike, Trampoline and Bodyweight, each with a thumbnail and, where there is something to weigh, a weight field." />
+      <img src="docs/screenshots/exercises.webp" width="420" alt="The exercises page: a search for crunch with a New button beside it, and the matching rows grouped under Multi-Gym and Bodyweight, each with a thumbnail, what it works, and a weight field where there is something to weigh." />
       <br /><b>The exercises page.</b> One picture and one weight per exercise,
-      grouped by kit, with what each one works underneath its name. Change a
-      weight here and every routine follows. Exercises you add yourself sit
-      beside the app's own and can be edited or removed.
+      yours included. Change a weight here and every routine follows.
     </td>
   </tr>
 </table>
