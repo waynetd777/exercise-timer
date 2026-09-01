@@ -520,29 +520,30 @@ describe('the instructor’s shape', () => {
     const names = namesOf(sections())
     expect(names[0]).toBe('Warm-up')
     expect(names.at(-1)).toBe('Finisher')
-    // The body between keeps her order whatever was dropped: a subsequence, opening on General Body.
+    // The body between keeps her order whatever was dropped: a subsequence.
     const order = ['General Body', 'Arms & Shoulders', 'Legs', 'Core']
     const between = names.slice(1, -1)
-    expect(between[0]).toBe('General Body')
     const positions = between.map((n) => order.indexOf(n))
     expect(positions).toEqual(positions.slice().sort((a, b) => a - b))
     expect(namesOf(sections({ sections: 6 }))).toEqual(['Warm-up', ...order, 'Finisher'])
   })
 
-  it('rotates which themes get the room, and protects General Body', () => {
+  it('drops the themes she most often leaves out, and keeps Arms & Shoulders', () => {
     /*
-     * In her order, Core was the casualty of every short routine; dropping the
-     * largest would have made it Legs every time. Her shorter routines differ in
-     * which theme is missing, so over a run of seeds each one gets its turn, and
-     * General Body, which opens thirteen of sixteen, is never the one dropped.
+     * The fitting priority is the harvest's `seen`: Arms & Shoulders is in every
+     * one of the sixteen (seventeen sections of it), Legs in fifteen, Core in
+     * fourteen, and General Body — the old rule's protected theme — is the one
+     * she most often omits, thirteen of sixteen. So when the minutes run out it
+     * is General Body or Core that goes, never Arms: a routine without an arms
+     * section is not a mix she has sent.
      */
-    const seen = new Set<string>()
+    let withoutGeneralBody = 0
     for (let seed = 1; seed <= 20; seed++) {
       const names = namesOf(sections({ totalMs: 40 * 60_000 }, seed))
-      expect(names[1]).toBe('General Body')
-      for (const name of names) seen.add(name)
+      expect(names, `seed ${seed}`).toContain('Arms & Shoulders')
+      if (!names.includes('General Body')) withoutGeneralBody += 1
     }
-    for (const theme of ['Arms & Shoulders', 'Legs', 'Core']) expect(seen).toContain(theme)
+    expect(withoutGeneralBody).toBeGreaterThan(0)
   })
 
   it('keeps the finisher last whatever the count', () => {
@@ -574,7 +575,53 @@ describe('the instructor’s shape', () => {
   })
 
   it('names the sections that did not fit, rather than dropping them quietly', () => {
-    expect(sections({ totalMs: 35 * 60_000 }).notes.join(' ')).toMatch(/No room for .* in 35 minutes/)
+    // Seed 7 at 35 minutes runs SHORT of the ask, so the minutes really did run
+    // out and what they could not pay for is worth naming.
+    expect(sections({ totalMs: 35 * 60_000 }, 7).notes.join(' ')).toMatch(
+      /No room for .* in 35 minutes/,
+    )
+  })
+
+  it('says nothing about room on a routine that overran the ask anyway', () => {
+    /*
+     * Sections come whole, so what fits can still overshoot: seed 1 at 35 minutes
+     * drops two themes and STILL comes to thirty-seven. "No room for General Body
+     * in 35 minutes" above "about 2 minutes longer than asked" reads as the
+     * generator arguing with itself, and the length note already says what happened.
+     */
+    const { workout, notes } = sections({ totalMs: 35 * 60_000 }, 1)
+    const guess = estimate(workout.blocks)
+    expect(guess.knownMs + guess.estimatedMs).toBeGreaterThan(35 * 60_000)
+    expect(namesOf({ workout, notes })).not.toContain('General Body')
+    expect(notes.join(' ')).not.toMatch(/No room/)
+  })
+
+  it('passes over a section too big for what is left instead of stopping there', () => {
+    /*
+     * The first theme to overshoot used to take every theme behind it with it, so
+     * a short Core was dropped because a long Legs happened to be drawn ahead of
+     * it. Over a run of seeds the fitted routines are longer for it.
+     */
+    const built = (seed: number) => sectionsOf(sections({ totalMs: 50 * 60_000 }, seed)).length
+    let total = 0
+    for (let seed = 1; seed <= 20; seed++) total += built(seed)
+    expect(total / 20).toBeGreaterThan(4)
+  })
+
+  it('gives back the exercises of a section it decided not to keep', () => {
+    /*
+     * The draw is shared so no exercise appears twice, and a section tried and
+     * dropped for want of minutes used to keep its draw: Legs ate the squats Core
+     * was about to want, and Core came out short of exercises nothing was using.
+     */
+    for (const minutes of [30, 50, 90]) {
+      for (let seed = 1; seed <= 12; seed++) {
+        const result = sections({ totalMs: minutes * 60_000 }, seed)
+        const names = exercises(result.workout).map((s) => s.name)
+        expect(new Set(names).size, `${minutes} min, seed ${seed}`).toBe(names.length)
+        expect(result.notes.join(' ')).not.toMatch(/Not enough left/)
+      }
+    }
   })
 
   it('puts each shape where she puts it', () => {
@@ -666,6 +713,16 @@ describe('the instructor’s shape', () => {
     }
     throw new Error(`no ${suffix} section in 400 seeds`)
   }
+  /** The same, for one exact section name: a theme in one particular format. */
+  const firstNamed = (name: string) => {
+    for (let seed = 1; seed <= 400; seed++) {
+      const built = sectionsOf(sections({ sections: 6 }, seed)).find(
+        (b) => b.kind === 'section' && b.name === name,
+      )
+      if (built?.kind === 'section') return built
+    }
+    throw new Error(`no ${name} section in 400 seeds`)
+  }
 
   it('writes an EMOM as a minute an exercise, twice round', () => {
     // Hers: "5-Minute EMOM", "Repeat 2 rounds", then "Minute 1: 12 × Bicep Curls".
@@ -701,22 +758,31 @@ describe('the instructor’s shape', () => {
   })
 
   it('writes an AMRAP as one clock with the round as its note', () => {
-    // HOW MANY rounds is the person's to count, so the step is the ten minutes
-    // and the round is written under it. Same shape the parser reads hers into.
-    const amrap = firstWith('AMRAP')
-    expect(amrap.display).toBe('timer')
-    expect(amrap.children).toHaveLength(1)
-    const clock = amrap.children[0]
-    expect(clock).toMatchObject({
-      kind: 'segment',
-      role: 'work',
-      name: 'As many rounds as possible',
-      durationMs: 10 * 60_000,
-    })
-    if (clock?.kind !== 'segment') throw new Error('not a step')
-    expect(clock.reps).toBeUndefined()
-    expect(clock.note?.split('\n')).toHaveLength(5)
-    for (const line of clock.note?.split('\n') ?? []) expect(line).toMatch(/^\d+ × ./)
+    // HOW MANY rounds is the person's to count, so the step is the clock and
+    // the round is written under it. Same shape the parser reads hers into.
+    // Hers come in two sizes: the ten-minute, five-move General Body one
+    // (2026-08-25) and the "AMRAP 3–5 mins" three-move burner she closes with
+    // (2026-04-16). One constant for both doubled the burner.
+    const sized = [
+      { name: 'General Body AMRAP', minutes: 10, moves: 5 },
+      { name: 'Finisher AMRAP', minutes: 4, moves: 3 },
+    ]
+    for (const { name, minutes, moves } of sized) {
+      const amrap = firstNamed(name)
+      expect(amrap.display).toBe('timer')
+      expect(amrap.children).toHaveLength(1)
+      const clock = amrap.children[0]
+      expect(clock).toMatchObject({
+        kind: 'segment',
+        role: 'work',
+        name: 'As many rounds as possible',
+        durationMs: minutes * 60_000,
+      })
+      if (clock?.kind !== 'segment') throw new Error('not a step')
+      expect(clock.reps).toBeUndefined()
+      expect(clock.note?.split('\n')).toHaveLength(moves)
+      for (const line of clock.note?.split('\n') ?? []) expect(line).toMatch(/^\d+ × ./)
+    }
   })
 
   it('builds every declared format on demand, and none when asked for none', () => {
@@ -759,6 +825,66 @@ describe('the instructor’s shape', () => {
       }
     }
     expect([...found].sort()).toEqual(['30/30', 'AMRAP', 'EMOM'])
+  })
+
+  it('never builds two AMRAPs, so always reads like her one all-format day', () => {
+    /*
+     * Both General Body and the Finisher declare an AMRAP, and picking each
+     * theme's format on its own gave every `always` routine two ten-minute
+     * clocks. Her all-format day (2026-08-25) runs the one-clock section once:
+     * AMRAP, EMOM, 30/30, a counted Core, an EMOM finisher. Two EMOMs in a day
+     * is hers; two AMRAPs is not. So the formats are assigned in her order and
+     * an AMRAP already taken is out of the later draws.
+     */
+    for (const formats of ['always', 'sometimes'] as const) {
+      for (let seed = 1; seed <= 60; seed++) {
+        const amraps = sectionsOf(sections({ sections: 6, formats }, seed)).filter(
+          (b) => b.kind === 'section' && b.name.endsWith(' AMRAP'),
+        )
+        expect(amraps.length, `${formats} seed ${seed}`).toBeLessThanOrEqual(1)
+      }
+    }
+    // And with the AMRAP taken by General Body, `always` closes on her EMOM finisher.
+    for (let seed = 1; seed <= 20; seed++) {
+      const names = sectionsOf(sections({ sections: 6, formats: 'always' }, seed)).map((b) =>
+        b.kind === 'section' ? b.name : '',
+      )
+      expect(names, `seed ${seed}`).toEqual([
+        'Warm-up',
+        'General Body AMRAP',
+        'Arms & Shoulders EMOM',
+        'Legs 30/30',
+        'Core',
+        'Finisher EMOM',
+      ])
+    }
+  })
+
+  it('trims a section to her smallest before dropping its theme', () => {
+    /*
+     * She flexes before she cuts — "Repeat 3-5x", "3 Rounds", "Rest as needed" —
+     * so a section that overshoots what is left is rebuilt at the low end of her
+     * range before the theme is given up. Observable in the Core rounds: squeezed
+     * into 45 minutes they sit at three more often than the open 3-to-5 draw a
+     * roomy 90 minutes gets.
+     */
+    const threeRoundShare = (minutes: number) => {
+      let cores = 0
+      let threes = 0
+      for (let seed = 1; seed <= 100; seed++) {
+        const core = sectionsOf(sections({ totalMs: minutes * 60_000 }, seed)).find(
+          (b) => b.kind === 'section' && b.name === 'Core',
+        )
+        if (core?.kind !== 'section') continue
+        const rounds = core.children.find((c) => c.kind === 'repeat')
+        if (rounds?.kind !== 'repeat') continue
+        cores += 1
+        if (rounds.times === 3) threes += 1
+      }
+      expect(cores).toBeGreaterThan(10)
+      return threes / cores
+    }
+    expect(threeRoundShare(45)).toBeGreaterThan(threeRoundShare(90))
   })
 
   it('only gives a theme a format she has written for it', () => {
@@ -900,8 +1026,12 @@ describe('the instructor’s shape', () => {
     // "Main exercise:" then "After every set:", which is the shape her ladders
     // take: rung 2 is two of the lift and still twelve of the rest.
     // The Legs one: General Body's ladder scales EVERY exercise, by design.
-    const { workout } = sections({ sections: 6 })
-    const routine = compile({ ...workout, blocks: [sectionNamed(sections({ sections: 6 }), 'Legs')] })
+    // `never`, so the Legs section is the ladder and not her occasional 30/30.
+    const { workout } = sections({ sections: 6, formats: 'never' })
+    const routine = compile({
+      ...workout,
+      blocks: [sectionNamed(sections({ sections: 6, formats: 'never' }), 'Legs')],
+    })
     const rungs = routine.runs
       .flatMap((r) => r.entries)
       .filter((e) => e.path.some((p) => p.kind === 'ladder'))

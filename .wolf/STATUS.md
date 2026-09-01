@@ -2,7 +2,45 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (v9.4: the EMOM/30/30/AMRAP formats are now askable in the generate dialog)
+> Last updated: 2026-09-01 (v9.5: the sections generator aligned to the corpus — one AMRAP, her drop order, trim before drop)
+
+---
+
+## 🎯 Corpus alignment for the sections generator (2026-09-01, done, v9.5)
+
+Wayne asked for a review of the 16 emails against what the generator builds on sections + Always + work all +
+no multi-gym, then to implement everything found. Review lives in the session scratchpad
+(`corpus-vs-generator-review.md`); measured over 500 seeds per config before and after.
+
+**The harvest was blind to her finisher EMOM.** "#5 FULL-LEG BURN – EVERY MINUTE ON THE MINUTE" (2026-08-25)
+matched no theme regex; `\bburn\b` added to Finisher and re-harvested, so `SECTION_FORMATS` now carries
+Finisher emom 1 beside amrap 1, and `ROUTINES = 16` is exported for the absence weights below.
+
+**Formats are assigned up front, one AMRAP at most.** `assigned` in `sectionsRoutine` walks the themes in her
+order before anything is built (the finisher is built before the body, so a per-build pick could not see what
+General Body would take) and drops `amrap` from later draws once taken. Every `always` routine used to carry
+TWO ten-minute AMRAPs; now `always` at a section count reads exactly her all-format day: Warm-up, GB AMRAP,
+Arms EMOM, Legs 30/30, Core, Finisher EMOM.
+
+**The finisher AMRAP is her burner now**: `FINISHER_AMRAP_MS` 4 min of 3 moves ("AMRAP 3–5 mins", 2026-04-16),
+not the General Body ten.
+
+**What drops when minutes run out follows her absences.** Drop order drawn weighted by `ROUTINES - seen`
+(GB 3, Core 2, Legs 1, Arms 0), priority is its reverse; Arms & Shoulders is now in 100% of routines (was 64%
+at 45-min always, and she has never sent a routine without it). Weighted, not sorted: a deterministic order
+made every 40-minute routine the same four sections.
+
+**Sections trim before their theme drops.** `build(entry, trim)` rebuilds an overshooting section at the
+smallest she has written the shape (3 rounds — "3 Rounds", 2026-07-27 — 5 EMOM moves, 4 climb moves, 2 ladder
+accessories) before the fitter gives the theme up.
+
+**Measured after** (60-min always): GB 84% vs corpus 81%, Legs 94% vs 94%, Core 100% vs 88%, Arms 100% vs
+100%, double-AMRAP 0%. 45-min still drops themes because her sessions estimate at 56–91 minutes; that is the
+cost model being honest.
+
+**Verified:** 1292 tests (+2, two rewritten for the new priority, AMRAP test now checks both sizes), lint,
+typecheck, production build. `APP_VERSION` 9.5. Includes the earlier uncommitted fitting fix (pass-over,
+undo the draw of a rejected section, No-room note only when the routine ran short).
 
 ---
 

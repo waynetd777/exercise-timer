@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T02:43:09.657Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T10:09:52.568Z
 > Files: 249 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
@@ -71,7 +71,7 @@
 - `fold.ts` — Exercise Timer (~72 tok)
 - `harvest-exercises.test.ts` — Exercise Timer (~3220 tok)
 - `harvest-prescription.test.ts` — Exercise Timer (~2158 tok)
-- `harvest-shapes.test.ts` — Exercise Timer (~3050 tok)
+- `harvest-shapes.test.ts` — Exercise Timer (~3149 tok)
 
 ## src/
 
@@ -175,7 +175,7 @@
 - `exercises.shapes.ts` — Exercise Timer (~1548 tok)
 - `exercises.ts` — Exercise Timer (~2047 tok)
 - `foldName.ts` — Exercise Timer (~886 tok)
-- `generate.ts` — Exercise Timer (~15912 tok)
+- `generate.ts` — Exercise Timer (~17772 tok)
 - `imageCatalogue.ts` — Exercise Timer (~1055 tok)
 - `importFiles.ts` — Exercise Timer (~2606 tok)
 - `loads.ts` — Exercise Timer (~2417 tok)
@@ -196,7 +196,7 @@
 - `exerciseOptions.test.ts` — Exercise Timer (~2764 tok)
 - `exercises.test.ts` — Exercise Timer (~2630 tok)
 - `fixtures.ts` — Exercise Timer (~368 tok)
-- `generate.test.ts` — Exercise Timer (~14585 tok)
+- `generate.test.ts` — Exercise Timer (~16812 tok)
 - `imageCatalogue.test.ts` — Exercise Timer (~876 tok)
 - `importFiles.test.ts` — Exercise Timer (~1618 tok)
 - `importPictures.test.ts` — Exercise Timer (~664 tok)

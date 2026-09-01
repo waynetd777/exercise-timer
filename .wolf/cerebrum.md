@@ -19,6 +19,30 @@
 
 ## Key Learnings
 
+### 2026-09-01: Corpus-alignment pass on the sections generator (v9.5)
+- `weightedPick` returns the LAST item when every remaining weight is zero.
+  Pre-shuffle the pool before sampling without replacement, or zero-weight
+  ties resolve deterministically.
+- Section formats are now assigned UP FRONT in her section order (see
+  `assigned` in sectionsRoutine), not inside each build: the finisher is built
+  before the body, so a per-build pick cannot see what General Body will take.
+  At most one AMRAP per routine — two EMOMs is corpus (2026-08-25), two AMRAPs
+  is not.
+- The fitting drop order is drawn weighted by corpus ABSENCE
+  (`ROUTINES - seen`), and a section that overshoots is rebuilt trimmed
+  (`build(entry, true)`: her smallest written rounds/moves) before its theme is
+  given up. A deterministic seen-desc sort made every 40-minute routine the
+  same four sections — variety needed the weighted draw.
+- The harvest classifies sections by HEADING regex. A heading she words freshly
+  ("FULL-LEG BURN – EVERY MINUTE ON THE MINUTE") silently vanishes from the
+  counts — when a corpus stat looks off, diff the harvest's section list
+  against the emails before trusting SECTION_FORMATS/SECTION_THEMES.
+- Measured mixes (500 seeds, all areas, no multi-gym): 60-min always now sits
+  on her absence rates (GB 84% vs corpus 81%, Legs 94% vs 94%, Arms 100%);
+  45-min drops themes because her sessions estimate at 56-91 min, which is the
+  honest cost model, not a bug.
+
+
 - [2026-09-01] **The paste grammar says a count AND a time in exactly one place: an EMOM minute.** Everywhere else a trailing duration ends the name, so "12 × Bicep Curls - 60 seconds" reads back as a step CALLED that, and `stepLines` drops the count. `emomLines` in `writeRoutine.ts` is the exception, and it works only because the minute belongs to the block rather than the line. Before adding any generator shape whose steps are both timed and counted, check it writes back.
 - [2026-09-01] **Harvest a section's FORMAT from what she declares in the heading, never from the parsed steps.** The shapes collide once parsed: her Core planks are a repeat of 30-second steps and so is a 30/30, and only "#3 LEGS - 30/30 INTERVAL" tells them apart. Same reason `THEMES` matches on heading text.
 - [2026-09-01] **`console.log` is swallowed under `vitest.harvest.config.ts`.** To see anything from a script there, write it to a file. And never run that config without a filter: `scripts/*.test.ts` REWRITE source files when they run.
