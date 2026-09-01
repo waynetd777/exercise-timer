@@ -48,6 +48,40 @@ describe('GenerateDialog', () => {
     expect(screen.getByText(/\d+ exercises · \d+:\d+/)).toBeTruthy()
   })
 
+  it('offers the declared formats only for the sections shape', () => {
+    open()
+    // A circuit has no sections to declare a format on.
+    expect(screen.queryByText('EMOM, 30/30, AMRAP')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Sections' }))
+    expect(screen.getByText('EMOM, 30/30, AMRAP')).toBeTruthy()
+    for (const label of ['Sometimes', 'Always', 'Never']) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy()
+    }
+    expect(screen.getByRole('button', { name: 'Sometimes' }).getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('builds one when asked, and none when told not to', () => {
+    /*
+     * The reason the setting exists: left to the harvest, an EMOM lands in about
+     * one routine in forty, so "Try another" is not a way to ask for one.
+     */
+    const onGenerate = open()
+    fireEvent.click(screen.getByRole('button', { name: 'Sections' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Always' }))
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+    const declared = /(EMOM|30\/30|AMRAP)$/
+    const built = onGenerate.mock.calls[0]?.[0] as Workout
+    expect(built.blocks.filter((b) => b.kind === 'section' && declared.test(b.name)).length).toBeGreaterThan(0)
+
+    cleanup()
+    const second = open()
+    fireEvent.click(screen.getByRole('button', { name: 'Sections' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Never' }))
+    fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
+    const plain = second.mock.calls[0]?.[0] as Workout
+    expect(plain.blocks.filter((b) => b.kind === 'section' && declared.test(b.name))).toHaveLength(0)
+  })
+
   it('hands the routine over rather than saving it', () => {
     const onGenerate = open()
     fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))

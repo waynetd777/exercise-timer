@@ -50,6 +50,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
     points: [
       'Shape comes first. Circuit is one exercise at a time, all on a clock. Sections is the usual written routine: a warm-up, named sections of rounds and ladders, a finisher.',
       'Then choose how long, what to work, and what kit you have. It shows what it will make as you answer.',
+      'On Sections, EMOM, 30/30, AMRAP decides how often a section runs in one of those formats. Sometimes matches your own routines, which use them rarely. Always builds every section that has ever been written as one, so you can ask for all three at once.',
       'Warm up with, Moving how and Cool down with are picked separately, each with its own length. They start at 10 min, 60s and 2 min.',
       'Moving how can be one thing throughout, or Random for a different exercise every minute between sets. Random lets you turn off anything you would rather not see.',
       'Choosing to rest between sets instead replaces all three with a single rest length.',

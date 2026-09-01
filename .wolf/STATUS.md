@@ -2,7 +2,30 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (EMOM/30/30/AMRAP generator, parser fix, and a history rewrite that redacted the emails)
+> Last updated: 2026-09-01 (v9.4: the EMOM/30/30/AMRAP formats are now askable in the generate dialog)
+
+---
+
+## 🎛 Asking for the declared formats (2026-09-01, done, v9.4)
+
+Weighting by the harvest is faithful and nearly unreachable: measured over 2000 seeds, about 17% of sections
+routines carry ANY declared format, an AMRAP about 14% (two themes can be one), and an EMOM or a 30/30 about
+2.4% each, roughly one in forty presses of Try another. Worst dry run seen was 33. So the dialog now asks.
+
+**`RoutineSpec.formats`**: `'sometimes' | 'always' | 'never'`, defaulting to `sometimes`, which is the old
+behaviour exactly. `pickFormat()` in `generate.ts` does the work: `always` drops the `standard` row from the
+draw and picks among what she HAS declared for that theme, `never` returns `standard` outright. A theme with
+nothing declared stays a list either way, so Core and the warm-up are never anything else.
+
+**The control** is a `Choice` in `GenerateDialog`, shown only for the sections shape, legend "EMOM, 30/30,
+AMRAP" and options Sometimes / Always / Never. The legend NAMES the formats rather than leaving them to the
+chip titles, because on a phone there is nothing to hover and "Sometimes" alone says nothing about what.
+
+**Measured after:** `always` gives every routine at least one, all three together in 36% (up from ~0.01%),
+EMOM 59% and 30/30 61% (they miss only when the fitter has no room for that theme). `never` gives none.
+
+**Verified:** 1287 tests (+4, two of them UI), lint, typecheck, production build. Help gained a line and
+`APP_VERSION` is 9.4.
 
 ---
 

@@ -12,7 +12,7 @@ import { EXERCISES } from '../exercises'
 import { PRESCRIPTIONS } from '../exercises.prescription'
 import { LADDER_COUNTS } from '../exercises.shapes'
 import { foldName } from '../foldName'
-import type { RoutineSpec } from '../generate'
+import type { Formats, RoutineSpec } from '../generate'
 import { describeRoutine, generateRoutine, seeded } from '../generate'
 import { estimate } from '../estimate'
 import { parseRoutine } from '../pasteFormat'
@@ -717,6 +717,48 @@ describe('the instructor’s shape', () => {
     expect(clock.reps).toBeUndefined()
     expect(clock.note?.split('\n')).toHaveLength(5)
     for (const line of clock.note?.split('\n') ?? []) expect(line).toMatch(/^\d+ × ./)
+  })
+
+  it('builds every declared format on demand, and none when asked for none', () => {
+    /*
+     * `sometimes` is the harvest, and the harvest is rare: about one routine in
+     * six carries any declared format, and an EMOM roughly one in forty. That is
+     * faithful and unreachable at the same time, so the dialog can ask outright.
+     */
+    const named = (formats: Formats, seed: number) =>
+      sectionsOf(sections({ sections: 6, formats }, seed))
+        .map((b) => (b.kind === 'section' ? b.name : ''))
+
+    for (let seed = 1; seed <= 40; seed++) {
+      const never = named('never', seed)
+      for (const name of never) expect(themeOf(name), `seed ${seed}`).toBe(name)
+
+      const always = named('always', seed)
+      // A theme she HAS declared a format for is built in one; Core and the
+      // warm-up have never been anything but a list and stay one.
+      for (const name of always) {
+        const theme = themeOf(name)
+        const declarable = theme === 'General Body' || theme === 'Arms & Shoulders' || theme === 'Legs' || theme === 'Finisher'
+        expect(theme === name, `${name} at seed ${seed}`).toBe(!declarable)
+      }
+      expect(always.filter((n) => themeOf(n) === 'Core').every((n) => n === 'Core')).toBe(true)
+      expect(always.filter((n) => themeOf(n) === 'Warm-up').every((n) => n === 'Warm-up')).toBe(true)
+    }
+  })
+
+  it('can put all three formats in one routine', () => {
+    // The reason the setting exists: "sometimes" gets all three together in
+    // about one routine in ten thousand.
+    const found = new Set<string>()
+    for (let seed = 1; seed <= 40 && found.size < 3; seed++) {
+      for (const block of sectionsOf(sections({ sections: 6, formats: 'always' }, seed))) {
+        if (block.kind !== 'section') continue
+        for (const suffix of ['EMOM', '30/30', 'AMRAP']) {
+          if (block.name.endsWith(` ${suffix}`)) found.add(suffix)
+        }
+      }
+    }
+    expect([...found].sort()).toEqual(['30/30', 'AMRAP', 'EMOM'])
   })
 
   it('only gives a theme a format she has written for it', () => {

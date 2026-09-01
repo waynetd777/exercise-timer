@@ -43,6 +43,7 @@ import type { BodyArea, Exercise, Pattern } from './exercises'
 import { EXERCISES, needsRigging, PREPARE_MS, RIG_PREPARE_MS } from './exercises'
 import type { Prescription } from './exercises.prescription'
 import { PRESCRIPTIONS } from './exercises.prescription'
+import type { SectionFormat, ThemeFormat } from './exercises.shapes'
 import {
   LADDER_COUNTS,
   SECTION_FORMATS,
@@ -73,6 +74,17 @@ export type Recovery = 'passive' | 'active'
  * was that both shapes should be asked the same question.
  */
 export type Style = 'circuit' | 'sections'
+
+/**
+ * How willing the generator is to build a section in a declared format.
+ *
+ * `sometimes` is the harvest speaking and the default. It is also RARE: about
+ * one routine in six carries any declared format at all, and an EMOM or a 30/30
+ * turns up in roughly one in forty, because that is how often she writes them.
+ * Faithful, and close to unreachable if you actually want one, which is why the
+ * dialog can ask.
+ */
+export type Formats = 'sometimes' | 'always' | 'never'
 
 /** Multi-gym, nothing but the multi-gym, or both. */
 export type EquipmentScope = 'machine' | 'none' | 'mixed'
@@ -121,6 +133,11 @@ export type RoutineSpec = {
   machineReps?: number
   /** Defaults to `circuit`. */
   style?: Style
+  /**
+   * Whether a section may be built in one of the formats she declares in a
+   * heading: an EMOM, a 30/30 interval, an AMRAP. Defaults to `sometimes`.
+   */
+  formats?: Formats
   /**
    * Sections, for `sections`, as an OVERRIDE. Left out, the count is fitted to
    * `totalMs` by estimate. Given, that many are built, bookends included.
@@ -251,6 +268,22 @@ function weightedPick<T>(items: readonly T[], weight: (item: T) => number, rng: 
     if (at < 0) return item
   }
   return items[items.length - 1]!
+}
+
+/**
+ * Which format a section is built in.
+ *
+ * `sometimes` weights by `seen` over every row the theme has, `standard`
+ * included, so a format turns up about as often as she writes one. `always`
+ * drops `standard` from the draw and picks among what she HAS declared for the
+ * theme. A theme she has only ever written as a list has nothing to pick from
+ * and stays one either way: Core and the warm-up are never anything else.
+ */
+function pickFormat(declared: readonly ThemeFormat[], want: Formats, rng: Rng): SectionFormat {
+  if (want === 'never') return 'standard'
+  const rows = want === 'always' ? declared.filter((entry) => entry.format !== 'standard') : declared
+  if (rows.length === 0) return 'standard'
+  return weightedPick(rows, (entry) => entry.seen, rng).format
 }
 
 function shuffled<T>(items: readonly T[], rng: Rng): T[] {
@@ -860,8 +893,11 @@ function sectionsRoutine(
      * anything but a list, and these three draw strength moves from the themed
      * pool while a warm-up draws cardio and stretches from its own.
      */
-    const declared = SECTION_FORMATS.filter((entry) => entry.theme === theme)
-    const format = declared.length > 0 ? weightedPick(declared, (entry) => entry.seen, rng).format : 'standard'
+    const format = pickFormat(
+      SECTION_FORMATS.filter((entry) => entry.theme === theme),
+      spec.formats ?? 'sometimes',
+      rng,
+    )
 
     if (format === 'emom') {
       const moves = draw(areas, 'strength', between(EMOM_MIN_MOVES, EMOM_MAX_MOVES, rng), (e) => !isHold(e))

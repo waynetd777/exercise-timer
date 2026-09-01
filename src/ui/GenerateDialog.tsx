@@ -12,7 +12,7 @@ import { estimate } from '../routines/estimate'
 import { currentRates } from '../storage/paces'
 import { currentWeights } from '../storage/weights'
 import { describeRoutine, generateRoutine, seeded } from '../routines/generate'
-import type { EquipmentScope, Recovery, Style } from '../routines/generate'
+import type { EquipmentScope, Formats, Recovery, Style } from '../routines/generate'
 import { estimated } from './format'
 import { CloseIcon, PlusIcon } from './icons'
 import { CountField } from './CountField'
@@ -196,6 +196,13 @@ export function GenerateDialog({
    * of them is hidden for the other, rather than being shown and ignored.
    */
   const [style, setStyle] = useState<Style>('circuit')
+  /*
+   * Defaults to what the harvest says, which is RARE: an EMOM or a 30/30 lands
+   * in about one routine in forty, because that is how often she writes one. The
+   * setting exists because "faithful" and "reachable" are not the same thing,
+   * and pressing Try another forty times is not a way to ask for something.
+   */
+  const [formats, setFormats] = useState<Formats>('sometimes')
   const [minutes, setMinutes] = useState(45)
   const [areas, setAreas] = useState<BodyArea[]>(['upper', 'torso', 'lower'])
   const [recovery, setRecovery] = useState<Recovery>('active')
@@ -288,6 +295,7 @@ export function GenerateDialog({
           recoveryMs: recoverSecs * 1000,
           equipment,
           sets,
+          formats,
         },
         {
           library,
@@ -305,6 +313,7 @@ export function GenerateDialog({
     cardio,
     coolDown,
     equipment,
+    formats,
     library,
     minutes,
     name,
@@ -384,6 +393,31 @@ export function GenerateDialog({
           value={style}
           onChange={chooseStyle}
         />
+
+        {/*
+          Named in the legend rather than left to a tooltip: on a phone there is
+          nothing to hover, and "Sometimes" on its own says nothing about what.
+        */}
+        {!circuit && (
+          <Choice
+            legend="EMOM, 30/30, AMRAP"
+            options={[
+              {
+                value: 'sometimes' as Formats,
+                label: 'Sometimes',
+                title: 'About as often as your routines use them, which is rarely',
+              },
+              {
+                value: 'always' as Formats,
+                label: 'Always',
+                title: 'Every section that has ever been written as one is built as one',
+              },
+              { value: 'never' as Formats, label: 'Never', title: 'Counted lists and ladders only' },
+            ]}
+            value={formats}
+            onChange={setFormats}
+          />
+        )}
 
         {/*
           The same question for both shapes. A circuit is that long; a routine of
