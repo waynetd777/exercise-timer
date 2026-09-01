@@ -2,7 +2,39 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (v9.5: the sections generator aligned to the corpus — one AMRAP, her drop order, trim before drop)
+> Last updated: 2026-09-01 (v9.6: review pass on v9.5 — per-routine absence weights, AMRAP hand-off, honest overrun notes)
+
+---
+
+## 🔍 Review pass on the alignment work (2026-09-01, done, v9.6)
+
+Wayne asked for a code review of the v9.5 changes and fixes for everything found. /code-review returned ten
+findings (five CONFIRMED correctness); all fixed:
+
+**The drop weights were backwards** (the big one). `ROUTINES - seen` mixed units: `seen` counts SECTIONS
+(Arms reaches 17 in 16 routines), and the heading regexes misread the corpus — "Legs Finisher" counted as
+Legs (first-match), asterisk-wrapped `*Legs*` matched nothing, and `/arms?\b/` matched inside "Warm up".
+The harvest now tallies per-routine presence (match-ALL rows, over the 14 routines that name ≥3 distinct
+themes) and exports `absent` per theme: GB 2, Arms 1, Core 1, Legs 0. The drop order is drawn weighted by
+`absent + 1` — smoothed, because those absences sit inside heading-style noise and a zero would make a theme
+undroppable. Measured at 40 min over 40 seeds: GB missing 32, Arms 22, Core 21, Legs 15.
+
+**`always` could ship no AMRAP** once the drop weights favoured dropping GB, its holder. After fitting, if
+the AMRAP's theme did not fit, the finisher (always built) releases its draw and is rebuilt as her 4-minute
+burner AMRAP. Measured: 0 of 500 without an AMRAP at any length, still never two.
+
+**Silent drops in the [ask, ask+5min) overrun band**: the No-room note was suppressed on ANY overrun while
+the length note only speaks from 5 minutes off. Overruns now explain themselves: "No room for X: what fits
+already comes to about M minutes."; running short still says "No room for X in N minutes."
+
+**Leaked draws**: bookends and the section-count path called `build()` bare; a failed build kept its partial
+draw. `attempt()` now auto-undoes failures and everything builds through it. **Futile trims**: the trim
+retry is skipped for 30/30/AMRAP (cost is the clock; the rebuild only wasted rng draws). **Cleanups**:
+AMRAP sizes live in a theme-keyed table, `size(lo, hi, trimTo)` replaces the inline ternary, the overshoot
+predicate is shared, the test seed-search helpers are one function, and the burn-regex risk is documented.
+
+**Verified:** 1293 tests (+1 for the AMRAP hand-off; three rewritten for the corrected weights and notes),
+lint, typecheck, production build. `APP_VERSION` 9.6.
 
 ---
 

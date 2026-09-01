@@ -418,3 +418,25 @@
 | 12:06 | Edited src/routines/__tests__/generate.test.ts | 10→10 lines | ~184 |
 | 12:07 | Edited src/routines/__tests__/generate.test.ts | added optional chaining | ~744 |
 | 12:09 | Edited src/version.ts | "9.4" → "9.5" | ~10 |
+| 12:52 | Corpus-alignment pass on the sections generator: harvest reads her finisher EMOM, one AMRAP max, absence-weighted drops, trim before drop (v9.5) | scripts/harvest-shapes.test.ts, src/routines/generate.ts, generate.test.ts, exercises.shapes.ts | committed 2346d8f, 1292 tests green | ~80k |
+| 13:14 | Edited scripts/harvest-shapes.test.ts | expanded (+7 lines) | ~292 |
+| 13:14 | Edited scripts/harvest-shapes.test.ts | added 1 condition(s) | ~351 |
+| 13:15 | Edited scripts/harvest-shapes.test.ts | added nullish coalescing | ~176 |
+| 13:15 | Edited scripts/harvest-shapes.test.ts | 4→8 lines | ~104 |
+| 13:16 | Edited scripts/harvest-shapes.test.ts | 1→4 lines | ~86 |
+| 13:16 | Edited src/routines/generate.ts | 4→3 lines | ~13 |
+| 13:16 | Edited src/routines/generate.ts | 10→15 lines | ~229 |
+| 13:16 | Edited src/routines/generate.ts | 5→5 lines | ~66 |
+| 13:17 | Edited src/routines/generate.ts | added nullish coalescing | ~105 |
+| 13:17 | Edited src/routines/generate.ts | 2→6 lines | ~89 |
+| 13:17 | Edited src/routines/generate.ts | 7→7 lines | ~106 |
+| 13:17 | Edited src/routines/generate.ts | added 1 condition(s) | ~308 |
+| 13:18 | Edited src/routines/generate.ts | added optional chaining | ~714 |
+| 13:19 | Edited src/routines/generate.ts | added optional chaining | ~1433 |
+| 13:19 | Edited src/routines/generate.ts | modified if() | ~261 |
+| 13:20 | Edited src/routines/__tests__/generate.test.ts | 6→6 lines | ~76 |
+| 13:20 | Edited src/routines/__tests__/generate.test.ts | 13→16 lines | ~288 |
+| 13:21 | Edited src/routines/__tests__/generate.test.ts | added nullish coalescing | ~339 |
+| 13:21 | Edited src/routines/__tests__/generate.test.ts | modified for() | ~184 |
+| 13:21 | Edited src/routines/__tests__/generate.test.ts | added optional chaining | ~346 |
+| 13:24 | Review pass on v9.5: per-routine absence weights (harvest regex fixes + absent export), always AMRAP hand-off to the finisher, honest overrun notes, attempt auto-undo, rigid-trim skip (v9.6) | harvest-shapes.test.ts, generate.ts, generate.test.ts, exercises.shapes.ts | 1293 tests green | ~60k |

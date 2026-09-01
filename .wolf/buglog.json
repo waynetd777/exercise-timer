@@ -2802,6 +2802,188 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-01T10:10:53.000Z"
+    },
+    {
+      "id": "bug-168",
+      "timestamp": "2026-09-01T11:14:38.530Z",
+      "error_message": "Type error",
+      "file": "scripts/harvest-shapes.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:14:38.530Z"
+    },
+    {
+      "id": "bug-169",
+      "timestamp": "2026-09-01T11:15:05.509Z",
+      "error_message": "Null/undefined access in harvest-shapes.test.ts",
+      "file": "scripts/harvest-shapes.test.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:15:05.509Z"
+    },
+    {
+      "id": "bug-170",
+      "timestamp": "2026-09-01T11:16:43.518Z",
+      "error_message": "Significant refactor of generate.ts",
+      "file": "src/routines/generate.ts",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 10\u219215 lines (8 removed) | Also: * Core came out short or empty for exercises that ; * that comes to nothing releases them again.",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-01T11:17:48.293Z"
+    },
+    {
+      "id": "bug-171",
+      "timestamp": "2026-09-01T11:17:15.248Z",
+      "error_message": "Null/undefined access in generate.ts",
+      "file": "src/routines/generate.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: return entry ? (attempt(entry)?.built ?? null) : null; let finisher = bookend(FINISHER) | Also: * WHICH themes get the room follows how often she LEAVES EAC; * the harvest's per-routine `absent`: of the fourteen routin",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-09-01T11:19:17.134Z"
+    },
+    {
+      "id": "bug-172",
+      "timestamp": "2026-09-01T11:19:40.178Z",
+      "error_message": "Type error",
+      "file": "src/routines/generate.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:19:40.178Z"
+    },
+    {
+      "id": "bug-173",
+      "timestamp": "2026-09-01T11:20:56.176Z",
+      "error_message": "Significant refactor of generate.test.ts",
+      "file": "src/routines/__tests__/generate.test.ts",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 13\u219216 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:20:56.176Z"
+    },
+    {
+      "id": "bug-174",
+      "timestamp": "2026-09-01T11:21:09.510Z",
+      "error_message": "Null/undefined access in generate.test.ts",
+      "file": "src/routines/__tests__/generate.test.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: it('hands the AMRAP to the finisher when its theme did not f; /*",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-01T11:21:40.555Z"
+    },
+    {
+      "id": "bug-175",
+      "timestamp": "2026-09-01T11:23:40.000Z",
+      "error_message": "CODE REVIEW: the drop-order weights Math.max(0, ROUTINES - t.seen) mixed units \u2014 seen counts SECTIONS (Arms reaches 17 in 16 routines) while ROUTINES counts routines \u2014 and heading-regex flaws (Legs Finisher counted as Legs; asterisk-wrapped *Legs* unclassified; 'arm' matching inside 'Warm up') inverted the tallies, so the fitting priority was roughly backwards",
+      "file": "src/routines/generate.ts",
+      "root_cause": "Per-section counts cannot express per-routine omission; /^legs?\\b/ was anchored past decoration and claimed finishers via first-match; /arms?\\b/ unanchored matched inside 'Warm up'",
+      "fix": "Harvest now tallies per-routine presence with match-ALL rows over routines naming >=3 distinct themes, exports absent per theme (GB 2, Arms 1, Core 1, Legs 0 of 14); Legs regex is /^\\W*legs?\\b(?!.*\\b(?:finisher|burn(?:out|er)?)\\b)/, Arms gets a leading \\b; generate.ts draws the drop order weighted by absent + 1 (smoothed, so nothing is undroppable)",
+      "tags": [
+        "generator",
+        "harvest",
+        "sections",
+        "fitting",
+        "code-review"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:23:40.000Z"
+    },
+    {
+      "id": "bug-176",
+      "timestamp": "2026-09-01T11:23:40.000Z",
+      "error_message": "CODE REVIEW: a minutes-fitted formats:'always' routine shipped with ZERO AMRAPs about half the time at short lengths \u2014 the up-front assignment gave the AMRAP to General Body, the theme the drop weights give up first",
+      "file": "src/routines/generate.ts",
+      "root_cause": "Format assignment never reacted to fitting; the finisher was locked to EMOM before any building",
+      "fix": "After fitting, if the AMRAP's theme did not fit under 'always', the finisher's draw is released from `taken`, Finisher is reassigned amrap, and it is rebuilt as her 4-minute 3-move burner; measured 38-min always: 0 routines without an AMRAP, 0 with two",
+      "tags": [
+        "generator",
+        "sections",
+        "amrap",
+        "formats",
+        "code-review"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:23:40.000Z"
+    },
+    {
+      "id": "bug-177",
+      "timestamp": "2026-09-01T11:23:40.000Z",
+      "error_message": "CODE REVIEW: themes dropped for time got no note at all when the routine overran the ask by under 5 minutes \u2014 the 'No room' note was suppressed on overrun and the length note only speaks from 5 minutes off",
+      "file": "src/routines/generate.ts",
+      "root_cause": "came < spec.totalMs gated the No-room note; the [ask, ask+5min) band fell between it and the length note",
+      "fix": "Overruns now explain themselves with different wording: 'No room for X: what fits already comes to about M minutes.'; only a routine that ran short blames the minutes ('No room for X in N minutes.')",
+      "tags": [
+        "generator",
+        "sections",
+        "notes",
+        "code-review"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:23:40.000Z"
+    },
+    {
+      "id": "bug-178",
+      "timestamp": "2026-09-01T11:23:40.000Z",
+      "error_message": "CODE REVIEW: bookend and section-count builds still called build() bare, so a failed build leaked its partial draw into the shared taken set (the starvation bug the attempt/undo fix addressed only in the minutes-fitted path); attempt's manual undo pairing was also fragile, and the trim retry was a guaranteed no-op for 30/30 and AMRAP sections that burned rng draws",
+      "file": "src/routines/generate.ts",
+      "root_cause": "attempt() returned {built, undo} and relied on callers pairing undo on every failure path; time-rigid formats have clock-fixed costs a trim cannot shrink",
+      "fix": "attempt() now auto-undoes when the build fails and returns null (callers pair reject only with a section they chose not to keep); every build goes through it, bookends and count path included; the trim retry is skipped for interval30/amrap",
+      "tags": [
+        "generator",
+        "sections",
+        "fitting",
+        "code-review"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:23:40.000Z"
     }
   ]
 }

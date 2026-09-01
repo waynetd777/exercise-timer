@@ -28,11 +28,21 @@
   before the body, so a per-build pick cannot see what General Body will take.
   At most one AMRAP per routine — two EMOMs is corpus (2026-08-25), two AMRAPs
   is not.
-- The fitting drop order is drawn weighted by corpus ABSENCE
-  (`ROUTINES - seen`), and a section that overshoots is rebuilt trimmed
+- The fitting drop order is drawn weighted by the harvest's per-routine
+  `absent + 1` (a code review caught `ROUTINES - seen` mixing units: `seen`
+  counts SECTIONS — Arms hits 17 in 16 routines — and heading-regex flaws had
+  inverted the tallies). A section that overshoots is rebuilt trimmed
   (`build(entry, true)`: her smallest written rounds/moves) before its theme is
-  given up. A deterministic seen-desc sort made every 40-minute routine the
-  same four sections — variety needed the weighted draw.
+  given up — except a 30/30 or AMRAP, whose cost is the clock, so a rebuild is
+  skipped. A deterministic sort made every 40-minute routine the same four
+  sections — variety needed the weighted draw.
+- Harvest regex traps found by review: unanchored `/arms?\b/` matches inside
+  "Warm up"; `/^legs?\b/` missed "*Legs*" (asterisks survive parsing) and
+  claimed "Legs Finisher" from the Finisher row (first-match). Per-routine
+  presence uses match-ALL rows; only routines naming >=3 distinct themes count.
+- Under `always`, if the AMRAP's theme is dropped by the fitter, the finisher
+  is rebuilt as her 4-minute burner AMRAP (release its draw from `taken`,
+  reassign, attempt again) so the promise of the dialog holds.
 - The harvest classifies sections by HEADING regex. A heading she words freshly
   ("FULL-LEG BURN – EVERY MINUTE ON THE MINUTE") silently vanishes from the
   counts — when a corpus stat looks off, diff the harvest's section list

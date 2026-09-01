@@ -46,7 +46,6 @@ import { PRESCRIPTIONS } from './exercises.prescription'
 import type { SectionFormat, ThemeFormat } from './exercises.shapes'
 import {
   LADDER_COUNTS,
-  ROUTINES,
   SECTION_FORMATS,
   SECTION_THEMES,
   SECTIONS_MAX,
@@ -511,16 +510,21 @@ const EMOM_ROUNDS = 2
 const INTERVAL_MS = 30_000
 const INTERVAL_MOVES = 5
 const INTERVAL_ROUNDS = 4
-const AMRAP_MS = 600_000
-const AMRAP_MOVES = 5
 /**
- * Her finisher AMRAP is smaller than her General Body one: "Optional Burner …
- * AMRAP 3–5 mins" of three moves (2026-04-16), against the ten-minute, five-move
- * "#1 GENERAL BODY 10-MINUTE AMRAP" (2026-08-25). Four minutes is the middle of
- * the range she leaves to the reader. One constant for both doubled the burner.
+ * How big each theme's AMRAP runs, read off the two she has written: the
+ * ten-minute, five-move "#1 GENERAL BODY 10-MINUTE AMRAP" (2026-08-25) and the
+ * "Optional Burner … AMRAP 3–5 mins" of three moves she closes with
+ * (2026-04-16; four minutes is the middle of the range she leaves to the
+ * reader). One constant for both doubled the burner. Keyed by theme so that a
+ * future harvest declaring an AMRAP on a new theme sizes it here on purpose
+ * rather than inheriting the General Body clock by accident; unlisted themes
+ * fall back to `AMRAP_DEFAULT`.
  */
-const FINISHER_AMRAP_MS = 240_000
-const FINISHER_AMRAP_MOVES = 3
+const AMRAP_SIZE: Readonly<Record<string, { clockMs: number; moves: number }>> = {
+  [GENERAL_BODY]: { clockMs: 600_000, moves: 5 },
+  [FINISHER]: { clockMs: 240_000, moves: 3 },
+}
+const AMRAP_DEFAULT = AMRAP_SIZE[GENERAL_BODY]!
 /** The step an AMRAP becomes, spelled the way `pasteFormat` spells it. */
 const AMRAP_STEP = 'As many rounds as possible'
 
@@ -903,8 +907,12 @@ function sectionsRoutine(
   ): Section | null => {
     const name = themeName(theme, areas, all)
     const shape = THEME_SHAPE[theme] ?? 'rounds'
-    /** The usual draw, or the low end of her range when the fit needs it. */
-    const size = (lo: number, hi: number) => (trim ? lo : between(lo, hi, rng))
+    /**
+     * The usual draw, or `trimTo` when the fit needs the smallest she has
+     * written — usually the low end of the range, but her Arms rounds go down
+     * to a three the open draw never picks.
+     */
+    const size = (lo: number, hi: number, trimTo = lo) => (trim ? trimTo : between(lo, hi, rng))
     const short = () => {
       notes.push(`Not enough left for a ${name} section with the equipment chosen.`)
       return null
@@ -957,10 +965,10 @@ function sectionsRoutine(
 
     if (format === 'amrap') {
       // Her finisher AMRAP is the small burner; the body one is the ten-minute clock.
-      const burner = theme === FINISHER
-      const moves = draw(areas, 'strength', burner ? FINISHER_AMRAP_MOVES : AMRAP_MOVES, (e) => !isHold(e))
+      const { clockMs, moves: wanted } = AMRAP_SIZE[theme] ?? AMRAP_DEFAULT
+      const moves = draw(areas, 'strength', wanted, (e) => !isHold(e))
       if (moves.length < 2) return short()
-      return amrapOf(`${name} AMRAP`, moves, burner ? FINISHER_AMRAP_MS : AMRAP_MS)
+      return amrapOf(`${name} AMRAP`, moves, clockMs)
     }
 
     if (shape === 'climb') {
@@ -1009,7 +1017,34 @@ function sectionsRoutine(
     // (2026-07-27 Arms & Shoulders).
     const moves = draw(areas, 'strength', size(5, 6), (e) => !isHold(e))
     if (moves.length < 2) return short()
-    return section(name, [roundsOf(trim ? 3 : between(4, 5, rng), moves)])
+    return section(name, [roundsOf(size(4, 5, 3), moves)])
+  }
+
+  /**
+   * A section built without committing to it, and the way to take it back.
+   *
+   * `taken` is shared across the themes so that no exercise appears twice, which
+   * means a section that is then dropped for want of minutes keeps its draw:
+   * Legs, tried and rejected, still ate the squats Core was about to want, and
+   * Core came out short or empty for exercises that nothing was using.
+   *
+   * A build that comes to nothing releases its draw ITSELF — every failing
+   * shape has drawn something by the time its guard says no — so callers only
+   * pair `reject` with a section they chose not to keep. Every build goes
+   * through here; a bare `build()` would leak its draw on failure.
+   */
+  const attempt = (entry: { theme: string; areas: BodyArea[]; all: readonly string[] }, trim = false) => {
+    const held = new Set(taken)
+    const undo = () => {
+      taken.clear()
+      for (const name of held) taken.add(name)
+    }
+    const built = build(entry, trim)
+    if (!built) {
+      undo()
+      return null
+    }
+    return { built, reject: undo }
   }
 
   /*
@@ -1023,10 +1058,10 @@ function sectionsRoutine(
    */
   const bookend = (theme: string) => {
     const entry = themes.find((t) => t.theme === theme)
-    return entry ? build(entry) : null
+    return entry ? (attempt(entry)?.built ?? null) : null
   }
   const warmUp = bookend(WARM_UP)
-  const finisher = bookend(FINISHER)
+  let finisher = bookend(FINISHER)
   const body = themes.filter((t) => t.theme !== WARM_UP && t.theme !== FINISHER)
   const ends = (warmUp ? 1 : 0) + (finisher ? 1 : 0)
 
@@ -1036,24 +1071,6 @@ function sectionsRoutine(
     return guess.knownMs + guess.estimatedMs
   }
 
-  /**
-   * A section built without committing to it, and the way to take it back.
-   *
-   * `taken` is shared across the themes so that no exercise appears twice, which
-   * means a section that is then dropped for want of minutes keeps its draw:
-   * Legs, tried and rejected, still ate the squats Core was about to want, and
-   * Core came out short or empty for exercises that nothing was using. A build
-   * that comes to nothing releases them again.
-   */
-  const attempt = (entry: { theme: string; areas: BodyArea[]; all: readonly string[] }, trim = false) => {
-    const held = new Set(taken)
-    const undo = () => {
-      taken.clear()
-      for (const name of held) taken.add(name)
-    }
-    return { built: build(entry, trim), undo }
-  }
-
   const middle: Block[] = []
   /** Themes the minutes could not pay for, named once the length is known. */
   const left: string[] = []
@@ -1061,7 +1078,7 @@ function sectionsRoutine(
     // Asked for a count outright: that many, the bookends included.
     const wanted = clampSections(spec.sections)
     for (const entry of body.slice(0, Math.max(0, wanted - ends))) {
-      const built = build(entry)
+      const built = attempt(entry)?.built
       if (built) middle.push(built)
     }
     if (middle.length + ends < wanted) {
@@ -1081,17 +1098,18 @@ function sectionsRoutine(
      * come to 56 to 91 minutes. A 45-minute routine is therefore four sections
      * or so rather than her six, and the ones that did not fit are named.
      *
-     * WHICH themes get the room follows how often she LEAVES EACH OUT. Across
-     * the sixteen, Arms & Shoulders is in every one, Legs misses one, Core two
-     * and General Body three, so the drop order is drawn with those absences as
-     * the weights: General Body goes first about half the time, Core a third,
-     * Legs the rest, and Arms & Shoulders only when nothing else is left. Drawn,
-     * not fixed — her short routines differ in which theme is missing, and a
-     * fixed order made every 40-minute routine the same four sections. The old
-     * rule protected General Body — the theme she omits MOST — and shuffled the
-     * rest flat, so a third of short routines lost Arms, a mix she has never
-     * sent. The sections are then ASSEMBLED in her order whatever the priority
-     * was, so the routine still reads like hers.
+     * WHICH themes get the room follows how often she LEAVES EACH OUT, which is
+     * the harvest's per-routine `absent`: of the fourteen routines that name
+     * their sections, two lack a General Body, one an Arms and one a Core, and
+     * none lacks a Legs. The drop order is drawn with `absent + 1` as the
+     * weights — smoothed by one, because those absences sit within the noise of
+     * her heading styles and a zero would make a theme undroppable outright.
+     * Drawn, not sorted: her short routines differ in which theme is missing,
+     * and a fixed order made every 40-minute routine the same four sections.
+     * (An earlier cut weighted by `ROUTINES - seen`, but `seen` counts SECTIONS
+     * — Arms reaches seventeen in sixteen routines — so the order came out
+     * roughly inverted.) The sections are then ASSEMBLED in her order whatever
+     * the priority was, so the routine still reads like hers.
      *
      * The themes that overshoot are PASSED OVER rather than ending the fitting.
      * The first one to miss used to take every theme behind it with it, so a
@@ -1100,52 +1118,90 @@ function sectionsRoutine(
      * with room for another. What is left over is what genuinely did not fit.
      */
     const budget = spec.totalMs - (warmUp ? cost(warmUp) : 0) - (finisher ? cost(finisher) : 0)
-    const dropped: typeof body = []
+    const dropOrder: typeof body = []
     {
-      // Shuffled first so themes she has never omitted (weight zero) tie randomly.
       const pool = shuffled(body, rng)
       while (pool.length > 0) {
-        const next = weightedPick(pool, (t) => Math.max(0, ROUTINES - t.seen), rng)
+        const next = weightedPick(pool, (t) => t.absent + 1, rng)
         pool.splice(pool.indexOf(next), 1)
-        dropped.push(next)
+        dropOrder.push(next)
       }
     }
-    const priority = dropped.reverse()
+    const priority = dropOrder.reverse()
     let spent = 0
+    // Half a section past the target is further from it than stopping here.
+    const overshoots = (price: number) => spent + price > budget + price / 2
     const fitted = new Map<string, Section>()
     for (const entry of priority) {
       const full = attempt(entry)
-      if (!full.built) {
-        full.undo()
-        continue
-      }
-      let built = full.built
-      let price = cost(built)
-      // Half a section past the target is further from it than stopping here.
-      if (fitted.size > 0 && spent + price > budget + price / 2) {
+      if (!full) continue
+      let choice = full
+      let price = cost(full.built)
+      if (fitted.size > 0 && overshoots(price)) {
         /*
          * Overshot at full size: retried at the smallest she has written the
          * shape before the theme is given up. She flexes before she cuts — the
          * corpus writes its rounds as ranges, "Repeat 3-5x", "Rest as needed" —
          * and a trimmed Core is far closer to her than a routine without one.
+         *
+         * Not for a 30/30 or an AMRAP: their length is the clock, so a rebuild
+         * would cost the same minutes and only waste draws on its way to the
+         * same answer.
          */
-        full.undo()
-        const small = attempt(entry, true)
-        if (!small.built) {
-          small.undo()
-          continue
-        }
-        price = cost(small.built)
-        if (spent + price > budget + price / 2) {
-          small.undo()
+        full.reject()
+        const format = assigned.get(entry.theme) ?? 'standard'
+        const small = format === 'interval30' || format === 'amrap' ? null : attempt(entry, true)
+        if (!small || overshoots((price = cost(small.built)))) {
+          small?.reject()
           left.push(entry.theme)
           continue
         }
-        built = small.built
+        choice = small
       }
-      fitted.set(entry.theme, built)
+      fitted.set(entry.theme, choice.built)
       spent += price
     }
+
+    /*
+     * `always` promises the declared formats, and the AMRAP is assigned in her
+     * order, which hands it to General Body — the very theme the drop weights
+     * give up first. A short routine could then carry no AMRAP at all while the
+     * dialog had promised one, so the finisher, which is built whatever fits,
+     * takes it instead, as her small burner. Only under `always`: `sometimes`
+     * promises nothing, and rarity is the point of it.
+     */
+    const amrapTheme = [...assigned].find(([, format]) => format === 'amrap')?.[0]
+    if (
+      (spec.formats ?? 'sometimes') === 'always' &&
+      finisher &&
+      amrapTheme !== undefined &&
+      amrapTheme !== FINISHER &&
+      !fitted.has(amrapTheme) &&
+      SECTION_FORMATS.some((row) => row.theme === FINISHER && row.format === 'amrap')
+    ) {
+      const entry = themes.find((t) => t.theme === FINISHER)
+      const names: string[] = []
+      const collect = (blocks: readonly Block[]) => {
+        for (const block of blocks) {
+          if (block.kind === 'segment') {
+            if (block.role === 'work') names.push(block.name)
+          } else collect(block.children)
+        }
+      }
+      collect(finisher.children)
+      for (const name of names) taken.delete(name)
+      const before = assigned.get(FINISHER)
+      assigned.set(FINISHER, 'amrap')
+      const swapped = entry ? attempt(entry) : null
+      if (swapped) {
+        finisher = swapped.built
+      } else {
+        // Nothing left to draw a burner from: keep the finisher it built.
+        for (const name of names) taken.add(name)
+        if (before) assigned.set(FINISHER, before)
+      }
+    }
+
     for (const entry of body) {
       const built = fitted.get(entry.theme)
       if (built) middle.push(built)
@@ -1157,16 +1213,22 @@ function sectionsRoutine(
   const came = blocks.reduce((sum, block) => sum + cost(block), 0)
   const off = Math.round((came - spec.totalMs) / 60_000)
   /*
-   * What the minutes could not pay for, said only where they actually ran out.
+   * What the minutes could not pay for, worded by where they went.
    *
-   * Sections come whole, so what fits can still overrun what was asked for: a
-   * fifty-minute routine that came to fifty-six carried "No room for Core in 50
-   * minutes" directly above "about 6 minutes longer than asked", which reads as
-   * the generator arguing with itself. Over the asked-for length, the routine is
-   * full, and a theme left out of a full routine needs no explaining.
+   * Sections come whole, so what fits can still overrun what was asked for, and
+   * "No room for Core in 50 minutes" directly above "about 6 minutes longer
+   * than asked" read as the generator arguing with itself. Suppressing the note
+   * on overrun was worse: a routine two minutes over the ask dropped themes
+   * with no explanation at all, since the length note only speaks from five
+   * minutes off. So an overrun explains itself instead — what fit is already
+   * past the ask — and only a routine that ran SHORT blames the minutes.
    */
-  if (left.length > 0 && came < spec.totalMs) {
-    notes.push(`No room for ${left.join(', ')} in ${Math.round(spec.totalMs / 60_000)} minutes.`)
+  if (left.length > 0) {
+    notes.push(
+      came < spec.totalMs
+        ? `No room for ${left.join(', ')} in ${Math.round(spec.totalMs / 60_000)} minutes.`
+        : `No room for ${left.join(', ')}: what fits already comes to about ${Math.round(came / 60_000)} minutes.`,
+    )
   }
   // The same test as the builder's: a count of NaN took the fitted path above
   // and then suppressed this note, as if a count had been honoured.

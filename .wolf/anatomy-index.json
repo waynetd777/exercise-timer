@@ -1,12 +1,12 @@
 {
   "version": 1,
   "meta": {
-    "lastScanned": "2026-09-01T10:09:52.568Z",
+    "lastScanned": "2026-09-01T11:21:40.545Z",
     "fileCount": 249,
     "hits": 0,
     "misses": 0,
-    "renderedHash": "d2b6e7a4f419cb87ed026292c634ac3d734c35d16abb476e350c5d9b3f40d003",
-    "storeUpdatedAt": "2026-09-01T10:09:52.576Z"
+    "renderedHash": "f6b1192d8062de67b66fe8b3e6c887c961659eb61c2745122349522c8067caf8",
+    "storeUpdatedAt": "2026-09-01T11:21:40.552Z"
   },
   "files": {
     ".claude/commands/designqc.md": {
@@ -410,11 +410,11 @@
     },
     "scripts/harvest-shapes.test.ts": {
       "description": "Exercise Timer",
-      "tokens": 3149,
-      "hash": "789e0d8469f38616",
-      "size": 11023,
-      "mtimeMs": 1788257103365.0623,
-      "updatedAt": "2026-09-01T10:05:03.428Z",
+      "tokens": 3932,
+      "hash": "38d6ad1a668757d4",
+      "size": 13769,
+      "mtimeMs": 1788261371521.5938,
+      "updatedAt": "2026-09-01T11:16:11.592Z",
       "source": "hook"
     },
     "src/__tests__/id.test.ts": {
@@ -2309,11 +2309,11 @@
     },
     "src/routines/__tests__/generate.test.ts": {
       "description": "Exercise Timer",
-      "tokens": 16812,
-      "hash": "b2c9c9e4bebd5912",
-      "size": 58864,
-      "mtimeMs": 1788257274601.79,
-      "updatedAt": "2026-09-01T10:07:54.664Z",
+      "tokens": 17264,
+      "hash": "f92beb297226bb98",
+      "size": 60450,
+      "mtimeMs": 1788261700482.6157,
+      "updatedAt": "2026-09-01T11:21:40.544Z",
       "source": "hook",
       "symbols": [
         {
@@ -2341,8 +2341,8 @@
           "name": "areaOf",
           "kind": "fn",
           "startLine": 52,
-          "endLine": 1301,
-          "tokens": 16252
+          "endLine": 1326,
+          "tokens": 16704
         }
       ]
     },
@@ -2781,137 +2781,137 @@
     },
     "src/routines/generate.ts": {
       "description": "Exercise Timer",
-      "tokens": 17772,
-      "hash": "4b62955e92bc6c8a",
-      "size": 62224,
-      "mtimeMs": 1788257142823.0679,
-      "updatedAt": "2026-09-01T10:05:42.880Z",
+      "tokens": 18615,
+      "hash": "349d00e9e2b99c79",
+      "size": 65188,
+      "mtimeMs": 1788261580107.0298,
+      "updatedAt": "2026-09-01T11:19:40.166Z",
       "source": "hook",
       "symbols": [
         {
           "name": "hasSectionCount",
           "kind": "fn",
-          "startLine": 198,
-          "endLine": 202,
+          "startLine": 197,
+          "endLine": 201,
           "tokens": 67
         },
         {
           "name": "clampSections",
           "kind": "fn",
-          "startLine": 203,
-          "endLine": 207,
+          "startLine": 202,
+          "endLine": 206,
           "tokens": 64
         },
         {
           "name": "sectionsAsked",
           "kind": "fn",
-          "startLine": 208,
-          "endLine": 223,
+          "startLine": 207,
+          "endLine": 222,
           "tokens": 192
         },
         {
           "name": "asks",
           "kind": "fn",
-          "startLine": 224,
-          "endLine": 247,
+          "startLine": 223,
+          "endLine": 246,
           "tokens": 280
         },
         {
           "name": "seeded",
           "kind": "fn",
-          "startLine": 248,
-          "endLine": 263,
+          "startLine": 247,
+          "endLine": 262,
           "tokens": 148
         },
         {
           "name": "weightedPick",
           "kind": "fn",
-          "startLine": 264,
-          "endLine": 282,
+          "startLine": 263,
+          "endLine": 281,
           "tokens": 211
         },
         {
           "name": "pickFormat",
           "kind": "fn",
-          "startLine": 283,
-          "endLine": 289,
+          "startLine": 282,
+          "endLine": 288,
           "tokens": 100
         },
         {
           "name": "shuffled",
           "kind": "fn",
-          "startLine": 290,
-          "endLine": 308,
+          "startLine": 289,
+          "endLine": 307,
           "tokens": 203
         },
         {
           "name": "loadFrom",
           "kind": "fn",
-          "startLine": 309,
-          "endLine": 329,
+          "startLine": 308,
+          "endLine": 328,
           "tokens": 210
         },
         {
           "name": "eligible",
           "kind": "fn",
-          "startLine": 330,
-          "endLine": 341,
+          "startLine": 329,
+          "endLine": 340,
           "tokens": 151
         },
         {
           "name": "share",
           "kind": "fn",
-          "startLine": 342,
-          "endLine": 359,
+          "startLine": 341,
+          "endLine": 358,
           "tokens": 208
         },
         {
           "name": "nextArea",
           "kind": "fn",
-          "startLine": 360,
-          "endLine": 394,
+          "startLine": 359,
+          "endLine": 393,
           "tokens": 365
         },
         {
           "name": "exerciseBlocks",
           "kind": "fn",
-          "startLine": 395,
-          "endLine": 579,
-          "tokens": 2134
+          "startLine": 394,
+          "endLine": 583,
+          "tokens": 2237
         },
         {
           "name": "between",
           "kind": "fn",
-          "startLine": 580,
-          "endLine": 589,
+          "startLine": 584,
+          "endLine": 593,
           "tokens": 143
         },
         {
           "name": "themeName",
           "kind": "fn",
-          "startLine": 590,
-          "endLine": 617,
+          "startLine": 594,
+          "endLine": 621,
           "tokens": 384
         },
         {
           "name": "sectionsRoutine",
           "kind": "fn",
-          "startLine": 618,
-          "endLine": 1199,
-          "tokens": 7016
+          "startLine": 622,
+          "endLine": 1261,
+          "tokens": 7760
         },
         {
           "name": "describeRoutine",
           "kind": "fn",
-          "startLine": 1200,
-          "endLine": 1234,
+          "startLine": 1262,
+          "endLine": 1296,
           "tokens": 319
         },
         {
           "name": "generateRoutine",
           "kind": "fn",
-          "startLine": 1235,
-          "endLine": 1523,
+          "startLine": 1297,
+          "endLine": 1585,
           "tokens": 3245
         }
       ]
