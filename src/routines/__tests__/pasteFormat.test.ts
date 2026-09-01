@@ -871,16 +871,53 @@ describe('the whole corpus', () => {
 })
 
 /**
- * The lines the parser cannot place and SAYS so. One: a closing "challenge" that
- * reads as a heading and has nothing under it. It was dropped silently until
- * empty headings at the end of the text were reported; the rule is that a line
- * lands somewhere or is reported, and this is the reporting.
+ * The lines the parser cannot place and SAYS so. Empty, and the point is to keep
+ * it that way: every line of all sixteen routines now lands somewhere.
+ *
+ * It held one entry until 2026-09-01, the closing "🔥 Challenge: Finish with a
+ * 60-second wall sit ..." of the 13 July trampoline routine. That read as a
+ * heading with nothing under it, so it was reported instead of run, and a real
+ * minute of work never reached the routine. `FINISH_WITH` reads it now.
  */
-const KNOWN_UNPLACED: Record<string, string[]> = {
-  '2026-07-13-trampoline': [
-    '🔥 Challenge: Finish with a 60-second wall sit to empty the tank! 💪🏻 \u200e',
-  ],
-}
+const KNOWN_UNPLACED: Record<string, string[]> = {}
+
+describe('a challenge written as a sentence', () => {
+  it('reads the step it states, and closes the block above it', () => {
+    /*
+     * "🔥 Challenge: Finish with a 60-second wall sit to empty the tank!" is her
+     * 13 July closer. Both halves of a step are stated, so there is nothing to
+     * invent. It used to read as a heading with nothing under it and was
+     * reported instead of run, which cost the routine a minute of work.
+     */
+    const parsed = parseRoutine(
+      '#1 Legs\nCounting: 2-4-6\nMain exercise:\n* Squat jumps\n' +
+        '🔥 Challenge: Finish with a 60-second wall sit to empty the tank! 💪🏻',
+    )
+    expect(parsed.skipped).toEqual([])
+    const section = parsed.blocks.find((b) => b.kind === 'section')
+    if (section?.kind !== 'section') throw new Error('no section')
+    // AFTER the ladder, not inside it: within, it would run on every rung.
+    expect(section.children.map((c) => c.kind)).toEqual(['ladder', 'segment'])
+    expect(section.children[1]).toMatchObject({ durationMs: 60_000, name: 'wall sit' })
+  })
+
+  it('leaves a challenge that states no time as prose', () => {
+    // Nothing to build a step out of, so the rule declines and the line is
+    // reported. A made-up thirty seconds would be the app inventing a number.
+    const parsed = parseRoutine('#1 Legs\n* Squats\nFinish with the last two on your knees')
+    expect(parsed.skipped.map((entry) => entry.text)).toEqual([
+      'Finish with the last two on your knees',
+    ])
+  })
+
+  it('still reads a short heading behind an emoji', () => {
+    // The heading match was narrowed to fix the above; these must still open one.
+    for (const heading of ['🔥 Final Burnout', '🔥 After Round 5:', '🔥 Finisher:', '💥 Bonus Challenge']) {
+      const blocks = parseRoutine(`${heading}\n10 x Squats`).blocks
+      expect(blocks.some((b) => b.kind === 'section' && b.name.length <= 30), heading).toBe(true)
+    }
+  })
+})
 
 describe('a heading with nothing under it', () => {
   it('is reported rather than dropped', () => {
