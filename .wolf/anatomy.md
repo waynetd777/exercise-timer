@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T11:21:40.545Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-01T11:44:07.895Z
 > Files: 249 tracked | Anatomy hits: 0 | Misses: 0
 
 > Project structure index. Auto-maintained by OpenWolf hooks and daemon.
@@ -175,13 +175,13 @@
 - `exercises.shapes.ts` — Exercise Timer (~1548 tok)
 - `exercises.ts` — Exercise Timer (~2047 tok)
 - `foldName.ts` — Exercise Timer (~886 tok)
-- `generate.ts` — Exercise Timer (~18615 tok)
+- `generate.ts` — Exercise Timer (~18696 tok)
 - `imageCatalogue.ts` — Exercise Timer (~1055 tok)
 - `importFiles.ts` — Exercise Timer (~2606 tok)
 - `loads.ts` — Exercise Timer (~2417 tok)
 - `pasteFormat.ts` — Exercise Timer (~15314 tok)
 - `pasteTemplate.ts` — Exercise Timer (~997 tok)
-- `README.md` — Project documentation (~7542 tok)
+- `README.md` — Project documentation (~7832 tok)
 - `rename.ts` — Exercise Timer (~3062 tok)
 - `samples.ts` — Exercise Timer (~979 tok)
 - `similar.ts` — Exercise Timer (~2040 tok)
@@ -293,12 +293,12 @@
 - `exercises.css` — Exercise Timer (~2874 tok)
 - `ExercisesScreen.tsx` — Exercise Timer (~11555 tok)
 - `format.ts` — Exercise Timer (~5054 tok)
-- `GenerateDialog.tsx` — Exercise Timer (~5749 tok)
+- `GenerateDialog.tsx` — Exercise Timer (~6287 tok)
 - `help.ts` — Exercise Timer (~4361 tok)
 - `HelpTray.tsx` — Exercise Timer (~794 tok)
 - `icons.tsx` — Exercise Timer (~2505 tok)
 - `keys.ts` — Exercise Timer (~454 tok)
-- `library.css` — Exercise Timer (~5293 tok)
+- `library.css` — Exercise Timer (~5537 tok)
 - `LibraryScreen.tsx` — Exercise Timer (~8370 tok)
 - `Menu.tsx` — Exercise Timer (~2398 tok)
 - `NoticeDialog.tsx` — Exercise Timer (~490 tok)

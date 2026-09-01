@@ -2,7 +2,46 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-09-01 (v9.6: review pass on v9.5 — per-routine absence weights, AMRAP hand-off, honest overrun notes)
+> Last updated: 2026-09-01 (v9.7: generate dialog — 55/60 min, panel owns its container, notes first)
+
+---
+
+## 🎚 Generate dialog: lengths, sizing and where the notes sit (2026-09-01, done, v9.7)
+
+Four things Wayne asked for on the generate dialog, all done:
+
+**55 and 60 minute options.** `LENGTHS` in `GenerateDialog.tsx` is now
+`[35, 40, 45, 50, 55, 60]`. It stopped at 50 on the reasoning that the useful choice is a few minutes either
+side of a normal session; but her sections estimate at 56–91 minutes, so asking for 50 dropped themes it did
+not have to. Six chips still fit one row on desktop at the pinned label size.
+
+**The report text no longer grows with the window, and the buttons no longer wrap on a desktop.** One cause
+for both: `.generate` never declared a container. `.paste` does, and the generate panel wears `.paste`'s
+title, report and actions — all sized in `cqi` (`--label-size-sm: clamp(1rem, 1.6cqi, 1.4rem)`). With no
+container of its own, `cqi` measured the LIBRARY behind the dialog and grew with the window while the panel
+stayed pinned at 44rem: three chips at 1.4rem come to ~724px inside 656px of panel. Added
+`container: paste / inline-size` to `.generate`. `cqi` now measures the panel, so `--label-size-sm` sits at
+its 1rem floor at every width (1.6% of 44rem is 11px) — the compact size always, which is what Wayne prefers
+— and `@container paste (max-width: 26rem)` finally has a container to name, so the actions become the
+full-width stack only on a narrow phone. **Side effect worth Wayne's eye:** `.paste__title` in the generate
+dialog drops from ~41px to the 24px the paste dialog already shows. The two dialogs now match, which the
+`.generate` comment already claimed they should.
+
+**Notes render above the count and the exercise list**, not below. The report is capped at 9rem with
+`overflow-y: auto`, so "No room for Core in 35 minutes" was scrolled out of sight under the list.
+
+**The standing "A rep-based routine has no length…" note is gone.** It fired on every sections routine, which
+is what buried the note that varied. `help.ts:79` covers it and every reported figure already says "about".
+The generator test now asserts its ABSENCE; a new dialog test asserts the report's first child is the note.
+
+**Files:** `src/ui/GenerateDialog.tsx`, `src/ui/library.css` (`.generate`), `src/routines/generate.ts`
+(note removed, `sectionsRoutine` docstring), the two test files, `src/version.ts` → 9.7.
+
+**Verified:** 1294 tests in 65 files (+1: one test replaced by two), oxlint, typecheck, production build. buglog bug-181, cerebrum learning
+on `cqi` and dialog panels.
+
+**Next:** Wayne's eye on the badge 9.7 build — specifically whether the smaller dialog title reads right, and
+whether the buttons hold one row at his window width.
 
 ---
 

@@ -2984,6 +2984,59 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-01T11:23:40.000Z"
+    },
+    {
+      "id": "bug-179",
+      "timestamp": "2026-09-01T11:43:33.233Z",
+      "error_message": "Significant refactor of GenerateDialog.tsx",
+      "file": "src/ui/GenerateDialog.tsx",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 8\u219211 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:43:33.233Z"
+    },
+    {
+      "id": "bug-180",
+      "timestamp": "2026-09-01T11:43:51.498Z",
+      "error_message": "Significant refactor of generate.ts",
+      "file": "src/routines/generate.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5\u21928 lines (3 removed) | Also: * and ends when you tap Next, so this routine has ; * rather than the app pretending to a number. That",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-01T11:43:57.001Z"
+    },
+    {
+      "id": "bug-181",
+      "timestamp": "2026-09-01T11:46:44.036755Z",
+      "error_message": "USER REPORTED: the generate dialog's report text grew on wide screens, and 'Try another / Cancel / Open in editor' wrapped on a DESKTOP while staying in one row on a phone",
+      "file": "src/ui/library.css",
+      "root_cause": "`.generate` never declared a container. `.paste` does (`container: paste / inline-size`), and the panel wears `.paste`'s title, report and actions, all sized in `cqi`: `--label-size-sm: clamp(1rem, 1.6cqi, 1.4rem)`. With no container of its own, cqi measured the LIBRARY screen behind the dialog, so the chips and report text grew with the window while the panel stayed pinned at 44rem \u2014 three chips at 1.4rem come to ~724px inside 656px of panel. The same absence meant `@container paste (max-width: 26rem)` had no container to name, so the full-width narrow-phone stack for the actions never fired at all.",
+      "fix": "Added `container: paste / inline-size` to `.generate`, matching `.paste`. cqi now measures the 44rem panel, so `--label-size-sm` sits at its 1rem floor at every width (1.6% of 44rem is 11px) and the 26rem query finally resolves. Side effect: `.paste__title` in the generate dialog drops from ~41px to the 24px the paste dialog already shows.",
+      "tags": [
+        "css",
+        "container-query",
+        "cqi",
+        "responsive",
+        "user-reported",
+        "generate-dialog"
+      ],
+      "related_bugs": [
+        "bug-013"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-01T11:46:44.036755Z"
     }
   ]
 }

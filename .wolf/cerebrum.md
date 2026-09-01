@@ -19,6 +19,27 @@
 
 ## Key Learnings
 
+### 2026-09-01: A dialog panel must own its container (v9.7)
+- **`cqi` measures the nearest container, and a modal panel is not one by
+  default.** `.paste` declares `container: paste / inline-size`; `.generate`
+  did not, while wearing `.paste`'s title, report and actions — all sized in
+  `cqi` via `--label-size-sm: clamp(1rem, 1.6cqi, 1.4rem)`. So those measured
+  the LIBRARY screen behind the dialog and grew with the window while the panel
+  stayed at 44rem: the report text swelled on desktop and three action chips at
+  1.4rem (~724px) wrapped inside 656px of panel. Wayne reported both as one
+  complaint. **Rule: any fixed-width panel borrowing `cq*`-sized styles needs
+  its own `container`, named to match whatever queries those styles.**
+- A NAMED container query with no matching ancestor container silently never
+  matches — no error, no fallback. `@container paste (max-width: 26rem)` had
+  been dead in the generate dialog the whole time, so its narrow-phone
+  full-width button stack never fired.
+- **A note shown on every run is not a note.** The sections generator pushed
+  "A rep-based routine has no length…" unconditionally, which buried the one
+  green line that varied ("No room for Core in 35 minutes") below the exercise
+  list, inside a report capped at 9rem with `overflow-y: auto`. Removed; the
+  help tray says it once and every figure is already hedged with "about".
+  Notes now render ABOVE the count and the list.
+
 ### 2026-09-01: Corpus-alignment pass on the sections generator (v9.5)
 - `weightedPick` returns the LAST item when every remaining weight is zero.
   Pre-shuffle the pool before sampling without replacement, or zero-weight

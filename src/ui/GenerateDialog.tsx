@@ -21,11 +21,14 @@ import { useModal } from './useModal'
 /**
  * The lengths a session actually runs to.
  *
- * Tight around the 42 to 45 minutes Wayne's own routines come to, rather than
- * spread from half an hour to a full one: the useful choice is a few minutes
- * either side of a normal session, not a different kind of session.
+ * Five-minute steps from 35 to a full hour. It stopped at 50, tight around the
+ * 42 to 45 minutes Wayne's own routines come to, on the reasoning that the
+ * useful choice is a few minutes either side of a normal session. The
+ * instructor's sections estimate at 56 to 91 minutes, so a sections routine
+ * asked for 50 drops themes it did not have to: an hour is a real session, not
+ * a different kind of one.
  */
-const LENGTHS = [35, 40, 45, 50]
+const LENGTHS = [35, 40, 45, 50, 55, 60]
 
 /**
  * The "surprise me" value for the cardio question.
@@ -569,6 +572,19 @@ export function GenerateDialog({
           ) : (
             <>
               {/*
+                FIRST, above the count and the list.
+
+                A note is the one thing here you did not ask for — a theme the
+                minutes could not pay for, an area nothing worked — and the
+                report scrolls at 9rem, so below the exercise list is exactly
+                where it went unread.
+              */}
+              {result.notes.map((note) => (
+                <p key={note} className="generate__note label label--sm">
+                  {note}
+                </p>
+              ))}
+              {/*
                 A circuit promises a length; the sections shape can only
                 estimate one, and says "about". Saying "35:20" for a routine
                 that ends when you stop tapping would be the dialog inventing
@@ -581,11 +597,6 @@ export function GenerateDialog({
                 {` · ${estimated(guess.knownMs + guess.estimatedMs, guess.rough)}`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>
-              {result.notes.map((note) => (
-                <p key={note} className="generate__note label label--sm">
-                  {note}
-                </p>
-              ))}
             </>
           )}
         </div>

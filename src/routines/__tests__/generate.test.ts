@@ -1021,10 +1021,15 @@ describe('the instructor’s shape', () => {
     expect(steps.filter((e) => e.selfPaced).length).toBeGreaterThan(steps.length / 2)
   })
 
-  it('says it cannot know how long it will take', () => {
-    // A self-paced step ends when you tap Next. Claiming a duration would be
-    // the app pretending to a number.
-    expect(sections().notes.join(' ')).toMatch(/no length/)
+  it('does not spend a note saying it cannot know how long it will take', () => {
+    /*
+     * It used to. A self-paced step ends when you tap Next, so the app cannot
+     * claim a duration — but that is true of EVERY sections routine, so the note
+     * fired every time and pushed the one that mattered ("No room for Core")
+     * down under it. The help tray says it once, and every reported figure is
+     * already hedged with "about".
+     */
+    expect(sections().notes.join(' ')).not.toMatch(/no length/)
   })
 
   it('uses a ladder the instructor actually writes, never a generated one', () => {

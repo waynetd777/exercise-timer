@@ -443,6 +443,20 @@
   grid-auto-rows: auto;
   gap: var(--step-3);
   color: var(--bone);
+  /*
+   * THE SAME CONTAINER AS `.paste`, and named the same, because this panel wears
+   * `.paste`'s title, report and actions and those are all sized in `cqi`.
+   *
+   * Without it they measured the LIBRARY behind the dialog, so on a wide screen
+   * the report's text and the action chips grew with the window while the panel
+   * stayed at 44rem — which is how "Try another / Cancel / Open in editor" came
+   * to wrap on a desktop and not on a phone, and how the exercise list read
+   * larger the wider the screen got. Measured against the panel, `--label-size-sm`
+   * sits at its 1rem floor at every width (1.6% of 44rem is 11px), so the report
+   * is the compact size always and `@container paste (max-width: 26rem)` below
+   * finally has a container to answer: the buttons stack only on a narrow phone.
+   */
+  container: paste / inline-size;
   background: var(--ink-800);
   border: var(--hairline);
   border-radius: var(--radius);
