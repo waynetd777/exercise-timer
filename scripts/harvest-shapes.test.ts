@@ -62,7 +62,10 @@ const THEMES: { theme: string; test: RegExp; areas: string[] }[] = [
   { theme: 'Arms & Shoulders', test: /arms?(\s*&\s*shoulders)?\b|shoulders/i, areas: ['upper'] },
   { theme: 'Legs', test: /^legs?\b/i, areas: ['lower'] },
   { theme: 'Core', test: /core|abs?\b/i, areas: ['torso'] },
-  { theme: 'Finisher', test: /finisher|burnout|burner/i, areas: ['lower', 'torso'] },
+  // `\bburn\b` for "#5 FULL-LEG BURN – EVERY MINUTE ON THE MINUTE" (2026-08-25),
+  // her finisher-slot EMOM, which "burnout|burner" left unread: the harvest saw
+  // her declare an AMRAP finisher but never this one.
+  { theme: 'Finisher', test: /finisher|burnout|burner|\bburn\b/i, areas: ['lower', 'torso'] },
 ]
 
 /**
@@ -238,6 +241,9 @@ export type ThemeFormat = {
 export const SECTION_FORMATS: readonly ThemeFormat[] = [
 ${formats}
 ]
+
+/** Routines harvested. Against a theme's \`seen\`, how often she leaves it out. */
+export const ROUTINES = ${routines}
 
 /** Sections in a routine: ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}. */
 export const SECTIONS_TYPICAL = ${median(sectionsPer)}

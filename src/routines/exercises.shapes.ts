@@ -67,7 +67,7 @@ export const SECTION_THEMES: readonly SectionTheme[] = [
   { theme: 'Arms & Shoulders', areas: ['upper'], seen: 17 },
   { theme: 'Legs', areas: ['lower'], seen: 15 },
   { theme: 'Core', areas: ['torso'], seen: 14 },
-  { theme: 'Finisher', areas: ['lower', 'torso'], seen: 14 },
+  { theme: 'Finisher', areas: ['lower', 'torso'], seen: 15 },
 ]
 
 export type SectionFormat = 'standard' | 'emom' | 'interval30' | 'amrap'
@@ -99,7 +99,11 @@ export const SECTION_FORMATS: readonly ThemeFormat[] = [
   { theme: 'Core', format: 'standard', seen: 14 },
   { theme: 'Finisher', format: 'standard', seen: 13 },
   { theme: 'Finisher', format: 'amrap', seen: 1 },
+  { theme: 'Finisher', format: 'emom', seen: 1 },
 ]
+
+/** Routines harvested. Against a theme's `seen`, how often she leaves it out. */
+export const ROUTINES = 16
 
 /** Sections in a routine: 6 typical, 5 to 8. */
 export const SECTIONS_TYPICAL = 6
