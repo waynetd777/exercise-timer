@@ -144,7 +144,7 @@ function isReps(value: unknown): boolean {
 }
 
 /** Exported for the pictures table, which stores the same refs and used to carry a copy of this. */
-export function isMedia(value: unknown): value is MediaRef {
+function isMedia(value: unknown): value is MediaRef {
   if (typeof value !== 'object' || value === null) return false
   const media = value as Record<string, unknown>
   if (!isOptionalFinite(media['w']) || !isOptionalFinite(media['h'])) return false

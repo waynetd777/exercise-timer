@@ -1,7 +1,8 @@
 # storage
 
-IndexedDB, the routine library, the export format, share links, and the two small
-things kept per device: your weights, your exercise pictures and your pace.
+IndexedDB, the routine library, the export format, share links, and the small
+things kept per device: your weights, your exercise pictures, your pace, and the
+exercises you added yourself.
 
 ## Why IndexedDB, not localStorage
 
@@ -152,7 +153,7 @@ samples minimum, then the median of the last eight.
 ## The export format
 
 One JSON file, versioned from the start: `{ kind, version, exportedAt, workouts,
-media, weights, pictures }`. `kind` is a marker so the importer never has to guess, and a file from a
+media, weights, pictures, exercises }`. `kind` is a marker so the importer never has to guess, and a file from a
 *newer* version is refused rather than half-read.
 
 Every block field is type-checked on the way in (`isBlock` in `bundle.ts`), and

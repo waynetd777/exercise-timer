@@ -1,6 +1,6 @@
 # ui
 
-The screens (library, run, edit, weights, plus a dev-only sound bench), the design
+The screens (library, run, edit, exercises, plus a dev-only sound bench), the design
 tokens and the type scale.
 
 ## One type scale, in `theme.css`

@@ -2,7 +2,29 @@
 
 > Single source of truth for resuming work. Read this FIRST when starting a session.
 > Update this file at the end of every work phase so the next `/clear` resumes in 1 read.
-> Last updated: 2026-08-31 (Exercises of your own: full CRUD, in the generator, v9.1, pushed)
+> Last updated: 2026-09-01 (Review round over v8.8..v9.1: copy fix, dead code, tests, docs; v9.2, committed)
+
+---
+
+## 🔍 Review round over everything since v8.8 (2026-09-01, done, v9.2)
+
+Wayne asked for a reliability/quality review of the code changed since the last round (the width fix, the
+doc rewrite, the preview picture tap, and the custom-exercises CRUD), dead code and stale docs eradicated,
+all fixes applied without stopping. Full report: scratchpad `review-2026-09-01.md`; summary:
+
+- **Fixed:** the rename confirm in `ExerciseDialog` said "Add … anyway" when Save performs a rename
+  (bug-156, test added); `exdlg__cand--inline` had no CSS rule (bug-157, modifier dropped); dead
+  `LOADABLE_GROUPS` removed and `isMedia` de-exported; 7 unit tests added for `renamedName`/`renameInWorkout`;
+  storage/README export-format line gained `exercises` and the intro stopped saying "two" tables; ui/README
+  "weights" → exercises; help.ts got `.md` back in the import line and stopped miscounting the dialog's
+  questions; GenerateDialog's pool initializer now reuses its own `table` memo. v9.2.
+- **Left deliberately:** removal keeps the measured pace (steps keep the name and still run);
+  SECTIONS_MIN/SECTION_SIZE are harvest-generated, not dead; single-routine backups carry the whole
+  custom table like the weights.
+- **Verified:** typecheck, oxlint, 1272 tests in 65 files (+8), production build.
+
+**Next:** `docs/screenshots/exercises.webp` still shows the pre-CRUD page (green, "n of n weighed", open
+sections). Needs retaking on a dev server (Wayne drives the browser). Wayne to check the badge 9.2 build.
 
 ---
 

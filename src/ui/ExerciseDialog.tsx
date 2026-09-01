@@ -207,7 +207,11 @@ export function ExerciseDialog({
       <div className="exdlg">
         {confirming ? (
           <>
-            <h2 className="exdlg__title">Add “{trimmed}” anyway?</h2>
+            {/* The act it performs: this screen also reaches a RENAME, where
+                "Add" would promise a second row that is not what Save does. */}
+            <h2 className="exdlg__title">
+              {editing ? <>Rename to “{trimmed}” anyway?</> : <>Add “{trimmed}” anyway?</>}
+            </h2>
             <p className="exdlg__why label label--sm">
               {similar.length === 1 ? 'This is already here' : 'These are already here'}. One
               exercise under two names keeps two weights, two pictures and two measured paces, so
@@ -251,8 +255,8 @@ export function ExerciseDialog({
                   button uses: this is the affirmative action of the dialog, and
                   `chip--action` is only a lighter label. */}
               <button type="button" className="chip chip--primary" onClick={save}>
-                <PlusIcon />
-                Add anyway
+                {editing ? <CheckIcon /> : <PlusIcon />}
+                {editing ? 'Rename anyway' : 'Add anyway'}
               </button>
             </div>
           </>
@@ -279,7 +283,7 @@ export function ExerciseDialog({
                 {onUse && (
                   <button
                     type="button"
-                    className="exdlg__cand exdlg__cand--inline"
+                    className="exdlg__cand"
                     onClick={() => {
                       onUse(clash)
                       onClose()

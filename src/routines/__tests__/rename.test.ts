@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine/types'
 import { SCHEMA_VERSION } from '../../engine/types'
-import { canonicalName, tidyLibrary, tidyNames } from '../rename'
+import { canonicalName, renamedName, renameInWorkout, tidyLibrary, tidyNames } from '../rename'
 
 describe('canonicalName', () => {
   it('leaves a name that is already the table’s', () => {
@@ -132,5 +132,70 @@ describe('tidyLibrary', () => {
     ])
     expect(workouts.map((w) => w.name)).toEqual(['Untidy'])
     expect(renamed).toHaveLength(1)
+  })
+})
+
+describe('renamedName', () => {
+  it('keeps everything around the name exactly as written', () => {
+    expect(
+      renamedName('12 × Bugarian Split Squat 12kg (each side)', 'Bugarian Split Squat', 'Bulgarian Split Squat'),
+    ).toBe('12 × Bulgarian Split Squat 12kg (each side)')
+  })
+
+  it('matches by fold, so a step spelt loosely is still that exercise', () => {
+    expect(renamedName('bugarian  split squat', 'Bugarian Split Squat', 'Bulgarian Split Squat')).toBe(
+      'Bulgarian Split Squat',
+    )
+  })
+
+  it('leaves a step that is not that exercise alone', () => {
+    expect(renamedName('Leg Press', 'Bugarian Split Squat', 'Bulgarian Split Squat')).toBeNull()
+  })
+
+  it('refuses a qualified name rather than shortening it', () => {
+    // "Left" says which side, and peeling could not place it: better a step left
+    // as written than one a rename quietly truncates.
+    expect(renamedName('Left Bugarian Split Squat', 'Bugarian Split Squat', 'Bulgarian Split Squat')).toBeNull()
+  })
+
+  it('returns null where the rename changes nothing', () => {
+    expect(renamedName('Bulgarian Split Squat', 'Bulgarian Split Squat', 'Bulgarian Split Squat')).toBeNull()
+  })
+})
+
+describe('renameInWorkout', () => {
+  const workout: Workout = {
+    id: 'w',
+    name: 'Legs',
+    blocks: [
+      {
+        kind: 'repeat',
+        id: 'r',
+        times: 3,
+        children: [
+          { kind: 'segment', id: 'a', name: '12 × Bugarian Split Squat', role: 'work', durationMs: 20_000 },
+          { kind: 'segment', id: 'b', name: 'Rest', role: 'rest', durationMs: 10_000 },
+        ],
+      },
+      { kind: 'segment', id: 'c', name: 'Bugarian Split Squat', role: 'work', durationMs: 20_000 },
+    ],
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: 1,
+    updatedAt: 1,
+  }
+
+  it('renames every step that says the old name, groups included, and counts them', () => {
+    const { workout: next, renamed } = renameInWorkout(workout, 'Bugarian Split Squat', 'Bulgarian Split Squat')
+    expect(renamed).toBe(2)
+    const inner = (next.blocks[0] as { children: { name: string }[] }).children
+    expect(inner[0]!.name).toBe('12 × Bulgarian Split Squat')
+    expect(inner[1]!.name).toBe('Rest')
+    expect((next.blocks[1] as { name: string }).name).toBe('Bulgarian Split Squat')
+  })
+
+  it('returns the same object where nothing changed, so React sees no edit', () => {
+    const { workout: next, renamed } = renameInWorkout(workout, 'Leg Press', 'Chest Press')
+    expect(renamed).toBe(0)
+    expect(next).toBe(workout)
   })
 })

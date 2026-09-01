@@ -357,3 +357,9 @@
 | 20:56 | Created src/storage/__tests__/customExercises.test.ts | — | ~1562 |
 | 20:57 | Created src/ui/__tests__/ExerciseDialog.test.tsx | — | ~2595 |
 | 21:18 | Exercises of your own: full CRUD store, similarity warning, generator + editor + backup reach, collapsible kit sections | src/storage/customExercises.ts, src/routines/similar.ts, src/ui/ExerciseDialog.tsx, +12 | 1261 tests pass, built, uncommitted | ~180k |
+| 21:46 | Session end: 6 writes across 6 files (customExercises.ts, similar.ts, ExerciseDialog.tsx, similar.test.ts, customExercises.test.ts) | 0 reads | ~13828 tok |
+
+## Session: 2026-08-31 21:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
