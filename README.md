@@ -209,3 +209,21 @@ Two things the licence does not cover. The exercise illustrations in
 `public/exercises/` are crops of the Horizon Torus 5 Exercise Guide, kept here
 for personal use, so bring your own images if you reuse this. The whistle is a
 CC0 public domain recording and needs no attribution. `LICENSE` has the detail.
+
+## OpenWolf (context management for Claude Code)
+
+This repo is managed with [OpenWolf](https://www.npmjs.com/package/openwolf). Everything it
+generates — the protocol docs, hooks, `.claude/` wiring and slash commands — is **gitignored**,
+because a fresh install regenerates all of it and tracking it only churns on every upgrade. Only
+the project knowledge it accumulates is tracked: `.wolf/cerebrum.md`, `.wolf/STATUS.md`,
+`.wolf/config.json`.
+
+So a fresh clone needs one command before the Claude Code integration works:
+
+```bash
+npm install -g openwolf     # needs sudo on this setup
+openwolf init --agent claude
+```
+
+`--agent claude` matters: a bare `openwolf init` also writes `.codex/` and `AGENTS.md` for any
+agent it thinks it detects. Nothing here needs them.

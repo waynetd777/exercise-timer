@@ -25,3 +25,44 @@ __pycache__/
 # `cwebp -resize 900 0 -q 80 -m 6 shot.png -o shot.webp`. The PNGs are ~1-2MB
 # each and would only ever be duplicates in the history.
 docs/screenshots/*.png
+
+# OpenWolf snapshots and pre-purge archives of .wolf/buglog.json. Runtime//backup
+# state, never durable knowledge; the other OpenWolf repos ignore this too.
+.wolf/backups/
+
+# OpenWolf-generated files: never tracked.
+#
+# A colleague who clones this repo and installs OpenWolf gets every one of these
+# regenerated locally, so tracking them only produces a diff on each upgrade and
+# invites local edits that the next `openwolf update` silently strips. Do not
+# "fix" a stale instruction in .wolf/OPENWOLF.md or .claude/rules/openwolf.md
+# either - they are in the CLI's ALWAYS_OVERWRITE list. Project-specific
+# corrections belong in CLAUDE.md, which OpenWolf does not manage.
+#
+# Still tracked, because `openwolf update` preserves them as user data (see
+# USER_DATA_FILES in the CLI's update.js): .wolf/cerebrum.md, .wolf/STATUS.md,
+# .wolf/config.json, and .wolf/buglog.json where a repo keeps it.
+#
+# Set up a fresh clone with:  openwolf init --agent claude
+#   (--agent claude matters: a bare init also writes .codex/ + AGENTS.md)
+.wolf/OPENWOLF.md
+.wolf/reframe-frameworks.md
+.wolf/identity.md
+.wolf/hooks/
+.wolf/cron-manifest.json
+.wolf/cron-state.json
+.wolf/suggestions.json
+.wolf/_scan-state.json
+.wolf/anatomy.md
+.wolf/anatomy-index.json
+.wolf/memory.md
+.claude/rules/openwolf.md
+.claude/settings.json
+.claude/commands/designqc.md
+.claude/commands/reframe.md
+.claude/commands/security-audit.md
+.claude/skills/designqc/
+.claude/skills/reframe/
+.codex/
+.opencode/
+AGENTS.md
