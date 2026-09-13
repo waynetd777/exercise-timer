@@ -1,11 +1,11 @@
 # Strength routine fixtures
 
-Sixteen routines written by a gym instructor and forwarded by email, saved
+Seventeen routines written by a gym instructor and forwarded by email, saved
 here verbatim as the source material for the paste parser. Weekly, from 16 April
-to 25 August 2026, with a few weeks missing.
+to 25 August 2026, with a few weeks missing, and then 13 September.
 
-**All sixteen are wired into the "understands every line" test**, and all sixteen
-pass. They read at 53% when they were added; the grammar was widened for them the
+**All seventeen are wired into the "understands every line" test**, and all
+seventeen pass. They read at 53% when they were added; the grammar was widened for them the
 same day.
 
 ## The twelve added on 2026-08-27
@@ -61,3 +61,31 @@ read, and Wayne made each one:
   shaped like a range.
 - **A ladder of durations**, "20-30-45-30-20 sec cardio", is a run of timed steps
   and emphatically not a rep ladder whose main lift is called "sec cardio".
+
+## The fourth template, 13 September 2026
+
+Pasted rather than forwarded, on a template terser again than August's. Nine
+lines were reported and about a dozen were read WRONGLY without a word, which
+is the worse failure. The forms, all read now:
+
+- `HARD EMOM – 6 MINUTES`: a word before EMOM and the minutes after it
+- `Minute 1` over TWO exercises, a bare `15 × Bicep Curls` and a bulleted
+  `* 10 × Push-Ups`: one minute, joined into one step
+- `Repeat × 2` with no "rounds" after the number
+- `30/15 INTERVAL` on its own line under `#3 LEGS`, and `30 sec WORK / 15 sec
+  TRANSITION` on ONE line above the list
+- `Round 1`, `Round 2`, `Round 3` under `3 ROUNDS`, each with rising reps of its
+  own: written-out rounds, flattened, not a repeat and not a ladder
+- `AFTER EACH ROUND` shouted, and `After each round:` under a plain repeat
+- `OR` alone between two bullets
+- `Only 15 seconds rest between rounds`, and `➡️ NO 30-second rest between
+  rounds.` behind an arrow
+- `60 seconds nonstop` over timed steps and `30 seconds nonstop:` over an
+  untimed one; `10 sec transition only.` after a list
+- `FINAL LEG BURN – 2 MINUTES`: a shouted heading with its length after a dash,
+  which the digits used to keep out of the capitals rule
+- `COUNTING CHALLENGE` straight under `#4 CORE`: a subtitle, joined onto the
+  heading
+- `Replace squat pulses with:` and the replacement on the next line
+- `After completing the ladder:` as a block break, like `Then:`
+- Prose rules: `Work continuously — …`, `Rule: If you finish early, …`

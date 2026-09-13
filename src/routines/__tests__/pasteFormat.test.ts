@@ -25,6 +25,7 @@ import e20260727trampoline from './emails/2026-07-27-trampoline.txt?raw'
 import e20260803trampoline from './emails/2026-08-03-trampoline.txt?raw'
 import e20260817bands from './emails/2026-08-17-bands.txt?raw'
 import e20260825emom from './emails/2026-08-25-emom.txt?raw'
+import e20260913emom from './emails/2026-09-13-emom.txt?raw'
 
 /** Every routine we hold, for the bar the parser is held to. */
 const ALL_EMAILS: Record<string, string> = {
@@ -44,6 +45,7 @@ const ALL_EMAILS: Record<string, string> = {
   '2026-08-03-trampoline': e20260803trampoline,
   '2026-08-17-bands': e20260817bands,
   '2026-08-25-emom': e20260825emom,
+  '2026-09-13-emom': e20260913emom,
 }
 
 import { compile, SCHEMA_VERSION } from '../../engine'
@@ -1022,5 +1024,137 @@ describe('small refusals that used to be silent', () => {
     // The "xtreme" fix took these two with it.
     expect(parseItem('12xSquats')).toMatchObject({ name: 'Squats', count: 12 })
     expect(parseItem('10 X Squats')).toMatchObject({ name: 'Squats', count: 10 })
+  })
+})
+
+describe('the September template', () => {
+  /*
+   * The 13 September routine arrived on a fourth template. Nine lines were
+   * reported and about a dozen more were read WRONGLY without a word, which is
+   * the worse failure: a six-minute step called "HARD EMOM", every EMOM minute
+   * split in two, and a leg ladder run three times over. Each form here is one
+   * of those.
+   */
+  const e = e20260913emom
+
+  it('reads every line of the 13 September routine', () => {
+    expect(parseRoutine(e).skipped).toEqual([])
+  })
+
+  it('joins a second exercise written under the same "Minute N" into the minute', () => {
+    const arms = find(parseRoutine(e).blocks, 'arms & shoulders')
+    const group = arms.children[0] as Repeat
+    expect(group.kind).toBe('repeat')
+    // "Repeat × 2" below the six minutes, with no "rounds" after the number.
+    expect(group.times).toBe(2)
+    expect(group.children.map((c) => [(c as Segment).name, (c as Segment).durationMs])).toEqual([
+      ['15 × Bicep Curls + 10 × Push-Ups', 60_000],
+      ['12 × Arnold Press + 10 × Cross Punches each side', 60_000],
+      ['15 × Bent-Over Rows + 10 × Plank Shoulder Taps', 60_000],
+      ['20 × Band Pull-Aparts + 10 × Lateral Raises', 60_000],
+      ['12 × Shoulder Press + 12 × Front Raises', 60_000],
+      ['10 × Squat thrust + 20 × Punches', 60_000],
+    ])
+  })
+
+  it('keeps "HARD EMOM – 6 MINUTES" and the prose rules as the section note', () => {
+    const arms = find(parseRoutine(e).blocks, 'arms & shoulders')
+    expect(arms.note).toContain('HARD EMOM – 6 MINUTES')
+    expect(arms.note).toContain('Work continuously')
+    expect(arms.note).toContain('Rule: If you finish early')
+  })
+
+  it('joins a shouted subtitle onto the numbered heading above it', () => {
+    const names = sections(parseRoutine(e).blocks).map((s) => s.name)
+    expect(names).toContain('LEGS – 30/15 INTERVAL')
+    expect(names).toContain('CORE – COUNTING CHALLENGE')
+    // Anywhere but the first line, a shouted line is the heading it looks like.
+    expect(names).toContain('FINAL ROUND')
+  })
+
+  it('reads "30 sec WORK / 15 sec TRANSITION" as the time on each step and the gap between them', () => {
+    const legs = find(parseRoutine(e).blocks, 'legs – 30/15')
+    const group = legs.children[0] as Repeat
+    expect(group.times).toBe(4)
+    const run = group.children.map((c) => [(c as Segment).role, (c as Segment).durationMs])
+    expect(run.slice(0, 4)).toEqual([
+      ['work', 30_000],
+      ['rest', 15_000],
+      ['work', 30_000],
+      ['rest', 15_000],
+    ])
+    // "After each round:" puts the squat jumps at the end of the round.
+    const last = group.children[group.children.length - 1] as Segment
+    expect(last).toMatchObject({ name: 'Squat Jumps', reps: { kind: 'fixed', count: 10 } })
+    expect(legs.note).toContain('NO 30-second rest between rounds')
+  })
+
+  it('reads "Replace squat pulses with:" and the step below it', () => {
+    const final = find(parseRoutine(e).blocks, 'final round')
+    expect(final.note).toBe('Replace squat pulses with:')
+    expect(final.children[0]).toMatchObject({ name: 'Squat Hold + 10 pulses at the end', durationMs: 30_000 })
+  })
+
+  it('keeps "After completing the ladder:" in the same section, and spaces the rounds with "10 sec transition only."', () => {
+    const core = find(parseRoutine(e).blocks, 'core – counting')
+    expect(core.children[0]!.kind).toBe('ladder')
+    const rounds = core.children[1] as Repeat
+    expect(rounds).toMatchObject({ kind: 'repeat', times: 3 })
+    expect(rounds.children.map((c) => (c as Segment).durationMs)).toEqual([
+      30_000, 10_000, 30_000, 10_000, 30_000, 10_000, 30_000,
+    ])
+  })
+
+  it('keeps "60 seconds nonstop" as a note over steps that state their own times', () => {
+    const finisher = find(parseRoutine(e).blocks, 'core finisher')
+    expect(finisher.note).toBe('60 seconds nonstop')
+    expect(finisher.children.map((c) => (c as Segment).durationMs)).toEqual([20_000, 20_000, 20_000])
+  })
+
+  it('flattens rounds written out in full, with the after-each-round step after each and the rest between', () => {
+    const burn = find(parseRoutine(e).blocks, 'full-leg burn')
+    const run = burn.children.map((c) => {
+      const s = c as Segment
+      return s.role === 'rest' ? 'rest' : s.reps?.kind === 'fixed' ? `${s.name} ${s.reps.count}` : s.name
+    })
+    expect(run).toEqual([
+      'Sumo Squats 10', 'Alternating Curtsy Lunges 10', 'Calf Raises 15', 'RB Squats 10', 'Squat Pulses 10',
+      'Squat Jumps', 'rest',
+      'Sumo Squats 15', 'Alternating Curtsy Lunges 14', 'Calf Raises 20', 'RB Squats 15', 'Squat Pulses 15',
+      'Squat Jumps', 'rest',
+      'Sumo Squats 20', 'Alternating Curtsy Lunges 18', 'Calf Raises 25', 'RB Squats 20', 'Squat Pulses 20',
+      'Squat Jumps',
+    ])
+    // "3 ROUNDS" is kept as the note, since the three groups are no longer a repeat.
+    expect(burn.note).toContain('3 ROUNDS')
+    // "30 seconds nonstop:" timed the squat jumps; "OR" gave them their swap.
+    const jumps = burn.children.filter((c) => (c as Segment).name === 'Squat Jumps') as Segment[]
+    expect(jumps).toHaveLength(3)
+    for (const jump of jumps) {
+      expect(jump).toMatchObject({ durationMs: 30_000, alternative: 'Squat + Calf Raise' })
+    }
+    // Every clone has its own id.
+    expect(new Set(burn.children.map((c) => c.id)).size).toBe(burn.children.length)
+  })
+
+  it('reads a shouted heading with its length after a dash as a heading', () => {
+    const last = find(parseRoutine(e).blocks, 'final leg burn – 2 minutes')
+    expect(last.children.map((c) => (c as Segment).name)).toEqual([
+      'Wall Sit',
+      'Squat Pulses',
+      'Wall Sit + Heel Raises',
+      'ALL-OUT Squat Pulses',
+    ])
+  })
+
+  it('does not read a mixed-case "Plank – 2 minutes" as a heading', () => {
+    const blocks = parseRoutine('Core\nPlank – 2 minutes').blocks
+    expect(sections(blocks).map((s) => s.name)).toEqual(['Routine'])
+    expect(named(blocks, 'Plank')).toMatchObject({ durationMs: 120_000 })
+  })
+
+  it('still reads a bare "2" as a pyramid row rather than "Repeat × 2"', () => {
+    // Only the word "repeat" licenses the bare count.
+    expect(parseRoutine('#1 Legs\n1 - 10 x Squats\n2 - 10 x Lunges\n1\n1 + 2').skipped).toEqual([])
   })
 })

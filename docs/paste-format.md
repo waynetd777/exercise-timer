@@ -100,7 +100,8 @@ A section is a named part of the routine. Four ways to start one:
 | A number | `#1 Full Body Ladder` |
 | A flame | `🔥 Final Burnout` |
 | After a round | `After Round 4` |
-| A known name | `Warm-up`, `Cool-down`, `Final Burnout`, `Band Burner`, `Burnout Ladder` |
+| A known name | `Warm-up`, `Cool-down`, `Final Burnout`, `Band Burner`, `Burnout Ladder`, anything ending in `Finisher` |
+| Capitals | `LEGS`, `FINAL ROUND`: no lowercase letter, no digit, under 24 characters. With a length after a dash, `FINAL LEG BURN – 2 MINUTES`, still a heading |
 
 Only those names are recognised on their own. Any other heading needs a `#` or a
 flame, because a rule like "a short line in title case" would swallow half the
@@ -138,17 +139,27 @@ that says `rest` becomes a rest. Everything else is work.
 | `3-5 Rounds` | five. A range takes its upper bound, since you can always stop early |
 | `Repeat 2 rounds` | the same as `2 Rounds`, and it may be written either above the steps or below them |
 | `Repeat × 4 rounds` | the same again |
+| `Repeat × 2` | the same, with "rounds" left off. Only with the word Repeat: a bare `2` is not a round count |
 | `3 × 30 seconds` | three rounds, and every step in them gets 30 seconds |
 | `Counting: 10-8-6-4-2` | a ladder: five rounds, the count changing each time |
 | `15-12-9-6-3` | the same, without the word |
 | `Rest 45 seconds after each round` | a rest between rounds, not after the last one |
+| `Only 15 seconds rest between rounds` | the same, said the other way round |
 | `15 sec rest between exercises` | written after the list, it spaces it out. Between, so the last step runs straight into the next round |
 | `Then:` | ends the block above it, so what follows is not read as part of it |
+| `After completing the ladder:` | the same |
 | `Every time you finish a round:` | the step on the next line closes every round |
+| `After each round:` | the same. Under a ladder it marks the accessories, like `After every set:` |
 
 `Repeat 2 rounds` below a run of steps wraps those steps. It only does that where
 the section is still a plain list: a section that has already stated a ladder or a
 round keeps it, and the line opens a new group beside it rather than around it.
+
+**Rounds written out in full.** A `3 ROUNDS` followed by `Round 1`, `Round 2`
+and `Round 3`, each with its own bulleted list, is not a repeat, because no round
+is the same as the last. It becomes the plain run of steps it is, with whatever
+`After each round` asked for placed after each one and a `rest between rounds`
+after all but the last. The `3 ROUNDS` line is kept as the section's note.
 
 In a ladder, `Main exercise:` marks the lift that takes the rung count, and
 `After every set:` marks accessories that keep their own count. Accessories run
@@ -164,8 +175,10 @@ target for that minute.
 | Write | Means |
 |---|---|
 | `5-Minute EMOM` | a heading. It becomes a note, since the minutes below carry the timing |
+| `HARD EMOM – 6 MINUTES` | the same heading, written the other way round |
 | `Minute 1: 12 × Bicep Curls` | one minute, labelled 12 reps |
 | `Minute 4` | a heading over the bulleted step that fills that minute |
+| `Minute 1` over `15 × Bicep Curls` and `* 10 × Push-Ups` | one minute, one step named "15 × Bicep Curls + 10 × Push-Ups". A second exercise under the same minute joins the first |
 | `Minute 6: 30-sec Wall Sit` | 30 seconds of work and 30 of rest, because the minute is fixed |
 | `Minute 5: 12 × Lateral Raises + 10 Cross Punches` | one minute, not two. A joined pair inside a minute stays one step |
 
@@ -175,8 +188,13 @@ A **30/30 interval** states the time on one line and the exercise on the next.
 |---|---|
 | `30 sec WORK` | 30 seconds for whatever is named on the line below |
 | `30 sec REST` | a 30-second rest, needing no line below |
+| `30 sec WORK / 15 sec TRANSITION` | over a list: 30 seconds on every step below it, and a 15-second rest between them |
+| `10 sec transition only` | after a list, the same as `10 sec rest between exercises` |
+| `30/15 INTERVAL` | on the line after `#3 LEGS`, joins the heading: "LEGS – 30/15 INTERVAL" |
+| `60 seconds nonstop` | a note over the steps below. With a colon, `30 seconds nonstop:`, it also times the next step if that step states no time of its own |
 | `LAST 20 SECONDS` | the same idea: 20 seconds for the effort named below it |
 | `Replace rest with 30-second Squat Hold` | a 30-second Squat Hold, and the line is kept as a note so you can see what it stands in for |
+| `Replace squat pulses with:` | the same, with the replacement on the next line |
 
 An **AMRAP** is a clock, and that is what it becomes.
 
@@ -199,13 +217,17 @@ it and shows you the round.
 | `Lateral Walks - 5 each direction` | the same |
 | `15 × Push-ups (or Knee Push-ups for low impact)` | an easier swap, shown beside the step |
 | `or March in Place` | on its own line, the same swap for the step above |
+| `OR` alone between two bullets | the second bullet is the swap for the first |
 | `20 × Front Punches + 20 × Uppercuts` | two steps, with or without the `×`. It splits only when both halves state a count |
 | `Squat + Shoulder Press` | one step. One movement, left intact |
 | `Squats with a Reach (start standing, step out…)` | a parenthesis of 24 characters or more becomes the step's note, so the name stays readable across a room |
 | `(basic)` | short ones stay in the name, because they are part of what the exercise is |
 
-Lines like `No rest between exercises` or `Complete the full count of one exercise
-before moving to the next` become a note on the section rather than on any step.
+Lines like `No rest between exercises`, `Work continuously — aim to finish each
+minute with only 5–10 sec rest.` or `Rule: If you finish early, keep moving` become
+a note on the section rather than on any step. A shouted line straight under a
+numbered heading, `#4 CORE` then `COUNTING CHALLENGE`, joins the heading instead:
+"CORE – COUNTING CHALLENGE", the way it is written on one line other weeks.
 
 ## Writing a routine back out
 

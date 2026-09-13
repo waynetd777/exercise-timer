@@ -106,6 +106,21 @@ const NAMED_SECTION =
  */
 const SHOUTED_SECTION = /^(?=.*\p{Lu})[^\p{Ll}\d]{2,24}$/u
 
+/**
+ * "FINAL LEG BURN – 2 MINUTES": a shouted heading with its length after a dash.
+ * The digits rule it out of `SHOUTED_SECTION`, and read as a step it became a
+ * two-minute countdown called "FINAL LEG BURN" inside the section above it. The
+ * head is tested against `SHOUTED_SECTION` on its own, so an exercise written
+ * "Plank – 2 minutes" in mixed case is still a step.
+ */
+const TIMED_HEADING = /^(.+?)\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:sec|secs|seconds?|mins?|minutes?)\s*$/i
+
+/** "30/15 INTERVAL" on a line of its own under "#3 LEGS". */
+const INTERVAL_HEADING = /^\d+\s*\/\s*\d+\s+interval\b/i
+
+/** "Round 1", "Round 2": rounds written out in full, with their own counts. */
+const ROUND_HEADING = /^round\s+(\d+):?\s*$/i
+
 /** A heading wrapped in asterisks, the way these emails emphasise one. */
 const STARRED_SECTION = /^\*+\s*([^*]+?)\s*\*+\s*(.*)$/
 
@@ -139,6 +154,8 @@ const ROUNDS = new RegExp(
   `^(?:repeat\\s*[×x]?\\s*)?(\\d+)\\s*(?:${DASH}\\s*(\\d+))?\\s*(?:rounds?\\b|[×x]\\s*$)`,
   'i',
 )
+/** "Repeat × 2", with no "rounds" after the number. Only with the word "repeat": a bare "2" is a pyramid row. */
+const REPEAT_TIMES = /^repeat\s*[×x]\s*(\d+)\s*$/i
 
 /** "3 × 30 seconds": a round count and the time every step in it gets. */
 const SETS_OF = new RegExp(`^(\\d+)\\s*[×x]\\s*${NUMBER}\\s*${UNIT}\\s*$`, 'i')
@@ -191,6 +208,11 @@ const ROUND_REST = new RegExp(
   `\\brest:?\\s*(\\d+)(?:\\s*${DASH}\\s*(\\d+))?\\s*(?:sec|secs|second|seconds)\\b.*\\bafter each round`,
   'i',
 )
+/** "Only 15 seconds rest between rounds", the same rest said the other way round. */
+const BETWEEN_ROUNDS_REST = new RegExp(
+  `^(?:only\\s+)?${NUMBER}\\s*${UNIT}\\s+rest\\s+between\\s+rounds\\b`,
+  'i',
+)
 
 /**
  * One minute of an EMOM ("Every Minute On the Minute").
@@ -214,7 +236,7 @@ const MINUTE_HEADING = /^minute\s+\d+\s*:?\s*$/i
  * its own minutes stranded after it.
  */
 const EMOM_HEADING = new RegExp(
-  `^(?:${NUMBER}[\\s${DASH_CHARS}]*(?:min|mins|minute|minutes)\\s+)?emom\\b`,
+  `^(?:[a-z]+\\s+)?(?:${NUMBER}[\\s${DASH_CHARS}]*(?:min|mins|minute|minutes)\\s+)?emom\\b`,
   'i',
 )
 
@@ -252,23 +274,44 @@ const AMRAP_NAME = 'As many rounds as possible'
  */
 const WORK_REST = new RegExp(`^${NUMBER}\\s*${UNIT}\\s+(work|rest)\\s*$`, 'i')
 
+/**
+ * "30 sec WORK / 15 sec TRANSITION": both halves of the interval on one line,
+ * stated ABOVE the list. The work time goes on every step below and the
+ * transition goes between them.
+ */
+const WORK_TRANSITION = new RegExp(
+  `^${NUMBER}\\s*${UNIT}\\s+work\\s*[/,]\\s*${NUMBER}\\s*${UNIT}\\s+(?:transition|rest)\\s*$`,
+  'i',
+)
+
+/**
+ * "60 seconds nonstop", "30 seconds nonstop:". A length over the steps below it.
+ * Kept as the note it is, and offered to the next step the way "30 sec WORK" is,
+ * so a step that states no time of its own takes it.
+ */
+const NONSTOP = new RegExp(`^${NUMBER}\\s*${UNIT}\\s+non[-\\s]?stop:?\\s*$`, 'i')
+
 /** "LAST 20 SECONDS", heading the all-out effort on the line below it. */
 const LAST_STRETCH = new RegExp(`^last\\s+${NUMBER}\\s*${UNIT}\\s*$`, 'i')
 
 /** "15 sec rest between exercises", stated after the list it applies to. */
 const BETWEEN_REST = new RegExp(
-  `^${NUMBER}\\s*${UNIT}\\s+rest\\s+between\\s+(?:each\\s+)?exercises?\\b`,
+  `^${NUMBER}\\s*${UNIT}\\s+(?:rest\\s+between\\s+(?:each\\s+)?exercises?|transition(?:\\s+only)?)\\b`,
   'i',
 )
 
 /** "Every time you finish a round:", introducing the step that closes one. */
 const EVERY_ROUND = /^every time you finish (?:a|each|the) round:?\s*$/i
+/** "After each round:", "AFTER EACH ROUND": the same directive, and under a ladder the accessories. */
+const AFTER_ROUND = /^after (?:every|each) round:?\s*$/i
 
 /** "Then:", which ends the block above it rather than opening anything. */
-const THEN = /^then:?\s*$/i
+const THEN = /^(?:then|after (?:completing|finishing) the [\p{L}\s]+?):?\s*$/iu
 
 /** "Replace rest with 30-second Squat Hold", under a "Final round" heading. */
 const REPLACE_WITH = /^replace\b.*?\bwith\s+(.+)$/i
+/** "Replace squat pulses with:" and the replacement on the next line. */
+const REPLACE_WITH_BELOW = /^replace\b.*\bwith:\s*$/i
 
 /**
  * "Finish with a 60-second wall sit to empty the tank!": a closing challenge
@@ -301,7 +344,7 @@ const BONUS = /^bonus:\s*(.+)$/i
 
 /** Instructions that belong on the section rather than on any one step. */
 const SECTION_NOTE =
-  /^(complete\b|no rest between exercises|rest\b|reps? and sets?\b|as many\b|start a new\b|work\s*(?:→|->)\s*rest\b|use\b|after every round\b|repeat the sequence\b|keep climbing\b|\d[\d\s\p{Pd},]*(?:…|\.\.\.)|b-weights\b|tabata\b)/iu
+  /^(?:\p{Extended_Pictographic}\uFE0F?\s*)?(complete\b|no rest between exercises|no\b[^.]*\brest\b|work continuously\b|rule:|rest\b|reps? and sets?\b|as many\b|start a new\b|work\s*(?:→|->)\s*rest\b|use\b|after every round\b|repeat the sequence\b|keep climbing\b|\d[\d\s\p{Pd},]*(?:…|\.\.\.)|b-weights\b|tabata\b)/iu
 
 /**
  * `•side plank left` has no space after the bullet, and only `•` is allowed to
@@ -362,6 +405,8 @@ const COLON_HEADING = /^[^\d:]{2,40}:$/
 const BARE_DURATION = new RegExp(`^${NUMBER}\\s*${UNIT}\\s*$`, 'i')
 
 const ALTERNATIVE_LINE = /^or\s+(.+)$/i
+/** "OR" on a line of its own: the bullet below is the alternative to the one above. */
+const OR_LINE = /^or:?$/i
 
 // ── Item parsing ────────────────────────────────────────────────────────────
 
@@ -700,6 +745,33 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
    * each side" says it better than anything reassembled from its parts.
    */
   let amrap: { durationMs: number; round: string[] } | null = null
+  /** Set by "30 sec WORK / 15 sec TRANSITION": the gap between the steps that follow. */
+  let betweenMs: number | null = null
+  /**
+   * The EMOM minute being filled, and the list it sits in.
+   *
+   * "Minute 1" over "15 × Bicep Curls" AND "* 10 × Push-Ups" is one minute of
+   * two exercises, exactly as "12 × Lateral Raises + 10 Cross Punches" is on one
+   * line, so the second line joins the first step's name rather than becoming a
+   * second, untimed step that split every minute in two.
+   */
+  let minute: { step: Segment; parts: string[]; list: Block[] } | null = null
+  /** A bare "OR" has been read: the next bullet is the alternative to the step above. */
+  let orNext = false
+  /**
+   * "Round 1", "Round 2", "Round 3" under "3 ROUNDS", each with its own counts.
+   *
+   * Not a repeat, since no round is the same as the last, and not a ladder, since
+   * every exercise climbs at its own pace. Collected as one-time groups while the
+   * section is read and FLATTENED at its close into the plain run of steps it is,
+   * with whatever "After each round" asked for cloned after each of them.
+   */
+  const roundGroups: Repeat[] = []
+  /** The steps "After each round" named, cloned onto every written-out round at close. */
+  const roundTail: Block[] = []
+  let afterEachRound = false
+  /** The "3 ROUNDS" line whose empty group the first "Round 1" stood down, kept as the note. */
+  let roundsSource: string | null = null
 
   /**
    * Ends an open AMRAP, emitting the one timed step it becomes.
@@ -824,10 +896,31 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
   /** The line being read, for `openSection` to record. */
   let currentLine: { line: number; text: string } | null = null
 
+  /**
+   * Written-out rounds become the run of steps they are. See `roundGroups`. The
+   * tail's rest is BETWEEN rounds, so the last round does without it.
+   */
+  const expandRounds = (current: Section): void => {
+    if (roundGroups.length === 0) return
+    const last = roundGroups[roundGroups.length - 1]
+    current.children = current.children.flatMap((child): Block[] => {
+      if (child.kind !== 'repeat' || !roundGroups.includes(child)) return [child]
+      const tail = roundTail.flatMap((block): Block[] => {
+        if (block.kind !== 'segment') return []
+        if (child === last && block.role === 'rest') return []
+        return [{ ...block, id: nextId('seg') }]
+      })
+      return [...child.children, ...tail]
+    })
+    roundGroups.length = 0
+    roundTail.length = 0
+  }
+
   const closeSection = (atEnd = false) => {
     flushAmrap()
     if (!section) return
     expandPyramid(section)
+    expandRounds(section)
     if (section.children.length > 0) {
       section.display = displayFor(section.children)
       blocks.push(section)
@@ -861,6 +954,29 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     pyramidRows.length = 0
     numberedItems.length = 0
     courseDistance = null
+    betweenMs = null
+    minute = null
+    orNext = false
+    roundGroups.length = 0
+    roundTail.length = 0
+    afterEachRound = false
+    roundsSource = null
+  }
+
+  /**
+   * "#4 CORE" and then "COUNTING CHALLENGE" on the line below: one title split
+   * over two lines, which other weeks she writes as "#4 CORE – COUNTING
+   * CHALLENGE". Joined the same way. True if the line was taken. Only the FIRST
+   * line under a numbered heading with a name of its own: anywhere else a
+   * shouted line is the heading it looks like.
+   */
+  const subtitle = (text: string): boolean => {
+    if (!section || sectionLines !== 1 || section.children.length > 0 || section.note) return false
+    if (!sectionSource || !NUMBERED_SECTION.test(sectionSource.text) || !/^\p{L}/u.test(section.name)) {
+      return false
+    }
+    section.name = tidy(`${section.name} – ${text}`)
+    return true
   }
 
   /** Steps outside any section still need somewhere to go. */
@@ -877,10 +993,21 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     host.note = host.note ? `${host.note} ${text}` : text
   }
 
-  const push = (block: Block) => {
+  /** Where the next step lands. */
+  const listFor = (): Block[] => {
+    if (afterEachRound) return roundTail
     const host = ensureSection()
-    if (target.kind === 'section') host.children.push(block)
-    else target.group.children.push(block)
+    return target.kind === 'section' ? host.children : target.group.children
+  }
+
+  const push = (block: Block) => {
+    const list = listFor()
+    // "30 sec WORK / 15 sec TRANSITION": the transition goes BETWEEN steps, so
+    // not before the first and not before a rest.
+    if (betweenMs !== null && list.length > 0 && block.kind === 'segment' && block.role !== 'rest') {
+      list.push(restFor(betweenMs))
+    }
+    list.push(block)
   }
 
   const addItem = (item: Item) => {
@@ -941,6 +1068,23 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     pendingFill = true
     if (JOINED_ITEMS.test(text)) addItem({ name: tidy(text), perSide: false })
     else addItem(parseItem(text))
+    // A minute that stated a shorter time has its balance as rest already, and
+    // takes no second exercise.
+    if (lastStep && lastStep.durationMs === MINUTE_MS) {
+      minute = { step: lastStep, parts: [tidy(text)], list: listFor() }
+    }
+  }
+
+  /** A second exercise under the same "Minute N". See `minute`. */
+  const joinMinute = (open: NonNullable<typeof minute>, text: string) => {
+    open.parts.push(tidy(text))
+    const joined = segment({ name: open.parts.join(' + '), perSide: false }, MINUTE_MS, undefined)
+    const at = open.list.indexOf(open.step)
+    if (at === -1) return
+    open.list[at] = joined
+    open.step = joined
+    lastStep = joined
+    minute = open
   }
 
   /**
@@ -974,6 +1118,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     const number = i + 1
     currentLine = { line: number, text: line }
     if (section) sectionLines += 1
+    // Both hold for exactly one line: the one after the minute's step, and the
+    // one after "OR". Any other line closes them.
+    const openMinute = minute
+    minute = null
+    const wantsOr = orNext
+    orNext = false
 
     /*
      * Headings first: they reset everything below them.
@@ -1015,7 +1165,22 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       /\p{L}{3}/u.test(heading) &&
       !/^(?:rest|work)$/i.test(heading.trim()) &&
       !AMRAP_HEADING.test(heading) &&
-      !EMOM_HEADING.test(heading)
+      !EMOM_HEADING.test(heading) &&
+      // "AFTER EACH ROUND" is a directive shouted, not a section.
+      !AFTER_ROUND.test(heading)
+    ) {
+      if (subtitle(heading.trim())) return
+      return openSection((marker + heading).trim())
+    }
+
+    // "FINAL LEG BURN – 2 MINUTES": shouted, with its length after the dash.
+    const timedHeading = TIMED_HEADING.exec(heading)
+    if (
+      timedHeading &&
+      SHOUTED_SECTION.test(timedHeading[1]!) &&
+      /\p{L}{3}/u.test(timedHeading[1]!) &&
+      !EMOM_HEADING.test(heading) &&
+      !AMRAP_HEADING.test(heading)
     ) {
       return openSection((marker + heading).trim())
     }
@@ -1030,6 +1195,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     }
 
     if (EMOM_HEADING.test(line)) return addNote(line)
+
+    // "30/15 INTERVAL" under "#3 LEGS", which other weeks is "#3 LEGS – 30/30 INTERVAL".
+    if (INTERVAL_HEADING.test(line)) {
+      if (!subtitle(line)) addNote(line)
+      return
+    }
 
     const amrapHeading = AMRAP_HEADING.exec(line)
     if (amrapHeading) {
@@ -1075,7 +1246,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
-    const rounds = ROUNDS.exec(unwrapped)
+    const rounds = ROUNDS.exec(unwrapped) ?? REPEAT_TIMES.exec(unwrapped)
     if (rounds) {
       // Whether an AMRAP was open is decided BEFORE it is flushed: flushed, it
       // is one more loose segment, and "4 Rounds" under it wrapped the ten-minute
@@ -1092,6 +1263,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       }
       const group: Repeat = { kind: 'repeat', id: nextId('rep'), times, children: [], label: 'Round' }
       const host = ensureSection()
+      roundsSource = line
       /*
        * "Repeat 2 rounds" is written above the steps it repeats in one email and
        * BELOW them in the next. Read after a run of loose steps it closes a block
@@ -1133,6 +1305,45 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
+    const roundHeading = ROUND_HEADING.exec(line)
+    if (roundHeading) {
+      flushAmrap()
+      const host = ensureSection()
+      /*
+       * "3 ROUNDS" above "Round 1": the count announced the rounds written out
+       * below it, so the empty group it opened stands down and the line is kept
+       * as the section's note, where it still says what the three groups are.
+       */
+      if (target.kind === 'rounds' && target.group.children.length === 0 && roundGroups.length === 0) {
+        const at = host.children.indexOf(target.group)
+        if (at !== -1) host.children.splice(at, 1)
+        if (roundsSource) addNote(roundsSource)
+      }
+      const group: Repeat = {
+        kind: 'repeat',
+        id: nextId('rep'),
+        times: 1,
+        children: [],
+        label: `Round ${roundHeading[1]}`,
+      }
+      host.children.push(group)
+      roundGroups.push(group)
+      target = { kind: 'rounds', group }
+      afterEachRound = false
+      eachMs = null
+      return
+    }
+
+    // "Only 15 seconds rest between rounds." Between, so not after the last.
+    const betweenRounds = BETWEEN_ROUNDS_REST.exec(line)
+    if (betweenRounds) {
+      const ms = toMs(betweenRounds[1]!, betweenRounds[2]!)
+      if (afterEachRound) roundTail.push(restFor(ms))
+      else if (target.kind === 'rounds') target.group.children.push(restFor(ms))
+      addNote(line)
+      return
+    }
+
     const roundRest = ROUND_REST.exec(line)
     if (roundRest) {
       const seconds = Number(roundRest[2] ?? roundRest[1])
@@ -1163,6 +1374,26 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         spaced.push(child)
       }
       host.children.splice(0, host.children.length, ...spaced)
+      return
+    }
+
+    // "30 sec WORK / 15 sec TRANSITION" over the list: every step gets the work
+    // time, and the transition is put between them as they arrive.
+    const workTransition = WORK_TRANSITION.exec(line)
+    if (workTransition) {
+      eachMs = toMs(workTransition[1]!, workTransition[2]!)
+      betweenMs = toMs(workTransition[3]!, workTransition[4]!)
+      return
+    }
+
+    // "60 seconds nonstop" over a run of timed steps, "30 seconds nonstop:" over
+    // one that states no time. The note is the record; the offer is taken only
+    // by a step with no time of its own.
+    const nonstop = NONSTOP.exec(line)
+    if (nonstop) {
+      addNote(line)
+      pendingMs = toMs(nonstop[1]!, nonstop[2]!)
+      expectItem = true
       return
     }
 
@@ -1222,6 +1453,21 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
+    /*
+     * "After each round:" says the same. Under a ladder it marks the accessories,
+     * as "After every set:" does; under rounds written out in full it opens the
+     * tail that every one of them gets; otherwise the next step closes the round.
+     */
+    if (AFTER_ROUND.test(line)) {
+      if (target.kind === 'ladder-main' || target.kind === 'ladder-accessory') {
+        target = { kind: 'ladder-accessory', group: target.group }
+        return
+      }
+      if (roundGroups.length > 0) afterEachRound = true
+      expectItem = true
+      return
+    }
+
     // "Then:" ends the block above it. Without this the list that follows lands
     // inside the ladder it was written to come after.
     if (THEN.test(line)) {
@@ -1230,6 +1476,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       flushAmrap()
       target = { kind: 'section' }
       eachMs = null
+      betweenMs = null
       return
     }
 
@@ -1256,6 +1503,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      * "Replace rest with 30-second Squat Hold" is both: the hold is a real step,
      * and what it replaces is why it is there, so the line is kept as a note too.
      */
+    // "Replace squat pulses with:" and the replacement on the line below.
+    if (REPLACE_WITH_BELOW.test(line)) {
+      addNote(line)
+      expectItem = true
+      return
+    }
+
     const replace = REPLACE_WITH.exec(line)
     if (replace) {
       addNote(line)
@@ -1351,6 +1605,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         return
       }
       if (readDurationLadder(bullet[1]!)) return
+      // "* Squat Jumps" / "OR" / "* Squat + Calf Raise": one step with a swap.
+      if (wantsOr && lastStep) {
+        lastStep.alternative = tidy(bullet[1]!)
+        return
+      }
+      // A second exercise under the same "Minute N" joins the minute's step.
+      if (openMinute) return joinMinute(openMinute, bullet[1]!)
       // Under a "Minute N" heading a joined pair is ONE minute's work, exactly
       // as it is on the one-line form; split, the second half became an untimed
       // gate that doubled the minute.
@@ -1359,6 +1620,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       if (dashIndex !== undefined && lastStep) {
         numberedItems.push({ index: Number(dashIndex), block: lastStep })
       }
+      return
+    }
+
+    // "OR" alone between two bullets: the next bullet is the swap for the last.
+    if (OR_LINE.test(line) && lastStep) {
+      orNext = true
       return
     }
 
@@ -1378,6 +1645,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         amrap.round.push(tidy(line))
         return
       }
+      if (pendingFill) return addMinute(line)
       return addItem(parseItem(line))
     }
 
@@ -1420,8 +1688,9 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      * like a parse, which is worse than a line reported as unread.
      */
     const loose = parseItem(line)
-    if (loose.durationMs !== undefined) return addItem(loose)
-    if (loose.count !== undefined && /^\p{L}/u.test(loose.name)) return addItem(loose)
+    const isStep = loose.durationMs !== undefined || (loose.count !== undefined && /^\p{L}/u.test(loose.name))
+    if (isStep && openMinute) return joinMinute(openMinute, line)
+    if (isStep) return addItem(loose)
 
     skipped.push({ line: number, text: line })
   })
