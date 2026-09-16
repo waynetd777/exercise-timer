@@ -10,11 +10,6 @@ coverage/
 .env.*
 !.env.example
 
-# Agent tooling. None of it is tracked: this repo is public, and the knowledge
-# files it accumulates are working notes about this machine and its owner rather
-# than project documentation. All of it is regenerated locally.
-.wolf/
-
 # Local tooling scratch, not part of the project.
 .gastown-ignore
 __pycache__/
@@ -29,3 +24,7 @@ docs/screenshots/*.png
 .opencode/
 CLAUDE.md
 AGENTS.md
+
+# sift: derived state and private notes
+_sift/.cache/
+_sift/local/
