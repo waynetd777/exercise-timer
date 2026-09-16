@@ -19,11 +19,14 @@ __pycache__/
 # each and would only ever be duplicates in the history.
 docs/screenshots/*.png
 
-.claude/
-.codex/
+# CLAUDE.md, AGENTS.md and the two hook files carry sift's stanza and hook
+# wiring, and are tracked so a fresh clone gets them. Per-machine slash
+# commands and local settings are not.
+.claude/*
+!.claude/settings.json
+.codex/*
+!.codex/hooks.json
 .opencode/
-CLAUDE.md
-AGENTS.md
 
 # sift: derived state and private notes
 _sift/.cache/
