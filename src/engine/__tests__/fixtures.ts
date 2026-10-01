@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type {
   Block,
@@ -90,7 +87,11 @@ export function circuit(): Workout {
 /** Two levels of repeat nesting, to exercise the `path` chain. */
 export function nested(): Workout {
   return workout('Pyramid', [
-    rep(2, [rep(3, [seg('Work', 5), seg('Rest', 5, 'rest')], 'Reps'), seg('Recover', 30, 'recover')], 'Set'),
+    rep(
+      2,
+      [rep(3, [seg('Work', 5), seg('Rest', 5, 'rest')], 'Reps'), seg('Recover', 30, 'recover')],
+      'Set',
+    ),
   ])
 }
 
@@ -178,7 +179,11 @@ export function legsLadder(): Workout {
     section('#3 Legs', [
       ladder(
         [20, 16, 12, 8, 4],
-        [step('Goblet Squats', 'rung'), step('RB Lateral Walks', 5, true), seg('Breathe', 15, 'rest')],
+        [
+          step('Goblet Squats', 'rung'),
+          step('RB Lateral Walks', 5, true),
+          seg('Breathe', 15, 'rest'),
+        ],
       ),
     ]),
   ])

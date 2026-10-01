@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 // The store is localStorage, so the tests need a browser's one.
@@ -47,7 +44,10 @@ describe('the store', () => {
   })
 
   it('reads an older store that recorded a cleared field as an empty string', () => {
-    globalThis.localStorage?.setItem('davshack-timer-weights', '{"leg pres":"","lat pulldown":"30kg"}')
+    globalThis.localStorage?.setItem(
+      'davshack-timer-weights',
+      '{"leg pres":"","lat pulldown":"30kg"}',
+    )
     saveWeights(loadWeights())
     expect(weightFor('Leg Press')).toBe('')
     expect(weightFor('Lat Pulldown')).toBe('30kg')
@@ -105,15 +105,20 @@ describe('fillLoads', () => {
     // The routine is saying something the table cannot: that today, deliberately,
     // it is not the usual weight.
     const stated: Block[] = [
-      { kind: 'segment', id: 'b', name: 'Leg Press', role: 'work', durationMs: 20_000, load: '40kg' },
+      {
+        kind: 'segment',
+        id: 'b',
+        name: 'Leg Press',
+        role: 'work',
+        durationMs: 20_000,
+        load: '40kg',
+      },
     ]
     expect((fillLoads(stated, weights)[0] as { load?: string }).load).toBe('40kg')
   })
 
   it('reaches inside a group', () => {
-    const nested: Block[] = [
-      { kind: 'repeat', id: 'r', times: 3, children: [blocks[1]!] },
-    ]
+    const nested: Block[] = [{ kind: 'repeat', id: 'r', times: 3, children: [blocks[1]!] }]
     const filled = fillLoads(nested, weights)[0] as { children: { load?: string }[] }
     expect(filled.children[0]!.load).toBe('65kg')
   })
@@ -132,7 +137,14 @@ describe('stripLoads', () => {
 
   it('takes off a weight the page can answer for', () => {
     const blocks: Block[] = [
-      { kind: 'segment', id: 'a', name: 'Leg Press', role: 'work', durationMs: 20_000, load: '40kg' },
+      {
+        kind: 'segment',
+        id: 'a',
+        name: 'Leg Press',
+        role: 'work',
+        durationMs: 20_000,
+        load: '40kg',
+      },
     ]
     const { blocks: next, cleared } = stripLoads(blocks, weights)
     expect(cleared).toBe(1)
@@ -144,7 +156,14 @@ describe('stripLoads', () => {
   it('leaves a weight nothing else records', () => {
     // The page says nothing about a band, so the routine is the only copy.
     const blocks: Block[] = [
-      { kind: 'segment', id: 'a', name: 'Band Squats', role: 'work', durationMs: 20_000, load: 'red' },
+      {
+        kind: 'segment',
+        id: 'a',
+        name: 'Band Squats',
+        role: 'work',
+        durationMs: 20_000,
+        load: 'red',
+      },
     ]
     expect(stripLoads(blocks, weights).cleared).toBe(0)
   })
@@ -156,8 +175,22 @@ describe('stripLoads', () => {
         id: 'r',
         times: 3,
         children: [
-          { kind: 'segment', id: 'a', name: '12 × Leg Press', role: 'work', durationMs: 20_000, load: '40kg' },
-          { kind: 'segment', id: 'b', name: 'Get ready: Leg Press', role: 'prepare', durationMs: 15_000, load: '40kg' },
+          {
+            kind: 'segment',
+            id: 'a',
+            name: '12 × Leg Press',
+            role: 'work',
+            durationMs: 20_000,
+            load: '40kg',
+          },
+          {
+            kind: 'segment',
+            id: 'b',
+            name: 'Get ready: Leg Press',
+            role: 'prepare',
+            durationMs: 15_000,
+            load: '40kg',
+          },
         ],
       },
     ]
@@ -190,7 +223,13 @@ describe('the shorthand a routine is actually written in', () => {
   it('fills a step named that way, on the way into a run', () => {
     saveWeights(withWeight(loadWeights(), 'Seated Abdominal Crunch', '15kg'))
     const blocks: Block[] = [
-      { kind: 'segment', id: 'a', name: 'Get ready: Seated Ab Crunch', role: 'prepare', durationMs: 15_000 },
+      {
+        kind: 'segment',
+        id: 'a',
+        name: 'Get ready: Seated Ab Crunch',
+        role: 'prepare',
+        durationMs: 15_000,
+      },
       { kind: 'segment', id: 'b', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
     ]
     const filled = fillLoads(blocks, currentWeights()) as Block[]

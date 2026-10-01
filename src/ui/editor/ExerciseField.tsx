@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -91,7 +88,10 @@ export function ExerciseField({
   const listId = useId()
   const optionId = (index: number) => `${listId}-${index}`
 
-  const rows = useMemo(() => (open ? listRows(options, value, !typed) : []), [open, options, value, typed])
+  const rows = useMemo(
+    () => (open ? listRows(options, value, !typed) : []),
+    [open, options, value, typed],
+  )
   const shown = useMemo(() => optionsOf(rows), [rows])
   /** True while the list is showing everything, which is the only time it has headings. */
   const grouped = rows.some((row) => row.kind === 'group')
@@ -325,11 +325,7 @@ export function ExerciseField({
                 return rows.map((row) => {
                   if (row.kind === 'group') {
                     return (
-                      <p
-                        key={`group:${row.label}`}
-                        className="ename__group"
-                        role="presentation"
-                      >
+                      <p key={`group:${row.label}`} className="ename__group" role="presentation">
                         {row.label}
                       </p>
                     )
@@ -339,9 +335,7 @@ export function ExerciseField({
                   const mine = index
                   /* A grouped list puts the kit in the heading above; a
                      filtered one has no headings, so the row says it instead. */
-                  const hint = [grouped ? '' : option.kit, option.hint]
-                    .filter(Boolean)
-                    .join(' · ')
+                  const hint = [grouped ? '' : option.kit, option.hint].filter(Boolean).join(' · ')
                   return (
                     <div
                       key={option.name}

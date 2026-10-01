@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { compile } from '../../engine'
@@ -44,7 +41,10 @@ describe('tick', () => {
   })
 
   it('moves to the next run when a timed run runs out', () => {
-    expect(tick(mixed(), 0, 80_000)).toEqual({ kind: 'move', cursor: { runIndex: 1, elapsedInRunMs: 0 } })
+    expect(tick(mixed(), 0, 80_000)).toEqual({
+      kind: 'move',
+      cursor: { runIndex: 1, elapsedInRunMs: 0 },
+    })
   })
 
   it('JUMPS to the gate after ten minutes asleep, rather than walking to it', () => {

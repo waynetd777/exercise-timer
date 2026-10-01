@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { compile } from '../compile'
@@ -76,13 +73,7 @@ describe('position', () => {
   it('clamps negative and non-finite input to the start', () => {
     // All non-finite input is invalid, so it gets one rule rather than treating
     // +Infinity as "past the end". A real clock never produces these.
-    for (const t of [
-      -1,
-      -10_000,
-      Number.NaN,
-      Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY,
-    ]) {
+    for (const t of [-1, -10_000, Number.NaN, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY]) {
       expect(position(TABATA, t)).toMatchObject({
         index: 0,
         elapsedInEntryMs: 0,

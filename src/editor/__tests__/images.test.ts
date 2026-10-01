@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine'
@@ -120,7 +117,7 @@ describe('collectImages', () => {
     expect(new Set(images.map((i) => i.id)).size).toBe(images.length)
   })
 
-  it('reaches images nested inside a seeded routine\'s reps groups', () => {
+  it("reaches images nested inside a seeded routine's reps groups", () => {
     // The seed's exercises live inside Reps groups, so a collector that only
     // walked top-level blocks would find nothing at all here.
     const images = collectImages(SEED_ROUTINES)

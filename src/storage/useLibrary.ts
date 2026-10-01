@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useCallback, useEffect, useState } from 'react'
 import type { Workout } from '../engine'
@@ -11,7 +8,14 @@ import { sweepOrphans } from './sweep'
 import { requestPersistence } from './db'
 import { markSeeded, seededIds } from './seeded'
 import * as lib from './library'
-import { addWorkoutIfMissing, deleteWorkout, listWorkouts, putWorkout, readWorkouts, saveWorkout } from './workouts'
+import {
+  addWorkoutIfMissing,
+  deleteWorkout,
+  listWorkouts,
+  putWorkout,
+  readWorkouts,
+  saveWorkout,
+} from './workouts'
 import { newId } from '../id'
 
 const now = () => Date.now()
@@ -109,7 +113,7 @@ export function useLibrary(seed: readonly Workout[]): Library {
    * caller that does wait (the editor's Save) can keep the draft and say so.
    * A write that succeeds clears it, since the store is evidently working again.
    */
-  const guarded = useCallback(<T,>(what: string, work: () => Promise<T>): Promise<T> => {
+  const guarded = useCallback(<T>(what: string, work: () => Promise<T>): Promise<T> => {
     return work().then(
       (result) => {
         setError(null)
@@ -137,12 +141,12 @@ export function useLibrary(seed: readonly Workout[]): Library {
   const remove = useCallback(
     (id: string) =>
       guarded('delete the routine', async () => {
-    await deleteWorkout(id)
-    const { workouts: remaining, heldHashes } = await readWorkouts()
-    setWorkouts(remaining)
+        await deleteWorkout(id)
+        const { workouts: remaining, heldHashes } = await readWorkouts()
+        setWorkouts(remaining)
 
-    // Dead bytes from a failed sweep are harmless; the next sweep gets them.
-    await sweepOrphans(loadPictures(), { workouts: remaining, heldHashes }).catch(() => {})
+        // Dead bytes from a failed sweep are harmless; the next sweep gets them.
+        await sweepOrphans(loadPictures(), { workouts: remaining, heldHashes }).catch(() => {})
       }),
     [guarded],
   )

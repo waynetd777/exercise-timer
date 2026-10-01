@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+/* Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+ * SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root. */
 
 /* ── Library ───────────────────────────────────────────────────────────────
  * The app's home: every routine, searchable, with a drop target over the whole
@@ -296,13 +293,12 @@
  * these rules end up in the cascade.
  */
 .row[data-colour]:not([data-confirming='true']) {
-  background:
-    linear-gradient(
-      100deg,
-      color-mix(in oklab, var(--tint) 24%, var(--ink-800)) 0%,
-      color-mix(in oklab, var(--tint) 10%, var(--ink-800)) 46%,
-      var(--ink-800) 82%
-    );
+  background: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--tint) 24%, var(--ink-800)) 0%,
+    color-mix(in oklab, var(--tint) 10%, var(--ink-800)) 46%,
+    var(--ink-800) 82%
+  );
   border-color: color-mix(in oklab, var(--tint) 24%, transparent);
 }
 
@@ -313,13 +309,12 @@
  * feedback at all. Same wash, mixed into the lighter hover ground.
  */
 .row[data-colour][data-clickable='true']:not([data-confirming='true']):hover {
-  background:
-    linear-gradient(
-      100deg,
-      color-mix(in oklab, var(--tint) 29%, var(--ink-700)) 0%,
-      color-mix(in oklab, var(--tint) 12%, var(--ink-700)) 46%,
-      var(--ink-700) 82%
-    );
+  background: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--tint) 29%, var(--ink-700)) 0%,
+    color-mix(in oklab, var(--tint) 12%, var(--ink-700)) 46%,
+    var(--ink-700) 82%
+  );
   border-color: var(--bone-faint);
 }
 
@@ -421,7 +416,6 @@
   border: var(--hairline);
   border-radius: var(--radius);
 }
-
 
 /*
  * The generator's panel.

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useMemo, useRef, useState } from 'react'
 import type { Block, Workout } from '../engine'
@@ -157,7 +154,11 @@ function Row({
             >
               <CheckIcon />
             </button>
-            <button className="btn btn--ghost" onClick={() => setConfirming(false)} aria-label="Keep">
+            <button
+              className="btn btn--ghost"
+              onClick={() => setConfirming(false)}
+              aria-label="Keep"
+            >
               <CloseIcon />
             </button>
           </>
@@ -437,8 +438,7 @@ export function LibraryScreen({
         toBundle(workouts, Date.now(), media, loadWeights(), pictures, loadCustomExercises()),
       )
 
-      const subject =
-        workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
+      const subject = workouts.length === 1 ? '1 routine' : `${workouts.length} routines`
       setNotice(
         photos === 0
           ? `Backed up ${subject}`
@@ -688,24 +688,24 @@ export function LibraryScreen({
         ) : visible.length === 0 ? (
           <p className="library__empty label">
             {query
-            ? `Nothing matches “${query}”`
-            : 'Drop a .tabata, an exported .json or a .txt routine here to add it'}
+              ? `Nothing matches “${query}”`
+              : 'Drop a .tabata, an exported .json or a .txt routine here to add it'}
           </p>
         ) : (
           <ul className="library__list">
             {visible.map((workout) => (
               <Row
-              key={workout.id}
-              workout={workout}
-              library={library}
-              onRun={onRun}
-              onPreview={onPreview}
-              onEdit={onEdit}
-              onShare={share}
-              onExport={(workout) => exportRoutines([workout], workout.name)}
-              onCopyText={copyRoutineText}
-              onDownloadText={downloadRoutineText}
-            />
+                key={workout.id}
+                workout={workout}
+                library={library}
+                onRun={onRun}
+                onPreview={onPreview}
+                onEdit={onEdit}
+                onShare={share}
+                onExport={(workout) => exportRoutines([workout], workout.name)}
+                onCopyText={copyRoutineText}
+                onDownloadText={downloadRoutineText}
+              />
             ))}
           </ul>
         )}

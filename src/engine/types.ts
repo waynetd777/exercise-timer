@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Core types for the interval-timer engine.
@@ -97,8 +94,7 @@ type Advance = 'set' | 'step'
  * scales with fixed accessories after it (#3 Legs).
  */
 export type Reps =
-  | { kind: 'fixed'; count: number; perSide?: boolean }
-  | { kind: 'rung'; perSide?: boolean }
+  { kind: 'fixed'; count: number; perSide?: boolean } | { kind: 'rung'; perSide?: boolean }
 
 export type Segment = {
   kind: 'segment'

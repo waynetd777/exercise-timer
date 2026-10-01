@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Names that look like the one about to be added.
@@ -136,11 +133,7 @@ export function sameExercise(name: string, existing: Iterable<string>): string |
  * first row is the one a person actually reads. An exact fold match is NOT
  * included: that is `sameExercise`, and a different answer.
  */
-export function similarExercises(
-  name: string,
-  existing: Iterable<string>,
-  limit = 4,
-): Similar[] {
+export function similarExercises(name: string, existing: Iterable<string>, limit = 4): Similar[] {
   const key = foldName(name)
   if (key === '') return []
   const mine = words(key)

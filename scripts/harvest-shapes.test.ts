@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Regenerates src/routines/exercises.shapes.ts from the instructor emails.
@@ -108,7 +105,9 @@ describe('harvest shapes', () => {
     const themeInRoutines = new Map<string, number>()
     const sectionsPer: number[] = []
 
-    for (const file of readdirSync(EMAILS).filter((f) => f.endsWith('.txt')).sort()) {
+    for (const file of readdirSync(EMAILS)
+      .filter((f) => f.endsWith('.txt'))
+      .sort()) {
       routines += 1
       let sections = 0
       /*
@@ -165,7 +164,8 @@ describe('harvest shapes', () => {
        */
       if (present.size >= 3) {
         themedRoutines += 1
-        for (const theme of present) themeInRoutines.set(theme, (themeInRoutines.get(theme) ?? 0) + 1)
+        for (const theme of present)
+          themeInRoutines.set(theme, (themeInRoutines.get(theme) ?? 0) + 1)
       }
     }
 
@@ -175,11 +175,15 @@ describe('harvest shapes', () => {
 
     console.log(`${routines} routines`)
     console.log(`  ladder shapes    : ${ordered.length}`)
-    console.log(`  sections each    : ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}`)
+    console.log(
+      `  sections each    : ${median(sectionsPer)} typical, ${Math.min(...sectionsPer)} to ${Math.max(...sectionsPer)}`,
+    )
     console.log(`  exercises a piece: ${median(sizes)} typical`)
     for (const { theme } of THEMES) {
       const declared = [...formatCounts.entries()]
-        .filter(([key, seen]) => key.startsWith(`${theme}|`) && !key.endsWith('|standard') && seen > 0)
+        .filter(
+          ([key, seen]) => key.startsWith(`${theme}|`) && !key.endsWith('|standard') && seen > 0,
+        )
         .map(([key, seen]) => `${key.split('|')[1]} ${seen}`)
       console.log(
         `      ${theme}: ${themeCounts.get(theme) ?? 0}${declared.length > 0 ? ` (${declared.join(', ')})` : ''}`,
@@ -200,16 +204,16 @@ describe('harvest shapes', () => {
       [...formatCounts.entries()]
         .filter(([key]) => key.startsWith(`${theme}|`))
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-        .map(([key, seen]) => `  { theme: '${theme}', format: '${key.split('|')[1]}', seen: ${seen} },`),
+        .map(
+          ([key, seen]) =>
+            `  { theme: '${theme}', format: '${key.split('|')[1]}', seen: ${seen} },`,
+        ),
     ).join('\n')
 
     writeFileSync(
       OUT,
-      `/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+      `// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * The SHAPE of an instructor routine, read out of the ${routines} we hold.
@@ -301,7 +305,10 @@ export const SECTION_SIZE = ${median(sizes)}
  * \`exercises.prescription.ts\` folds names. What a warm-up may be made of.
  */
 export const WARM_UP_MOVES: readonly string[] = [
-${[...warmUpMoves].sort().map((m) => `  '${m.replace(/'/g, "\\'")}',`).join('\n')}
+${[...warmUpMoves]
+  .sort()
+  .map((m) => `  '${m.replace(/'/g, "\\'")}',`)
+  .join('\n')}
 ]
 `,
       'utf8',

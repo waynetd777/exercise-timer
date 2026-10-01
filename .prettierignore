@@ -1,0 +1,11 @@
+dist
+node_modules
+_sift
+public
+docs
+coverage
+*.md
+*.json
+*.html
+*.txt
+*.yml

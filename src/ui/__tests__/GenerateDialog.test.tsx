@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -27,7 +24,14 @@ const saved: Workout = {
   id: 'w1',
   name: 'Last week',
   blocks: [
-    { kind: 'segment', id: 's1', name: '12 × Leg Press', role: 'work', durationMs: 20_000, load: '65kg' },
+    {
+      kind: 'segment',
+      id: 's1',
+      name: '12 × Leg Press',
+      role: 'work',
+      durationMs: 20_000,
+      load: '65kg',
+    },
   ],
   schemaVersion: SCHEMA_VERSION,
   createdAt: 0,
@@ -57,7 +61,9 @@ describe('GenerateDialog', () => {
     for (const label of ['Sometimes', 'Always', 'Never']) {
       expect(screen.getByRole('button', { name: label })).toBeTruthy()
     }
-    expect(screen.getByRole('button', { name: 'Sometimes' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Sometimes' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
   })
 
   it('builds one when asked, and none when told not to', () => {
@@ -71,7 +77,9 @@ describe('GenerateDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
     const declared = /(EMOM|30\/30|AMRAP)$/
     const built = onGenerate.mock.calls[0]?.[0] as Workout
-    expect(built.blocks.filter((b) => b.kind === 'section' && declared.test(b.name)).length).toBeGreaterThan(0)
+    expect(
+      built.blocks.filter((b) => b.kind === 'section' && declared.test(b.name)).length,
+    ).toBeGreaterThan(0)
 
     cleanup()
     const second = open()
@@ -79,7 +87,9 @@ describe('GenerateDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Never' }))
     fireEvent.click(screen.getByRole('button', { name: /Open in editor/ }))
     const plain = second.mock.calls[0]?.[0] as Workout
-    expect(plain.blocks.filter((b) => b.kind === 'section' && declared.test(b.name))).toHaveLength(0)
+    expect(plain.blocks.filter((b) => b.kind === 'section' && declared.test(b.name))).toHaveLength(
+      0,
+    )
   })
 
   it('hands the routine over rather than saving it', () => {
@@ -229,7 +239,9 @@ describe('GenerateDialog', () => {
     const workout = onGenerate.mock.calls[0]![0] as Workout
     const loads: string[] = []
     const walk = (blocks: readonly any[]) =>
-      blocks.forEach((b) => (b.kind === 'segment' ? b.load && loads.push(b.load) : walk(b.children)))
+      blocks.forEach((b) =>
+        b.kind === 'segment' ? b.load && loads.push(b.load) : walk(b.children),
+      )
     walk(workout.blocks)
     expect(loads).not.toContain('65kg')
 
@@ -286,11 +298,17 @@ describe('the shape question', () => {
     // The instructor has never written a machine exercise, so a sections
     // routine of Seated Leg Extension ladders read like nothing she has sent.
     open()
-    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
     pick('Sections')
-    expect(screen.getByRole('button', { name: 'No multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'No multi-gym' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
     pick('Circuit')
-    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Multi-gym' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
 
     // Chosen by hand, it stays put when the shape changes.
     pick('Mixed')

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import generalEmail from './emails/2026-07-20-general.txt?raw'
@@ -102,7 +99,13 @@ describe('importTabataFile', () => {
 
   it('skips intervals with no duration', () => {
     const imported = importTabataFile({
-      workout: { title: 'Edge', intervals: [{ type: 1, time: 0 }, { type: 1, time: 20 }] },
+      workout: {
+        title: 'Edge',
+        intervals: [
+          { type: 1, time: 0 },
+          { type: 1, time: 20 },
+        ],
+      },
     })
     expect(imported.blocks).toHaveLength(1)
   })
@@ -183,7 +186,10 @@ describe('the other seeded routines', () => {
      * change someone's workout. A trailing rest is dropped inside a group.
      */
     for (const workout of IMPORTED_ROUTINES) {
-      expect(workout.blocks.every((b) => b.kind === 'segment'), workout.name).toBe(true)
+      expect(
+        workout.blocks.every((b) => b.kind === 'segment'),
+        workout.name,
+      ).toBe(true)
     }
   })
 })

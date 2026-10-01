@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MediaRef } from '../engine'
@@ -204,13 +201,17 @@ export function ExerciseDialog({
    * pressing Save would report that it clashes with itself.
    */
   const others = useMemo(
-    () => table.filter((exercise) => exercise.name !== editing?.name).map((exercise) => exercise.name),
+    () =>
+      table.filter((exercise) => exercise.name !== editing?.name).map((exercise) => exercise.name),
     [table, editing?.name],
   )
 
   const trimmed = name.trim()
   /** The exercise this name already IS. Blocks the save; see the doc comment. */
-  const clash = useMemo(() => (trimmed === '' ? null : sameExercise(trimmed, others)), [trimmed, others])
+  const clash = useMemo(
+    () => (trimmed === '' ? null : sameExercise(trimmed, others)),
+    [trimmed, others],
+  )
   const similar = useMemo(
     () => (trimmed === '' || clash !== null ? [] : similarExercises(trimmed, others)),
     [trimmed, clash, others],
@@ -286,247 +287,256 @@ export function ExerciseDialog({
 
   return (
     <>
-    <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
-      {/* The panel is its own element: a <dialog> styled as the box does not hug
+      <dialog ref={dialog} className="modal" onClose={onClose} onClick={onBackdropClick}>
+        {/* The panel is its own element: a <dialog> styled as the box does not hug
           its content on iOS. See `.modal` in theme.css. */}
-      <div className="exdlg">
-        {confirming ? (
-          <>
-            {/* The act it performs: this screen also reaches a RENAME, where
+        <div className="exdlg">
+          {confirming ? (
+            <>
+              {/* The act it performs: this screen also reaches a RENAME, where
                 "Add" would promise a second row that is not what Save does. */}
-            <h2 className="exdlg__title">
-              {editing ? <>Rename to “{trimmed}” anyway?</> : <>Add “{trimmed}” anyway?</>}
-            </h2>
-            <p className="exdlg__why label label--sm">
-              {similar.length === 1 ? 'This is already here' : 'These are already here'}. One
-              exercise under two names keeps two weights, two pictures and two measured paces, so
-              take the one you have if it is the same movement.
-            </p>
-            <ul className="exdlg__cands">
-              {similar.map((found) => (
-                <li key={found.name}>
-                  {/*
+              <h2 className="exdlg__title">
+                {editing ? <>Rename to “{trimmed}” anyway?</> : <>Add “{trimmed}” anyway?</>}
+              </h2>
+              <p className="exdlg__why label label--sm">
+                {similar.length === 1 ? 'This is already here' : 'These are already here'}. One
+                exercise under two names keeps two weights, two pictures and two measured paces, so
+                take the one you have if it is the same movement.
+              </p>
+              <ul className="exdlg__cands">
+                {similar.map((found) => (
+                  <li key={found.name}>
+                    {/*
                     A BUTTON per candidate, not a line of text. Where the dialog
                     was opened from a step, pressing one puts that exercise on the
                     step and adds nothing; from the page it shows you the row.
                     Either way it is one tap against retyping.
                   */}
-                  <button
-                    type="button"
-                    className="exdlg__cand"
-                    onClick={() => {
-                      onUse?.(found.name)
-                      onClose()
-                    }}
-                  >
-                    <span className="exdlg__candname">{found.name}</span>
-                    <span className="exdlg__candwhy label label--sm">
-                      {[found.why === 'typo' ? 'looks like the same name' : 'same movement',
-                        attributes(found.name)]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="exdlg__actions">
-              {/* Back is focused: a stray Enter must not be what adds a duplicate. */}
-              <button type="button" className="chip" onClick={() => setConfirming(false)} autoFocus>
-                <CloseIcon />
-                Back
-              </button>
-              {/* `chip--primary`, the filled blue the generator's own Generate
+                    <button
+                      type="button"
+                      className="exdlg__cand"
+                      onClick={() => {
+                        onUse?.(found.name)
+                        onClose()
+                      }}
+                    >
+                      <span className="exdlg__candname">{found.name}</span>
+                      <span className="exdlg__candwhy label label--sm">
+                        {[
+                          found.why === 'typo' ? 'looks like the same name' : 'same movement',
+                          attributes(found.name),
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="exdlg__actions">
+                {/* Back is focused: a stray Enter must not be what adds a duplicate. */}
+                <button
+                  type="button"
+                  className="chip"
+                  onClick={() => setConfirming(false)}
+                  autoFocus
+                >
+                  <CloseIcon />
+                  Back
+                </button>
+                {/* `chip--primary`, the filled blue the generator's own Generate
                   button uses: this is the affirmative action of the dialog, and
                   `chip--action` is only a lighter label. */}
-              <button type="button" className="chip chip--primary" onClick={save}>
-                {editing ? <CheckIcon /> : <PlusIcon />}
-                {editing ? 'Rename anyway' : 'Add anyway'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="exdlg__title">{editing ? 'Change this exercise' : 'Add an exercise'}</h2>
+                <button type="button" className="chip chip--primary" onClick={save}>
+                  {editing ? <CheckIcon /> : <PlusIcon />}
+                  {editing ? 'Rename anyway' : 'Add anyway'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="exdlg__title">
+                {editing ? 'Change this exercise' : 'Add an exercise'}
+              </h2>
 
-            <label className="exdlg__field">
-              <span className="label label--sm">Name</span>
-              <input
-                className="exdlg__name"
-                value={name}
-                aria-label="Exercise name"
-                autoComplete="off"
-                onChange={(event) => setName(event.target.value)}
-              />
-            </label>
+              <label className="exdlg__field">
+                <span className="label label--sm">Name</span>
+                <input
+                  className="exdlg__name"
+                  value={name}
+                  aria-label="Exercise name"
+                  autoComplete="off"
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
 
-            {clash !== null && (
-              <p className="exdlg__clash label label--sm">
-                “{clash}” is already here, and this is another way of writing it. Two rows would
-                share one weight and one picture.{' '}
-                {onUse ? 'Take that one instead:' : 'Search the page for it to set its weight.'}
-                {onUse && (
-                  <button
-                    type="button"
-                    className="exdlg__cand"
-                    onClick={() => {
-                      onUse(clash)
-                      onClose()
-                    }}
-                  >
-                    <span className="exdlg__candname">{clash}</span>
-                  </button>
-                )}
-              </p>
-            )}
+              {clash !== null && (
+                <p className="exdlg__clash label label--sm">
+                  “{clash}” is already here, and this is another way of writing it. Two rows would
+                  share one weight and one picture.{' '}
+                  {onUse ? 'Take that one instead:' : 'Search the page for it to set its weight.'}
+                  {onUse && (
+                    <button
+                      type="button"
+                      className="exdlg__cand"
+                      onClick={() => {
+                        onUse(clash)
+                        onClose()
+                      }}
+                    >
+                      <span className="exdlg__candname">{clash}</span>
+                    </button>
+                  )}
+                </p>
+              )}
 
-            {/*
+              {/*
               Free text, like the load on a step and for the same reason: half
               of what an exercise loads is not a number. Empty is a real answer
               and the common one — a press-up has your own weight — so nothing
               here is required.
             */}
-            <div className="exdlg__field">
-              <span className="label label--sm">Weight</span>
-              {/* A `div` and a plain span, not a `label`: the × lives inside the
+              <div className="exdlg__field">
+                <span className="label label--sm">Weight</span>
+                {/* A `div` and a plain span, not a `label`: the × lives inside the
                   field and a button inside a label is a press that also lands on
                   the input. The input names itself, as the picture field's
                   controls do. */}
-              <span className="clearable">
-                <input
-                  className="exdlg__name"
-                  value={weight}
-                  aria-label="Weight"
-                  autoComplete="off"
-                  placeholder="65kg, red band"
-                  onChange={(event) => setWeight(event.target.value)}
-                />
-                {weight !== '' && (
-                  <button
-                    type="button"
-                    className="clearable__x"
-                    aria-label="Clear the weight"
-                    title="Clear"
-                    onClick={() => setWeight('')}
-                  >
-                    <CloseIcon />
-                  </button>
-                )}
-              </span>
-            </div>
+                <span className="clearable">
+                  <input
+                    className="exdlg__name"
+                    value={weight}
+                    aria-label="Weight"
+                    autoComplete="off"
+                    placeholder="65kg, red band"
+                    onChange={(event) => setWeight(event.target.value)}
+                  />
+                  {weight !== '' && (
+                    <button
+                      type="button"
+                      className="clearable__x"
+                      aria-label="Clear the weight"
+                      title="Clear"
+                      onClick={() => setWeight('')}
+                    >
+                      <CloseIcon />
+                    </button>
+                  )}
+                </span>
+              </div>
 
-            {/*
+              {/*
               The picture, chosen through the editor's own catalogue rather than
               a second one: "which picture" is one question, and this dialog
               opens over both screens that ask it.
             */}
-            {knownImages && (
-              <div className="exdlg__field">
-                <span className="label label--sm">Picture</span>
-                <div className="exdlg__pic">
-                  {pictureUrl ? (
-                    <img className="exdlg__picimg" src={pictureUrl} alt="" />
-                  ) : (
-                    /* An empty frame rather than nothing, so the row keeps its
+              {knownImages && (
+                <div className="exdlg__field">
+                  <span className="label label--sm">Picture</span>
+                  <div className="exdlg__pic">
+                    {pictureUrl ? (
+                      <img className="exdlg__picimg" src={pictureUrl} alt="" />
+                    ) : (
+                      /* An empty frame rather than nothing, so the row keeps its
                        height and the buttons do not jump when one is chosen. */
-                    <span className="exdlg__picimg exdlg__picimg--none" aria-hidden="true" />
-                  )}
-                  <button
-                    type="button"
-                    className="chip chip--action"
-                    onClick={() => setPicking(true)}
-                  >
-                    <ImageIcon />
-                    {picture ? 'Change' : 'Choose'}
-                  </button>
-                  {picture && (
+                      <span className="exdlg__picimg exdlg__picimg--none" aria-hidden="true" />
+                    )}
                     <button
                       type="button"
-                      className="chip chip--danger"
-                      onClick={() => {
-                        setPicture(null)
-                        setPictureError(null)
-                      }}
+                      className="chip chip--action"
+                      onClick={() => setPicking(true)}
                     >
-                      <TrashIcon />
-                      Remove
+                      <ImageIcon />
+                      {picture ? 'Change' : 'Choose'}
                     </button>
+                    {picture && (
+                      <button
+                        type="button"
+                        className="chip chip--danger"
+                        onClick={() => {
+                          setPicture(null)
+                          setPictureError(null)
+                        }}
+                      >
+                        <TrashIcon />
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {pictureError !== null && (
+                    <p className="exdlg__clash label label--sm">{pictureError}</p>
                   )}
                 </div>
-                {pictureError !== null && (
-                  <p className="exdlg__clash label label--sm">{pictureError}</p>
-                )}
-              </div>
-            )}
+              )}
 
-            <Choice
-              legend="Kit"
-              options={KIT_GROUPS.map((group) => ({ value: group.kit, label: group.label }))}
-              value={kit}
-              onChange={setKit}
-            />
-
-            <Choice legend="What it works" options={AREAS} value={area} onChange={setArea} />
-
-            {/* Upper body only, as in the table. A squat has no direction. */}
-            {area === 'upper' && (
               <Choice
-                legend="Push or pull"
-                options={PATTERNS}
-                value={pattern}
-                onChange={setPattern}
+                legend="Kit"
+                options={KIT_GROUPS.map((group) => ({ value: group.kit, label: group.label }))}
+                value={kit}
+                onChange={setKit}
               />
-            )}
 
-            <Choice legend="What it is for" options={USES} value={use} onChange={setUse} />
+              <Choice legend="What it works" options={AREAS} value={area} onChange={setArea} />
 
-            <Choice legend="Side" options={SIDES} value={side} onChange={setSide} />
+              {/* Upper body only, as in the table. A squat has no direction. */}
+              {area === 'upper' && (
+                <Choice
+                  legend="Push or pull"
+                  options={PATTERNS}
+                  value={pattern}
+                  onChange={setPattern}
+                />
+              )}
 
-            <div className="exdlg__actions">
-              {/*
+              <Choice legend="What it is for" options={USES} value={use} onChange={setUse} />
+
+              <Choice legend="Side" options={SIDES} value={side} onChange={setSide} />
+
+              <div className="exdlg__actions">
+                {/*
                 Cancel focused, as everywhere else: the safe answer is the easy
                 one. NOT by `autoFocus`, which scrolls the button into view and
                 so opened this dialog at its own bottom, with the name field
                 out of sight above. See `focusCancel`.
               */}
-              <button type="button" className="chip" ref={cancel} onClick={onClose}>
-                <CloseIcon />
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="chip chip--primary"
-                disabled={trimmed === '' || clash !== null}
-                onClick={submit}
-              >
-                {editing ? <CheckIcon /> : <PlusIcon />}
-                {editing ? 'Save' : 'Add'}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </dialog>
+                <button type="button" className="chip" ref={cancel} onClick={onClose}>
+                  <CloseIcon />
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="chip chip--primary"
+                  disabled={trimmed === '' || clash !== null}
+                  onClick={submit}
+                >
+                  {editing ? <CheckIcon /> : <PlusIcon />}
+                  {editing ? 'Save' : 'Add'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </dialog>
 
-    {/*
+      {/*
       A SIBLING of this dialog, never a child: `close` reaches React's handlers
       on the way up, so a picker nested inside would fire this dialog's own
       onClose and shut the form behind it. Rendered after it, so it sits above
       it in the top layer. Same rule as the editor's notice over its chooser.
     */}
-    {picking && knownImages && (
-      <ImagePicker
-        images={knownImages}
-        onPick={(ref) => {
-          setPicture(ref)
-          setPictureError(null)
-          setPicking(false)
-        }}
-        onUpload={(file) => void upload(file)}
-        onError={setPictureError}
-        onClose={() => setPicking(false)}
-      />
-    )}
+      {picking && knownImages && (
+        <ImagePicker
+          images={knownImages}
+          onPick={(ref) => {
+            setPicture(ref)
+            setPictureError(null)
+            setPicking(false)
+          }}
+          onUpload={(file) => void upload(file)}
+          onError={setPictureError}
+          onClose={() => setPicking(false)}
+        />
+      )}
     </>
   )
 }

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Filling a routine's empty WEIGHTS and PICTURES in from the exercises page.
@@ -80,10 +77,7 @@ export function keyFor(table: ReadonlyMap<string, unknown>, name: string): strin
  * because the generic is what the picture table needed rather than a second copy
  * of the same three lines.
  */
-export function findLoad(
-  weights: ReadonlyMap<string, string>,
-  name: string,
-): string | undefined {
+export function findLoad(weights: ReadonlyMap<string, string>, name: string): string | undefined {
   return findFor(weights, name)
 }
 
@@ -162,10 +156,7 @@ export function fillPictures(
 }
 
 /** The same, for a whole routine. Identity-preserving in the same way. */
-export function withPictures(
-  workout: Workout,
-  pictures: ReadonlyMap<string, MediaRef>,
-): Workout {
+export function withPictures(workout: Workout, pictures: ReadonlyMap<string, MediaRef>): Workout {
   const blocks = fillPictures(workout.blocks, pictures)
   return blocks === workout.blocks ? workout : { ...workout, blocks: [...blocks] }
 }
@@ -213,5 +204,7 @@ export function withoutStatedLoads(
   weights: ReadonlyMap<string, string>,
 ): { workout: Workout; cleared: number } {
   const { blocks, cleared } = stripLoads(workout.blocks, weights)
-  return cleared === 0 ? { workout, cleared } : { workout: { ...workout, blocks: [...blocks] }, cleared }
+  return cleared === 0
+    ? { workout, cleared }
+    : { workout: { ...workout, blocks: [...blocks] }, cleared }
 }

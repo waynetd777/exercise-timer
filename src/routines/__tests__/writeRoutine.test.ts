@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { parseRoutine } from '../pasteFormat'
@@ -114,7 +111,10 @@ describe('a step survives being written and read', () => {
 
   it('keeps a note long enough to be one, alongside a duration', () => {
     const note = 'start standing, step out to one side and sink your hips'
-    const back = find(pass([step({ name: 'Side Squats', durationMs: 30_000, note })]), 'Side Squats')
+    const back = find(
+      pass([step({ name: 'Side Squats', durationMs: 30_000, note })]),
+      'Side Squats',
+    )
     expect(back).toMatchObject({ note, durationMs: 30_000 })
   })
 
@@ -123,13 +123,21 @@ describe('a step survives being written and read', () => {
      * "Plank (hold for 2 seconds at the top of each rep) - 40 seconds" read back
      * as a two-second step called "Plank (hold", and nothing said so.
      */
-    const plank = step({ name: 'Plank', durationMs: 40_000, note: 'hold for 2 seconds at the top of each rep' })
+    const plank = step({
+      name: 'Plank',
+      durationMs: 40_000,
+      note: 'hold for 2 seconds at the top of each rep',
+    })
     expect(find(pass([plank]), 'Plank')).toMatchObject({ durationMs: 40_000 })
     expect(writeRoutine(workout([plank])).lost.join(' ')).toMatch(/Note on "Plank" would change/)
   })
 
   it('leaves out a note with a parenthesis of its own, and says so', () => {
-    const dog = step({ name: 'Bird Dog', durationMs: 30_000, note: 'Keep your back straight (do not arch) and breathe' })
+    const dog = step({
+      name: 'Bird Dog',
+      durationMs: 30_000,
+      note: 'Keep your back straight (do not arch) and breathe',
+    })
     const back = find(pass([dog]), 'Bird Dog')
     expect(back).toMatchObject({ name: 'Bird Dog', durationMs: 30_000 })
     expect(back.note).toBeUndefined()
@@ -139,7 +147,11 @@ describe('a step survives being written and read', () => {
   it('keeps an alternative', () => {
     const back = find(
       pass([
-        step({ name: 'Push-ups', reps: { kind: 'fixed', count: 15 }, alternative: 'Knee Push-ups' }),
+        step({
+          name: 'Push-ups',
+          reps: { kind: 'fixed', count: 15 },
+          alternative: 'Knee Push-ups',
+        }),
       ]),
       'Push-ups',
     )
@@ -147,7 +159,10 @@ describe('a step survives being written and read', () => {
   })
 
   it('keeps a name that contains a dash', () => {
-    const back = find(pass([step({ name: 'Cable Fly - Standing', durationMs: 20_000 })]), 'Cable Fly - Standing')
+    const back = find(
+      pass([step({ name: 'Cable Fly - Standing', durationMs: 20_000 })]),
+      'Cable Fly - Standing',
+    )
     expect(back.durationMs).toBe(20_000)
   })
 
@@ -168,7 +183,10 @@ describe('a step survives being written and read', () => {
     expect(written.text).toContain('Leg Press 65kg')
     expect(written.lost).not.toContain('The picture on "Leg Press"')
 
-    const back = find(pass([step({ name: 'Leg Press', load: '65kg', durationMs: 20_000 })]), 'Leg Press 65kg')
+    const back = find(
+      pass([step({ name: 'Leg Press', load: '65kg', durationMs: 20_000 })]),
+      'Leg Press 65kg',
+    )
     expect(back.durationMs).toBe(20_000)
   })
 
@@ -234,7 +252,12 @@ describe('a group survives being written and read', () => {
 
   it('closes a group before a loose step, or the step is read into it', () => {
     const blocks: Block[] = [
-      { kind: 'repeat', id: 'r', times: 3, children: [step({ name: 'Squat', durationMs: 20_000 })] },
+      {
+        kind: 'repeat',
+        id: 'r',
+        times: 3,
+        children: [step({ name: 'Squat', durationMs: 20_000 })],
+      },
       step({ name: 'Cool Down', durationMs: 60_000 }),
     ]
     expect(writeRoutine(workout(blocks)).text).toContain('Then:')
@@ -308,7 +331,11 @@ describe('writing is a fixed point after one pass', () => {
         id: 'e',
         times: 2,
         label: 'Set',
-        children: [minute('Bicep Curls', 12), minute('Arnold Press', 10), minute('Bent-Over Rows', 12)],
+        children: [
+          minute('Bicep Curls', 12),
+          minute('Arnold Press', 10),
+          minute('Bent-Over Rows', 12),
+        ],
       },
     ]
 
@@ -331,12 +358,18 @@ describe('writing is a fixed point after one pass', () => {
         times: 2,
         label: 'Set',
         children: [
-          step({ name: 'Split Squats', durationMs: 60_000, reps: { kind: 'fixed', count: 5, perSide: true } }),
+          step({
+            name: 'Split Squats',
+            durationMs: 60_000,
+            reps: { kind: 'fixed', count: 5, perSide: true },
+          }),
           step({ name: 'Calf Raises', durationMs: 60_000, reps: { kind: 'fixed', count: 15 } }),
         ],
       },
     ]
-    expect(writeRoutine(workout(blocks)).text).toContain('Minute 1: 10 × Split Squats (5 each side)')
+    expect(writeRoutine(workout(blocks)).text).toContain(
+      'Minute 1: 10 × Split Squats (5 each side)',
+    )
     expect(find(pass(blocks), 'Split Squats')).toMatchObject({
       durationMs: 60_000,
       reps: { kind: 'fixed', count: 5, perSide: true },
@@ -402,9 +435,9 @@ describe('writeRoutine says what it could not say', () => {
   })
 
   it('warns when a role cannot be rebuilt from the name', () => {
-    expect(lostFor([step({ name: 'Change Sides', role: 'prepare', durationMs: 15_000 })])).toContain(
-      '"Change Sides" is a get-ready step and will come back as work',
-    )
+    expect(
+      lostFor([step({ name: 'Change Sides', role: 'prepare', durationMs: 15_000 })]),
+    ).toContain('"Change Sides" is a get-ready step and will come back as work')
   })
 
   it('warns about a note too short to survive', () => {
@@ -417,7 +450,9 @@ describe('writeRoutine says what it could not say', () => {
     // Loose, so there is no EMOM for it to sit in. A whole group of minutes
     // keeps its counts instead: see "writes a group of minutes as an EMOM".
     expect(
-      lostFor([step({ name: 'Bicep Curls', durationMs: 60_000, reps: { kind: 'fixed', count: 12 } })]),
+      lostFor([
+        step({ name: 'Bicep Curls', durationMs: 60_000, reps: { kind: 'fixed', count: 12 } }),
+      ]),
     ).toContain('The count on "Bicep Curls" (12 ×), which is also timed')
   })
 
@@ -444,7 +479,7 @@ describe('writeRoutine says what it could not say', () => {
         step({ name: 'Get ready', role: 'prepare', durationMs: 15_000 }),
         step({ name: 'Squat', durationMs: 20_000 }),
       ]),
-    ).toEqual(["The routine's name (\"W\"), which is typed in on the way back"])
+    ).toEqual(['The routine\'s name ("W"), which is typed in on the way back'])
   })
 })
 

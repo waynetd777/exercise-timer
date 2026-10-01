@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { CueKind } from '../engine'
 import type { SampleName } from './samples'
@@ -92,7 +89,6 @@ const WHISTLE: Note = {
   sustain: 0.9,
   strikeMs: 40,
 }
-
 
 /**
  * Measured from the app: 2659Hz with an INHARMONIC partial at x2.578. The

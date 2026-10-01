@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Builds a routine from a few answers, in the shape of the routines this app has
@@ -281,7 +278,8 @@ function weightedPick<T>(items: readonly T[], weight: (item: T) => number, rng: 
  */
 function pickFormat(declared: readonly ThemeFormat[], want: Formats, rng: Rng): SectionFormat {
   if (want === 'never') return 'standard'
-  const rows = want === 'always' ? declared.filter((entry) => entry.format !== 'standard') : declared
+  const rows =
+    want === 'always' ? declared.filter((entry) => entry.format !== 'standard') : declared
   if (rows.length === 0) return 'standard'
   return weightedPick(rows, (entry) => entry.seen, rng).format
 }
@@ -307,7 +305,11 @@ function shuffled<T>(items: readonly T[], rng: Rng): T[] {
  */
 function loadFrom(library: readonly Workout[]): Map<string, string> {
   const found = new Map<string, string>()
-  const bare = (name: string) => name.replace(/^\s*\d+\s*×\s*/, '').trim().toLowerCase()
+  const bare = (name: string) =>
+    name
+      .replace(/^\s*\d+\s*×\s*/, '')
+      .trim()
+      .toLowerCase()
 
   // Oldest first, so a more recent routine overwrites what an older one said.
   const ordered = [...library].sort(
@@ -389,7 +391,6 @@ const sets = (child: Segment, times: number): Repeat => ({
   children: [child, segment({ name: 'Rest', role: 'rest', durationMs: REST_MS })],
 })
 
-
 /** Everything one exercise contributes, ready to be costed before it is kept. */
 function exerciseBlocks(
   exercise: Exercise,
@@ -444,9 +445,7 @@ function exerciseBlocks(
     blocks.push(segment({ name: 'Get ready', role: 'prepare', durationMs: prepareMs }))
   } else {
     // No cardio to announce it during, so the get-ready carries the name itself.
-    blocks.push(
-      segment({ name: `Get ready: ${labelled}`, role: 'prepare', durationMs: prepareMs }),
-    )
+    blocks.push(segment({ name: `Get ready: ${labelled}`, role: 'prepare', durationMs: prepareMs }))
   }
 
   blocks.push(sets(work, count))
@@ -552,7 +551,10 @@ const PRESCRIBED = new Map<string, Prescription | undefined>()
 const prescribed = (exercise: Exercise): Prescription | undefined => {
   if (!PRESCRIBED.has(exercise.name)) {
     const key = foldName(exercise.name)
-    PRESCRIBED.set(exercise.name, PRESCRIPTIONS.find((p) => p.name === key))
+    PRESCRIBED.set(
+      exercise.name,
+      PRESCRIPTIONS.find((p) => p.name === key),
+    )
   }
   return PRESCRIBED.get(exercise.name)
 }
@@ -599,7 +601,11 @@ function themeName(theme: string, areas: readonly BodyArea[], all: readonly stri
     return kept.length === 1 && kept[0] === 'lower' ? 'Legs Finisher' : 'Core Finisher'
   }
   if (theme === GENERAL_BODY) {
-    const words: Record<BodyArea, string> = { upper: 'Upper Body', torso: 'Abs', lower: 'Lower Body' }
+    const words: Record<BodyArea, string> = {
+      upper: 'Upper Body',
+      torso: 'Abs',
+      lower: 'Lower Body',
+    }
     return kept.map((area) => words[area]).join(' & ')
   }
   return theme
@@ -630,7 +636,8 @@ function sectionsRoutine(
   table: readonly Exercise[],
 ): Block[] {
   // Nothing to work is the same answer the circuit gives, not a routine of one warm-up.
-  if (spec.areas.length === 0) throw new Error('No exercises match that combination of areas and equipment.')
+  if (spec.areas.length === 0)
+    throw new Error('No exercises match that combination of areas and equipment.')
 
   /**
    * Everything eligible, by area, shuffled once so a section can draw freely.
@@ -717,7 +724,13 @@ function sectionsRoutine(
       role: 'work',
       ...(timed
         ? { durationMs: (said?.seconds ?? HOLD_MS / 1000) * 1000 }
-        : { reps: { kind: 'fixed', count: said?.reps ?? DEFAULT_REPS, ...(exercise.perSide ? { perSide: true } : {}) } }),
+        : {
+            reps: {
+              kind: 'fixed',
+              count: said?.reps ?? DEFAULT_REPS,
+              ...(exercise.perSide ? { perSide: true } : {}),
+            },
+          }),
       ...(load ? { load } : {}),
       ...(exercise.media ? { media: bundled(exercise.media) } : {}),
     })
@@ -839,7 +852,10 @@ function sectionsRoutine(
           role: 'work',
           durationMs: clockMs,
           note: moves
-            .map((e) => `${prescribed(e)?.reps ?? DEFAULT_REPS} × ${e.name}${e.perSide ? ' each side' : ''}`)
+            .map(
+              (e) =>
+                `${prescribed(e)?.reps ?? DEFAULT_REPS} × ${e.name}${e.perSide ? ' each side' : ''}`,
+            )
             .join('\n'),
         }),
       ],
@@ -936,8 +952,12 @@ function sectionsRoutine(
       return section(
         name,
         [
-          ...cardio.map((e) => segment({ name: e.name, role: 'work', durationMs: WARM_UP_EACH_MS })),
-          ...mobility.map((e) => segment({ name: e.name, role: 'work', durationMs: MOBILITY_EACH_MS })),
+          ...cardio.map((e) =>
+            segment({ name: e.name, role: 'work', durationMs: WARM_UP_EACH_MS }),
+          ),
+          ...mobility.map((e) =>
+            segment({ name: e.name, role: 'work', durationMs: MOBILITY_EACH_MS }),
+          ),
         ],
         { display: 'timer', note: `${WARM_UP_EACH_MS / 1000} seconds each, continuous movement` },
       )
@@ -977,9 +997,7 @@ function sectionsRoutine(
       // cannot climb a rep ladder, so none is drawn here.
       const moves = drawPreferring(areas, size(4, 5), isRung)
       if (moves.length < 2) return short()
-      return section(name, [
-        ladder(moves.map(rung)),
-      ])
+      return section(name, [ladder(moves.map(rung))])
     }
 
     if (shape === 'ladder' || shape === 'finisher') {
@@ -1008,7 +1026,10 @@ function sectionsRoutine(
       if (moves.length < 2) return short()
       const children: Block[] = [roundsOf(size(3, 5), [...moves, ...hold])]
       // "After Round N:" a couple more, and a hold to finish where one is left.
-      const tail = [...draw(areas, 'strength', 2, (e) => !isHold(e)), ...draw(areas, 'strength', 1, isHold)]
+      const tail = [
+        ...draw(areas, 'strength', 2, (e) => !isHold(e)),
+        ...draw(areas, 'strength', 1, isHold),
+      ]
       children.push(...tail.map(counted))
       return section(name, children)
     }
@@ -1034,7 +1055,10 @@ function sectionsRoutine(
    * pair `reject` with a section they chose not to keep. Every build goes
    * through here; a bare `build()` would leak its draw on failure.
    */
-  const attempt = (entry: { theme: string; areas: BodyArea[]; all: readonly string[] }, trim = false) => {
+  const attempt = (
+    entry: { theme: string; areas: BodyArea[]; all: readonly string[] },
+    trim = false,
+  ) => {
     const held = new Set(taken)
     const undo = () => {
       taken.clear()
@@ -1314,8 +1338,7 @@ export function describeRoutine(
         ? 'Full-Body'
         : areas.map((area) => TITLE_WORDS[area]).join(' & ')
 
-  const kit =
-    spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
+  const kit = spec.equipment === 'none' ? 'Bodyweight ' : spec.equipment === 'mixed' ? 'Mixed ' : ''
 
   if (spec.style === 'sections') {
     const count = built ?? clampSections(sectionsAsked(spec))
@@ -1434,7 +1457,9 @@ export function generateRoutine(
   const asked = spec.recoveryPool ?? []
   const chosen = cardio.filter((e) => asked.includes(e.name))
   if (asked.length > 0 && chosen.length === 0) {
-    notes.push(`Nothing in the list to move with is a cardio exercise, so ${recovery?.name} was used.`)
+    notes.push(
+      `Nothing in the list to move with is a cardio exercise, so ${recovery?.name} was used.`,
+    )
   }
   const spin = chosen.length > 0 ? shuffled(chosen, rng) : []
 
@@ -1456,7 +1481,10 @@ export function generateRoutine(
   // Never silent: the recovery exercise said when it fell back, these did not.
   const named = (want: string | undefined, slot: string) => {
     const found = cardio.find((e) => e.name === want)
-    if (want && !found) notes.push(`No cardio exercise called "${want}" for the ${slot}, so ${recovery?.name} was used.`)
+    if (want && !found)
+      notes.push(
+        `No cardio exercise called "${want}" for the ${slot}, so ${recovery?.name} was used.`,
+      )
     return found ?? recovery
   }
   const warmUp = named(spec.warmUpExercise, 'warm-up')
@@ -1467,8 +1495,14 @@ export function generateRoutine(
     spun += 1
     return pick
   }
-  if (spec.recovery === 'active' && spec.recoveryExercise && recovery?.name !== spec.recoveryExercise) {
-    notes.push(`No cardio exercise called "${spec.recoveryExercise}", so ${recovery?.name} was used.`)
+  if (
+    spec.recovery === 'active' &&
+    spec.recoveryExercise &&
+    recovery?.name !== spec.recoveryExercise
+  ) {
+    notes.push(
+      `No cardio exercise called "${spec.recoveryExercise}", so ${recovery?.name} was used.`,
+    )
   }
 
   const pools = new Map<BodyArea, Exercise[]>()
@@ -1559,7 +1593,8 @@ export function generateRoutine(
     const announce = body.length > 0 || spec.recovery !== 'active'
     // Drawn only where a slot is actually going to be built, or the sequence
     // advances on exercises that never make it past the budget check.
-    const spinner = spin.length > 0 && announce && spec.recovery === 'active' ? nextSpin() : recovery
+    const spinner =
+      spin.length > 0 && announce && spec.recovery === 'active' ? nextSpin() : recovery
     const blocks = exerciseBlocks(
       pick,
       spec,

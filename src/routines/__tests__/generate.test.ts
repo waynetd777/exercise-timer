@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { compile, totalDurationMs } from '../../engine'
@@ -134,7 +131,9 @@ describe('what it chooses', () => {
 
   it('supplements freely when asked for mixed', () => {
     const { workout } = make({ areas: ['torso'], equipment: 'mixed', totalMs: 60 * 60_000 })
-    const kit = new Set(distinct(workout).map((n) => EXERCISES.find((e) => e.name === n)?.equipment))
+    const kit = new Set(
+      distinct(workout).map((n) => EXERCISES.find((e) => e.name === n)?.equipment),
+    )
     expect(kit.size).toBeGreaterThan(1)
   })
 
@@ -147,7 +146,9 @@ describe('what it chooses', () => {
 
 describe('the shape it builds', () => {
   it('opens on a warm-up and closes on a cool down, for active recovery', () => {
-    const names = make().workout.blocks.filter((b) => b.kind === 'segment').map((b) => b.name)
+    const names = make()
+      .workout.blocks.filter((b) => b.kind === 'segment')
+      .map((b) => b.name)
     expect(names[1]).toBe('Warm Up: Cycling')
     expect(names.at(-1)).toBe('Cool Down: Cycling')
   })
@@ -231,7 +232,8 @@ describe('the shape it builds', () => {
     const { workout } = make({ recoveryPool: ALL_CARDIO, totalMs: 50 * 60_000 })
     const cardioNames = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
     const slots = workout.blocks.filter(
-      (b): b is Segment => b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
+      (b): b is Segment =>
+        b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
     )
     expect(slots.length).toBeGreaterThan(4)
 
@@ -248,7 +250,8 @@ describe('the shape it builds', () => {
     const { workout } = make({ recoveryPool: only, totalMs: 50 * 60_000 })
     const cardioNames = new Set(EXERCISES.filter((e) => e.use === 'cardio').map((e) => e.name))
     const slots = workout.blocks.filter(
-      (b): b is Segment => b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
+      (b): b is Segment =>
+        b.kind === 'segment' && b.durationMs === 60_000 && cardioNames.has(b.name),
     )
     expect(slots.length).toBeGreaterThan(4)
     expect([...new Set(slots.map((s) => s.name))].sort()).toEqual(['Cycling', 'Trampoline'])
@@ -351,7 +354,8 @@ describe('the shape it builds', () => {
 
     for (const name of chosen) {
       const groups = workout.blocks.filter(
-        (b) => b.kind === 'repeat' && b.children.some((c) => c.kind === 'segment' && c.name === name),
+        (b) =>
+          b.kind === 'repeat' && b.children.some((c) => c.kind === 'segment' && c.name === name),
       )
       expect(groups).toHaveLength(2)
       expect(groups.every((g) => g.kind === 'repeat' && g.times === 2)).toBe(true)
@@ -494,10 +498,10 @@ describe('the seed', () => {
 
 describe('the instructor’s shape', () => {
   const sections = (over: Partial<RoutineSpec> = {}, seed = 5) =>
-    generateRoutine(
-      spec({ style: 'sections', equipment: 'none', recovery: 'passive', ...over }),
-      { rng: seeded(seed), now: 0 },
-    )
+    generateRoutine(spec({ style: 'sections', equipment: 'none', recovery: 'passive', ...over }), {
+      rng: seeded(seed),
+      now: 0,
+    })
   /** The sections alone: everything after the get-ready the routine opens on. */
   const sectionsOf = (result: ReturnType<typeof sections>) => result.workout.blocks.slice(1)
 
@@ -505,7 +509,12 @@ describe('the instructor’s shape', () => {
     // Loose and above the warm-up, and exactly the parser's step, so Send as
     // text leaves it out and Paste puts it back.
     const head = sections().workout.blocks[0]
-    expect(head).toMatchObject({ kind: 'segment', role: 'prepare', name: 'Get ready', durationMs: 5_000 })
+    expect(head).toMatchObject({
+      kind: 'segment',
+      role: 'prepare',
+      name: 'Get ready',
+      durationMs: 5_000,
+    })
     expect(sectionsOf(sections()).every((b) => b.kind === 'section')).toBe(true)
   })
 
@@ -565,7 +574,12 @@ describe('the instructor’s shape', () => {
     // It used to fall off the end of a short routine, which is the one section
     // she closes fourteen of sixteen with.
     expect(namesOf(sections({ sections: 3 }))).toEqual(['Warm-up', 'General Body', 'Finisher'])
-    expect(namesOf(sections({ sections: 4 }))).toEqual(['Warm-up', 'General Body', 'Arms & Shoulders', 'Finisher'])
+    expect(namesOf(sections({ sections: 4 }))).toEqual([
+      'Warm-up',
+      'General Body',
+      'Arms & Shoulders',
+      'Finisher',
+    ])
   })
 
   it('fits whole sections to the minutes asked, by estimate', () => {
@@ -631,7 +645,9 @@ describe('the instructor’s shape', () => {
     const guess = estimate(workout.blocks)
     expect(guess.knownMs + guess.estimatedMs).toBeGreaterThan(35 * 60_000)
     expect(namesOf({ workout, notes })).not.toContain('General Body')
-    expect(notes.join(' ')).toMatch(/No room for .*: what fits already comes to about \d+ minutes\./)
+    expect(notes.join(' ')).toMatch(
+      /No room for .*: what fits already comes to about \d+ minutes\./,
+    )
     expect(notes.join(' ')).not.toMatch(/No room for .* in 35 minutes/)
   })
 
@@ -679,7 +695,9 @@ describe('the instructor’s shape', () => {
     const general = sectionNamed(result, 'General Body').children[0]
     if (general?.kind !== 'ladder') throw new Error('General Body is not a ladder')
     expect(general.children.length).toBeGreaterThanOrEqual(4)
-    expect(general.children.every((c) => c.kind === 'segment' && c.reps?.kind === 'rung')).toBe(true)
+    expect(general.children.every((c) => c.kind === 'segment' && c.reps?.kind === 'rung')).toBe(
+      true,
+    )
   })
 
   it('carries a ladder on a lift that has carried one of her', () => {
@@ -704,7 +722,9 @@ describe('the instructor’s shape', () => {
     const core = sectionNamed(sections({ sections: 6 }), 'Core')
     const rounds = core.children[0]
     if (rounds?.kind !== 'repeat') throw new Error('Core is not rounds')
-    const work = rounds.children.filter((c): c is Segment => c.kind === 'segment' && c.role === 'work')
+    const work = rounds.children.filter(
+      (c): c is Segment => c.kind === 'segment' && c.role === 'work',
+    )
     expect(work.length).toBe(5)
     expect(work.at(-1)?.durationMs).toBeDefined()
     expect(work.slice(0, -1).every((c) => c.reps !== undefined)).toBe(true)
@@ -824,8 +844,9 @@ describe('the instructor’s shape', () => {
      * faithful and unreachable at the same time, so the dialog can ask outright.
      */
     const named = (formats: Formats, seed: number) =>
-      sectionsOf(sections({ sections: 6, formats }, seed))
-        .map((b) => (b.kind === 'section' ? b.name : ''))
+      sectionsOf(sections({ sections: 6, formats }, seed)).map((b) =>
+        b.kind === 'section' ? b.name : '',
+      )
 
     for (let seed = 1; seed <= 40; seed++) {
       const never = named('never', seed)
@@ -836,11 +857,17 @@ describe('the instructor’s shape', () => {
       // warm-up have never been anything but a list and stay one.
       for (const name of always) {
         const theme = themeOf(name)
-        const declarable = theme === 'General Body' || theme === 'Arms & Shoulders' || theme === 'Legs' || theme === 'Finisher'
+        const declarable =
+          theme === 'General Body' ||
+          theme === 'Arms & Shoulders' ||
+          theme === 'Legs' ||
+          theme === 'Finisher'
         expect(theme === name, `${name} at seed ${seed}`).toBe(!declarable)
       }
       expect(always.filter((n) => themeOf(n) === 'Core').every((n) => n === 'Core')).toBe(true)
-      expect(always.filter((n) => themeOf(n) === 'Warm-up').every((n) => n === 'Warm-up')).toBe(true)
+      expect(always.filter((n) => themeOf(n) === 'Warm-up').every((n) => n === 'Warm-up')).toBe(
+        true,
+      )
     }
   })
 
@@ -975,7 +1002,13 @@ describe('the instructor’s shape', () => {
 
   it('warms up with what she warms up with', () => {
     // The cardio pool also holds burpees and plank jacks, and no warm-up of her has either.
-    const never = ['Burpees', 'Plank Jacks', 'Mountain Climbers', 'Cross-Body Mountain Climbers', 'Speed Skaters']
+    const never = [
+      'Burpees',
+      'Plank Jacks',
+      'Mountain Climbers',
+      'Cross-Body Mountain Climbers',
+      'Speed Skaters',
+    ]
     for (let seed = 1; seed <= 30; seed++) {
       const warm = sectionNamed(sections({}, seed), 'Warm-up')
       for (const step of warm.children) {
@@ -986,9 +1019,21 @@ describe('the instructor’s shape', () => {
 
   it('names a narrowed theme for what is left in it', () => {
     // "General Body" of nothing but legs is not general, and "Legs Finisher" is her own heading.
-    expect(namesOf(sections({ areas: ['lower'], sections: 6 }))).toEqual(['Warm-up', 'Lower Body', 'Legs', 'Legs Finisher'])
-    expect(namesOf(sections({ areas: ['torso'], sections: 6 }))).toEqual(['Warm-up', 'Abs', 'Core', 'Core Finisher'])
-    expect(namesOf(sections({ areas: ['upper', 'torso'], sections: 6 }))).toContain('Upper Body & Abs')
+    expect(namesOf(sections({ areas: ['lower'], sections: 6 }))).toEqual([
+      'Warm-up',
+      'Lower Body',
+      'Legs',
+      'Legs Finisher',
+    ])
+    expect(namesOf(sections({ areas: ['torso'], sections: 6 }))).toEqual([
+      'Warm-up',
+      'Abs',
+      'Core',
+      'Core Finisher',
+    ])
+    expect(namesOf(sections({ areas: ['upper', 'torso'], sections: 6 }))).toContain(
+      'Upper Body & Abs',
+    )
   })
 
   it('names the routine for the sections it built, not the count asked', () => {
@@ -1000,7 +1045,13 @@ describe('the instructor’s shape', () => {
     // The built count went through the same clamp as an asked one, so a
     // routine of two sections was named "3 sections".
     const { workout } = generateRoutine(
-      { style: 'sections', totalMs: 10 * 60_000, areas: ['upper'], equipment: 'none', recovery: 'passive' },
+      {
+        style: 'sections',
+        totalMs: 10 * 60_000,
+        areas: ['upper'],
+        equipment: 'none',
+        recovery: 'passive',
+      },
       { rng: seeded(1), library: [], now: 0 },
     )
     const built = workout.blocks.filter((block) => block.kind === 'section').length
@@ -1012,7 +1063,13 @@ describe('the instructor’s shape', () => {
     // Send as text, then Paste: the tails after a group are written with `Then:` and read back loose.
     const shape = (blocks: readonly Block[]): string =>
       blocks
-        .map((b) => (b.kind === 'segment' ? (b.role === 'work' ? 's' : 'r') : `${b.kind[0]}(${shape(b.children)})`))
+        .map((b) =>
+          b.kind === 'segment'
+            ? b.role === 'work'
+              ? 's'
+              : 'r'
+            : `${b.kind[0]}(${shape(b.children)})`,
+        )
         .join('')
     for (let seed = 1; seed <= 5; seed++) {
       const { workout } = sections({ sections: 6 }, seed)
@@ -1245,7 +1302,9 @@ describe('what the sections shape can reach', () => {
       const warm = workout.blocks.find((b) => b.kind === 'section')
       if (warm?.kind === 'section') for (const name of steps(warm.children)) seen.add(name)
     }
-    const lower = EXERCISES.filter((e) => e.area === 'lower' && (e.use === 'mobility' || e.use === 'cardio'))
+    const lower = EXERCISES.filter(
+      (e) => e.area === 'lower' && (e.use === 'mobility' || e.use === 'cardio'),
+    )
     expect(lower.some((e) => seen.has(e.name))).toBe(true)
   })
 
@@ -1283,7 +1342,12 @@ describe('the exercises you added yourself', () => {
    */
   const mine = [
     { name: 'Sandbag Haul', area: 'lower' as const, equipment: 'kettlebell' as const },
-    { name: 'Sandbag Press', area: 'upper' as const, pattern: 'push' as const, equipment: 'kettlebell' as const },
+    {
+      name: 'Sandbag Press',
+      area: 'upper' as const,
+      pattern: 'push' as const,
+      equipment: 'kettlebell' as const,
+    },
   ]
 
   it('draws from them in a circuit, beside the app’s own', () => {

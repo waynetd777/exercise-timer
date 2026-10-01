@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Everything the instructor has written that the hand-authored table does not
@@ -30,7 +27,13 @@ export const HARVESTED_EXERCISES: readonly Exercise[] = [
   { name: 'Plank Jacks', area: 'torso', equipment: 'bodyweight', use: 'cardio' },
   { name: 'Plie Squats', area: 'lower', equipment: 'bodyweight' },
   { name: 'Quad Stretch', area: 'lower', equipment: 'bodyweight', use: 'mobility' },
-  { name: 'Shoulder Press Jacks', area: 'upper', pattern: 'push', equipment: 'bodyweight', use: 'cardio' },
+  {
+    name: 'Shoulder Press Jacks',
+    area: 'upper',
+    pattern: 'push',
+    equipment: 'bodyweight',
+    use: 'cardio',
+  },
   { name: 'Sit Up Press', area: 'torso', equipment: 'dumbbell' },
   { name: 'Sit Ups', area: 'torso', equipment: 'bodyweight' },
   { name: 'Squat With Front Raise', area: 'lower', equipment: 'dumbbell' },

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
@@ -114,7 +111,9 @@ describe('LibraryScreen', () => {
     // A failed write or an unreadable record lands here; it used to vanish.
     render(
       <LibraryScreen
-        {...props(library([workout('a', 'Legs')], { error: 'Could not save “Legs”: quota exceeded' }))}
+        {...props(
+          library([workout('a', 'Legs')], { error: 'Could not save “Legs”: quota exceeded' }),
+        )}
       />,
     )
     expect(screen.getByRole('alert').textContent).toMatch(/Could not save/)
@@ -128,7 +127,8 @@ describe('LibraryScreen', () => {
         {...props(
           library([workout('a', 'Legs')], {
             error: null,
-            notice: 'One routine in storage could not be read. It was left in place, and the rest are shown.',
+            notice:
+              'One routine in storage could not be read. It was left in place, and the rest are shown.',
           }),
         )}
       />,

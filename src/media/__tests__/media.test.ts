@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine'
@@ -68,9 +65,7 @@ describe('liveHashes', () => {
   })
 
   it('looks inside repeat groups', () => {
-    const nested: Block[] = [
-      { kind: 'repeat', id: 'r', times: 2, children: [local('deep')] },
-    ]
+    const nested: Block[] = [{ kind: 'repeat', id: 'r', times: 2, children: [local('deep')] }]
     expect(liveHashes([routine('R', nested)]).has('deep')).toBe(true)
   })
 
@@ -130,7 +125,10 @@ describe('orphanedHashes', () => {
 })
 
 describe('resolvePlan', () => {
-  const has = (...hashes: string[]) => (hash: string) => hashes.includes(hash)
+  const has =
+    (...hashes: string[]) =>
+    (hash: string) =>
+      hashes.includes(hash)
   const BASE = '/exercise-timer/'
 
   it('resolves nothing for a step with no image', () => {

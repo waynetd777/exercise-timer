@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { newId } from '../id'
@@ -25,8 +22,13 @@ describe('newId', () => {
      */
     const real = globalThis.crypto.randomUUID
     try {
-      Object.defineProperty(globalThis.crypto, 'randomUUID', { value: undefined, configurable: true })
-      expect(newId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: undefined,
+        configurable: true,
+      })
+      expect(newId()).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      )
     } finally {
       Object.defineProperty(globalThis.crypto, 'randomUUID', { value: real, configurable: true })
     }

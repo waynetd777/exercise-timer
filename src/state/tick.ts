@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { locate, nextRun, runIsOver } from '../engine'
 import type { Cursor, Routine } from '../engine'
@@ -41,7 +38,9 @@ export function tick(routine: Routine, runIndex: number, elapsedInRunMs: number)
     while (runIsOver(routine, cursor)) {
       cursor = nextRun(routine, cursor)
     }
-    return locate(routine, cursor).isComplete ? { kind: 'complete', cursor } : { kind: 'move', cursor }
+    return locate(routine, cursor).isComplete
+      ? { kind: 'complete', cursor }
+      : { kind: 'move', cursor }
   }
 
   const at = locate(routine, cursor)

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Position, Timeline, TimelineEntry } from './types'
 
@@ -97,6 +94,7 @@ export function skipForward(timeline: Timeline, elapsedMs: number): number {
 export function skipBack(timeline: Timeline, elapsedMs: number, restartThresholdMs = 1500): number {
   const current = position(timeline, elapsedMs)
   if (current.isComplete) return elapsedAtStepStart(timeline, timeline.entries.length - 1)
-  if (current.elapsedInEntryMs > restartThresholdMs) return elapsedAtStepStart(timeline, current.index)
+  if (current.elapsedInEntryMs > restartThresholdMs)
+    return elapsedAtStepStart(timeline, current.index)
   return elapsedAtStepStart(timeline, current.index - 1)
 }

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
@@ -13,7 +10,7 @@ import { VitePWA } from 'vite-plugin-pwa'
  * The copyright notice, carried into the built bundle.
  *
  * Every source file has this header, but a plain comment does not survive
- * minification, so the deployed app used to ship with no notice at all. MIT
+ * minification, so the deployed app used to ship with no notice at all. The GPL
  * asks for the notice to travel with the code, and the deployed bundle is the
  * only copy most people will ever hold.
  *
@@ -28,9 +25,9 @@ import { VitePWA } from 'vite-plugin-pwa'
  */
 const NOTICE = `/*!
  * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
+ * Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
  *
- * MIT License. https://github.com/waynetd777/exercise-timer/blob/main/LICENSE
+ * SPDX-License-Identifier: GPL-3.0-or-later. https://github.com/waynetd777/exercise-timer/blob/main/LICENSE
  * The exercise illustrations are third-party and NOT covered by it.
  */`
 

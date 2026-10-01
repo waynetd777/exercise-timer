@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { CueKind } from '../engine'
 import { audio } from '../audio/engine'
@@ -113,31 +110,27 @@ function VoiceCard() {
           disabled={!available}
           onClick={() => speak(SPOKEN.start)}
         >
-          <PlayIcon />
-          “{SPOKEN.start}”
+          <PlayIcon />“{SPOKEN.start}”
         </button>
         <button
           className="chip chip--action"
           disabled={!available}
           onClick={() => speak(SPOKEN.tenSecondsLeft)}
         >
-          <PlayIcon />
-          “{SPOKEN.tenSecondsLeft}”
+          <PlayIcon />“{SPOKEN.tenSecondsLeft}”
         </button>
         <button
           className="chip chip--action"
           disabled={!available}
           onClick={() => speak(SPOKEN.thatsAWrap)}
         >
-          <PlayIcon />
-          “{SPOKEN.thatsAWrap}”
+          <PlayIcon />“{SPOKEN.thatsAWrap}”
         </button>
       </div>
 
       <ul className="sound__notes">
         <li>
-          “{SPOKEN.start}”, just after the routine starts, once per run, not on
-          resume from a pause
+          “{SPOKEN.start}”, just after the routine starts, once per run, not on resume from a pause
         </li>
         <li>“{SPOKEN.tenSecondsLeft}”, at ten seconds left, on steps of 20s or more</li>
         <li>“{SPOKEN.thatsAWrap}”, after the three dings, at the end of a routine</li>
@@ -172,7 +165,10 @@ export function SoundsScreen({ onExit }: { onExit: () => void }) {
     audio.preview(sequenceFor('workout-complete'))
     if (canSpeak()) {
       // 3000ms is the sequence's own lead-in before the completion figure.
-      window.setTimeout(() => speak(SPOKEN.thatsAWrap), 3000 + lastStrikeMs(complete) + AFTER_LAST_DING_MS)
+      window.setTimeout(
+        () => speak(SPOKEN.thatsAWrap),
+        3000 + lastStrikeMs(complete) + AFTER_LAST_DING_MS,
+      )
     }
   }
 

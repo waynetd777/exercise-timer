@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { EXERCISES, HARVESTED_EXERCISES, MACHINE_EXERCISES, OTHER_EXERCISES } from '../exercises'
@@ -47,7 +44,9 @@ describe('the machine table, generated from the Horizon guide', () => {
 
   it('puts every exercise on a station the machine has', () => {
     expect(MACHINE_EXERCISES.every((e) => e.station !== undefined)).toBe(true)
-    expect(MACHINE_EXERCISES.filter((e) => (e.station ?? 0) < 1 || (e.station ?? 0) > 8)).toEqual([])
+    expect(MACHINE_EXERCISES.filter((e) => (e.station ?? 0) < 1 || (e.station ?? 0) > 8)).toEqual(
+      [],
+    )
   })
 
   it('calls exactly the ankle-strap exercises ankle-strap', () => {
@@ -96,8 +95,7 @@ describe('the machine table, generated from the Horizon guide', () => {
 
 describe('the authored half, harvested from the corpus', () => {
   const area = (a: string) => OTHER_EXERCISES.filter((e) => e.area === a)
-  const use = (u: string) =>
-    OTHER_EXERCISES.filter((e) => (e.use ?? 'strength') === u)
+  const use = (u: string) => OTHER_EXERCISES.filter((e) => (e.use ?? 'strength') === u)
 
   it('never calls for kit that is not in the garage', () => {
     /*
@@ -160,7 +158,9 @@ describe('the authored half, harvested from the corpus', () => {
   it('can balance a session without the machine at all', () => {
     // The point of "no multi-gym": every area has enough to fill a rotation.
     for (const a of ['upper', 'torso', 'lower']) {
-      expect(area(a).filter((e) => (e.use ?? 'strength') === 'strength').length).toBeGreaterThanOrEqual(6)
+      expect(
+        area(a).filter((e) => (e.use ?? 'strength') === 'strength').length,
+      ).toBeGreaterThanOrEqual(6)
     }
   })
 
@@ -175,7 +175,9 @@ describe('the authored half, harvested from the corpus', () => {
 describe('the harvested half', () => {
   it('adds what the corpus knows and the authored tables do not', () => {
     expect(HARVESTED_EXERCISES.length).toBeGreaterThan(10)
-    const authored = new Set([...MACHINE_EXERCISES, ...OTHER_EXERCISES].map((e) => foldName(e.name)))
+    const authored = new Set(
+      [...MACHINE_EXERCISES, ...OTHER_EXERCISES].map((e) => foldName(e.name)),
+    )
     // Nothing here duplicates a name the authored tables already chose. That was
     // the whole failure mode of the first pass: "Curtsy Lunge" beside
     // "Alternating Curtsy Lunges", "Rb Squats" beside "Band Squats".

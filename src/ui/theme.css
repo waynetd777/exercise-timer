@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+/* Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+ * SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root. */
 
 /*
  * Tokens. Dark ground for gym lighting: a NEUTRAL grey ramp, faintly cool.
@@ -75,7 +72,7 @@
   --radius: 10px;
   --hairline: 1px solid var(--ink-600);
 
-  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /*
    * Wide-tracked uppercase, the counterweight to the huge numerals. Sized
@@ -365,7 +362,6 @@ button {
   width: 18px;
   height: 18px;
 }
-
 
 /* ── Dialogs ───────────────────────────────────────────────────────────────
  * `NoticeDialog` reports an outcome; `ConfirmDialog` asks before something
@@ -1065,7 +1061,6 @@ button {
 .btn--ghost {
   background: none;
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   *,

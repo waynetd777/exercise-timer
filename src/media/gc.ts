@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Block, MediaRef, Workout } from '../engine'
 
@@ -52,7 +49,8 @@ export function hashesIn(value: unknown): string[] {
     }
     if (typeof node !== 'object' || node === null) return
     const record = node as Record<string, unknown>
-    if (record['source'] === 'local' && typeof record['hash'] === 'string') found.add(record['hash'])
+    if (record['source'] === 'local' && typeof record['hash'] === 'string')
+      found.add(record['hash'])
     if (record['source'] === 'remote' && typeof record['cachedHash'] === 'string') {
       found.add(record['cachedHash'])
     }

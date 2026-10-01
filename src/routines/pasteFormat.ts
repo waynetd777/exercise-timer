@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Block, Ladder, Repeat, Reps, Section, SectionDisplay, Segment } from '../engine'
 
@@ -141,7 +138,10 @@ const toMs = (value: string, unit: string): number =>
  * NOT "30 seconds each side": that is one step's own time per side, and reading
  * it as a directive would retime every exercise after it.
  */
-const EACH_FOR = new RegExp(`${NUMBER}\\s*${UNIT}\\s+each\\b(?!\\s+(?:side|leg|arm|direction))`, 'i')
+const EACH_FOR = new RegExp(
+  `${NUMBER}\\s*${UNIT}\\s+each\\b(?!\\s+(?:side|leg|arm|direction))`,
+  'i',
+)
 
 /**
  * "4 Rounds", "3-5 Rounds:", "Repeat 2 rounds", "Repeat × 4 rounds". The upper
@@ -338,7 +338,8 @@ const MAIN_EXERCISE = /^main\s+exercise:?\s*$/i
 /** "After every set:", "After every Goblet Squat set:". */
 const AFTER_EVERY_SET = /^after every\b.*\bset:?\s*$/i
 /** Openers that introduce a plain list and mean nothing structural. */
-const LIST_OPENER = /^(perform the following|complete (?:the following|without stopping|once)):?\s*$/i
+const LIST_OPENER =
+  /^(perform the following|complete (?:the following|without stopping|once)):?\s*$/i
 /** "Bonus: After completing the ladder, 30 seconds fast mountain climbers". */
 const BONUS = /^bonus:\s*(.+)$/i
 
@@ -421,7 +422,10 @@ const PER_SIDE_COUNT = new RegExp(
   'i',
 )
 /** "(or Reverse Lunges for low impact)", "– step-back option for low impact". */
-const ALTERNATIVE = new RegExp(`[(,]\\s*or\\s+([^)]+?)\\s*\\)|\\s+${DASH}\\s+(.*?\\boption\\b.*)$`, 'i')
+const ALTERNATIVE = new RegExp(
+  `[(,]\\s*or\\s+([^)]+?)\\s*\\)|\\s+${DASH}\\s+(.*?\\boption\\b.*)$`,
+  'i',
+)
 
 /** "30-second Plank", "1-minute Wall Sit", "20 second Hollow Hold". */
 const LEADING_DURATION = new RegExp(`^${NUMBER}[\\s${DASH_CHARS}]*${UNIT}\\s+(.+)$`, 'i')
@@ -469,10 +473,7 @@ const LEADING_COUNT = /^(\d+)\s*(?:×\s*|[xX]\s+|x(?=[A-Z])|\s)(.+)$/
 // plain hyphen, which is the one these routines actually use.
 const RANGE = `(?:\\s*[${DASH_CHARS}/]\\s*(\\d+))?`
 const LEADING_RANGE_COUNT = new RegExp(`^(\\d+)${RANGE}\\s*[×x]\\s*(.+)$`)
-const LEADING_RANGE_DURATION = new RegExp(
-  `^${NUMBER}${RANGE}\\s*${UNIT}\\s+(.+)$`,
-  'i',
-)
+const LEADING_RANGE_DURATION = new RegExp(`^${NUMBER}${RANGE}\\s*${UNIT}\\s+(.+)$`, 'i')
 
 /** "wide squats 15x", "…crunch x12". The `x` is what makes it a count. */
 const TRAILING_COUNT =
@@ -861,11 +862,14 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
       return
     }
 
-    const spent = new Set(numbered.filter((e) => vocabulary.get(e.index) === e.block).map((e) => e.at))
+    const spent = new Set(
+      numbered.filter((e) => vocabulary.get(e.index) === e.block).map((e) => e.at),
+    )
     // A row naming a rung no line defined loses that rung: said, rather than a
     // shorter round built quietly.
     for (const row of pyramidRows) {
-      if (row.rungs.some((rung) => !vocabulary.has(rung))) skipped.push({ line: row.line, text: row.text })
+      if (row.rungs.some((rung) => !vocabulary.has(rung)))
+        skipped.push({ line: row.line, text: row.text })
     }
     const rounds: Block[] = pyramidRows.map((row) => ({
       kind: 'repeat',
@@ -941,7 +945,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
 
   const openSection = (title: string) => {
     closeSection()
-    section = { kind: 'section', id: nextId('sec'), name: tidy(title), display: 'list', children: [] }
+    section = {
+      kind: 'section',
+      id: nextId('sec'),
+      name: tidy(title),
+      display: 'list',
+      children: [],
+    }
     sectionSource = currentLine
     sectionLines = 0
     target = { kind: 'section' }
@@ -972,7 +982,11 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
    */
   const subtitle = (text: string): boolean => {
     if (!section || sectionLines !== 1 || section.children.length > 0 || section.note) return false
-    if (!sectionSource || !NUMBERED_SECTION.test(sectionSource.text) || !/^\p{L}/u.test(section.name)) {
+    if (
+      !sectionSource ||
+      !NUMBERED_SECTION.test(sectionSource.text) ||
+      !/^\p{L}/u.test(section.name)
+    ) {
       return false
     }
     section.name = tidy(`${section.name} – ${text}`)
@@ -1004,7 +1018,12 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     const list = listFor()
     // "30 sec WORK / 15 sec TRANSITION": the transition goes BETWEEN steps, so
     // not before the first and not before a rest.
-    if (betweenMs !== null && list.length > 0 && block.kind === 'segment' && block.role !== 'rest') {
+    if (
+      betweenMs !== null &&
+      list.length > 0 &&
+      block.kind === 'segment' &&
+      block.role !== 'rest'
+    ) {
       list.push(restFor(betweenMs))
     }
     list.push(block)
@@ -1134,8 +1153,7 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      */
     // "(Repeat 2x)" is the directive in brackets, not a marker on a heading.
     const bracketed = /^\((.+)\)$/.exec(line)
-    const unwrapped =
-      bracketed && ROUNDS.test(bracketed[1]!.trim()) ? bracketed[1]!.trim() : line
+    const unwrapped = bracketed && ROUNDS.test(bracketed[1]!.trim()) ? bracketed[1]!.trim() : line
 
     const marker = LEADING_PAREN.exec(unwrapped)?.[0] ?? ''
     const heading = unwrapped.slice(marker.length)
@@ -1228,7 +1246,10 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     // parenthetical explains the ladder, it is not the lift.
     const ladderNote = /^\((.+)\)$/.exec(mainLift)
     if (ladderNote) mainLift = ''
-    if (ladderCounts && (mainLift === '' || (/^\p{L}/u.test(mainLift) && !UNIT_WORD.test(mainLift)))) {
+    if (
+      ladderCounts &&
+      (mainLift === '' || (/^\p{L}/u.test(mainLift) && !UNIT_WORD.test(mainLift)))
+    ) {
       flushAmrap()
       const counts = ladderCounts[1]!
         .split(new RegExp(`(?:[${DASH_CHARS},]|→|->)`))
@@ -1261,7 +1282,13 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
         skipped.push({ line: number, text: line })
         return
       }
-      const group: Repeat = { kind: 'repeat', id: nextId('rep'), times, children: [], label: 'Round' }
+      const group: Repeat = {
+        kind: 'repeat',
+        id: nextId('rep'),
+        times,
+        children: [],
+        label: 'Round',
+      }
       const host = ensureSection()
       roundsSource = line
       /*
@@ -1314,7 +1341,11 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
        * below it, so the empty group it opened stands down and the line is kept
        * as the section's note, where it still says what the three groups are.
        */
-      if (target.kind === 'rounds' && target.group.children.length === 0 && roundGroups.length === 0) {
+      if (
+        target.kind === 'rounds' &&
+        target.group.children.length === 0 &&
+        roundGroups.length === 0
+      ) {
         const at = host.children.indexOf(target.group)
         if (at !== -1) host.children.splice(at, 1)
         if (roundsSource) addNote(roundsSource)
@@ -1543,7 +1574,11 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
     // the section: the routines before July have no bullets, and this read as a
     // note and vanished from the clock. "Rest 30 seconds between rounds" stays
     // an instruction.
-    if (/^rest\b/i.test(line) && /\d\s*(?:sec|min)/i.test(line) && !/\b(?:between|after|each)\b/i.test(line)) {
+    if (
+      /^rest\b/i.test(line) &&
+      /\d\s*(?:sec|min)/i.test(line) &&
+      !/\b(?:between|after|each)\b/i.test(line)
+    ) {
       addItem(parseItem(line))
       return
     }
@@ -1688,7 +1723,8 @@ export function parseRoutine(text: string, name = 'Pasted routine'): ParsedRouti
      * like a parse, which is worse than a line reported as unread.
      */
     const loose = parseItem(line)
-    const isStep = loose.durationMs !== undefined || (loose.count !== undefined && /^\p{L}/u.test(loose.name))
+    const isStep =
+      loose.durationMs !== undefined || (loose.count !== undefined && /^\p{L}/u.test(loose.name))
     if (isStep && openMinute) return joinMinute(openMinute, line)
     if (isStep) return addItem(loose)
 

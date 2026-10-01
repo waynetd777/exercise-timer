@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useState } from 'react'
 import type { Block, Ladder, Repeat, RoutineColour, Section, Segment, Workout } from '../../engine'
@@ -137,5 +134,15 @@ export function useDraftHistory(workout: Workout): {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  return { history, setHistory, edit, editBlocks, patchSegment, patchRepeat, patchLadder, patchSection, patchTiming }
+  return {
+    history,
+    setHistory,
+    edit,
+    editBlocks,
+    patchSegment,
+    patchRepeat,
+    patchLadder,
+    patchSection,
+    patchTiming,
+  }
 }

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Re-keys a table written under an older `foldName`.
@@ -51,7 +48,10 @@ export function refoldKey(key: string): string {
  * The table with every stale key moved to its current spelling, and whether
  * anything moved, so the caller can write it back once.
  */
-export function refoldKeys<T>(table: Record<string, T>): { table: Record<string, T>; changed: boolean } {
+export function refoldKeys<T>(table: Record<string, T>): {
+  table: Record<string, T>
+  changed: boolean
+} {
   const out: Record<string, T> = {}
   let changed = false
   // Current keys first, so an entry the new build has already written is never

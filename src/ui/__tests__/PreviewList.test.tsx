@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -193,7 +190,9 @@ describe('PreviewList: a picture, full size', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Leg Press 65kg, full size' }))
 
     const shown = screen.getByRole('dialog')
-    expect(shown.querySelector('img')?.getAttribute('src')).toBe('https://example.test/leg-press.png')
+    expect(shown.querySelector('img')?.getAttribute('src')).toBe(
+      'https://example.test/leg-press.png',
+    )
     // The load reads with the name, exactly as it does in the row.
     expect(screen.getAllByText('Leg Press 65kg').length).toBeGreaterThan(1)
   })

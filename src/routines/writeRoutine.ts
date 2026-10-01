@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * A routine written back out as text the paste parser can read.
@@ -39,7 +36,14 @@
 
 import type { Block, Ladder, Repeat, Section, Segment, Workout } from '../engine/types'
 import { isGroup } from '../engine/types'
-import { DESCRIPTION_CHARS, GET_READY_MS, MINUTE_MS, parseItem, PREPARE_NAME, REST_NAME } from './pasteFormat'
+import {
+  DESCRIPTION_CHARS,
+  GET_READY_MS,
+  MINUTE_MS,
+  parseItem,
+  PREPARE_NAME,
+  REST_NAME,
+} from './pasteFormat'
 import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 
 /**
@@ -184,7 +188,9 @@ function stepLines(segment: Segment, lost: string[]): string[] {
   }
   if (!readsBack(line)) {
     if (note !== null) {
-      lost.push(`Note on "${segment.name}" would change how the step reads, so it was left out: "${note}"`)
+      lost.push(
+        `Note on "${segment.name}" would change how the step reads, so it was left out: "${note}"`,
+      )
       line = bare + time
     }
     if (!readsBack(line)) {
@@ -215,7 +221,12 @@ function stepLines(segment: Segment, lost: string[]): string[] {
 function ladderLines(ladder: Ladder, counter: { n: number }, lost: string[]): string[] {
   // The grammar has no ladder label; the reader's default is "Rung", and older
   // ladders carrying "Set" are migrated to it, so neither is worth a word.
-  if (ladder.label && ladder.label.trim() !== '' && ladder.label !== DEFAULT_LADDER_LABEL && ladder.label !== DEFAULT_REPEAT_LABEL) {
+  if (
+    ladder.label &&
+    ladder.label.trim() !== '' &&
+    ladder.label !== DEFAULT_LADDER_LABEL &&
+    ladder.label !== DEFAULT_REPEAT_LABEL
+  ) {
     lost.push(`The name "${ladder.label}" on a ladder; it will come back as "Rung"`)
   }
   const lines = [`Counting: ${ladder.counts.join('-')}`]
@@ -246,7 +257,9 @@ function repeatLines(repeat: Repeat, counter: { n: number }, lost: string[]): st
   // The grammar names every group "Rounds"; the reader's migration then calls
   // it "Set". Any other name is the user's, and does not survive.
   if (repeat.label && repeat.label !== DEFAULT_REPEAT_LABEL && repeat.label !== 'Round') {
-    lost.push(`The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`)
+    lost.push(
+      `The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`,
+    )
   }
   const lines = [`${repeat.times} Rounds`]
   lines.push(...siblingLines(body, counter, lost, false))
@@ -362,7 +375,9 @@ function emomLines(repeat: Repeat, lost: string[]): string[] | null {
    */
   if (!steps.some((step) => step.reps?.kind === 'fixed')) return null
   // Both belong to the line, not to the minute, and neither has a place in this form.
-  if (steps.some((step) => (step.note ?? '').trim() !== '' || (step.alternative ?? '').trim() !== '')) {
+  if (
+    steps.some((step) => (step.note ?? '').trim() !== '' || (step.alternative ?? '').trim() !== '')
+  ) {
     return null
   }
 
@@ -387,7 +402,9 @@ function emomLines(repeat: Repeat, lost: string[]): string[] | null {
   }
 
   if (repeat.label && repeat.label !== DEFAULT_REPEAT_LABEL && repeat.label !== 'Round') {
-    lost.push(`The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`)
+    lost.push(
+      `The name "${repeat.label}" on a group of ${repeat.times}; it will come back as "Set"`,
+    )
   }
   for (const step of steps) if (step.media) lost.push(`The picture on "${step.name}"`)
 

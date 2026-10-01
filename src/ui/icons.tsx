@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /*
  * Inline SVG rather than an icon font or emoji: it inherits `currentColor`,
@@ -117,7 +114,8 @@ export function GripIcon() {
 }
 
 export function StarIcon({ filled = false }: { filled?: boolean }) {
-  const points = "12 3.6 14.7 9.2 20.8 10 16.4 14.3 17.5 20.4 12 17.4 6.5 20.4 7.6 14.3 3.2 10 9.3 9.2"
+  const points =
+    '12 3.6 14.7 9.2 20.8 10 16.4 14.3 17.5 20.4 12 17.4 6.5 20.4 7.6 14.3 3.2 10 9.3 9.2'
   return (
     <Svg>
       {filled ? (

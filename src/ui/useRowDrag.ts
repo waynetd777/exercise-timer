@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
@@ -96,12 +93,9 @@ export function useRowDrag({ list, onStep, onEnd, onCancel }: Options): RowDrag 
   const latest = useRef({ onStep, onEnd, onCancel })
   latest.current = { onStep, onEnd, onCancel }
 
-  const shift = useCallback(
-    (rows: HTMLElement[], by: number) => {
-      for (const row of rows) row.style.transform = by === 0 ? '' : `translateY(${by}px)`
-    },
-    [],
-  )
+  const shift = useCallback((rows: HTMLElement[], by: number) => {
+    for (const row of rows) row.style.transform = by === 0 ? '' : `translateY(${by}px)`
+  }, [])
 
   const stop = useCallback(
     (cancelled: boolean) => {

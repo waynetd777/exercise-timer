@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Workout } from '../engine'
 import { hashesIn } from '../media/gc'
@@ -94,4 +91,3 @@ export async function putWorkout(workout: Workout): Promise<Workout> {
 export async function deleteWorkout(id: string): Promise<void> {
   await run(STORE_WORKOUTS, 'readwrite', (store) => store.delete(id))
 }
-

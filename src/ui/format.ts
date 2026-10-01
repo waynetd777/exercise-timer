@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
 
@@ -59,10 +56,15 @@ export function stopwatch(ms: number): string {
 }
 
 /** "Set 3 of 8 · Round 2 of 2" from a timeline entry's repeat path. */
-export function pathLabel(path: { kind?: string; label?: string; iteration: number; of: number }[]): string {
+export function pathLabel(
+  path: { kind?: string; label?: string; iteration: number; of: number }[],
+): string {
   return path
     .filter((step) => step.of > 1)
-    .map((step) => `${step.label?.trim() || (step.kind === 'ladder' ? DEFAULT_LADDER_LABEL : DEFAULT_REPEAT_LABEL)} ${step.iteration} of ${step.of}`)
+    .map(
+      (step) =>
+        `${step.label?.trim() || (step.kind === 'ladder' ? DEFAULT_LADDER_LABEL : DEFAULT_REPEAT_LABEL)} ${step.iteration} of ${step.of}`,
+    )
     .join(' · ')
 }
 
@@ -294,7 +296,10 @@ export function nameWithEffort(step: { name: string; load?: string } & Effort): 
   const statesCount = new RegExp(`\\b${count}\\s+(?:each|per)\\s+\\w+`, 'i').test(step.name)
   const suffix = step.reps.perSide && !NAMES_PER_SIDE.test(step.name) ? ' each side' : ''
   const named = `${step.name}${suffix}`
-  const withLoad = nameWithLoad({ name: named, ...(step.load !== undefined ? { load: step.load } : {}) })
+  const withLoad = nameWithLoad({
+    name: named,
+    ...(step.load !== undefined ? { load: step.load } : {}),
+  })
   return statesCount ? withLoad : `${count} × ${withLoad}`
 }
 
@@ -323,13 +328,15 @@ export function nameWithLoad(step: { name: string; load?: string }): string {
  * A section contributes `of: 1` and so captions as nothing, because its name is
  * already the heading above the list.
  */
-export function groupCaption(group: {
-  kind: 'section' | 'repeat' | 'ladder'
-  label?: string
-  iteration: number
-  of: number
-  rung?: number
-} | null): string {
+export function groupCaption(
+  group: {
+    kind: 'section' | 'repeat' | 'ladder'
+    label?: string
+    iteration: number
+    of: number
+    rung?: number
+  } | null,
+): string {
   if (!group || group.of <= 1) return ''
   // `||`, not `??`: deleting the label in the editor stores an empty string,
   // and a caption reading " 2 of 3" is worse than the default word.

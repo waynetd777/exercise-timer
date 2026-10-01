@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Putting a step's exercise back under the name the app knows it by.
@@ -68,7 +65,8 @@ const TRAILING_NOTE = /\s*\([^)]*\)$/
  */
 const TRAILING_DASH = /\s*[–—-]\s+.*$/
 /** The side, or the limb: "left", "right leg", "per leg", "each side". */
-const TRAILING_SIDE = /\s+(?:(?:left|right)(?:\s+(?:leg|arm|side))?|(?:per|each)\s+(?:leg|side|arm|direction))$/i
+const TRAILING_SIDE =
+  /\s+(?:(?:left|right)(?:\s+(?:leg|arm|side))?|(?:per|each)\s+(?:leg|side|arm|direction))$/i
 /** A count written after the name: "× 3", "x12". */
 const TRAILING_COUNT = /\s*[×x]\s*\d+$/i
 
@@ -194,10 +192,7 @@ export function tidyNames(
 }
 
 /** The same, for a whole routine. */
-function tidyWorkout(
-  workout: Workout,
-  byKey = table(),
-): { workout: Workout; renamed: Rename[] } {
+function tidyWorkout(workout: Workout, byKey = table()): { workout: Workout; renamed: Rename[] } {
   const { blocks, renamed } = tidyNames(workout.blocks, byKey)
   return renamed.length === 0
     ? { workout, renamed }

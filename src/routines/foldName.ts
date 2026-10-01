@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * An exercise name reduced far enough that its spellings meet.
@@ -52,23 +49,27 @@ export function closestKey(key: string, candidates: Iterable<string>): string | 
 }
 
 export function foldName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/\b\d+\s*[×x]?\s*/g, ' ')
-    .replace(/\b(?:each|per)\s+(?:side|leg|arm|direction)\b/g, ' ')
-    .replace(/[^a-z\s]/g, ' ')
-    .replace(/\b(?:left|right)\b/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => {
-      // "Crunches" is "crunch", not "crunche": an -es plural after a sibilant
-      // drops both letters.
-      if (/(?:ch|sh|ss|x|z)es$/.test(word)) return word.slice(0, -2)
-      // "Press" is not a plural: a word ending in a double s keeps both.
-      return word.length > 3 && word.endsWith('s') && !word.endsWith('ss') ? word.slice(0, -1) : word
-    })
-    // A trailing limb is the side, which is a field: "Fire Hydrant Left Leg".
-    .filter((word, at, all) => !(at === all.length - 1 && /^(?:leg|arm|side)$/.test(word)))
-    .join(' ')
+  return (
+    name
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/\b\d+\s*[×x]?\s*/g, ' ')
+      .replace(/\b(?:each|per)\s+(?:side|leg|arm|direction)\b/g, ' ')
+      .replace(/[^a-z\s]/g, ' ')
+      .replace(/\b(?:left|right)\b/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => {
+        // "Crunches" is "crunch", not "crunche": an -es plural after a sibilant
+        // drops both letters.
+        if (/(?:ch|sh|ss|x|z)es$/.test(word)) return word.slice(0, -2)
+        // "Press" is not a plural: a word ending in a double s keeps both.
+        return word.length > 3 && word.endsWith('s') && !word.endsWith('ss')
+          ? word.slice(0, -1)
+          : word
+      })
+      // A trailing limb is the side, which is a field: "Fire Hydrant Left Leg".
+      .filter((word, at, all) => !(at === all.length - 1 && /^(?:leg|arm|side)$/.test(word)))
+      .join(' ')
+  )
 }

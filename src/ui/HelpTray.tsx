@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useId } from 'react'
 import { CloseIcon } from './icons'
@@ -51,7 +48,13 @@ export function HelpTray({
   const group = useId()
 
   return (
-    <dialog ref={dialog} className="tray" aria-label={title} onClose={onClose} onClick={onBackdropClick}>
+    <dialog
+      ref={dialog}
+      className="tray"
+      aria-label={title}
+      onClose={onClose}
+      onClick={onBackdropClick}
+    >
       <div className="tray__head">
         <h2 className="tray__title">{title}</h2>
         <button
@@ -67,12 +70,7 @@ export function HelpTray({
 
       <div className="tray__body">
         {sections.map((section, index) => (
-          <details
-            key={section.heading}
-            className="tray__section"
-            name={group}
-            open={index === 0}
-          >
+          <details key={section.heading} className="tray__section" name={group} open={index === 0}>
             <summary className="tray__summary">{section.heading}</summary>
             <ul className="tray__points">
               {section.points.map((point) => (

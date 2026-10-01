@@ -1,12 +1,19 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { compile, stepCount, totalDurationMs } from '../compile'
-import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'
+import {
+  armsSection,
+  ladder,
+  legsLadder,
+  rep,
+  section,
+  seg,
+  step,
+  tabata,
+  workout,
+} from './fixtures'
 import type { Repeat, Segment } from '../types'
 
 describe('self-paced steps', () => {
@@ -41,7 +48,11 @@ describe('self-paced steps', () => {
   })
 
   it('counts only timed steps towards the total, and flags the routine as estimated', () => {
-    const mixed = workout('Mixed', [seg('Warm up', 40), step('Push-ups', 12), seg('Rest', 20, 'rest')])
+    const mixed = workout('Mixed', [
+      seg('Warm up', 40),
+      step('Push-ups', 12),
+      seg('Rest', 20, 'rest'),
+    ])
     const routine = compile(mixed)
 
     expect(routine.totalMs).toBe(60_000)
@@ -75,7 +86,9 @@ describe('runs and gates', () => {
       ]),
     )
 
-    expect(routine.runs.map((run) => ({ selfPaced: run.selfPaced, steps: run.entries.length }))).toEqual([
+    expect(
+      routine.runs.map((run) => ({ selfPaced: run.selfPaced, steps: run.entries.length })),
+    ).toEqual([
       { selfPaced: false, steps: 2 },
       { selfPaced: true, steps: 1 },
       { selfPaced: true, steps: 1 },
@@ -86,11 +99,21 @@ describe('runs and gates', () => {
 
   it('restarts run-local time after every gate, while step numbers stay continuous', () => {
     const routine = compile(
-      workout('Mixed', [seg('Jog', 40), step('Push-ups', 12), seg('Rest', 45, 'rest'), seg('Plank', 30)]),
+      workout('Mixed', [
+        seg('Jog', 40),
+        step('Push-ups', 12),
+        seg('Rest', 45, 'rest'),
+        seg('Plank', 30),
+      ]),
     )
 
     expect(
-      routine.entries.map((e) => ({ step: e.step, index: e.index, run: e.runIndex, start: e.startMs })),
+      routine.entries.map((e) => ({
+        step: e.step,
+        index: e.index,
+        run: e.runIndex,
+        start: e.startMs,
+      })),
     ).toEqual([
       { step: 1, index: 0, run: 0, start: 0 },
       { step: 2, index: 0, run: 1, start: 0 },
@@ -172,7 +195,7 @@ describe('ladders', () => {
 })
 
 describe('a round clears with ONE tap', () => {
-  it('puts a round\'s rep-based steps in one gate, and keeps its rest on the clock', () => {
+  it("puts a round's rep-based steps in one gate, and keeps its rest on the clock", () => {
     const routine = compile(armsSection())
 
     expect(
@@ -206,14 +229,18 @@ describe('a round clears with ONE tap', () => {
       ['Press'],
     ])
     const timer = compile(
-      workout('Timer', [section('Arms', [rep(2, [step('Curls', 12), step('Press', 10)])], 'timer')]),
+      workout('Timer', [
+        section('Arms', [rep(2, [step('Curls', 12), step('Press', 10)])], 'timer'),
+      ]),
     )
     expect(timer.runs).toHaveLength(4)
   })
 
   it('does not merge one round into the next', () => {
     const routine = compile(
-      workout('Rounds', [section('Arms', [rep(3, [step('Curls', 12), step('Press', 10)], 'Round')])]),
+      workout('Rounds', [
+        section('Arms', [rep(3, [step('Curls', 12), step('Press', 10)], 'Round')]),
+      ]),
     )
     expect(routine.runs).toHaveLength(3)
   })
@@ -254,7 +281,7 @@ describe('a round clears with ONE tap', () => {
     expect(routine.runs[0]!.entries).toHaveLength(3)
   })
 
-  it('keeps a section\'s own steps separate from a group inside it', () => {
+  it("keeps a section's own steps separate from a group inside it", () => {
     // The last rung of the ladder must not merge with the block that follows it.
     const routine = compile(
       workout('Legs', [
@@ -286,7 +313,12 @@ describe('a ladder rung clears with ONE tap', () => {
   it('puts the whole rung in one gate', () => {
     const routine = compile(
       workout('Ladder', [
-        section('Legs', [ladder([20, 16], [step('Goblet Squats', 'rung'), step('Walks', 10), step('Kickbacks', 10)])]),
+        section('Legs', [
+          ladder(
+            [20, 16],
+            [step('Goblet Squats', 'rung'), step('Walks', 10), step('Kickbacks', 10)],
+          ),
+        ]),
       ]),
     )
 
@@ -304,10 +336,12 @@ describe('a ladder rung clears with ONE tap', () => {
     // tap that clears the reps. It plays itself and flows into the next rung.
     const routine = compile(legsLadder())
 
-    expect(routine.runs.slice(0, 4).map((run) => ({
-      selfPaced: run.selfPaced,
-      names: run.entries.map((entry) => entry.name),
-    }))).toEqual([
+    expect(
+      routine.runs.slice(0, 4).map((run) => ({
+        selfPaced: run.selfPaced,
+        names: run.entries.map((entry) => entry.name),
+      })),
+    ).toEqual([
       { selfPaced: true, names: ['Goblet Squats', 'RB Lateral Walks'] },
       { selfPaced: false, names: ['Breathe'] },
       { selfPaced: true, names: ['Goblet Squats', 'RB Lateral Walks'] },
@@ -355,7 +389,9 @@ describe('sections', () => {
 
   it('changes nothing about timing or step count', () => {
     const bare = workout('Bare', [seg('Jog', 40), seg('Rest', 20, 'rest')])
-    const wrapped = workout('Wrapped', [section('Warm-up', [seg('Jog', 40), seg('Rest', 20, 'rest')], 'timer')])
+    const wrapped = workout('Wrapped', [
+      section('Warm-up', [seg('Jog', 40), seg('Rest', 20, 'rest')], 'timer'),
+    ])
 
     expect(compile(wrapped).totalMs).toBe(compile(bare).totalMs)
     expect(compile(wrapped).entries).toHaveLength(compile(bare).entries.length)

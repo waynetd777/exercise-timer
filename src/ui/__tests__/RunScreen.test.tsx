@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -98,8 +95,20 @@ const listed = (): Workout => ({
       name: 'CORE',
       display: 'list',
       children: [
-        { kind: 'segment', id: 's1', name: 'Heel Taps', role: 'work', reps: { kind: 'fixed', count: 10 } },
-        { kind: 'segment', id: 's2', name: 'Toe Touches', role: 'work', reps: { kind: 'fixed', count: 12 } },
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Heel Taps',
+          role: 'work',
+          reps: { kind: 'fixed', count: 10 },
+        },
+        {
+          kind: 'segment',
+          id: 's2',
+          name: 'Toe Touches',
+          role: 'work',
+          reps: { kind: 'fixed', count: 12 },
+        },
       ],
     },
   ],
@@ -168,11 +177,7 @@ describe('RunScreen: the countdown layout', () => {
     run(amrap())
     const items = screen.getAllByRole('listitem').map((li) => li.textContent)
 
-    expect(items).toEqual([
-      '10 × Squat + Shoulder Press',
-      '6 × Burpees',
-      '10 Mountain Climbers',
-    ])
+    expect(items).toEqual(['10 × Squat + Shoulder Press', '6 × Burpees', '10 Mountain Climbers'])
   })
 
   it('names the section once, in the header, whichever layout is running', () => {

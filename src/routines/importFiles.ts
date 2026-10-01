@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
@@ -84,7 +81,8 @@ export async function importRoutineFiles(
         // Not JSON, so read it the way the paste dialog would.
         const routine = pasted(text, file.name, now)
         imported.push(routine.workout)
-        if (routine.skipped.length > 0) skippedLines.push({ file: file.name, lines: routine.skipped })
+        if (routine.skipped.length > 0)
+          skippedLines.push({ file: file.name, lines: routine.skipped })
         continue
       }
 

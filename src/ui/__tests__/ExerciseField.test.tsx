@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { useState } from 'react'
@@ -218,7 +215,7 @@ describe('the exercise name field', () => {
     expect(active?.querySelector('.ename__label')?.textContent).toBe('Cycling')
   })
 
-  it('finds it through the instructor\'s own spelling', () => {
+  it("finds it through the instructor's own spelling", () => {
     // The routines are full of shorthand; the table is not.
     render(<Field start="12 × Seated Ab Crunch" />)
 

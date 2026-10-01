@@ -1,15 +1,21 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { advance, compile, locate, retreat, START } from '../engine'
 import type { TimelineEntry } from '../engine/types'
 import type { Cursor, Routine, RoutinePosition, Run, Workout } from '../engine'
 import type { Anchor, Clock } from './clock'
-import { credited, elapsed, IDLE_CLOCK, paused, resumed, seeked, started, suspendedMs } from './clock'
+import {
+  credited,
+  elapsed,
+  IDLE_CLOCK,
+  paused,
+  resumed,
+  seeked,
+  started,
+  suspendedMs,
+} from './clock'
 import { tick } from './tick'
 import { useWakeLock } from './useWakeLock'
 

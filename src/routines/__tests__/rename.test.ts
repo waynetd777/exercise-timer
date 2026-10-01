@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine/types'
@@ -91,15 +88,19 @@ describe('tidyNames', () => {
         id: 'r',
         times: 3,
         children: [
-          { kind: 'segment', id: 'a', name: '12 × Seated Ab Crunch', role: 'work', durationMs: 20_000 },
+          {
+            kind: 'segment',
+            id: 'a',
+            name: '12 × Seated Ab Crunch',
+            role: 'work',
+            durationMs: 20_000,
+          },
           { kind: 'segment', id: 'b', name: 'Rest', role: 'rest', durationMs: 10_000 },
         ],
       },
     ]
     const { blocks: next, renamed } = tidyNames(blocks)
-    expect(renamed).toEqual([
-      { from: '12 × Seated Ab Crunch', to: '12 × Seated Abdominal Crunch' },
-    ])
+    expect(renamed).toEqual([{ from: '12 × Seated Ab Crunch', to: '12 × Seated Abdominal Crunch' }])
     const children = (next[0] as { children: { name: string }[] }).children
     expect(children[0]!.name).toBe('12 × Seated Abdominal Crunch')
     expect(children[1]!.name).toBe('Rest')
@@ -138,14 +139,18 @@ describe('tidyLibrary', () => {
 describe('renamedName', () => {
   it('keeps everything around the name exactly as written', () => {
     expect(
-      renamedName('12 × Bugarian Split Squat 12kg (each side)', 'Bugarian Split Squat', 'Bulgarian Split Squat'),
+      renamedName(
+        '12 × Bugarian Split Squat 12kg (each side)',
+        'Bugarian Split Squat',
+        'Bulgarian Split Squat',
+      ),
     ).toBe('12 × Bulgarian Split Squat 12kg (each side)')
   })
 
   it('matches by fold, so a step spelt loosely is still that exercise', () => {
-    expect(renamedName('bugarian  split squat', 'Bugarian Split Squat', 'Bulgarian Split Squat')).toBe(
-      'Bulgarian Split Squat',
-    )
+    expect(
+      renamedName('bugarian  split squat', 'Bugarian Split Squat', 'Bulgarian Split Squat'),
+    ).toBe('Bulgarian Split Squat')
   })
 
   it('leaves a step that is not that exercise alone', () => {
@@ -155,11 +160,15 @@ describe('renamedName', () => {
   it('refuses a qualified name rather than shortening it', () => {
     // "Left" says which side, and peeling could not place it: better a step left
     // as written than one a rename quietly truncates.
-    expect(renamedName('Left Bugarian Split Squat', 'Bugarian Split Squat', 'Bulgarian Split Squat')).toBeNull()
+    expect(
+      renamedName('Left Bugarian Split Squat', 'Bugarian Split Squat', 'Bulgarian Split Squat'),
+    ).toBeNull()
   })
 
   it('returns null where the rename changes nothing', () => {
-    expect(renamedName('Bulgarian Split Squat', 'Bulgarian Split Squat', 'Bulgarian Split Squat')).toBeNull()
+    expect(
+      renamedName('Bulgarian Split Squat', 'Bulgarian Split Squat', 'Bulgarian Split Squat'),
+    ).toBeNull()
   })
 })
 
@@ -173,7 +182,13 @@ describe('renameInWorkout', () => {
         id: 'r',
         times: 3,
         children: [
-          { kind: 'segment', id: 'a', name: '12 × Bugarian Split Squat', role: 'work', durationMs: 20_000 },
+          {
+            kind: 'segment',
+            id: 'a',
+            name: '12 × Bugarian Split Squat',
+            role: 'work',
+            durationMs: 20_000,
+          },
           { kind: 'segment', id: 'b', name: 'Rest', role: 'rest', durationMs: 10_000 },
         ],
       },
@@ -185,7 +200,11 @@ describe('renameInWorkout', () => {
   }
 
   it('renames every step that says the old name, groups included, and counts them', () => {
-    const { workout: next, renamed } = renameInWorkout(workout, 'Bugarian Split Squat', 'Bulgarian Split Squat')
+    const { workout: next, renamed } = renameInWorkout(
+      workout,
+      'Bugarian Split Squat',
+      'Bulgarian Split Squat',
+    )
     expect(renamed).toBe(2)
     const inner = (next.blocks[0] as { children: { name: string }[] }).children
     expect(inner[0]!.name).toBe('12 × Bulgarian Split Squat')

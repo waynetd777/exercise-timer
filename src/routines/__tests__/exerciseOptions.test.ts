@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Exercise } from '../exercises'
@@ -45,7 +42,10 @@ describe('the exercise table as the name field offers it', () => {
     const by = (name: string) => options.find((o) => o.name === name)
 
     expect(by('Leg Press')?.picture).toEqual(chosen)
-    expect(by('Bicep Curl')?.picture).toEqual({ source: 'bundled', path: 'exercises/Bicep-Curl.jpg' })
+    expect(by('Bicep Curl')?.picture).toEqual({
+      source: 'bundled',
+      path: 'exercises/Bicep-Curl.jpg',
+    })
     expect(by('Squat') && 'picture' in by('Squat')!).toBe(false)
   })
 
@@ -68,7 +68,7 @@ describe('the exercise table as the name field offers it', () => {
     expect(kickback?.perSide).toBe(true)
   })
 
-  it('deduplicates by folded name, so the guide\'s spelling wins', () => {
+  it("deduplicates by folded name, so the guide's spelling wins", () => {
     /*
      * The table is three files, one harvested from the routines, so the same
      * movement can arrive twice under two spellings. Two rows for one exercise
@@ -108,9 +108,9 @@ describe('what the list shows for what has been typed', () => {
   it('groups everything under its kit while nothing is typed', () => {
     const rows = exerciseRows(options, '')
 
-    expect(rows.filter((r) => r.kind === 'group').map((r) => r.kind === 'group' && r.label)).toEqual(
-      ['Multi-gym', 'Bodyweight'],
-    )
+    expect(
+      rows.filter((r) => r.kind === 'group').map((r) => r.kind === 'group' && r.label),
+    ).toEqual(['Multi-gym', 'Bodyweight'])
     expect(optionsOf(rows).length).toBe(5)
   })
 
@@ -150,7 +150,7 @@ describe('what the list shows for what has been typed', () => {
     expect(exerciseRows(options, 'leg').some((r) => r.kind === 'group')).toBe(false)
   })
 
-  it('folds both sides, so the instructor\'s own spellings find their exercise', () => {
+  it("folds both sides, so the instructor's own spellings find their exercise", () => {
     // `foldName` is why: she writes counts, plurals and brackets into a name,
     // and this field is where they get typed.
     expect(optionsOf(exerciseRows(options, 'ab crunch')).map((o) => o.name)).toEqual([
@@ -212,7 +212,7 @@ describe('where a written name sits in the list', () => {
     expect(indexOfName(options, 'Cycling')).toBe(2)
   })
 
-  it('reads through a count and the instructor\'s shorthand', () => {
+  it("reads through a count and the instructor's shorthand", () => {
     // Exact first, then `closestKey`: "ab" finds "abdominal", the same way the
     // weight lookup and the renamer read a written name.
     expect(indexOfName(options, '12 × Seated Ab Crunch')).toBe(1)

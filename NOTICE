@@ -1,0 +1,16 @@
+Exercise Timer
+Copyright © 2026 Wayne Davies
+
+The source code of this repository is free software under the GNU General
+Public License, version 3 or later (GPL-3.0-or-later). See LICENSE.
+
+It does not cover the exercise illustrations in `public/exercises/` or the
+images referenced by remote URL in the seed routines. Those are crops of the
+Horizon Torus 5 Exercise Guide, reproduced here for personal use. They belong to
+their owner, and no rights to them are granted or implied. Anyone reusing this
+code should supply their own illustrations. `scripts/exercise_plates.py` shows
+how the set is produced from a guide PDF.
+
+`src/audio/referee-whistle-cc0.wav` is a Creative Commons 0 1.0 public domain
+recording by SpliceSound (freesound.org sound 218318), prepared as described in
+`src/audio/samples.ts`. CC0 requires no attribution.

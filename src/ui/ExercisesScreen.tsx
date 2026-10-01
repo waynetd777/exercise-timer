@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useMemo, useState } from 'react'
 import type { Block, MediaRef, Workout } from '../engine'
@@ -11,7 +8,13 @@ import { attributesOf, KIT_GROUPS, loadable } from '../routines/exercises'
 import { exerciseKey, withoutStatedLoads } from '../routines/loads'
 import type { KnownImage } from '../editor/images'
 import { currentWeights, loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
-import { chosenPicture, loadPictures, picturesOver, savePictures, withPicture } from '../storage/pictures'
+import {
+  chosenPicture,
+  loadPictures,
+  picturesOver,
+  savePictures,
+  withPicture,
+} from '../storage/pictures'
 import type { CustomExercise } from '../storage/customExercises'
 import {
   addCustom,
@@ -114,30 +117,30 @@ function PictureDialog({
 }) {
   return (
     <ImageSheet src={src} alt={name} onClose={onClose}>
-        <p className="notice__text">{name}</p>
-        {chosen && (
-          <p className="notice__detail label label--sm">
-            Shown by every routine that names this exercise and carries no picture of its own.
-          </p>
-        )}
-        <div className="notice__actions">
-          {/* Close first and focused, so a stray Enter keeps the picture. The
+      <p className="notice__text">{name}</p>
+      {chosen && (
+        <p className="notice__detail label label--sm">
+          Shown by every routine that names this exercise and carries no picture of its own.
+        </p>
+      )}
+      <div className="notice__actions">
+        {/* Close first and focused, so a stray Enter keeps the picture. The
               same order, for the same reason, as every other dialog here. */}
-          <button type="button" className="chip" onClick={onClose} autoFocus>
-            <CloseIcon />
-            Close
+        <button type="button" className="chip" onClick={onClose} autoFocus>
+          <CloseIcon />
+          Close
+        </button>
+        <button type="button" className="chip chip--action" onClick={onChange}>
+          <ImageIcon />
+          Change
+        </button>
+        {chosen && (
+          <button type="button" className="chip chip--danger" onClick={onClear}>
+            <TrashIcon />
+            {guide ? "Use the guide's" : 'Remove'}
           </button>
-          <button type="button" className="chip chip--action" onClick={onChange}>
-            <ImageIcon />
-            Change
-          </button>
-          {chosen && (
-            <button type="button" className="chip chip--danger" onClick={onClear}>
-              <TrashIcon />
-              {guide ? "Use the guide's" : 'Remove'}
-            </button>
-          )}
-        </div>
+        )}
+      </div>
     </ImageSheet>
   )
 }
@@ -557,7 +560,8 @@ export function ExercisesScreen({
   }
 
   const missing = table.filter(
-    (exercise) => loadable(exercise) && !shown(exercise.name) && fromLibrary.has(exerciseKey(exercise.name)),
+    (exercise) =>
+      loadable(exercise) && !shown(exercise.name) && fromLibrary.has(exerciseKey(exercise.name)),
   )
 
   const fillFromRoutines = () => {
@@ -604,18 +608,20 @@ export function ExercisesScreen({
     // page that asked, rather than left as an unhandled rejection.
     void Promise.resolve(onFollow(overriding.rewritten)).catch((cause: unknown) => {
       const reason = cause instanceof Error ? cause.message : 'Could not save'
-      setNotice(`${reason}. The routines not yet rewritten still state their own weights; try again.`)
+      setNotice(
+        `${reason}. The routines not yet rewritten still state their own weights; try again.`,
+      )
     })
   }
 
-/*
- * NO "n of n weighed, n of n pictured" HERE ANY MORE. It read as a completeness
- * score for a page nobody is meant to complete: most of these exercises you will
- * never do, blank is a real answer for a weight, and the number quietly asked
- * you to fill in 68 of them. Each kit's heading carries its own count, which
- * answers the only question the total was really being asked: how much is in
- * here. "Fill n from my routines" still says when there is something to do.
- */
+  /*
+   * NO "n of n weighed, n of n pictured" HERE ANY MORE. It read as a completeness
+   * score for a page nobody is meant to complete: most of these exercises you will
+   * never do, blank is a real answer for a weight, and the number quietly asked
+   * you to fill in 68 of them. Each kit's heading carries its own count, which
+   * answers the only question the total was really being asked: how much is in
+   * here. "Fill n from my routines" still says when there is something to do.
+   */
 
   return (
     <main className="weights">
@@ -875,9 +881,7 @@ export function ExercisesScreen({
                               className="clearable__x"
                               aria-label={`Clear the weight for ${exercise.name}`}
                               title={
-                                hint
-                                  ? `Clear, and show what your routines use: ${hint}`
-                                  : 'Clear'
+                                hint ? `Clear, and show what your routines use: ${hint}` : 'Clear'
                               }
                               onClick={() => set(exercise.name, '')}
                             >

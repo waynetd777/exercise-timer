@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { IMAGE_CATALOGUE } from '../imageCatalogue'
@@ -50,8 +47,8 @@ describe('IMAGE_CATALOGUE', () => {
    * would let app code reach for `fs` by accident. The loaders are never called,
    * so nothing here ends up in a bundle.
    */
-  const shipped = Object.keys(import.meta.glob('/public/exercises/*.jpg')).map(
-    (path) => path.split('/').pop()!,
+  const shipped = Object.keys(import.meta.glob('/public/exercises/*.jpg')).map((path) =>
+    path.split('/').pop()!,
   )
 
   it('names a file that actually ships', () => {

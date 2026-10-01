@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Workout } from '../../engine'
@@ -116,7 +113,7 @@ describe('an uploaded photo travels in the file', () => {
     expect(await sha256(restored.entries[0]!.blob)).toBe(hash)
   })
 
-  it('carries nothing for a routine that only uses the app\'s own illustrations', async () => {
+  it("carries nothing for a routine that only uses the app's own illustrations", async () => {
     const routine = workout('Bundled only')
     routine.blocks[0] = {
       kind: 'segment',
@@ -197,7 +194,12 @@ describe('fromBundle', () => {
     // `compile()` throws on more than MAX_TIMELINE_ENTRIES steps, in the run
     // screen's render. A file is the one way such a routine arrives without
     // the editor's guard seeing it.
-    const nested = (times: number, child: Block): Block => ({ kind: 'repeat', id: `r${times}`, times, children: [child] })
+    const nested = (times: number, child: Block): Block => ({
+      kind: 'repeat',
+      id: `r${times}`,
+      times,
+      children: [child],
+    })
     const huge = {
       kind: 'davshack-timer-bundle',
       version: 1,
@@ -205,7 +207,21 @@ describe('fromBundle', () => {
         {
           id: 'big',
           name: 'Too big',
-          blocks: [nested(99, nested(99, nested(99, { kind: 'segment', id: 's', name: 'Squat', role: 'work', reps: { kind: 'fixed', count: 5 } })))],
+          blocks: [
+            nested(
+              99,
+              nested(
+                99,
+                nested(99, {
+                  kind: 'segment',
+                  id: 's',
+                  name: 'Squat',
+                  role: 'work',
+                  reps: { kind: 'fixed', count: 5 },
+                }),
+              ),
+            ),
+          ],
         },
       ],
     }
@@ -329,21 +345,57 @@ describe('field validation', () => {
   })
 
   it('rejects a malformed reps shape and keeps the two real ones', () => {
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed', count: '10' } }])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed', count: '10' } },
+    ])
     rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed' } }])
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'rung', perSide: 'yes' } }])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'rung', perSide: 'yes' } },
+    ])
     rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: 'ten' }])
-    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'fixed', count: 10, perSide: true } }])
+    accepts([
+      {
+        kind: 'segment',
+        id: 's',
+        name: 'W',
+        role: 'work',
+        reps: { kind: 'fixed', count: 10, perSide: true },
+      },
+    ])
     accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', reps: { kind: 'rung' } }])
   })
 
   it('rejects media whose fields do not match its source', () => {
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'local', hash: 'h' } }])
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'bundled', path: 9 } }])
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'remote', url: null } }])
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'dropbox', url: 'x' } }])
-    rejects([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'bundled', path: 'p', w: '640' } }])
-    accepts([{ kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'local', hash: 'h', mime: 'image/webp' } }])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'local', hash: 'h' } },
+    ])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'bundled', path: 9 } },
+    ])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'remote', url: null } },
+    ])
+    rejects([
+      { kind: 'segment', id: 's', name: 'W', role: 'work', media: { source: 'dropbox', url: 'x' } },
+    ])
+    rejects([
+      {
+        kind: 'segment',
+        id: 's',
+        name: 'W',
+        role: 'work',
+        media: { source: 'bundled', path: 'p', w: '640' },
+      },
+    ])
+    accepts([
+      {
+        kind: 'segment',
+        id: 's',
+        name: 'W',
+        role: 'work',
+        media: { source: 'local', hash: 'h', mime: 'image/webp' },
+      },
+    ])
   })
 
   it('rejects a repeat whose times is not a finite number', () => {
@@ -426,7 +478,9 @@ describe('the weights a backup carries', () => {
   it('drops an empty weight, which an older export wrote for a cleared one', () => {
     // Merged over the local table on import, that '' emptied a real number.
     const bundle = toBundle([workout('Legs')], 1000, {}, { 'leg press': '', 'seated row': '40kg' })
-    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).weights).toEqual({ 'seated row': '40kg' })
+    expect(fromBundle(JSON.parse(JSON.stringify(bundle)), 2000).weights).toEqual({
+      'seated row': '40kg',
+    })
   })
 })
 

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Roughly how long a routine takes, including the parts that have no length.
@@ -103,7 +100,11 @@ export function estimate(
         }
         // Self-paced. A rung takes its count from the ladder around it.
         const count =
-          block.reps?.kind === 'fixed' ? block.reps.count : block.reps?.kind === 'rung' ? rung : null
+          block.reps?.kind === 'fixed'
+            ? block.reps.count
+            : block.reps?.kind === 'rung'
+              ? rung
+              : null
         if (count !== null && count > 0) {
           estimatedMs += stepMs(block.name, count, block.reps?.perSide === true, measured)
         }
@@ -113,7 +114,10 @@ export function estimate(
       if (block.kind === 'repeat') {
         const before = { knownMs, estimatedMs }
         walk(block.children, rung)
-        const once = { known: knownMs - before.knownMs, estimated: estimatedMs - before.estimatedMs }
+        const once = {
+          known: knownMs - before.knownMs,
+          estimated: estimatedMs - before.estimatedMs,
+        }
         // The first pass is already counted, so add the rest.
         const more = Math.max(0, Math.floor(block.times) - 1)
         knownMs += once.known * more

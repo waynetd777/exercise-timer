@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Block, MediaRef, SegmentRole, Workout } from '../engine'
 import { MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, SCHEMA_VERSION, stepCount } from '../engine'
@@ -284,8 +281,17 @@ export function fromBundle(json: unknown, now: number): BundleContents {
        * unknown key used to land in the store. A last run in the future, which
        * would sit at the top of the library for years, is brought back to now.
        */
-      const { id, name, colour, blocks, createdAt, updatedAt, lastRunAt, favourite, estimatedTotalMs } =
-        entry
+      const {
+        id,
+        name,
+        colour,
+        blocks,
+        createdAt,
+        updatedAt,
+        lastRunAt,
+        favourite,
+        estimatedTotalMs,
+      } = entry
       workouts.push({
         id,
         name,

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * What an exercise LOOKS like, per exercise, in one place.
@@ -175,10 +172,7 @@ export function picturesFor(names: Iterable<string>, pictures: Pictures): Pictur
  * must also keep a pinned copy of a linked image alive, an export wants only the
  * bytes nothing else has.
  */
-export function pictureHashes(
-  pictures: Pictures,
-  uploadedOnly = false,
-): string[] {
+export function pictureHashes(pictures: Pictures, uploadedOnly = false): string[] {
   const found = new Set<string>()
   for (const ref of Object.values(pictures)) {
     const hash = blobHashOf(ref, uploadedOnly)

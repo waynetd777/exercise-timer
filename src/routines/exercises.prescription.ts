@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * How the instructor prescribes each exercise.
@@ -47,7 +44,14 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'alternating lateral lunge', prescribe: 'reps', reps: 20 },
   { name: 'alternating leg raise', prescribe: 'reps', reps: 10 },
   { name: 'alternating reverse lunge knee drive', prescribe: 'time', rung: true },
-  { name: 'alternating reverse lunge', prescribe: 'reps', reps: 12, seconds: 30, rung: true, secondsPerRep: 2.5 },
+  {
+    name: 'alternating reverse lunge',
+    prescribe: 'reps',
+    reps: 12,
+    seconds: 30,
+    rung: true,
+    secondsPerRep: 2.5,
+  },
   { name: 'alternating step back lunge', prescribe: 'time' },
   { name: 'arm circle', prescribe: 'time', seconds: 30 },
   { name: 'arm swing across chest overhead', prescribe: 'time', seconds: 30 },
@@ -65,7 +69,14 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'bicycle crunch', prescribe: 'reps', reps: 12, rung: true },
   { name: 'bodyweight squat', prescribe: 'reps', reps: 10 },
   { name: 'bugarian split squat', prescribe: 'time', rung: true },
-  { name: 'bulgarian split squat', prescribe: 'time', reps: 5, seconds: 30, rung: true, secondsPerRep: 6 },
+  {
+    name: 'bulgarian split squat',
+    prescribe: 'time',
+    reps: 5,
+    seconds: 30,
+    rung: true,
+    secondsPerRep: 6,
+  },
   { name: 'butt kick', prescribe: 'time', seconds: 20 },
   { name: 'butt stretch', prescribe: 'reps', reps: 3, seconds: 20 },
   { name: 'calf raise pulse', prescribe: 'reps', reps: 10 },
@@ -93,7 +104,13 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'front punch', prescribe: 'reps', reps: 20 },
   { name: 'glute bridge march', prescribe: 'reps', reps: 15 },
   { name: 'glute bridge pulse', prescribe: 'reps', reps: 20 },
-  { name: 'glute bridge rb abduction', prescribe: 'reps', reps: 20, seconds: 30, secondsPerRep: 1.5 },
+  {
+    name: 'glute bridge rb abduction',
+    prescribe: 'reps',
+    reps: 20,
+    seconds: 30,
+    secondsPerRep: 1.5,
+  },
   { name: 'glute bridge', prescribe: 'reps', reps: 12 },
   { name: 'glute kickback with resistance band', prescribe: 'reps', reps: 10 },
   { name: 'glute stretch', prescribe: 'time' },
@@ -132,7 +149,14 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'low plank sec plank jack', prescribe: 'time', seconds: 20 },
   { name: 'low plank to high plank x', prescribe: 'time' },
   { name: 'march jog on the spot', prescribe: 'time', seconds: 40 },
-  { name: 'mountain climber', prescribe: 'reps', reps: 30, seconds: 30, rung: true, secondsPerRep: 1 },
+  {
+    name: 'mountain climber',
+    prescribe: 'reps',
+    reps: 30,
+    seconds: 30,
+    rung: true,
+    secondsPerRep: 1,
+  },
   { name: 'normal push up', prescribe: 'time' },
   { name: 'oblique crunch', prescribe: 'reps', reps: 10 },
   { name: 'on trampoline', prescribe: 'time' },
@@ -159,7 +183,11 @@ export const PRESCRIPTIONS: readonly Prescription[] = [
   { name: 'rear delt flie', prescribe: 'reps', reps: 12 },
   { name: 'renegade row', prescribe: 'reps', reps: 8 },
   { name: 'rep min', prescribe: 'reps', reps: 10 },
-  { name: 'resistance band side raise or resistance band fire hydrant', prescribe: 'reps', reps: 20 },
+  {
+    name: 'resistance band side raise or resistance band fire hydrant',
+    prescribe: 'reps',
+    reps: 20,
+  },
   { name: 'resistance band side step', prescribe: 'reps', reps: 15 },
   { name: 'resistance band walk', prescribe: 'reps', reps: 15 },
   { name: 'rev lunge forward lunge', prescribe: 'reps', reps: 5 },

@@ -122,7 +122,8 @@ Only needed if you want to change the code.
 npm install
 npm run dev        # http://localhost:35173
 npm test           # no browser needed
-npm run lint       # oxlint: correctness and the rules of hooks
+npm run lint       # Prettier, oxlint and Ruff; any warning fails it
+npm run format     # Prettier for the TypeScript and CSS, Ruff for scripts/
 npm run typecheck
 npm run build
 ```
@@ -132,7 +133,7 @@ every cue as the full figure and as its terminal sound alone, with the
 parameters printed beside it. It is compiled out of a production build.
 
 Deployment is automatic. A push to `main` builds and publishes to GitHub Pages,
-gated on typecheck and tests, because a broken timer is worse than a stale one.
+gated on typecheck, lint and tests, because a broken timer is worse than a stale one.
 Pages serves from a subpath, so `VITE_BASE` is set in the workflow and every
 bundled asset path goes through `import.meta.env.BASE_URL`.
 
@@ -201,10 +202,13 @@ Several tests are named after the bug they exist to prevent.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE). Use the code for anything, including commercially,
-as long as the copyright notice and licence text come along with it.
+GNU General Public License, version 3 or later. See [LICENSE](LICENSE). Use,
+change and share the code freely, including commercially, as long as anything
+you distribute built from it is under the same licence with its source available.
+Every source file carries a copyright and `SPDX-License-Identifier:
+GPL-3.0-or-later` header; add both to a new file.
 
 Two things the licence does not cover. The exercise illustrations in
 `public/exercises/` are crops of the Horizon Torus 5 Exercise Guide, kept here
 for personal use, so bring your own images if you reuse this. The whistle is a
-CC0 public domain recording and needs no attribution. `LICENSE` has the detail.
+CC0 public domain recording and needs no attribution. `NOTICE` has the detail.

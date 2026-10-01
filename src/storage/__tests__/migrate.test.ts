@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Section, Segment, Workout } from '../../engine'
@@ -88,7 +85,9 @@ describe("an AMRAP's round, run together into a paragraph", () => {
 
 describe('rehosted illustrations', () => {
   it('turns an old postimages link into the image that ships with the app', () => {
-    const migrated = migrateWorkout(workout([step('Cable Fly', { source: 'remote', url: CABLE_FLY })]))
+    const migrated = migrateWorkout(
+      workout([step('Cable Fly', { source: 'remote', url: CABLE_FLY })]),
+    )
     expect(steps(migrated)[0]!.media).toEqual({
       source: 'bundled',
       path: 'exercises/Cable-Fly.jpg',
@@ -116,7 +115,10 @@ describe('rehosted illustrations', () => {
     const cases: [string, string][] = [
       ['https://i.postimg.cc/Gt7J6VXr/Tricep-Press.png', 'exercises/Triceps-Press.jpg'],
       ['https://i.postimg.cc/RFNCzVxN/Standing-Arm-Curl.png', 'exercises/Standing-Arm-Curl.jpg'],
-      ['https://i.postimg.cc/Znb8dQVQ/Seated-Ab-Crunch.png', 'exercises/Seated-Abdominal-Crunch.jpg'],
+      [
+        'https://i.postimg.cc/Znb8dQVQ/Seated-Ab-Crunch.png',
+        'exercises/Seated-Abdominal-Crunch.jpg',
+      ],
       ['https://i.postimg.cc/rphybRbB/Cable-Row.png', 'exercises/Seated-Cable-Row.jpg'],
       ['https://i.postimg.cc/xCSy08Hn/Tricep-Dip.png', 'exercises/Tricep-Dips.jpg'],
     ]
@@ -202,18 +204,14 @@ describe('rehosted illustrations', () => {
       expect(named(name)).toMatchObject({ name: expected, load })
     })
 
-    it.each([
-      'Squat to 90',
-      'Minute 5',
-      'Row 500m',
-      '20kg Goblet Squat',
-      'Cycling',
-      '65kg',
-    ])('leaves %s alone', (name) => {
-      const step = named(name)
-      expect(step.name).toBe(name)
-      expect(step.load).toBeUndefined()
-    })
+    it.each(['Squat to 90', 'Minute 5', 'Row 500m', '20kg Goblet Squat', 'Cycling', '65kg'])(
+      'leaves %s alone',
+      (name) => {
+        const step = named(name)
+        expect(step.name).toBe(name)
+        expect(step.load).toBeUndefined()
+      },
+    )
 
     it('does not overwrite a load the step already has', () => {
       expect(named('Leg Press 65kg', '70kg')).toMatchObject({

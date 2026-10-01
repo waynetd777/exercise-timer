@@ -1,0 +1,8 @@
+# Ruff, for the Python in scripts/ (npm run lint). Same width and quotes as Prettier.
+line-length = 100
+
+[lint]
+extend-select = ["I"]
+
+[format]
+quote-style = "single"

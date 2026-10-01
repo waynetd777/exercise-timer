@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useState } from 'react'
 import { parseRoutine } from '../routines/pasteFormat'
@@ -53,7 +50,6 @@ export function PasteDialog({
   /** The acknowledgement after copying the template, or null. */
   const [copied, setCopied] = useState<string | null>(null)
 
-
   /**
    * Hands over an example of everything the parser understands.
    *
@@ -68,13 +64,17 @@ export function PasteDialog({
   const copyTemplate = async () => {
     try {
       await navigator.clipboard.writeText(PASTE_TEMPLATE)
-      setCopied('Template copied to the clipboard. Paste it here, or edit it wherever you keep your routines.')
+      setCopied(
+        'Template copied to the clipboard. Paste it here, or edit it wherever you keep your routines.',
+      )
     } catch {
       if (text.trim() === '') {
         setText(PASTE_TEMPLATE)
         setCopied('The clipboard was not available, so the template is in the box instead.')
       } else {
-        setCopied('The clipboard was not available. Empty the box and try again to have the template put there instead.')
+        setCopied(
+          'The clipboard was not available. Empty the box and try again to have the template put there instead.',
+        )
       }
     }
   }
@@ -89,78 +89,80 @@ export function PasteDialog({
       <dialog ref={dialog} className="modal" onCancel={onCancel} onClose={onCancel}>
         {/* The panel is its own element. See `.modal` in theme.css. */}
         <div className="paste">
-      <h2 className="paste__title">Paste a routine</h2>
+          <h2 className="paste__title">Paste a routine</h2>
 
-      <label className="paste__field">
-        <span className="label label--sm">Name</span>
-        <input
-          className="paste__name"
-          value={name}
-          placeholder={fallback}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
+          <label className="paste__field">
+            <span className="label label--sm">Name</span>
+            <input
+              className="paste__name"
+              value={name}
+              placeholder={fallback}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
 
-      <label className="paste__field">
-        <span className="label label--sm">Routine text</span>
-        <textarea
-          className="paste__text"
-          value={text}
-          autoFocus
-          placeholder={'#1 General Body\nCounting: 2-4-6-8-10-8-6-4-2\n\n* Squat + Shoulder Press\n…'}
-          onChange={(event) => setText(event.target.value)}
-        />
-      </label>
+          <label className="paste__field">
+            <span className="label label--sm">Routine text</span>
+            <textarea
+              className="paste__text"
+              value={text}
+              autoFocus
+              placeholder={
+                '#1 General Body\nCounting: 2-4-6-8-10-8-6-4-2\n\n* Squat + Shoulder Press\n…'
+              }
+              onChange={(event) => setText(event.target.value)}
+            />
+          </label>
 
-      {parsed && (
-        <div className="paste__report">
-          <p className="label label--sm">
-            {sections} {sections === 1 ? 'section' : 'sections'} ·{' '}
-            {parsed.skipped.length === 0
-              ? 'every line understood'
-              : `${parsed.skipped.length} ${parsed.skipped.length === 1 ? 'line' : 'lines'} not understood`}
-          </p>
-          {parsed.skipped.length > 0 && (
-            <ul className="paste__skipped label label--sm">
-              {parsed.skipped.map((line) => (
-                <li key={line.line}>
-                  <b>{line.line}</b> {line.text}
-                </li>
-              ))}
-            </ul>
+          {parsed && (
+            <div className="paste__report">
+              <p className="label label--sm">
+                {sections} {sections === 1 ? 'section' : 'sections'} ·{' '}
+                {parsed.skipped.length === 0
+                  ? 'every line understood'
+                  : `${parsed.skipped.length} ${parsed.skipped.length === 1 ? 'line' : 'lines'} not understood`}
+              </p>
+              {parsed.skipped.length > 0 && (
+                <ul className="paste__skipped label label--sm">
+                  {parsed.skipped.map((line) => (
+                    <li key={line.line}>
+                      <b>{line.line}</b> {line.text}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
-        </div>
-      )}
 
-      <div className="paste__actions">
-        {/* First, and not primary: it is the way in for someone who has nothing
+          <div className="paste__actions">
+            {/* First, and not primary: it is the way in for someone who has nothing
             to paste yet, and a distraction for everyone else. */}
-        <button
-          type="button"
-          className="chip chip--action paste__template"
-          onClick={() => void copyTemplate()}
-          title="An example using everything this box understands"
-        >
-          <CopyIcon />
-          Copy template
-        </button>
+            <button
+              type="button"
+              className="chip chip--action paste__template"
+              onClick={() => void copyTemplate()}
+              title="An example using everything this box understands"
+            >
+              <CopyIcon />
+              Copy template
+            </button>
 
-        <button type="button" className="chip" onClick={onCancel}>
-          <CloseIcon />
-          Cancel
-        </button>
-        {/* Importing with unread lines is allowed. They are listed above, and a
+            <button type="button" className="chip" onClick={onCancel}>
+              <CloseIcon />
+              Cancel
+            </button>
+            {/* Importing with unread lines is allowed. They are listed above, and a
             routine with one odd line should not be unimportable. */}
-        <button
-          type="button"
-          className="chip chip--primary"
-          disabled={!parsed || parsed.blocks.length === 0}
-          onClick={() => parsed && onImport(parsed)}
-        >
-          <PlusIcon />
-          Add to library
-        </button>
-      </div>
+            <button
+              type="button"
+              className="chip chip--primary"
+              disabled={!parsed || parsed.blocks.length === 0}
+              onClick={() => parsed && onImport(parsed)}
+            >
+              <PlusIcon />
+              Add to library
+            </button>
+          </div>
         </div>
       </dialog>
 

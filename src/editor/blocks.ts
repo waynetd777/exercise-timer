@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Block, Ladder, Repeat, Section, Segment, SegmentRole } from '../engine'
 import { isGroup, DEFAULT_LADDER_LABEL, DEFAULT_REPEAT_LABEL } from '../engine'
@@ -163,11 +160,7 @@ export function blockAt(blocks: readonly Block[], path: Path): Block | undefined
 }
 
 /** Replaces the block at `path`; returning null removes it. */
-function mapAt(
-  blocks: readonly Block[],
-  path: Path,
-  fn: (block: Block) => Block | null,
-): Block[] {
+function mapAt(blocks: readonly Block[], path: Path, fn: (block: Block) => Block | null): Block[] {
   if (path.length === 0) return [...blocks]
   const [head, ...rest] = path
   return blocks.flatMap((block, index) => {
@@ -303,7 +296,11 @@ export function moveStep(blocks: readonly Block[], path: Path, delta: 1 | -1): B
   if (parentPath.length > 0) {
     const without = removeAt(blocks, path)
     const groupIndex = parentPath[parentPath.length - 1]!
-    return insertAt(without, [...parentPath.slice(0, -1), groupIndex + (delta === 1 ? 1 : 0)], target)
+    return insertAt(
+      without,
+      [...parentPath.slice(0, -1), groupIndex + (delta === 1 ? 1 : 0)],
+      target,
+    )
   }
 
   return [...blocks]
@@ -314,9 +311,7 @@ export function updateSegment(
   path: Path,
   patch: Partial<Omit<Segment, 'kind' | 'id'>>,
 ): Block[] {
-  return mapAt(blocks, path, (block) =>
-    block.kind === 'segment' ? { ...block, ...patch } : block,
-  )
+  return mapAt(blocks, path, (block) => (block.kind === 'segment' ? { ...block, ...patch } : block))
 }
 
 /**

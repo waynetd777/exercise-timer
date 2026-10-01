@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -25,7 +22,13 @@ const sectioned = (): Workout => ({
       name: 'Arms',
       display: 'list',
       children: [
-        { kind: 'segment', id: 's1', name: 'Curls', role: 'work', reps: { kind: 'fixed', count: 10 } },
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Curls',
+          role: 'work',
+          reps: { kind: 'fixed', count: 10 },
+        },
       ],
     },
   ],
@@ -225,7 +228,13 @@ describe('EditorScreen', () => {
     // Save was already disabled there. Preview compiled in render, and the
     // error boundary that caught it took the unsaved draft with it.
     type Block = Workout['blocks'][number]
-    const step = (id: string): Block => ({ kind: 'segment', id, name: 'Squats', role: 'work', durationMs: 20_000 })
+    const step = (id: string): Block => ({
+      kind: 'segment',
+      id,
+      name: 'Squats',
+      role: 'work',
+      durationMs: 20_000,
+    })
     const huge: Workout = {
       ...timed(),
       blocks: [
@@ -433,7 +442,15 @@ describe('EditorScreen', () => {
     const p = props({
       id: 'w1',
       name: 'Rest day',
-      blocks: [{ kind: 'segment', id: 's1', name: 'Walk', role: 'recover', reps: { kind: 'fixed', count: 10 } }],
+      blocks: [
+        {
+          kind: 'segment',
+          id: 's1',
+          name: 'Walk',
+          role: 'recover',
+          reps: { kind: 'fixed', count: 10 },
+        },
+      ],
       schemaVersion: SCHEMA_VERSION,
       createdAt: 0,
       updatedAt: 0,
@@ -1087,7 +1104,9 @@ describe('offering a step\u2019s weight and picture to the exercises page', () =
     // The tables are keyed by folded name, so "leg presses" belongs under Leg
     // Press or under nothing: two spellings would keep two weights.
     render(<EditorScreen {...props(timed())} />)
-    fireEvent.change(screen.getAllByLabelText('Step name')[0]!, { target: { value: 'leg presses' } })
+    fireEvent.change(screen.getAllByLabelText('Step name')[0]!, {
+      target: { value: 'leg presses' },
+    })
 
     const field = weightField()
     fireEvent.change(field, { target: { value: '65kg' } })
@@ -1099,12 +1118,7 @@ describe('offering a step\u2019s weight and picture to the exercises page', () =
   })
 
   it('asks the same about a picture, and writes it to the page', async () => {
-    render(
-      <EditorScreen
-        {...props(timed())}
-        knownImages={[catalogue]}
-      />,
-    )
+    render(<EditorScreen {...props(timed())} knownImages={[catalogue]} />)
 
     fireEvent.click(screen.getByLabelText('Add an image to Squats'))
     fireEvent.click(await screen.findByRole('button', { name: /Squat rack/ }))
@@ -1119,12 +1133,7 @@ describe('offering a step\u2019s weight and picture to the exercises page', () =
 
   it('leaves a picture on the step where the page already illustrates it', async () => {
     savePictures(withPicture({}, 'Squats', { source: 'bundled', path: 'other.jpg' }))
-    render(
-      <EditorScreen
-        {...props(timed())}
-        knownImages={[catalogue]}
-      />,
-    )
+    render(<EditorScreen {...props(timed())} knownImages={[catalogue]} />)
 
     /* The step shows the page's illustration already, so there is no "add an
        image" button: overriding it goes through the preview. */
@@ -1217,9 +1226,7 @@ describe('an exercise added from a step that already says what it lifts', () => 
      * the picture the step shows is the page's.
      */
     expect(screen.queryByLabelText('Weight')).toBeNull()
-    expect(
-      screen.getByLabelText(/Image for Sandbag Haul, from the Exercises page/),
-    ).toBeTruthy()
+    expect(screen.getByLabelText(/Image for Sandbag Haul, from the Exercises page/)).toBeTruthy()
   })
 
   it('leaves the step alone where the dialog was emptied', () => {

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Run, TimelineEntry, Workout } from '../engine'
@@ -106,10 +103,7 @@ function SectionList({
 
       {/* Sized to fill the sheet: see `listLines`. A group of four short
           exercises has height going spare, and the rows should use it. */}
-      <ol
-        className="sheet__list"
-        style={{ ['--lines' as string]: listLines(rows, run.entries) }}
-      >
+      <ol className="sheet__list" style={{ ['--lines' as string]: listLines(rows, run.entries) }}>
         {rows.map((row) => {
           const done = row.step < entry.step
           /*
@@ -195,7 +189,10 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
         ) : items ? (
           /* NOT aria-hidden, unlike the name below: the round is the only place
              these exercises are written, so it is the panel's own content. */
-          <ul className="panel__round" style={{ ['--fit' as string]: fit, ['--lines' as string]: lines }}>
+          <ul
+            className="panel__round"
+            style={{ ['--fit' as string]: fit, ['--lines' as string]: lines }}
+          >
             {items.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -468,7 +465,6 @@ export function RunScreen({
     // requestExit reads live state; only the request count should re-run this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backRequest])
-
 
   const stay = () => {
     setLeaving(false)

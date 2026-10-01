@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useId, useLayoutEffect, useRef, useState, useEffect, useMemo } from 'react'
 import type { Ladder, Repeat, Section, Segment, SegmentRole } from '../../engine'
@@ -239,8 +236,7 @@ export function SegmentRow({
   useDismiss(
     tools,
     () => setTools(false),
-    (target) =>
-      panel.current?.contains(target) === true || more.current?.contains(target) === true,
+    (target) => panel.current?.contains(target) === true || more.current?.contains(target) === true,
   )
 
   /*
@@ -291,7 +287,10 @@ export function SegmentRow({
           {/* A .tabata import can arrive with the 'custom' role, which has no
               add button. Offered here only when the step already has it, so
               the select does not show "Get ready" for a step that is not. */}
-          {[...ROLES, ...(segment.role === 'custom' ? [{ role: 'custom' as const, label: 'Custom' }] : [])].map(({ role, label }) => (
+          {[
+            ...ROLES,
+            ...(segment.role === 'custom' ? [{ role: 'custom' as const, label: 'Custom' }] : []),
+          ].map(({ role, label }) => (
             <option key={role} value={role}>
               {label}
             </option>
@@ -360,138 +359,138 @@ export function SegmentRow({
           and the wrapper is just the flex item that holds the trailing edge.
         */}
         <div className="erow__menu">
-        <div
-          ref={panel}
-          id={toolsId}
-          className="erow__tools"
-          data-open={tools || undefined}
-          data-up={(tools && toolsUp) || undefined}
-          role="group"
-          aria-label={`Controls for ${segment.name}`}
-          /* Anything in here is a deed, and a panel left open over a row that has
+          <div
+            ref={panel}
+            id={toolsId}
+            className="erow__tools"
+            data-open={tools || undefined}
+            data-up={(tools && toolsUp) || undefined}
+            role="group"
+            aria-label={`Controls for ${segment.name}`}
+            /* Anything in here is a deed, and a panel left open over a row that has
              just moved, or been deleted, points at nothing. Inert above the
              breakpoint, where the panel is the row and nothing is open. */
-          onClick={() => setTools(false)}
-        >
-          <div className="erow__own">
-            {segment.media !== undefined || (inherited && !listed) ? (
-              <button
-                type="button"
-                className="erow__thumb"
-                data-inherited={inherited !== undefined || undefined}
-                onClick={() =>
-                  onPreview({
-                    path,
-                    src: imageUrl,
-                    alt: segment.name,
-                    unseen: listed,
-                    ...(inherited ? { inherited: true } : {}),
-                  })
-                }
-                aria-label={
-                  inherited
-                    ? `Image for ${segment.name}, from the Exercises page. Preview it, or use your own.`
-                    : `Image for ${segment.name}. Preview or remove it.`
-                }
-                title={inherited ? 'From the Exercises page' : 'Preview image'}
-              >
-                {/* Empty frame when the ref is set and its file is not on this
-                    device. The button still opens, because that is the only way
-                    left to remove it. */}
-                {imageUrl && <img src={imageUrl} alt="" />}
-              </button>
-            ) : (
-              !listed && (
+            onClick={() => setTools(false)}
+          >
+            <div className="erow__own">
+              {segment.media !== undefined || (inherited && !listed) ? (
                 <button
                   type="button"
-                  className="btn btn--ghost erow__image"
-                  onClick={() => onChoose(path)}
-                  aria-label={`Add an image to ${segment.name}`}
-                  title="Add an image"
+                  className="erow__thumb"
+                  data-inherited={inherited !== undefined || undefined}
+                  onClick={() =>
+                    onPreview({
+                      path,
+                      src: imageUrl,
+                      alt: segment.name,
+                      unseen: listed,
+                      ...(inherited ? { inherited: true } : {}),
+                    })
+                  }
+                  aria-label={
+                    inherited
+                      ? `Image for ${segment.name}, from the Exercises page. Preview it, or use your own.`
+                      : `Image for ${segment.name}. Preview or remove it.`
+                  }
+                  title={inherited ? 'From the Exercises page' : 'Preview image'}
                 >
-                  <ImageIcon />
+                  {/* Empty frame when the ref is set and its file is not on this
+                    device. The button still opens, because that is the only way
+                    left to remove it. */}
+                  {imageUrl && <img src={imageUrl} alt="" />}
                 </button>
-              )
-            )}
+              ) : (
+                !listed && (
+                  <button
+                    type="button"
+                    className="btn btn--ghost erow__image"
+                    onClick={() => onChoose(path)}
+                    aria-label={`Add an image to ${segment.name}`}
+                    title="Add an image"
+                  >
+                    <ImageIcon />
+                  </button>
+                )
+              )}
 
-            <button
-              className="btn btn--ghost erow__note"
-              onClick={() => setExtras((open) => !open)}
-              aria-pressed={showExtras}
-              disabled={hasExtras}
-              aria-label="Add a note or an alternative"
-              title={
-                hasExtras
-                  ? 'Note and alternative are shown below. Empty them to remove.'
-                  : 'Add a note or an alternative'
-              }
-            >
-              <NoteIcon />
-            </button>
-          </div>
+              <button
+                className="btn btn--ghost erow__note"
+                onClick={() => setExtras((open) => !open)}
+                aria-pressed={showExtras}
+                disabled={hasExtras}
+                aria-label="Add a note or an alternative"
+                title={
+                  hasExtras
+                    ? 'Note and alternative are shown below. Empty them to remove.'
+                    : 'Add a note or an alternative'
+                }
+              >
+                <NoteIcon />
+              </button>
+            </div>
 
-          <div className="erow__actions">
-            {/*
+            <div className="erow__actions">
+              {/*
               Adds a FRESH step of the same type below, where duplicate beside it
               copies this one. Same type because that is what "another" means on a
               row: plus on a 20s work step gives another work step at its default
               length, not a copy of this one's name and image.
             */}
-            <button
-              className="btn btn--ghost"
-              onClick={() => onAdd(path, segment.role)}
-              aria-label={`Add a ${segment.role} step below`}
-              title="Add a step below"
-            >
-              <PlusIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => onWrap(path)}
-              disabled={depth > 0}
-              aria-label="Repeat this step"
-              title={depth > 0 ? 'Already inside sets' : 'Repeat this step'}
-            >
-              <RepsIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => onDuplicate(path)}
-              aria-label="Duplicate step"
-              title="Duplicate step"
-            >
-              <CopyIcon />
-            </button>
-            <button
-              className="btn btn--ghost"
-              onClick={() => onRemove(path)}
-              aria-label="Delete step"
-              title="Delete step"
-            >
-              <TrashIcon />
-            </button>
+              <button
+                className="btn btn--ghost"
+                onClick={() => onAdd(path, segment.role)}
+                aria-label={`Add a ${segment.role} step below`}
+                title="Add a step below"
+              >
+                <PlusIcon />
+              </button>
+              <button
+                className="btn btn--ghost"
+                onClick={() => onWrap(path)}
+                disabled={depth > 0}
+                aria-label="Repeat this step"
+                title={depth > 0 ? 'Already inside sets' : 'Repeat this step'}
+              >
+                <RepsIcon />
+              </button>
+              <button
+                className="btn btn--ghost"
+                onClick={() => onDuplicate(path)}
+                aria-label="Duplicate step"
+                title="Duplicate step"
+              >
+                <CopyIcon />
+              </button>
+              <button
+                className="btn btn--ghost"
+                onClick={() => onRemove(path)}
+                aria-label="Delete step"
+                title="Delete step"
+              >
+                <TrashIcon />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/*
+          {/*
           Opens the panel, and only exists while there is no room to show it. The
           eight buttons need about 380pt of a row; a phone has about 311pt, and
           shrinking them to fit lands at 36px, well under the touch guideline. So
           on a narrow screen the row shows its fields and one way in to the rest.
         */}
-        <button
-          ref={more}
-          type="button"
-          className="btn btn--ghost erow__more"
-          aria-haspopup="true"
-          aria-expanded={tools}
-          aria-controls={toolsId}
-          onClick={() => setTools((open) => !open)}
-          aria-label={`Controls for ${segment.name}`}
-          title="Image, note and step controls"
-        >
-          <MoreIcon />
-        </button>
+          <button
+            ref={more}
+            type="button"
+            className="btn btn--ghost erow__more"
+            aria-haspopup="true"
+            aria-expanded={tools}
+            aria-controls={toolsId}
+            onClick={() => setTools((open) => !open)}
+            aria-label={`Controls for ${segment.name}`}
+            title="Image, note and step controls"
+          >
+            <MoreIcon />
+          </button>
         </div>
       </div>
 

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MediaRef } from '../../engine'
@@ -109,7 +106,10 @@ describe('resolveMedia: two callers at once', () => {
     vi.resetModules()
     const { resolveMedia } = await import('../resolveMedia')
     blobs.set('shared', new Blob(['x']))
-    const [a, b] = await Promise.all([resolveMedia(local('shared'), '/'), resolveMedia(local('shared'), '/')])
+    const [a, b] = await Promise.all([
+      resolveMedia(local('shared'), '/'),
+      resolveMedia(local('shared'), '/'),
+    ])
     expect(a).toMatch(/^blob:/)
     expect(b).toBe(a)
   })

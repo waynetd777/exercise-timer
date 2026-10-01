@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# Exercise Timer
-# Copyright (c) 2026 Wayne Davies
-# MIT License. See LICENSE in the project root.
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 """
 Regenerates src/routines/exercises.machine.ts from the Horizon Torus guide PDF.
@@ -51,10 +50,9 @@ import subprocess
 import sys
 import tempfile
 
+import exercise_plates as plates
 import numpy as np
 from PIL import Image
-
-import exercise_plates as plates
 
 #: The guide's muscle-group key, as the band is actually printed.
 AREA_BY_BAND = {
@@ -92,9 +90,20 @@ PATTERN_OVERRIDES: dict[str, str] = {}
 def area_of(pdf: pathlib.Path, page: int, work: pathlib.Path) -> str:
     """The muscle group, read off the colour of the title band."""
     subprocess.run(
-        ['pdftoppm', '-f', str(page), '-l', str(page), '-r', '60', '-png',
-         str(pdf), str(work / 'page')],
-        capture_output=True, check=True,
+        [
+            'pdftoppm',
+            '-f',
+            str(page),
+            '-l',
+            str(page),
+            '-r',
+            '60',
+            '-png',
+            str(pdf),
+            str(work / 'page'),
+        ],
+        capture_output=True,
+        check=True,
     )
     rendered = next(work.glob('page-*.png'))
     pixels = np.asarray(Image.open(rendered).convert('RGB'), dtype=np.int16)
@@ -105,7 +114,7 @@ def area_of(pdf: pathlib.Path, page: int, work: pathlib.Path) -> str:
     rows = np.median(pixels, axis=1)
     top = int(np.argmax(np.abs(rows - plates.STRIP).sum(axis=1) > 20))
 
-    band = pixels[top + 3:top + 12].reshape(-1, 3)
+    band = pixels[top + 3 : top + 12].reshape(-1, 3)
     # The band's own colour, not the white of the title printed on it.
     saturated = band[band.max(axis=1) - band.min(axis=1) > 40]
     rgb = tuple(int(v) for v in np.median(saturated if len(saturated) else band, axis=0))
@@ -121,7 +130,7 @@ def station_of(text: str) -> int:
     """
     lines = [line.rstrip() for line in text.split('\n')]
     start = next(i for i, line in enumerate(lines) if 'STATION' in line)
-    for line in lines[start:start + 4]:
+    for line in lines[start : start + 4]:
         if 'STATION' in line:
             continue
         found = re.search(r'(\d)\s*$', line.strip())
@@ -152,15 +161,19 @@ def rows(pdf: pathlib.Path) -> list[dict[str, object]]:
             flat = ' '.join(text.split()).lower()
             area = area_of(pdf, page, work)
             title = name.title()
-            found.append({
-                'name': title,
-                'area': area,
-                'pattern': pattern_of(title, area),
-                'media': f'exercises/{plates.slug(name)}.jpg',
-                'station': station_of(text),
-                'attachment': next((tag for phrase, tag in ATTACHMENTS if phrase in flat), None),
-                'perSide': bool(PER_SIDE.search(flat)),
-            })
+            found.append(
+                {
+                    'name': title,
+                    'area': area,
+                    'pattern': pattern_of(title, area),
+                    'media': f'exercises/{plates.slug(name)}.jpg',
+                    'station': station_of(text),
+                    'attachment': next(
+                        (tag for phrase, tag in ATTACHMENTS if phrase in flat), None
+                    ),
+                    'perSide': bool(PER_SIDE.search(flat)),
+                }
+            )
     return found
 
 
@@ -174,11 +187,8 @@ def literal(value: object) -> str:
 
 def typescript(found: list[dict[str, object]]) -> str:
     lines = [
-        '/**',
-        ' * Exercise Timer',
-        ' * Copyright (c) 2026 Wayne Davies',
-        ' * MIT License. See LICENSE in the project root.',
-        ' */',
+        '// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.',
+        '// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.',
         '',
         '/**',
         ' * The multi-gym half of the exercise table.',
@@ -188,7 +198,7 @@ def typescript(found: list[dict[str, object]]) -> str:
         ' * its `PATTERN_OVERRIDES` so it survives the next regeneration.',
         ' *',
         ' * Every field but `pattern` is read out of the guide. `area` is the colour of',
-        ' * the title band, which the manual\'s own key defines; `attachment` is named in',
+        " * the title band, which the manual's own key defines; `attachment` is named in",
         ' * the instruction text; `perSide` is the instructions saying which limb to',
         ' * start on. `pattern` is derived from the name, because the guide has no notion',
         ' * of push against pull and the generator alternates them.',
@@ -199,14 +209,14 @@ def typescript(found: list[dict[str, object]]) -> str:
         'export const MACHINE_EXERCISES: readonly Exercise[] = [',
     ]
     for row in found:
-        fields = [f'name: {literal(row["name"])}', f"area: {literal(row['area'])}"]
+        fields = [f'name: {literal(row["name"])}', f'area: {literal(row["area"])}']
         if row['pattern']:
-            fields.append(f"pattern: {literal(row['pattern'])}")
+            fields.append(f'pattern: {literal(row["pattern"])}')
         fields.append("equipment: 'machine'")
-        fields.append(f"media: {literal(row['media'])}")
-        fields.append(f"station: {row['station']}")
+        fields.append(f'media: {literal(row["media"])}')
+        fields.append(f'station: {row["station"]}')
         if row['attachment']:
-            fields.append(f"attachment: {literal(row['attachment'])}")
+            fields.append(f'attachment: {literal(row["attachment"])}')
         if row['perSide']:
             fields.append('perSide: true')
         lines.append('  { ' + ', '.join(fields) + ' },')
@@ -223,7 +233,9 @@ def main() -> None:
         raise SystemExit(f'no such file: {pdf}')
 
     found = rows(pdf)
-    out = pathlib.Path(__file__).resolve().parent.parent / 'src' / 'routines' / 'exercises.machine.ts'
+    out = (
+        pathlib.Path(__file__).resolve().parent.parent / 'src' / 'routines' / 'exercises.machine.ts'
+    )
     out.write_text(typescript(found), encoding='utf-8')
 
     by_area: dict[str, int] = {}

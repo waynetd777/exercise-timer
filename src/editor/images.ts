@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Block, MediaRef, Workout } from '../engine'
 import { resolvePlan, bundled } from '../media/resolve'
@@ -33,9 +30,7 @@ export type KnownImage = {
  * the URL case stays because it costs one line and a routine may still carry one.
  */
 export function refFor(entry: string): MediaRef {
-  return entry.startsWith('https://')
-    ? { source: 'remote', url: entry }
-    : bundled(entry)
+  return entry.startsWith('https://') ? { source: 'remote', url: entry } : bundled(entry)
 }
 
 /** The identity of a ref, for deduplication. Local blobs have no picker entry. */
@@ -71,7 +66,10 @@ function walk(blocks: readonly Block[], visit: (ref: MediaRef, name: string) => 
  */
 export function labelFromUrl(url: string): string {
   const file = url.split('?')[0]!.split('/').pop() ?? ''
-  const name = file.replace(/\.[a-z0-9]+$/i, '').replace(/[-_+]+/g, ' ').trim()
+  const name = file
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/[-_+]+/g, ' ')
+    .trim()
   return name || 'Untitled'
 }
 

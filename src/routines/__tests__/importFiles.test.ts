@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import general from './emails/2026-07-20-general.txt?raw'
@@ -154,10 +151,7 @@ describe('what a lossy import must say out loud', () => {
   })
 
   it('reports nothing when every line parsed', async () => {
-    const { skippedLines } = await importRoutineFiles(
-      [file('Strength training.txt', general)],
-      NOW,
-    )
+    const { skippedLines } = await importRoutineFiles([file('Strength training.txt', general)], NOW)
     expect(skippedLines).toEqual([])
   })
 })

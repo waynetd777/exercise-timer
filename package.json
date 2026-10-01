@@ -1,7 +1,7 @@
 {
   "name": "exercise-timer",
   "private": true,
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
     "harvest": "vitest run --config vitest.harvest.config.ts",
-    "lint": "oxlint"
+    "lint": "prettier --check . && oxlint --deny-warnings && pipx run ruff check scripts && pipx run ruff format --check scripts",
+    "format": "prettier --write . && pipx run ruff check --fix scripts && pipx run ruff format scripts"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.1.0",
     "jsdom": "^30.0.1",
     "oxlint": "^1.80.0",
+    "prettier": "^3.9.9",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vite-plugin-pwa": "^1.3.0",

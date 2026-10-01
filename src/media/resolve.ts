@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { MediaRef } from '../engine'
 
@@ -19,10 +16,7 @@ export function bundled(path: string): MediaRef {
  * pinning, so the routine keeps working when the gym wifi does not, and when
  * postimages eventually loses the file.
  */
-type Plan =
-  | { kind: 'url'; url: string }
-  | { kind: 'blob'; hash: string }
-  | { kind: 'none' }
+type Plan = { kind: 'url'; url: string } | { kind: 'blob'; hash: string } | { kind: 'none' }
 
 export function resolvePlan(
   ref: MediaRef | undefined,

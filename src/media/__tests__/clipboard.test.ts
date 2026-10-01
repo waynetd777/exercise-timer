@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -20,10 +17,7 @@ const item = (types: string[], blob = new Blob(['x'], { type: types[0] ?? '' }))
  * `permission` of null means the descriptor is unknown, which browsers signal by
  * THROWING from query() rather than reporting denied: Safari and Firefox both.
  */
-function stub(options: {
-  read?: () => Promise<unknown[]>
-  permission?: PermissionState | null
-}) {
+function stub(options: { read?: () => Promise<unknown[]>; permission?: PermissionState | null }) {
   const read = options.read ? vi.fn(options.read) : undefined
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,

@@ -1,12 +1,15 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MediaRef, SegmentRole, Workout } from '../engine'
-import { compile, MAX_TIMELINE_ENTRIES, ROUTINE_COLOURS, stepCount, totalDurationMs } from '../engine'
+import {
+  compile,
+  MAX_TIMELINE_ENTRIES,
+  ROUTINE_COLOURS,
+  stepCount,
+  totalDurationMs,
+} from '../engine'
 import { estimate } from '../routines/estimate'
 import { collectExercises } from '../routines/exerciseOptions'
 import type { CustomExercise } from '../storage/customExercises'
@@ -18,7 +21,13 @@ import {
   withCustom,
 } from '../storage/customExercises'
 import { currentRates } from '../storage/paces'
-import { currentPictures, loadPictures, pictureFor, savePictures, withPicture } from '../storage/pictures'
+import {
+  currentPictures,
+  loadPictures,
+  pictureFor,
+  savePictures,
+  withPicture,
+} from '../storage/pictures'
 import { loadWeights, saveWeights, weightFor, withWeight } from '../storage/weights'
 import { foldName } from '../routines/foldName'
 import { sameExercise } from '../routines/similar'
@@ -60,7 +69,16 @@ import { ImageDialog, ImagePicker, type ImageView } from './editor/ImageDialogs'
 import { LadderRow, RepeatRow, ROLES, SectionRow, SegmentRow } from './editor/rows'
 import { useDraftHistory } from './editor/useDraftHistory'
 import { useDraftDrag } from './editor/useDraftDrag'
-import { BackIcon, CheckIcon, CloseIcon, HelpIcon, ListIcon, PlusIcon, RedoIcon, UndoIcon } from './icons'
+import {
+  BackIcon,
+  CheckIcon,
+  CloseIcon,
+  HelpIcon,
+  ListIcon,
+  PlusIcon,
+  RedoIcon,
+  UndoIcon,
+} from './icons'
 import './editor.css'
 
 export function EditorScreen({
@@ -167,12 +185,16 @@ export function EditorScreen({
    * A weight or a picture just put on a step for an exercise the exercises page
    * holds none for, waiting to be asked about. See `offer` below for why.
    */
-  const [offeredWeight, setOfferedWeight] = useState<
-    { path: Path; name: string; load: string } | null
-  >(null)
-  const [offeredPicture, setOfferedPicture] = useState<
-    { path: Path; name: string; media: MediaRef } | null
-  >(null)
+  const [offeredWeight, setOfferedWeight] = useState<{
+    path: Path
+    name: string
+    load: string
+  } | null>(null)
+  const [offeredPicture, setOfferedPicture] = useState<{
+    path: Path
+    name: string
+    media: MediaRef
+  } | null>(null)
   /*
    * The exercises already asked about and turned down, so each is asked once per
    * visit to the editor. Without it, correcting a typo in a weight you have just
@@ -231,10 +253,7 @@ export function EditorScreen({
    * button is disabled on the same condition; this is the guard behind it.
    */
   const previewRoutine = useMemo(
-    () =>
-      previewing && !tooLarge
-        ? compile(fromTables(preview))
-        : null,
+    () => (previewing && !tooLarge ? compile(fromTables(preview)) : null),
     [previewing, tooLarge, preview],
   )
   const dirty = useMemo(
@@ -409,19 +428,26 @@ export function EditorScreen({
           </div>
         ) : (
           <>
-            <button className="btn btn--ghost" onClick={goBack} aria-label="Back to routines" title="Back to routines">
+            <button
+              className="btn btn--ghost"
+              onClick={goBack}
+              aria-label="Back to routines"
+              title="Back to routines"
+            >
               <BackIcon />
             </button>
 
-        <input
-          className="efield editor__name"
-          value={name}
-          aria-label="Routine name"
-          placeholder="Routine name"
-          onChange={(event) => edit((draft) => ({ ...draft, name: event.target.value }), 'name')}
-        />
+            <input
+              className="efield editor__name"
+              value={name}
+              aria-label="Routine name"
+              placeholder="Routine name"
+              onChange={(event) =>
+                edit((draft) => ({ ...draft, name: event.target.value }), 'name')
+              }
+            />
 
-        {/* Labelled, not icon-only: saving is infrequent and consequential, so
+            {/* Labelled, not icon-only: saving is infrequent and consequential, so
             a word beats a tick. */}
             <button
               className="btn btn--primary editor__save"
@@ -526,7 +552,8 @@ export function EditorScreen({
           </span>
           <span>
             {steps.toLocaleString()} steps
-            {tooLarge && ` (the most a routine can run is ${MAX_TIMELINE_ENTRIES.toLocaleString()})`}
+            {tooLarge &&
+              ` (the most a routine can run is ${MAX_TIMELINE_ENTRIES.toLocaleString()})`}
           </span>
         </p>
       </div>
@@ -534,100 +561,100 @@ export function EditorScreen({
       {previewing && previewRoutine ? (
         <PreviewList routine={previewRoutine} />
       ) : (
-      <div className="editor__scroll">
-        {rows.length === 0 ? (
-          <p className="editor__empty label label--sm">No steps yet. Add one below.</p>
-        ) : (
-          <ul className="editor__list" ref={list}>
-            {rows.map(({ block, path, depth, last }) =>
-              /*
-               * One row component per block kind. Exhaustive rather than a
-               * cast, so adding a kind cannot silently render it as a repeat.
-               */
-              block.kind === 'section' ? (
-                <SectionRow
-                  key={block.id}
-                  section={block}
-                  path={path}
-                  depth={depth}
-                  grip={drag.gripProps(block.id)}
-                  dragging={held(path)}
-                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
-                  onDuplicate={duplicateRow}
-                  onRemove={removeRow}
-                  onPatch={patchSection}
-                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
-                />
-              ) : block.kind === 'ladder' ? (
-                <LadderRow
-                  key={block.id}
-                  ladder={block}
-                  path={path}
-                  depth={depth}
-                  grip={drag.gripProps(block.id)}
-                  dragging={held(path)}
-                  onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
-                  onDuplicate={duplicateRow}
-                  onRemove={removeRow}
-                  onPatch={patchLadder}
-                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
-                />
-              ) : block.kind === 'segment' ? (
-                <SegmentRow
-                  key={block.id}
-                  last={last}
-                  segment={block}
-                  path={path}
-                  depth={depth}
-                  grip={drag.gripProps(block.id)}
-                  dragging={held(path)}
-                  listed={shownAsList(blocks, path)}
-                  onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
-                  onAdd={addRow}
-                  onDuplicate={duplicateRow}
-                  onRemove={removeRow}
-                  onPatch={patchSegment}
-                  onTiming={patchTiming}
-                  onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
-                  onWeightTyped={offerWeight}
-                  exercises={exercises}
-                  pictures={pictures}
-                  /* One tree operation, so one press of undo takes the whole
+        <div className="editor__scroll">
+          {rows.length === 0 ? (
+            <p className="editor__empty label label--sm">No steps yet. Add one below.</p>
+          ) : (
+            <ul className="editor__list" ref={list}>
+              {rows.map(({ block, path, depth, last }) =>
+                /*
+                 * One row component per block kind. Exhaustive rather than a
+                 * cast, so adding a kind cannot silently render it as a repeat.
+                 */
+                block.kind === 'section' ? (
+                  <SectionRow
+                    key={block.id}
+                    section={block}
+                    path={path}
+                    depth={depth}
+                    grip={drag.gripProps(block.id)}
+                    dragging={held(path)}
+                    onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                    onDuplicate={duplicateRow}
+                    onRemove={removeRow}
+                    onPatch={patchSection}
+                    onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
+                  />
+                ) : block.kind === 'ladder' ? (
+                  <LadderRow
+                    key={block.id}
+                    ladder={block}
+                    path={path}
+                    depth={depth}
+                    grip={drag.gripProps(block.id)}
+                    dragging={held(path)}
+                    onMove={(p, d) => editBlocks((c) => moveBy(c, p, d))}
+                    onDuplicate={duplicateRow}
+                    onRemove={removeRow}
+                    onPatch={patchLadder}
+                    onAddChild={(p) => editBlocks((c) => appendTo(c, p, newRepsStep()))}
+                  />
+                ) : block.kind === 'segment' ? (
+                  <SegmentRow
+                    key={block.id}
+                    last={last}
+                    segment={block}
+                    path={path}
+                    depth={depth}
+                    grip={drag.gripProps(block.id)}
+                    dragging={held(path)}
+                    listed={shownAsList(blocks, path)}
+                    onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
+                    onAdd={addRow}
+                    onDuplicate={duplicateRow}
+                    onRemove={removeRow}
+                    onPatch={patchSegment}
+                    onTiming={patchTiming}
+                    onClearText={(p, field) => editBlocks((c) => clearText(c, p, field))}
+                    onWeightTyped={offerWeight}
+                    exercises={exercises}
+                    pictures={pictures}
+                    /* One tree operation, so one press of undo takes the whole
                      pick back: the name and the per-side flag. The picture is
                      not written; the step takes the exercises page's. */
-                  onPickExercise={(p, option) =>
-                    editBlocks((c) =>
-                      applyExercise(c, p, {
-                        name: option.name,
-                        ...(option.perSide === true ? { perSide: true } : {}),
-                      }),
-                    )
-                  }
-                  onAddExercise={(p, typed) => setNaming({ path: p, name: typed })}
-                  onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
-                  onPreview={setImagePreview}
-                  onChoose={setChoosingFor}
-                />
-              ) : (
-                <RepeatRow
-                  key={block.id}
-                  repeat={block}
-                  path={path}
-                  depth={depth}
-                  grip={drag.gripProps(block.id)}
-                  dragging={held(path)}
-                  onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
-                  onDuplicate={duplicateRow}
-                  onRemove={removeRow}
-                  onPatch={patchRepeat}
-                  onAddChild={(p) => editBlocks((c) => appendTo(c, p, newSegment('work')))}
-                  onUnwrap={(p) => editBlocks((c) => unwrapRepeat(c, p))}
-                />
-              ),
-            )}
-          </ul>
-        )}
-      </div>
+                    onPickExercise={(p, option) =>
+                      editBlocks((c) =>
+                        applyExercise(c, p, {
+                          name: option.name,
+                          ...(option.perSide === true ? { perSide: true } : {}),
+                        }),
+                      )
+                    }
+                    onAddExercise={(p, typed) => setNaming({ path: p, name: typed })}
+                    onWrap={(p) => editBlocks((c) => wrapInRepeat(c, p))}
+                    onPreview={setImagePreview}
+                    onChoose={setChoosingFor}
+                  />
+                ) : (
+                  <RepeatRow
+                    key={block.id}
+                    repeat={block}
+                    path={path}
+                    depth={depth}
+                    grip={drag.gripProps(block.id)}
+                    dragging={held(path)}
+                    onMove={(p, d) => editBlocks((c) => moveStep(c, p, d))}
+                    onDuplicate={duplicateRow}
+                    onRemove={removeRow}
+                    onPatch={patchRepeat}
+                    onAddChild={(p) => editBlocks((c) => appendTo(c, p, newSegment('work')))}
+                    onUnwrap={(p) => editBlocks((c) => unwrapRepeat(c, p))}
+                  />
+                ),
+              )}
+            </ul>
+          )}
+        </div>
       )}
 
       {choosingFor && (
@@ -802,45 +829,45 @@ export function EditorScreen({
       {/* Gone while the draft is being read: every one of these adds a row to a
           list that is not on screen, and the reading page takes the height. */}
       {!previewing && (
-      <div className="editor__add">
-        {ROLES.map(({ role, label }) => (
+        <div className="editor__add">
+          {ROLES.map(({ role, label }) => (
+            <button
+              key={role}
+              className="chip chip--action"
+              data-kind={role}
+              onClick={() => editBlocks((c) => insertAfter(c, [], newSegment(role)))}
+            >
+              <PlusIcon />
+              {label}
+            </button>
+          ))}
           <button
-            key={role}
             className="chip chip--action"
-            data-kind={role}
-            onClick={() => editBlocks((c) => insertAfter(c, [], newSegment(role)))}
+            data-kind="reps"
+            onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
           >
             <PlusIcon />
-            {label}
+            Sets
           </button>
-        ))}
-        <button
-          className="chip chip--action"
-          data-kind="reps"
-          onClick={() => editBlocks((c) => insertAfter(c, [], newRepeat()))}
-        >
-          <PlusIcon />
-          Sets
-        </button>
-        <button
-          className="chip chip--action"
-          data-kind="ladder"
-          onClick={() => editBlocks((c) => insertAfter(c, [], newLadder()))}
-          title="A group whose rep count changes each set: 5-10-15"
-        >
-          <PlusIcon />
-          Ladder
-        </button>
-        <button
-          className="chip chip--action"
-          data-kind="section"
-          onClick={() => editBlocks((c) => insertAfter(c, [], newSection()))}
-          title="A named part of the routine, shown as a list while running"
-        >
-          <PlusIcon />
-          Section
-        </button>
-      </div>
+          <button
+            className="chip chip--action"
+            data-kind="ladder"
+            onClick={() => editBlocks((c) => insertAfter(c, [], newLadder()))}
+            title="A group whose rep count changes each set: 5-10-15"
+          >
+            <PlusIcon />
+            Ladder
+          </button>
+          <button
+            className="chip chip--action"
+            data-kind="section"
+            onClick={() => editBlocks((c) => insertAfter(c, [], newSection()))}
+            title="A named part of the routine, shown as a list while running"
+          >
+            <PlusIcon />
+            Section
+          </button>
+        </div>
       )}
     </main>
   )

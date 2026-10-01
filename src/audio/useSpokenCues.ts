@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useRef } from 'react'
 import type { RoutinePosition } from '../engine'
@@ -54,11 +51,7 @@ const AFTER_START_CUE_MS = 900
  * land a fraction late. Fine for information, and not fine for a beat, which is
  * why it lives apart from the scheduled cues.
  */
-export function useSpokenCues(
-  at: RoutinePosition,
-  status: RunStatus,
-  muted: boolean,
-): void {
+export function useSpokenCues(at: RoutinePosition, status: RunStatus, muted: boolean): void {
   const announced = useRef<number | null>(null)
   const greeted = useRef(false)
 

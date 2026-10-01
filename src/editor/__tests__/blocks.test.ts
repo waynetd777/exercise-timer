@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block, Ladder, Repeat, Section, Segment } from '../../engine'
@@ -173,13 +170,7 @@ describe('updateSegment / updateRepeat', () => {
   })
 
   it('ignores a segment patch aimed at a repeat, and vice versa', () => {
-    expect(names(updateSegment(tree(), [1], { name: 'nope' }))).toEqual([
-      'A',
-      '[R]',
-      'B',
-      'C',
-      'D',
-    ])
+    expect(names(updateSegment(tree(), [1], { name: 'nope' }))).toEqual(['A', '[R]', 'B', 'C', 'D'])
     expect(blockAt(updateRepeat(tree(), [0], { times: 9 }), [0])).toMatchObject({ name: 'A' })
   })
 })
@@ -245,12 +236,12 @@ describe('constructors', () => {
     const reps = newRepeat()
     expect(reps.times).toBe(3)
     expect(reps.label).toBe('Set')
-    expect(reps.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null))).toEqual(
-      [
-        ['work', 20_000],
-        ['rest', 10_000],
-      ],
-    )
+    expect(
+      reps.children.map((c) => (c.kind === 'segment' ? [c.role, c.durationMs] : null)),
+    ).toEqual([
+      ['work', 20_000],
+      ['rest', 10_000],
+    ])
   })
 })
 
@@ -676,7 +667,7 @@ describe('the tree operations reach every kind of group', () => {
     expect((blockAt(gone, [0]) as Section).children).toHaveLength(1)
   })
 
-  it('edits a ladder\'s counts', () => {
+  it("edits a ladder's counts", () => {
     const blocks = updateLadder(routine(), [1, 0], { counts: [3, 6, 9] })
     expect((blockAt(blocks, [1, 0]) as Ladder).counts).toEqual([3, 6, 9])
   })
@@ -922,7 +913,9 @@ describe('clearing a group field removes it', () => {
     // Select-all and Backspace in the title used to delete the key: the
     // controlled input lost its value and the routine failed `isBlock` on
     // export and share.
-    const blocks: Block[] = [{ kind: 'section', id: 's', name: 'Legs', display: 'list', children: [] }]
+    const blocks: Block[] = [
+      { kind: 'section', id: 's', name: 'Legs', display: 'list', children: [] },
+    ]
     const section = updateSection(blocks, [0], { name: '' })[0]
     expect(section?.kind === 'section' && section.name).toBe('')
   })
@@ -938,7 +931,7 @@ describe('a step given an exercise from the table', () => {
     return block
   }
 
-  it('takes the table\'s name, and leaves the picture to the exercises page', () => {
+  it("takes the table's name, and leaves the picture to the exercises page", () => {
     /*
      * The name is the whole point: `weightFor`, `paces` and `estimate` all key
      * on it, and a name typed by hand matches none of them. The picture is NOT
@@ -1022,13 +1015,13 @@ describe('a step given an exercise from the table', () => {
   })
 
   it('reaches a step nested in a group and leaves the group alone', () => {
-    const blocks: Block[] = [
-      { kind: 'repeat', id: 'r', times: 3, label: 'Set', children: work() },
-    ]
+    const blocks: Block[] = [{ kind: 'repeat', id: 'r', times: 3, label: 'Set', children: work() }]
     const next = applyExercise(blocks, [0, 0], { name: 'Leg Press' })
     const group = next[0]
 
     expect(group?.kind === 'repeat' && group.children.length).toBe(1)
-    expect(group?.kind === 'repeat' && group.children[0]?.kind === 'segment' && group.children[0].name).toBe('Leg Press')
+    expect(
+      group?.kind === 'repeat' && group.children[0]?.kind === 'segment' && group.children[0].name,
+    ).toBe('Leg Press')
   })
 })

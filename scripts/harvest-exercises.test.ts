@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Regenerates src/routines/exercises.harvested.ts from the instructor emails.
@@ -49,9 +46,18 @@ const OUT = 'src/routines/exercises.harvested.ts'
 
 /** Words that place a movement, most specific first. */
 const AREA: [RegExp, string][] = [
-  [/plank|crunch|sit ?up|v-?up|hollow|russian twist|oblique|dead ?bug|flutter|heel tap|leg raise|toe touch|knee raise|bicycle|ab\b|abs\b|mountain climber|windmill|torso/i, 'torso'],
-  [/squat|lunge|calf|glute|hamstring|quad|leg (?:curl|extension|swing)|hip|kickback|fire hydrant|step ?up|bridge|skater|jump|bounce|knee lift|jog|run|heel dig|butt kick|fast feet|toe raise/i, 'lower'],
-  [/press|curl|row|raise|fly|flye|punch|push ?up|push-?up|dip|pulldown|pull ?apart|shrug|tricep|bicep|shoulder|chest|arnold|around the world|arm|uppercut|plank jack/i, 'upper'],
+  [
+    /plank|crunch|sit ?up|v-?up|hollow|russian twist|oblique|dead ?bug|flutter|heel tap|leg raise|toe touch|knee raise|bicycle|ab\b|abs\b|mountain climber|windmill|torso/i,
+    'torso',
+  ],
+  [
+    /squat|lunge|calf|glute|hamstring|quad|leg (?:curl|extension|swing)|hip|kickback|fire hydrant|step ?up|bridge|skater|jump|bounce|knee lift|jog|run|heel dig|butt kick|fast feet|toe raise/i,
+    'lower',
+  ],
+  [
+    /press|curl|row|raise|fly|flye|punch|push ?up|push-?up|dip|pulldown|pull ?apart|shrug|tricep|bicep|shoulder|chest|arnold|around the world|arm|uppercut|plank jack/i,
+    'upper',
+  ],
 ]
 
 const PATTERN: [string, RegExp][] = [
@@ -66,7 +72,8 @@ const EQUIPMENT: [RegExp, string][] = [
   [/trampoline|rebound|bounce/i, 'trampoline'],
 ]
 
-const CARDIO = /jog|run\b|jump|jack|burpee|climber|skater|fast feet|bounce|knee lift|high knee|butt kick|heel dig|punch|uppercut|sprint|shuffle|ski/i
+const CARDIO =
+  /jog|run\b|jump|jack|burpee|climber|skater|fast feet|bounce|knee lift|high knee|butt kick|heel dig|punch|uppercut|sprint|shuffle|ski/i
 const MOBILITY = /stretch|circle|swing|rotation|hug|soldier|inchworm|windmill|opener|mobilit/i
 
 const PER_SIDE = /\b(?:each|per)\s+(?:side|leg|arm|direction)\b|\bleft\b|\bright\b|alternat/i
@@ -178,7 +185,9 @@ describe('harvest exercises', () => {
         found.set(key, entry)
       }
     }
-    for (const name of readdirSync(EMAILS).filter((f) => f.endsWith('.txt')).sort()) {
+    for (const name of readdirSync(EMAILS)
+      .filter((f) => f.endsWith('.txt'))
+      .sort()) {
       file = name
       walk(parseRoutine(readFileSync(`${EMAILS}/${file}`, 'utf8'), file).blocks)
     }
@@ -235,11 +244,8 @@ describe('harvest exercises', () => {
 
     writeFileSync(
       OUT,
-      `/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+      `// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Everything the instructor has written that the hand-authored table does not

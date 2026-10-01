@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Everything the Horizon guide does not draw.
@@ -48,7 +45,13 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
    * it cannot live in the generated table. Rigged like the Deadlift, which is
    * the same low pulley and the same bar.
    */
-  { name: 'Low Pulley Squat', area: 'lower', equipment: 'machine', station: 5, attachment: 'low row bar' },
+  {
+    name: 'Low Pulley Squat',
+    area: 'lower',
+    equipment: 'machine',
+    station: 5,
+    attachment: 'low row bar',
+  },
 
   // ── Mobility, for the opening minutes ────────────────────────────────────
   { name: 'Arm Circles', area: 'upper', pattern: 'push', equipment: 'bodyweight', use: 'mobility' },
@@ -67,7 +70,13 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
   },
 
   // ── Cardio, for a warm-up and for active recovery between sets ───────────
-  { name: 'Cycling', area: 'lower', equipment: 'bike', use: 'cardio', media: 'exercises/Cycling.jpg' },
+  {
+    name: 'Cycling',
+    area: 'lower',
+    equipment: 'bike',
+    use: 'cardio',
+    media: 'exercises/Cycling.jpg',
+  },
   /*
    * The trampoline as an ACTIVITY, beside the specific moves further down. A
    * minute of recovery on it is "a minute on the trampoline", the same way a
@@ -108,12 +117,22 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
   { name: 'Sumo Squat Pulses', area: 'lower', equipment: 'bodyweight' },
   { name: 'Squat Jumps', area: 'lower', equipment: 'bodyweight' },
   // In her "40 sec each (continuous movement)" warm-up block with the jog and the jacks, never a set.
-  { name: 'Side-to-Side Squats with a Reach', area: 'lower', equipment: 'bodyweight', use: 'cardio' },
+  {
+    name: 'Side-to-Side Squats with a Reach',
+    area: 'lower',
+    equipment: 'bodyweight',
+    use: 'cardio',
+  },
   { name: 'Walking Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Reverse Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Alternating Curtsy Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Alternating Jump Lunges', area: 'lower', equipment: 'bodyweight', perSide: true },
-  { name: 'Lateral Lunges with Overhead Reach', area: 'lower', equipment: 'bodyweight', perSide: true },
+  {
+    name: 'Lateral Lunges with Overhead Reach',
+    area: 'lower',
+    equipment: 'bodyweight',
+    perSide: true,
+  },
   { name: 'Bulgarian Split Squats', area: 'lower', equipment: 'bodyweight', perSide: true },
   { name: 'Calf Raises', area: 'lower', equipment: 'bodyweight' },
   { name: 'Glute Bridge Marches', area: 'lower', equipment: 'bodyweight', perSide: true },
@@ -150,7 +169,12 @@ export const OTHER_EXERCISES: readonly Exercise[] = [
   { name: 'Toe Touches', area: 'torso', equipment: 'bodyweight' },
   { name: 'Sit-ups with a Reach', area: 'torso', equipment: 'bodyweight' },
   { name: 'Alternating Leg Raises', area: 'torso', equipment: 'bodyweight', perSide: true },
-  { name: 'Knee Drives with Opposite Elbow', area: 'torso', equipment: 'bodyweight', perSide: true },
+  {
+    name: 'Knee Drives with Opposite Elbow',
+    area: 'torso',
+    equipment: 'bodyweight',
+    perSide: true,
+  },
   { name: 'Crunches', area: 'torso', equipment: 'bodyweight' }, // ADDED, the plainest of the set
 
   // ── Upper body, push ─────────────────────────────────────────────────────

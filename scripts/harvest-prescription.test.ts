@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * Regenerates src/routines/exercises.prescription.ts from the instructor emails.
@@ -94,7 +91,9 @@ describe('harvest', () => {
       }
     }
 
-    const files = readdirSync(EMAILS).filter((f) => f.endsWith('.txt')).sort()
+    const files = readdirSync(EMAILS)
+      .filter((f) => f.endsWith('.txt'))
+      .sort()
     for (const file of files) {
       walk(parseRoutine(readFileSync(`${EMAILS}/${file}`, 'utf8'), file).blocks)
     }
@@ -136,11 +135,8 @@ describe('harvest', () => {
 
     writeFileSync(
       OUT,
-      `/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+      `// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 /**
  * How the instructor prescribes each exercise.

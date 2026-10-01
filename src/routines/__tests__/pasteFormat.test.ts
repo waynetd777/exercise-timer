@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import general from './emails/2026-07-20-general.txt?raw'
@@ -530,8 +527,13 @@ describe('parseItem', () => {
 
   it('drops a bracket left dangling by the alternative it qualified', () => {
     expect(
-      parseItem('Bulgarian Split Squats (alternate legs each set, or perform half the reps per leg)'),
-    ).toMatchObject({ name: 'Bulgarian Split Squats', alternative: 'perform half the reps per leg' })
+      parseItem(
+        'Bulgarian Split Squats (alternate legs each set, or perform half the reps per leg)',
+      ),
+    ).toMatchObject({
+      name: 'Bulgarian Split Squats',
+      alternative: 'perform half the reps per leg',
+    })
   })
 
   it('lifts a long trailing instruction out of the name', () => {
@@ -572,9 +574,7 @@ describe('parseItem', () => {
     // The guard on the whole pipeline: 159 characters was the worst case before
     // descriptions were lifted out, and it broke every box it was put in.
     for (const text of Object.values(EMAILS)) {
-      const longest = Math.max(
-        ...steps(parseRoutine(text).blocks).map((step) => step.name.length),
-      )
+      const longest = Math.max(...steps(parseRoutine(text).blocks).map((step) => step.name.length))
       expect(longest).toBeLessThanOrEqual(60)
     }
   })
@@ -818,7 +818,9 @@ describe('the last of the earlier template', () => {
      * are kept rather than turned into forwards and backwards: they are what
      * the diagram labelled, and it is still there to point at.
      */
-    const parsed = clean('#1 General body\nA🔺-------5m———🔺B\nWalking lunge A-B\nWalking lunge B-A')
+    const parsed = clean(
+      '#1 General body\nA🔺-------5m———🔺B\nWalking lunge A-B\nWalking lunge B-A',
+    )
     const section = parsed.blocks.find((b) => b.kind === 'section')!
     expect(section.note).toContain('5m')
     expect(section.children.map((c) => (c.kind === 'segment' ? c.name : ''))).toEqual([
@@ -850,7 +852,11 @@ describe('the last of the earlier template', () => {
   })
 
   it('reads a heading that ends in a colon, and one behind an emoji', () => {
-    for (const heading of ['Exercises:', '💥 Bonus Challenge', 'Optional Burner (if you want to)']) {
+    for (const heading of [
+      'Exercises:',
+      '💥 Bonus Challenge',
+      'Optional Burner (if you want to)',
+    ]) {
       const blocks = clean(`${heading}\n10 x Squats`).blocks
       expect(blocks.some((b) => b.kind === 'section')).toBe(true)
     }
@@ -865,9 +871,10 @@ describe('the whole corpus', () => {
      * routines were added on 2026-08-27.
      */
     for (const [name, text] of Object.entries(ALL_EMAILS)) {
-      expect(parseRoutine(text).skipped.map((entry) => entry.text), name).toEqual(
-        KNOWN_UNPLACED[name] ?? [],
-      )
+      expect(
+        parseRoutine(text).skipped.map((entry) => entry.text),
+        name,
+      ).toEqual(KNOWN_UNPLACED[name] ?? [])
     }
   })
 })
@@ -914,9 +921,17 @@ describe('a challenge written as a sentence', () => {
 
   it('still reads a short heading behind an emoji', () => {
     // The heading match was narrowed to fix the above; these must still open one.
-    for (const heading of ['🔥 Final Burnout', '🔥 After Round 5:', '🔥 Finisher:', '💥 Bonus Challenge']) {
+    for (const heading of [
+      '🔥 Final Burnout',
+      '🔥 After Round 5:',
+      '🔥 Finisher:',
+      '💥 Bonus Challenge',
+    ]) {
       const blocks = parseRoutine(`${heading}\n10 x Squats`).blocks
-      expect(blocks.some((b) => b.kind === 'section' && b.name.length <= 30), heading).toBe(true)
+      expect(
+        blocks.some((b) => b.kind === 'section' && b.name.length <= 30),
+        heading,
+      ).toBe(true)
     }
   })
 })
@@ -938,7 +953,7 @@ describe('a date is not a ladder', () => {
   it('leaves "2026-04-16" out of the routine rather than reading it as rungs', () => {
     const parsed = parseRoutine('2026-04-16\n10 x Squats')
     const kinds: string[] = []
-    const walk = (blocks: readonly typeof parsed.blocks[number][]) => {
+    const walk = (blocks: readonly (typeof parsed.blocks)[number][]) => {
       for (const block of blocks) {
         kinds.push(block.kind)
         if (block.kind !== 'segment') walk(block.children)
@@ -1092,7 +1107,10 @@ describe('the September template', () => {
   it('reads "Replace squat pulses with:" and the step below it', () => {
     const final = find(parseRoutine(e).blocks, 'final round')
     expect(final.note).toBe('Replace squat pulses with:')
-    expect(final.children[0]).toMatchObject({ name: 'Squat Hold + 10 pulses at the end', durationMs: 30_000 })
+    expect(final.children[0]).toMatchObject({
+      name: 'Squat Hold + 10 pulses at the end',
+      durationMs: 30_000,
+    })
   })
 
   it('keeps "After completing the ladder:" in the same section, and spaces the rounds with "10 sec transition only."', () => {
@@ -1108,21 +1126,41 @@ describe('the September template', () => {
   it('keeps "60 seconds nonstop" as a note over steps that state their own times', () => {
     const finisher = find(parseRoutine(e).blocks, 'core finisher')
     expect(finisher.note).toBe('60 seconds nonstop')
-    expect(finisher.children.map((c) => (c as Segment).durationMs)).toEqual([20_000, 20_000, 20_000])
+    expect(finisher.children.map((c) => (c as Segment).durationMs)).toEqual([
+      20_000, 20_000, 20_000,
+    ])
   })
 
   it('flattens rounds written out in full, with the after-each-round step after each and the rest between', () => {
     const burn = find(parseRoutine(e).blocks, 'full-leg burn')
     const run = burn.children.map((c) => {
       const s = c as Segment
-      return s.role === 'rest' ? 'rest' : s.reps?.kind === 'fixed' ? `${s.name} ${s.reps.count}` : s.name
+      return s.role === 'rest'
+        ? 'rest'
+        : s.reps?.kind === 'fixed'
+          ? `${s.name} ${s.reps.count}`
+          : s.name
     })
     expect(run).toEqual([
-      'Sumo Squats 10', 'Alternating Curtsy Lunges 10', 'Calf Raises 15', 'RB Squats 10', 'Squat Pulses 10',
-      'Squat Jumps', 'rest',
-      'Sumo Squats 15', 'Alternating Curtsy Lunges 14', 'Calf Raises 20', 'RB Squats 15', 'Squat Pulses 15',
-      'Squat Jumps', 'rest',
-      'Sumo Squats 20', 'Alternating Curtsy Lunges 18', 'Calf Raises 25', 'RB Squats 20', 'Squat Pulses 20',
+      'Sumo Squats 10',
+      'Alternating Curtsy Lunges 10',
+      'Calf Raises 15',
+      'RB Squats 10',
+      'Squat Pulses 10',
+      'Squat Jumps',
+      'rest',
+      'Sumo Squats 15',
+      'Alternating Curtsy Lunges 14',
+      'Calf Raises 20',
+      'RB Squats 15',
+      'Squat Pulses 15',
+      'Squat Jumps',
+      'rest',
+      'Sumo Squats 20',
+      'Alternating Curtsy Lunges 18',
+      'Calf Raises 25',
+      'RB Squats 20',
+      'Squat Pulses 20',
       'Squat Jumps',
     ])
     // "3 ROUNDS" is kept as the note, since the three groups are no longer a repeat.

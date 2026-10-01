@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+/* Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+ * SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root. */
 
 /*
  * The weights page. Header, lede and tools stay put; the rows scroll under
@@ -282,7 +279,9 @@
   border: var(--hairline);
   border-radius: 999px;
   cursor: pointer;
-  transition: color 150ms var(--ease), border-color 150ms var(--ease);
+  transition:
+    color 150ms var(--ease),
+    border-color 150ms var(--ease);
 }
 
 .weight__act:hover,

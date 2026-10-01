@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it, vi } from 'vitest'
 import type { MediaRef } from '../../engine'
@@ -29,7 +26,15 @@ vi.mock('../../storage/pictures', async (importOriginal) => ({
 const routine = () => ({
   id: 'p1',
   name: 'Legs',
-  blocks: [{ kind: 'segment' as const, id: 's1', name: 'Leg Press', role: 'work' as const, durationMs: 20_000 }],
+  blocks: [
+    {
+      kind: 'segment' as const,
+      id: 's1',
+      name: 'Leg Press',
+      role: 'work' as const,
+      durationMs: 20_000,
+    },
+  ],
   schemaVersion: SCHEMA_VERSION,
   createdAt: 0,
   updatedAt: 0,
@@ -56,6 +61,8 @@ describe('importing the exercise pictures', () => {
 
     expect(imported).toHaveLength(1)
     expect(droppedImages).toBe(1)
-    expect(savePictures).toHaveBeenCalledWith({ 'seated row': { source: 'remote', url: 'https://x/y.jpg' } })
+    expect(savePictures).toHaveBeenCalledWith({
+      'seated row': { source: 'remote', url: 'https://x/y.jpg' },
+    })
   })
 })

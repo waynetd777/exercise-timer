@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { CuePoint } from '../../engine'
@@ -135,9 +132,7 @@ describe('runCues: one run at a time', () => {
     const routine = mixed()
     const gate = routine.runs.findIndex((run) => run.selfPaced)
 
-    expect(runCues(routine, gate)).toEqual([
-      { atMs: 0, kind: 'work-start', entryIndex: 0 },
-    ])
+    expect(runCues(routine, gate)).toEqual([{ atMs: 0, kind: 'work-start', entryIndex: 0 }])
   })
 
   it('does not finish the workout at the end of every run', () => {

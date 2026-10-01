@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import type { Block } from '../../engine/types'
@@ -27,7 +24,12 @@ describe('estimate', () => {
      * disagree about the same routine.
      */
     const { workout } = generateRoutine(
-      { totalMs: 45 * 60_000, areas: ['upper', 'torso', 'lower'], recovery: 'active', equipment: 'machine' },
+      {
+        totalMs: 45 * 60_000,
+        areas: ['upper', 'torso', 'lower'],
+        recovery: 'active',
+        equipment: 'machine',
+      },
       { rng: seeded(3), now: 0 },
     )
     expect(estimate(workout.blocks).knownMs).toBe(totalDurationMs(workout))
@@ -36,11 +38,15 @@ describe('estimate', () => {
 
   it('estimates a self-paced step at the rate for that exercise', () => {
     // Mountain climbers are a second a rep in the corpus; the default is two.
-    const climbers = estimate([step({ name: 'Mountain Climbers', reps: { kind: 'fixed', count: 30 } })])
+    const climbers = estimate([
+      step({ name: 'Mountain Climbers', reps: { kind: 'fixed', count: 30 } }),
+    ])
     expect(climbers.estimatedMs).toBe(30_000)
     expect(climbers.rough).toBe(true)
 
-    const unknown = estimate([step({ name: 'Not An Exercise', reps: { kind: 'fixed', count: 10 } })])
+    const unknown = estimate([
+      step({ name: 'Not An Exercise', reps: { kind: 'fixed', count: 10 } }),
+    ])
     expect(unknown.estimatedMs).toBe(10 * DEFAULT_SECONDS_PER_REP * 1000)
   })
 
@@ -64,9 +70,16 @@ describe('estimate', () => {
       },
     ]
     expect(estimate(blocks).knownMs).toBe(3 * 30_000 - 10_000)
-    expect(estimate(blocks).knownMs).toBe(totalDurationMs({
-      id: 'w', name: 'W', blocks, schemaVersion: SCHEMA_VERSION, createdAt: 0, updatedAt: 0,
-    }))
+    expect(estimate(blocks).knownMs).toBe(
+      totalDurationMs({
+        id: 'w',
+        name: 'W',
+        blocks,
+        schemaVersion: SCHEMA_VERSION,
+        createdAt: 0,
+        updatedAt: 0,
+      }),
+    )
   })
 
   it('gives a ladder its rungs, not its rung count', () => {
@@ -87,7 +100,13 @@ describe('estimate', () => {
 
   it('answers for a rep-based routine, which the engine cannot', () => {
     const { workout } = generateRoutine(
-      { totalMs: 0, areas: ['upper', 'torso', 'lower'], recovery: 'passive', equipment: 'none', style: 'sections' },
+      {
+        totalMs: 0,
+        areas: ['upper', 'torso', 'lower'],
+        recovery: 'passive',
+        equipment: 'none',
+        style: 'sections',
+      },
       { rng: seeded(5), now: 0 },
     )
     const found = estimate(workout.blocks)

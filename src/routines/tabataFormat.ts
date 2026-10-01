@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { MediaRef, Segment, SegmentRole, Workout } from '../engine'
 import { SCHEMA_VERSION } from '../engine'
@@ -62,7 +59,8 @@ function assertShape(json: unknown): TabataFile {
   const workout = (json as { workout?: unknown }).workout
   if (typeof workout !== 'object' || workout === null) throw new TabataImportError('no workout')
   const title = (workout as { title?: unknown }).title
-  if (title !== undefined && typeof title !== 'string') throw new TabataImportError('title is not text')
+  if (title !== undefined && typeof title !== 'string')
+    throw new TabataImportError('title is not text')
   const intervals = (workout as { intervals?: unknown }).intervals
   if (!Array.isArray(intervals)) throw new TabataImportError('no intervals array')
   return json as TabataFile
@@ -75,13 +73,15 @@ function assertShape(json: unknown): TabataFile {
  */
 function assertInterval(value: unknown, index: number): TabataInterval {
   const at = `interval ${index + 1}`
-  if (typeof value !== 'object' || value === null) throw new TabataImportError(`${at} is not an object`)
+  if (typeof value !== 'object' || value === null)
+    throw new TabataImportError(`${at} is not an object`)
   const { type, time, description, url } = value as Record<string, unknown>
   if (typeof type !== 'number') throw new TabataImportError(`${at} has no numeric type`)
   if (typeof time !== 'number') throw new TabataImportError(`${at} has no numeric time`)
   if (description !== undefined && typeof description !== 'string')
     throw new TabataImportError(`${at} description is not text`)
-  if (url !== undefined && typeof url !== 'string') throw new TabataImportError(`${at} url is not text`)
+  if (url !== undefined && typeof url !== 'string')
+    throw new TabataImportError(`${at} url is not text`)
   return value as TabataInterval
 }
 

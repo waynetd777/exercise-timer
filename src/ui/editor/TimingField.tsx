@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { Segment } from '../../engine'
 import type { Timing } from '../../editor/blocks'
@@ -82,10 +79,14 @@ export function TimingField({
     }
     // The role's own default, as the counted-and-timed branch above uses: a
     // rest going timed used to get twenty seconds this way and its ten the other.
-    onChange({ kind: 'timed', durationMs: segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000 })
+    onChange({
+      kind: 'timed',
+      durationMs: segment.durationMs ?? DEFAULT_SECONDS[segment.role] * 1000,
+    })
   }
 
-  const value = timing.kind === 'timed' ? Math.round(timing.durationMs / 1000) : counted ? timing.count : 0
+  const value =
+    timing.kind === 'timed' ? Math.round(timing.durationMs / 1000) : counted ? timing.count : 0
 
   /** The clock that sits beside the count, for a step that is both. */
   const clockMs = timing.kind === 'reps' ? timing.durationMs : undefined
@@ -153,7 +154,15 @@ export function TimingField({
             max={5999}
             label="Seconds"
             onCommit={(entered) =>
-              onChange({ kind: 'reps', count: timing.count, ...(timing.perSide ? { perSide: true } : {}), durationMs: entered * 1000 }, true)
+              onChange(
+                {
+                  kind: 'reps',
+                  count: timing.count,
+                  ...(timing.perSide ? { perSide: true } : {}),
+                  durationMs: entered * 1000,
+                },
+                true,
+              )
             }
           />
           <span className="esecs__unit" aria-hidden="true">

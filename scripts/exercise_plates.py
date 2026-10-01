@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# Exercise Timer
-# Copyright (c) 2026 Wayne Davies
-# MIT License. See LICENSE in the project root.
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 """
 Regenerates public/exercises/ from the Horizon Torus exercise guide PDF.
@@ -73,7 +72,9 @@ def page_count(pdf: pathlib.Path) -> int:
 def page_text(pdf: pathlib.Path, page: int) -> str:
     return subprocess.run(
         ['pdftotext', '-f', str(page), '-l', str(page), '-layout', str(pdf), '-'],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout
 
 
@@ -92,7 +93,7 @@ def exercise_names(pdf: pathlib.Path, pages: int) -> list[tuple[int, str]]:
         if head is None:
             raise SystemExit(f'page {page} has no STATION heading. Is this the right guide?')
         name = head.split('STATION')[0].strip()
-        after = lines[lines.index(head) + 1:]
+        after = lines[lines.index(head) + 1 :]
         tail = next((t for t in after if not re.match(r'^\d+\.?$', t)), '')
         if not re.match(r'^\d+\.', tail) and not tail.startswith('TRAINING'):
             name = f'{name} {tail}'
@@ -101,14 +102,27 @@ def exercise_names(pdf: pathlib.Path, pages: int) -> list[tuple[int, str]]:
 
 
 def slug(name: str) -> str:
-    return '-'.join(w.capitalize() for w in re.findall(r'[A-Za-z]+', name.lower().replace('-', ' ')))
+    return '-'.join(
+        w.capitalize() for w in re.findall(r'[A-Za-z]+', name.lower().replace('-', ' '))
+    )
 
 
 def plate(pdf: pathlib.Path, page: int, work: pathlib.Path) -> Image.Image:
     subprocess.run(
-        ['pdftoppm', '-f', str(page), '-l', str(page), '-r', str(RENDER_DPI), '-png',
-         str(pdf), str(work / 'page')],
-        capture_output=True, check=True,
+        [
+            'pdftoppm',
+            '-f',
+            str(page),
+            '-l',
+            str(page),
+            '-r',
+            str(RENDER_DPI),
+            '-png',
+            str(pdf),
+            str(work / 'page'),
+        ],
+        capture_output=True,
+        check=True,
     )
     rendered = next(work.glob('page-*.png'))
     image = Image.open(rendered).convert('RGB')

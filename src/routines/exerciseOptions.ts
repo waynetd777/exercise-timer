@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import type { MediaRef } from '../engine'
 import type { Equipment, Exercise } from './exercises'
@@ -42,8 +39,7 @@ export type ExerciseOption = {
 
 /** A heading, or one exercise, in the order the list renders them. */
 export type ExerciseRow =
-  | { kind: 'group'; label: string }
-  | { kind: 'option'; option: ExerciseOption }
+  { kind: 'group'; label: string } | { kind: 'option'; option: ExerciseOption }
 
 /**
  * The kit, in the order the list offers it: `KIT_GROUPS`, which the exercises
@@ -105,9 +101,7 @@ export function collectExercises(
     // group if one is ever added.
     if (!group) continue
 
-    const picture =
-      pictures?.get(key) ??
-      (exercise.media ? bundled(exercise.media) : undefined)
+    const picture = pictures?.get(key) ?? (exercise.media ? bundled(exercise.media) : undefined)
 
     const option: ExerciseOption = {
       name: exercise.name,
@@ -203,10 +197,7 @@ function needleOf(query: string): string {
  *    noise over two results, and ranked order would make it repeat anyway. The
  *    kit still shows, on the row itself; see `ExerciseField`.
  */
-export function exerciseRows(
-  options: readonly ExerciseOption[],
-  query: string,
-): ExerciseRow[] {
+export function exerciseRows(options: readonly ExerciseOption[], query: string): ExerciseRow[] {
   const needle = needleOf(query)
 
   if (needle === '') {
@@ -223,15 +214,18 @@ export function exerciseRows(
   }
 
   const words = needle.split(' ').filter(Boolean)
-  return options
-    .map((option, at) => ({ option, at, rank: score(option, needle, words) }))
-    .filter((entry): entry is { option: ExerciseOption; at: number; rank: number } =>
-      entry.rank !== null,
-    )
-    // `at` breaks ties, so equally good matches stay in table order rather than
-    // in whatever order `sort` happens to leave them.
-    .sort((a, b) => a.rank - b.rank || a.at - b.at)
-    .map(({ option }) => ({ kind: 'option', option }))
+  return (
+    options
+      .map((option, at) => ({ option, at, rank: score(option, needle, words) }))
+      .filter(
+        (entry): entry is { option: ExerciseOption; at: number; rank: number } =>
+          entry.rank !== null,
+      )
+      // `at` breaks ties, so equally good matches stay in table order rather than
+      // in whatever order `sort` happens to leave them.
+      .sort((a, b) => a.rank - b.rank || a.at - b.at)
+      .map(({ option }) => ({ kind: 'option', option }))
+  )
 }
 
 /**
@@ -265,7 +259,10 @@ export function indexOfName(options: readonly ExerciseOption[], name: string): n
    * candidates read alike, which is the right answer here too: highlighting the
    * wrong one of two is worse than highlighting neither.
    */
-  const closest = closestKey(needle, options.map((option) => option.key))
+  const closest = closestKey(
+    needle,
+    options.map((option) => option.key),
+  )
   if (closest !== null) {
     const at = options.findIndex((option) => option.key === closest)
     if (at !== -1) return at

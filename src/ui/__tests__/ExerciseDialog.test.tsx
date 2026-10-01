@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -32,9 +29,7 @@ const name = () => screen.getByLabelText('Exercise name') as HTMLInputElement
 describe('adding an exercise of your own', () => {
   it('takes the typed name and the answers, and writes only what is not the default', () => {
     const onSave = vi.fn()
-    render(
-      <ExerciseDialog name="Sandbag Lunge" table={table} onSave={onSave} onClose={vi.fn()} />,
-    )
+    render(<ExerciseDialog name="Sandbag Lunge" table={table} onSave={onSave} onClose={vi.fn()} />)
 
     expect(name().value).toBe('Sandbag Lunge')
     fireEvent.click(screen.getByRole('button', { name: 'Kettlebell' }))
@@ -131,7 +126,12 @@ describe('the warning', () => {
 
   it('goes back to the form, so a warning is not a dead end', () => {
     render(
-      <ExerciseDialog name="Bugarian Split Squat" table={table} onSave={vi.fn()} onClose={vi.fn()} />,
+      <ExerciseDialog
+        name="Bugarian Split Squat"
+        table={table}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Add' }))
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
@@ -236,7 +236,11 @@ describe('changing one of yours', () => {
     // The confirm screen is shared with adding, where it says "Add anyway".
     // Here Save performs a rename, so "Add" would promise a row it will not make.
     const onSave = vi.fn()
-    const squat = { name: 'Sandbag Squat', area: 'lower' as const, equipment: 'kettlebell' as const }
+    const squat = {
+      name: 'Sandbag Squat',
+      area: 'lower' as const,
+      equipment: 'kettlebell' as const,
+    }
     render(
       <ExerciseDialog
         name=""
@@ -262,7 +266,11 @@ describe('changing one of yours', () => {
     // Nothing new is being introduced, so there is nothing to warn about: the
     // exercise has been on the page since the day it was added.
     const onSave = vi.fn()
-    const squat = { name: 'Sandbag Squat', area: 'lower' as const, equipment: 'kettlebell' as const }
+    const squat = {
+      name: 'Sandbag Squat',
+      area: 'lower' as const,
+      equipment: 'kettlebell' as const,
+    }
     render(
       <ExerciseDialog
         name=""
@@ -285,9 +293,7 @@ describe('changing one of yours', () => {
 describe('the weight and the picture', () => {
   it('hands back what was typed, separately from the exercise', () => {
     const onSave = vi.fn()
-    render(
-      <ExerciseDialog name="Sandbag Lunge" table={table} onSave={onSave} onClose={vi.fn()} />,
-    )
+    render(<ExerciseDialog name="Sandbag Lunge" table={table} onSave={onSave} onClose={vi.fn()} />)
 
     fireEvent.change(screen.getByLabelText('Weight'), { target: { value: ' 30kg ' } })
     fireEvent.click(screen.getByRole('button', { name: 'Add' }))

@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import { compile } from '../compile'
@@ -19,7 +16,17 @@ import {
   START,
 } from '../navigate'
 import type { Cursor } from '../navigate'
-import { armsSection, ladder, legsLadder, rep, section, seg, step, tabata, workout } from './fixtures'
+import {
+  armsSection,
+  ladder,
+  legsLadder,
+  rep,
+  section,
+  seg,
+  step,
+  tabata,
+  workout,
+} from './fixtures'
 
 /** Warm-up (2 timed), two rep steps, then a rest and a plank (2 timed). */
 const mixed = () =>
@@ -196,7 +203,9 @@ describe('cursorForStep', () => {
     // position inside it to seek to. Seeking to the rung's second exercise
     // lands on the gate, which reports its FIRST step. Intended, not a bug.
     const routine = compile(
-      workout('Rung', [section('Legs', [ladder([5], [step('Squats', 'rung'), step('Walks', 10)])])]),
+      workout('Rung', [
+        section('Legs', [ladder([5], [step('Squats', 'rung'), step('Walks', 10)])]),
+      ]),
     )
     const second = routine.entries[1]!
     const cursor = cursorForStep(routine, second.step)
@@ -212,7 +221,12 @@ describe('groupEntries: what list mode draws', () => {
     const secondRound = routine.entries.filter((e) => groupOf(e)!.iteration === 2)
     const group = groupEntries(routine, secondRound[0]!)
 
-    expect(group.map((e) => e.name)).toEqual(['Bicep Curls', 'Arnold Press', 'Upright Rows', 'Rest'])
+    expect(group.map((e) => e.name)).toEqual([
+      'Bicep Curls',
+      'Arnold Press',
+      'Upright Rows',
+      'Rest',
+    ])
     expect(group).toEqual(secondRound)
   })
 
@@ -230,7 +244,11 @@ describe('groupEntries: what list mode draws', () => {
   it('gives the whole section when the section has no group inside it', () => {
     const routine = compile(
       workout('Burnout', [
-        section('Final Burnout', [step('Sumo Squats', 20), step('Squat Pulses', 20), seg('Wall Sit', 30)]),
+        section('Final Burnout', [
+          step('Sumo Squats', 20),
+          step('Squat Pulses', 20),
+          seg('Wall Sit', 30),
+        ]),
       ]),
     )
 

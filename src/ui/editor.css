@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+/* Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+ * SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root. */
 
 /* ── Editor ────────────────────────────────────────────────────────────────
  * Header and add-buttons fixed, the step list scrolling between them. The same
@@ -199,13 +196,27 @@
   background: var(--kind, var(--bone-faint));
 }
 
-.editor__add .chip[data-kind='prepare'] { --kind: var(--role-prepare); }
-.editor__add .chip[data-kind='work'] { --kind: var(--role-work); }
-.editor__add .chip[data-kind='rest'] { --kind: var(--role-rest); }
-.editor__add .chip[data-kind='recover'] { --kind: var(--role-recover); }
-.editor__add .chip[data-kind='reps'] { --kind: var(--group-reps); }
-.editor__add .chip[data-kind='ladder'] { --kind: var(--group-ladder); }
-.editor__add .chip[data-kind='section'] { --kind: var(--group-section); }
+.editor__add .chip[data-kind='prepare'] {
+  --kind: var(--role-prepare);
+}
+.editor__add .chip[data-kind='work'] {
+  --kind: var(--role-work);
+}
+.editor__add .chip[data-kind='rest'] {
+  --kind: var(--role-rest);
+}
+.editor__add .chip[data-kind='recover'] {
+  --kind: var(--role-recover);
+}
+.editor__add .chip[data-kind='reps'] {
+  --kind: var(--group-reps);
+}
+.editor__add .chip[data-kind='ladder'] {
+  --kind: var(--group-ladder);
+}
+.editor__add .chip[data-kind='section'] {
+  --kind: var(--group-section);
+}
 
 /* ── Rows ─────────────────────────────────────────────────────────────────
  * A left border in the step's own phase colour, which makes the shape of a
@@ -224,10 +235,18 @@
   border-radius: var(--radius);
 }
 
-.erow[data-role='prepare'] { border-left-color: var(--role-prepare); }
-.erow[data-role='work'] { border-left-color: var(--role-work); }
-.erow[data-role='rest'] { border-left-color: var(--role-rest); }
-.erow[data-role='recover'] { border-left-color: var(--role-recover); }
+.erow[data-role='prepare'] {
+  border-left-color: var(--role-prepare);
+}
+.erow[data-role='work'] {
+  border-left-color: var(--role-work);
+}
+.erow[data-role='rest'] {
+  border-left-color: var(--role-rest);
+}
+.erow[data-role='recover'] {
+  border-left-color: var(--role-recover);
+}
 
 /*
  * An open panel has to paint over the rows below it, and a later sibling paints
@@ -422,7 +441,6 @@
   display: grid;
 }
 
-
 /*
  * Opens upward instead, for a row with no room below it: the last few rows of the
  * list, where a panel hanging off the bottom would be clipped by the scroller.
@@ -599,7 +617,6 @@
   border-radius: var(--radius);
   overflow: hidden;
 }
-
 
 .picker__head {
   display: grid;
@@ -1004,13 +1021,12 @@
  * 72px row would be a coloured page here.
  */
 .editor[data-colour] {
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in oklab, var(--tint) 15%, var(--ink-900)) 0%,
-      color-mix(in oklab, var(--tint) 6%, var(--ink-900)) 38%,
-      var(--ink-900) 78%
-    );
+  background: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--tint) 15%, var(--ink-900)) 0%,
+    color-mix(in oklab, var(--tint) 6%, var(--ink-900)) 38%,
+    var(--ink-900) 78%
+  );
 }
 
 .editor__colours {
@@ -1032,20 +1048,21 @@
   border-radius: 50%;
   background: color-mix(in oklab, var(--tint) 62%, var(--ink-800));
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 /* A diagonal through an empty circle: the absence of colour, drawn. */
 .swatch--none {
   border-color: var(--bone-faint);
-  background:
-    linear-gradient(
-      45deg,
-      transparent calc(50% - 1px),
-      var(--bone-faint) calc(50% - 1px),
-      var(--bone-faint) calc(50% + 1px),
-      transparent calc(50% + 1px)
-    );
+  background: linear-gradient(
+    45deg,
+    transparent calc(50% - 1px),
+    var(--bone-faint) calc(50% - 1px),
+    var(--bone-faint) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
 }
 
 .swatch:hover {

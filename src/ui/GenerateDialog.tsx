@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useMemo, useState } from 'react'
 import type { Block, Workout } from '../engine/types'
@@ -46,8 +43,16 @@ const AREAS: { area: BodyArea; label: string }[] = [
 ]
 
 const EQUIPMENT: { value: EquipmentScope; label: string; title: string }[] = [
-  { value: 'machine', label: 'Multi-gym', title: 'Only the machine, and only what the guide illustrates' },
-  { value: 'none', label: 'No multi-gym', title: 'Bodyweight, bands, dumbbells, kettlebell and trampoline' },
+  {
+    value: 'machine',
+    label: 'Multi-gym',
+    title: 'Only the machine, and only what the guide illustrates',
+  },
+  {
+    value: 'none',
+    label: 'No multi-gym',
+    title: 'Bodyweight, bands, dumbbells, kettlebell and trampoline',
+  },
   { value: 'mixed', label: 'Mixed', title: 'Whatever fits best, machine or not' },
 ]
 
@@ -345,7 +350,10 @@ export function GenerateDialog({
     const walk = (blocks: readonly Block[]): void => {
       for (const block of blocks) {
         if (block.kind !== 'segment') walk(block.children)
-        else if (block.role === 'work' && table.some((e) => e.name === block.name && e.use !== 'cardio')) {
+        else if (
+          block.role === 'work' &&
+          table.some((e) => e.name === block.name && e.use !== 'cardio')
+        ) {
           if (!names.includes(block.name)) names.push(block.name)
         }
       }
@@ -415,7 +423,11 @@ export function GenerateDialog({
                 label: 'Always',
                 title: 'Every section that has ever been written as one is built as one',
               },
-              { value: 'never' as Formats, label: 'Never', title: 'Counted lists and ladders only' },
+              {
+                value: 'never' as Formats,
+                label: 'Never',
+                title: 'Counted lists and ladders only',
+              },
             ]}
             value={formats}
             onChange={setFormats}
@@ -483,15 +495,23 @@ export function GenerateDialog({
         )}
 
         {circuit && (
-        <Choice
-          legend="Between sets"
-          options={[
-            { value: 'active' as Recovery, label: 'Keep moving', title: 'A minute of cardio between exercises' },
-            { value: 'passive' as Recovery, label: 'Rest', title: 'A minute to recover between exercises' },
-          ]}
-          value={recovery}
-          onChange={setRecovery}
-        />
+          <Choice
+            legend="Between sets"
+            options={[
+              {
+                value: 'active' as Recovery,
+                label: 'Keep moving',
+                title: 'A minute of cardio between exercises',
+              },
+              {
+                value: 'passive' as Recovery,
+                label: 'Rest',
+                title: 'A minute to recover between exercises',
+              },
+            ]}
+            value={recovery}
+            onChange={setRecovery}
+          />
         )}
 
         {circuit && recovery === 'active' && (
@@ -593,7 +613,8 @@ export function GenerateDialog({
               */}
               <p className="label label--sm">
                 {chosen.length} {chosen.length === 1 ? 'exercise' : 'exercises'}
-                {!circuit && ` · ${result.workout.blocks.filter((b) => b.kind === 'section').length} sections`}
+                {!circuit &&
+                  ` · ${result.workout.blocks.filter((b) => b.kind === 'section').length} sections`}
                 {` · ${estimated(guess.knownMs + guess.estimatedMs, guess.rough)}`}
               </p>
               <p className="generate__list label label--sm">{chosen.join(' · ')}</p>

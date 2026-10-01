@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 // The tables are localStorage, so the tests need a browser's one.
@@ -44,7 +41,9 @@ describe('refoldKeys', () => {
       table: { 'leg press': '60kg', 'seated row': '40kg' },
       changed: true,
     })
-    expect(refoldKeys({ 'leg pres': '60kg', 'leg press': '65kg' }).table).toEqual({ 'leg press': '65kg' })
+    expect(refoldKeys({ 'leg pres': '60kg', 'leg press': '65kg' }).table).toEqual({
+      'leg press': '65kg',
+    })
     expect(refoldKeys({ 'seated row': '40kg' }).changed).toBe(false)
   })
 })
@@ -61,7 +60,9 @@ describe('the tables', () => {
     expect(weightFor('Leg Press')).toBe('60kg')
     expect(loadWeights()).toEqual({ 'leg press': '60kg' })
     // Written back once, so the next read has nothing to move.
-    expect(JSON.parse(localStorage.getItem('davshack-timer-weights')!)).toEqual({ 'leg press': '60kg' })
+    expect(JSON.parse(localStorage.getItem('davshack-timer-weights')!)).toEqual({
+      'leg press': '60kg',
+    })
 
     saveWeights(withWeight(loadWeights(), 'Leg Press', ''))
     expect(weightFor('Leg Press')).toBe('')

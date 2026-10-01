@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { describe, expect, it } from 'vitest'
 import {
@@ -203,7 +200,13 @@ describe('fitPanel', () => {
 
   it('uses the height budget without overrunning it, at every length', () => {
     // The invariant the square root exists to hold: lines × size fits the box.
-    for (const text of ['Go', 'Rest', 'Seated Abdominal Crunch', 'a '.repeat(90), 'x'.repeat(200)]) {
+    for (const text of [
+      'Go',
+      'Rest',
+      'Seated Abdominal Crunch',
+      'a '.repeat(90),
+      'x'.repeat(200),
+    ]) {
       const { fit, lines } = fitPanel(text)
       expect(lines * fit).toBeLessThanOrEqual(FIT_HEIGHT_BUDGET + fit)
     }
@@ -310,7 +313,10 @@ describe('nameWithEffort', () => {
     // A dashed "– each side" stays in the name: it is the only record of which
     // limb, since `perSide` is a boolean and cannot tell a leg from an arm.
     expect(
-      nameWithEffort({ name: 'Plank Shoulder Taps – each side', reps: { count: 10, perSide: true } }),
+      nameWithEffort({
+        name: 'Plank Shoulder Taps – each side',
+        reps: { count: 10, perSide: true },
+      }),
     ).toBe('10 × Plank Shoulder Taps – each side')
   })
 
@@ -318,14 +324,17 @@ describe('nameWithEffort', () => {
     // "5 × Bulgarian split squat – 5 each side" states it at both ends. The name
     // has already answered the question, so the prefix stands down.
     expect(
-      nameWithEffort({ name: 'Bulgarian split squat – 5 each side', reps: { count: 5, perSide: true } }),
+      nameWithEffort({
+        name: 'Bulgarian split squat – 5 each side',
+        reps: { count: 5, perSide: true },
+      }),
     ).toBe('Bulgarian split squat – 5 each side')
   })
 
   it('carries the load through, after the count and the per-side words', () => {
-    expect(
-      nameWithEffort({ name: 'Leg Press', load: '65kg', reps: { count: 12 } }),
-    ).toBe('12 × Leg Press 65kg')
+    expect(nameWithEffort({ name: 'Leg Press', load: '65kg', reps: { count: 12 } })).toBe(
+      '12 × Leg Press 65kg',
+    )
     expect(
       nameWithEffort({ name: 'Kickback', load: '20kg', reps: { count: 10, perSide: true } }),
     ).toBe('10 × Kickback each side 20kg')

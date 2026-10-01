@@ -1,8 +1,5 @@
-/**
- * Exercise Timer
- * Copyright (c) 2026 Wayne Davies
- * MIT License. See LICENSE in the project root.
- */
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // @vitest-environment jsdom
 import { cleanup, renderHook } from '@testing-library/react'
@@ -65,7 +62,13 @@ const routine = compile(workout('drill', [seg('push-ups', 25, 'work'), seg('rest
 /** Ends on a self-paced step, so the finish fires on the tap, not the clock. */
 const gated = compile(workout('gated', [step('plank')]))
 
-type Props = { status: RunStatus; muted: boolean; generation: number; runIndex?: number; seeks?: number }
+type Props = {
+  status: RunStatus
+  muted: boolean
+  generation: number
+  runIndex?: number
+  seeks?: number
+}
 
 let elapsed = 0
 // Stable across renders, as the real timer's is: a fresh identity per render
