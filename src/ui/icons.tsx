@@ -79,6 +79,24 @@ export function SoundOnIcon() {
   )
 }
 
+/** Four corners pointing out: enter full screen. */
+export function FullscreenIcon() {
+  return (
+    <Svg>
+      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" {...STROKE} />
+    </Svg>
+  )
+}
+
+/** Four corners pointing in: leave full screen. */
+export function ExitFullscreenIcon() {
+  return (
+    <Svg>
+      <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" {...STROKE} />
+    </Svg>
+  )
+}
+
 /** A stopwatch at icon size, for the ten-second warning. `StopwatchIcon` is the app mark, sized in em. */
 export function WarningTimerIcon() {
   return (

@@ -199,6 +199,7 @@
 {"desc": "Exercise Timer", "hash": "da2d0e21cca3c75b", "path": "src/ui/sounds.css", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "bf125f61868d192c", "path": "src/ui/theme.css", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "37c95e61ebc463a8", "path": "src/ui/useDismiss.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "Full screen: enter on opening a routine, leave on closing it, F to toggle", "hash": "7ab4bd411aec12f9", "path": "src/ui/useFullscreen.ts", "ts": "2026-10-21T15:09:25Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "e8cd4b3fa42da6b3", "path": "src/ui/useMediaUrl.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "d47c4451bf7b9cc5", "path": "src/ui/useModal.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "a880cc319506a6fd", "path": "src/ui/useRowDrag.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}

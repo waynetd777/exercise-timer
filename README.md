@@ -59,7 +59,7 @@ from across a gym, with the phone propped against a rack.
       counts what it found and owns up to any line it could not read.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/generator.webp" width="420" alt="The generate dialog: name, shape, about how long, what to work, equipment, warm up with, sets, between sets, moving how and cool down with, then a summary reading 11 exercises, 46:15, and the exercises listed." />
+      <img src="docs/screenshots/generator.webp" width="420" alt="The generate dialog: name, shape, about how long, what to work, equipment, warm up with, sets, between sets, moving how and cool down with, then a summary giving how many exercises and how long, and the exercises listed." />
       <br /><b>Generating one.</b> Every answer updates the summary at the
       bottom, so you see the routine before you commit to it.
     </td>

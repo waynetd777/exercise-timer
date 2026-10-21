@@ -18,6 +18,7 @@ import { RunScreen } from './RunScreen'
 import { ExercisesScreen } from './ExercisesScreen'
 import { newId } from '../id'
 import { fromTables } from '../storage/tables'
+import { enterFullscreen } from './useFullscreen'
 
 /**
  * The sound bench is a development tool and is not shipped.
@@ -274,8 +275,16 @@ function Screens() {
   return (
     <LibraryScreen
       library={library}
-      onRun={(workout) => setView({ screen: 'run', workout })}
-      onPreview={(workout) => setView({ screen: 'run', workout, preview: true })}
+      // Full screen from the tap itself, which is the only place a browser
+      // allows it. The run screen leaves it again when it closes.
+      onRun={(workout) => {
+        enterFullscreen()
+        setView({ screen: 'run', workout })
+      }}
+      onPreview={(workout) => {
+        enterFullscreen()
+        setView({ screen: 'run', workout, preview: true })
+      }}
       onEdit={(workout) => setView({ screen: 'edit', workout })}
       onNew={() => setView({ screen: 'edit', workout: blankRoutine() })}
       // Migrated on the way in, as a stored routine is on the way out: a pasted

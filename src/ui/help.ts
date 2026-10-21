@@ -70,7 +70,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
   {
     heading: 'While it runs',
     points: [
-      'Space starts and pauses, and so does K. ← and → step back and forward. M mutes.',
+      'Space starts and pauses, and so does K. ← and → step back and forward. M mutes. F goes full screen and back.',
       'Three beeps lead every change: a whistle into work, a bell out of it.',
       'On a step of 20 seconds or more, ten seconds before the end is called out. The stopwatch button beside Sound makes that a double beep, or nothing.',
       'A counted step waits for Next, and shows its whole group so you can see what is coming.',

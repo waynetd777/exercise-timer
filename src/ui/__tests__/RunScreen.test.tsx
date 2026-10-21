@@ -393,3 +393,41 @@ describe('RunScreen: a weight that comes from the weights page', () => {
     expect(screen.getAllByText(/12 × Seated Ab Crunch 15kg/).length).toBeGreaterThan(0)
   })
 })
+
+describe('RunScreen: full screen', () => {
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+    Reflect.deleteProperty(document, 'fullscreenEnabled')
+  })
+
+  it('F asks for full screen, where the browser offers it', () => {
+    Object.defineProperty(document, 'fullscreenEnabled', { value: true, configurable: true })
+    const request = vi.fn(() => Promise.resolve())
+    document.documentElement.requestFullscreen = request
+    render(<RunScreen workout={timed()} />)
+
+    fireEvent.keyDown(window, { key: 'f' })
+    expect(request).toHaveBeenCalledOnce()
+    expect(screen.getByLabelText('Full screen')).toBeTruthy()
+  })
+
+  it('leaves full screen when the routine closes', () => {
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: document.documentElement,
+      configurable: true,
+    })
+    const exit = vi.fn(() => Promise.resolve())
+    document.exitFullscreen = exit
+    const { unmount } = render(<RunScreen workout={timed()} />)
+
+    unmount()
+    expect(exit).toHaveBeenCalledOnce()
+    Reflect.deleteProperty(document, 'fullscreenElement')
+  })
+
+  it('offers no button where it cannot, as on iPhone Safari', () => {
+    render(<RunScreen workout={timed()} />)
+    expect(screen.queryByLabelText('Full screen')).toBeNull()
+  })
+})

@@ -34,6 +34,8 @@ import {
 import {
   BackIcon,
   CloseIcon,
+  ExitFullscreenIcon,
+  FullscreenIcon,
   ListIcon,
   PencilIcon,
   NextIcon,
@@ -51,6 +53,7 @@ import { PreviewList } from './PreviewList'
 import { shortcutApplies } from './keys'
 import { currentRates, recordGate } from '../storage/paces'
 import { useMediaUrl } from './useMediaUrl'
+import { canFullscreen, exitFullscreen, useFullscreen } from './useFullscreen'
 import './run-screen.css'
 
 /** The final three seconds of a step, where the countdown starts to pulse. */
@@ -296,6 +299,10 @@ export function RunScreen({
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
   const [warning, setWarning] = useWarning()
+  const [fullscreen, toggleFullscreen] = useFullscreen()
+  // Opening a routine went full screen (see App); leaving it, by any route,
+  // comes back out.
+  useEffect(() => exitFullscreen, [])
   const [leaving, setLeaving] = useState(false)
   const [resetting, setResetting] = useState(false)
   /*
@@ -433,6 +440,8 @@ export function RunScreen({
         return act(timer.previous)
       case 'm':
         return act(toggleMuted)
+      case 'f':
+        return act(toggleFullscreen)
       default:
         return
     }
@@ -839,6 +848,21 @@ export function RunScreen({
             onSelect: () => setWarning(value),
           }))}
         />
+
+        {/* Rightmost, as a window's own full-screen control is. Not offered
+            where the browser cannot do it, which is iPhone Safari.
+            Installed to the home screen, the app is full screen there anyway. */}
+        {canFullscreen() && (
+          <button
+            className="btn btn--ghost"
+            onClick={toggleFullscreen}
+            aria-pressed={fullscreen}
+            aria-label={fullscreen ? 'Leave full screen' : 'Full screen'}
+            title={fullscreen ? 'Leave full screen (f)' : 'Full screen (f)'}
+          >
+            {fullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
+          </button>
+        )}
       </div>
     </main>
   )

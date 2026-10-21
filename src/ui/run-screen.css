@@ -690,8 +690,26 @@
      Sound fall to the second. */
   flex-wrap: wrap;
   gap: var(--step-3);
-  padding: var(--step-4) var(--step-4) var(--step-5);
+  padding: var(--step-3) var(--step-4) var(--step-4);
   border-top: var(--hairline);
+}
+
+/* A step down from the shared `.btn` size: the transport row is reached for, not
+   read, and at 56/68 it took height the countdown could use. Phones go smaller
+   again, below. */
+.controls .btn {
+  width: 48px;
+  height: 48px;
+}
+
+.controls .btn--primary {
+  width: 58px;
+  height: 58px;
+}
+
+.controls .btn--primary .icon {
+  width: 26px;
+  height: 26px;
 }
 
 /*
@@ -701,12 +719,13 @@
  * wrapped onto a second row and the controls took close to 180px of the
  * screen. In landscape the row fits, but 68px is a fifth of the height. At these
  * sizes all six fit a 360px screen on one line, and 44px is still the smallest
- * comfortable touch target.
+ * comfortable touch target. Seven, where the browser offers full screen (not
+ * iPhone Safari), fit from 375px; a narrower phone wraps the last one.
  */
 @media (max-width: 30rem), (max-height: 540px) {
   .controls {
-    gap: var(--step-2);
-    padding: var(--step-2) var(--step-3) var(--step-3);
+    gap: 6px;
+    padding: var(--step-2) var(--step-2) var(--step-3);
   }
 
   .controls .btn {
