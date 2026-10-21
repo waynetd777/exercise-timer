@@ -3,6 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # Docs and README screenshots are not part of the app, so a push that only
+    # touches them deploys nothing new. workflow_dispatch still runs it by hand.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
