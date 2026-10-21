@@ -97,6 +97,34 @@ export async function importRoutineFiles(
         rejectedRoutines.push(...contents.rejected)
 
         /*
+         * The weights the file carried are MERGED over what is here, not
+         * swapped in: a restore onto a device that already has weights should
+         * not silently drop the ones the file has never heard of. The file
+         * wins where both say something, since it is the one being restored.
+         *
+         * Saved BEFORE the photos, which need nothing of theirs. Restoring
+         * them can fail as a whole: the hash check needs `crypto.subtle`,
+         * which a browser offers only over https or on localhost, and the
+         * photo store needs IndexedDB. The routines have already been taken by
+         * then, so weights saved after the photos were lost with the file
+         * while the routines arrived without them.
+         */
+        if (Object.keys(contents.weights).length > 0) {
+          saveWeights({ ...loadWeights(), ...contents.weights })
+        }
+
+        /*
+         * The exercises of your own, merged the same way: the file wins where
+         * both know a name, and one this device has never heard of is added
+         * rather than dropped. It matters that this runs beside the weights:
+         * a weight restored without the exercise it belongs to would sit under
+         * a name the page no longer lists.
+         */
+        if (Object.keys(contents.exercises).length > 0) {
+          saveCustomExercises({ ...loadCustomExercises(), ...contents.exercises })
+        }
+
+        /*
          * The uploaded photos it carries, stored BEFORE the routines are saved so
          * a step never renders looking for bytes that have not landed yet. Each
          * one has already been checked against its own hash. See `restoreMedia`.
@@ -115,16 +143,6 @@ export async function importRoutineFiles(
           if (!(await hasBlob(hash))) await putBlob(hash, blob)
         }
         droppedImages += media.skipped.length
-
-        /*
-         * The weights the file carried are MERGED over what is here, not
-         * swapped in: a restore onto a device that already has weights should
-         * not silently drop the ones the file has never heard of. The file
-         * wins where both say something, since it is the one being restored.
-         */
-        if (Object.keys(contents.weights).length > 0) {
-          saveWeights({ ...loadWeights(), ...contents.weights })
-        }
 
         /*
          * The exercise pictures, merged the same way and for the same reason,
@@ -146,17 +164,6 @@ export async function importRoutineFiles(
         }
         if (Object.keys(pictures).length > 0) {
           savePictures({ ...loadPictures(), ...pictures })
-        }
-
-        /*
-         * The exercises of your own, merged the same way: the file wins where
-         * both know a name, and one this device has never heard of is added
-         * rather than dropped. It matters that this runs beside the two above:
-         * a weight or a picture restored without the exercise it belongs to
-         * would sit under a name the page no longer lists.
-         */
-        if (Object.keys(contents.exercises).length > 0) {
-          saveCustomExercises({ ...loadCustomExercises(), ...contents.exercises })
         }
         continue
       }

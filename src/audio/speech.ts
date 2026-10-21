@@ -15,7 +15,27 @@ export const SPOKEN = {
   start: "Let's go!",
   tenSecondsLeft: 'Ten seconds left',
   thatsAWrap: "That's a wrap, well done!",
+  getReadyFor: (name: string) => `Get ready for ${name}`,
 } as const
+
+/**
+ * What a get-ready says: what its own pane shows, when that names the exercise.
+ *
+ * A routine generated with active recovery opens each exercise on "Get ready:
+ * Leg Press 65kg", and the step after it is the cardio minute you change the pin
+ * during, not the exercise. So a name that already says what it is for is the
+ * one read out. A bare "Get ready" says nothing about what comes next, so it
+ * names the exercise it leads into instead. Any other get-ready, "Change Sides"
+ * being the one the generator writes, is an instruction in itself, and is said
+ * as written.
+ */
+export function getReadyLine(name: string, upcoming: string | null): string | null {
+  // Said as "Get ready for Leg Press 65kg": the colon reads on screen, not aloud.
+  const named = /^get ready\s*:\s*(.+)$/i.exec(name)
+  if (named) return SPOKEN.getReadyFor(named[1]!)
+  if (!/^get ready$/i.test(name.trim())) return name
+  return upcoming ? SPOKEN.getReadyFor(upcoming) : null
+}
 
 /** How it is spoken. Slightly quick, slightly under full volume. */
 export const VOICE = { rate: 1.05, volume: 0.9 } as const

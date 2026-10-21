@@ -187,6 +187,9 @@ Every boundary sounds like what it means: three beeps then a whistle into work,
 three beeps then a bell out of it, three beeps then a triple ding at the end.
 On a long step a voice says "ten seconds left", or, for whoever is training
 beside you, a double beep or nothing: the stopwatch button on the run screen.
+A get-ready says what it is for, "Get ready for Leg Press 65kg", and not twice
+across the cardio minute you set the machine up during; the speech-bubble
+button turns that off.
 
 **The UI is sized for viewing distance, not convention.** Secondary text starts
 around 1rem and scales with its container. The countdown is sized from the

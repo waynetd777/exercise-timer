@@ -45,9 +45,19 @@ export const AFTER_LAST_DING_MS = 450
 const AFTER_START_CUE_MS = 900
 
 /**
- * The spoken cues: an opening line, "ten seconds left" (or a double beep, or
- * nothing: see `useWarning`) during a long step, and a
- * wrap-up once the routine is done.
+ * Past this far into a get-ready its exercise is no longer named.
+ *
+ * The same reasoning as `ANNOUNCE_FLOOR`: a window wide enough to survive a
+ * throttled tick, and no wider, so a return from background halfway through a
+ * get-ready does not name the exercise with three seconds left to get there.
+ */
+const NAME_WINDOW_MS = 3_000
+
+/**
+ * The spoken cues: an opening line, what a get-ready is getting ready for
+ * (`getReady`, the line `getReadyLine` builds, or null: see `useSayNext`), "ten seconds left" (or a double
+ * beep, or nothing: see `useWarning`) during a long step, and a wrap-up once
+ * the routine is done.
  *
  * These are a different mechanism from the beeps and bells. Speech cannot be
  * queued against the audio clock, so it is fired from the timer's tick and may
@@ -59,9 +69,15 @@ export function useSpokenCues(
   status: RunStatus,
   muted: boolean,
   warning: Warning = 'voice',
+  getReady: string | null = null,
 ): void {
   const announced = useRef<number | null>(null)
+  const named = useRef<number | null>(null)
   const greeted = useRef(false)
+  // Read by the opening line without being one of its dependencies: `at`
+  // changes every tick, and re-running would clear the pending greeting.
+  const opening = useRef({ at, getReady })
+  opening.current = { at, getReady }
 
   /*
    * The opening line, once per run.
@@ -79,12 +95,24 @@ export function useSpokenCues(
       // The announcement guard resets with it, or a rerun of the same routine
       // would skip "ten seconds left" for any step it had spoken before.
       announced.current = null
+      named.current = null
       return
     }
     if (status !== 'running' || greeted.current) return
     greeted.current = true
     if (muted || !canSpeak()) return
-    const timer = window.setTimeout(() => speak(SPOKEN.start), AFTER_START_CUE_MS)
+    /*
+     * A routine that opens on a get-ready names its exercise in the same line.
+     * Both are due at the same moment, and `speak` cancels whatever is still
+     * queued, so two separate lines would lose the first.
+     */
+    const { at: first, getReady: ready } = opening.current
+    let line: string = SPOKEN.start
+    if (first.entry?.role === 'prepare' && ready) {
+      named.current = first.entry.step
+      line = `${SPOKEN.start} ${ready}`
+    }
+    const timer = window.setTimeout(() => speak(line), AFTER_START_CUE_MS)
     return () => window.clearTimeout(timer)
   }, [status, muted])
 
@@ -109,6 +137,22 @@ export function useSpokenCues(
     const timer = window.setTimeout(() => speak(SPOKEN.thatsAWrap), delay)
     return () => window.clearTimeout(timer)
   }, [status, muted])
+
+  /*
+   * The exercise a get-ready leads into, once per get-ready, just after the
+   * bell that opens it. Keyed on the step for the same reason "ten seconds
+   * left" is, so a pause or a re-render cannot say it twice.
+   */
+  useEffect(() => {
+    if (status !== 'running' || muted || !getReady || !canSpeak()) return
+    const entry = at.entry
+    if (!entry || entry.role !== 'prepare') return
+    if (named.current === entry.step) return
+    if (at.elapsedInEntryMs < AFTER_START_CUE_MS || at.elapsedInEntryMs > NAME_WINDOW_MS) return
+
+    named.current = entry.step
+    speak(getReady)
+  }, [at, status, muted, getReady])
 
   /*
    * "Ten seconds left", once per long step. Keyed on the step's index rather

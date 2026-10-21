@@ -131,7 +131,8 @@ the `DEV` branch that loads it compiles away in a production build.
 
 `speech.ts` and `useSpokenCues.ts` sit outside the scheduling system, because speech
 cannot be queued against the audio clock. The spoken lines are the opening "Let's
-go!", "ten seconds left" and the wrap-up. They fire from the timer's tick and may
+go!", what a get-ready is for ("Get ready for Leg Press 65kg", built in
+`ui/getReady.ts` and switched by `useSayNext`), "ten seconds left" and the wrap-up. They fire from the timer's tick and may
 land a fraction late, which is fine for information and would not be for a beat.
 Keeping them in their own module is what stops anyone mistaking one for a scheduled
 cue.
@@ -148,6 +149,7 @@ cue.
 | `referee-whistle-cc0.wav` | 44KB, 22.05kHz mono, CC0. See `samples.ts` before touching it |
 | `useMuted.ts` | Mute, persisted to localStorage, the right home for a UI flag |
 | `speech.ts`, `useSpokenCues.ts` | The spoken lines, and why they are not scheduled cues |
+| `useSayNext.ts` | Whether a get-ready says what it is for, persisted like mute |
 
 ## A seek is not a pause
 

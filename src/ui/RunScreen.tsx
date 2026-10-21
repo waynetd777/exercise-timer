@@ -10,6 +10,7 @@ import { useSpokenCues } from '../audio/useSpokenCues'
 import { unlockSpeech } from '../audio/speech'
 import { useMuted } from '../audio/useMuted'
 import { useWarning, WARNINGS } from '../audio/useWarning'
+import { useSayNext } from '../audio/useSayNext'
 import { useTimer } from '../state/useTimer'
 import { estimate } from '../routines/estimate'
 import type { RunStatus } from '../state/useTimer'
@@ -34,8 +35,6 @@ import {
 import {
   BackIcon,
   CloseIcon,
-  ExitFullscreenIcon,
-  FullscreenIcon,
   ListIcon,
   PencilIcon,
   NextIcon,
@@ -43,17 +42,20 @@ import {
   PlayIcon,
   PrevIcon,
   ResetIcon,
+  SayNextIcon,
+  SayNextOffIcon,
   SoundOffIcon,
   SoundOnIcon,
   WarningTimerIcon,
 } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
+import { spokenGetReady } from './getReady'
 import { Menu } from './Menu'
 import { PreviewList } from './PreviewList'
 import { shortcutApplies } from './keys'
 import { currentRates, recordGate } from '../storage/paces'
 import { useMediaUrl } from './useMediaUrl'
-import { canFullscreen, exitFullscreen, useFullscreen } from './useFullscreen'
+import { exitFullscreen, useFullscreen } from './useFullscreen'
 import './run-screen.css'
 
 /** The final three seconds of a step, where the countdown starts to pulse. */
@@ -299,9 +301,10 @@ export function RunScreen({
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
   const [warning, setWarning] = useWarning()
-  const [fullscreen, toggleFullscreen] = useFullscreen()
-  // Opening a routine went full screen (see App); leaving it, by any route,
-  // comes back out.
+  const [sayNext, toggleSayNext] = useSayNext()
+  // F still toggles it; there is no button, since opening a routine goes full
+  // screen by itself (see App). Leaving it, by any route, comes back out.
+  const [, toggleFullscreen] = useFullscreen()
   useEffect(() => exitFullscreen, [])
   const [leaving, setLeaving] = useState(false)
   const [resetting, setResetting] = useState(false)
@@ -327,7 +330,17 @@ export function RunScreen({
     seeks: timer.seeks,
   })
 
-  useSpokenCues(at, status, muted, warning)
+  /*
+   * What the "Next" line names. A get-ready is not something to prepare for: it
+   * IS the preparing, and "Next Get ready" mid-set told you nothing about what
+   * to get ready for. So it is skipped, to the exercise it leads into.
+   */
+  let upcoming = at.nextEntry
+  while (upcoming?.role === 'prepare') upcoming = routine.entries[upcoming.step] ?? null
+
+  const getReady =
+    sayNext && at.entry?.role === 'prepare' ? spokenGetReady(routine.entries, at.entry.step) : null
+  useSpokenCues(at, status, muted, warning, getReady)
 
   /**
    * Every control unlocks the AudioContext and primes the voice. Both have to
@@ -359,13 +372,6 @@ export function RunScreen({
    */
   const rows = entry ? groupEntries(routine, entry) : []
 
-  /*
-   * What the "Next" line names. A get-ready is not something to prepare for: it
-   * IS the preparing, and "Next Get ready" mid-set told you nothing about what
-   * to get ready for. So it is skipped, to the exercise it leads into.
-   */
-  let upcoming = at.nextEntry
-  while (upcoming?.role === 'prepare') upcoming = routine.entries[upcoming.step] ?? null
   const showList = entry !== null && listMode(routine, entry)
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
@@ -849,20 +855,16 @@ export function RunScreen({
           }))}
         />
 
-        {/* Rightmost, as a window's own full-screen control is. Not offered
-            where the browser cannot do it, which is iPhone Safari.
-            Installed to the home screen, the app is full screen there anyway. */}
-        {canFullscreen() && (
-          <button
-            className="btn btn--ghost"
-            onClick={toggleFullscreen}
-            aria-pressed={fullscreen}
-            aria-label={fullscreen ? 'Leave full screen' : 'Full screen'}
-            title={fullscreen ? 'Leave full screen (f)' : 'Full screen (f)'}
-          >
-            {fullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
-          </button>
-        )}
+        {/* Whether a get-ready says what it leads into: see `useSayNext`. */}
+        <button
+          className="btn btn--ghost"
+          onClick={toggleSayNext}
+          aria-pressed={sayNext}
+          aria-label={sayNext ? 'Stop saying the next exercise' : 'Say the next exercise'}
+          title={sayNext ? 'Stop saying the next exercise' : 'Say the next exercise'}
+        >
+          {sayNext ? <SayNextIcon /> : <SayNextOffIcon />}
+        </button>
       </div>
     </main>
   )

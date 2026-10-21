@@ -409,7 +409,6 @@ describe('RunScreen: full screen', () => {
 
     fireEvent.keyDown(window, { key: 'f' })
     expect(request).toHaveBeenCalledOnce()
-    expect(screen.getByLabelText('Full screen')).toBeTruthy()
   })
 
   it('leaves full screen when the routine closes', () => {
@@ -426,7 +425,8 @@ describe('RunScreen: full screen', () => {
     Reflect.deleteProperty(document, 'fullscreenElement')
   })
 
-  it('offers no button where it cannot, as on iPhone Safari', () => {
+  it('offers no button, since opening a routine goes full screen by itself', () => {
+    Object.defineProperty(document, 'fullscreenEnabled', { value: true, configurable: true })
     render(<RunScreen workout={timed()} />)
     expect(screen.queryByLabelText('Full screen')).toBeNull()
   })

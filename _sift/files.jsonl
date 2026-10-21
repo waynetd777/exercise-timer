@@ -27,6 +27,7 @@
 {"desc": "Exercise Timer", "hash": "adec144c2353ed30", "path": "src/audio/tones.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "4495de0ff0983cbc", "path": "src/audio/useCueScheduler.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "0617b610c9a636d7", "path": "src/audio/useMuted.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "Whether a get-ready says what it is for, persisted; on by default", "hash": "789415ce7ef5727a", "path": "src/audio/useSayNext.ts", "ts": "2026-10-21T22:42:16Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "9be680f30f1edbc9", "path": "src/audio/useSpokenCues.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Ten-second warning setting: voice, double beep or nothing, persisted", "hash": "76527877910b76b9", "path": "src/audio/useWarning.ts", "ts": "2026-10-21T12:03:22Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "9c770c2456b97cd2", "path": "src/build.d.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
@@ -81,6 +82,7 @@
 {"desc": "Exercise Timer", "hash": "2988e3d3e9512135", "path": "src/routines/__tests__/imageCatalogue.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "ec75050ce1e354e3", "path": "src/routines/__tests__/importFiles.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "e14f54d5f3749ab5", "path": "src/routines/__tests__/importPictures.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "A backup whose photos fail to restore still restores its weights", "hash": "68edef07a0b85da7", "path": "src/routines/__tests__/importWeights.test.ts", "ts": "2026-10-21T22:42:17Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "5f91cbff61901d71", "path": "src/routines/__tests__/pasteFormat.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "8ba4383c8300d047", "path": "src/routines/__tests__/pasteTemplate.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "4e90c703f55bcdc2", "path": "src/routines/__tests__/rename.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
@@ -178,6 +180,7 @@
 {"desc": "Exercise Timer", "hash": "ca428a839dadc0cf", "path": "src/ui/__tests__/PreviewList.test.tsx", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "7b1b895dc45cce32", "path": "src/ui/__tests__/RunScreen.test.tsx", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "0db2021dd24c932c", "path": "src/ui/__tests__/format.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "Tests for spokenGetReady: no repeat across cardio, repeat across rounds", "hash": "13cff11f89a6b682", "path": "src/ui/__tests__/getReady.test.ts", "ts": "2026-10-21T22:42:17Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "3ffdeef1103f29ae", "path": "src/ui/__tests__/keys.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "1d78ff4a41520d0c", "path": "src/ui/__tests__/preview.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "d8209bb1a8ec2868", "path": "src/ui/editor.css", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
@@ -189,6 +192,7 @@
 {"desc": "Exercise Timer", "hash": "35230bffd28ec32c", "path": "src/ui/editor/useDraftHistory.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "8f20bf5736d8dd58", "path": "src/ui/exercises.css", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "eef479ebab45753d", "path": "src/ui/format.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "The line a get-ready speaks, skipping one the previous get-ready already said", "hash": "b57e6a5988ce0089", "path": "src/ui/getReady.ts", "ts": "2026-10-21T22:42:16Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "d5298c82b6fb1e18", "path": "src/ui/help.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "23d500d3700ac2d5", "path": "src/ui/icons.tsx", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "5418713092822682", "path": "src/ui/keys.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}

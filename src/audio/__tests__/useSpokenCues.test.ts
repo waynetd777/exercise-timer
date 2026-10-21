@@ -8,7 +8,7 @@ import { compile, locate } from '../../engine'
 import type { RoutinePosition } from '../../engine'
 import { seg, workout } from '../../engine/__tests__/fixtures'
 import { audio } from '../engine'
-import { SPOKEN } from '../speech'
+import { getReadyLine, SPOKEN } from '../speech'
 import { DOUBLE_BEEP } from '../tones'
 import { useSpokenCues } from '../useSpokenCues'
 
@@ -141,5 +141,92 @@ describe('the wrap-up', () => {
     rerender({ at: positionAt(25_000), status: 'complete', muted: false })
     vi.runAllTimers()
     expect(spoken.filter((text) => text === SPOKEN.thatsAWrap)).toHaveLength(1)
+  })
+})
+
+describe('naming the exercise a get-ready leads into', () => {
+  /** A get-ready into a work step, after a work step, so neither is the routine's first. */
+  const drill = compile(
+    workout('drill', [
+      seg('warm-up', 25, 'work'),
+      seg('Get ready', 15, 'prepare'),
+      seg('squats', 25, 'work'),
+    ]),
+  )
+
+  function at(elapsedInRunMs: number): RoutinePosition {
+    return locate(drill, { runIndex: 0, elapsedInRunMs })
+  }
+
+  type NameProps = { at: RoutinePosition; upcoming: string | null }
+
+  function renderNamed(
+    position: RoutinePosition,
+    upcoming: string | null = SPOKEN.getReadyFor('squats'),
+  ) {
+    return renderHook(
+      ({ at, upcoming }: NameProps) => useSpokenCues(at, 'running', false, 'voice', upcoming),
+      { initialProps: { at: position, upcoming } },
+    )
+  }
+
+  const said = () => spoken.filter((text) => text === SPOKEN.getReadyFor('squats'))
+
+  it('says it just after the get-ready opens, once', () => {
+    // From the top, as a run starts: the opening line reads where it begins.
+    const { rerender } = renderNamed(at(0))
+    rerender({ at: at(25_000), upcoming: SPOKEN.getReadyFor('squats') })
+    expect(said()).toEqual([])
+    rerender({ at: at(26_000), upcoming: SPOKEN.getReadyFor('squats') })
+    rerender({ at: at(27_000), upcoming: SPOKEN.getReadyFor('squats') })
+    expect(said()).toEqual([SPOKEN.getReadyFor('squats')])
+  })
+
+  it('stays silent when switched off', () => {
+    const { rerender } = renderNamed(at(25_000), null)
+    rerender({ at: at(26_000), upcoming: null })
+    expect(said()).toEqual([])
+  })
+
+  it('stays silent when a return from background lands past the window', () => {
+    renderNamed(at(30_000))
+    expect(said()).toEqual([])
+  })
+
+  it('folds into the opening line when the routine opens on a get-ready', () => {
+    vi.useFakeTimers()
+    const opener = compile(
+      workout('drill', [seg('Get ready', 15, 'prepare'), seg('squats', 25, 'work')]),
+    )
+    const first = (ms: number) => locate(opener, { runIndex: 0, elapsedInRunMs: ms })
+    const { rerender } = renderHook(
+      ({ at }: { at: RoutinePosition }) =>
+        useSpokenCues(at, 'running', false, 'voice', SPOKEN.getReadyFor('squats')),
+      { initialProps: { at: first(0) } },
+    )
+    rerender({ at: first(1_000) })
+    vi.runAllTimers()
+    expect(spoken).toEqual([`${SPOKEN.start} ${SPOKEN.getReadyFor('squats')}`])
+    vi.useRealTimers()
+  })
+})
+
+describe('getReadyLine', () => {
+  it('reads the exercise a get-ready names, not the one after it', () => {
+    expect(getReadyLine('Get ready: Leg Press 65kg', 'Trampoline')).toBe(
+      SPOKEN.getReadyFor('Leg Press 65kg'),
+    )
+  })
+
+  it('names the exercise a bare get-ready leads into', () => {
+    expect(getReadyLine('Get ready', 'Leg Press')).toBe(SPOKEN.getReadyFor('Leg Press'))
+  })
+
+  it('says any other get-ready as written', () => {
+    expect(getReadyLine('Change Sides', 'Lunges')).toBe('Change Sides')
+  })
+
+  it('says nothing when there is nothing after it', () => {
+    expect(getReadyLine('Get ready', null)).toBeNull()
   })
 })

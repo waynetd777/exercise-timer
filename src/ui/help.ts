@@ -73,6 +73,7 @@ export const LIBRARY_HELP: readonly HelpSection[] = [
       'Space starts and pauses, and so does K. ← and → step back and forward. M mutes. F goes full screen and back.',
       'Three beeps lead every change: a whistle into work, a bell out of it.',
       'On a step of 20 seconds or more, ten seconds before the end is called out. The stopwatch button beside Sound makes that a double beep, or nothing.',
+      'A get-ready says what it is for: “Get ready for Leg Press 65kg”, or “Change Sides”. One said before a minute of cardio is not said again after it. The speech-bubble button turns this off and on.',
       'A counted step waits for Next, and shows its whole group so you can see what is coming.',
       'The clock in the header is time since you started, pauses left out.',
       'The screen stays awake while a routine runs, where the browser allows it.',

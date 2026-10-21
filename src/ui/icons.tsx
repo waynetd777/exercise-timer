@@ -79,30 +79,32 @@ export function SoundOnIcon() {
   )
 }
 
-/** Four corners pointing out: enter full screen. */
-export function FullscreenIcon() {
-  return (
-    <Svg>
-      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" {...STROKE} />
-    </Svg>
-  )
-}
-
-/** Four corners pointing in: leave full screen. */
-export function ExitFullscreenIcon() {
-  return (
-    <Svg>
-      <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" {...STROKE} />
-    </Svg>
-  )
-}
-
 /** A stopwatch at icon size, for the ten-second warning. `StopwatchIcon` is the app mark, sized in em. */
 export function WarningTimerIcon() {
   return (
     <Svg>
       <circle cx="12" cy="14" r="7.5" {...STROKE} />
       <path d="M9.5 2.8h5M12 2.8v3.7M18.2 6.6l1.5 1.5M12 14v-3.6" {...STROKE} />
+    </Svg>
+  )
+}
+
+/** A speech bubble: a get-ready says the exercise it leads into. */
+export function SayNextIcon() {
+  return (
+    <Svg>
+      <path d="M4 5.5h16v10H10l-4.5 4v-4H4z" {...STROKE} />
+      <path d="M8 10.5h8" {...STROKE} />
+    </Svg>
+  )
+}
+
+/** The speech bubble struck through: get-readys stay quiet. */
+export function SayNextOffIcon() {
+  return (
+    <Svg>
+      <path d="M4 5.5h16v10H10l-4.5 4v-4H4z" {...STROKE} />
+      <path d="M3 3l18 18" {...STROKE} />
     </Svg>
   )
 }
