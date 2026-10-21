@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { compile, locate } from '../../engine'
 import type { RoutinePosition } from '../../engine'
 import { seg, workout } from '../../engine/__tests__/fixtures'
+import { audio } from '../engine'
 import { SPOKEN } from '../speech'
+import { DOUBLE_BEEP } from '../tones'
 import { useSpokenCues } from '../useSpokenCues'
 
 type Status = 'idle' | 'running' | 'paused' | 'complete'
@@ -97,6 +99,22 @@ describe('the ten-seconds announcement', () => {
     rerender({ at: positionAt(0), status: 'idle', muted: false })
     rerender({ at: positionAt(15_000), status: 'running', muted: false })
     expect(announcements()).toEqual([SPOKEN.tenSecondsLeft, SPOKEN.tenSecondsLeft])
+  })
+
+  it('double-beeps instead of speaking when set to', () => {
+    const tone = vi.spyOn(audio, 'scheduleTone').mockImplementation(() => {})
+    renderHook(() => useSpokenCues(positionAt(15_000), 'running', false, 'beeps'))
+    expect(announcements()).toEqual([])
+    expect(tone).toHaveBeenCalledWith(expect.any(Number), DOUBLE_BEEP)
+    tone.mockRestore()
+  })
+
+  it('does nothing at all when set to nothing', () => {
+    const tone = vi.spyOn(audio, 'scheduleTone').mockImplementation(() => {})
+    renderHook(() => useSpokenCues(positionAt(15_000), 'running', false, 'none'))
+    expect(announcements()).toEqual([])
+    expect(tone).not.toHaveBeenCalled()
+    tone.mockRestore()
   })
 })
 

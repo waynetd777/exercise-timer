@@ -1,0 +1,12 @@
+{
+  "name": "exercise-timer-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Retakes the README screenshots in docs/screenshots",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}

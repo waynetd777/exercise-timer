@@ -9,6 +9,7 @@ import { useCueScheduler } from '../audio/useCueScheduler'
 import { useSpokenCues } from '../audio/useSpokenCues'
 import { unlockSpeech } from '../audio/speech'
 import { useMuted } from '../audio/useMuted'
+import { useWarning, WARNINGS } from '../audio/useWarning'
 import { useTimer } from '../state/useTimer'
 import { estimate } from '../routines/estimate'
 import type { RunStatus } from '../state/useTimer'
@@ -42,8 +43,10 @@ import {
   ResetIcon,
   SoundOffIcon,
   SoundOnIcon,
+  WarningTimerIcon,
 } from './icons'
 import { ConfirmDialog } from './ConfirmDialog'
+import { Menu } from './Menu'
 import { PreviewList } from './PreviewList'
 import { shortcutApplies } from './keys'
 import { currentRates, recordGate } from '../storage/paces'
@@ -143,7 +146,17 @@ function SectionList({
   )
 }
 
-function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry | null }) {
+function MediaPanel({
+  entry,
+  next,
+  upcoming,
+}: {
+  entry: TimelineEntry
+  /** The step straight after this one, whose picture is decoded ahead. */
+  next: TimelineEntry | null
+  /** The exercise the "Next" line names: `next`, unless that is a get-ready. */
+  upcoming: TimelineEntry | null
+}) {
   const src = useMediaUrl(entry.media)
   const nextSrc = useMediaUrl(next?.media)
 
@@ -213,12 +226,21 @@ function MediaPanel({ entry, next }: { entry: TimelineEntry; next: TimelineEntry
           </span>
         )}
       </div>
-      <p className="panel__next label">
-        {next ? (
+      {/* Sized to fill the panel's width, in up to two lines: it is read from
+          across the room, mid-set. See `fitBlockCqi`. */}
+      <p
+        className="panel__next label"
+        style={
+          upcoming
+            ? { ['--fit' as string]: fitBlockCqi(`Next ${upcoming.name}`, 2, 14) }
+            : undefined
+        }
+      >
+        {upcoming ? (
           <>
-            Next <b>{next.name}</b>{' '}
-            {next.durationMs !== undefined && (
-              <span className="unit">{duration(next.durationMs)}</span>
+            <span className="panel__next-label">Next</span> <b>{upcoming.name}</b>{' '}
+            {upcoming.durationMs !== undefined && (
+              <span className="unit">{duration(upcoming.durationMs)}</span>
             )}
           </>
         ) : (
@@ -273,6 +295,7 @@ export function RunScreen({
   const guess = useMemo(() => estimate(workout.blocks, currentRates()), [workout.blocks])
   const { at, status, routine, run } = timer
   const [muted, toggleMuted] = useMuted()
+  const [warning, setWarning] = useWarning()
   const [leaving, setLeaving] = useState(false)
   const [resetting, setResetting] = useState(false)
   /*
@@ -297,7 +320,7 @@ export function RunScreen({
     seeks: timer.seeks,
   })
 
-  useSpokenCues(at, status, muted)
+  useSpokenCues(at, status, muted, warning)
 
   /**
    * Every control unlocks the AudioContext and primes the voice. Both have to
@@ -328,6 +351,14 @@ export function RunScreen({
    * any section has no other sensible rendering.
    */
   const rows = entry ? groupEntries(routine, entry) : []
+
+  /*
+   * What the "Next" line names. A get-ready is not something to prepare for: it
+   * IS the preparing, and "Next Get ready" mid-set told you nothing about what
+   * to get ready for. So it is skipped, to the exercise it leads into.
+   */
+  let upcoming = at.nextEntry
+  while (upcoming?.role === 'prepare') upcoming = routine.entries[upcoming.step] ?? null
   const showList = entry !== null && listMode(routine, entry)
 
   const phase = `var(--role-${entry?.role ?? 'prepare'})`
@@ -696,19 +727,24 @@ export function RunScreen({
             </div>
 
             {/* No "Paused" chip: the primary button already reads "Resume". */}
+            {/* The figures in bold and the words beside them small, so the two
+                numbers read from across the room the way the countdown does. */}
             <p className="count__meta label">
               {timer.totalRemainingMs !== null && (
                 <span>
-                  <span className="unit">{duration(timer.totalRemainingMs)}</span> left
+                  <b className="unit">{duration(timer.totalRemainingMs)}</b> left
                 </span>
               )}
               <span>
-                Step {at.step} / {routine.entries.length}
+                Step{' '}
+                <b>
+                  {at.step} / {routine.entries.length}
+                </b>
               </span>
             </p>
           </div>
 
-          <MediaPanel entry={entry} next={at.nextEntry} />
+          <MediaPanel entry={entry} next={at.nextEntry} upcoming={upcoming} />
 
           {/* A self-paced step needs the slab wherever it is shown: the icon in
               the control row is not a target you hit mid-effort at arm's length. */}
@@ -790,6 +826,19 @@ export function RunScreen({
         >
           {muted ? <SoundOffIcon /> : <SoundOnIcon />}
         </button>
+
+        {/* The ten-second warning, apart from mute: see `useWarning`. */}
+        <Menu
+          label=""
+          hint="Ten-second warning"
+          icon={<WarningTimerIcon />}
+          className="btn btn--ghost"
+          items={WARNINGS.map(({ value, label }) => ({
+            label,
+            selected: warning === value,
+            onSelect: () => setWarning(value),
+          }))}
+        />
       </div>
     </main>
   )

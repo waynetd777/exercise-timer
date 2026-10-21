@@ -4,7 +4,9 @@
 import { useEffect, useRef } from 'react'
 import type { RoutinePosition } from '../engine'
 import { canSpeak, speak, SPOKEN } from './speech'
-import { lastStrikeMs, toneFor } from './tones'
+import { audio } from './engine'
+import { DOUBLE_BEEP, lastStrikeMs, toneFor } from './tones'
+import type { Warning } from './useWarning'
 import type { RunStatus } from '../state/useTimer'
 
 /** Steps shorter than this never announce: the countdown beeps cover them. */
@@ -43,7 +45,8 @@ export const AFTER_LAST_DING_MS = 450
 const AFTER_START_CUE_MS = 900
 
 /**
- * The spoken cues: an opening line, "ten seconds left" during a long step, and a
+ * The spoken cues: an opening line, "ten seconds left" (or a double beep, or
+ * nothing: see `useWarning`) during a long step, and a
  * wrap-up once the routine is done.
  *
  * These are a different mechanism from the beeps and bells. Speech cannot be
@@ -51,7 +54,12 @@ const AFTER_START_CUE_MS = 900
  * land a fraction late. Fine for information, and not fine for a beat, which is
  * why it lives apart from the scheduled cues.
  */
-export function useSpokenCues(at: RoutinePosition, status: RunStatus, muted: boolean): void {
+export function useSpokenCues(
+  at: RoutinePosition,
+  status: RunStatus,
+  muted: boolean,
+  warning: Warning = 'voice',
+): void {
   const announced = useRef<number | null>(null)
   const greeted = useRef(false)
 
@@ -106,9 +114,15 @@ export function useSpokenCues(at: RoutinePosition, status: RunStatus, muted: boo
    * "Ten seconds left", once per long step. Keyed on the step's index rather
    * than on time, so a pause, a seek or a re-render cannot repeat it within the
    * same step.
+   *
+   * Or a double beep in its place, which shares the timing and the guard but not
+   * the voice: the setting exists because the voice bothers other people training
+   * nearby. Played straight away on the audio clock, from the tick, for the same
+   * reason the voice is.
    */
   useEffect(() => {
-    if (status !== 'running' || muted || !canSpeak()) return
+    if (status !== 'running' || muted || warning === 'none') return
+    if (warning === 'voice' && !canSpeak()) return
     const entry = at.entry
     // A self-paced step has no end to count down to, so nothing to announce.
     if (!entry || at.remainingMs === null) return
@@ -121,6 +135,7 @@ export function useSpokenCues(at: RoutinePosition, status: RunStatus, muted: boo
     if (announced.current === entry.step) return
 
     announced.current = entry.step
-    speak(SPOKEN.tenSecondsLeft)
-  }, [at, status, muted])
+    if (warning === 'beeps') audio.scheduleTone(audio.now, DOUBLE_BEEP)
+    else speak(SPOKEN.tenSecondsLeft)
+  }, [at, status, muted, warning])
 }

@@ -123,6 +123,18 @@ const COUNTDOWN: ToneSpec = { notes: [BEEP] }
 const WORK_START: ToneSpec = { notes: [WHISTLE] }
 const WORK_END: ToneSpec = { notes: [BELL] }
 
+/**
+ * The ten-second warning, for when the voice is turned off. Two quick beeps a
+ * fifth up from the countdown's, so it cannot be mistaken for the last three
+ * seconds starting early.
+ */
+export const DOUBLE_BEEP: ToneSpec = {
+  notes: [
+    { ...BEEP, freq: 784, durationMs: 300 },
+    { ...BEEP, freq: 784, durationMs: 300, atMs: 160 },
+  ],
+}
+
 /** Spaced at 430ms: slow enough to read as three deliberate strikes. */
 const COMPLETE: ToneSpec = { notes: [ding(0), ding(430), ding(860)] }
 

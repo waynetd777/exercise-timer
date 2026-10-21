@@ -4,7 +4,7 @@
 import type { CueKind } from '../engine'
 import { audio } from '../audio/engine'
 import { canSpeak, speak, SPOKEN, VOICE } from '../audio/speech'
-import { lastStrikeMs, sequenceFor, toneFor } from '../audio/tones'
+import { DOUBLE_BEEP, lastStrikeMs, sequenceFor, toneFor } from '../audio/tones'
 import type { Note, ToneSpec } from '../audio/tones'
 import { BackIcon, PlayIcon } from './icons'
 import './sounds.css'
@@ -216,6 +216,12 @@ export function SoundsScreen({ onExit }: { onExit: () => void }) {
                 The whole finish, with voice
               </button>
             }
+          />
+
+          <Card
+            title="Double beep"
+            signals="Ten seconds left on a long step, when the warning is set to beeps"
+            spec={DOUBLE_BEEP}
           />
 
           <VoiceCard />

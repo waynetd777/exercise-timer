@@ -395,12 +395,34 @@
      cramped once the labels grew to ~43px. */
   gap: var(--step-3) 1.75em;
   margin: 0;
+  /*
+   * Sized in the column's own units, like the clock above it. The words take
+   * the label's size; the figures, in `b`, are set larger and brighter. The
+   * clock's budget leaves this row about 20cqh, and 9cqh at a 1.3 line height
+   * stays inside it on one line.
+   */
+  --label-size: clamp(1.1rem, min(3.4cqi, 6cqh), 2.2rem);
+  align-items: baseline;
+}
+
+.count__meta b {
+  /* Capped in the column's height as well, so on a short window the figures
+     cannot crowd out the clock, but never below a quarter over the words: the
+     cap alone, on a phone on its side, set them SMALLER than "left" and "step". */
+  font-size: max(1.25em, min(1.6em, 8cqh));
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-name);
+  color: var(--bone);
 }
 
 /* ── Media panel ───────────────────────────────────────────────────────────
  * Bounded beside the countdown on wide layouts, stacked below on a phone.
  */
 .panel {
+  /* So the "next" line can size itself to the panel's width. Inline-size only:
+     its height is the frame's leftover, and `cqh` below still means the body. */
+  container: panel / inline-size;
   display: grid;
   /* Frame takes the slack; the "next" line keeps its intrinsic height. */
   grid-template-rows: minmax(0, 1fr) auto;
@@ -436,13 +458,106 @@
    make sense in the column, so a portrait iPad must not pick them up. */
 @container shell (min-width: 46rem) {
   @media (orientation: landscape) {
-    /* Beside the panel the clock has far less width and far more height than it
-       does stacked, so both terms change. */
+    /*
+     * Beside the panel the clock has more height than it does stacked.
+     *
+     * The width term is the stacked one. It used to be 88, calibrated when `cqi`
+     * meant the whole body and the clock had only its 3fr share of it; `.count`
+     * has since become the container, so `cqi` IS the column, and 88 held a
+     * large landscape screen's numerals to about 60% of the width they had.
+     */
     .count__clock {
-      --clock-coef: 88;
       /* Sets --clock-height rather than --clock-max on purpose, so the short-screen
          queries above cannot reach it, but it still owes the name its lines. */
       --clock-height: calc(74cqh - (var(--name-lines, 1) - 1) * 11cqh);
+    }
+  }
+
+  /*
+   * A tall landscape screen has height to spare too. The rows around the clock
+   * stop growing at their rem caps, so on a column this tall they take well
+   * under the share the 74cqh budget allows for, and the clock can have it.
+   * Gated on height because a short one is the opposite case: there the rem
+   * FLOORS of those rows are what fill the column.
+   */
+  @media (orientation: landscape) and (min-height: 800px) {
+    .count__clock {
+      --clock-height: calc(80cqh - (var(--name-lines, 1) - 1) * 11cqh);
+    }
+  }
+
+  /*
+   * A phone on its side: plenty of width, under 200px of column height.
+   *
+   * Stacked, the label, the clock, the name and the meta row could not fit that
+   * height, and the 74cqh above, which the short-screen queries cannot reach,
+   * gave the clock most of it, so the rest landed on top of each other. So here
+   * everything else goes BESIDE the clock, which gets the column's full height.
+   *
+   * The picture's column narrows to pay for it. The illustrations are near
+   * square and this frame is short, so they were letterboxed in width they could
+   * never use.
+   */
+  @media (orientation: landscape) and (max-height: 540px) {
+    .run__body {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 2fr);
+      gap: var(--step-5);
+    }
+
+    /*
+     * The clock takes the column's whole height, and everything else stacks
+     * beside it: the label, the name and the meta row, centred by the two `1fr`
+     * spacer rows. The lead box is dissolved so its children join this grid.
+     */
+    .count {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-rows: 1fr auto auto auto 1fr;
+      gap: var(--step-1) var(--step-5);
+    }
+
+    .count__lead {
+      display: contents;
+    }
+
+    .count__clock {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      align-self: center;
+      /*
+       * A two-digit count fills the height; a four-character one ("1:30") is
+       * held by width instead, to about 60% of the column, so the name keeps
+       * room beside it. The line box is 0.82 of the size, so 105cqh is 86% of
+       * the column: the pulse's 3.5% fits inside the rest.
+       */
+      --clock-coef: 110;
+      --clock-height: 105cqh;
+    }
+
+    .count__lead > .label,
+    .count__name,
+    .count__meta {
+      grid-column: 2;
+      justify-self: start;
+      text-align: start;
+    }
+
+    .count__lead > .label {
+      grid-row: 2;
+    }
+
+    .count__name {
+      grid-row: 3;
+    }
+
+    .count__meta {
+      grid-row: 4;
+      justify-content: start;
+      column-gap: 1em;
+    }
+
+    .count__name {
+      /* `--fit` is for the full column width; the name has a bit under half. */
+      font-size: clamp(1rem, min(14cqh, calc(var(--fit, 11) * 0.45cqi)), 2.5rem);
     }
   }
 }
@@ -536,15 +651,29 @@
   align-items: baseline;
   justify-content: center;
   text-align: center;
-  gap: var(--step-2) var(--step-3);
+  gap: 0 0.3em;
   min-height: 1.2em;
+  line-height: 1.1;
+}
+
+/*
+ * Fills the panel's width, from `--fit` (see `fitBlockCqi`), bounded by the
+ * body's height so a short window still leaves the picture most of the panel.
+ * Doubled class to beat `.label`'s size whatever order the sheets load in.
+ */
+.panel__next.panel__next {
+  font-size: clamp(1.1rem, min(calc(var(--fit, 8) * 1cqi), 9cqh), 4.5rem);
+}
+
+/* The word "Next" and the duration are the label; the name is the headline. */
+.panel__next-label,
+.panel__next .unit {
+  font-size: 0.6em;
 }
 
 .panel__next b {
   font-weight: 700;
   color: var(--bone);
-  /* Stays above the label scale: this names the next exercise. */
-  font-size: var(--size-name);
   letter-spacing: var(--track-name);
 }
 
@@ -565,6 +694,37 @@
   border-top: var(--hairline);
 }
 
+/*
+ * A phone, either way up: smaller buttons on ONE row.
+ *
+ * Six buttons at full size need about 440px, so on a phone in portrait they
+ * wrapped onto a second row and the controls took close to 180px of the
+ * screen. In landscape the row fits, but 68px is a fifth of the height. At these
+ * sizes all six fit a 360px screen on one line, and 44px is still the smallest
+ * comfortable touch target.
+ */
+@media (max-width: 30rem), (max-height: 540px) {
+  .controls {
+    gap: var(--step-2);
+    padding: var(--step-2) var(--step-3) var(--step-3);
+  }
+
+  .controls .btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .controls .btn--primary {
+    width: 52px;
+    height: 52px;
+  }
+
+  .controls .btn--primary .icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
 /* ── Idle and complete ─────────────────────────────────────────────────── */
 .rest-state {
   display: grid;
@@ -573,6 +733,33 @@
   justify-items: center;
   text-align: center;
   padding: var(--step-6) var(--step-5);
+  /*
+   * Gives way rather than pushing the controls off the bottom. The body row is
+   * `1fr`, whose floor is the content's height, so a Ready card taller than the
+   * row shoved Start off a phone held sideways. Scrolling is the last resort;
+   * the short-landscape rule below is what makes it fit.
+   */
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/*
+ * A phone on its side has about 240px between the header and the controls, and
+ * the card stacked is well over 300. So the title and the figures go side by
+ * side, with Preview under them, which halves its height.
+ */
+@media (orientation: landscape) and (max-height: 540px) {
+  .rest-state {
+    grid-template-columns: auto auto;
+    justify-content: center;
+    align-items: center;
+    gap: var(--step-3) var(--step-6);
+    padding: var(--step-3) var(--step-5);
+  }
+
+  .rest-state > .chip {
+    grid-column: 1 / -1;
+  }
 }
 
 @container shell (min-width: 46rem) {

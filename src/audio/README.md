@@ -18,6 +18,11 @@ somewhere:
 Entering work and leaving it mean opposite things mid-effort, which is the whole
 reason they must not sound alike.
 
+The ten-second warning on a long step is not one of these. It is fired from the
+tick like the voice, and is the voice by default, or a double beep a fifth above
+the countdown's, or nothing (`useWarning`). It got its own setting because the
+voice carries across a gym floor, and muting it should not take the beeps too.
+
 ## One run at a time
 
 A routine that can wait for a tap is scheduled run by run: `runCues(routine, i)`

@@ -79,6 +79,16 @@ export function SoundOnIcon() {
   )
 }
 
+/** A stopwatch at icon size, for the ten-second warning. `StopwatchIcon` is the app mark, sized in em. */
+export function WarningTimerIcon() {
+  return (
+    <Svg>
+      <circle cx="12" cy="14" r="7.5" {...STROKE} />
+      <path d="M9.5 2.8h5M12 2.8v3.7M18.2 6.6l1.5 1.5M12 14v-3.6" {...STROKE} />
+    </Svg>
+  )
+}
+
 export function SoundOffIcon() {
   return (
     <Svg>

@@ -14,9 +14,9 @@ coverage/
 .gastown-ignore
 __pycache__/
 
-# Screenshot sources. The README serves the .webp beside them, converted with
-# `cwebp -resize 900 0 -q 80 -m 6 shot.png -o shot.webp`. The PNGs are ~1-2MB
-# each and would only ever be duplicates in the history.
+# Screenshot sources. The README serves the .webp beside them, which
+# tools/screenshots converts with cwebp. The PNGs are ~1-2MB each and would
+# only ever be duplicates in the history.
 docs/screenshots/*.png
 
 # CLAUDE.md, AGENTS.md and the two hook files carry sift's stanza and hook

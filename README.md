@@ -42,12 +42,12 @@ from across a gym, with the phone propped against a rack.
 <table>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/run-timed.webp" width="420" alt="A timed step running: a large red 9:43 countdown above the step name Warm Up, then 40:17 left and step 2 of 82, a photo of the exercise bike, and NEXT GET READY 15s underneath." />
+      <img src="docs/screenshots/run-timed.webp" width="420" alt="A timed step running: a large red 9:42 countdown above the step name Warm Up, then 40:16 left and step 2 of 82 with the figures in bold, a photo of the exercise bike, and NEXT LEG PRESS 20s in large type underneath." />
       <br /><b>A timed step.</b> The number is sized to be read from across a
-      room, and the picture says which machine without a word.
+      room, and Next names the exercise coming, never the get-ready before it.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/run-list.webp" width="420" alt="A ladder rung shown as a list: Rung 1 of 9, 3 reps, five exercises each with its count, one marked each side and one carrying a lower-impact alternative, and a full-width Next button." />
+      <img src="docs/screenshots/run-list.webp" width="420" alt="A ladder rung shown as a list: Rung 1 of 9, 2 reps, five exercises each with its count, one marked each side, and a full-width Next button." />
       <br /><b>A rep-based rung.</b> The whole thing is on screen, and one Next
       clears it. You do not tap through a round with your hands full.
     </td>
@@ -59,26 +59,26 @@ from across a gym, with the phone propped against a rack.
       counts what it found and owns up to any line it could not read.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/generator.webp" width="420" alt="The generate dialog: name, shape, about how long, what to work, equipment, warm up with, sets, between sets, moving how and cool down with, then a summary reading 11 exercises, 46:45, the exercises listed, and a note that it came out 2 minutes longer than asked." />
+      <img src="docs/screenshots/generator.webp" width="420" alt="The generate dialog: name, shape, about how long, what to work, equipment, warm up with, sets, between sets, moving how and cool down with, then a summary reading 11 exercises, 46:15, and the exercises listed." />
       <br /><b>Generating one.</b> Every answer updates the summary at the
       bottom, so you see the routine before you commit to it.
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/library.webp" width="420" alt="The routine library: a search box, sort and routines menus, and rows showing each routine's name, total time, step count and last run, with a star on the favourite and a colour tint per routine." />
+      <img src="docs/screenshots/library.webp" width="420" alt="The routine library: a search box, sort and routines menus, and rows showing each routine's name, total time and step count, with a star on the favourite and a colour tint per routine." />
       <br /><b>The library.</b> Favourites pin to the top, and each routine's own
       colour makes it findable at a glance.
     </td>
     <td width="50%">
-      <img src="docs/screenshots/preview.webp" width="420" alt="Preview reading a routine out: a scrolling list of every step with its thumbnail, duration or count and name, broken up by headings reading Set 1 of 3, Set 2 of 3 and Set 3 of 3, with the transport controls at the bottom." />
+      <img src="docs/screenshots/preview.webp" width="420" alt="Preview reading a routine out: a scrolling list of every step with its thumbnail, duration and name, Get ready, Warm Up, Leg Press and Rest among them, with the transport controls at the bottom." />
       <br /><b>Preview.</b> The whole routine written out in the order it will
       run, weights included, with Start still under your thumb.
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name, a count and a unit, a sets group holding two of them, the per-row controls panel open showing an image thumbnail and a note button, and coloured add buttons along the bottom." />
+      <img src="docs/screenshots/editor.webp" width="420" alt="The editor: rows of steps with a type, a name, a duration and a unit, one row's controls panel open showing an image thumbnail and its step buttons, and coloured add buttons along the bottom." />
       <br /><b>The editor.</b> Steps, sets, ladders and sections, with undo. The
       coloured edge on a row is its step type, and the add buttons match.
     </td>
@@ -132,6 +132,9 @@ npm run build
 every cue as the full figure and as its terminal sound alone, with the
 parameters printed beside it. It is compiled out of a production build.
 
+The screenshots above are retaken with `tools/screenshots`, which drives the
+dev server in headless Chromium from demo data. See its README.
+
 Deployment is automatic. A push to `main` builds and publishes to GitHub Pages,
 gated on typecheck, lint and tests, because a broken timer is worse than a stale one.
 Pages serves from a subpath, so `VITE_BASE` is set in the workflow and every
@@ -182,6 +185,8 @@ parks until you tap.
 tick, because the audio thread keeps time when the main thread is throttled.
 Every boundary sounds like what it means: three beeps then a whistle into work,
 three beeps then a bell out of it, three beeps then a triple ding at the end.
+On a long step a voice says "ten seconds left", or, for whoever is training
+beside you, a double beep or nothing: the stopwatch button on the run screen.
 
 **The UI is sized for viewing distance, not convention.** Secondary text starts
 around 1rem and scales with its container. The countdown is sized from the

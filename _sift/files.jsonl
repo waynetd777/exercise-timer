@@ -28,6 +28,7 @@
 {"desc": "Exercise Timer", "hash": "4495de0ff0983cbc", "path": "src/audio/useCueScheduler.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "0617b610c9a636d7", "path": "src/audio/useMuted.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "9be680f30f1edbc9", "path": "src/audio/useSpokenCues.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "Ten-second warning setting: voice, double beep or nothing, persisted", "hash": "76527877910b76b9", "path": "src/audio/useWarning.ts", "ts": "2026-10-21T12:03:22Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "9c770c2456b97cd2", "path": "src/build.d.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Project documentation", "hash": "97e1a94a33621169", "path": "src/editor/README.md", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "03207677b389ad0e", "path": "src/editor/__tests__/blocks.test.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
@@ -202,6 +203,7 @@
 {"desc": "Exercise Timer", "hash": "d47c4451bf7b9cc5", "path": "src/ui/useModal.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "a880cc319506a6fd", "path": "src/ui/useRowDrag.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "a0771effc15975a7", "path": "src/version.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
+{"desc": "Retakes the README screenshots in headless Chromium", "hash": "76819a1c12e9a5b2", "path": "tools/screenshots/capture.mjs", "ts": "2026-10-21T12:03:22Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "TypeScript configuration", "hash": "8bcae99c05ce4b24", "path": "tsconfig.json", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Vite build configuration", "hash": "5d0c81602e95d630", "path": "vite.config.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
 {"desc": "Exercise Timer", "hash": "1bee0e5b8174891e", "path": "vitest.harvest.config.ts", "ts": "2026-09-16T16:33:38Z", "who": "waynetd777@users.noreply.github.com"}
