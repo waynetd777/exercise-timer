@@ -44,7 +44,7 @@ from across a gym, with the phone propped against a rack.
     <td width="50%">
       <img src="docs/screenshots/run-timed.webp" width="420" alt="A timed step running: a large red 9:42 countdown above the step name Warm Up, then 40:16 left and step 2 of 82 with the figures in bold, a photo of the exercise bike, and NEXT LEG PRESS 20s in large type underneath." />
       <br /><b>A timed step.</b> The number is sized to be read from across a
-      room, and Next names the exercise coming, never the get-ready before it.
+      room, and Next names the exercise coming next or after cardio.
     </td>
     <td width="50%">
       <img src="docs/screenshots/run-list.webp" width="420" alt="A ladder rung shown as a list: Rung 1 of 9, 2 reps, five exercises each with its count, one marked each side, and a full-width Next button." />
